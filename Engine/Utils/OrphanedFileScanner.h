@@ -12,9 +12,11 @@
 namespace ExplorerLens {
 namespace Engine {
 
-class OrphanedFileScanner {
-public:
-    struct Config {
+class OrphanedFileScanner
+{
+  public:
+    struct Config
+    {
         bool enabled = true;
         uint32_t maxEntries = 1024;
         std::string label = "OrphanedFileScanner";
@@ -23,17 +25,28 @@ public:
     OrphanedFileScanner() = default;
     explicit OrphanedFileScanner(const Config& cfg) : m_config(cfg) {}
 
-    bool Initialize() {
-        if (!m_config.enabled) return false;
+    bool Initialize()
+    {
+        if (!m_config.enabled)
+            return false;
         m_initialized = true;
         return true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
-    const Config& GetConfig() const { return m_config; }
-    const std::string& GetName() const { return m_config.label; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    const Config& GetConfig() const
+    {
+        return m_config;
+    }
+    const std::string& GetName() const
+    {
+        return m_config.label;
+    }
 
-private:
+  private:
     Config m_config{};
     bool m_initialized = false;
     std::string m_scanRoots{};
@@ -41,5 +54,5 @@ private:
     uint32_t m_orphanCount{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

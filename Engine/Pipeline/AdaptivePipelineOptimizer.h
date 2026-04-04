@@ -8,8 +8,8 @@
 //
 #pragma once
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,7 +23,8 @@ enum class PipelineMetric : uint8_t {
     QueueDepth
 };
 
-struct AdaptivePipelineConfig {
+struct AdaptivePipelineConfig
+{
     uint32_t concurrencyLevel = 4;
     uint32_t bufferSizeKB = 256;
     uint32_t maxQueueDepth = 64;
@@ -31,7 +32,8 @@ struct AdaptivePipelineConfig {
     double targetThroughput = 235.0;
 };
 
-struct OptimizationStats {
+struct OptimizationStats
+{
     uint64_t totalAdjustments = 0;
     uint64_t concurrencyChanges = 0;
     uint64_t bufferResizes = 0;
@@ -40,42 +42,46 @@ struct OptimizationStats {
     double improvementPercent = 0.0;
 };
 
-class AdaptivePipelineOptimizer {
-public:
-    static AdaptivePipelineOptimizer& Instance() {
+class AdaptivePipelineOptimizer
+{
+  public:
+    static AdaptivePipelineOptimizer& Instance()
+    {
         static AdaptivePipelineOptimizer instance;
         return instance;
     }
 
-    bool Initialize(const AdaptivePipelineConfig& config = {}) {
+    bool Initialize(const AdaptivePipelineConfig& config = {})
+    {
         m_config = config;
         m_initialized = true;
         return true;
     }
 
-    void RecordMetric(PipelineMetric metric, double value) {
-        if (!m_initialized) return;
+    void RecordMetric(PipelineMetric metric, double value)
+    {
+        if (!m_initialized)
+            return;
         switch (metric) {
-        case PipelineMetric::Throughput:
-            m_stats.currentThroughput = value;
-            break;
-        case PipelineMetric::Latency:
-            m_stats.currentLatencyMs = value;
-            break;
-        default:
-            break;
+            case PipelineMetric::Throughput:
+                m_stats.currentThroughput = value;
+                break;
+            case PipelineMetric::Latency:
+                m_stats.currentLatencyMs = value;
+                break;
+            default:
+                break;
         }
     }
 
-    bool Optimize() {
-        if (!m_initialized) return false;
+    bool Optimize()
+    {
+        if (!m_initialized)
+            return false;
         if (m_stats.currentLatencyMs > m_config.targetLatencyMs * 1.2) {
-            m_config.concurrencyLevel = (m_config.concurrencyLevel > 1)
-                ? m_config.concurrencyLevel - 1
-                : 1;
+            m_config.concurrencyLevel = (m_config.concurrencyLevel > 1) ? m_config.concurrencyLevel - 1 : 1;
             m_stats.concurrencyChanges++;
-        } else if (m_stats.currentLatencyMs < m_config.targetLatencyMs * 0.5
-                   && m_config.concurrencyLevel < 16) {
+        } else if (m_stats.currentLatencyMs < m_config.targetLatencyMs * 0.5 && m_config.concurrencyLevel < 16) {
             m_config.concurrencyLevel++;
             m_stats.concurrencyChanges++;
         }
@@ -83,18 +89,30 @@ public:
         return true;
     }
 
-    AdaptivePipelineConfig GetConfig() const { return m_config; }
-    OptimizationStats GetStats() const { return m_stats; }
-    bool IsInitialized() const { return m_initialized; }
+    AdaptivePipelineConfig GetConfig() const
+    {
+        return m_config;
+    }
+    OptimizationStats GetStats() const
+    {
+        return m_stats;
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
-    void Shutdown() { m_initialized = false; }
+    void Shutdown()
+    {
+        m_initialized = false;
+    }
 
-private:
+  private:
     AdaptivePipelineOptimizer() = default;
     bool m_initialized = false;
     AdaptivePipelineConfig m_config{};
     OptimizationStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

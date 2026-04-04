@@ -7,92 +7,113 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
 #include <cstdint>
-#include <vector>
-#include <string>
 #include <mutex>
-#include <unordered_map>
 #include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct SerializerSection {
+struct SerializerSection
+{
     std::string sectionName;
     std::unordered_map<std::string, std::string> values;
 
-    void Set(const std::string& key, const std::string& value) {
+    void Set(const std::string& key, const std::string& value)
+    {
         values[key] = value;
     }
 
-    std::string Get(const std::string& key, const std::string& defaultVal = "") const {
+    std::string Get(const std::string& key, const std::string& defaultVal = "") const
+    {
         auto it = values.find(key);
         return it != values.end() ? it->second : defaultVal;
     }
 
-    bool Has(const std::string& key) const {
+    bool Has(const std::string& key) const
+    {
         return values.find(key) != values.end();
     }
 };
 
-struct SettingsDiff {
-    struct Change {
+struct SettingsDiff
+{
+    struct Change
+    {
         std::string section;
         std::string key;
         std::string oldValue;
         std::string newValue;
-        bool        isAdded = false;
-        bool        isRemoved = false;
+        bool isAdded = false;
+        bool isRemoved = false;
     };
 
     std::vector<Change> changes;
 
-    size_t AddedCount() const {
+    size_t AddedCount() const
+    {
         size_t c = 0;
-        for (const auto& ch : changes) if (ch.isAdded) c++;
+        for (const auto& ch : changes)
+            if (ch.isAdded)
+                c++;
         return c;
     }
 
-    size_t RemovedCount() const {
+    size_t RemovedCount() const
+    {
         size_t c = 0;
-        for (const auto& ch : changes) if (ch.isRemoved) c++;
+        for (const auto& ch : changes)
+            if (ch.isRemoved)
+                c++;
         return c;
     }
 
-    size_t ModifiedCount() const {
+    size_t ModifiedCount() const
+    {
         size_t c = 0;
-        for (const auto& ch : changes) if (!ch.isAdded && !ch.isRemoved) c++;
+        for (const auto& ch : changes)
+            if (!ch.isAdded && !ch.isRemoved)
+                c++;
         return c;
     }
 };
 
-class SettingsSerializer {
-public:
-    static SettingsSerializer& Instance() {
+class SettingsSerializer
+{
+  public:
+    static SettingsSerializer& Instance()
+    {
         static SettingsSerializer s;
         return s;
     }
 
-    void SetSection(const SerializerSection& section) {
+    void SetSection(const SerializerSection& section)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_sections[section.sectionName] = section;
     }
 
-    SerializerSection GetSection(const std::string& name) const {
+    SerializerSection GetSection(const std::string& name) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_sections.find(name);
         return it != m_sections.end() ? it->second : SerializerSection{};
     }
 
-    std::string ExportToJSON() const {
+    std::string ExportToJSON() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return ExportToJSONInternal();
     }
 
-    bool ImportFromJSON(const std::string& json) {
+    bool ImportFromJSON(const std::string& json)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         // Lightweight parser for our known format
         m_sections.clear();
@@ -103,7 +124,8 @@ public:
         std::string line;
         while (std::getline(iss, line)) {
             auto trimmed = Trim(line);
-            if (trimmed.empty() || trimmed == "{" || trimmed == "}") continue;
+            if (trimmed.empty() || trimmed == "{" || trimmed == "}")
+                continue;
 
             // Remove trailing comma
             if (!trimmed.empty() && trimmed.back() == ',')
@@ -118,11 +140,9 @@ public:
                     m_sections[currentSection].sectionName = currentSection;
                     inSection = true;
                 }
-            }
-            else if (trimmed == "}") {
+            } else if (trimmed == "}") {
                 inSection = false;
-            }
-            else if (inSection) {
+            } else if (inSection) {
                 // Key-value pair
                 size_t q1 = trimmed.find('"');
                 size_t q2 = trimmed.find('"', q1 + 1);
@@ -138,7 +158,8 @@ public:
         return !m_sections.empty();
     }
 
-    SettingsDiff ComputeDiff(const std::string& otherJSON) const {
+    SettingsDiff ComputeDiff(const std::string& otherJSON) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         SettingsDiff diff;
 
@@ -152,14 +173,17 @@ public:
             for (const auto& kvPair : sectionPair.second.values) {
                 if (!otherSec.Has(kvPair.first)) {
                     SettingsDiff::Change ch;
-                    ch.section = sectionPair.first; ch.key = kvPair.first;
-                    ch.oldValue = kvPair.second; ch.isRemoved = true;
+                    ch.section = sectionPair.first;
+                    ch.key = kvPair.first;
+                    ch.oldValue = kvPair.second;
+                    ch.isRemoved = true;
                     diff.changes.push_back(ch);
-                }
-                else if (otherSec.Get(kvPair.first) != kvPair.second) {
+                } else if (otherSec.Get(kvPair.first) != kvPair.second) {
                     SettingsDiff::Change ch;
-                    ch.section = sectionPair.first; ch.key = kvPair.first;
-                    ch.oldValue = kvPair.second; ch.newValue = otherSec.Get(kvPair.first);
+                    ch.section = sectionPair.first;
+                    ch.key = kvPair.first;
+                    ch.oldValue = kvPair.second;
+                    ch.newValue = otherSec.Get(kvPair.first);
                     diff.changes.push_back(ch);
                 }
             }
@@ -172,8 +196,10 @@ public:
                 auto mySec = m_sections.find(sectionPair.first);
                 if (mySec == m_sections.end() || !mySec->second.Has(kvPair.first)) {
                     SettingsDiff::Change ch;
-                    ch.section = sectionPair.first; ch.key = kvPair.first;
-                    ch.newValue = kvPair.second; ch.isAdded = true;
+                    ch.section = sectionPair.first;
+                    ch.key = kvPair.first;
+                    ch.newValue = kvPair.second;
+                    ch.isAdded = true;
                     diff.changes.push_back(ch);
                 }
             }
@@ -182,55 +208,65 @@ public:
         return diff;
     }
 
-    std::unordered_map<std::string, SerializerSection> GetAllSections() const {
+    std::unordered_map<std::string, SerializerSection> GetAllSections() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_sections;
     }
 
-    bool ExportToFile(const std::wstring& path) const {
+    bool ExportToFile(const std::wstring& path) const
+    {
         std::string json = ExportToJSON();
-        HANDLE hFile = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr,
-            CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-        if (hFile == INVALID_HANDLE_VALUE) return false;
+        HANDLE hFile =
+            CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile == INVALID_HANDLE_VALUE)
+            return false;
         DWORD written;
         WriteFile(hFile, json.c_str(), static_cast<DWORD>(json.size()), &written, nullptr);
         CloseHandle(hFile);
         return true;
     }
 
-    void Reset() {
+    void Reset()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_sections.clear();
     }
 
-    bool Validate() const {
+    bool Validate() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (const auto& sectionPair : m_sections) {
-            if (sectionPair.second.sectionName.empty()) return false;
-            if (sectionPair.second.sectionName != sectionPair.first) return false;
+            if (sectionPair.second.sectionName.empty())
+                return false;
+            if (sectionPair.second.sectionName != sectionPair.first)
+                return false;
         }
         // Verify roundtrip (use internal method to avoid deadlock from ExportToJSON re-locking m_mutex)
         std::string json = ExportToJSONInternal();
         return !json.empty();
     }
 
-private:
+  private:
     SettingsSerializer() = default;
     ~SettingsSerializer() = default;
     SettingsSerializer(const SettingsSerializer&) = delete;
     SettingsSerializer& operator=(const SettingsSerializer&) = delete;
 
-    std::string ExportToJSONInternal() const {
+    std::string ExportToJSONInternal() const
+    {
         std::ostringstream oss;
         oss << "{\n";
         bool firstSection = true;
         for (const auto& sectionPair : m_sections) {
-            if (!firstSection) oss << ",\n";
+            if (!firstSection)
+                oss << ",\n";
             firstSection = false;
             oss << "  \"" << EscapeJSON(sectionPair.first) << "\": {\n";
             bool firstVal = true;
             for (const auto& kvPair : sectionPair.second.values) {
-                if (!firstVal) oss << ",\n";
+                if (!firstVal)
+                    oss << ",\n";
                 firstVal = false;
                 oss << "    \"" << EscapeJSON(kvPair.first) << "\": \"" << EscapeJSON(kvPair.second) << "\"";
             }
@@ -240,21 +276,33 @@ private:
         return oss.str();
     }
 
-    static std::string EscapeJSON(const std::string& s) {
+    static std::string EscapeJSON(const std::string& s)
+    {
         std::string result;
         for (char c : s) {
             switch (c) {
-            case '"': result += "\\\""; break;
-            case '\\': result += "\\\\"; break;
-            case '\n': result += "\\n"; break;
-            case '\t': result += "\\t"; break;
-            default: result += c; break;
+                case '"':
+                    result += "\\\"";
+                    break;
+                case '\\':
+                    result += "\\\\";
+                    break;
+                case '\n':
+                    result += "\\n";
+                    break;
+                case '\t':
+                    result += "\\t";
+                    break;
+                default:
+                    result += c;
+                    break;
             }
         }
         return result;
     }
 
-    static std::string Trim(const std::string& s) {
+    static std::string Trim(const std::string& s)
+    {
         size_t start = s.find_first_not_of(" \t\r\n");
         size_t end = s.find_last_not_of(" \t\r\n");
         return (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
@@ -264,5 +312,5 @@ private:
     std::unordered_map<std::string, SerializerSection> m_sections;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

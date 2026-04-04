@@ -6,14 +6,15 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct TileDescriptor {
+struct TileDescriptor
+{
     uint32_t tileX = 0;
     uint32_t tileY = 0;
     uint32_t width = 0;
@@ -22,27 +23,33 @@ struct TileDescriptor {
     uint32_t sizeBytes = 0;
 };
 
-struct CacheFriendlyConfig {
+struct CacheFriendlyConfig
+{
     uint32_t tileSize = 64;        // 64x64 pixel tiles
     uint32_t cacheLineBytes = 64;  // CPU cache line size
     bool enablePrefetch = true;
     uint32_t prefetchAheadTiles = 2;
-    uint32_t alignment = 64;       // Memory alignment for allocations
+    uint32_t alignment = 64;  // Memory alignment for allocations
 };
 
-struct CacheFriendlyStats {
+struct CacheFriendlyStats
+{
     uint64_t tilesProcessed = 0;
     uint64_t prefetchHints = 0;
     double avgTileProcessMs = 0.0;
     double estimatedCacheMissRate = 0.0;
 };
 
-class CacheFriendlyDecoder {
-public:
-    void Configure(const CacheFriendlyConfig& config) { m_config = config; }
+class CacheFriendlyDecoder
+{
+  public:
+    void Configure(const CacheFriendlyConfig& config)
+    {
+        m_config = config;
+    }
 
-    std::vector<TileDescriptor> GenerateTiles(uint32_t imageWidth, uint32_t imageHeight,
-        uint32_t bytesPerPixel) const {
+    std::vector<TileDescriptor> GenerateTiles(uint32_t imageWidth, uint32_t imageHeight, uint32_t bytesPerPixel) const
+    {
         std::vector<TileDescriptor> tiles;
         uint32_t ts = m_config.tileSize;
         uint32_t tilesX = (imageWidth + ts - 1) / ts;
@@ -64,26 +71,32 @@ public:
         return tiles;
     }
 
-    size_t AlignedSize(size_t bytes) const {
+    size_t AlignedSize(size_t bytes) const
+    {
         return (bytes + m_config.alignment - 1) & ~static_cast<size_t>(m_config.alignment - 1);
     }
 
-    uint32_t TileCount(uint32_t imageWidth, uint32_t imageHeight) const {
+    uint32_t TileCount(uint32_t imageWidth, uint32_t imageHeight) const
+    {
         uint32_t ts = m_config.tileSize;
         return ((imageWidth + ts - 1) / ts) * ((imageHeight + ts - 1) / ts);
     }
 
-    bool ShouldTile(uint32_t imageWidth, uint32_t imageHeight) const {
+    bool ShouldTile(uint32_t imageWidth, uint32_t imageHeight) const
+    {
         // Only tile if image is significantly larger than a single tile
         return imageWidth > m_config.tileSize * 2 && imageHeight > m_config.tileSize * 2;
     }
 
-    CacheFriendlyStats GetStats() const { return m_stats; }
+    CacheFriendlyStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     CacheFriendlyConfig m_config;
     CacheFriendlyStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

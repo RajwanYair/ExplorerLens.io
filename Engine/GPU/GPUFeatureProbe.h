@@ -12,7 +12,8 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct GPUFeatureSet {
+struct GPUFeatureSet
+{
     // Compute features
     bool computeShaders = false;
     bool typed_uav_load = false;
@@ -38,48 +39,59 @@ struct GPUFeatureSet {
     bool dx11 = false;
     bool dx12 = false;
     bool vulkan = false;
-    uint32_t shaderModel = 0; // e.g., 60 = SM 6.0
+    uint32_t shaderModel = 0;  // e.g., 60 = SM 6.0
 };
 
-struct ProbeResult {
+struct ProbeResult
+{
     bool success = false;
     std::string errorMessage;
     GPUFeatureSet features;
     uint32_t probeTimeMs = 0;
 };
 
-class GPUFeatureProbe {
-public:
-    bool SupportsComputeDecode(const GPUFeatureSet& fs) const {
+class GPUFeatureProbe
+{
+  public:
+    bool SupportsComputeDecode(const GPUFeatureSet& fs) const
+    {
         return fs.computeShaders && (fs.dx12 || fs.vulkan) && fs.shaderModel >= 50;
     }
 
-    bool SupportsHardwareDecode(const GPUFeatureSet& fs) const {
-        return fs.hardwareJpegDecode || fs.hardwareH264Decode ||
-            fs.hardwareH265Decode || fs.hardwareAV1Decode;
+    bool SupportsHardwareDecode(const GPUFeatureSet& fs) const
+    {
+        return fs.hardwareJpegDecode || fs.hardwareH264Decode || fs.hardwareH265Decode || fs.hardwareAV1Decode;
     }
 
-    uint32_t RecommendedThreadGroupSize(const GPUFeatureSet& fs) const {
-        if (fs.maxThreadGroupSize >= 1024) return 256;
-        if (fs.maxThreadGroupSize >= 256) return 64;
+    uint32_t RecommendedThreadGroupSize(const GPUFeatureSet& fs) const
+    {
+        if (fs.maxThreadGroupSize >= 1024)
+            return 256;
+        if (fs.maxThreadGroupSize >= 256)
+            return 64;
         return 32;
     }
 
-    std::string SummaryString(const GPUFeatureSet& fs) const {
+    std::string SummaryString(const GPUFeatureSet& fs) const
+    {
         std::string s;
-        if (fs.dx12) s += "DX12 ";
-        if (fs.dx11) s += "DX11 ";
-        if (fs.vulkan) s += "VK ";
-        s += "SM" + std::to_string(fs.shaderModel / 10) + "." +
-            std::to_string(fs.shaderModel % 10);
-        if (fs.fp16) s += " FP16";
-        if (fs.waveOps) s += " Wave";
+        if (fs.dx12)
+            s += "DX12 ";
+        if (fs.dx11)
+            s += "DX11 ";
+        if (fs.vulkan)
+            s += "VK ";
+        s += "SM" + std::to_string(fs.shaderModel / 10) + "." + std::to_string(fs.shaderModel % 10);
+        if (fs.fp16)
+            s += " FP16";
+        if (fs.waveOps)
+            s += " Wave";
         return s;
     }
 
-private:
+  private:
     // Feature detection state
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

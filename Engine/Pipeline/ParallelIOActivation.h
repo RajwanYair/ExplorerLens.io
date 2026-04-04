@@ -14,16 +14,16 @@
 
 #pragma once
 
-#include <cstdint>
+#include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
-#include <algorithm>
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 
@@ -31,52 +31,59 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Configuration for parallel I/O activation
-struct ParallelIOConfig {
-    uint32_t maxConcurrency = 0;   // 0 = auto (core count)
-    uint32_t maxQueueDepth = 256; // Max pending I/O operations
-    uint32_t maxFileSizeMB = 512; // Skip parallel path for very large files
-    uint32_t readBufferSizeKB = 256; // Per-read buffer size
-    bool     enableDirectIO = false; // FILE_FLAG_NO_BUFFERING
-    bool     enablePrefetch = true;  // Prefetch adjacent files
-    bool     fallbackToSync = true;  // Fall back to sync on IOCP failure
-    uint32_t timeoutMs = 5000;  // Per-file timeout
+struct ParallelIOConfig
+{
+    uint32_t maxConcurrency = 0;      // 0 = auto (core count)
+    uint32_t maxQueueDepth = 256;     // Max pending I/O operations
+    uint32_t maxFileSizeMB = 512;     // Skip parallel path for very large files
+    uint32_t readBufferSizeKB = 256;  // Per-read buffer size
+    bool enableDirectIO = false;      // FILE_FLAG_NO_BUFFERING
+    bool enablePrefetch = true;       // Prefetch adjacent files
+    bool fallbackToSync = true;       // Fall back to sync on IOCP failure
+    uint32_t timeoutMs = 5000;        // Per-file timeout
 };
 
 /// Result of a parallel read operation
-struct ParallelIOResult {
+struct ParallelIOResult
+{
     std::wstring filePath;
     std::vector<uint8_t> data;
-    uint32_t   bytesRead = 0;
-    double     readTimeMs = 0.0;
-    bool       success = false;
-    bool       usedFallback = false;  // True if sync fallback was used
-    uint32_t   errorCode = 0;
+    uint32_t bytesRead = 0;
+    double readTimeMs = 0.0;
+    bool success = false;
+    bool usedFallback = false;  // True if sync fallback was used
+    uint32_t errorCode = 0;
 };
 
 /// Aggregate statistics for parallel I/O
-struct ParallelIOStats {
+struct ParallelIOStats
+{
     uint64_t totalReads = 0;
     uint64_t successfulReads = 0;
     uint64_t failedReads = 0;
     uint64_t fallbackReads = 0;
     uint64_t totalBytesRead = 0;
-    double   avgReadTimeMs = 0.0;
-    double   peakBandwidthMBps = 0.0;
+    double avgReadTimeMs = 0.0;
+    double peakBandwidthMBps = 0.0;
     uint32_t activeConcurrency = 0;
     uint32_t peakQueueDepth = 0;
 };
 
 /// Production-grade parallel I/O with automatic tuning and fallback.
-class ParallelIOActivation {
-public:
-    static ParallelIOActivation& Instance() {
+class ParallelIOActivation
+{
+  public:
+    static ParallelIOActivation& Instance()
+    {
         static ParallelIOActivation inst;
         return inst;
     }
 
     /// Activate the parallel I/O subsystem.
-    bool Activate(const ParallelIOConfig& config = {}) {
-        if (m_active.load()) return true;
+    bool Activate(const ParallelIOConfig& config = {})
+    {
+        if (m_active.load())
+            return true;
 
         m_config = config;
 
@@ -88,8 +95,7 @@ public:
         }
 
         // Create IOCP
-        m_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0,
-            m_config.maxConcurrency);
+        m_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, m_config.maxConcurrency);
         if (!m_iocp) {
             m_lastError = GetLastError();
             return false;
@@ -100,7 +106,8 @@ public:
     }
 
     /// Read multiple files in parallel via IOCP.
-    std::vector<ParallelIOResult> ReadFiles(const std::vector<std::wstring>& paths) {
+    std::vector<ParallelIOResult> ReadFiles(const std::vector<std::wstring>& paths)
+    {
         std::vector<ParallelIOResult> results;
         results.reserve(paths.size());
 
@@ -110,13 +117,11 @@ public:
 
             if (m_active.load()) {
                 ReadFileAsync(path, r);
-            }
-            else if (m_config.fallbackToSync) {
+            } else if (m_config.fallbackToSync) {
                 ReadFileSync(path, r);
                 r.usedFallback = true;
                 m_stats.fallbackReads++;
-            }
-            else {
+            } else {
                 r.success = false;
                 r.errorCode = ERROR_NOT_READY;
                 m_stats.failedReads++;
@@ -135,13 +140,20 @@ public:
     }
 
     /// Check if parallel I/O is active.
-    bool IsActive() const { return m_active.load(); }
+    bool IsActive() const
+    {
+        return m_active.load();
+    }
 
     /// Get I/O statistics.
-    ParallelIOStats GetStats() const { return m_stats; }
+    ParallelIOStats GetStats() const
+    {
+        return m_stats;
+    }
 
     /// Deactivate and cleanup.
-    void Deactivate() {
+    void Deactivate()
+    {
         if (m_iocp) {
             CloseHandle(m_iocp);
             m_iocp = nullptr;
@@ -149,21 +161,24 @@ public:
         m_active.store(false);
     }
 
-    ~ParallelIOActivation() { Deactivate(); }
+    ~ParallelIOActivation()
+    {
+        Deactivate();
+    }
 
-private:
+  private:
     ParallelIOActivation() = default;
     ParallelIOActivation(const ParallelIOActivation&) = delete;
     ParallelIOActivation& operator=(const ParallelIOActivation&) = delete;
 
-    void ReadFileAsync(const std::wstring& path, ParallelIOResult& result) {
+    void ReadFileAsync(const std::wstring& path, ParallelIOResult& result)
+    {
         using Clock = std::chrono::steady_clock;
         auto start = Clock::now();
 
-        HANDLE hFile = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ,
-            nullptr, OPEN_EXISTING,
-            FILE_FLAG_OVERLAPPED | (m_config.enableDirectIO ? FILE_FLAG_NO_BUFFERING : 0),
-            nullptr);
+        HANDLE hFile =
+            CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                        FILE_FLAG_OVERLAPPED | (m_config.enableDirectIO ? FILE_FLAG_NO_BUFFERING : 0), nullptr);
 
         if (hFile == INVALID_HANDLE_VALUE) {
             result.errorCode = GetLastError();
@@ -187,8 +202,7 @@ private:
         ov.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
 
         DWORD bytesRead = 0;
-        BOOL readOk = ::ReadFile(hFile, result.data.data(),
-            static_cast<DWORD>(fileSize.QuadPart), &bytesRead, &ov);
+        BOOL readOk = ::ReadFile(hFile, result.data.data(), static_cast<DWORD>(fileSize.QuadPart), &bytesRead, &ov);
 
         if (!readOk && GetLastError() == ERROR_IO_PENDING) {
             // Wait for async completion
@@ -197,17 +211,14 @@ private:
                 GetOverlappedResult(hFile, &ov, &bytesRead, FALSE);
                 result.success = true;
                 result.bytesRead = bytesRead;
-            }
-            else {
+            } else {
                 CancelIoEx(hFile, &ov);
                 result.errorCode = ERROR_TIMEOUT;
             }
-        }
-        else if (readOk) {
+        } else if (readOk) {
             result.success = true;
             result.bytesRead = bytesRead;
-        }
-        else {
+        } else {
             result.errorCode = GetLastError();
         }
 
@@ -218,12 +229,13 @@ private:
         result.readTimeMs = std::chrono::duration<double, std::milli>(end - start).count();
     }
 
-    void ReadFileSync(const std::wstring& path, ParallelIOResult& result) {
+    void ReadFileSync(const std::wstring& path, ParallelIOResult& result)
+    {
         using Clock = std::chrono::steady_clock;
         auto start = Clock::now();
 
-        HANDLE hFile = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ,
-            nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        HANDLE hFile = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                                   FILE_ATTRIBUTE_NORMAL, nullptr);
 
         if (hFile == INVALID_HANDLE_VALUE) {
             result.errorCode = GetLastError();
@@ -239,12 +251,10 @@ private:
 
         result.data.resize(static_cast<size_t>(fileSize.QuadPart));
         DWORD bytesRead = 0;
-        if (::ReadFile(hFile, result.data.data(),
-            static_cast<DWORD>(fileSize.QuadPart), &bytesRead, nullptr)) {
+        if (::ReadFile(hFile, result.data.data(), static_cast<DWORD>(fileSize.QuadPart), &bytesRead, nullptr)) {
             result.success = true;
             result.bytesRead = bytesRead;
-        }
-        else {
+        } else {
             result.errorCode = GetLastError();
         }
 
@@ -253,12 +263,12 @@ private:
         result.readTimeMs = std::chrono::duration<double, std::milli>(end - start).count();
     }
 
-    ParallelIOConfig  m_config;
-    HANDLE            m_iocp = nullptr;
-    uint32_t          m_lastError = 0;
-    std::atomic<bool> m_active{ false };
-    ParallelIOStats   m_stats{};
+    ParallelIOConfig m_config;
+    HANDLE m_iocp = nullptr;
+    uint32_t m_lastError = 0;
+    std::atomic<bool> m_active{false};
+    ParallelIOStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

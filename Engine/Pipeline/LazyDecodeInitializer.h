@@ -6,11 +6,11 @@
 //
 #pragma once
 
+#include <atomic>
 #include <cstdint>
-#include <string>
 #include <functional>
 #include <mutex>
-#include <atomic>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,7 +22,8 @@ enum class DecoderInitState : uint8_t {
     Failed = 3
 };
 
-struct LazyInitStats {
+struct LazyInitStats
+{
     uint32_t totalDecoders = 0;
     uint32_t initializedCount = 0;
     uint32_t failedCount = 0;
@@ -30,11 +31,13 @@ struct LazyInitStats {
     uint64_t totalInitMs = 0;
 };
 
-class LazyDecodeInitializer {
-public:
+class LazyDecodeInitializer
+{
+  public:
     using InitFunc = std::function<bool()>;
 
-    struct Entry {
+    struct Entry
+    {
         std::string decoderName;
         InitFunc initFn;
         DecoderInitState state = DecoderInitState::NotStarted;
@@ -42,7 +45,8 @@ public:
         uint32_t initAttempts = 0;
     };
 
-    void Register(const std::string& name, InitFunc fn) {
+    void Register(const std::string& name, InitFunc fn)
+    {
         std::lock_guard lock(m_mutex);
         Entry e;
         e.decoderName = name;
@@ -50,12 +54,15 @@ public:
         m_entries.push_back(std::move(e));
     }
 
-    bool EnsureInitialized(const std::string& name) {
+    bool EnsureInitialized(const std::string& name)
+    {
         std::lock_guard lock(m_mutex);
         for (auto& e : m_entries) {
             if (e.decoderName == name) {
-                if (e.state == DecoderInitState::Ready) return true;
-                if (e.state == DecoderInitState::Failed) return false;
+                if (e.state == DecoderInitState::Ready)
+                    return true;
+                if (e.state == DecoderInitState::Failed)
+                    return false;
                 e.state = DecoderInitState::Initializing;
                 e.initAttempts++;
                 bool ok = e.initFn ? e.initFn() : false;
@@ -66,21 +73,24 @@ public:
         return false;
     }
 
-    LazyInitStats GetStats() const {
+    LazyInitStats GetStats() const
+    {
         LazyInitStats stats;
         stats.totalDecoders = static_cast<uint32_t>(m_entries.size());
         for (const auto& e : m_entries) {
-            if (e.state == DecoderInitState::Ready) stats.initializedCount++;
-            if (e.state == DecoderInitState::Failed) stats.failedCount++;
+            if (e.state == DecoderInitState::Ready)
+                stats.initializedCount++;
+            if (e.state == DecoderInitState::Failed)
+                stats.failedCount++;
             stats.totalInitMs += e.initDurationMs;
         }
         return stats;
     }
 
-private:
+  private:
     std::mutex m_mutex;
     std::vector<Entry> m_entries;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

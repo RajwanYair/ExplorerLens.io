@@ -7,28 +7,30 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // Parameters for linear contrast stretch mapping
-struct ContrastStretchParams {
-    double scale;       // Multiply factor
-    double offset;      // Additive offset after scale
-    uint8_t inMin;      // Input range minimum
-    uint8_t inMax;      // Input range maximum
-    uint8_t outMin;     // Output range minimum
-    uint8_t outMax;     // Output range maximum
+struct ContrastStretchParams
+{
+    double scale;    // Multiply factor
+    double offset;   // Additive offset after scale
+    uint8_t inMin;   // Input range minimum
+    uint8_t inMax;   // Input range maximum
+    uint8_t outMin;  // Output range minimum
+    uint8_t outMax;  // Output range maximum
 };
 
 // Result of histogram analysis
-struct HistogramAnalysis {
-    double avgBrightness;   // 0.0 - 255.0
-    double contrast;        // Standard deviation of luminance
+struct HistogramAnalysis
+{
+    double avgBrightness;  // 0.0 - 255.0
+    double contrast;       // Standard deviation of luminance
     uint8_t minLuminance;
     uint8_t maxLuminance;
     bool valid;
@@ -37,20 +39,20 @@ struct HistogramAnalysis {
 // Adaptive contrast enhancement for thumbnail images.
 // Analyzes pixel luminance distribution and applies linear contrast
 // stretching to improve visibility of dark or washed-out thumbnails.
-class AdaptiveContrastEnhancer {
-public:
-    AdaptiveContrastEnhancer()
-        : m_brightnessThreshold(80.0)
-        , m_contrastThreshold(40.0) {
-    }
+class AdaptiveContrastEnhancer
+{
+  public:
+    AdaptiveContrastEnhancer() : m_brightnessThreshold(80.0), m_contrastThreshold(40.0) {}
 
     // Analyze the luminance histogram of a pixel buffer (BGRA format, 4 bytes/pixel).
     // Returns brightness and contrast statistics.
-    HistogramAnalysis AnalyzeHistogram(const uint8_t* pixels, uint32_t w, uint32_t h) const {
+    HistogramAnalysis AnalyzeHistogram(const uint8_t* pixels, uint32_t w, uint32_t h) const
+    {
         HistogramAnalysis result = {};
         result.valid = false;
 
-        if (!pixels || w == 0 || h == 0) return result;
+        if (!pixels || w == 0 || h == 0)
+            return result;
 
         const size_t pixelCount = static_cast<size_t>(w) * h;
         double sumLum = 0.0;
@@ -62,8 +64,7 @@ public:
             const uint8_t g = pixels[i * 4 + 1];
             const uint8_t r = pixels[i * 4 + 2];
             // ITU-R BT.601 luminance
-            uint8_t lum = static_cast<uint8_t>(
-                (std::min)(255.0, 0.299 * r + 0.587 * g + 0.114 * b));
+            uint8_t lum = static_cast<uint8_t>((std::min)(255.0, 0.299 * r + 0.587 * g + 0.114 * b));
             sumLum += lum;
             minLum = (std::min)(minLum, lum);
             maxLum = (std::max)(maxLum, lum);
@@ -89,8 +90,9 @@ public:
     }
 
     // Compute linear contrast stretch parameters to map [inMin, inMax] -> [targetMin, targetMax]
-    static ContrastStretchParams ComputeStretchParams(
-        uint8_t minVal, uint8_t maxVal, uint8_t targetMin, uint8_t targetMax) {
+    static ContrastStretchParams ComputeStretchParams(uint8_t minVal, uint8_t maxVal, uint8_t targetMin,
+                                                      uint8_t targetMax)
+    {
         ContrastStretchParams params = {};
         params.inMin = minVal;
         params.inMax = maxVal;
@@ -104,8 +106,7 @@ public:
             // Degenerate case: all pixels same value
             params.scale = 1.0;
             params.offset = static_cast<double>(targetMin) - static_cast<double>(minVal);
-        }
-        else {
+        } else {
             params.scale = outRange / inRange;
             params.offset = static_cast<double>(targetMin) - params.scale * static_cast<double>(minVal);
         }
@@ -113,23 +114,29 @@ public:
     }
 
     // Apply contrast stretch to a single channel value
-    static uint8_t ApplyContrastStretch(uint8_t pixel, const ContrastStretchParams& params) {
+    static uint8_t ApplyContrastStretch(uint8_t pixel, const ContrastStretchParams& params)
+    {
         double mapped = params.scale * static_cast<double>(pixel) + params.offset;
         mapped = (std::max)(0.0, (std::min)(255.0, mapped));
         return static_cast<uint8_t>(mapped + 0.5);
     }
 
     // Determine if the image needs contrast enhancement based on brightness and contrast
-    bool NeedsEnhancement(double avgBrightness, double contrast) const {
+    bool NeedsEnhancement(double avgBrightness, double contrast) const
+    {
         // Enhance if too dark or too low contrast
-        if (avgBrightness < m_brightnessThreshold) return true;
-        if (contrast < m_contrastThreshold) return true;
+        if (avgBrightness < m_brightnessThreshold)
+            return true;
+        if (contrast < m_contrastThreshold)
+            return true;
         return false;
     }
 
     // Compute a simple brightness score (0.0 - 1.0) from a BGRA pixel buffer
-    static double GetBrightnessScore(const uint8_t* pixels, uint32_t w, uint32_t h) {
-        if (!pixels || w == 0 || h == 0) return 0.0;
+    static double GetBrightnessScore(const uint8_t* pixels, uint32_t w, uint32_t h)
+    {
+        if (!pixels || w == 0 || h == 0)
+            return 0.0;
 
         const size_t pixelCount = static_cast<size_t>(w) * h;
         double sumLum = 0.0;
@@ -146,13 +153,19 @@ public:
     }
 
     // Configuration
-    void SetBrightnessThreshold(double t) { m_brightnessThreshold = t; }
-    void SetContrastThreshold(double t) { m_contrastThreshold = t; }
+    void SetBrightnessThreshold(double t)
+    {
+        m_brightnessThreshold = t;
+    }
+    void SetContrastThreshold(double t)
+    {
+        m_contrastThreshold = t;
+    }
 
-private:
+  private:
     double m_brightnessThreshold;
     double m_contrastThreshold;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

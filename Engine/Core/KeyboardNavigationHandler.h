@@ -8,65 +8,75 @@
 #pragma once
 
 #include <windows.h>
-#include <string>
-#include <vector>
-#include <functional>
-#include <unordered_map>
 #include <cstdint>
+#include <functional>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-namespace ExplorerLens { namespace Engine { namespace Core {
+namespace ExplorerLens {
+namespace Engine {
+namespace Core {
 
-struct FocusableControl {
-    HWND      hwnd       = nullptr;
-    int       tabIndex   = 0;
+struct FocusableControl
+{
+    HWND hwnd = nullptr;
+    int tabIndex = 0;
     std::wstring ariaLabel;
-    bool      skipInTabOrder = false;
+    bool skipInTabOrder = false;
 };
 
-struct KeyboardShortcut {
-    UINT      modifiers;     // MOD_CONTROL | MOD_ALT | MOD_SHIFT
-    UINT      vkCode;
+struct KeyboardShortcut
+{
+    UINT modifiers;  // MOD_CONTROL | MOD_ALT | MOD_SHIFT
+    UINT vkCode;
     std::wstring description;
     std::function<void()> action;
 };
 
-class KeyboardNavigationHandler {
-public:
-    static KeyboardNavigationHandler& Instance() {
+class KeyboardNavigationHandler
+{
+  public:
+    static KeyboardNavigationHandler& Instance()
+    {
         static KeyboardNavigationHandler inst;
         return inst;
     }
 
     // Register the main application window for keyboard monitoring
-    void AttachWindow(HWND hwnd) {
+    void AttachWindow(HWND hwnd)
+    {
         m_hwnd = hwnd;
         InstallMsgHook();
     }
 
-    void DetachWindow() {
+    void DetachWindow()
+    {
         RemoveMsgHook();
-        m_hwnd  = nullptr;
+        m_hwnd = nullptr;
         m_controls.clear();
     }
 
     // Register focusable controls in tab order
-    void RegisterControl(const FocusableControl& ctrl) {
+    void RegisterControl(const FocusableControl& ctrl)
+    {
         m_controls.push_back(ctrl);
         std::sort(m_controls.begin(), m_controls.end(),
-            [](const FocusableControl& a, const FocusableControl& b) {
-                return a.tabIndex < b.tabIndex;
-            });
+                  [](const FocusableControl& a, const FocusableControl& b) { return a.tabIndex < b.tabIndex; });
     }
 
     // Register a global shortcut (VK + modifier)
-    void RegisterShortcut(KeyboardShortcut ks) {
+    void RegisterShortcut(KeyboardShortcut ks)
+    {
         DWORD id = static_cast<DWORD>(m_shortcuts.size());
-        if (m_hwnd) RegisterHotKey(m_hwnd, static_cast<int>(id), ks.modifiers, ks.vkCode);
+        if (m_hwnd)
+            RegisterHotKey(m_hwnd, static_cast<int>(id), ks.modifiers, ks.vkCode);
         m_shortcuts[id] = std::move(ks);
     }
 
     // Handle WM_KEYDOWN to move focus; returns true if consumed
-    bool HandleKeyDown(UINT vk, HWND currentFocus) {
+    bool HandleKeyDown(UINT vk, HWND currentFocus)
+    {
         if (vk == VK_TAB) {
             BOOL shift = GetKeyState(VK_SHIFT) & 0x8000;
             MoveFocus(currentFocus, shift ? -1 : 1);
@@ -81,7 +91,8 @@ public:
     }
 
     // Handle WM_HOTKEY
-    bool HandleHotKey(int id) {
+    bool HandleHotKey(int id)
+    {
         auto it = m_shortcuts.find(static_cast<DWORD>(id));
         if (it != m_shortcuts.end()) {
             it->second.action();
@@ -91,7 +102,8 @@ public:
     }
 
     // Draw focus ring on current focused control
-    void DrawFocusRing(HDC hdc, HWND targetHwnd) const {
+    void DrawFocusRing(HDC hdc, HWND targetHwnd) const
+    {
         RECT r;
         GetClientRect(targetHwnd, &r);
         InflateRect(&r, -2, -2);
@@ -99,15 +111,18 @@ public:
     }
 
     // Get ARIA label for a control (used in UIA provider)
-    std::wstring GetAriaLabel(HWND hwnd) const {
+    std::wstring GetAriaLabel(HWND hwnd) const
+    {
         for (auto& c : m_controls)
-            if (c.hwnd == hwnd) return c.ariaLabel;
+            if (c.hwnd == hwnd)
+                return c.ariaLabel;
         wchar_t buf[256] = {};
         GetWindowTextW(hwnd, buf, 256);
         return buf;
     }
 
-    void SetFocusFirst() {
+    void SetFocusFirst()
+    {
         for (auto& c : m_controls) {
             if (!c.skipInTabOrder && c.hwnd) {
                 SetFocus(c.hwnd);
@@ -116,28 +131,33 @@ public:
         }
     }
 
-private:
+  private:
     KeyboardNavigationHandler() = default;
 
-    void MoveFocus(HWND current, int delta) {
-        if (m_controls.empty()) return;
+    void MoveFocus(HWND current, int delta)
+    {
+        if (m_controls.empty())
+            return;
         int idx = -1;
         for (int i = 0; i < static_cast<int>(m_controls.size()); ++i)
-            if (m_controls[i].hwnd == current) { idx = i; break; }
+            if (m_controls[i].hwnd == current) {
+                idx = i;
+                break;
+            }
 
-        int next = (idx + delta + static_cast<int>(m_controls.size()))
-                    % static_cast<int>(m_controls.size());
+        int next = (idx + delta + static_cast<int>(m_controls.size())) % static_cast<int>(m_controls.size());
         // Skip disabled/hidden
         for (int tries = 0; tries < static_cast<int>(m_controls.size()); ++tries) {
             if (m_controls[next].skipInTabOrder || !IsWindowEnabled(m_controls[next].hwnd)) {
-                next = (next + delta + static_cast<int>(m_controls.size()))
-                        % static_cast<int>(m_controls.size());
-            } else break;
+                next = (next + delta + static_cast<int>(m_controls.size())) % static_cast<int>(m_controls.size());
+            } else
+                break;
         }
         SetFocus(m_controls[next].hwnd);
     }
 
-    void InstallMsgHook() {
+    void InstallMsgHook()
+    {
         // Production: SetWindowsHookEx(WH_GETMESSAGE) or subclass the window
         // Stub: no-op (hook installed via WndProc delegation in LENSManager)
     }
@@ -145,8 +165,10 @@ private:
     void RemoveMsgHook() {}
 
     HWND m_hwnd = nullptr;
-    std::vector<FocusableControl>               m_controls;
+    std::vector<FocusableControl> m_controls;
     std::unordered_map<DWORD, KeyboardShortcut> m_shortcuts;
 };
 
-}}} // namespace ExplorerLens::Engine::Core
+}  // namespace Core
+}  // namespace Engine
+}  // namespace ExplorerLens

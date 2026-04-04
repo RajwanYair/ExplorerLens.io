@@ -53,7 +53,7 @@ ReferenceAlignment: Left
 
 # Include sorting — 4 groups per coding-standards.md:
 #   1. Corresponding header  2. C system  3. C++ stdlib  4. Third-party  5. Project
-IncludeBlocks: Regroup
+IncludeBlocks: Preserve
 SortIncludes: CaseSensitive
 IncludeCategories:
   - Regex:    '^<windows\.h>'

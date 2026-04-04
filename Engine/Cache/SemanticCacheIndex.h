@@ -6,20 +6,21 @@
 //
 #pragma once
 
+#include <algorithm>
+#include <array>
+#include <cmath>
 #include <cstdint>
-#include <vector>
+#include <mutex>
+#include <numeric>
 #include <string>
 #include <unordered_map>
-#include <algorithm>
-#include <mutex>
-#include <cmath>
-#include <array>
-#include <numeric>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct SemanticFingerprint {
+struct SemanticFingerprint
+{
     std::array<uint64_t, 4> hash = {};
     std::array<float, 16> featureVector = {};
     uint32_t width = 0;
@@ -28,7 +29,8 @@ struct SemanticFingerprint {
     float edgeDensity = 0.0f;
 };
 
-struct SemanticSimilarityResult {
+struct SemanticSimilarityResult
+{
     std::string matchKey;
     double similarity = 0.0;
     bool isDuplicate = false;
@@ -36,7 +38,8 @@ struct SemanticSimilarityResult {
     double cosineSimilarity = 0.0;
 };
 
-struct SemanticIndexStats {
+struct SemanticIndexStats
+{
     uint64_t totalEntries = 0;
     uint64_t duplicatesFound = 0;
     uint64_t bytesSaved = 0;
@@ -44,19 +47,23 @@ struct SemanticIndexStats {
     uint64_t lookupCount = 0;
 };
 
-class SemanticCacheIndex {
-public:
-    static SemanticCacheIndex& Instance() {
+class SemanticCacheIndex
+{
+  public:
+    static SemanticCacheIndex& Instance()
+    {
         static SemanticCacheIndex instance;
         return instance;
     }
 
     inline SemanticFingerprint ComputeFingerprint(const uint8_t* pixels, uint32_t width, uint32_t height,
-        uint32_t channels = 4) const {
+                                                  uint32_t channels = 4) const
+    {
         SemanticFingerprint fp;
         fp.width = width;
         fp.height = height;
-        if (!pixels || width == 0 || height == 0) return fp;
+        if (!pixels || width == 0 || height == 0)
+            return fp;
 
         fp.avgLuminance = ComputeAvgLuminance(pixels, width, height, channels);
 
@@ -67,10 +74,10 @@ public:
                 float blockAvg = 0.0f;
                 uint32_t count = 0;
                 for (uint32_t y = by * blockH; y < (std::min)((by + 1) * blockH, height); ++y) {
-                    for (uint32_t x = bx * blockW; x < (std::min)((bx + 1)* blockW, width); ++x) {
+                    for (uint32_t x = bx * blockW; x < (std::min)((bx + 1) * blockW, width); ++x) {
                         size_t idx = (static_cast<size_t>(y) * width + x) * channels;
-                        float lum = 0.299f * pixels[idx] + 0.587f * pixels[idx + (std::min)(1u, channels - 1)] +
-                            0.114f * pixels[idx + (std::min)(2u, channels - 1)];
+                        float lum = 0.299f * pixels[idx] + 0.587f * pixels[idx + (std::min)(1u, channels - 1)]
+                                    + 0.114f * pixels[idx + (std::min)(2u, channels - 1)];
                         blockAvg += lum;
                         ++count;
                     }
@@ -94,14 +101,15 @@ public:
         return fp;
     }
 
-    inline void Insert(const std::string& key, const SemanticFingerprint& fingerprint) {
+    inline void Insert(const std::string& key, const SemanticFingerprint& fingerprint)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_index[key] = fingerprint;
         m_stats.totalEntries = m_index.size();
     }
 
-    inline SemanticSimilarityResult FindMostSimilar(const SemanticFingerprint& query,
-        double threshold = 0.95) const {
+    inline SemanticSimilarityResult FindMostSimilar(const SemanticFingerprint& query, double threshold = 0.95) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.lookupCount++;
 
@@ -125,37 +133,43 @@ public:
         return best;
     }
 
-    inline bool Remove(const std::string& key) {
+    inline bool Remove(const std::string& key)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto removed = m_index.erase(key) > 0;
-        if (removed) m_stats.totalEntries = m_index.size();
+        if (removed)
+            m_stats.totalEntries = m_index.size();
         return removed;
     }
 
-    inline SemanticIndexStats GetStats() const {
+    inline SemanticIndexStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-private:
+  private:
     SemanticCacheIndex() = default;
 
-    inline float ComputeAvgLuminance(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const {
+    inline float ComputeAvgLuminance(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const
+    {
         double sum = 0.0;
         size_t count = static_cast<size_t>(w) * h;
         size_t step = (std::max)(static_cast<size_t>(1), count / 1024);
         size_t sampled = 0;
         for (size_t i = 0; i < count; i += step) {
             size_t idx = i * c;
-            sum += 0.299 * pixels[idx] + 0.587 * pixels[idx + (std::min)(1u, c - 1)] +
-                0.114 * pixels[idx + (std::min)(2u, c - 1)];
+            sum += 0.299 * pixels[idx] + 0.587 * pixels[idx + (std::min)(1u, c - 1)]
+                   + 0.114 * pixels[idx + (std::min)(2u, c - 1)];
             ++sampled;
         }
         return sampled > 0 ? static_cast<float>(sum / sampled) : 0.0f;
     }
 
-    inline float ComputeEdgeDensity(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const {
-        if (w < 3 || h < 3) return 0.0f;
+    inline float ComputeEdgeDensity(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const
+    {
+        if (w < 3 || h < 3)
+            return 0.0f;
         uint32_t edges = 0;
         uint32_t total = 0;
         uint32_t step = (std::max)(1u, (std::min)(w, h) / 16);
@@ -166,14 +180,16 @@ private:
                 size_t idxD = (static_cast<size_t>((y + 1)) * w + x) * c;
                 int dx = std::abs(static_cast<int>(pixels[idx]) - static_cast<int>(pixels[idxR]));
                 int dy = std::abs(static_cast<int>(pixels[idx]) - static_cast<int>(pixels[idxD]));
-                if (dx + dy > 30) ++edges;
+                if (dx + dy > 30)
+                    ++edges;
                 ++total;
             }
         }
         return total > 0 ? static_cast<float>(edges) / total : 0.0f;
     }
 
-    inline double ComputeCosineSimilarity(const std::array<float, 16>& a, const std::array<float, 16>& b) const {
+    inline double ComputeCosineSimilarity(const std::array<float, 16>& a, const std::array<float, 16>& b) const
+    {
         double dot = 0.0, normA = 0.0, normB = 0.0;
         for (size_t i = 0; i < 16; ++i) {
             dot += a[i] * b[i];
@@ -184,11 +200,15 @@ private:
         return denom > 1e-10 ? dot / denom : 0.0;
     }
 
-    inline double ComputeHammingDistance(const std::array<uint64_t, 4>& a, const std::array<uint64_t, 4>& b) const {
+    inline double ComputeHammingDistance(const std::array<uint64_t, 4>& a, const std::array<uint64_t, 4>& b) const
+    {
         uint32_t dist = 0;
         for (size_t i = 0; i < 4; ++i) {
             uint64_t x = a[i] ^ b[i];
-            while (x) { dist += x & 1; x >>= 1; }
+            while (x) {
+                dist += x & 1;
+                x >>= 1;
+            }
         }
         return static_cast<double>(dist);
     }
@@ -198,5 +218,5 @@ private:
     mutable SemanticIndexStats m_stats;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

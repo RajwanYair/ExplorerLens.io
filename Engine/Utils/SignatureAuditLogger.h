@@ -5,71 +5,100 @@
 // Outputs structured log entries in JSON format with tamper-evident chaining.
 //
 #pragma once
-#include <string>
-#include <vector>
 #include <cstdint>
 #include <functional>
+#include <string>
+#include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-enum class SignatureAuditEventType { VerifyOk, VerifyFail, KeyRotated, CertExpired, PolicyViolation };
+enum class SignatureAuditEventType {
+    VerifyOk,
+    VerifyFail,
+    KeyRotated,
+    CertExpired,
+    PolicyViolation
+};
 
-struct AuditLogEntry {
-    int64_t                 timestampMs  = 0;
-    SignatureAuditEventType type         = SignatureAuditEventType::VerifyOk;
-    std::string   subject;
-    std::string   algorithm;
-    std::string   keyId;
-    std::string   callerContext;
-    bool          success      = false;
+struct AuditLogEntry
+{
+    int64_t timestampMs = 0;
+    SignatureAuditEventType type = SignatureAuditEventType::VerifyOk;
+    std::string subject;
+    std::string algorithm;
+    std::string keyId;
+    std::string callerContext;
+    bool success = false;
 };
 
 using SignatureAuditSinkFn = std::function<void(const AuditLogEntry&)>;
 
-class SignatureAuditLogger {
-public:
+class SignatureAuditLogger
+{
+  public:
     SignatureAuditLogger() = default;
 
-    bool Initialize(uint32_t maxEntries = 10000) {
+    bool Initialize(uint32_t maxEntries = 10000)
+    {
         m_maxEntries = maxEntries;
-        m_ready      = true;
+        m_ready = true;
         return true;
     }
-    bool IsReady() const { return m_ready; }
-
-    void Log(const AuditLogEntry& entry) {
-        if (m_entries.size() >= m_maxEntries) m_entries.erase(m_entries.begin());
-        m_entries.push_back(entry);
-        if (m_sink) m_sink(entry);
+    bool IsReady() const
+    {
+        return m_ready;
     }
 
-    void SetSink(SignatureAuditSinkFn fn) { m_sink = std::move(fn); }
+    void Log(const AuditLogEntry& entry)
+    {
+        if (m_entries.size() >= m_maxEntries)
+            m_entries.erase(m_entries.begin());
+        m_entries.push_back(entry);
+        if (m_sink)
+            m_sink(entry);
+    }
 
-    std::string ExportJSON() const {
+    void SetSink(SignatureAuditSinkFn fn)
+    {
+        m_sink = std::move(fn);
+    }
+
+    std::string ExportJSON() const
+    {
         std::string out = "[";
         for (size_t i = 0; i < m_entries.size(); ++i) {
-            if (i > 0) out += ",";
+            if (i > 0)
+                out += ",";
             const auto& e = m_entries[i];
-            out += "{\"ts\":" + std::to_string(e.timestampMs)
-                 + ",\"type\":" + std::to_string(static_cast<int>(e.type))
-                 + ",\"subject\":\"" + e.subject + "\""
-                 + ",\"ok\":" + (e.success ? "true" : "false") + "}";
+            out += "{\"ts\":" + std::to_string(e.timestampMs) + ",\"type\":" + std::to_string(static_cast<int>(e.type))
+                   + ",\"subject\":\"" + e.subject + "\"" + ",\"ok\":" + (e.success ? "true" : "false") + "}";
         }
         out += "]";
         return out;
     }
 
-    uint64_t GetEntryCount() const { return m_entries.size(); }
+    uint64_t GetEntryCount() const
+    {
+        return m_entries.size();
+    }
 
-    void Clear() { m_entries.clear(); }
+    void Clear()
+    {
+        m_entries.clear();
+    }
 
-    void Shutdown() { m_ready = false; }
+    void Shutdown()
+    {
+        m_ready = false;
+    }
 
-private:
-    bool                      m_ready      = false;
-    uint32_t                  m_maxEntries = 10000;
+  private:
+    bool m_ready = false;
+    uint32_t m_maxEntries = 10000;
     std::vector<AuditLogEntry> m_entries;
-    SignatureAuditSinkFn       m_sink;
+    SignatureAuditSinkFn m_sink;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

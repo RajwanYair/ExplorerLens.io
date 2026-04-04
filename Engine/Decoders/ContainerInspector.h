@@ -28,7 +28,8 @@ enum class ContainerType : uint8_t {
     Unknown = 255
 };
 
-struct ContainerEntry {
+struct ContainerEntry
+{
     std::wstring path;
     uint64_t size = 0;
     bool isExecutable = false;
@@ -36,7 +37,8 @@ struct ContainerEntry {
     bool isManifest = false;
 };
 
-struct ContainerMetadata {
+struct ContainerMetadata
+{
     ContainerType type = ContainerType::Unknown;
     std::wstring volumeLabel;
     uint64_t totalSize = 0;
@@ -47,7 +49,8 @@ struct ContainerMetadata {
     std::vector<ContainerEntry> thumbnailCandidates;
 };
 
-struct InspectorConfig {
+struct InspectorConfig
+{
     uint32_t maxEntriesToScan = 500;
     uint32_t maxCandidates = 4;
     bool searchForIcons = true;
@@ -55,45 +58,51 @@ struct InspectorConfig {
     bool searchForScreenshots = true;
 };
 
-class ContainerInspector {
-public:
-    void Configure(const InspectorConfig& config) { m_config = config; }
+class ContainerInspector
+{
+  public:
+    void Configure(const InspectorConfig& config)
+    {
+        m_config = config;
+    }
 
-    ContainerType DetectType(const uint8_t* header, size_t headerSize) const {
-        if (headerSize < 8) return ContainerType::Unknown;
+    ContainerType DetectType(const uint8_t* header, size_t headerSize) const
+    {
+        if (headerSize < 8)
+            return ContainerType::Unknown;
         // ISO: "CD001" at offset 32769
-        if (headerSize > 32773 && header[32769] == 'C' && header[32770] == 'D' &&
-            header[32771] == '0' && header[32772] == '0' && header[32773] == '1')
+        if (headerSize > 32773 && header[32769] == 'C' && header[32770] == 'D' && header[32771] == '0'
+            && header[32772] == '0' && header[32773] == '1')
             return ContainerType::ISO9660;
         // VHD: "conectix" at offset 0
-        if (headerSize >= 8 && header[0] == 'c' && header[1] == 'o' &&
-            header[2] == 'n' && header[3] == 'e')
+        if (headerSize >= 8 && header[0] == 'c' && header[1] == 'o' && header[2] == 'n' && header[3] == 'e')
             return ContainerType::VHD;
         // VHDX: "vhdxfile" at offset 0
-        if (headerSize >= 8 && header[0] == 'v' && header[1] == 'h' &&
-            header[2] == 'd' && header[3] == 'x')
+        if (headerSize >= 8 && header[0] == 'v' && header[1] == 'h' && header[2] == 'd' && header[3] == 'x')
             return ContainerType::VHDX;
         // CAB: "MSCF" at offset 0
-        if (headerSize >= 4 && header[0] == 'M' && header[1] == 'S' &&
-            header[2] == 'C' && header[3] == 'F')
+        if (headerSize >= 4 && header[0] == 'M' && header[1] == 'S' && header[2] == 'C' && header[3] == 'F')
             return ContainerType::CAB;
         return ContainerType::Unknown;
     }
 
-    bool IsBrandingAsset(const std::wstring& name) const {
+    bool IsBrandingAsset(const std::wstring& name) const
+    {
         std::wstring lower = name;
-        for (auto& c : lower) c = towlower(c);
-        return lower.find(L"icon") != std::wstring::npos ||
-            lower.find(L"logo") != std::wstring::npos ||
-            lower.find(L"banner") != std::wstring::npos ||
-            lower.find(L"appxmanifest") != std::wstring::npos;
+        for (auto& c : lower)
+            c = towlower(c);
+        return lower.find(L"icon") != std::wstring::npos || lower.find(L"logo") != std::wstring::npos
+               || lower.find(L"banner") != std::wstring::npos || lower.find(L"appxmanifest") != std::wstring::npos;
     }
 
-    InspectorConfig GetConfig() const { return m_config; }
+    InspectorConfig GetConfig() const
+    {
+        return m_config;
+    }
 
-private:
+  private:
     InspectorConfig m_config;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

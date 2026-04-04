@@ -34,7 +34,8 @@ enum class RenderQualityTier : uint8_t {
     Ultra
 };
 
-struct ContextualRenderParams {
+struct ContextualRenderParams
+{
     RenderContextType contextType = RenderContextType::Default;
     RenderQualityTier qualityTier = RenderQualityTier::Medium;
     uint32_t targetWidthPx = 256;
@@ -44,7 +45,8 @@ struct ContextualRenderParams {
     bool allowCaching = true;
 };
 
-struct RenderContextSignals {
+struct RenderContextSignals
+{
     float displayDPI = 96.0f;
     uint64_t availableGPUMemoryBytes = 0;
     bool onBattery = false;
@@ -52,7 +54,8 @@ struct RenderContextSignals {
     uint32_t concurrentRenderCount = 0;
 };
 
-struct ContextualRenderStats {
+struct ContextualRenderStats
+{
     uint64_t totalEvaluations = 0;
     uint64_t contextSwitches = 0;
     uint64_t qualityUpgrades = 0;
@@ -60,14 +63,17 @@ struct ContextualRenderStats {
     bool initialized = false;
 };
 
-class ContextualRenderingEngine {
-public:
-    static ContextualRenderingEngine& Instance() {
+class ContextualRenderingEngine
+{
+  public:
+    static ContextualRenderingEngine& Instance()
+    {
         static ContextualRenderingEngine instance;
         return instance;
     }
 
-    void Initialize(RenderQualityTier defaultTier = RenderQualityTier::Medium) {
+    void Initialize(RenderQualityTier defaultTier = RenderQualityTier::Medium)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_defaultTier = defaultTier;
         m_currentParams = {};
@@ -76,7 +82,8 @@ public:
         m_stats.initialized = true;
     }
 
-    ContextualRenderParams Evaluate(const RenderContextSignals& signals) {
+    ContextualRenderParams Evaluate(const RenderContextSignals& signals)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalEvaluations++;
 
@@ -116,28 +123,32 @@ public:
         return params;
     }
 
-    ContextualRenderParams GetCurrentParams() const {
+    ContextualRenderParams GetCurrentParams() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_currentParams;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    ContextualRenderStats GetStats() const {
+    ContextualRenderStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_currentParams = {};
     }
 
-private:
+  private:
     ContextualRenderingEngine() = default;
     ~ContextualRenderingEngine() = default;
     ContextualRenderingEngine(const ContextualRenderingEngine&) = delete;
@@ -149,5 +160,5 @@ private:
     ContextualRenderStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

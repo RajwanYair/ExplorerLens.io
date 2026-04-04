@@ -9,56 +9,68 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include <cstdint>
-#include <cmath>
 #include <algorithm>
-#include <vector>
+#include <cmath>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct RegressionAlert {
+struct RegressionAlert
+{
     std::string metric;
-    double      baselineValue = 0.0;
-    double      currentValue = 0.0;
-    double      deviationPercent = 0.0;
-    double      zScore = 0.0;
-    uint64_t    detectedTick = 0;
-    bool        isRegression = false;
+    double baselineValue = 0.0;
+    double currentValue = 0.0;
+    double deviationPercent = 0.0;
+    double zScore = 0.0;
+    uint64_t detectedTick = 0;
+    bool isRegression = false;
 };
 
-struct RegressionConfig {
-    uint32_t baselineWindowSize = 100;  // Samples for baseline
-    uint32_t recentWindowSize = 20;     // Samples for recent comparison
-    double   regressionThresholdPercent = 20.0; // Alert if >20% slower
-    double   zScoreThreshold = 2.5;     // Statistical significance
+struct RegressionConfig
+{
+    uint32_t baselineWindowSize = 100;         // Samples for baseline
+    uint32_t recentWindowSize = 20;            // Samples for recent comparison
+    double regressionThresholdPercent = 20.0;  // Alert if >20% slower
+    double zScoreThreshold = 2.5;              // Statistical significance
 };
 
-struct RegressionStats {
+struct RegressionStats
+{
     uint32_t totalChecks = 0;
     uint32_t regressionsDetected = 0;
     uint32_t improvementsDetected = 0;
-    double   currentBaselineMs = 0.0;
-    double   currentRecentMs = 0.0;
+    double currentBaselineMs = 0.0;
+    double currentRecentMs = 0.0;
 };
 
-class PerformanceRegressionDetector {
-public:
-    PerformanceRegressionDetector() {
+class PerformanceRegressionDetector
+{
+  public:
+    PerformanceRegressionDetector()
+    {
         InitializeSRWLock(&m_lock);
     }
     ~PerformanceRegressionDetector() = default;
 
-    static const wchar_t* GetName() { return L"PerformanceRegressionDetector"; }
+    static const wchar_t* GetName()
+    {
+        return L"PerformanceRegressionDetector";
+    }
 
-    void Configure(const RegressionConfig& config) { m_config = config; }
+    void Configure(const RegressionConfig& config)
+    {
+        m_config = config;
+    }
 
     /// Add a latency sample.
-    void AddSample(double latencyMs) {
+    void AddSample(double latencyMs)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_allSamples.push_back(latencyMs);
         // Keep only recent enough samples for analysis
@@ -69,7 +81,8 @@ public:
     }
 
     /// Check for regression against baseline.
-    RegressionAlert Check() {
+    RegressionAlert Check()
+    {
         RegressionAlert alert;
         alert.metric = "decode_latency_ms";
         alert.detectedTick = GetTickCount64();
@@ -97,37 +110,46 @@ public:
 
         alert.baselineValue = baselineMean;
         alert.currentValue = recentMean;
-        alert.deviationPercent = baselineMean > 0 ?
-            100.0 * (recentMean - baselineMean) / baselineMean : 0.0;
+        alert.deviationPercent = baselineMean > 0 ? 100.0 * (recentMean - baselineMean) / baselineMean : 0.0;
 
         if (baselineStdDev > 0.001)
             alert.zScore = (recentMean - baselineMean) / baselineStdDev;
 
-        alert.isRegression = alert.deviationPercent > m_config.regressionThresholdPercent &&
-            std::abs(alert.zScore) > m_config.zScoreThreshold;
+        alert.isRegression = alert.deviationPercent > m_config.regressionThresholdPercent
+                             && std::abs(alert.zScore) > m_config.zScoreThreshold;
 
         m_stats.totalChecks++;
         m_stats.currentBaselineMs = baselineMean;
         m_stats.currentRecentMs = recentMean;
-        if (alert.isRegression) m_stats.regressionsDetected++;
+        if (alert.isRegression)
+            m_stats.regressionsDetected++;
         else if (alert.deviationPercent < -m_config.regressionThresholdPercent)
             m_stats.improvementsDetected++;
 
         return alert;
     }
 
-    RegressionStats GetStats() const { return m_stats; }
+    RegressionStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
-    void ComputeStats(const std::vector<double>& data, size_t start, size_t end,
-        double& mean, double& stdDev) const {
+  private:
+    void ComputeStats(const std::vector<double>& data, size_t start, size_t end, double& mean, double& stdDev) const
+    {
         size_t n = end - start;
-        if (n == 0) { mean = 0; stdDev = 0; return; }
+        if (n == 0) {
+            mean = 0;
+            stdDev = 0;
+            return;
+        }
         double sum = 0;
-        for (size_t i = start; i < end; ++i) sum += data[i];
+        for (size_t i = start; i < end; ++i)
+            sum += data[i];
         mean = sum / n;
         double sumSq = 0;
-        for (size_t i = start; i < end; ++i) sumSq += (data[i] - mean) * (data[i] - mean);
+        for (size_t i = start; i < end; ++i)
+            sumSq += (data[i] - mean) * (data[i] - mean);
         stdDev = std::sqrt(sumSq / n);
     }
 
@@ -137,5 +159,5 @@ private:
     mutable RegressionStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

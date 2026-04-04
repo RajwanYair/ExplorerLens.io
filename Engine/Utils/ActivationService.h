@@ -7,13 +7,14 @@
 #pragma once
 #include <windows.h>
 #include <winhttp.h>
-#include <string>
-#include <functional>
 #include <cstdint>
+#include <functional>
+#include <string>
 
 #pragma comment(lib, "winhttp.lib")
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class ActivationStatus {
     NotActivated,
@@ -22,31 +23,33 @@ enum class ActivationStatus {
     GraceExpired,  // Offline > 7 days: revert to Community
     ServerError,
     InvalidKey,
-    MachineLimit   // Max activations reached for this key
+    MachineLimit  // Max activations reached for this key
 };
 
-struct ActivationResult {
+struct ActivationResult
+{
     ActivationStatus status = ActivationStatus::NotActivated;
-    std::wstring     message;
-    std::wstring     licensee;
-    std::wstring     tier;           // "Pro" / "Enterprise"
-    int              activationsLeft = 0;
-    SYSTEMTIME       expiresAt       = {};
-    bool             success() const {
-        return status == ActivationStatus::Activated ||
-               status == ActivationStatus::GracePeriod;
+    std::wstring message;
+    std::wstring licensee;
+    std::wstring tier;  // "Pro" / "Enterprise"
+    int activationsLeft = 0;
+    SYSTEMTIME expiresAt = {};
+    bool success() const
+    {
+        return status == ActivationStatus::Activated || status == ActivationStatus::GracePeriod;
     }
 };
 
-class ActivationService {
-public:
+class ActivationService
+{
+  public:
     static constexpr const wchar_t* LICENSE_SERVER = L"activate.explorerlens.io";
-    static constexpr INTERNET_PORT  LICENSE_PORT    = 443;
-    static constexpr int            GRACE_DAYS      = 7;
+    static constexpr INTERNET_PORT LICENSE_PORT = 443;
+    static constexpr int GRACE_DAYS = 7;
 
     // Activate a new key against the server. Stores result in HKCU on success.
-    ActivationResult Activate(const std::wstring& rawKey,
-                              const std::wstring& email = L"") {
+    ActivationResult Activate(const std::wstring& rawKey, const std::wstring& email = L"")
+    {
         ActivationResult res;
         std::wstring body = BuildRequestBody(rawKey, email);
         std::wstring resp = PostJson(L"/api/v2/activate", body);
@@ -63,9 +66,12 @@ public:
     }
 
     // Deactivate current machine (allows transfer)
-    bool Deactivate(const std::wstring& keyHash) {
-        std::wstring body = L"{\"keyHash\":\"" + keyHash + L"\","
-                            L"\"machineId\":\"" + GetMachineId() + L"\"}";
+    bool Deactivate(const std::wstring& keyHash)
+    {
+        std::wstring body = L"{\"keyHash\":\"" + keyHash
+                            + L"\","
+                              L"\"machineId\":\""
+                            + GetMachineId() + L"\"}";
         std::wstring resp = PostJson(L"/api/v2/deactivate", body);
         if (resp.find(L"\"ok\":true") != std::wstring::npos) {
             RemoveActivation();
@@ -75,22 +81,26 @@ public:
     }
 
     // Check if the machine is still within the offline grace period
-    ActivationResult CheckGrace() {
+    ActivationResult CheckGrace()
+    {
         ActivationResult res;
         HKEY hk = nullptr;
-        if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Activation",
-                0, KEY_READ, &hk) != ERROR_SUCCESS) {
+        if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Activation", 0, KEY_READ, &hk) != ERROR_SUCCESS) {
             res.status = ActivationStatus::NotActivated;
             return res;
         }
-        DWORD lastOnline = 0; DWORD sz = sizeof(lastOnline);
-        RegQueryValueExW(hk, L"LastOnlineEpoch", nullptr, nullptr,
-                reinterpret_cast<BYTE*>(&lastOnline), &sz);
+        DWORD lastOnline = 0;
+        DWORD sz = sizeof(lastOnline);
+        RegQueryValueExW(hk, L"LastOnlineEpoch", nullptr, nullptr, reinterpret_cast<BYTE*>(&lastOnline), &sz);
         RegCloseKey(hk);
 
-        SYSTEMTIME now = {}; GetSystemTime(&now);
-        FILETIME ft = {}; SystemTimeToFileTime(&now, &ft);
-        ULARGE_INTEGER uli; uli.LowPart = ft.dwLowDateTime; uli.HighPart = ft.dwHighDateTime;
+        SYSTEMTIME now = {};
+        GetSystemTime(&now);
+        FILETIME ft = {};
+        SystemTimeToFileTime(&now, &ft);
+        ULARGE_INTEGER uli;
+        uli.LowPart = ft.dwLowDateTime;
+        uli.HighPart = ft.dwHighDateTime;
         uint64_t nowEpoch = (uli.QuadPart - 116444736000000000ULL) / 10000000ULL;
 
         uint64_t diff = (nowEpoch > lastOnline) ? (nowEpoch - lastOnline) : 0;
@@ -107,10 +117,13 @@ public:
     }
 
     // Get a stable machine fingerprint (volume serial + CPU brand hash)
-    static std::wstring GetMachineId() {
-        wchar_t sysRoot[MAX_PATH] = {}; GetSystemDirectoryW(sysRoot, MAX_PATH);
+    static std::wstring GetMachineId()
+    {
+        wchar_t sysRoot[MAX_PATH] = {};
+        GetSystemDirectoryW(sysRoot, MAX_PATH);
         wchar_t vol[MAX_PATH] = {};
-        wcsncpy_s(vol, sysRoot, 3); vol[3] = 0; // e.g. "C:\"
+        wcsncpy_s(vol, sysRoot, 3);
+        vol[3] = 0;  // e.g. "C:\"
         DWORD serial = 0;
         GetVolumeInformationW(vol, nullptr, 0, &serial, nullptr, nullptr, nullptr, 0);
         wchar_t buf[32] = {};
@@ -118,36 +131,43 @@ public:
         return buf;
     }
 
-    void OnActivated(std::function<void(const ActivationResult&)> cb) {
+    void OnActivated(std::function<void(const ActivationResult&)> cb)
+    {
         m_callback = std::move(cb);
     }
 
-private:
-    std::wstring BuildRequestBody(const std::wstring& key, const std::wstring& email) {
-        return L"{\"key\":\"" + key + L"\","
-               L"\"machineId\":\"" + GetMachineId() + L"\","
-               L"\"email\":\"" + email + L"\","
-               L"\"product\":\"ExplorerLens\","
-               L"\"version\":\"20.0.0\"}";
+  private:
+    std::wstring BuildRequestBody(const std::wstring& key, const std::wstring& email)
+    {
+        return L"{\"key\":\"" + key
+               + L"\","
+                 L"\"machineId\":\""
+               + GetMachineId()
+               + L"\","
+                 L"\"email\":\""
+               + email
+               + L"\","
+                 L"\"product\":\"ExplorerLens\","
+                 L"\"version\":\"20.0.0\"}";
     }
 
-    std::wstring PostJson(const std::wstring& path, const std::wstring& body) {
-        HINTERNET hSess = WinHttpOpen(L"ExplorerLens/20.0 Activation",
-                WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, nullptr, nullptr, 0);
-        if (!hSess) return L"";
+    std::wstring PostJson(const std::wstring& path, const std::wstring& body)
+    {
+        HINTERNET hSess =
+            WinHttpOpen(L"ExplorerLens/20.0 Activation", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, nullptr, nullptr, 0);
+        if (!hSess)
+            return L"";
 
         HINTERNET hConn = WinHttpConnect(hSess, LICENSE_SERVER, LICENSE_PORT, 0);
-        HINTERNET hReq  = WinHttpOpenRequest(hConn, L"POST", path.c_str(),
-                nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
-                WINHTTP_FLAG_SECURE);
+        HINTERNET hReq = WinHttpOpenRequest(hConn, L"POST", path.c_str(), nullptr, WINHTTP_NO_REFERER,
+                                            WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
 
         std::string bodyUtf8(body.size(), '\0');
-        for (std::size_t _i = 0; _i < body.size(); ++_i) bodyUtf8[_i] = static_cast<char>(body[_i]);
-        BOOL sent = WinHttpSendRequest(hReq,
-                L"Content-Type: application/json\r\n", static_cast<DWORD>(-1L),
-                const_cast<char*>(bodyUtf8.c_str()),
-                static_cast<DWORD>(bodyUtf8.size()),
-                static_cast<DWORD>(bodyUtf8.size()), 0);
+        for (std::size_t _i = 0; _i < body.size(); ++_i)
+            bodyUtf8[_i] = static_cast<char>(body[_i]);
+        BOOL sent = WinHttpSendRequest(hReq, L"Content-Type: application/json\r\n", static_cast<DWORD>(-1L),
+                                       const_cast<char*>(bodyUtf8.c_str()), static_cast<DWORD>(bodyUtf8.size()),
+                                       static_cast<DWORD>(bodyUtf8.size()), 0);
 
         std::wstring result;
         if (sent && WinHttpReceiveResponse(hReq, nullptr)) {
@@ -165,7 +185,8 @@ private:
         return result;
     }
 
-    void ParseResponse(const std::wstring& resp, ActivationResult& res) {
+    void ParseResponse(const std::wstring& resp, ActivationResult& res)
+    {
         if (resp.find(L"\"status\":\"activated\"") != std::wstring::npos)
             res.status = ActivationStatus::Activated;
         else if (resp.find(L"\"status\":\"invalid_key\"") != std::wstring::npos)
@@ -177,46 +198,55 @@ private:
 
         auto extract = [&](const wchar_t* key) -> std::wstring {
             auto pos = resp.find(key);
-            if (pos == std::wstring::npos) return L"";
+            if (pos == std::wstring::npos)
+                return L"";
             pos += wcslen(key);
             auto end = resp.find(L'"', pos);
             return (end != std::wstring::npos) ? resp.substr(pos, end - pos) : L"";
         };
         res.licensee = extract(L"\"licensee\":\"");
-        res.tier     = extract(L"\"tier\":\"");
-        res.message  = extract(L"\"message\":\"");
+        res.tier = extract(L"\"tier\":\"");
+        res.message = extract(L"\"message\":\"");
     }
 
-    void PersistActivation(const ActivationResult& res) {
+    void PersistActivation(const ActivationResult& res)
+    {
         HKEY hk = nullptr;
-        RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Activation",
-                0, nullptr, 0, KEY_WRITE, nullptr, &hk, nullptr);
-        if (!hk) return;
+        RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Activation", 0, nullptr, 0, KEY_WRITE, nullptr,
+                        &hk, nullptr);
+        if (!hk)
+            return;
 
-        SYSTEMTIME now = {}; GetSystemTime(&now);
-        FILETIME ft = {}; SystemTimeToFileTime(&now, &ft);
-        ULARGE_INTEGER uli; uli.LowPart = ft.dwLowDateTime; uli.HighPart = ft.dwHighDateTime;
+        SYSTEMTIME now = {};
+        GetSystemTime(&now);
+        FILETIME ft = {};
+        SystemTimeToFileTime(&now, &ft);
+        ULARGE_INTEGER uli;
+        uli.LowPart = ft.dwLowDateTime;
+        uli.HighPart = ft.dwHighDateTime;
         uint64_t epoch = (uli.QuadPart - 116444736000000000ULL) / 10000000ULL;
         DWORD ep32 = static_cast<DWORD>(epoch & 0xFFFFFFFF);
-        RegSetValueExW(hk, L"LastOnlineEpoch", 0, REG_DWORD,
-                reinterpret_cast<const BYTE*>(&ep32), sizeof(DWORD));
-        RegSetValueExW(hk, L"Licensee", 0, REG_SZ,
-            reinterpret_cast<const BYTE*>(res.licensee.c_str()),
-            static_cast<DWORD>((res.licensee.size() + 1) * sizeof(wchar_t)));
+        RegSetValueExW(hk, L"LastOnlineEpoch", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&ep32), sizeof(DWORD));
+        RegSetValueExW(hk, L"Licensee", 0, REG_SZ, reinterpret_cast<const BYTE*>(res.licensee.c_str()),
+                       static_cast<DWORD>((res.licensee.size() + 1) * sizeof(wchar_t)));
         RegCloseKey(hk);
 
-        if (m_callback) m_callback(res);
+        if (m_callback)
+            m_callback(res);
     }
 
-    void RemoveActivation() {
+    void RemoveActivation()
+    {
         RegDeleteKeyW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Activation");
     }
 
-    void ResetGraceTimer() {
+    void ResetGraceTimer()
+    {
         // LastOnlineEpoch is updated in PersistActivation
     }
 
     std::function<void(const ActivationResult&)> m_callback;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -8,8 +8,8 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,7 +23,8 @@ enum class AnalyzerLogLevel : uint8_t {
     Fatal = 5
 };
 
-struct AnalyzerLogEntry {
+struct AnalyzerLogEntry
+{
     uint64_t timestampMs = 0;
     AnalyzerLogLevel level = AnalyzerLogLevel::Info;
     std::string source;
@@ -31,7 +32,8 @@ struct AnalyzerLogEntry {
     uint32_t threadId = 0;
 };
 
-struct LogPattern {
+struct LogPattern
+{
     std::string patternName;
     std::string matchSubstring;
     AnalyzerLogLevel minLevel = AnalyzerLogLevel::Warning;
@@ -40,7 +42,8 @@ struct LogPattern {
     uint64_t lastSeenMs = 0;
 };
 
-struct LogAnalysis {
+struct LogAnalysis
+{
     uint32_t totalEntries = 0;
     uint32_t errorCount = 0;
     uint32_t warningCount = 0;
@@ -51,10 +54,12 @@ struct LogAnalysis {
     double errorsPerMinute = 0.0;
 };
 
-class LogAnalyzer {
-public:
+class LogAnalyzer
+{
+  public:
     void RegisterPattern(const std::string& name, const std::string& match,
-        AnalyzerLogLevel minLevel = AnalyzerLogLevel::Warning) {
+                         AnalyzerLogLevel minLevel = AnalyzerLogLevel::Warning)
+    {
         LogPattern p;
         p.patternName = name;
         p.matchSubstring = match;
@@ -62,27 +67,32 @@ public:
         m_patterns.push_back(p);
     }
 
-    void Ingest(const AnalyzerLogEntry& entry) {
+    void Ingest(const AnalyzerLogEntry& entry)
+    {
         m_analysis.totalEntries++;
-        if (entry.level == AnalyzerLogLevel::Error) m_analysis.errorCount++;
-        if (entry.level == AnalyzerLogLevel::Warning) m_analysis.warningCount++;
-        if (entry.level == AnalyzerLogLevel::Fatal) m_analysis.fatalCount++;
+        if (entry.level == AnalyzerLogLevel::Error)
+            m_analysis.errorCount++;
+        if (entry.level == AnalyzerLogLevel::Warning)
+            m_analysis.warningCount++;
+        if (entry.level == AnalyzerLogLevel::Fatal)
+            m_analysis.fatalCount++;
 
         if (entry.level >= AnalyzerLogLevel::Error) {
             m_sourceCounts[entry.source]++;
         }
 
         for (auto& p : m_patterns) {
-            if (entry.level >= p.minLevel &&
-                entry.message.find(p.matchSubstring) != std::string::npos) {
+            if (entry.level >= p.minLevel && entry.message.find(p.matchSubstring) != std::string::npos) {
                 p.occurrences++;
-                if (p.firstSeenMs == 0) p.firstSeenMs = entry.timestampMs;
+                if (p.firstSeenMs == 0)
+                    p.firstSeenMs = entry.timestampMs;
                 p.lastSeenMs = entry.timestampMs;
             }
         }
     }
 
-    LogAnalysis GetAnalysis() const {
+    LogAnalysis GetAnalysis() const
+    {
         auto result = m_analysis;
         result.detectedPatterns = m_patterns;
 
@@ -98,7 +108,8 @@ public:
         return result;
     }
 
-    void Reset() {
+    void Reset()
+    {
         m_analysis = {};
         m_sourceCounts.clear();
         for (auto& p : m_patterns) {
@@ -108,11 +119,11 @@ public:
         }
     }
 
-private:
+  private:
     LogAnalysis m_analysis;
     std::vector<LogPattern> m_patterns;
     std::unordered_map<std::string, uint32_t> m_sourceCounts;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

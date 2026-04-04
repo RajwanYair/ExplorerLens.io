@@ -33,14 +33,14 @@
  *****************************************************************************/
 
 #include <windows.h>
-#include <string>
-#include <vector>
-#include <functional>
 #include <atomic>
-#include <thread>
-#include <mutex>
 #include <chrono>
 #include <cstdint>
+#include <functional>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Memory {
@@ -48,21 +48,28 @@ namespace Memory {
 // ─── Pressure level (5-tier) ─────────────────────────────────────────────────
 
 enum class PressureLevel : uint32_t {
-    Normal = 0,   // > 50% free
-    Low = 1,   // 25–50% free — start background compaction
-    Medium = 2,   // 10–25% free — shed D3D11 cache
-    High = 3,   // 5–10% free — shed all caches
-    Critical = 4,   // < 5% free — emergency eviction, no new decodes
+    Normal = 0,    // > 50% free
+    Low = 1,       // 25–50% free — start background compaction
+    Medium = 2,    // 10–25% free — shed D3D11 cache
+    High = 3,      // 5–10% free — shed all caches
+    Critical = 4,  // < 5% free — emergency eviction, no new decodes
 };
 
-inline std::string ToString(PressureLevel p) {
+inline std::string ToString(PressureLevel p)
+{
     switch (p) {
-    case PressureLevel::Normal:   return "Normal";
-    case PressureLevel::Low:      return "Low";
-    case PressureLevel::Medium:   return "Medium";
-    case PressureLevel::High:     return "High";
-    case PressureLevel::Critical: return "Critical";
-    default:                      return "Unknown";
+        case PressureLevel::Normal:
+            return "Normal";
+        case PressureLevel::Low:
+            return "Low";
+        case PressureLevel::Medium:
+            return "Medium";
+        case PressureLevel::High:
+            return "High";
+        case PressureLevel::Critical:
+            return "Critical";
+        default:
+            return "Unknown";
     }
 }
 
@@ -78,103 +85,107 @@ enum class PressureAction : uint32_t {
     CompactHeaps = 0x20,
     EmergencyRelease = 0x40,
     PauseDecodeQueue = 0x80,
-    BackgroundCompact = 0x01,  // alias for TrimDecodeCaches
-    EvictD3D11Cache = 0x10,  // alias for EvictUnpinned
-    EvictCPUPixelCache = 0x10, // alias
-    EvictMetadataCache = 0x10, // alias
-    BlockNewDecodes = 0x80,  // alias for PauseDecodeQueue
+    BackgroundCompact = 0x01,   // alias for TrimDecodeCaches
+    EvictD3D11Cache = 0x10,     // alias for EvictUnpinned
+    EvictCPUPixelCache = 0x10,  // alias
+    EvictMetadataCache = 0x10,  // alias
+    BlockNewDecodes = 0x80,     // alias for PauseDecodeQueue
     EmitETWEvent = 0x100,
 };
 
-inline PressureAction operator|(PressureAction a, PressureAction b) {
-    return static_cast<PressureAction>(
-        static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+inline PressureAction operator|(PressureAction a, PressureAction b)
+{
+    return static_cast<PressureAction>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
 
-inline PressureAction operator&(PressureAction a, PressureAction b) {
-    return static_cast<PressureAction>(
-        static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+inline PressureAction operator&(PressureAction a, PressureAction b)
+{
+    return static_cast<PressureAction>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 }
 
-inline bool HasAction(PressureAction combined, PressureAction flag) {
+inline bool HasAction(PressureAction combined, PressureAction flag)
+{
     return (static_cast<uint32_t>(combined) & static_cast<uint32_t>(flag)) != 0;
 }
 
 // ─── Response ladder rung ────────────────────────────────────────────────────
 
-struct PressureLadderRung {
-    PressureLevel  level;
+struct PressureLadderRung
+{
+    PressureLevel level;
     PressureAction actions;
-    uint32_t       maxEvictionMs{ 200 };
-    size_t         targetFreeBytes{ 0 };
+    uint32_t maxEvictionMs{200};
+    size_t targetFreeBytes{0};
 };
 
-inline std::vector<PressureLadderRung> DefaultPressureLadder() {
+inline std::vector<PressureLadderRung> DefaultPressureLadder()
+{
     return {
-        { PressureLevel::Normal,
-          PressureAction::None, 0, 0 },
-        { PressureLevel::Low,
-          PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled | PressureAction::EmitETWEvent,
-          200, 64ULL * 1024 * 1024 },
-        { PressureLevel::Medium,
-          PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled
-          | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget
-          | PressureAction::EmitETWEvent,
-          300, 128ULL * 1024 * 1024 },
-        { PressureLevel::High,
-          PressureAction::EvictUnpinned | PressureAction::CompactHeaps
-          | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget
-          | PressureAction::EmitETWEvent,
-          400, 256ULL * 1024 * 1024 },
-        { PressureLevel::Critical,
-          PressureAction::EmergencyRelease | PressureAction::PauseDecodeQueue
-          | PressureAction::EvictUnpinned | PressureAction::CompactHeaps
-          | PressureAction::EmitETWEvent,
-          500, 512ULL * 1024 * 1024 },
+        {PressureLevel::Normal, PressureAction::None, 0, 0},
+        {PressureLevel::Low,
+         PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled | PressureAction::EmitETWEvent, 200,
+         64ULL * 1024 * 1024},
+        {PressureLevel::Medium,
+         PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled | PressureAction::FlushWriteBehind
+             | PressureAction::ReduceCacheBudget | PressureAction::EmitETWEvent,
+         300, 128ULL * 1024 * 1024},
+        {PressureLevel::High,
+         PressureAction::EvictUnpinned | PressureAction::CompactHeaps | PressureAction::FlushWriteBehind
+             | PressureAction::ReduceCacheBudget | PressureAction::EmitETWEvent,
+         400, 256ULL * 1024 * 1024},
+        {PressureLevel::Critical,
+         PressureAction::EmergencyRelease | PressureAction::PauseDecodeQueue | PressureAction::EvictUnpinned
+             | PressureAction::CompactHeaps | PressureAction::EmitETWEvent,
+         500, 512ULL * 1024 * 1024},
     };
 }
 
 // ─── Pressure transition event ───────────────────────────────────────────────
 
-struct PressureTransition {
-    PressureLevel  from;
-    PressureLevel  to;
-    uint64_t       timestampMs{ 0 };
-    size_t         freeBytesBefore{ 0 };
-    size_t         freeBytesAfter{ 0 };
-    PressureAction actionsExecuted{ PressureAction::None };
+struct PressureTransition
+{
+    PressureLevel from;
+    PressureLevel to;
+    uint64_t timestampMs{0};
+    size_t freeBytesBefore{0};
+    size_t freeBytesAfter{0};
+    PressureAction actionsExecuted{PressureAction::None};
 
-    bool IsEscalation() const {
+    bool IsEscalation() const
+    {
         return static_cast<uint32_t>(to) > static_cast<uint32_t>(from);
     }
 };
 
 // ─── Memory pressure statistics ──────────────────────────────────────────────
 
-struct MemoryPressureStats {
-    PressureLevel currentTier{ PressureLevel::Normal };
-    uint64_t      processWorkingSet{ 0 };
-    uint64_t      processCommitCharge{ 0 };
-    uint32_t      systemMemoryLoad{ 0 };
-    uint32_t      escalationCount{ 0 };
-    uint64_t      timeInNormalMs{ 0 };
-    uint64_t      timeInLowMs{ 0 };
-    uint64_t      timeInMediumMs{ 0 };
-    uint64_t      timeInHighMs{ 0 };
-    uint64_t      timeInCriticalMs{ 0 };
+struct MemoryPressureStats
+{
+    PressureLevel currentTier{PressureLevel::Normal};
+    uint64_t processWorkingSet{0};
+    uint64_t processCommitCharge{0};
+    uint32_t systemMemoryLoad{0};
+    uint32_t escalationCount{0};
+    uint64_t timeInNormalMs{0};
+    uint64_t timeInLowMs{0};
+    uint64_t timeInMediumMs{0};
+    uint64_t timeInHighMs{0};
+    uint64_t timeInCriticalMs{0};
 };
 
 // ─── Process memory info (dynamically loaded) ───────────────────────────────
 
-struct ProcessMemInfo {
-    uint64_t workingSetBytes{ 0 };
-    uint64_t peakWorkingSetBytes{ 0 };
-    uint64_t privateBytes{ 0 };
+struct ProcessMemInfo
+{
+    uint64_t workingSetBytes{0};
+    uint64_t peakWorkingSetBytes{0};
+    uint64_t privateBytes{0};
 };
 
 // ─── Callback registration ──────────────────────────────────────────────────
 
-struct PressureCallbackEntry {
+struct PressureCallbackEntry
+{
     PressureLevel minTier;
     std::function<void(PressureLevel, PressureAction)> callback;
 };
@@ -185,25 +196,29 @@ using PressureTransitionCallback = std::function<void(const PressureTransition&)
 
 // ─── MemoryPressureControllerV2 ─────────────────────────────────────────────
 
-class MemoryPressureControllerV2 {
-public:
-    explicit MemoryPressureControllerV2(
-        std::vector<PressureLadderRung> ladder = DefaultPressureLadder())
+class MemoryPressureControllerV2
+{
+  public:
+    explicit MemoryPressureControllerV2(std::vector<PressureLadderRung> ladder = DefaultPressureLadder())
         : m_ladder(std::move(ladder))
         , m_current(PressureLevel::Normal)
         , m_pending(PressureLevel::Normal)
         , m_hysteresisCount(0)
         , m_escalationCount(0)
-        , m_pollingRunning(false) {
+        , m_pollingRunning(false)
+    {
         ::InitializeSRWLock(&m_srwLock);
         m_tierEntryTime = std::chrono::steady_clock::now();
-        for (auto& t : m_tierDurations) t = std::chrono::milliseconds(0);
+        for (auto& t : m_tierDurations)
+            t = std::chrono::milliseconds(0);
         LoadProcessMemoryInfoProc();
     }
 
-    ~MemoryPressureControllerV2() {
+    ~MemoryPressureControllerV2()
+    {
         StopPolling();
-        if (m_psapiModule) ::FreeLibrary(m_psapiModule);
+        if (m_psapiModule)
+            ::FreeLibrary(m_psapiModule);
     }
 
     MemoryPressureControllerV2(const MemoryPressureControllerV2&) = delete;
@@ -218,28 +233,36 @@ public:
         , m_escalationCount(other.m_escalationCount)
         , m_pollingRunning(other.m_pollingRunning.load())
         , m_pfnGetProcessMemoryInfo(other.m_pfnGetProcessMemoryInfo)
-        , m_psapiModule(other.m_psapiModule) {
+        , m_psapiModule(other.m_psapiModule)
+    {
         ::InitializeSRWLock(&m_srwLock);
         m_tierEntryTime = other.m_tierEntryTime;
-        for (int i = 0; i < 5; ++i) m_tierDurations[i] = other.m_tierDurations[i];
+        for (int i = 0; i < 5; ++i)
+            m_tierDurations[i] = other.m_tierDurations[i];
         other.m_psapiModule = nullptr;
         other.m_pfnGetProcessMemoryInfo = nullptr;
     }
 
     // ── Factory ─────────────────────────────────────────────────────────────
 
-    static MemoryPressureControllerV2 Create() {
+    static MemoryPressureControllerV2 Create()
+    {
         return MemoryPressureControllerV2(DefaultPressureLadder());
     }
 
     // ── Core evaluation ─────────────────────────────────────────────────────
 
-    PressureLevel CurrentLevel() const { return m_current; }
-    struct PressureTier {
-        PressureLevel  level{ PressureLevel::Normal };
-        PressureAction actions{ PressureAction::None };
+    PressureLevel CurrentLevel() const
+    {
+        return m_current;
+    }
+    struct PressureTier
+    {
+        PressureLevel level{PressureLevel::Normal};
+        PressureAction actions{PressureAction::None};
     };
-    PressureTier EvaluatePressure() {
+    PressureTier EvaluatePressure()
+    {
         ::AcquireSRWLockExclusive(&m_srwLock);
         MEMORYSTATUSEX msx{};
         msx.dwLength = sizeof(msx);
@@ -259,7 +282,8 @@ public:
 
     // ── Backward-compatible Evaluate ────────────────────────────────────────
 
-    PressureTransition Evaluate(uint64_t totalBytes, uint64_t freeBytes) {
+    PressureTransition Evaluate(uint64_t totalBytes, uint64_t freeBytes)
+    {
         PressureTransition t;
         t.from = m_current;
         t.freeBytesBefore = static_cast<size_t>(freeBytes);
@@ -267,11 +291,16 @@ public:
         double ratio = totalBytes > 0 ? static_cast<double>(freeBytes) / static_cast<double>(totalBytes) : 1.0;
 
         PressureLevel newLevel;
-        if (ratio > 0.50)      newLevel = PressureLevel::Normal;
-        else if (ratio > 0.25) newLevel = PressureLevel::Low;
-        else if (ratio > 0.10) newLevel = PressureLevel::Medium;
-        else if (ratio > 0.05) newLevel = PressureLevel::High;
-        else                   newLevel = PressureLevel::Critical;
+        if (ratio > 0.50)
+            newLevel = PressureLevel::Normal;
+        else if (ratio > 0.25)
+            newLevel = PressureLevel::Low;
+        else if (ratio > 0.10)
+            newLevel = PressureLevel::Medium;
+        else if (ratio > 0.05)
+            newLevel = PressureLevel::High;
+        else
+            newLevel = PressureLevel::Critical;
 
         t.to = newLevel;
         m_current = newLevel;
@@ -283,33 +312,38 @@ public:
             }
         }
 
-        if (m_transitionCallback) m_transitionCallback(t);
+        if (m_transitionCallback)
+            m_transitionCallback(t);
         return t;
     }
 
     // ── Recommended actions ─────────────────────────────────────────────────
 
-    static PressureAction GetRecommendedActions(PressureLevel tier) {
+    static PressureAction GetRecommendedActions(PressureLevel tier)
+    {
         return GetRecommendedActionsForLevel(tier);
     }
 
     // ── Callback registration ───────────────────────────────────────────────
 
-    void RegisterPressureCallback(PressureLevel minTier,
-        std::function<void(PressureLevel, PressureAction)> fn) {
+    void RegisterPressureCallback(PressureLevel minTier, std::function<void(PressureLevel, PressureAction)> fn)
+    {
         ::AcquireSRWLockExclusive(&m_srwLock);
-        m_callbacks.push_back({ minTier, std::move(fn) });
+        m_callbacks.push_back({minTier, std::move(fn)});
         ::ReleaseSRWLockExclusive(&m_srwLock);
     }
 
-    void OnTransition(PressureTransitionCallback cb) {
+    void OnTransition(PressureTransitionCallback cb)
+    {
         m_transitionCallback = std::move(cb);
     }
 
     // ── Background polling ──────────────────────────────────────────────────
 
-    void StartPolling(uint32_t intervalMs = 2000) {
-        if (m_pollingRunning.exchange(true)) return;
+    void StartPolling(uint32_t intervalMs = 2000)
+    {
+        if (m_pollingRunning.exchange(true))
+            return;
         m_pollingThread = std::thread([this, intervalMs]() {
             while (m_pollingRunning.load()) {
                 PollOnce();
@@ -317,17 +351,21 @@ public:
                     ::Sleep(100);
                 }
             }
-            });
+        });
     }
 
-    void StopPolling() {
-        if (!m_pollingRunning.exchange(false)) return;
-        if (m_pollingThread.joinable()) m_pollingThread.join();
+    void StopPolling()
+    {
+        if (!m_pollingRunning.exchange(false))
+            return;
+        if (m_pollingThread.joinable())
+            m_pollingThread.join();
     }
 
     // ── Emergency release ───────────────────────────────────────────────────
 
-    void EmergencyRelease() {
+    void EmergencyRelease()
+    {
         ::AcquireSRWLockExclusive(&m_srwLock);
         PressureLevel old = m_current;
         m_current = PressureLevel::Critical;
@@ -353,14 +391,16 @@ public:
 
         for (const auto& entry : callbacks) {
             if (static_cast<uint32_t>(PressureLevel::Critical) >= static_cast<uint32_t>(entry.minTier)) {
-                if (entry.callback) entry.callback(PressureLevel::Critical, actions);
+                if (entry.callback)
+                    entry.callback(PressureLevel::Critical, actions);
             }
         }
     }
 
     // ── Statistics ──────────────────────────────────────────────────────────
 
-    MemoryPressureStats GetStats() const {
+    MemoryPressureStats GetStats() const
+    {
         ::AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
         MemoryPressureStats stats;
         stats.currentTier = m_current;
@@ -385,13 +425,14 @@ public:
         return stats;
     }
 
-private:
+  private:
     // ── Dynamic psapi loading ───────────────────────────────────────────────
 
     // PROCESS_MEMORY_COUNTERS equivalent to avoid #include <psapi.h>
-    struct ProcessMemoryCounters {
-        DWORD  cb;
-        DWORD  PageFaultCount;
+    struct ProcessMemoryCounters
+    {
+        DWORD cb;
+        DWORD PageFaultCount;
         SIZE_T PeakWorkingSetSize;
         SIZE_T WorkingSetSize;
         SIZE_T QuotaPeakPagedPoolUsage;
@@ -404,27 +445,30 @@ private:
 
     using FnGetProcessMemoryInfo = BOOL(WINAPI*)(HANDLE, ProcessMemoryCounters*, DWORD);
 
-    void LoadProcessMemoryInfoProc() {
+    void LoadProcessMemoryInfoProc()
+    {
         // Try kernel32 first (Win7+), then psapi.dll
         m_psapiModule = ::GetModuleHandleW(L"kernel32.dll");
         if (m_psapiModule) {
-            m_pfnGetProcessMemoryInfo = reinterpret_cast<FnGetProcessMemoryInfo>(
-                ::GetProcAddress(m_psapiModule, "K32GetProcessMemoryInfo"));
+            m_pfnGetProcessMemoryInfo =
+                reinterpret_cast<FnGetProcessMemoryInfo>(::GetProcAddress(m_psapiModule, "K32GetProcessMemoryInfo"));
             if (m_pfnGetProcessMemoryInfo) {
-                m_psapiModule = nullptr; // Don't FreeLibrary kernel32
+                m_psapiModule = nullptr;  // Don't FreeLibrary kernel32
                 return;
             }
         }
         m_psapiModule = ::LoadLibraryW(L"psapi.dll");
         if (m_psapiModule) {
-            m_pfnGetProcessMemoryInfo = reinterpret_cast<FnGetProcessMemoryInfo>(
-                ::GetProcAddress(m_psapiModule, "GetProcessMemoryInfo"));
+            m_pfnGetProcessMemoryInfo =
+                reinterpret_cast<FnGetProcessMemoryInfo>(::GetProcAddress(m_psapiModule, "GetProcessMemoryInfo"));
         }
     }
 
-    ProcessMemInfo QueryProcessMemory() {
+    ProcessMemInfo QueryProcessMemory()
+    {
         ProcessMemInfo info;
-        if (!m_pfnGetProcessMemoryInfo) return info;
+        if (!m_pfnGetProcessMemoryInfo)
+            return info;
 
         ProcessMemoryCounters pmc{};
         pmc.cb = sizeof(pmc);
@@ -438,38 +482,45 @@ private:
 
     // ── Level computation ───────────────────────────────────────────────────
 
-    PressureLevel ComputeLevel(const MEMORYSTATUSEX& msx, const ProcessMemInfo& /*proc*/) {
+    PressureLevel ComputeLevel(const MEMORYSTATUSEX& msx, const ProcessMemInfo& /*proc*/)
+    {
         uint32_t load = msx.dwMemoryLoad;
-        if (load < 50)  return PressureLevel::Normal;
-        if (load < 75)  return PressureLevel::Low;
-        if (load < 90)  return PressureLevel::Medium;
-        if (load < 95)  return PressureLevel::High;
+        if (load < 50)
+            return PressureLevel::Normal;
+        if (load < 75)
+            return PressureLevel::Low;
+        if (load < 90)
+            return PressureLevel::Medium;
+        if (load < 95)
+            return PressureLevel::High;
         return PressureLevel::Critical;
     }
 
-    static PressureAction GetRecommendedActionsForLevel(PressureLevel tier) {
+    static PressureAction GetRecommendedActionsForLevel(PressureLevel tier)
+    {
         switch (tier) {
-        case PressureLevel::Normal:
-            return PressureAction::None;
-        case PressureLevel::Low:
-            return PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled;
-        case PressureLevel::Medium:
-            return PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled
-                | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget;
-        case PressureLevel::High:
-            return PressureAction::EvictUnpinned | PressureAction::CompactHeaps
-                | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget;
-        case PressureLevel::Critical:
-            return PressureAction::EmergencyRelease | PressureAction::PauseDecodeQueue
-                | PressureAction::EvictUnpinned | PressureAction::CompactHeaps;
-        default:
-            return PressureAction::None;
+            case PressureLevel::Normal:
+                return PressureAction::None;
+            case PressureLevel::Low:
+                return PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled;
+            case PressureLevel::Medium:
+                return PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled
+                       | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget;
+            case PressureLevel::High:
+                return PressureAction::EvictUnpinned | PressureAction::CompactHeaps | PressureAction::FlushWriteBehind
+                       | PressureAction::ReduceCacheBudget;
+            case PressureLevel::Critical:
+                return PressureAction::EmergencyRelease | PressureAction::PauseDecodeQueue
+                       | PressureAction::EvictUnpinned | PressureAction::CompactHeaps;
+            default:
+                return PressureAction::None;
         }
     }
 
     // ── Hysteresis and transition ───────────────────────────────────────────
 
-    void ApplyHysteresisAndTransition(PressureLevel newLevel, uint64_t freeBytes) {
+    void ApplyHysteresisAndTransition(PressureLevel newLevel, uint64_t freeBytes)
+    {
         auto now = std::chrono::steady_clock::now();
 
         // Immediate de-escalation
@@ -486,8 +537,7 @@ private:
         if (newLevel != m_current) {
             if (newLevel == m_pending) {
                 m_hysteresisCount++;
-            }
-            else {
+            } else {
                 m_pending = newLevel;
                 m_hysteresisCount = 1;
             }
@@ -498,31 +548,34 @@ private:
                 m_hysteresisCount = 0;
                 FireCallbacks(newLevel, GetRecommendedActionsForLevel(newLevel));
             }
-        }
-        else {
+        } else {
             m_hysteresisCount = 0;
             m_pending = m_current;
         }
         (void)freeBytes;
     }
 
-    void AccumulateTierTime(std::chrono::steady_clock::time_point now) {
+    void AccumulateTierTime(std::chrono::steady_clock::time_point now)
+    {
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_tierEntryTime);
         m_tierDurations[static_cast<size_t>(m_current)] += elapsed;
         m_tierEntryTime = now;
     }
 
-    void FireCallbacks(PressureLevel level, PressureAction actions) {
+    void FireCallbacks(PressureLevel level, PressureAction actions)
+    {
         for (const auto& entry : m_callbacks) {
             if (static_cast<uint32_t>(level) >= static_cast<uint32_t>(entry.minTier)) {
-                if (entry.callback) entry.callback(level, actions);
+                if (entry.callback)
+                    entry.callback(level, actions);
             }
         }
     }
 
     // ── Poll once ───────────────────────────────────────────────────────────
 
-    void PollOnce() {
+    void PollOnce()
+    {
         MEMORYSTATUSEX msx{};
         msx.dwLength = sizeof(msx);
         ::GlobalMemoryStatusEx(&msx);
@@ -556,5 +609,5 @@ private:
     HMODULE m_psapiModule = nullptr;
 };
 
-} // namespace Memory
-} // namespace ExplorerLens
+}  // namespace Memory
+}  // namespace ExplorerLens

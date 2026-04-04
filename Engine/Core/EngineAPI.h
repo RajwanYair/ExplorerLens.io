@@ -7,25 +7,25 @@
 
 // DLL export/import macros for Windows
 #ifdef _WIN32
-#ifdef ENGINE_STATIC
-// Static library: no dllexport/dllimport
-#define ENGINE_API
-#elif defined(ENGINE_EXPORTS)
-// Building DLL: export symbols
-#define ENGINE_API __declspec(dllexport)
+    #ifdef ENGINE_STATIC
+        // Static library: no dllexport/dllimport
+        #define ENGINE_API
+    #elif defined(ENGINE_EXPORTS)
+        // Building DLL: export symbols
+        #define ENGINE_API __declspec(dllexport)
+    #else
+        // Using DLL: import symbols
+        #define ENGINE_API __declspec(dllimport)
+    #endif
 #else
-// Using DLL: import symbols
-#define ENGINE_API __declspec(dllimport)
-#endif
-#else
-#define ENGINE_API
+    #define ENGINE_API
 #endif
 
 // Calling convention for Engine API functions
 #ifdef _WIN32
-#define ENGINE_CALL __stdcall
+    #define ENGINE_CALL __stdcall
 #else
-#define ENGINE_CALL
+    #define ENGINE_CALL
 #endif
 
 // Version information
@@ -37,10 +37,10 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Get engine version as wide string
-ENGINE_API const wchar_t *ENGINE_CALL GetEngineVersion();
+ENGINE_API const wchar_t* ENGINE_CALL GetEngineVersion();
 
 /// Get engine build date as wide string
-ENGINE_API const wchar_t *ENGINE_CALL GetEngineBuildDate();
+ENGINE_API const wchar_t* ENGINE_CALL GetEngineBuildDate();
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

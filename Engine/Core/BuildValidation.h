@@ -19,7 +19,8 @@ namespace ExplorerLens {
 namespace BuildValidation {
 
 /// Build configuration snapshot for diagnostics
-struct BuildInfo {
+struct BuildInfo
+{
     static constexpr int MajorVersion = 32;
     static constexpr int MinorVersion = 3;
     static constexpr int PatchVersion = 0;
@@ -49,12 +50,13 @@ struct BuildInfo {
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 4434;
+    static constexpr int UnitTestCount = 4483;
     static constexpr int BenchmarkSuites = 5;
 };
 
 /// Validates runtime environment for diagnostics export
-inline bool ValidateRuntime() {
+inline bool ValidateRuntime()
+{
     // Check Windows version >= 10.0.19041
     OSVERSIONINFOEXW osvi = {};
     osvi.dwOSVersionInfoSize = sizeof(osvi);
@@ -62,5 +64,5 @@ inline bool ValidateRuntime() {
     return osvi.dwOSVersionInfoSize > 0;
 }
 
-} // namespace BuildValidation
-} // namespace ExplorerLens
+}  // namespace BuildValidation
+}  // namespace ExplorerLens

@@ -6,14 +6,14 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <chrono>
 #include <algorithm>
-#include <mutex>
+#include <chrono>
+#include <cstdint>
 #include <cstring>
+#include <mutex>
 #include <numeric>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -34,7 +34,8 @@ enum class BandwidthBottleneck : uint8_t {
     TLBMiss
 };
 
-struct BandwidthMeasurement {
+struct BandwidthMeasurement
+{
     double readBandwidthGBps = 0.0;
     double writeBandwidthGBps = 0.0;
     double copyBandwidthGBps = 0.0;
@@ -43,7 +44,8 @@ struct BandwidthMeasurement {
     MemoryAccessPattern pattern = MemoryAccessPattern::Sequential;
 };
 
-struct ProfilingResult {
+struct ProfilingResult
+{
     std::vector<BandwidthMeasurement> measurements;
     double peakReadGBps = 0.0;
     double peakWriteGBps = 0.0;
@@ -51,15 +53,18 @@ struct ProfilingResult {
     std::string recommendation;
 };
 
-class MemoryBandwidthProfiler {
-public:
-    static MemoryBandwidthProfiler& Instance() {
+class MemoryBandwidthProfiler
+{
+  public:
+    static MemoryBandwidthProfiler& Instance()
+    {
         static MemoryBandwidthProfiler instance;
         return instance;
     }
 
     inline BandwidthMeasurement MeasureReadBandwidth(size_t bufferSize = 64 * 1024 * 1024,
-        uint32_t iterations = 10) const {
+                                                     uint32_t iterations = 10) const
+    {
         BandwidthMeasurement result;
         result.blockSize = bufferSize;
         result.pattern = MemoryAccessPattern::Sequential;
@@ -87,7 +92,8 @@ public:
     }
 
     inline BandwidthMeasurement MeasureWriteBandwidth(size_t bufferSize = 64 * 1024 * 1024,
-        uint32_t iterations = 10) const {
+                                                      uint32_t iterations = 10) const
+    {
         BandwidthMeasurement result;
         result.blockSize = bufferSize;
         result.pattern = MemoryAccessPattern::Sequential;
@@ -107,7 +113,8 @@ public:
     }
 
     inline BandwidthMeasurement MeasureCopyBandwidth(size_t bufferSize = 64 * 1024 * 1024,
-        uint32_t iterations = 10) const {
+                                                     uint32_t iterations = 10) const
+    {
         BandwidthMeasurement result;
         result.blockSize = bufferSize;
 
@@ -126,12 +133,14 @@ public:
         return result;
     }
 
-    inline ProfilingResult RunFullProfile(size_t maxBufferSize = 64 * 1024 * 1024) const {
+    inline ProfilingResult RunFullProfile(size_t maxBufferSize = 64 * 1024 * 1024) const
+    {
         ProfilingResult result;
 
-        size_t blockSizes[] = { 4096, 65536, 1048576, 16 * 1048576, maxBufferSize };
+        size_t blockSizes[] = {4096, 65536, 1048576, 16 * 1048576, maxBufferSize};
         for (size_t bs : blockSizes) {
-            if (bs > maxBufferSize) continue;
+            if (bs > maxBufferSize)
+                continue;
             auto read = MeasureReadBandwidth(bs, 5);
             auto write = MeasureWriteBandwidth(bs, 5);
             auto copy = MeasureCopyBandwidth(bs, 5);
@@ -143,40 +152,48 @@ public:
             combined.copyBandwidthGBps = copy.copyBandwidthGBps;
             result.measurements.push_back(combined);
 
-            if (read.readBandwidthGBps > result.peakReadGBps) result.peakReadGBps = read.readBandwidthGBps;
-            if (write.writeBandwidthGBps > result.peakWriteGBps) result.peakWriteGBps = write.writeBandwidthGBps;
+            if (read.readBandwidthGBps > result.peakReadGBps)
+                result.peakReadGBps = read.readBandwidthGBps;
+            if (write.writeBandwidthGBps > result.peakWriteGBps)
+                result.peakWriteGBps = write.writeBandwidthGBps;
         }
 
         if (result.peakReadGBps < result.peakWriteGBps * 0.5) {
             result.bottleneck = BandwidthBottleneck::ReadBandwidth;
             result.recommendation = "Read bandwidth limited — consider prefetching or streaming reads";
-        }
-        else if (result.peakWriteGBps < result.peakReadGBps * 0.5) {
+        } else if (result.peakWriteGBps < result.peakReadGBps * 0.5) {
             result.bottleneck = BandwidthBottleneck::WriteBandwidth;
             result.recommendation = "Write bandwidth limited — consider write-combining or NT stores";
-        }
-        else {
+        } else {
             result.bottleneck = BandwidthBottleneck::None;
             result.recommendation = "Bandwidth is balanced";
         }
         return result;
     }
 
-    inline std::string BottleneckToString(BandwidthBottleneck type) const {
+    inline std::string BottleneckToString(BandwidthBottleneck type) const
+    {
         switch (type) {
-        case BandwidthBottleneck::None:           return "None";
-        case BandwidthBottleneck::ReadBandwidth:  return "Read Bandwidth";
-        case BandwidthBottleneck::WriteBandwidth:  return "Write Bandwidth";
-        case BandwidthBottleneck::Latency:        return "Latency";
-        case BandwidthBottleneck::CacheMiss:      return "Cache Miss";
-        case BandwidthBottleneck::TLBMiss:        return "TLB Miss";
-        default:                             return "Unknown";
+            case BandwidthBottleneck::None:
+                return "None";
+            case BandwidthBottleneck::ReadBandwidth:
+                return "Read Bandwidth";
+            case BandwidthBottleneck::WriteBandwidth:
+                return "Write Bandwidth";
+            case BandwidthBottleneck::Latency:
+                return "Latency";
+            case BandwidthBottleneck::CacheMiss:
+                return "Cache Miss";
+            case BandwidthBottleneck::TLBMiss:
+                return "TLB Miss";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     MemoryBandwidthProfiler() = default;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

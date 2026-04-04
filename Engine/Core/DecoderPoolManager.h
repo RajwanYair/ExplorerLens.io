@@ -7,9 +7,9 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -21,7 +21,8 @@ enum class DecoderPoolState : uint8_t {
     Shutdown
 };
 
-struct PooledDecoderInfo {
+struct PooledDecoderInfo
+{
     uint32_t decoderId = 0;
     std::string formatType;
     bool inUse = false;
@@ -29,7 +30,8 @@ struct PooledDecoderInfo {
     uint64_t lastUsedTimestamp = 0;
 };
 
-struct PoolMetrics {
+struct PoolMetrics
+{
     uint32_t totalDecoders = 0;
     uint32_t activeDecoders = 0;
     uint32_t idleDecoders = 0;
@@ -38,13 +40,13 @@ struct PoolMetrics {
     uint64_t poolMisses = 0;
 };
 
-class DecoderPoolManager {
-public:
-    explicit DecoderPoolManager(uint32_t maxPoolSize = 16)
-        : m_maxPoolSize(maxPoolSize) {
-    }
+class DecoderPoolManager
+{
+  public:
+    explicit DecoderPoolManager(uint32_t maxPoolSize = 16) : m_maxPoolSize(maxPoolSize) {}
 
-    uint32_t AcquireDecoder(const std::string& formatType) {
+    uint32_t AcquireDecoder(const std::string& formatType)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_metrics.totalAcquisitions++;
         for (auto& decoder : m_pool) {
@@ -59,7 +61,7 @@ public:
         m_metrics.poolMisses++;
         if (m_pool.size() < m_maxPoolSize) {
             uint32_t id = static_cast<uint32_t>(m_pool.size()) + 1;
-            m_pool.push_back({ id, formatType, true, 1, 0 });
+            m_pool.push_back({id, formatType, true, 1, 0});
             m_metrics.totalDecoders++;
             m_metrics.activeDecoders++;
             return id;
@@ -67,7 +69,8 @@ public:
         return 0;
     }
 
-    void ReleaseDecoder(uint32_t decoderId) {
+    void ReleaseDecoder(uint32_t decoderId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (auto& decoder : m_pool) {
             if (decoder.decoderId == decoderId && decoder.inUse) {
@@ -80,25 +83,31 @@ public:
         }
     }
 
-    PoolMetrics GetMetrics() const {
+    PoolMetrics GetMetrics() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_metrics;
     }
 
-    DecoderPoolState GetState() const { return m_state; }
-    uint32_t GetMaxPoolSize() const { return m_maxPoolSize; }
+    DecoderPoolState GetState() const
+    {
+        return m_state;
+    }
+    uint32_t GetMaxPoolSize() const
+    {
+        return m_maxPoolSize;
+    }
 
-    void Drain() {
+    void Drain()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_state = DecoderPoolState::Draining;
-        m_pool.erase(
-            std::remove_if(m_pool.begin(), m_pool.end(),
-                [](const PooledDecoderInfo& d) { return !d.inUse; }),
-            m_pool.end());
+        m_pool.erase(std::remove_if(m_pool.begin(), m_pool.end(), [](const PooledDecoderInfo& d) { return !d.inUse; }),
+                     m_pool.end());
         m_state = DecoderPoolState::Idle;
     }
 
-private:
+  private:
     mutable std::mutex m_mutex;
     std::vector<PooledDecoderInfo> m_pool;
     uint32_t m_maxPoolSize;
@@ -106,5 +115,5 @@ private:
     PoolMetrics m_metrics;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

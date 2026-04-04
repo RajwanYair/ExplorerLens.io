@@ -26,11 +26,11 @@
 
 #pragma once
 
-#include "Types.h"
-#include "../../SDK/plugin_api.h"
 #include <Windows.h>
-#include <string>
 #include <cstring>
+#include <string>
+#include "../../SDK/plugin_api.h"
+#include "Types.h"
 
 namespace ExplorerLens {
 namespace Engine {
@@ -42,22 +42,20 @@ namespace Engine {
 /// Serialization format for IPC data transfer between Engine and PluginHost.
 /// SharedMemory is preferred for large bitmap data (> 4KB).
 /// Pipe is used for small messages (requests, status, heartbeats).
-enum class IPCTransferMode : uint32_t
-{
-    Pipe = 0, ///< Named pipe (small payloads, e.g. < 4KB)
-    SharedMemory = 1, ///< Shared memory (large payloads, bitmap data)
+enum class IPCTransferMode : uint32_t {
+    Pipe = 0,          ///< Named pipe (small payloads, e.g. < 4KB)
+    SharedMemory = 1,  ///< Shared memory (large payloads, bitmap data)
 };
 
 /// Status of a plugin decode operation tracked across IPC boundary.
-enum class PluginDecodeStatus : uint32_t
-{
-    Pending = 0, ///< Request sent, waiting for response
-    InProgress = 1, ///< PluginHost acknowledged, decoding in progress
-    Completed = 2, ///< Decode finished successfully
-    Failed = 3, ///< Decode failed (check error_code)
-    Timeout = 4, ///< Response not received within timeout
-    Crashed = 5, ///< PluginHost process crashed during decode
-    Cancelled = 6, ///< Request was cancelled by the Engine
+enum class PluginDecodeStatus : uint32_t {
+    Pending = 0,     ///< Request sent, waiting for response
+    InProgress = 1,  ///< PluginHost acknowledged, decoding in progress
+    Completed = 2,   ///< Decode finished successfully
+    Failed = 3,      ///< Decode failed (check error_code)
+    Timeout = 4,     ///< Response not received within timeout
+    Crashed = 5,     ///< PluginHost process crashed during decode
+    Cancelled = 6,   ///< Request was cancelled by the Engine
 };
 
 //============================================================================
@@ -72,7 +70,7 @@ enum class PluginDecodeStatus : uint32_t
 struct alignas(8) SerializableDecodeRequest
 {
     /// Source file path (UTF-8, null-terminated)
-    char file_path[520]; // MAX_PATH * 2 for safety
+    char file_path[520];  // MAX_PATH * 2 for safety
 
     /// Desired output dimensions
     uint32_t target_width;
@@ -144,27 +142,23 @@ struct PluginTypeConvert
     /// The dst.file_path pointer references an internal static buffer;
     /// caller must consume before next call or copy the string.
     //------------------------------------------------------------------------
-    static void ToPluginRequest(const ThumbnailRequest& src, ::DecodeRequest& dst) {
+    static void ToPluginRequest(const ThumbnailRequest& src, ::DecodeRequest& dst)
+    {
         std::memset(&dst, 0, sizeof(dst));
 
         // Convert wide file path to UTF-8
         if (src.filePath) {
             thread_local static char utf8_buf[1040];
-            int len = WideCharToMultiByte(CP_UTF8, 0,
-                src.filePath, -1,
-                utf8_buf, sizeof(utf8_buf),
-                nullptr, nullptr);
+            int len = WideCharToMultiByte(CP_UTF8, 0, src.filePath, -1, utf8_buf, sizeof(utf8_buf), nullptr, nullptr);
             dst.file_path = (len > 0) ? utf8_buf : nullptr;
         }
 
         dst.target_width = src.width;
         dst.target_height = src.height;
-        dst.output_format = PIXEL_FORMAT_BGRA32; // Windows native
+        dst.output_format = PIXEL_FORMAT_BGRA32;  // Windows native
 
-        dst.preserve_aspect_ratio =
-            (src.flags & ThumbnailFlags::PreserveAspect);
-        dst.high_quality =
-            (src.flags & ThumbnailFlags::HighQuality);
+        dst.preserve_aspect_ratio = (src.flags & ThumbnailFlags::PreserveAspect);
+        dst.high_quality = (src.flags & ThumbnailFlags::HighQuality);
         dst.frame_index = 0;
     }
 
@@ -178,12 +172,13 @@ struct PluginTypeConvert
     /// @note This does NOT create an HBITMAP. The caller must call
     /// CreateHBITMAPFromPixels separately if needed.
     //------------------------------------------------------------------------
-    static HRESULT ToEngineResult(const ::DecodeResult& src, ThumbnailResult& dst) {
+    static HRESULT ToEngineResult(const ::DecodeResult& src, ThumbnailResult& dst)
+    {
         dst.width = src.width;
         dst.height = src.height;
         dst.usedGPU = false;
         dst.fromCache = false;
-        dst.hBitmap = nullptr; // Caller creates HBITMAP from pixels
+        dst.hBitmap = nullptr;  // Caller creates HBITMAP from pixels
 
         if (src.error_code != PLUGIN_SUCCESS) {
             dst.status = TranslateErrorCode(src.error_code);
@@ -206,25 +201,19 @@ struct PluginTypeConvert
     /// @param dst Serializable output (zero-initialized first)
     /// @param correlation_id Unique ID for request/response matching
     //------------------------------------------------------------------------
-    static void ToSerializable(const ThumbnailRequest& src,
-        SerializableDecodeRequest& dst,
-        uint64_t correlation_id) {
+    static void ToSerializable(const ThumbnailRequest& src, SerializableDecodeRequest& dst, uint64_t correlation_id)
+    {
         std::memset(&dst, 0, sizeof(dst));
 
         if (src.filePath) {
-            WideCharToMultiByte(CP_UTF8, 0,
-                src.filePath, -1,
-                dst.file_path, sizeof(dst.file_path),
-                nullptr, nullptr);
+            WideCharToMultiByte(CP_UTF8, 0, src.filePath, -1, dst.file_path, sizeof(dst.file_path), nullptr, nullptr);
         }
 
         dst.target_width = src.width;
         dst.target_height = src.height;
         dst.output_format = PIXEL_FORMAT_BGRA32;
-        dst.preserve_aspect_ratio =
-            (src.flags & ThumbnailFlags::PreserveAspect);
-        dst.high_quality =
-            (src.flags & ThumbnailFlags::HighQuality);
+        dst.preserve_aspect_ratio = (src.flags & ThumbnailFlags::PreserveAspect);
+        dst.high_quality = (src.flags & ThumbnailFlags::HighQuality);
         dst.frame_index = 0;
         dst.correlation_id = correlation_id;
     }
@@ -235,8 +224,8 @@ struct PluginTypeConvert
     /// @param src Serializable wire-format request
     /// @param dst Plugin SDK request (output)
     //------------------------------------------------------------------------
-    static void FromSerializable(const SerializableDecodeRequest& src,
-        ::DecodeRequest& dst) {
+    static void FromSerializable(const SerializableDecodeRequest& src, ::DecodeRequest& dst)
+    {
         std::memset(&dst, 0, sizeof(dst));
 
         dst.file_path = src.file_path;
@@ -251,37 +240,57 @@ struct PluginTypeConvert
     //------------------------------------------------------------------------
     /// Translate Plugin SDK error code to HRESULT
     //------------------------------------------------------------------------
-    static HRESULT TranslateErrorCode(PluginErrorCode code) {
+    static HRESULT TranslateErrorCode(PluginErrorCode code)
+    {
         switch (code) {
-        case PLUGIN_SUCCESS: return S_OK;
-        case PLUGIN_ERROR_INVALID_PARAMETER: return E_INVALIDARG;
-        case PLUGIN_ERROR_UNSUPPORTED_FORMAT: return DT_E_UNSUPPORTED_FORMAT;
-        case PLUGIN_ERROR_OUT_OF_MEMORY: return E_OUTOFMEMORY;
-        case PLUGIN_ERROR_FILE_NOT_FOUND: return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
-        case PLUGIN_ERROR_READ_ERROR: return HRESULT_FROM_WIN32(ERROR_READ_FAULT);
-        case PLUGIN_ERROR_DECODE_ERROR: return DT_E_INVALID_IMAGE_DATA;
-        case PLUGIN_ERROR_CORRUPTED_DATA: return DT_E_INVALID_IMAGE_DATA;
-        case PLUGIN_ERROR_NOT_INITIALIZED: return E_NOT_VALID_STATE;
-        default: return E_FAIL;
+            case PLUGIN_SUCCESS:
+                return S_OK;
+            case PLUGIN_ERROR_INVALID_PARAMETER:
+                return E_INVALIDARG;
+            case PLUGIN_ERROR_UNSUPPORTED_FORMAT:
+                return DT_E_UNSUPPORTED_FORMAT;
+            case PLUGIN_ERROR_OUT_OF_MEMORY:
+                return E_OUTOFMEMORY;
+            case PLUGIN_ERROR_FILE_NOT_FOUND:
+                return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+            case PLUGIN_ERROR_READ_ERROR:
+                return HRESULT_FROM_WIN32(ERROR_READ_FAULT);
+            case PLUGIN_ERROR_DECODE_ERROR:
+                return DT_E_INVALID_IMAGE_DATA;
+            case PLUGIN_ERROR_CORRUPTED_DATA:
+                return DT_E_INVALID_IMAGE_DATA;
+            case PLUGIN_ERROR_NOT_INITIALIZED:
+                return E_NOT_VALID_STATE;
+            default:
+                return E_FAIL;
         }
     }
 
     //------------------------------------------------------------------------
     /// Translate PluginDecodeStatus to human-readable string
     //------------------------------------------------------------------------
-    static const wchar_t* StatusToString(PluginDecodeStatus status) {
+    static const wchar_t* StatusToString(PluginDecodeStatus status)
+    {
         switch (status) {
-        case PluginDecodeStatus::Pending: return L"Pending";
-        case PluginDecodeStatus::InProgress: return L"In Progress";
-        case PluginDecodeStatus::Completed: return L"Completed";
-        case PluginDecodeStatus::Failed: return L"Failed";
-        case PluginDecodeStatus::Timeout: return L"Timeout";
-        case PluginDecodeStatus::Crashed: return L"Crashed";
-        case PluginDecodeStatus::Cancelled: return L"Cancelled";
-        default: return L"Unknown";
+            case PluginDecodeStatus::Pending:
+                return L"Pending";
+            case PluginDecodeStatus::InProgress:
+                return L"In Progress";
+            case PluginDecodeStatus::Completed:
+                return L"Completed";
+            case PluginDecodeStatus::Failed:
+                return L"Failed";
+            case PluginDecodeStatus::Timeout:
+                return L"Timeout";
+            case PluginDecodeStatus::Crashed:
+                return L"Crashed";
+            case PluginDecodeStatus::Cancelled:
+                return L"Cancelled";
+            default:
+                return L"Unknown";
         }
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

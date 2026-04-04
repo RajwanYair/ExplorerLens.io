@@ -6,61 +6,90 @@
 // Block Kit (Slack) formats for rich notification display.
 //
 #pragma once
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace ExplorerLens {
 namespace Engine {
 
-enum class WebhookPlatform { Teams, Slack, Generic };
-
-struct WebhookConfig {
-    WebhookPlatform platform    = WebhookPlatform::Teams;
-    std::string     webhookUrl;
-    std::string     channelName;
-    bool            enabled     = true;
+enum class WebhookPlatform {
+    Teams,
+    Slack,
+    Generic
 };
 
-struct AnnotationEvent {
-    enum class Kind { Created, Deleted, Shared, BatchShared } kind = Kind::Created;
+struct WebhookConfig
+{
+    WebhookPlatform platform = WebhookPlatform::Teams;
+    std::string webhookUrl;
+    std::string channelName;
+    bool enabled = true;
+};
+
+struct AnnotationEvent
+{
+    enum class Kind {
+        Created,
+        Deleted,
+        Shared,
+        BatchShared
+    } kind = Kind::Created;
     std::wstring filePath;
     std::wstring annotationValue;
     std::wstring authorId;
-    int          count = 1;
+    int count = 1;
 };
 
-struct WebhookPostResult {
-    bool        success     = false;
-    int         statusCode  = 0;
+struct WebhookPostResult
+{
+    bool success = false;
+    int statusCode = 0;
     std::string error;
 };
 
 using HttpPostFn = std::function<WebhookPostResult(const std::string& url, const std::string& body)>;
 
-class CollabWebhookBridge {
-public:
+class CollabWebhookBridge
+{
+  public:
     explicit CollabWebhookBridge() = default;
     explicit CollabWebhookBridge(HttpPostFn postFn) : m_postFn(std::move(postFn)) {}
 
-    void AddConfig(const WebhookConfig& cfg) { m_configs.push_back(cfg); }
-    void ClearConfigs() noexcept              { m_configs.clear(); }
-    int  ConfigCount() const noexcept         { return (int)m_configs.size(); }
+    void AddConfig(const WebhookConfig& cfg)
+    {
+        m_configs.push_back(cfg);
+    }
+    void ClearConfigs() noexcept
+    {
+        m_configs.clear();
+    }
+    int ConfigCount() const noexcept
+    {
+        return (int)m_configs.size();
+    }
 
-    std::vector<WebhookPostResult> PostEvent(const AnnotationEvent& evt) {
+    std::vector<WebhookPostResult> PostEvent(const AnnotationEvent& evt)
+    {
         std::vector<WebhookPostResult> results;
         for (const auto& cfg : m_configs) {
-            if (!cfg.enabled || cfg.webhookUrl.empty()) continue;
+            if (!cfg.enabled || cfg.webhookUrl.empty())
+                continue;
             std::string payload = BuildPayload(cfg.platform, evt);
             WebhookPostResult r;
-            if (m_postFn) r = m_postFn(cfg.webhookUrl, payload);
-            else          { r.success = true; r.statusCode = 200; } // stub
+            if (m_postFn)
+                r = m_postFn(cfg.webhookUrl, payload);
+            else {
+                r.success = true;
+                r.statusCode = 200;
+            }  // stub
             results.push_back(r);
         }
         return results;
     }
 
-    std::string BuildPayload(WebhookPlatform platform, const AnnotationEvent& evt) const {
+    std::string BuildPayload(WebhookPlatform platform, const AnnotationEvent& evt) const
+    {
         if (platform == WebhookPlatform::Slack)
             return "{\"text\":\"Annotation event on file\"}";
         // Teams Adaptive Card
@@ -68,10 +97,10 @@ public:
         (void)evt;
     }
 
-private:
+  private:
     std::vector<WebhookConfig> m_configs;
-    HttpPostFn                 m_postFn;
+    HttpPostFn m_postFn;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

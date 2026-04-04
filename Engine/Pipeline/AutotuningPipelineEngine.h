@@ -10,51 +10,72 @@
 #include <cstdint>
 #include <string>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct PipelineParameters {
+struct PipelineParameters
+{
     uint32_t decodeConcurrency = 4;
-    uint32_t cacheAdmitKB     = 512;
-    uint32_t qualityTarget    = 85;   // 0–100
-    float    timeoutMs        = 50.0f;
+    uint32_t cacheAdmitKB = 512;
+    uint32_t qualityTarget = 85;  // 0–100
+    float timeoutMs = 50.0f;
 };
 
-struct AutotuneStats {
-    uint32_t tuningCycles   = 0;
-    float    bestThroughput = 0.0f;
-    float    currentThroughput = 0.0f;
-    float    p99LatencyMs   = 0.0f;
-    float    convergencePct = 0.0f;
+struct AutotuneStats
+{
+    uint32_t tuningCycles = 0;
+    float bestThroughput = 0.0f;
+    float currentThroughput = 0.0f;
+    float p99LatencyMs = 0.0f;
+    float convergencePct = 0.0f;
 };
 
-class AutotuningPipelineEngine {
-public:
-    explicit AutotuningPipelineEngine(uint32_t explorationBudget = 100)
-        : m_budget(explorationBudget) {}
+class AutotuningPipelineEngine
+{
+  public:
+    explicit AutotuningPipelineEngine(uint32_t explorationBudget = 100) : m_budget(explorationBudget) {}
 
-    void Observe(float throughput, float p99Ms) {
+    void Observe(float throughput, float p99Ms)
+    {
         ++m_stats.tuningCycles;
         m_stats.currentThroughput = throughput;
-        m_stats.p99LatencyMs      = p99Ms;
+        m_stats.p99LatencyMs = p99Ms;
         if (throughput > m_stats.bestThroughput) {
             m_stats.bestThroughput = throughput;
             m_best = m_current;
         }
-        m_stats.convergencePct = m_budget > 0
-            ? (static_cast<float>(m_stats.tuningCycles) / static_cast<float>(m_budget)) * 100.0f
-            : 100.0f;
+        m_stats.convergencePct =
+            m_budget > 0 ? (static_cast<float>(m_stats.tuningCycles) / static_cast<float>(m_budget)) * 100.0f : 100.0f;
     }
-    PipelineParameters Step()               { return m_current; }
-    PipelineParameters GetBestParams() const { return m_best; }
-    PipelineParameters GetCurrentParams() const { return m_current; }
-    void Reset() { m_stats = {}; m_best = {}; m_current = {}; }
-    AutotuneStats GetStats() const { return m_stats; }
+    PipelineParameters Step()
+    {
+        return m_current;
+    }
+    PipelineParameters GetBestParams() const
+    {
+        return m_best;
+    }
+    PipelineParameters GetCurrentParams() const
+    {
+        return m_current;
+    }
+    void Reset()
+    {
+        m_stats = {};
+        m_best = {};
+        m_current = {};
+    }
+    AutotuneStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
-    uint32_t           m_budget;
+  private:
+    uint32_t m_budget;
     PipelineParameters m_best;
     PipelineParameters m_current;
-    AutotuneStats      m_stats;
+    AutotuneStats m_stats;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

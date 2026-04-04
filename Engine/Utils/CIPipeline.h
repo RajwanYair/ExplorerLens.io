@@ -9,15 +9,15 @@
 // - Release checklist validation, MSI/PortableZIP packaging
 // - Code-signing, CI quality gates, release governance
 
+#include <algorithm>
+#include <array>
+#include <chrono>
 #include <cstdint>
+#include <functional>
+#include <numeric>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <array>
-#include <functional>
-#include <chrono>
-#include <sstream>
-#include <algorithm>
-#include <numeric>
 
 // ─── CIHardeningConfig ───────────────────────────────────────────────────────
 
@@ -44,100 +44,125 @@ enum class CIPipelineStage : uint8_t {
 /// Security scan tool
 enum class SecurityScanner : uint8_t {
     None = 0,
-    MSDefender = 1, ///< Windows Defender for CI
-    CppCheck = 2, ///< Static analysis
-    PVSStudio = 3, ///< Deep static analysis
-    Snyk = 4, ///< Dependency vulnerability scan
-    Trivy = 5, ///< Container/artifact scanning
-    CodeQL = 6 ///< GitHub CodeQL
+    MSDefender = 1,  ///< Windows Defender for CI
+    CppCheck = 2,    ///< Static analysis
+    PVSStudio = 3,   ///< Deep static analysis
+    Snyk = 4,        ///< Dependency vulnerability scan
+    Trivy = 5,       ///< Container/artifact scanning
+    CodeQL = 6       ///< GitHub CodeQL
 };
 
 /// Build reproducibility settings
-struct ReproducibleBuildConfig {
-    bool stripTimestamps = true; ///< Remove __DATE__, __TIME__
-    bool deterministicMode = true; ///< /Brepro for MSVC
-    bool lockDependencies = true; ///< Pin all dependency versions
-    bool hashSourceFiles = true; ///< SHA-256 of all source
-    bool embedBuildId = true; ///< Embed unique build ID in binary
+struct ReproducibleBuildConfig
+{
+    bool stripTimestamps = true;    ///< Remove __DATE__, __TIME__
+    bool deterministicMode = true;  ///< /Brepro for MSVC
+    bool lockDependencies = true;   ///< Pin all dependency versions
+    bool hashSourceFiles = true;    ///< SHA-256 of all source
+    bool embedBuildId = true;       ///< Embed unique build ID in binary
     const char* buildIdFormat = "LENS-{version}-{date}-{commit:8}";
 };
 
 /// Artifact signing configuration
-struct ArtifactSigningConfig {
-    bool signBinaries = true; ///< Authenticode sign .dll/.exe
-    bool signInstaller = true; ///< Sign MSI/MSIX
-    bool timestampSign = true; ///< RFC 3161 timestamp
+struct ArtifactSigningConfig
+{
+    bool signBinaries = true;   ///< Authenticode sign .dll/.exe
+    bool signInstaller = true;  ///< Sign MSI/MSIX
+    bool timestampSign = true;  ///< RFC 3161 timestamp
     const char* timestampServer = "http://timestamp.digicert.com";
     const char* hashAlgorithm = "SHA256";
     const char* certSubject = "ExplorerLens";
-    bool dualSign = false; ///< SHA1 + SHA256 dual signing
+    bool dualSign = false;  ///< SHA1 + SHA256 dual signing
 };
 
 /// CI hardening configuration
-class CIHardeningConfig {
-public:
-    static CIHardeningConfig& Instance() {
+class CIHardeningConfig
+{
+  public:
+    static CIHardeningConfig& Instance()
+    {
         static CIHardeningConfig inst;
         return inst;
     }
 
     /// Get stage name
-    static const char* StageName(CIPipelineStage s) {
+    static const char* StageName(CIPipelineStage s)
+    {
         switch (s) {
-        case CIPipelineStage::Checkout: return "checkout";
-        case CIPipelineStage::DependencyPin: return "dependency-pin";
-        case CIPipelineStage::Configure: return "configure";
-        case CIPipelineStage::Build: return "build";
-        case CIPipelineStage::UnitTest: return "unit-test";
-        case CIPipelineStage::IntegrationTest: return "integration-test";
-        case CIPipelineStage::StaticAnalysis: return "static-analysis";
-        case CIPipelineStage::SecurityScan: return "security-scan";
-        case CIPipelineStage::ArtifactSign: return "artifact-sign";
-        case CIPipelineStage::SBOMGenerate: return "sbom-generate";
-        case CIPipelineStage::Package: return "package";
-        case CIPipelineStage::Publish: return "publish";
-        default: return "unknown";
+            case CIPipelineStage::Checkout:
+                return "checkout";
+            case CIPipelineStage::DependencyPin:
+                return "dependency-pin";
+            case CIPipelineStage::Configure:
+                return "configure";
+            case CIPipelineStage::Build:
+                return "build";
+            case CIPipelineStage::UnitTest:
+                return "unit-test";
+            case CIPipelineStage::IntegrationTest:
+                return "integration-test";
+            case CIPipelineStage::StaticAnalysis:
+                return "static-analysis";
+            case CIPipelineStage::SecurityScan:
+                return "security-scan";
+            case CIPipelineStage::ArtifactSign:
+                return "artifact-sign";
+            case CIPipelineStage::SBOMGenerate:
+                return "sbom-generate";
+            case CIPipelineStage::Package:
+                return "package";
+            case CIPipelineStage::Publish:
+                return "publish";
+            default:
+                return "unknown";
         }
     }
 
     /// Check if a stage is enabled
-    bool IsStageEnabled(CIPipelineStage stage) const {
+    bool IsStageEnabled(CIPipelineStage stage) const
+    {
         return (m_enabledStages & (1u << static_cast<uint32_t>(stage))) != 0;
     }
 
     /// Enable/disable a stage
-    void SetStageEnabled(CIPipelineStage stage, bool enabled) {
+    void SetStageEnabled(CIPipelineStage stage, bool enabled)
+    {
         uint32_t bit = 1u << static_cast<uint32_t>(stage);
-        if (enabled) m_enabledStages |= bit;
-        else m_enabledStages &= ~bit;
+        if (enabled)
+            m_enabledStages |= bit;
+        else
+            m_enabledStages &= ~bit;
     }
 
     /// MSVC compiler hardening flags
-    static const char* GetHardenedCompileFlags() {
-        return "/sdl " // Security Development Lifecycle checks
-            "/GS " // Buffer security check
-            "/guard:cf " // Control Flow Guard
-            "/guard:ehcont " // EH continuation metadata
-            "/Qspectre " // Spectre mitigation
-            "/DYNAMICBASE " // ASLR
-            "/CETCOMPAT"; // CET Shadow Stack
+    static const char* GetHardenedCompileFlags()
+    {
+        return "/sdl "           // Security Development Lifecycle checks
+               "/GS "            // Buffer security check
+               "/guard:cf "      // Control Flow Guard
+               "/guard:ehcont "  // EH continuation metadata
+               "/Qspectre "      // Spectre mitigation
+               "/DYNAMICBASE "   // ASLR
+               "/CETCOMPAT";     // CET Shadow Stack
     }
 
     /// MSVC linker hardening flags
-    static const char* GetHardenedLinkFlags() {
-        return "/NXCOMPAT " // DEP
-            "/DYNAMICBASE " // ASLR
-            "/HIGHENTROPYVA " // High-entropy ASLR
-            "/GUARD:CF " // CFG
-            "/CETCOMPAT " // CET
-            "/INTEGRITYCHECK"; // Force integrity check
+    static const char* GetHardenedLinkFlags()
+    {
+        return "/NXCOMPAT "        // DEP
+               "/DYNAMICBASE "     // ASLR
+               "/HIGHENTROPYVA "   // High-entropy ASLR
+               "/GUARD:CF "        // CFG
+               "/CETCOMPAT "       // CET
+               "/INTEGRITYCHECK";  // Force integrity check
     }
 
     /// CMake flags for hardened build
-    static const char* GetCMakeHardenFlags() {
+    static const char* GetCMakeHardenFlags()
+    {
         return "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL "
-            "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON "
-            "-DCMAKE_BUILD_TYPE=Release";
+               "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON "
+               "-DCMAKE_BUILD_TYPE=Release";
     }
 
     ReproducibleBuildConfig reproducible;
@@ -148,10 +173,10 @@ public:
     SecurityScanner secondaryScanner = SecurityScanner::CppCheck;
 
     /// Maximum allowed vulnerabilities by severity
-    uint32_t maxCriticalVulns = 0; ///< Build fails if > 0
-    uint32_t maxHighVulns = 0; ///< Build fails if > 0
-    uint32_t maxMediumVulns = 5; ///< Warning threshold
-    uint32_t maxLowVulns = 20; ///< Info only
+    uint32_t maxCriticalVulns = 0;  ///< Build fails if > 0
+    uint32_t maxHighVulns = 0;      ///< Build fails if > 0
+    uint32_t maxMediumVulns = 5;    ///< Warning threshold
+    uint32_t maxLowVulns = 20;      ///< Info only
 
     /// Dependency pinning
     bool pinVcpkgBaseline = true;
@@ -159,16 +184,14 @@ public:
     const char* pinnedWindowsSDK = "10.0.26100.0";
     const char* pinnedMSVCToolset = "14.50.35717";
 
-private:
-    CIHardeningConfig()
-        : m_enabledStages(0xFFFFFFFF) {
-    } // All stages enabled by default
+  private:
+    CIHardeningConfig() : m_enabledStages(0xFFFFFFFF) {}  // All stages enabled by default
 
     uint32_t m_enabledStages;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 // ─── ReleaseGovernance ───────────────────────────────────────────────────────
 
@@ -180,14 +203,24 @@ namespace Release {
 // Quality Gate — individual pass/fail check
 //==============================================================================
 
-enum class CIPipelineGateStatus { Pending, Passed, Failed, Skipped };
+enum class CIPipelineGateStatus {
+    Pending,
+    Passed,
+    Failed,
+    Skipped
+};
 
-inline const char* GateStatusName(CIPipelineGateStatus s) {
+inline const char* GateStatusName(CIPipelineGateStatus s)
+{
     switch (s) {
-    case CIPipelineGateStatus::Pending: return "Pending";
-    case CIPipelineGateStatus::Passed: return "Passed";
-    case CIPipelineGateStatus::Failed: return "Failed";
-    case CIPipelineGateStatus::Skipped: return "Skipped";
+        case CIPipelineGateStatus::Pending:
+            return "Pending";
+        case CIPipelineGateStatus::Passed:
+            return "Passed";
+        case CIPipelineGateStatus::Failed:
+            return "Failed";
+        case CIPipelineGateStatus::Skipped:
+            return "Skipped";
     }
     return "Unknown";
 }
@@ -200,14 +233,21 @@ struct QualityGate
     std::string detail;
     double durationMs = 0.0;
 
-    bool IsPassed() const { return status == CIPipelineGateStatus::Passed; }
-    bool IsFailed() const { return status == CIPipelineGateStatus::Failed; }
+    bool IsPassed() const
+    {
+        return status == CIPipelineGateStatus::Passed;
+    }
+    bool IsFailed() const
+    {
+        return status == CIPipelineGateStatus::Failed;
+    }
 
-    std::string Summary() const {
+    std::string Summary() const
+    {
         std::ostringstream ss;
-        ss << (IsPassed() ? "[PASS]" : IsFailed() ? "[FAIL]" : "[----]")
-            << " " << id << " — " << description;
-        if (!detail.empty()) ss << " (" << detail << ")";
+        ss << (IsPassed() ? "[PASS]" : IsFailed() ? "[FAIL]" : "[----]") << " " << id << " — " << description;
+        if (!detail.empty())
+            ss << " (" << detail << ")";
         return ss.str();
     }
 };
@@ -216,18 +256,36 @@ struct QualityGate
 // Release Artifact — represents a build output
 //==============================================================================
 
-enum class ArtifactType { DLL, EXE, LIB, MSI, ZIP, PDB, MSIX, Unknown };
+enum class ArtifactType {
+    DLL,
+    EXE,
+    LIB,
+    MSI,
+    ZIP,
+    PDB,
+    MSIX,
+    Unknown
+};
 
-inline const char* ArtifactTypeName(ArtifactType t) {
+inline const char* ArtifactTypeName(ArtifactType t)
+{
     switch (t) {
-    case ArtifactType::DLL: return "DLL";
-    case ArtifactType::EXE: return "EXE";
-    case ArtifactType::LIB: return "LIB";
-    case ArtifactType::MSI: return "MSI";
-    case ArtifactType::ZIP: return "ZIP";
-    case ArtifactType::PDB: return "PDB";
-    case ArtifactType::MSIX: return "MSIX";
-    case ArtifactType::Unknown: return "Unknown";
+        case ArtifactType::DLL:
+            return "DLL";
+        case ArtifactType::EXE:
+            return "EXE";
+        case ArtifactType::LIB:
+            return "LIB";
+        case ArtifactType::MSI:
+            return "MSI";
+        case ArtifactType::ZIP:
+            return "ZIP";
+        case ArtifactType::PDB:
+            return "PDB";
+        case ArtifactType::MSIX:
+            return "MSIX";
+        case ArtifactType::Unknown:
+            return "Unknown";
     }
     return "Unknown";
 }
@@ -242,9 +300,13 @@ struct ReleaseArtifact
     bool hasSymbols = false;
     std::string sha256Hash;
 
-    bool IsValid() const { return !name.empty() && sizeBytes > 0; }
+    bool IsValid() const
+    {
+        return !name.empty() && sizeBytes > 0;
+    }
 
-    std::string SizeMB() const {
+    std::string SizeMB() const
+    {
         double mb = static_cast<double>(sizeBytes) / (1024.0 * 1024.0);
         std::ostringstream ss;
         ss.precision(2);
@@ -259,29 +321,31 @@ struct ReleaseArtifact
 
 class ReleaseChecklist
 {
-public:
-    ReleaseChecklist() {
+  public:
+    ReleaseChecklist()
+    {
         // Core quality gates per spec
         gates_ = {
-        {"BUILD_SUCCESS", "Solution builds with 0 errors, 0 warnings", CIPipelineGateStatus::Pending, "", 0},
-        {"TEST_PASS", "All unit tests pass (100% pass rate)", CIPipelineGateStatus::Pending, "", 0},
-        {"BENCHMARK_PASS", "Performance benchmarks within threshold", CIPipelineGateStatus::Pending, "", 0},
-        {"VERSION_CONSIST", "Version consistent across all docs/code", CIPipelineGateStatus::Pending, "", 0},
-        {"DOCS_INTEGRITY", "No stale version references in docs", CIPipelineGateStatus::Pending, "", 0},
-        {"BINARY_SIGNED", "All release binaries code-signed", CIPipelineGateStatus::Pending, "", 0},
-        {"SYMBOLS_PRESENT", "PDB symbols generated for all binaries", CIPipelineGateStatus::Pending, "", 0},
-        {"MSI_INSTALL", "MSI installer builds and installs cleanly", CIPipelineGateStatus::Pending, "", 0},
-        {"MSI_UNINSTALL", "MSI uninstaller removes all components", CIPipelineGateStatus::Pending, "", 0},
-        {"PORTABLE_ZIP", "Portable ZIP package created with all files", CIPipelineGateStatus::Pending, "", 0},
-        {"CHECKSUM_GEN", "SHA-256 checksums generated for artifacts", CIPipelineGateStatus::Pending, "", 0},
-        {"CI_PIPELINE", "GitHub Actions CI passes on self-hosted", CIPipelineGateStatus::Pending, "", 0},
-        {"CHANGELOG_UPDATED","CHANGELOG.md updated with release notes", CIPipelineGateStatus::Pending, "", 0},
-        {"RELEASE_NOTES", "Release notes document exists and correct", CIPipelineGateStatus::Pending, "", 0},
+            {"BUILD_SUCCESS", "Solution builds with 0 errors, 0 warnings", CIPipelineGateStatus::Pending, "", 0},
+            {"TEST_PASS", "All unit tests pass (100% pass rate)", CIPipelineGateStatus::Pending, "", 0},
+            {"BENCHMARK_PASS", "Performance benchmarks within threshold", CIPipelineGateStatus::Pending, "", 0},
+            {"VERSION_CONSIST", "Version consistent across all docs/code", CIPipelineGateStatus::Pending, "", 0},
+            {"DOCS_INTEGRITY", "No stale version references in docs", CIPipelineGateStatus::Pending, "", 0},
+            {"BINARY_SIGNED", "All release binaries code-signed", CIPipelineGateStatus::Pending, "", 0},
+            {"SYMBOLS_PRESENT", "PDB symbols generated for all binaries", CIPipelineGateStatus::Pending, "", 0},
+            {"MSI_INSTALL", "MSI installer builds and installs cleanly", CIPipelineGateStatus::Pending, "", 0},
+            {"MSI_UNINSTALL", "MSI uninstaller removes all components", CIPipelineGateStatus::Pending, "", 0},
+            {"PORTABLE_ZIP", "Portable ZIP package created with all files", CIPipelineGateStatus::Pending, "", 0},
+            {"CHECKSUM_GEN", "SHA-256 checksums generated for artifacts", CIPipelineGateStatus::Pending, "", 0},
+            {"CI_PIPELINE", "GitHub Actions CI passes on self-hosted", CIPipelineGateStatus::Pending, "", 0},
+            {"CHANGELOG_UPDATED", "CHANGELOG.md updated with release notes", CIPipelineGateStatus::Pending, "", 0},
+            {"RELEASE_NOTES", "Release notes document exists and correct", CIPipelineGateStatus::Pending, "", 0},
         };
     }
 
     // Record a gate result
-    void SetGate(const std::string& id, CIPipelineGateStatus status, const std::string& detail = "") {
+    void SetGate(const std::string& id, CIPipelineGateStatus status, const std::string& detail = "")
+    {
         for (auto& g : gates_) {
             if (g.id == id) {
                 g.status = status;
@@ -292,38 +356,66 @@ public:
     }
 
     // Query counts
-    size_t TotalGates() const { return gates_.size(); }
-    size_t PassedGates() const { return CountStatus(CIPipelineGateStatus::Passed); }
-    size_t FailedGates() const { return CountStatus(CIPipelineGateStatus::Failed); }
-    size_t PendingGates() const { return CountStatus(CIPipelineGateStatus::Pending); }
-    size_t SkippedGates() const { return CountStatus(CIPipelineGateStatus::Skipped); }
-
-    bool AllPassed() const {
-        return std::all_of(gates_.begin(), gates_.end(), [](const auto& g) {
-            return g.status == CIPipelineGateStatus::Passed || g.status == CIPipelineGateStatus::Skipped;
-            });
+    size_t TotalGates() const
+    {
+        return gates_.size();
+    }
+    size_t PassedGates() const
+    {
+        return CountStatus(CIPipelineGateStatus::Passed);
+    }
+    size_t FailedGates() const
+    {
+        return CountStatus(CIPipelineGateStatus::Failed);
+    }
+    size_t PendingGates() const
+    {
+        return CountStatus(CIPipelineGateStatus::Pending);
+    }
+    size_t SkippedGates() const
+    {
+        return CountStatus(CIPipelineGateStatus::Skipped);
     }
 
-    bool HasBlockers() const { return FailedGates() > 0; }
+    bool AllPassed() const
+    {
+        return std::all_of(gates_.begin(), gates_.end(), [](const auto& g) {
+            return g.status == CIPipelineGateStatus::Passed || g.status == CIPipelineGateStatus::Skipped;
+        });
+    }
 
-    double PassRate() const {
-        if (gates_.empty()) return 100.0;
+    bool HasBlockers() const
+    {
+        return FailedGates() > 0;
+    }
+
+    double PassRate() const
+    {
+        if (gates_.empty())
+            return 100.0;
         size_t evaluated = PassedGates() + FailedGates();
-        if (evaluated == 0) return 0.0;
+        if (evaluated == 0)
+            return 0.0;
         return (static_cast<double>(PassedGates()) / evaluated) * 100.0;
     }
 
-    const std::vector<QualityGate>& Gates() const { return gates_; }
+    const std::vector<QualityGate>& Gates() const
+    {
+        return gates_;
+    }
 
-    std::vector<QualityGate> GetFailed() const {
+    std::vector<QualityGate> GetFailed() const
+    {
         std::vector<QualityGate> result;
         for (auto& g : gates_)
-            if (g.IsFailed()) result.push_back(g);
+            if (g.IsFailed())
+                result.push_back(g);
         return result;
     }
 
     // Generate Markdown report
-    std::string GenerateReport() const {
+    std::string GenerateReport() const
+    {
         std::ostringstream ss;
         ss << "# Release Checklist Report\n\n";
         ss << "| Gate | Status | Detail |\n";
@@ -338,12 +430,13 @@ public:
         return ss.str();
     }
 
-private:
+  private:
     std::vector<QualityGate> gates_;
 
-    size_t CountStatus(CIPipelineGateStatus s) const {
-        return static_cast<size_t>(std::count_if(gates_.begin(), gates_.end(),
-            [s](const auto& g) { return g.status == s; }));
+    size_t CountStatus(CIPipelineGateStatus s) const
+    {
+        return static_cast<size_t>(
+            std::count_if(gates_.begin(), gates_.end(), [s](const auto& g) { return g.status == s; }));
     }
 };
 
@@ -351,14 +444,24 @@ private:
 // Code Signing Policy — certificate validation and signing rules
 //==============================================================================
 
-enum class SigningMethod { None, SelfSigned, EV, AzureKeyVault };
+enum class SigningMethod {
+    None,
+    SelfSigned,
+    EV,
+    AzureKeyVault
+};
 
-inline const char* SigningMethodName(SigningMethod m) {
+inline const char* SigningMethodName(SigningMethod m)
+{
     switch (m) {
-    case SigningMethod::None: return "None";
-    case SigningMethod::SelfSigned: return "Self-Signed";
-    case SigningMethod::EV: return "EV Certificate";
-    case SigningMethod::AzureKeyVault: return "Azure Key Vault";
+        case SigningMethod::None:
+            return "None";
+        case SigningMethod::SelfSigned:
+            return "Self-Signed";
+        case SigningMethod::EV:
+            return "EV Certificate";
+        case SigningMethod::AzureKeyVault:
+            return "Azure Key Vault";
     }
     return "Unknown";
 }
@@ -369,33 +472,47 @@ struct CodeSigningPolicy
     bool timestampEnabled = true;
     std::string timestampUrl = "http://timestamp.digicert.com";
     std::string hashAlgorithm = "SHA256";
-    bool dualSign = false; // SHA1 + SHA256 for legacy compat
-    std::vector<std::string> requiredBinaries = {
-    "LENSShell.dll", "LENSManager.exe", "PluginHost.exe"
-    };
+    bool dualSign = false;  // SHA1 + SHA256 for legacy compat
+    std::vector<std::string> requiredBinaries = {"LENSShell.dll", "LENSManager.exe", "PluginHost.exe"};
 
-    bool IsConfigured() const { return method != SigningMethod::None; }
+    bool IsConfigured() const
+    {
+        return method != SigningMethod::None;
+    }
 
-    bool RequiresSigning(const std::string& filename) const {
+    bool RequiresSigning(const std::string& filename) const
+    {
         for (auto& req : requiredBinaries)
-            if (filename == req) return true;
+            if (filename == req)
+                return true;
         return false;
     }
 
-    size_t RequiredCount() const { return requiredBinaries.size(); }
+    size_t RequiredCount() const
+    {
+        return requiredBinaries.size();
+    }
 };
 
 //==============================================================================
 // Packaging Validator — verify MSI, Portable ZIP, MSIX readiness
 //==============================================================================
 
-enum class PackageType { MSI, PortableZip, MSIX };
+enum class PackageType {
+    MSI,
+    PortableZip,
+    MSIX
+};
 
-inline const char* PackageTypeName(PackageType t) {
+inline const char* PackageTypeName(PackageType t)
+{
     switch (t) {
-    case PackageType::MSI: return "MSI";
-    case PackageType::PortableZip: return "Portable ZIP";
-    case PackageType::MSIX: return "MSIX";
+        case PackageType::MSI:
+            return "MSI";
+        case PackageType::PortableZip:
+            return "Portable ZIP";
+        case PackageType::MSIX:
+            return "MSIX";
     }
     return "Unknown";
 }
@@ -410,7 +527,8 @@ struct PackageValidation
     uint64_t packageSize = 0;
     std::string validationMessage;
 
-    bool IsReady() const {
+    bool IsReady() const
+    {
         if (type == PackageType::PortableZip)
             return canBuild && containsAllFiles;
         return canBuild && installClean && uninstallClean && containsAllFiles;
@@ -419,57 +537,53 @@ struct PackageValidation
 
 class PackagingValidator
 {
-public:
+  public:
     // Required files in all packages
-    static std::vector<std::string> RequiredFiles() {
-        return {
-        "LENSShell.dll",
-        "LENSManager.exe",
-        "ExplorerLens.Engine.dll",
-        "Install-ExplorerLens.ps1",
-        "README.md",
-        "LICENSE"
-        };
+    static std::vector<std::string> RequiredFiles()
+    {
+        return {"LENSShell.dll", "LENSManager.exe", "ExplorerLens.Engine.dll", "Install-ExplorerLens.ps1",
+                "README.md",     "LICENSE"};
     }
 
     // MSI-specific required files
-    static std::vector<std::string> MSISpecificFiles() {
-        return {
-        "ExplorerLens.wxs",
-        "Build-Installer.ps1"
-        };
+    static std::vector<std::string> MSISpecificFiles()
+    {
+        return {"ExplorerLens.wxs", "Build-Installer.ps1"};
     }
 
-    PackageValidation ValidateMSI() {
+    PackageValidation ValidateMSI()
+    {
         PackageValidation pv;
         pv.type = PackageType::MSI;
-        pv.canBuild = true; // Prerequisites check (simulated)
+        pv.canBuild = true;  // Prerequisites check (simulated)
         pv.containsAllFiles = true;
         pv.installClean = true;
         pv.uninstallClean = true;
-        pv.packageSize = 8 * 1024 * 1024; // ~8 MB typical
+        pv.packageSize = 8 * 1024 * 1024;  // ~8 MB typical
         pv.validationMessage = "MSI validation passed";
         return pv;
     }
 
-    PackageValidation ValidatePortableZip() {
+    PackageValidation ValidatePortableZip()
+    {
         PackageValidation pv;
         pv.type = PackageType::PortableZip;
         pv.canBuild = true;
         pv.containsAllFiles = true;
-        pv.packageSize = 6 * 1024 * 1024; // ~6 MB typical
+        pv.packageSize = 6 * 1024 * 1024;  // ~6 MB typical
         pv.validationMessage = "Portable ZIP validation passed";
         return pv;
     }
 
-    PackageValidation ValidateMSIX() {
+    PackageValidation ValidateMSIX()
+    {
         PackageValidation pv;
         pv.type = PackageType::MSIX;
         pv.canBuild = true;
         pv.containsAllFiles = true;
         pv.installClean = true;
         pv.uninstallClean = true;
-        pv.packageSize = 12 * 1024 * 1024; // ~12 MB typical
+        pv.packageSize = 12 * 1024 * 1024;  // ~12 MB typical
         pv.validationMessage = "MSIX validation passed";
         return pv;
     }
@@ -483,48 +597,77 @@ struct CIPipelineConfig
 {
     std::string workflowName;
     bool isEnabled = true;
-    bool isRequired = false; // Block merge on failure?
+    bool isRequired = false;  // Block merge on failure?
     std::string triggerBranch = "main";
     std::vector<std::string> steps;
 
-    size_t StepCount() const { return steps.size(); }
+    size_t StepCount() const
+    {
+        return steps.size();
+    }
 };
 
 class CIPipelineRegistry
 {
-public:
-    CIPipelineRegistry() {
+  public:
+    CIPipelineRegistry()
+    {
         pipelines_ = {
-        {"build", true, true, "main", {"checkout", "setup-msvc", "cmake-configure", "cmake-build", "msbuild-shell"}},
-        {"build-and-test", true, true, "main", {"checkout", "setup-msvc", "cmake-build", "run-ctest", "report-results"}},
-        {"code-quality", true, true, "main", {"checkout", "clang-tidy", "cppcheck", "warning-check"}},
-        {"performance-regression", true, false, "main", {"checkout", "build-release", "run-benchmarks", "compare-baseline", "gate-check"}},
-        {"release", true, false, "main", {"checkout", "build-all", "sign-binaries", "create-msi", "create-zip", "publish-release"}},
-        {"build-v7", true, true, "main", {"checkout", "restore-vcpkg", "cmake-preset", "build-engine", "build-shell"}}
-        };
+            {"build", true, true, "main", {"checkout", "setup-msvc", "cmake-configure", "cmake-build", "msbuild-shell"}},
+            {"build-and-test",
+             true,
+             true,
+             "main",
+             {"checkout", "setup-msvc", "cmake-build", "run-ctest", "report-results"}},
+            {"code-quality", true, true, "main", {"checkout", "clang-tidy", "cppcheck", "warning-check"}},
+            {"performance-regression",
+             true,
+             false,
+             "main",
+             {"checkout", "build-release", "run-benchmarks", "compare-baseline", "gate-check"}},
+            {"release",
+             true,
+             false,
+             "main",
+             {"checkout", "build-all", "sign-binaries", "create-msi", "create-zip", "publish-release"}},
+            {"build-v7",
+             true,
+             true,
+             "main",
+             {"checkout", "restore-vcpkg", "cmake-preset", "build-engine", "build-shell"}}};
     }
 
-    size_t TotalPipelines() const { return pipelines_.size(); }
-
-    size_t RequiredPipelines() const {
-        return static_cast<size_t>(std::count_if(pipelines_.begin(), pipelines_.end(),
-            [](const auto& p) { return p.isRequired; }));
+    size_t TotalPipelines() const
+    {
+        return pipelines_.size();
     }
 
-    size_t EnabledPipelines() const {
-        return static_cast<size_t>(std::count_if(pipelines_.begin(), pipelines_.end(),
-            [](const auto& p) { return p.isEnabled; }));
+    size_t RequiredPipelines() const
+    {
+        return static_cast<size_t>(
+            std::count_if(pipelines_.begin(), pipelines_.end(), [](const auto& p) { return p.isRequired; }));
     }
 
-    const std::vector<CIPipelineConfig>& AllPipelines() const { return pipelines_; }
+    size_t EnabledPipelines() const
+    {
+        return static_cast<size_t>(
+            std::count_if(pipelines_.begin(), pipelines_.end(), [](const auto& p) { return p.isEnabled; }));
+    }
 
-    size_t TotalSteps() const {
+    const std::vector<CIPipelineConfig>& AllPipelines() const
+    {
+        return pipelines_;
+    }
+
+    size_t TotalSteps() const
+    {
         size_t total = 0;
-        for (auto& p : pipelines_) total += p.StepCount();
+        for (auto& p : pipelines_)
+            total += p.StepCount();
         return total;
     }
 
-private:
+  private:
     std::vector<CIPipelineConfig> pipelines_;
 };
 
@@ -545,15 +688,21 @@ struct ReleaseManifest
     CodeSigningPolicy signingPolicy;
     std::vector<PackageValidation> packages;
 
-    size_t TotalArtifacts() const { return artifacts.size(); }
+    size_t TotalArtifacts() const
+    {
+        return artifacts.size();
+    }
 
-    uint64_t TotalSizeBytes() const {
+    uint64_t TotalSizeBytes() const
+    {
         uint64_t total = 0;
-        for (auto& a : artifacts) total += a.sizeBytes;
+        for (auto& a : artifacts)
+            total += a.sizeBytes;
         return total;
     }
 
-    std::string TotalSizeMB() const {
+    std::string TotalSizeMB() const
+    {
         double mb = static_cast<double>(TotalSizeBytes()) / (1024.0 * 1024.0);
         std::ostringstream ss;
         ss.precision(2);
@@ -561,13 +710,13 @@ struct ReleaseManifest
         return ss.str();
     }
 
-    bool IsReleaseReady() const {
-        return checklist.AllPassed() &&
-            signingPolicy.IsConfigured() &&
-            !artifacts.empty();
+    bool IsReleaseReady() const
+    {
+        return checklist.AllPassed() && signingPolicy.IsConfigured() && !artifacts.empty();
     }
 
-    std::string GenerateManifestMarkdown() const {
+    std::string GenerateManifestMarkdown() const
+    {
         std::ostringstream ss;
         ss << "# ExplorerLens v" << version << " Release Manifest\n\n";
         ss << "- **Build Date:** " << buildDate << "\n";
@@ -579,10 +728,8 @@ struct ReleaseManifest
         ss << "| File | Type | Size | Signed | Symbols |\n";
         ss << "|------|------|------|--------|--------|\n";
         for (auto& a : artifacts) {
-            ss << "| " << a.name << " | " << ArtifactTypeName(a.type)
-                << " | " << a.SizeMB()
-                << " | " << (a.isSigned ? "Yes" : "No")
-                << " | " << (a.hasSymbols ? "Yes" : "No") << " |\n";
+            ss << "| " << a.name << " | " << ArtifactTypeName(a.type) << " | " << a.SizeMB() << " | "
+               << (a.isSigned ? "Yes" : "No") << " | " << (a.hasSymbols ? "Yes" : "No") << " |\n";
         }
 
         ss << "\n## Checklist\n\n";
@@ -592,9 +739,9 @@ struct ReleaseManifest
     }
 };
 
-}
-}
-} // namespace ExplorerLens::Engine::Release
+}  // namespace Release
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 // ─── CIValidator (separate .h/.cpp — kept as-is) ────────────────────────────
 #include "CIValidator.h"

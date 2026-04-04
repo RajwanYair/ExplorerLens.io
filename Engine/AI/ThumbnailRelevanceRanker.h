@@ -11,27 +11,35 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct RankedFile {
+struct RankedFile
+{
     std::string filePath;
-    float       score     = 0.0f;  // 0.0 (lowest) to 1.0 (highest)
-    uint32_t    priority  = 0;
+    float score = 0.0f;  // 0.0 (lowest) to 1.0 (highest)
+    uint32_t priority = 0;
 };
 
-struct RelevanceStats {
-    uint32_t filesRanked  = 0;
-    uint32_t topNHits     = 0;   // hits in top-3 on evaluation set
-    float    avgScoreMs   = 0.0f;
+struct RelevanceStats
+{
+    uint32_t filesRanked = 0;
+    uint32_t topNHits = 0;  // hits in top-3 on evaluation set
+    float avgScoreMs = 0.0f;
 };
 
-class ThumbnailRelevanceRanker {
-public:
+class ThumbnailRelevanceRanker
+{
+  public:
     ThumbnailRelevanceRanker() = default;
 
-    void RecordAccess(const std::string& /*filePath*/) { ++m_stats.filesRanked; }
+    void RecordAccess(const std::string& /*filePath*/)
+    {
+        ++m_stats.filesRanked;
+    }
 
-    std::vector<RankedFile> Rank(const std::vector<std::string>& files) {
+    std::vector<RankedFile> Rank(const std::vector<std::string>& files)
+    {
         std::vector<RankedFile> result;
         result.reserve(files.size());
         uint32_t idx = 0;
@@ -43,17 +51,33 @@ public:
         return result;
     }
 
-    void SetRecencyWeight(float w)       { m_recencyW = w; }
-    void SetFrequencyWeight(float w)     { m_freqW    = w; }
-    void SetVisualInterestWeight(float w){ m_visualW  = w; }
-    RelevanceStats GetStats() const      { return m_stats; }
-    void Reset()                         { m_stats = {}; }
+    void SetRecencyWeight(float w)
+    {
+        m_recencyW = w;
+    }
+    void SetFrequencyWeight(float w)
+    {
+        m_freqW = w;
+    }
+    void SetVisualInterestWeight(float w)
+    {
+        m_visualW = w;
+    }
+    RelevanceStats GetStats() const
+    {
+        return m_stats;
+    }
+    void Reset()
+    {
+        m_stats = {};
+    }
 
-private:
-    float          m_recencyW   = 0.4f;
-    float          m_freqW      = 0.4f;
-    float          m_visualW    = 0.2f;
+  private:
+    float m_recencyW = 0.4f;
+    float m_freqW = 0.4f;
+    float m_visualW = 0.2f;
     RelevanceStats m_stats;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -5,86 +5,120 @@
 // tracking active participants, cursor positions, and last-seen timestamps.
 //
 #pragma once
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <chrono>
 #include <array>
+#include <chrono>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-enum class PresenceState      { Online, Idle, Away, Offline };
-enum class CollabSessionRole  { Owner, Editor, Viewer };
-
-struct PresenceUser {
-    std::string         userId;
-    std::string         displayName;
-    PresenceState       state      = PresenceState::Online;
-    CollabSessionRole   role       = CollabSessionRole::Viewer;
-    std::array<float,2> cursorPos  = {0.0f, 0.0f};
-    std::array<uint8_t,3> color    = {255, 128, 0};
-    int64_t             lastSeenMs = 0;
+enum class PresenceState {
+    Online,
+    Idle,
+    Away,
+    Offline
+};
+enum class CollabSessionRole {
+    Owner,
+    Editor,
+    Viewer
 };
 
-struct PresenceEvent {
-    std::string  userId;
+struct PresenceUser
+{
+    std::string userId;
+    std::string displayName;
+    PresenceState state = PresenceState::Online;
+    CollabSessionRole role = CollabSessionRole::Viewer;
+    std::array<float, 2> cursorPos = {0.0f, 0.0f};
+    std::array<uint8_t, 3> color = {255, 128, 0};
+    int64_t lastSeenMs = 0;
+};
+
+struct PresenceEvent
+{
+    std::string userId;
     PresenceState newState = PresenceState::Online;
 };
 
-struct PresenceSnapshot {
+struct PresenceSnapshot
+{
     std::vector<PresenceUser> users;
-    int onlineCount() const noexcept {
+    int onlineCount() const noexcept
+    {
         int c = 0;
-        for (const auto& u : users) if (u.state == PresenceState::Online) c++;
+        for (const auto& u : users)
+            if (u.state == PresenceState::Online)
+                c++;
         return c;
     }
 };
 
-class CollaborationPresenceEngine {
-public:
+class CollaborationPresenceEngine
+{
+  public:
     explicit CollaborationPresenceEngine() = default;
 
-    void JoinSession(const PresenceUser& user) {
+    void JoinSession(const PresenceUser& user)
+    {
         m_users[user.userId] = user;
     }
 
-    void LeaveSession(const std::string& userId) {
+    void LeaveSession(const std::string& userId)
+    {
         auto it = m_users.find(userId);
-        if (it != m_users.end()) it->second.state = PresenceState::Offline;
+        if (it != m_users.end())
+            it->second.state = PresenceState::Offline;
     }
 
-    void UpdatePresence(const std::string& userId, PresenceState state) {
+    void UpdatePresence(const std::string& userId, PresenceState state)
+    {
         auto it = m_users.find(userId);
-        if (it != m_users.end()) it->second.state = state;
+        if (it != m_users.end())
+            it->second.state = state;
     }
 
-    void UpdateCursor(const std::string& userId, float x, float y) {
+    void UpdateCursor(const std::string& userId, float x, float y)
+    {
         auto it = m_users.find(userId);
-        if (it != m_users.end()) { it->second.cursorPos = {x, y}; }
+        if (it != m_users.end()) {
+            it->second.cursorPos = {x, y};
+        }
     }
 
-    PresenceSnapshot GetSnapshot() const {
+    PresenceSnapshot GetSnapshot() const
+    {
         PresenceSnapshot snap;
-        for (const auto& [_, u] : m_users) snap.users.push_back(u);
+        for (const auto& [_, u] : m_users)
+            snap.users.push_back(u);
         return snap;
     }
 
-    int UserCount() const noexcept { return static_cast<int>(m_users.size()); }
+    int UserCount() const noexcept
+    {
+        return static_cast<int>(m_users.size());
+    }
 
-    static std::string StateName(PresenceState s) noexcept {
+    static std::string StateName(PresenceState s) noexcept
+    {
         switch (s) {
-        case PresenceState::Online:  return "Online";
-        case PresenceState::Idle:    return "Idle";
-        case PresenceState::Away:    return "Away";
-        case PresenceState::Offline: return "Offline";
+            case PresenceState::Online:
+                return "Online";
+            case PresenceState::Idle:
+                return "Idle";
+            case PresenceState::Away:
+                return "Away";
+            case PresenceState::Offline:
+                return "Offline";
         }
         return "Unknown";
     }
 
-private:
+  private:
     std::unordered_map<std::string, PresenceUser> m_users;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

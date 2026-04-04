@@ -6,14 +6,14 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
-#include <numeric>
+#include <cstdint>
 #include <functional>
+#include <numeric>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -37,55 +37,74 @@ enum class TensorOp : uint8_t {
     Multiply
 };
 
-struct GPUTensorShape {
+struct GPUTensorShape
+{
     uint32_t batch = 1;
     uint32_t channels = 1;
     uint32_t height = 1;
     uint32_t width = 1;
 
-    inline size_t ElementCount() const {
+    inline size_t ElementCount() const
+    {
         return static_cast<size_t>(batch) * channels * height * width;
     }
 
-    inline size_t ByteSize(TensorDataType type) const {
+    inline size_t ByteSize(TensorDataType type) const
+    {
         size_t elemSize = 4;
         switch (type) {
-        case TensorDataType::Float32: elemSize = 4; break;
-        case TensorDataType::Float16: elemSize = 2; break;
-        case TensorDataType::Int32:   elemSize = 4; break;
-        case TensorDataType::Int8:    elemSize = 1; break;
-        case TensorDataType::UInt8:   elemSize = 1; break;
+            case TensorDataType::Float32:
+                elemSize = 4;
+                break;
+            case TensorDataType::Float16:
+                elemSize = 2;
+                break;
+            case TensorDataType::Int32:
+                elemSize = 4;
+                break;
+            case TensorDataType::Int8:
+                elemSize = 1;
+                break;
+            case TensorDataType::UInt8:
+                elemSize = 1;
+                break;
         }
         return ElementCount() * elemSize;
     }
 };
 
-struct TensorBuffer {
+struct TensorBuffer
+{
     std::vector<float> data;
     GPUTensorShape shape;
     TensorDataType dataType = TensorDataType::Float32;
     std::string name;
 
-    inline float& At(uint32_t b, uint32_t c, uint32_t h, uint32_t w) {
+    inline float& At(uint32_t b, uint32_t c, uint32_t h, uint32_t w)
+    {
         size_t idx = ((static_cast<size_t>(b) * shape.channels + c) * shape.height + h) * shape.width + w;
         return data[idx];
     }
 
-    inline float At(uint32_t b, uint32_t c, uint32_t h, uint32_t w) const {
+    inline float At(uint32_t b, uint32_t c, uint32_t h, uint32_t w) const
+    {
         size_t idx = ((static_cast<size_t>(b) * shape.channels + c) * shape.height + h) * shape.width + w;
         return data[idx];
     }
 };
 
-class GPUTensorAccelerator {
-public:
-    static GPUTensorAccelerator& Instance() {
+class GPUTensorAccelerator
+{
+  public:
+    static GPUTensorAccelerator& Instance()
+    {
         static GPUTensorAccelerator instance;
         return instance;
     }
 
     inline TensorBuffer CreateTensor(const GPUTensorShape& shape, TensorDataType type = TensorDataType::Float32,
-        const std::string& name = "") const {
+                                     const std::string& name = "") const
+    {
         TensorBuffer buffer;
         buffer.shape = shape;
         buffer.dataType = type;
@@ -94,7 +113,8 @@ public:
         return buffer;
     }
 
-    inline TensorBuffer ReLU(const TensorBuffer& input) const {
+    inline TensorBuffer ReLU(const TensorBuffer& input) const
+    {
         TensorBuffer output = input;
         for (auto& v : output.data) {
             v = (std::max)(0.0f, v);
@@ -102,7 +122,8 @@ public:
         return output;
     }
 
-    inline TensorBuffer Softmax(const TensorBuffer& input) const {
+    inline TensorBuffer Softmax(const TensorBuffer& input) const
+    {
         TensorBuffer output = input;
         for (uint32_t b = 0; b < input.shape.batch; ++b) {
             size_t offset = static_cast<size_t>(b) * input.shape.channels * input.shape.height * input.shape.width;
@@ -123,13 +144,14 @@ public:
         return output;
     }
 
-    inline TensorBuffer Conv2D(const TensorBuffer& input, const TensorBuffer& kernel,
-        uint32_t stride = 1, uint32_t padding = 0) const {
+    inline TensorBuffer Conv2D(const TensorBuffer& input, const TensorBuffer& kernel, uint32_t stride = 1,
+                               uint32_t padding = 0) const
+    {
         uint32_t outH = (input.shape.height + 2 * padding - kernel.shape.height) / stride + 1;
         uint32_t outW = (input.shape.width + 2 * padding - kernel.shape.width) / stride + 1;
         uint32_t outC = kernel.shape.batch;
 
-        GPUTensorShape outShape{ input.shape.batch, outC, outH, outW };
+        GPUTensorShape outShape{input.shape.batch, outC, outH, outW};
         TensorBuffer output = CreateTensor(outShape, input.dataType);
 
         for (uint32_t b = 0; b < input.shape.batch; ++b) {
@@ -142,8 +164,8 @@ public:
                                 for (uint32_t kw = 0; kw < kernel.shape.width; ++kw) {
                                     int ih = static_cast<int>(oh * stride + kh) - static_cast<int>(padding);
                                     int iw = static_cast<int>(ow * stride + kw) - static_cast<int>(padding);
-                                    if (ih >= 0 && ih < static_cast<int>(input.shape.height) &&
-                                        iw >= 0 && iw < static_cast<int>(input.shape.width)) {
+                                    if (ih >= 0 && ih < static_cast<int>(input.shape.height) && iw >= 0
+                                        && iw < static_cast<int>(input.shape.width)) {
                                         sum += input.At(b, ic, ih, iw) * kernel.At(oc, ic, kh, kw);
                                     }
                                 }
@@ -157,10 +179,11 @@ public:
         return output;
     }
 
-    inline TensorBuffer MaxPool2D(const TensorBuffer& input, uint32_t poolSize = 2, uint32_t stride = 2) const {
+    inline TensorBuffer MaxPool2D(const TensorBuffer& input, uint32_t poolSize = 2, uint32_t stride = 2) const
+    {
         uint32_t outH = (input.shape.height - poolSize) / stride + 1;
         uint32_t outW = (input.shape.width - poolSize) / stride + 1;
-        GPUTensorShape outShape{ input.shape.batch, input.shape.channels, outH, outW };
+        GPUTensorShape outShape{input.shape.batch, input.shape.channels, outH, outW};
         TensorBuffer output = CreateTensor(outShape, input.dataType);
 
         for (uint32_t b = 0; b < input.shape.batch; ++b) {
@@ -171,7 +194,8 @@ public:
                         for (uint32_t ph = 0; ph < poolSize; ++ph) {
                             for (uint32_t pw = 0; pw < poolSize; ++pw) {
                                 float v = input.At(b, c, oh * stride + ph, ow * stride + pw);
-                                if (v > maxVal) maxVal = v;
+                                if (v > maxVal)
+                                    maxVal = v;
                             }
                         }
                         output.At(b, c, oh, ow) = maxVal;
@@ -182,14 +206,15 @@ public:
         return output;
     }
 
-    inline std::string ShapeToString(const GPUTensorShape& shape) const {
-        return "[" + std::to_string(shape.batch) + "," + std::to_string(shape.channels) + "," +
-            std::to_string(shape.height) + "," + std::to_string(shape.width) + "]";
+    inline std::string ShapeToString(const GPUTensorShape& shape) const
+    {
+        return "[" + std::to_string(shape.batch) + "," + std::to_string(shape.channels) + ","
+               + std::to_string(shape.height) + "," + std::to_string(shape.width) + "]";
     }
 
-private:
+  private:
     GPUTensorAccelerator() = default;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

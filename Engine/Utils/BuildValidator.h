@@ -6,13 +6,13 @@
 //
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <chrono>
 
 #ifndef NOMINMAX
-#define NOMINMAX
+    #define NOMINMAX
 #endif
 #include <Windows.h>
 
@@ -31,7 +31,8 @@ static_assert(_MSVC_LANG >= 202002L, "ExplorerLens requires C++20 (/std:c++20)")
 // Require 64-bit target
 static_assert(sizeof(void*) == 8, "ExplorerLens requires a 64-bit (x64) build target");
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 // ── Build configuration info ───────────────────────────────────
 
@@ -49,7 +50,8 @@ enum class BuildConfiguration : uint8_t {
     Unknown
 };
 
-struct ValidatorBuildInfo {
+struct ValidatorBuildInfo
+{
     uint32_t compilerVersionMajor = 0;
     uint32_t compilerVersionMinor = 0;
     uint32_t compilerVersionPatch = 0;
@@ -66,34 +68,39 @@ struct ValidatorBuildInfo {
 
 // ── Validation result ──────────────────────────────────────────
 
-struct BuildCheckResult {
+struct BuildCheckResult
+{
     bool passed = true;
     std::string checkName;
     std::string message;
 };
 
-struct BuildValidationReport {
+struct BuildValidationReport
+{
     bool allPassed = true;
     std::vector<BuildCheckResult> results;
 
-    void AddResult(const std::string& name, bool ok, const std::string& msg = "") {
+    void AddResult(const std::string& name, bool ok, const std::string& msg = "")
+    {
         results.push_back({ok, name, msg});
-        if (!ok) allPassed = false;
+        if (!ok)
+            allPassed = false;
     }
 };
 
 // ── GetBuildInfo ───────────────────────────────────────────────
 
-inline ValidatorBuildInfo GetBuildInfo() {
+inline ValidatorBuildInfo GetBuildInfo()
+{
     ValidatorBuildInfo info;
 
 #ifdef _MSC_VER
     info.compilerName = "MSVC";
     info.compilerVersionMajor = _MSC_VER / 100;
     info.compilerVersionMinor = _MSC_VER % 100;
-#ifdef _MSC_FULL_VER
+    #ifdef _MSC_FULL_VER
     info.compilerVersionPatch = _MSC_FULL_VER % 100000;
-#endif
+    #endif
 #endif
 
     info.buildDate = __DATE__;
@@ -142,14 +149,13 @@ inline ValidatorBuildInfo GetBuildInfo() {
 
 // ── ValidateBuildEnvironment (compile-time checks at runtime) ──
 
-inline BuildValidationReport ValidateBuildEnvironment() {
+inline BuildValidationReport ValidateBuildEnvironment()
+{
     BuildValidationReport report;
 
     // Check compiler version
 #ifdef _MSC_VER
-    report.AddResult("CompilerVersion",
-        _MSC_VER >= 1940,
-        "MSVC " + std::to_string(_MSC_VER) + " (need >= 1940)");
+    report.AddResult("CompilerVersion", _MSC_VER >= 1940, "MSVC " + std::to_string(_MSC_VER) + " (need >= 1940)");
 #else
     report.AddResult("CompilerVersion", false, "Non-MSVC compiler detected");
 #endif
@@ -182,7 +188,8 @@ inline BuildValidationReport ValidateBuildEnvironment() {
 
 // ── ValidateCRTConsistency ─────────────────────────────────────
 
-inline BuildCheckResult ValidateCRTConsistency() {
+inline BuildCheckResult ValidateCRTConsistency()
+{
     BuildCheckResult result;
     result.checkName = "CRTConsistency";
 
@@ -198,12 +205,11 @@ inline BuildCheckResult ValidateCRTConsistency() {
 
     result.passed = (dynamicCrt == compiledDynamic);
     if (result.passed) {
-        result.message = "CRT linkage consistent: " +
-            std::string(compiledDynamic ? "/MD" : "/MT") + " compile matches runtime";
+        result.message =
+            "CRT linkage consistent: " + std::string(compiledDynamic ? "/MD" : "/MT") + " compile matches runtime";
     } else {
-        result.message = "CRT mismatch: compiled " +
-            std::string(compiledDynamic ? "/MD" : "/MT") +
-            " but runtime " + std::string(dynamicCrt ? "dynamic" : "static");
+        result.message = "CRT mismatch: compiled " + std::string(compiledDynamic ? "/MD" : "/MT") + " but runtime "
+                         + std::string(dynamicCrt ? "dynamic" : "static");
     }
 
     return result;
@@ -211,28 +217,27 @@ inline BuildCheckResult ValidateCRTConsistency() {
 
 // ── ValidateRuntimeEnvironment ─────────────────────────────────
 
-inline BuildValidationReport ValidateRuntimeEnvironment() {
+inline BuildValidationReport ValidateRuntimeEnvironment()
+{
     BuildValidationReport report;
 
     // Check OS version via RtlGetVersion (NOT versionhelpers.h)
     {
-        typedef LONG(WINAPI* RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
+        typedef LONG(WINAPI * RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
         HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
         if (hNtdll) {
-            auto pRtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(
-                GetProcAddress(hNtdll, "RtlGetVersion"));
+            auto pRtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(GetProcAddress(hNtdll, "RtlGetVersion"));
             if (pRtlGetVersion) {
                 RTL_OSVERSIONINFOW osvi = {};
                 osvi.dwOSVersionInfoSize = sizeof(osvi);
                 if (pRtlGetVersion(&osvi) == 0) {
                     // Windows 10 1809 = build 17763
-                    bool osOk = (osvi.dwMajorVersion > 10) ||
-                        (osvi.dwMajorVersion == 10 && osvi.dwBuildNumber >= 17763);
-                    report.AddResult("OSVersion", osOk,
-                        "Windows " + std::to_string(osvi.dwMajorVersion) + "." +
-                        std::to_string(osvi.dwMinorVersion) +
-                        " build " + std::to_string(osvi.dwBuildNumber) +
-                        (osOk ? " (OK)" : " (need 10.0.17763+)"));
+                    bool osOk =
+                        (osvi.dwMajorVersion > 10) || (osvi.dwMajorVersion == 10 && osvi.dwBuildNumber >= 17763);
+                    report.AddResult(
+                        "OSVersion", osOk,
+                        "Windows " + std::to_string(osvi.dwMajorVersion) + "." + std::to_string(osvi.dwMinorVersion)
+                            + " build " + std::to_string(osvi.dwBuildNumber) + (osOk ? " (OK)" : " (need 10.0.17763+)"));
                 } else {
                     report.AddResult("OSVersion", false, "RtlGetVersion failed");
                 }
@@ -252,8 +257,7 @@ inline BuildValidationReport ValidateRuntimeEnvironment() {
             uint64_t availMB = memInfo.ullAvailPhys / (1024ULL * 1024ULL);
             bool ramOk = availMB > 512;
             report.AddResult("AvailableRAM", ramOk,
-                std::to_string(availMB) + " MB available" +
-                (ramOk ? " (OK)" : " (need >512 MB)"));
+                             std::to_string(availMB) + " MB available" + (ramOk ? " (OK)" : " (need >512 MB)"));
         } else {
             report.AddResult("AvailableRAM", false, "GlobalMemoryStatusEx failed");
         }
@@ -264,16 +268,15 @@ inline BuildValidationReport ValidateRuntimeEnvironment() {
         // GetProcessDpiAwareness requires shcore.dll
         HMODULE hShcore = LoadLibraryW(L"shcore.dll");
         if (hShcore) {
-            typedef HRESULT(WINAPI* GetProcessDpiAwarenessPtr)(HANDLE, int*);
-            auto pGetDpiAwareness = reinterpret_cast<GetProcessDpiAwarenessPtr>(
-                GetProcAddress(hShcore, "GetProcessDpiAwareness"));
+            typedef HRESULT(WINAPI * GetProcessDpiAwarenessPtr)(HANDLE, int*);
+            auto pGetDpiAwareness =
+                reinterpret_cast<GetProcessDpiAwarenessPtr>(GetProcAddress(hShcore, "GetProcessDpiAwareness"));
             if (pGetDpiAwareness) {
                 int awareness = 0;
                 HRESULT hr = pGetDpiAwareness(nullptr, &awareness);
                 if (SUCCEEDED(hr)) {
                     // 0=unaware, 1=system, 2=per-monitor
-                    report.AddResult("DPIAwareness", true,
-                        "DPI awareness level: " + std::to_string(awareness));
+                    report.AddResult("DPIAwareness", true, "DPI awareness level: " + std::to_string(awareness));
                 } else {
                     report.AddResult("DPIAwareness", true, "DPI query returned HRESULT, process running");
                 }
@@ -295,4 +298,5 @@ inline BuildValidationReport ValidateRuntimeEnvironment() {
     return report;
 }
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

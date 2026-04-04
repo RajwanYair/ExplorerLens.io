@@ -8,14 +8,17 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 enum class CompilerShaderType : uint8_t {
-    Compute, Vertex, Pixel, COUNT
+    Compute,
+    Vertex,
+    Pixel,
+    COUNT
 };
 
 enum class CompilerOptLevel : uint8_t {
@@ -26,7 +29,8 @@ enum class CompilerOptLevel : uint8_t {
     COUNT
 };
 
-struct ShaderCompileResult {
+struct ShaderCompileResult
+{
     bool success = false;
     std::wstring errors;
     uint32_t bytecodeSize = 0;
@@ -34,7 +38,8 @@ struct ShaderCompileResult {
     uint64_t cacheKey = 0;
 };
 
-struct CompilerShaderStats {
+struct CompilerShaderStats
+{
     uint32_t totalCompiles = 0;
     uint32_t cacheHits = 0;
     uint32_t cacheMisses = 0;
@@ -43,15 +48,22 @@ struct CompilerShaderStats {
     float hitRate = 0.0f;
 };
 
-class GPUShaderCompiler {
-public:
-    void SetOptLevel(CompilerOptLevel level) { m_optLevel = level; }
-    CompilerOptLevel GetOptLevel() const { return m_optLevel; }
+class GPUShaderCompiler
+{
+  public:
+    void SetOptLevel(CompilerOptLevel level)
+    {
+        m_optLevel = level;
+    }
+    CompilerOptLevel GetOptLevel() const
+    {
+        return m_optLevel;
+    }
 
-    ShaderCompileResult Compile(const std::wstring& source,
-        CompilerShaderType type,
-        const std::wstring& entryPoint) {
-        (void)type; (void)entryPoint;
+    ShaderCompileResult Compile(const std::wstring& source, CompilerShaderType type, const std::wstring& entryPoint)
+    {
+        (void)type;
+        (void)entryPoint;
         ShaderCompileResult r;
         uint64_t key = HashSource(source);
         if (m_cache.count(key)) {
@@ -70,8 +82,7 @@ public:
         r.cacheKey = key;
         if (r.success) {
             m_cache[key] = r.bytecodeSize;
-        }
-        else {
+        } else {
             m_stats.failedCompiles++;
             r.errors = L"Compilation failed";
         }
@@ -80,41 +91,68 @@ public:
         return r;
     }
 
-    void InvalidateCache() { m_cache.clear(); }
-    const CompilerShaderStats& Stats() const { return m_stats; }
-    size_t CachedShaderCount() const { return m_cache.size(); }
+    void InvalidateCache()
+    {
+        m_cache.clear();
+    }
+    const CompilerShaderStats& Stats() const
+    {
+        return m_stats;
+    }
+    size_t CachedShaderCount() const
+    {
+        return m_cache.size();
+    }
 
-    static const wchar_t* TypeName(CompilerShaderType t) {
+    static const wchar_t* TypeName(CompilerShaderType t)
+    {
         switch (t) {
-        case CompilerShaderType::Compute: return L"Compute";
-        case CompilerShaderType::Vertex:  return L"Vertex";
-        case CompilerShaderType::Pixel:   return L"Pixel";
-        default: return L"Unknown";
+            case CompilerShaderType::Compute:
+                return L"Compute";
+            case CompilerShaderType::Vertex:
+                return L"Vertex";
+            case CompilerShaderType::Pixel:
+                return L"Pixel";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* OptLevelName(CompilerOptLevel l) {
+    static const wchar_t* OptLevelName(CompilerOptLevel l)
+    {
         switch (l) {
-        case CompilerOptLevel::Debug:        return L"Debug";
-        case CompilerOptLevel::Default:      return L"Default";
-        case CompilerOptLevel::Optimized:    return L"Optimized";
-        case CompilerOptLevel::MaxOptimized: return L"MaxOptimized";
-        default: return L"Unknown";
+            case CompilerOptLevel::Debug:
+                return L"Debug";
+            case CompilerOptLevel::Default:
+                return L"Default";
+            case CompilerOptLevel::Optimized:
+                return L"Optimized";
+            case CompilerOptLevel::MaxOptimized:
+                return L"MaxOptimized";
+            default:
+                return L"Unknown";
         }
     }
-    static size_t TypeCount() { return static_cast<size_t>(CompilerShaderType::COUNT); }
-    static size_t OptLevelCount() { return static_cast<size_t>(CompilerOptLevel::COUNT); }
+    static size_t TypeCount()
+    {
+        return static_cast<size_t>(CompilerShaderType::COUNT);
+    }
+    static size_t OptLevelCount()
+    {
+        return static_cast<size_t>(CompilerOptLevel::COUNT);
+    }
 
-private:
-    uint64_t HashSource(const std::wstring& src) const {
+  private:
+    uint64_t HashSource(const std::wstring& src) const
+    {
         uint64_t h = 0;
-        for (auto c : src) h = h * 31 + c;
+        for (auto c : src)
+            h = h * 31 + c;
         return h;
     }
-    void UpdateHitRate() {
+    void UpdateHitRate()
+    {
         uint32_t total = m_stats.cacheHits + m_stats.cacheMisses;
-        m_stats.hitRate = total > 0
-            ? static_cast<float>(m_stats.cacheHits) / static_cast<float>(total)
-            : 0.0f;
+        m_stats.hitRate = total > 0 ? static_cast<float>(m_stats.cacheHits) / static_cast<float>(total) : 0.0f;
     }
 
     CompilerOptLevel m_optLevel = CompilerOptLevel::Optimized;
@@ -122,5 +160,5 @@ private:
     CompilerShaderStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,72 +6,72 @@
 //
 #pragma once
 
-#include <string>
-#include <vector>
-#include <functional>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens::Engine {
 
 enum class DecoderAction : uint8_t {
-    Enable       = 0,
-    Disable      = 1,
-    Quarantine   = 2,
-    Restore      = 3,
+    Enable = 0,
+    Disable = 1,
+    Quarantine = 2,
+    Restore = 3,
     UpdateConfig = 4
 };
 
 enum class DecoderState : uint8_t {
-    Active      = 0,
-    Disabled    = 1,
+    Active = 0,
+    Disabled = 1,
     Quarantined = 2,
-    Unknown     = 3
+    Unknown = 3
 };
 
-struct DecoderTarget {
-    std::string  decoderId;
-    uint32_t     endpointCount{0};
-    std::string  currentState;
-    std::string  version;
+struct DecoderTarget
+{
+    std::string decoderId;
+    uint32_t endpointCount{0};
+    std::string currentState;
+    std::string version;
     std::chrono::system_clock::time_point lastContactAt;
 };
 
-struct ControlResult {
-    bool                     success{false};
-    uint32_t                 affected{0};
+struct ControlResult
+{
+    bool success{false};
+    uint32_t affected{0};
     std::vector<std::string> errors;
-    uint32_t                 durationMs{0};
+    uint32_t durationMs{0};
 };
 
-class RemoteDecoderControl {
-public:
-    RemoteDecoderControl()  = default;
+class RemoteDecoderControl
+{
+  public:
+    RemoteDecoderControl() = default;
     ~RemoteDecoderControl() = default;
 
-    RemoteDecoderControl(const RemoteDecoderControl&)            = delete;
+    RemoteDecoderControl(const RemoteDecoderControl&) = delete;
     RemoteDecoderControl& operator=(const RemoteDecoderControl&) = delete;
 
     // Core control operations
     ControlResult Execute(const std::string& decoderId, DecoderAction action);
-    ControlResult Execute(const std::string& decoderId, DecoderAction action,
-                          const std::string& configJson);
+    ControlResult Execute(const std::string& decoderId, DecoderAction action, const std::string& configJson);
 
     // State queries
     std::optional<DecoderTarget> GetDecoderState(const std::string& decoderId) const;
-    std::vector<DecoderTarget>   ListDecoders() const;
-    std::vector<DecoderTarget>   GetQuarantinedDecoders() const;
-    std::vector<DecoderTarget>   GetDisabledDecoders() const;
+    std::vector<DecoderTarget> ListDecoders() const;
+    std::vector<DecoderTarget> GetQuarantinedDecoders() const;
+    std::vector<DecoderTarget> GetDisabledDecoders() const;
 
     // Convenience wrappers
-    ControlResult QuarantineDecoder(const std::string& decoderId,
-                                    const std::string& reason);
+    ControlResult QuarantineDecoder(const std::string& decoderId, const std::string& reason);
     ControlResult RestoreDecoder(const std::string& decoderId);
 
     // Fleet-wide broadcast
-    ControlResult BroadcastAction(DecoderAction action,
-                                  const std::vector<std::string>& decoderIds);
+    ControlResult BroadcastAction(DecoderAction action, const std::vector<std::string>& decoderIds);
 
     // Register/unregister decoders for remote control
     bool RegisterDecoder(DecoderTarget target);
@@ -81,13 +81,12 @@ public:
     using ActionCallback = std::function<void(const std::string&, const ControlResult&)>;
     void SetActionCallback(ActionCallback cb);
 
-private:
+  private:
     std::vector<DecoderTarget> m_decoders;
-    ActionCallback             m_actionCallback;
+    ActionCallback m_actionCallback;
 
-    bool          ValidateDecoderId(const std::string& id) const;
-    ControlResult ApplyAction(DecoderTarget& target, DecoderAction action,
-                               const std::string& configJson);
+    bool ValidateDecoderId(const std::string& id) const;
+    ControlResult ApplyAction(DecoderTarget& target, DecoderAction action, const std::string& configJson);
 };
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

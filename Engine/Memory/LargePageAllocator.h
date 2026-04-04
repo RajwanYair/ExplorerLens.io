@@ -8,7 +8,7 @@
 #pragma once
 
 #ifndef NOMINMAX
-#define NOMINMAX
+    #define NOMINMAX
 #endif
 #include <Windows.h>
 
@@ -19,13 +19,14 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class PageSize : uint8_t {
-    Standard4K,   // 4 KB pages (default)
-    Large2MB,     // 2 MB large pages
-    Huge1GB,      // 1 GB huge pages (if supported)
+    Standard4K,  // 4 KB pages (default)
+    Large2MB,    // 2 MB large pages
+    Huge1GB,     // 1 GB huge pages (if supported)
     COUNT
 };
 
-struct LargePageStats {
+struct LargePageStats
+{
     uint64_t largePageAllocs = 0;
     uint64_t standardFallbacks = 0;
     uint64_t totalBytesLarge = 0;
@@ -34,27 +35,27 @@ struct LargePageStats {
     size_t minLargePageSize = 2 * 1024 * 1024;
 };
 
-class LargePageAllocator {
-public:
-    void Initialize() {
+class LargePageAllocator
+{
+  public:
+    void Initialize()
+    {
         m_stats.minLargePageSize = ::GetLargePageMinimum();
         if (m_stats.minLargePageSize == 0)
-            m_stats.minLargePageSize = 2 * 1024 * 1024; // Default 2MB
+            m_stats.minLargePageSize = 2 * 1024 * 1024;  // Default 2MB
         m_stats.privilegeAvailable = AcquireLargePagePrivilege();
     }
 
-    void* Allocate(size_t size) {
-        if (size == 0) return nullptr;
+    void* Allocate(size_t size)
+    {
+        if (size == 0)
+            return nullptr;
 
         // Try large pages if privilege is available and size warrants it
         if (m_stats.privilegeAvailable && size >= m_stats.minLargePageSize) {
             // Round up to large page boundary
-            size_t rounded = (size + m_stats.minLargePageSize - 1)
-                & ~(m_stats.minLargePageSize - 1);
-            void* ptr = ::VirtualAlloc(
-                nullptr, rounded,
-                MEM_COMMIT | MEM_RESERVE | MEM_LARGE_PAGES,
-                PAGE_READWRITE);
+            size_t rounded = (size + m_stats.minLargePageSize - 1) & ~(m_stats.minLargePageSize - 1);
+            void* ptr = ::VirtualAlloc(nullptr, rounded, MEM_COMMIT | MEM_RESERVE | MEM_LARGE_PAGES, PAGE_READWRITE);
             if (ptr) {
                 m_stats.largePageAllocs++;
                 m_stats.totalBytesLarge += rounded;
@@ -64,10 +65,7 @@ public:
         }
 
         // Standard allocation via VirtualAlloc (4K pages)
-        void* ptr = ::VirtualAlloc(
-            nullptr, size,
-            MEM_COMMIT | MEM_RESERVE,
-            PAGE_READWRITE);
+        void* ptr = ::VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
         if (ptr) {
             m_stats.standardFallbacks++;
             m_stats.totalBytesStd += size;
@@ -75,33 +73,51 @@ public:
         return ptr;
     }
 
-    void Free(void* ptr, size_t /*size*/) {
+    void Free(void* ptr, size_t /*size*/)
+    {
         if (ptr) {
             ::VirtualFree(ptr, 0, MEM_RELEASE);
         }
     }
 
-    const LargePageStats& Stats() const { return m_stats; }
-    bool IsLargePageAvailable() const { return m_stats.privilegeAvailable; }
+    const LargePageStats& Stats() const
+    {
+        return m_stats;
+    }
+    bool IsLargePageAvailable() const
+    {
+        return m_stats.privilegeAvailable;
+    }
 
-    void SetMinSize(size_t sz) { m_stats.minLargePageSize = sz; }
+    void SetMinSize(size_t sz)
+    {
+        m_stats.minLargePageSize = sz;
+    }
 
-    static const wchar_t* PageSizeName(PageSize p) {
+    static const wchar_t* PageSizeName(PageSize p)
+    {
         switch (p) {
-        case PageSize::Standard4K: return L"Standard4K";
-        case PageSize::Large2MB:   return L"Large2MB";
-        case PageSize::Huge1GB:    return L"Huge1GB";
-        default: return L"Unknown";
+            case PageSize::Standard4K:
+                return L"Standard4K";
+            case PageSize::Large2MB:
+                return L"Large2MB";
+            case PageSize::Huge1GB:
+                return L"Huge1GB";
+            default:
+                return L"Unknown";
         }
     }
-    static size_t PageSizeCount() { return static_cast<size_t>(PageSize::COUNT); }
+    static size_t PageSizeCount()
+    {
+        return static_cast<size_t>(PageSize::COUNT);
+    }
 
-private:
+  private:
     // Attempt to enable SeLockMemoryPrivilege for the current process token
-    static bool AcquireLargePagePrivilege() {
+    static bool AcquireLargePagePrivilege()
+    {
         HANDLE hToken = nullptr;
-        if (!::OpenProcessToken(::GetCurrentProcess(),
-            TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+        if (!::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
             return false;
 
         TOKEN_PRIVILEGES tp = {};
@@ -121,5 +137,5 @@ private:
     LargePageStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

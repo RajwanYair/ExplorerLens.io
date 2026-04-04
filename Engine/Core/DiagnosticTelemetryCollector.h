@@ -34,7 +34,8 @@ enum class DiagnosticSeverity : uint8_t {
     Critical
 };
 
-struct DiagnosticTelemetryRecord {
+struct DiagnosticTelemetryRecord
+{
     uint64_t sequenceId = 0;
     DiagnosticCategory category = DiagnosticCategory::Decode;
     DiagnosticSeverity severity = DiagnosticSeverity::Info;
@@ -44,7 +45,8 @@ struct DiagnosticTelemetryRecord {
     uint64_t timestampMs = 0;
 };
 
-struct TelemetryCollectorStats {
+struct TelemetryCollectorStats
+{
     uint64_t totalRecorded = 0;
     uint64_t totalDropped = 0;
     uint64_t errorCount = 0;
@@ -52,14 +54,17 @@ struct TelemetryCollectorStats {
     bool initialized = false;
 };
 
-class DiagnosticTelemetryCollector {
-public:
-    static DiagnosticTelemetryCollector& Instance() {
+class DiagnosticTelemetryCollector
+{
+  public:
+    static DiagnosticTelemetryCollector& Instance()
+    {
         static DiagnosticTelemetryCollector instance;
         return instance;
     }
 
-    void Initialize(uint32_t maxRecords = 10000) {
+    void Initialize(uint32_t maxRecords = 10000)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_maxRecords = maxRecords;
         m_records.clear();
@@ -69,14 +74,16 @@ public:
         m_stats.initialized = true;
     }
 
-    void Record(DiagnosticCategory category, DiagnosticSeverity severity,
-                const std::wstring& source, const std::wstring& message,
-                float value = 0.0f) {
+    void Record(DiagnosticCategory category, DiagnosticSeverity severity, const std::wstring& source,
+                const std::wstring& message, float value = 0.0f)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalRecorded++;
 
-        if (severity == DiagnosticSeverity::Error) m_stats.errorCount++;
-        if (severity == DiagnosticSeverity::Critical) m_stats.criticalCount++;
+        if (severity == DiagnosticSeverity::Error)
+            m_stats.errorCount++;
+        if (severity == DiagnosticSeverity::Critical)
+            m_stats.criticalCount++;
 
         if (m_records.size() >= m_maxRecords) {
             m_records.erase(m_records.begin());
@@ -93,16 +100,19 @@ public:
         m_records.push_back(std::move(rec));
     }
 
-    std::vector<DiagnosticTelemetryRecord> GetRecords(DiagnosticCategory category) const {
+    std::vector<DiagnosticTelemetryRecord> GetRecords(DiagnosticCategory category) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::vector<DiagnosticTelemetryRecord> filtered;
         for (const auto& r : m_records) {
-            if (r.category == category) filtered.push_back(r);
+            if (r.category == category)
+                filtered.push_back(r);
         }
         return filtered;
     }
 
-    std::vector<DiagnosticTelemetryRecord> GetRecentErrors(uint32_t maxCount = 100) const {
+    std::vector<DiagnosticTelemetryRecord> GetRecentErrors(uint32_t maxCount = 100) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::vector<DiagnosticTelemetryRecord> errors;
         for (auto it = m_records.rbegin(); it != m_records.rend() && errors.size() < maxCount; ++it) {
@@ -113,28 +123,32 @@ public:
         return errors;
     }
 
-    uint32_t GetRecordCount() const {
+    uint32_t GetRecordCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return static_cast<uint32_t>(m_records.size());
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    TelemetryCollectorStats GetStats() const {
+    TelemetryCollectorStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_records.clear();
     }
 
-private:
+  private:
     DiagnosticTelemetryCollector() = default;
     ~DiagnosticTelemetryCollector() = default;
     DiagnosticTelemetryCollector(const DiagnosticTelemetryCollector&) = delete;
@@ -147,5 +161,5 @@ private:
     TelemetryCollectorStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

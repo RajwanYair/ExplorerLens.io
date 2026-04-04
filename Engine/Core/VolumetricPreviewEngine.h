@@ -6,13 +6,13 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
-#include <string>
+#include <cstdint>
 #include <numeric>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -30,7 +30,8 @@ enum class ProjectionMode : uint8_t {
     CentralSlice
 };
 
-struct VolumeInfo {
+struct VolumeInfo
+{
     uint32_t dimX = 0;
     uint32_t dimY = 0;
     uint32_t dimZ = 0;
@@ -41,20 +42,24 @@ struct VolumeInfo {
     double windowWidth = 400.0;
 };
 
-class VolumetricPreviewEngine {
-public:
-    static VolumetricPreviewEngine& Instance() {
+class VolumetricPreviewEngine
+{
+  public:
+    static VolumetricPreviewEngine& Instance()
+    {
         static VolumetricPreviewEngine instance;
         return instance;
     }
 
-    inline std::vector<uint8_t> ExtractSlice(const int16_t* volumeData, const VolumeInfo& info,
-        SliceAxis axis, uint32_t sliceIndex) const {
+    inline std::vector<uint8_t> ExtractSlice(const int16_t* volumeData, const VolumeInfo& info, SliceAxis axis,
+                                             uint32_t sliceIndex) const
+    {
         uint32_t outW = 0, outH = 0;
         GetSliceDimensions(info, axis, outW, outH);
         std::vector<uint8_t> slice(static_cast<size_t>(outW) * outH, 0);
 
-        if (!volumeData || outW == 0 || outH == 0) return slice;
+        if (!volumeData || outW == 0 || outH == 0)
+            return slice;
 
         sliceIndex = (std::min)(sliceIndex, GetSliceCount(info, axis) - 1);
 
@@ -67,14 +72,16 @@ public:
         return slice;
     }
 
-    inline std::vector<uint8_t> GenerateProjection(const int16_t* volumeData, const VolumeInfo& info,
-        SliceAxis axis, ProjectionMode mode) const {
+    inline std::vector<uint8_t> GenerateProjection(const int16_t* volumeData, const VolumeInfo& info, SliceAxis axis,
+                                                   ProjectionMode mode) const
+    {
         uint32_t outW = 0, outH = 0;
         GetSliceDimensions(info, axis, outW, outH);
         uint32_t depth = GetSliceCount(info, axis);
         std::vector<uint8_t> output(static_cast<size_t>(outW) * outH, 0);
 
-        if (!volumeData || outW == 0 || outH == 0 || depth == 0) return output;
+        if (!volumeData || outW == 0 || outH == 0 || depth == 0)
+            return output;
 
         for (uint32_t y = 0; y < outH; ++y) {
             for (uint32_t x = 0; x < outW; ++x) {
@@ -85,69 +92,105 @@ public:
                 for (uint32_t d = 0; d < depth; ++d) {
                     int16_t voxel = SampleVoxel(volumeData, info, axis, d, x, y);
                     accumulator += voxel;
-                    if (voxel > maxVal) maxVal = voxel;
-                    if (voxel < minVal) minVal = voxel;
+                    if (voxel > maxVal)
+                        maxVal = voxel;
+                    if (voxel < minVal)
+                        minVal = voxel;
                 }
 
                 int16_t projected = 0;
                 switch (mode) {
-                case ProjectionMode::MaxIntensityProjection:
-                    projected = maxVal; break;
-                case ProjectionMode::AverageIntensityProjection:
-                    projected = static_cast<int16_t>(accumulator / depth); break;
-                case ProjectionMode::MinIntensityProjection:
-                    projected = minVal; break;
-                case ProjectionMode::CentralSlice:
-                    projected = SampleVoxel(volumeData, info, axis, depth / 2, x, y); break;
+                    case ProjectionMode::MaxIntensityProjection:
+                        projected = maxVal;
+                        break;
+                    case ProjectionMode::AverageIntensityProjection:
+                        projected = static_cast<int16_t>(accumulator / depth);
+                        break;
+                    case ProjectionMode::MinIntensityProjection:
+                        projected = minVal;
+                        break;
+                    case ProjectionMode::CentralSlice:
+                        projected = SampleVoxel(volumeData, info, axis, depth / 2, x, y);
+                        break;
                 }
-                output[static_cast<size_t>(y) * outW + x] = ApplyWindowing(projected, info.windowCenter, info.windowWidth);
+                output[static_cast<size_t>(y) * outW + x] =
+                    ApplyWindowing(projected, info.windowCenter, info.windowWidth);
             }
         }
         return output;
     }
 
-    inline void GetSliceDimensions(const VolumeInfo& info, SliceAxis axis,
-        uint32_t& outWidth, uint32_t& outHeight) const {
+    inline void GetSliceDimensions(const VolumeInfo& info, SliceAxis axis, uint32_t& outWidth, uint32_t& outHeight) const
+    {
         switch (axis) {
-        case SliceAxis::Axial:    outWidth = info.dimX; outHeight = info.dimY; break;
-        case SliceAxis::Coronal:  outWidth = info.dimX; outHeight = info.dimZ; break;
-        case SliceAxis::Sagittal: outWidth = info.dimY; outHeight = info.dimZ; break;
+            case SliceAxis::Axial:
+                outWidth = info.dimX;
+                outHeight = info.dimY;
+                break;
+            case SliceAxis::Coronal:
+                outWidth = info.dimX;
+                outHeight = info.dimZ;
+                break;
+            case SliceAxis::Sagittal:
+                outWidth = info.dimY;
+                outHeight = info.dimZ;
+                break;
         }
     }
 
-    inline uint32_t GetSliceCount(const VolumeInfo& info, SliceAxis axis) const {
+    inline uint32_t GetSliceCount(const VolumeInfo& info, SliceAxis axis) const
+    {
         switch (axis) {
-        case SliceAxis::Axial:    return info.dimZ;
-        case SliceAxis::Coronal:  return info.dimY;
-        case SliceAxis::Sagittal: return info.dimX;
+            case SliceAxis::Axial:
+                return info.dimZ;
+            case SliceAxis::Coronal:
+                return info.dimY;
+            case SliceAxis::Sagittal:
+                return info.dimX;
         }
         return 0;
     }
 
-private:
+  private:
     VolumetricPreviewEngine() = default;
 
-    inline int16_t SampleVoxel(const int16_t* data, const VolumeInfo& info,
-        SliceAxis axis, uint32_t slice, uint32_t x, uint32_t y) const {
+    inline int16_t SampleVoxel(const int16_t* data, const VolumeInfo& info, SliceAxis axis, uint32_t slice, uint32_t x,
+                               uint32_t y) const
+    {
         size_t vx = 0, vy = 0, vz = 0;
         switch (axis) {
-        case SliceAxis::Axial:    vx = x; vy = y; vz = slice; break;
-        case SliceAxis::Coronal:  vx = x; vy = slice; vz = y; break;
-        case SliceAxis::Sagittal: vx = slice; vy = x; vz = y; break;
+            case SliceAxis::Axial:
+                vx = x;
+                vy = y;
+                vz = slice;
+                break;
+            case SliceAxis::Coronal:
+                vx = x;
+                vy = slice;
+                vz = y;
+                break;
+            case SliceAxis::Sagittal:
+                vx = slice;
+                vy = x;
+                vz = y;
+                break;
         }
         size_t index = vz * info.dimX * info.dimY + vy * info.dimX + vx;
         return data[index];
     }
 
-    inline uint8_t ApplyWindowing(int16_t value, double center, double width) const {
+    inline uint8_t ApplyWindowing(int16_t value, double center, double width) const
+    {
         double lower = center - width / 2.0;
         double upper = center + width / 2.0;
         double v = static_cast<double>(value);
-        if (v <= lower) return 0;
-        if (v >= upper) return 255;
+        if (v <= lower)
+            return 0;
+        if (v >= upper)
+            return 255;
         return static_cast<uint8_t>(((v - lower) / width) * 255.0);
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

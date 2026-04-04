@@ -8,4 +8,4 @@ namespace ExplorerLens::Engine {
 PluginBundleInstaller::PluginBundleInstaller(std::string) {}
 PluginBundleInstaller::~PluginBundleInstaller() noexcept = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

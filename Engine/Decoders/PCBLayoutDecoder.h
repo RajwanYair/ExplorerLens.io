@@ -6,13 +6,13 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -37,21 +37,24 @@ enum class PCBLayer : uint8_t {
     InnerCopper
 };
 
-struct PCBPad {
+struct PCBPad
+{
     float x = 0.0f, y = 0.0f;
     float width = 0.5f, height = 0.5f;
     bool isCircle = true;
     PCBLayer layer = PCBLayer::TopCopper;
 };
 
-struct PCBTrace {
+struct PCBTrace
+{
     float x0 = 0.0f, y0 = 0.0f;
     float x1 = 0.0f, y1 = 0.0f;
     float traceWidth = 0.25f;
     PCBLayer layer = PCBLayer::TopCopper;
 };
 
-struct PCBBoardInfo {
+struct PCBBoardInfo
+{
     PCBFormat format = PCBFormat::Unknown;
     float width = 0.0f;
     float height = 0.0f;
@@ -63,30 +66,38 @@ struct PCBBoardInfo {
     bool isValid = false;
 };
 
-class PCBLayoutDecoder {
-public:
-    static PCBLayoutDecoder& Instance() {
+class PCBLayoutDecoder
+{
+  public:
+    static PCBLayoutDecoder& Instance()
+    {
         static PCBLayoutDecoder instance;
         return instance;
     }
 
-    inline PCBFormat DetectFormat(const uint8_t* data, size_t size) const {
-        if (!data || size < 8) return PCBFormat::Unknown;
+    inline PCBFormat DetectFormat(const uint8_t* data, size_t size) const
+    {
+        if (!data || size < 8)
+            return PCBFormat::Unknown;
         std::string header(reinterpret_cast<const char*>(data), (std::min)(size, static_cast<size_t>(512)));
-        if (header.find("(kicad_pcb") != std::string::npos) return PCBFormat::KiCadPCB;
+        if (header.find("(kicad_pcb") != std::string::npos)
+            return PCBFormat::KiCadPCB;
         if (header.find("%FSLAX") != std::string::npos || header.find("G04") != std::string::npos)
             return PCBFormat::Gerber;
-        if (header.find("TF.FileFunction") != std::string::npos) return PCBFormat::GerberX2;
+        if (header.find("TF.FileFunction") != std::string::npos)
+            return PCBFormat::GerberX2;
         if (header.find("<?xml") != std::string::npos && header.find("<eagle") != std::string::npos)
             return PCBFormat::EagleBRD;
         return PCBFormat::Unknown;
     }
 
-    inline PCBBoardInfo ParseBoardInfo(const uint8_t* data, size_t size) const {
+    inline PCBBoardInfo ParseBoardInfo(const uint8_t* data, size_t size) const
+    {
         PCBBoardInfo info;
         info.format = DetectFormat(data, size);
         info.isValid = info.format != PCBFormat::Unknown;
-        if (!info.isValid) return info;
+        if (!info.isValid)
+            return info;
 
         std::string content(reinterpret_cast<const char*>(data), (std::min)(size, static_cast<size_t>(8192)));
 
@@ -101,11 +112,12 @@ public:
     }
 
     inline std::vector<uint8_t> GenerateBoardThumbnail(const std::vector<PCBPad>& pads,
-        const std::vector<PCBTrace>& traces,
-        float boardW, float boardH,
-        uint32_t thumbWidth, uint32_t thumbHeight) const {
+                                                       const std::vector<PCBTrace>& traces, float boardW, float boardH,
+                                                       uint32_t thumbWidth, uint32_t thumbHeight) const
+    {
         std::vector<uint8_t> thumbnail(static_cast<size_t>(thumbWidth) * thumbHeight * 3, 0);
-        if (thumbWidth == 0 || thumbHeight == 0 || boardW <= 0.0f || boardH <= 0.0f) return thumbnail;
+        if (thumbWidth == 0 || thumbHeight == 0 || boardW <= 0.0f || boardH <= 0.0f)
+            return thumbnail;
 
         FillRect(thumbnail.data(), thumbWidth, thumbHeight, 0, 0, thumbWidth, thumbHeight, 20, 60, 20);
 
@@ -134,8 +146,7 @@ public:
 
             if (pad.isCircle) {
                 DrawFilledCircle(thumbnail.data(), thumbWidth, thumbHeight, px, py, pr, r, g, b);
-            }
-            else {
+            } else {
                 int hw = static_cast<int>(pad.width * scale * 0.5f);
                 int hh = static_cast<int>(pad.height * scale * 0.5f);
                 FillRect(thumbnail.data(), thumbWidth, thumbHeight, px - hw, py - hh, hw * 2, hh * 2, r, g, b);
@@ -145,85 +156,125 @@ public:
         return thumbnail;
     }
 
-    inline std::string FormatToString(PCBFormat fmt) const {
+    inline std::string FormatToString(PCBFormat fmt) const
+    {
         switch (fmt) {
-        case PCBFormat::Gerber:   return "Gerber";
-        case PCBFormat::GerberX2: return "Gerber X2";
-        case PCBFormat::KiCadPCB: return "KiCad PCB";
-        case PCBFormat::EagleBRD: return "Eagle BRD";
-        default:                  return "Unknown";
+            case PCBFormat::Gerber:
+                return "Gerber";
+            case PCBFormat::GerberX2:
+                return "Gerber X2";
+            case PCBFormat::KiCadPCB:
+                return "KiCad PCB";
+            case PCBFormat::EagleBRD:
+                return "Eagle BRD";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     PCBLayoutDecoder() = default;
 
-    struct RGB { uint8_t r, g, b; };
+    struct RGB
+    {
+        uint8_t r, g, b;
+    };
 
-    inline RGB GetLayerColor(PCBLayer layer) const {
+    inline RGB GetLayerColor(PCBLayer layer) const
+    {
         switch (layer) {
-        case PCBLayer::TopCopper:    return { 200, 40, 40 };
-        case PCBLayer::BottomCopper: return { 40, 40, 200 };
-        case PCBLayer::TopSilk:      return { 220, 220, 220 };
-        case PCBLayer::BottomSilk:   return { 180, 180, 220 };
-        case PCBLayer::TopMask:      return { 100, 200, 100 };
-        case PCBLayer::BottomMask:   return { 100, 100, 200 };
-        case PCBLayer::BoardOutline: return { 255, 255, 0 };
-        case PCBLayer::Drill:        return { 255, 255, 255 };
-        case PCBLayer::InnerCopper:  return { 200, 150, 50 };
-        default:                     return { 128, 128, 128 };
+            case PCBLayer::TopCopper:
+                return {200, 40, 40};
+            case PCBLayer::BottomCopper:
+                return {40, 40, 200};
+            case PCBLayer::TopSilk:
+                return {220, 220, 220};
+            case PCBLayer::BottomSilk:
+                return {180, 180, 220};
+            case PCBLayer::TopMask:
+                return {100, 200, 100};
+            case PCBLayer::BottomMask:
+                return {100, 100, 200};
+            case PCBLayer::BoardOutline:
+                return {255, 255, 0};
+            case PCBLayer::Drill:
+                return {255, 255, 255};
+            case PCBLayer::InnerCopper:
+                return {200, 150, 50};
+            default:
+                return {128, 128, 128};
         }
     }
 
-    inline uint32_t CountOccurrences(const std::string& str, const std::string& sub) const {
+    inline uint32_t CountOccurrences(const std::string& str, const std::string& sub) const
+    {
         uint32_t count = 0;
         size_t pos = 0;
-        while ((pos = str.find(sub, pos)) != std::string::npos) { ++count; pos += sub.size(); }
+        while ((pos = str.find(sub, pos)) != std::string::npos) {
+            ++count;
+            pos += sub.size();
+        }
         return count;
     }
 
-    inline void FillRect(uint8_t* p, uint32_t w, uint32_t h, int x, int y, int rw, int rh,
-        uint8_t cr, uint8_t cg, uint8_t cb) const {
+    inline void FillRect(uint8_t* p, uint32_t w, uint32_t h, int x, int y, int rw, int rh, uint8_t cr, uint8_t cg,
+                         uint8_t cb) const
+    {
         for (int dy = 0; dy < rh; ++dy)
             for (int dx = 0; dx < rw; ++dx) {
                 int px = x + dx, py = y + dy;
                 if (px >= 0 && px < static_cast<int>(w) && py >= 0 && py < static_cast<int>(h)) {
                     size_t idx = (static_cast<size_t>(py) * w + px) * 3;
-                    p[idx] = cr; p[idx + 1] = cg; p[idx + 2] = cb;
+                    p[idx] = cr;
+                    p[idx + 1] = cg;
+                    p[idx + 2] = cb;
                 }
             }
     }
 
-    inline void DrawFilledCircle(uint8_t* p, uint32_t w, uint32_t h, int cx, int cy, int r,
-        uint8_t cr, uint8_t cg, uint8_t cb) const {
+    inline void DrawFilledCircle(uint8_t* p, uint32_t w, uint32_t h, int cx, int cy, int r, uint8_t cr, uint8_t cg,
+                                 uint8_t cb) const
+    {
         for (int dy = -r; dy <= r; ++dy)
             for (int dx = -r; dx <= r; ++dx)
                 if (dx * dx + dy * dy <= r * r) {
                     int px = cx + dx, py = cy + dy;
                     if (px >= 0 && px < static_cast<int>(w) && py >= 0 && py < static_cast<int>(h)) {
                         size_t idx = (static_cast<size_t>(py) * w + px) * 3;
-                        p[idx] = cr; p[idx + 1] = cg; p[idx + 2] = cb;
+                        p[idx] = cr;
+                        p[idx + 1] = cg;
+                        p[idx + 2] = cb;
                     }
                 }
     }
 
-    inline void DrawLine(uint8_t* p, uint32_t w, uint32_t h, int x0, int y0, int x1, int y1,
-        uint8_t cr, uint8_t cg, uint8_t cb) const {
+    inline void DrawLine(uint8_t* p, uint32_t w, uint32_t h, int x0, int y0, int x1, int y1, uint8_t cr, uint8_t cg,
+                         uint8_t cb) const
+    {
         int dx = std::abs(x1 - x0), dy = std::abs(y1 - y0);
         int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
         int err = dx - dy;
         for (int i = 0; i < 10000; ++i) {
             if (x0 >= 0 && x0 < static_cast<int>(w) && y0 >= 0 && y0 < static_cast<int>(h)) {
                 size_t idx = (static_cast<size_t>(y0) * w + x0) * 3;
-                p[idx] = cr; p[idx + 1] = cg; p[idx + 2] = cb;
+                p[idx] = cr;
+                p[idx + 1] = cg;
+                p[idx + 2] = cb;
             }
-            if (x0 == x1 && y0 == y1) break;
+            if (x0 == x1 && y0 == y1)
+                break;
             int e2 = 2 * err;
-            if (e2 > -dy) { err -= dy; x0 += sx; }
-            if (e2 < dx) { err += dx; y0 += sy; }
+            if (e2 > -dy) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y0 += sy;
+            }
         }
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

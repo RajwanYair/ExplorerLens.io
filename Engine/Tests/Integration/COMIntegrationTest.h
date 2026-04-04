@@ -8,10 +8,10 @@
 #pragma once
 
 #include <windows.h>
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,23 +23,22 @@ namespace Tests {
 
 class COMIntegrationTest
 {
-public:
+  public:
     //--------------------------------------------------------------------------
     // ExplorerLens COM CLSID (fixed — must not change)
     //--------------------------------------------------------------------------
-    static constexpr wchar_t EXPLORERLENS_CLSID_STR[] =
-        L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}";
+    static constexpr wchar_t EXPLORERLENS_CLSID_STR[] = L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}";
 
     //--------------------------------------------------------------------------
     // Per-file test outcome
     //--------------------------------------------------------------------------
     struct TestResult
     {
-        std::wstring filePath;   // Full path to the test file
-        HRESULT      hr{E_FAIL}; // HRESULT from GetThumbnail or creation
-        uint32_t     width{0};   // Returned bitmap width (0 on failure)
-        uint32_t     height{0};  // Returned bitmap height (0 on failure)
-        bool         succeeded{false};
+        std::wstring filePath;  // Full path to the test file
+        HRESULT hr{E_FAIL};     // HRESULT from GetThumbnail or creation
+        uint32_t width{0};      // Returned bitmap width (0 on failure)
+        uint32_t height{0};     // Returned bitmap height (0 on failure)
+        bool succeeded{false};
         std::wstring errorMessage;
     };
 
@@ -64,9 +63,8 @@ public:
     // If IsDllRegistered() is false the entire run is skipped gracefully
     // (all results succeed = true with a "skipped" message).
     // desiredSize: thumbnail size hint passed to GetThumbnail (default 256).
-    std::vector<TestResult> RunRoundTrip(
-        const std::vector<std::filesystem::path>& testFiles,
-        UINT desiredSize = 256) const;
+    std::vector<TestResult> RunRoundTrip(const std::vector<std::filesystem::path>& testFiles,
+                                         UINT desiredSize = 256) const;
 
     // Run a minimal smoke test that:
     //   1. Parses the CLSID string.
@@ -75,11 +73,11 @@ public:
     // Returns true if all steps that could be verified succeeded.
     static bool RunSmoke() noexcept;
 
-private:
+  private:
     // Internal helper: create IThumbnailProvider from registered CLSID.
     static HRESULT CreateThumbnailProvider(REFIID riid, void** ppv) noexcept;
 };
 
-} // namespace Tests
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Tests
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -8,7 +8,7 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 
@@ -19,34 +19,38 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct ModuleSecurityFlags {
+struct ModuleSecurityFlags
+{
     std::wstring dllPath;
-    bool         cfgEnabled{false};       // /guard:cf
-    bool         shadowStackEnabled{false}; // CET / CETCOMPAT PE flag
-    bool         depEnabled{false};        // NX bit / /NXCOMPAT
-    bool         aslrEnabled{false};       // DYNAMICBASE
-    bool         safeExceptionsEnabled{false}; // SafeSEH / SEHOP
-    bool         rfgEnabled{false};        // /guard:rf (return-flow guard)
+    bool cfgEnabled{false};             // /guard:cf
+    bool shadowStackEnabled{false};     // CET / CETCOMPAT PE flag
+    bool depEnabled{false};             // NX bit / /NXCOMPAT
+    bool aslrEnabled{false};            // DYNAMICBASE
+    bool safeExceptionsEnabled{false};  // SafeSEH / SEHOP
+    bool rfgEnabled{false};             // /guard:rf (return-flow guard)
 };
 
-struct ProcessSecurityReport {
-    bool                              cfgEnabled{false};
-    bool                              shadowStackEnabled{false};
-    bool                              depEnabled{false};
-    bool                              aslrEnabled{false};
-    std::vector<ModuleSecurityFlags>  modules;
-    std::vector<std::wstring>         violatingModules;  // modules missing required flags
-    bool                              allPoliciesMet{false};
+struct ProcessSecurityReport
+{
+    bool cfgEnabled{false};
+    bool shadowStackEnabled{false};
+    bool depEnabled{false};
+    bool aslrEnabled{false};
+    std::vector<ModuleSecurityFlags> modules;
+    std::vector<std::wstring> violatingModules;  // modules missing required flags
+    bool allPoliciesMet{false};
 };
 
-class StackGuardPolicy {
-public:
-    struct Requirements {
+class StackGuardPolicy
+{
+  public:
+    struct Requirements
+    {
         bool requireCFG{true};
         bool requireShadowStack{false};  // requires Win11 22H2+ hardware CET
         bool requireDEP{true};
         bool requireASLR{true};
-        bool blockOnViolation{false};    // if true, refuse to load violating plugins
+        bool blockOnViolation{false};  // if true, refuse to load violating plugins
     };
 
     explicit StackGuardPolicy(Requirements req = {}) : m_req(req) {}
@@ -64,12 +68,12 @@ public:
     static bool IsShadowStackEnabled() noexcept;
     static bool IsDEPEnabled() noexcept;
 
-private:
+  private:
     static uint32_t GetPEDllCharacteristics(const std::wstring& dllPath) noexcept;
-    static bool     HasCETCompatFlag(const std::wstring& dllPath) noexcept;
+    static bool HasCETCompatFlag(const std::wstring& dllPath) noexcept;
 
     Requirements m_req;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -7,9 +7,9 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,7 +23,8 @@ enum class MultiBatchItemStatus : uint8_t {
     CacheHit = 5
 };
 
-struct BatchDecodeItem {
+struct BatchDecodeItem
+{
     std::wstring filePath;
     std::string decoderName;
     uint32_t targetWidth = 256;
@@ -34,7 +35,8 @@ struct BatchDecodeItem {
     uint32_t priority = 0;
 };
 
-struct MultiBatchDecodeConfig {
+struct MultiBatchDecodeConfig
+{
     uint32_t maxConcurrent = 4;
     uint32_t timeoutPerItemMs = 5000;
     uint32_t maxBatchSize = 100;
@@ -43,7 +45,8 @@ struct MultiBatchDecodeConfig {
     bool priorityOrdering = true;
 };
 
-struct BatchDecodeResult {
+struct BatchDecodeResult
+{
     uint32_t totalItems = 0;
     uint32_t successCount = 0;
     uint32_t failedCount = 0;
@@ -54,20 +57,34 @@ struct BatchDecodeResult {
     double throughputPerSec = 0.0;
 };
 
-class MultiFormatBatchDecoder {
-public:
-    void Configure(const MultiBatchDecodeConfig& config) { m_config = config; }
+class MultiFormatBatchDecoder
+{
+  public:
+    void Configure(const MultiBatchDecodeConfig& config)
+    {
+        m_config = config;
+    }
 
-    BatchDecodeResult Summarize(const std::vector<BatchDecodeItem>& items) const {
+    BatchDecodeResult Summarize(const std::vector<BatchDecodeItem>& items) const
+    {
         BatchDecodeResult r;
         r.totalItems = static_cast<uint32_t>(items.size());
         for (const auto& item : items) {
             switch (item.status) {
-            case MultiBatchItemStatus::Success: r.successCount++; break;
-            case MultiBatchItemStatus::Failed: r.failedCount++; break;
-            case MultiBatchItemStatus::Skipped: r.skippedCount++; break;
-            case MultiBatchItemStatus::CacheHit: r.cacheHitCount++; break;
-            default: break;
+                case MultiBatchItemStatus::Success:
+                    r.successCount++;
+                    break;
+                case MultiBatchItemStatus::Failed:
+                    r.failedCount++;
+                    break;
+                case MultiBatchItemStatus::Skipped:
+                    r.skippedCount++;
+                    break;
+                case MultiBatchItemStatus::CacheHit:
+                    r.cacheHitCount++;
+                    break;
+                default:
+                    break;
             }
             r.totalMs += item.decodeMs;
         }
@@ -77,23 +94,27 @@ public:
         return r;
     }
 
-    void SortByPriority(std::vector<BatchDecodeItem>& items) const {
-        if (!m_config.priorityOrdering) return;
+    void SortByPriority(std::vector<BatchDecodeItem>& items) const
+    {
+        if (!m_config.priorityOrdering)
+            return;
         std::sort(items.begin(), items.end(),
-            [](const BatchDecodeItem& a, const BatchDecodeItem& b) {
-                return a.priority > b.priority;
-            });
+                  [](const BatchDecodeItem& a, const BatchDecodeItem& b) { return a.priority > b.priority; });
     }
 
-    bool ShouldSkip(const BatchDecodeItem& item) const {
+    bool ShouldSkip(const BatchDecodeItem& item) const
+    {
         return item.status == MultiBatchItemStatus::Failed && m_config.skipOnError;
     }
 
-    MultiBatchDecodeConfig GetConfig() const { return m_config; }
+    MultiBatchDecodeConfig GetConfig() const
+    {
+        return m_config;
+    }
 
-private:
+  private:
     MultiBatchDecodeConfig m_config;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

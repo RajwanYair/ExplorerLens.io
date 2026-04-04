@@ -8,94 +8,121 @@
 #pragma once
 
 #include <windows.h>
-#include <string>
-#include <functional>
-#include <vector>
-#include <optional>
-#include <chrono>
-#include <thread>
 #include <atomic>
+#include <chrono>
 #include <cstdint>
+#include <functional>
+#include <optional>
+#include <string>
+#include <thread>
+#include <vector>
 
-namespace ExplorerLens { namespace Engine { namespace Utils {
+namespace ExplorerLens {
+namespace Engine {
+namespace Utils {
 
 enum class AutoUpdateChannel : uint8_t {
-    Stable   = 0,
-    Preview  = 1,
-    Insider  = 2,
+    Stable = 0,
+    Preview = 1,
+    Insider = 2,
     Disabled = 3
 };
 
 enum class UpdateState : uint8_t {
-    Idle          = 0,
-    Checking      = 1,
-    Available     = 2,
-    Downloading   = 3,
-    ReadyToApply  = 4,
-    Applying      = 5,
-    UpToDate      = 6,
-    Error         = 7,
+    Idle = 0,
+    Checking = 1,
+    Available = 2,
+    Downloading = 3,
+    ReadyToApply = 4,
+    Applying = 5,
+    UpToDate = 6,
+    Error = 7,
     PolicyBlocked = 8
 };
 
-struct PackageVersion {
-    uint32_t  major = 0, minor = 0, patch = 0, build = 0;
-    std::string ToString() const {
+struct PackageVersion
+{
+    uint32_t major = 0, minor = 0, patch = 0, build = 0;
+    std::string ToString() const
+    {
         return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
     }
-    bool operator>(const PackageVersion& o) const {
-        if (major != o.major) return major > o.major;
-        if (minor != o.minor) return minor > o.minor;
-        if (patch != o.patch) return patch > o.patch;
+    bool operator>(const PackageVersion& o) const
+    {
+        if (major != o.major)
+            return major > o.major;
+        if (minor != o.minor)
+            return minor > o.minor;
+        if (patch != o.patch)
+            return patch > o.patch;
         return build > o.build;
     }
 };
 
-struct AutoUpdateInfo {
+struct AutoUpdateInfo
+{
     PackageVersion latestVersion;
-    PackageVersion currentVersion = { 19, 1, 0, 0 };
-    std::string    downloadUrl;
-    std::string    releaseNotes;
-    size_t         sizeBytes        = 0;
-    std::string    sha256;
-    bool           isDelta          = true;   // Prefer delta packages
+    PackageVersion currentVersion = {19, 1, 0, 0};
+    std::string downloadUrl;
+    std::string releaseNotes;
+    size_t sizeBytes = 0;
+    std::string sha256;
+    bool isDelta = true;  // Prefer delta packages
     std::chrono::system_clock::time_point publishedAt;
 };
 
-class AutoUpdateManager {
-public:
-    static AutoUpdateManager& Instance() {
+class AutoUpdateManager
+{
+  public:
+    static AutoUpdateManager& Instance()
+    {
         static AutoUpdateManager inst;
         return inst;
     }
 
-    void SetChannel(AutoUpdateChannel ch) { m_channel = ch; }
-    AutoUpdateChannel Channel() const { return m_channel; }
-    UpdateState   State()   const { return m_state; }
-    const std::optional<AutoUpdateInfo>& AvailableUpdate() const { return m_pending; }
+    void SetChannel(AutoUpdateChannel ch)
+    {
+        m_channel = ch;
+    }
+    AutoUpdateChannel Channel() const
+    {
+        return m_channel;
+    }
+    UpdateState State() const
+    {
+        return m_state;
+    }
+    const std::optional<AutoUpdateInfo>& AvailableUpdate() const
+    {
+        return m_pending;
+    }
 
     // Start background check loop (interval from GP or 24h default)
-    void StartAutoCheck(uint32_t intervalHours = 24) {
-        if (m_running || m_channel == AutoUpdateChannel::Disabled) return;
+    void StartAutoCheck(uint32_t intervalHours = 24)
+    {
+        if (m_running || m_channel == AutoUpdateChannel::Disabled)
+            return;
         m_running = true;
         m_checkThread = std::thread([this, intervalHours]() {
             while (m_running) {
                 CheckForUpdate();
-                auto deadline = std::chrono::steady_clock::now()
-                    + std::chrono::hours(intervalHours);
+                auto deadline = std::chrono::steady_clock::now() + std::chrono::hours(intervalHours);
                 while (m_running && std::chrono::steady_clock::now() < deadline)
                     std::this_thread::sleep_for(std::chrono::minutes(1));
             }
         });
     }
 
-    void StopAutoCheck() {
+    void StopAutoCheck()
+    {
         m_running = false;
-        if (m_checkThread.joinable()) m_checkThread.join();
+        if (m_checkThread.joinable())
+            m_checkThread.join();
     }
 
     // Synchronous check (blocks briefly for network query)
-    bool CheckForUpdate() {
+    bool CheckForUpdate()
+    {
         if (m_channel == AutoUpdateChannel::Disabled) {
             m_state = UpdateState::PolicyBlocked;
             return false;
@@ -110,7 +137,7 @@ public:
 
         if (info->latestVersion > info->currentVersion) {
             m_pending = info;
-            m_state   = UpdateState::Available;
+            m_state = UpdateState::Available;
             FireUpdateCallbacks(*info);
             return true;
         }
@@ -120,8 +147,10 @@ public:
     }
 
     // Download and stage the update package
-    bool DownloadUpdate() {
-        if (m_state != UpdateState::Available || !m_pending.has_value()) return false;
+    bool DownloadUpdate()
+    {
+        if (m_state != UpdateState::Available || !m_pending.has_value())
+            return false;
         m_state = UpdateState::Downloading;
 
         // Production: use BITS (Background Intelligent Transfer Service) for
@@ -131,12 +160,15 @@ public:
     }
 
     // Apply update on next idle (deferred — COM server must be unloaded)
-    bool ScheduleApply() {
-        if (m_state != UpdateState::ReadyToApply) return false;
+    bool ScheduleApply()
+    {
+        if (m_state != UpdateState::ReadyToApply)
+            return false;
         // Write pending-apply flag to registry; Install-ExplorerLens.ps1 picks it up
         HKEY hk = nullptr;
-        if (RegCreateKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\ExplorerLens\\Update",
-            0, nullptr, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, nullptr, &hk, nullptr) == ERROR_SUCCESS) {
+        if (RegCreateKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\ExplorerLens\\Update", 0, nullptr, REG_OPTION_NON_VOLATILE,
+                            KEY_SET_VALUE, nullptr, &hk, nullptr)
+            == ERROR_SUCCESS) {
             DWORD v = 1;
             RegSetValueExW(hk, L"PendingApply", 0, REG_DWORD, reinterpret_cast<BYTE*>(&v), 4);
             RegCloseKey(hk);
@@ -146,41 +178,52 @@ public:
 
     // Subscribe to "update available" events
     using UpdateFn = std::function<void(const AutoUpdateInfo&)>;
-    void OnUpdateAvailable(UpdateFn fn) { m_callbacks.push_back(std::move(fn)); }
+    void OnUpdateAvailable(UpdateFn fn)
+    {
+        m_callbacks.push_back(std::move(fn));
+    }
 
-    ~AutoUpdateManager() { StopAutoCheck(); }
+    ~AutoUpdateManager()
+    {
+        StopAutoCheck();
+    }
 
-private:
-    AutoUpdateManager() {
+  private:
+    AutoUpdateManager()
+    {
         // Read channel from GP
         HKEY hk = nullptr;
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\ExplorerLens",
-            0, KEY_READ, &hk) == ERROR_SUCCESS) {
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\ExplorerLens", 0, KEY_READ, &hk) == ERROR_SUCCESS) {
             DWORD val = 0, sz = sizeof(DWORD);
-            if (RegQueryValueExW(hk, L"AutoUpdateChannel", nullptr, nullptr,
-                reinterpret_cast<BYTE*>(&val), &sz) == ERROR_SUCCESS)
+            if (RegQueryValueExW(hk, L"AutoUpdateChannel", nullptr, nullptr, reinterpret_cast<BYTE*>(&val), &sz)
+                == ERROR_SUCCESS)
                 m_channel = static_cast<AutoUpdateChannel>(val <= 3 ? val : 0);
             RegCloseKey(hk);
         }
     }
 
-    std::optional<AutoUpdateInfo> QueryUpdateEndpoint() {
+    std::optional<AutoUpdateInfo> QueryUpdateEndpoint()
+    {
         // Production: HTTPS GET https://update.explorerlens.io/v2/check?channel=stable
         // Returns JSON: { "version": "19.2.0", "url": "...", "sha256": "...", "size": ... }
         // Stub: return empty (no update available)
         return std::nullopt;
     }
 
-    void FireUpdateCallbacks(const AutoUpdateInfo& info) {
-        for (auto& fn : m_callbacks) fn(info);
+    void FireUpdateCallbacks(const AutoUpdateInfo& info)
+    {
+        for (auto& fn : m_callbacks)
+            fn(info);
     }
 
-    AutoUpdateChannel                    m_channel   = AutoUpdateChannel::Stable;
-    UpdateState                      m_state     = UpdateState::Idle;
-    std::optional<AutoUpdateInfo>        m_pending;
-    std::vector<UpdateFn>            m_callbacks;
-    std::thread                      m_checkThread;
-    std::atomic<bool>                m_running { false };
+    AutoUpdateChannel m_channel = AutoUpdateChannel::Stable;
+    UpdateState m_state = UpdateState::Idle;
+    std::optional<AutoUpdateInfo> m_pending;
+    std::vector<UpdateFn> m_callbacks;
+    std::thread m_checkThread;
+    std::atomic<bool> m_running{false};
 };
 
-}}} // namespace ExplorerLens::Engine::Utils
+}  // namespace Utils
+}  // namespace Engine
+}  // namespace ExplorerLens

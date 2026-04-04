@@ -8,13 +8,13 @@
 #pragma once
 
 #include <windows.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <cstdint>
-#include <cmath>
-#include <algorithm>
-#include <sstream>
-#include <iomanip>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,23 +23,26 @@ namespace Engine {
 using PHash = uint64_t;
 
 /// Simple grayscale pixel buffer used as input.
-struct GrayImage {
-    std::vector<uint8_t> pixels; // row-major, 1 byte per pixel
+struct GrayImage
+{
+    std::vector<uint8_t> pixels;  // row-major, 1 byte per pixel
     uint32_t width = 0;
     uint32_t height = 0;
 };
 
-class PerceptualHashEngine {
-public:
+class PerceptualHashEngine
+{
+  public:
     PerceptualHashEngine() = default;
 
     // ── Hash computation ─────────────────────────────────────────────
 
     /// Average Hash (aHash): resize to 8×8, compare each pixel against the
     /// mean luminance.  Returns a 64-bit hash.
-    PHash ComputeAverageHash(const uint8_t* pixels,
-        uint32_t w, uint32_t h) const {
-        if (!pixels || w == 0 || h == 0) return 0;
+    PHash ComputeAverageHash(const uint8_t* pixels, uint32_t w, uint32_t h) const
+    {
+        if (!pixels || w == 0 || h == 0)
+            return 0;
 
         // Down-sample to 8×8 using nearest-neighbour
         uint8_t thumb8x8[64]{};
@@ -47,7 +50,8 @@ public:
 
         // Mean
         uint32_t sum = 0;
-        for (int i = 0; i < 64; ++i) sum += thumb8x8[i];
+        for (int i = 0; i < 64; ++i)
+            sum += thumb8x8[i];
         uint8_t mean = static_cast<uint8_t>(sum / 64);
 
         // Build hash: bit = 1 if pixel >= mean
@@ -61,9 +65,10 @@ public:
 
     /// Difference Hash (dHash): resize to 9×8, compare adjacent horizontal
     /// pixels.  Returns a 64-bit hash.
-    PHash ComputeDifferenceHash(const uint8_t* pixels,
-        uint32_t w, uint32_t h) const {
-        if (!pixels || w == 0 || h == 0) return 0;
+    PHash ComputeDifferenceHash(const uint8_t* pixels, uint32_t w, uint32_t h) const
+    {
+        if (!pixels || w == 0 || h == 0)
+            return 0;
 
         // Down-sample to 9×8 (72 pixels)
         uint8_t thumb9x8[72]{};
@@ -86,20 +91,22 @@ public:
     // ── Comparison ───────────────────────────────────────────────────
 
     /// Hamming distance between two 64-bit hashes (0 = identical, 64 = max).
-    uint32_t HammingDistance(PHash hash1, PHash hash2) const {
+    uint32_t HammingDistance(PHash hash1, PHash hash2) const
+    {
         uint64_t diff = hash1 ^ hash2;
         return PopCount64(diff);
     }
 
     /// Returns true if two hashes are within the similarity threshold.
     /// Default threshold = 10 bits (out of 64).
-    bool AreSimilar(PHash hash1, PHash hash2,
-        uint32_t threshold = 10) const {
+    bool AreSimilar(PHash hash1, PHash hash2, uint32_t threshold = 10) const
+    {
         return HammingDistance(hash1, hash2) <= threshold;
     }
 
     /// Normalised similarity score in [0.0, 1.0] where 1.0 = identical.
-    float SimilarityScore(PHash hash1, PHash hash2) const {
+    float SimilarityScore(PHash hash1, PHash hash2) const
+    {
         uint32_t dist = HammingDistance(hash1, hash2);
         return 1.0f - static_cast<float>(dist) / 64.0f;
     }
@@ -107,14 +114,16 @@ public:
     // ── Utility ──────────────────────────────────────────────────────
 
     /// Convert a hash to a 16-char hex string.
-    std::wstring HashToString(PHash hash) const {
+    std::wstring HashToString(PHash hash) const
+    {
         std::wstringstream ss;
         ss << std::hex << std::setfill(L'0') << std::setw(16) << hash;
         return ss.str();
     }
 
     /// Parse a 16-char hex string back to PHash.  Returns 0 on failure.
-    PHash StringToHash(const std::wstring& str) const {
+    PHash StringToHash(const std::wstring& str) const
+    {
         PHash result = 0;
         std::wstringstream ss(str);
         ss >> std::hex >> result;
@@ -122,8 +131,8 @@ public:
     }
 
     /// Create a GrayImage from ARGB pixel data (uint32_t per pixel).
-    static GrayImage ArgbToGray(const uint32_t* argb,
-        uint32_t w, uint32_t h) {
+    static GrayImage ArgbToGray(const uint32_t* argb, uint32_t w, uint32_t h)
+    {
         GrayImage img;
         img.width = w;
         img.height = h;
@@ -134,14 +143,14 @@ public:
             uint8_t g = static_cast<uint8_t>((px >> 8) & 0xFF);
             uint8_t b = static_cast<uint8_t>(px & 0xFF);
             // ITU-R BT.601 luma
-            img.pixels[i] = static_cast<uint8_t>(
-                0.299f * r + 0.587f * g + 0.114f * b);
+            img.pixels[i] = static_cast<uint8_t>(0.299f * r + 0.587f * g + 0.114f * b);
         }
         return img;
     }
 
     /// Rotate a hash 90° (transpose the 8×8 bit-grid).
-    PHash RotateHash90(PHash hash) const {
+    PHash RotateHash90(PHash hash) const
+    {
         PHash rotated = 0;
         for (int row = 0; row < 8; ++row) {
             for (int col = 0; col < 8; ++col) {
@@ -154,20 +163,19 @@ public:
         return rotated;
     }
 
-private:
+  private:
     // ── Internal helpers ─────────────────────────────────────────────
 
     /// Nearest-neighbour downsample to exactly 8×8.
-    static void Downsample8x8(const uint8_t* src, uint32_t srcW, uint32_t srcH,
-        uint8_t dst[64]) {
+    static void Downsample8x8(const uint8_t* src, uint32_t srcW, uint32_t srcH, uint8_t dst[64])
+    {
         DownsampleNxM(src, srcW, srcH, 8, 8, dst);
     }
 
     /// Nearest-neighbour downsample to dstW × dstH.
-    static void DownsampleNxM(const uint8_t* src,
-        uint32_t srcW, uint32_t srcH,
-        uint32_t dstW, uint32_t dstH,
-        uint8_t* dst) {
+    static void DownsampleNxM(const uint8_t* src, uint32_t srcW, uint32_t srcH, uint32_t dstW, uint32_t dstH,
+                              uint8_t* dst)
+    {
         for (uint32_t y = 0; y < dstH; ++y) {
             uint32_t sy = y * srcH / dstH;
             sy = (std::min)(sy, srcH - 1);
@@ -180,7 +188,8 @@ private:
     }
 
     /// Portable 64-bit popcount.
-    static uint32_t PopCount64(uint64_t v) {
+    static uint32_t PopCount64(uint64_t v)
+    {
         // Kernighan's bit-counting
         uint32_t count = 0;
         while (v) {
@@ -191,5 +200,5 @@ private:
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

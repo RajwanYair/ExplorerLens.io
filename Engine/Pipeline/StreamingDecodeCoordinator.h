@@ -33,14 +33,16 @@ enum class StreamingChunkPriority : uint8_t {
     Background
 };
 
-struct StreamingDecodeRequest {
+struct StreamingDecodeRequest
+{
     std::wstring filePath;
     uint64_t fileSize = 0;
     uint32_t chunkSizeKB = 64;
     bool allowPartialRender = true;
 };
 
-struct StreamingDecodeProgress {
+struct StreamingDecodeProgress
+{
     StreamingDecodeState state = StreamingDecodeState::Idle;
     float progressPercent = 0.0f;
     uint32_t chunksProcessed = 0;
@@ -49,7 +51,8 @@ struct StreamingDecodeProgress {
     float elapsedMs = 0.0f;
 };
 
-struct StreamCoordinatorStats {
+struct StreamCoordinatorStats
+{
     uint64_t totalStreams = 0;
     uint64_t completedStreams = 0;
     uint64_t partialRenders = 0;
@@ -58,14 +61,17 @@ struct StreamCoordinatorStats {
     bool initialized = false;
 };
 
-class StreamingDecodeCoordinator {
-public:
-    static StreamingDecodeCoordinator& Instance() {
+class StreamingDecodeCoordinator
+{
+  public:
+    static StreamingDecodeCoordinator& Instance()
+    {
         static StreamingDecodeCoordinator instance;
         return instance;
     }
 
-    void Initialize(uint32_t defaultChunkSizeKB = 64) {
+    void Initialize(uint32_t defaultChunkSizeKB = 64)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_defaultChunkSizeKB = defaultChunkSizeKB;
         m_stats = {};
@@ -73,14 +79,16 @@ public:
         m_progress = {};
     }
 
-    StreamingDecodeProgress StartStream(const StreamingDecodeRequest& request) {
+    StreamingDecodeProgress StartStream(const StreamingDecodeRequest& request)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalStreams++;
 
         uint32_t chunkSize = request.chunkSizeKB > 0 ? request.chunkSizeKB : m_defaultChunkSizeKB;
-        uint32_t totalChunks = static_cast<uint32_t>(
-            (request.fileSize + (chunkSize * 1024ULL - 1)) / (chunkSize * 1024ULL));
-        if (totalChunks == 0) totalChunks = 1;
+        uint32_t totalChunks =
+            static_cast<uint32_t>((request.fileSize + (chunkSize * 1024ULL - 1)) / (chunkSize * 1024ULL));
+        if (totalChunks == 0)
+            totalChunks = 1;
 
         m_progress.state = StreamingDecodeState::HeaderParsed;
         m_progress.totalChunks = totalChunks;
@@ -88,22 +96,22 @@ public:
         m_progress.progressPercent = 100.0f / totalChunks;
         m_progress.partialRenderAvailable = request.allowPartialRender;
 
-        if (request.allowPartialRender) m_stats.partialRenders++;
+        if (request.allowPartialRender)
+            m_stats.partialRenders++;
 
         return m_progress;
     }
 
-    StreamingDecodeProgress AdvanceChunk() {
+    StreamingDecodeProgress AdvanceChunk()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_progress.state == StreamingDecodeState::Complete ||
-            m_progress.state == StreamingDecodeState::Idle) {
+        if (m_progress.state == StreamingDecodeState::Complete || m_progress.state == StreamingDecodeState::Idle) {
             return m_progress;
         }
 
         m_progress.chunksProcessed++;
         m_progress.progressPercent =
-            (static_cast<float>(m_progress.chunksProcessed) /
-             static_cast<float>(m_progress.totalChunks)) * 100.0f;
+            (static_cast<float>(m_progress.chunksProcessed) / static_cast<float>(m_progress.totalChunks)) * 100.0f;
 
         if (m_progress.chunksProcessed >= m_progress.totalChunks) {
             m_progress.state = StreamingDecodeState::Complete;
@@ -117,38 +125,42 @@ public:
         return m_progress;
     }
 
-    StreamingDecodeProgress GetProgress() const {
+    StreamingDecodeProgress GetProgress() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_progress;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    StreamCoordinatorStats GetStats() const {
+    StreamCoordinatorStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_progress = {};
     }
 
-private:
+  private:
     StreamingDecodeCoordinator() = default;
     ~StreamingDecodeCoordinator() = default;
     StreamingDecodeCoordinator(const StreamingDecodeCoordinator&) = delete;
     StreamingDecodeCoordinator& operator=(const StreamingDecodeCoordinator&) = delete;
 
-    void UpdateAverageChunks() {
+    void UpdateAverageChunks()
+    {
         float n = static_cast<float>(m_stats.completedStreams);
         m_stats.averageChunksPerStream =
-            m_stats.averageChunksPerStream * ((n - 1.0f) / n) +
-            static_cast<float>(m_progress.totalChunks) / n;
+            m_stats.averageChunksPerStream * ((n - 1.0f) / n) + static_cast<float>(m_progress.totalChunks) / n;
     }
 
     mutable std::mutex m_mutex;
@@ -157,5 +169,5 @@ private:
     StreamCoordinatorStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

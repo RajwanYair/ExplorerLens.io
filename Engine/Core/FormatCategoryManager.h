@@ -21,23 +21,33 @@ enum class FormatCategoryGroup : uint8_t {
     COUNT = 6
 };
 
-class FormatCategoryManager {
-public:
-    static size_t CategoryCount() noexcept {
+class FormatCategoryManager
+{
+  public:
+    static size_t CategoryCount() noexcept
+    {
         return static_cast<size_t>(FormatCategoryGroup::COUNT);
     }
-    static const wchar_t *CategoryName(FormatCategoryGroup g) noexcept {
+    static const wchar_t* CategoryName(FormatCategoryGroup g) noexcept
+    {
         switch (g) {
-        case FormatCategoryGroup::Archives:   return L"Archives";
-        case FormatCategoryGroup::Images:     return L"Images";
-        case FormatCategoryGroup::Video:      return L"Video";
-        case FormatCategoryGroup::Audio:      return L"Audio";
-        case FormatCategoryGroup::Documents:  return L"Documents";
-        case FormatCategoryGroup::Scientific: return L"Scientific";
-        default: return L"Unknown";
+            case FormatCategoryGroup::Archives:
+                return L"Archives";
+            case FormatCategoryGroup::Images:
+                return L"Images";
+            case FormatCategoryGroup::Video:
+                return L"Video";
+            case FormatCategoryGroup::Audio:
+                return L"Audio";
+            case FormatCategoryGroup::Documents:
+                return L"Documents";
+            case FormatCategoryGroup::Scientific:
+                return L"Scientific";
+            default:
+                return L"Unknown";
         }
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

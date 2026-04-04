@@ -6,77 +6,81 @@
 //
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
-#include <array>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class BuildPlatform : uint8_t {
-    Win64   = 0,
-    Win32   = 1,
+    Win64 = 0,
+    Win32 = 1,
     macOS_ARM64 = 2,
-    macOS_x64   = 3,
-    Linux_x64   = 4,
+    macOS_x64 = 3,
+    Linux_x64 = 4,
     Linux_ARM64 = 5,
     Unknown = 255
 };
 
 enum class PlatformFeature : uint16_t {
-    DirectX11       = 0x0001,
-    DirectX12       = 0x0002,
-    Vulkan          = 0x0004,
-    Metal           = 0x0008,
-    OpenGL          = 0x0010,
-    COM             = 0x0020,
-    DRM             = 0x0040,
-    EGL             = 0x0080,
-    NTFS_Notify     = 0x0100,
-    inotify         = 0x0200,
-    FSEvents        = 0x0400,
-    WinShellExt     = 0x0800,
-    QuickLook       = 0x1000,
+    DirectX11 = 0x0001,
+    DirectX12 = 0x0002,
+    Vulkan = 0x0004,
+    Metal = 0x0008,
+    OpenGL = 0x0010,
+    COM = 0x0020,
+    DRM = 0x0040,
+    EGL = 0x0080,
+    NTFS_Notify = 0x0100,
+    inotify = 0x0200,
+    FSEvents = 0x0400,
+    WinShellExt = 0x0800,
+    QuickLook = 0x1000,
     LinuxThumbnailer = 0x2000
 };
 
-struct PlatformBuildInfo {
-    BuildPlatform platform    = BuildPlatform::Unknown;
-    const char*   compilerName = "Unknown";
-    uint32_t      compilerVersion = 0;
-    const char*   arch        = "Unknown";
-    uint16_t      featureMask = 0;
-    bool          isDebug     = false;
+struct PlatformBuildInfo
+{
+    BuildPlatform platform = BuildPlatform::Unknown;
+    const char* compilerName = "Unknown";
+    uint32_t compilerVersion = 0;
+    const char* arch = "Unknown";
+    uint16_t featureMask = 0;
+    bool isDebug = false;
 };
 
 // Compile-time platform validation
 #ifdef _WIN32
     #ifdef _WIN64
-        static_assert(sizeof(void*) == 8, "ExplorerLens requires 64-bit builds on Windows");
+static_assert(sizeof(void*) == 8, "ExplorerLens requires 64-bit builds on Windows");
     #endif
     #ifndef _MSC_VER
-        // Allow but warn conceptually — MSVC is preferred
+    // Allow but warn conceptually — MSVC is preferred
     #endif
 #endif
 
 #if defined(__APPLE__) && defined(__x86_64__)
-    // macOS x64 is supported but ARM64 is preferred
+// macOS x64 is supported but ARM64 is preferred
 #endif
 
 // Guard against platform header leakage
 #if defined(_WIN32) && defined(__linux__)
-    static_assert(false, "Conflicting platform macros: both _WIN32 and __linux__ defined");
+static_assert(false, "Conflicting platform macros: both _WIN32 and __linux__ defined");
 #endif
 #if defined(_WIN32) && defined(__APPLE__)
-    static_assert(false, "Conflicting platform macros: both _WIN32 and __APPLE__ defined");
+static_assert(false, "Conflicting platform macros: both _WIN32 and __APPLE__ defined");
 #endif
 #if defined(__APPLE__) && defined(__linux__)
-    static_assert(false, "Conflicting platform macros: both __APPLE__ and __linux__ defined");
+static_assert(false, "Conflicting platform macros: both __APPLE__ and __linux__ defined");
 #endif
 
-class PlatformBuildMatrix {
-public:
-    static constexpr BuildPlatform GetBuildPlatform() {
+class PlatformBuildMatrix
+{
+  public:
+    static constexpr BuildPlatform GetBuildPlatform()
+    {
 #if defined(_WIN64)
         return BuildPlatform::Win64;
 #elif defined(_WIN32)
@@ -94,15 +98,15 @@ public:
 #endif
     }
 
-    static constexpr const char* GetBuildPlatformName() {
-        constexpr const char* NAMES[] = {
-            "Win64", "Win32", "macOS-ARM64", "macOS-x64", "Linux-x64", "Linux-ARM64"
-        };
+    static constexpr const char* GetBuildPlatformName()
+    {
+        constexpr const char* NAMES[] = {"Win64", "Win32", "macOS-ARM64", "macOS-x64", "Linux-x64", "Linux-ARM64"};
         auto idx = static_cast<uint8_t>(GetBuildPlatform());
         return (idx < 6) ? NAMES[idx] : "Unknown";
     }
 
-    static constexpr const char* GetCompilerName() {
+    static constexpr const char* GetCompilerName()
+    {
 #ifdef _MSC_VER
         return "MSVC";
 #elif defined(__clang__)
@@ -114,7 +118,8 @@ public:
 #endif
     }
 
-    static constexpr uint32_t GetCompilerVersion() {
+    static constexpr uint32_t GetCompilerVersion()
+    {
 #ifdef _MSC_VER
         return _MSC_VER;
 #elif defined(__clang__)
@@ -126,7 +131,8 @@ public:
 #endif
     }
 
-    static uint16_t GetSupportedFeatures() {
+    static uint16_t GetSupportedFeatures()
+    {
         uint16_t mask = 0;
 #ifdef _WIN32
         mask |= static_cast<uint16_t>(PlatformFeature::DirectX11);
@@ -151,17 +157,19 @@ public:
         return mask;
     }
 
-    static bool HasFeature(PlatformFeature feature) {
+    static bool HasFeature(PlatformFeature feature)
+    {
         return (GetSupportedFeatures() & static_cast<uint16_t>(feature)) != 0;
     }
 
-    static PlatformBuildInfo GetBuildInfo() {
+    static PlatformBuildInfo GetBuildInfo()
+    {
         PlatformBuildInfo info;
-        info.platform        = GetBuildPlatform();
-        info.compilerName    = GetCompilerName();
+        info.platform = GetBuildPlatform();
+        info.compilerName = GetCompilerName();
         info.compilerVersion = GetCompilerVersion();
-        info.arch            = GetBuildPlatformName();
-        info.featureMask     = GetSupportedFeatures();
+        info.arch = GetBuildPlatformName();
+        info.featureMask = GetSupportedFeatures();
 #ifdef NDEBUG
         info.isDebug = false;
 #else
@@ -170,7 +178,8 @@ public:
         return info;
     }
 
-    static bool ValidatePlatformHeaders() {
+    static bool ValidatePlatformHeaders()
+    {
         bool valid = true;
 #ifdef _WIN32
         valid &= HasFeature(PlatformFeature::COM);
@@ -182,4 +191,5 @@ public:
     }
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

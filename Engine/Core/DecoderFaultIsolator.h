@@ -32,14 +32,16 @@ enum class QuarantineStatus : uint8_t {
     PermanentlyDisabled
 };
 
-struct DecoderFaultRecord {
+struct DecoderFaultRecord
+{
     std::wstring decoderName;
     FaultSeverity severity = FaultSeverity::Minor;
     std::wstring faultDescription;
     uint64_t faultTimestamp = 0;
 };
 
-struct DecoderIsolationState {
+struct DecoderIsolationState
+{
     std::wstring decoderName;
     QuarantineStatus status = QuarantineStatus::Active;
     uint32_t totalFaults = 0;
@@ -48,7 +50,8 @@ struct DecoderIsolationState {
     FaultSeverity worstSeverity = FaultSeverity::Minor;
 };
 
-struct FaultIsolationStats {
+struct FaultIsolationStats
+{
     uint64_t totalFaults = 0;
     uint64_t quarantineEvents = 0;
     uint64_t decodersCurrentlyQuarantined = 0;
@@ -56,14 +59,17 @@ struct FaultIsolationStats {
     bool initialized = false;
 };
 
-class DecoderFaultIsolator {
-public:
-    static DecoderFaultIsolator& Instance() {
+class DecoderFaultIsolator
+{
+  public:
+    static DecoderFaultIsolator& Instance()
+    {
         static DecoderFaultIsolator instance;
         return instance;
     }
 
-    void Initialize(uint32_t faultThreshold = 5, uint32_t maxQuarantines = 3) {
+    void Initialize(uint32_t faultThreshold = 5, uint32_t maxQuarantines = 3)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_faultThreshold = faultThreshold;
         m_maxQuarantines = maxQuarantines;
@@ -72,8 +78,8 @@ public:
         m_stats.initialized = true;
     }
 
-    void RecordFault(const std::wstring& decoderName, FaultSeverity severity,
-                     const std::wstring& description = L"") {
+    void RecordFault(const std::wstring& decoderName, FaultSeverity severity, const std::wstring& description = L"")
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalFaults++;
 
@@ -81,10 +87,11 @@ public:
         state.decoderName = decoderName;
         state.totalFaults++;
         state.consecutiveFaults++;
-        if (severity > state.worstSeverity) state.worstSeverity = severity;
+        if (severity > state.worstSeverity)
+            state.worstSeverity = severity;
 
-        if (severity == FaultSeverity::Fatal ||
-            (state.consecutiveFaults >= m_faultThreshold && state.status == QuarantineStatus::Active)) {
+        if (severity == FaultSeverity::Fatal
+            || (state.consecutiveFaults >= m_faultThreshold && state.status == QuarantineStatus::Active)) {
             if (state.quarantineCount >= m_maxQuarantines) {
                 state.status = QuarantineStatus::PermanentlyDisabled;
                 m_stats.permanentlyDisabled++;
@@ -99,7 +106,8 @@ public:
         (void)description;
     }
 
-    void RecordSuccess(const std::wstring& decoderName) {
+    void RecordSuccess(const std::wstring& decoderName)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_decoderStates.find(decoderName);
         if (it != m_decoderStates.end()) {
@@ -107,15 +115,18 @@ public:
         }
     }
 
-    bool IsQuarantined(const std::wstring& decoderName) const {
+    bool IsQuarantined(const std::wstring& decoderName) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_decoderStates.find(decoderName);
-        if (it == m_decoderStates.end()) return false;
-        return it->second.status == QuarantineStatus::Quarantined ||
-               it->second.status == QuarantineStatus::PermanentlyDisabled;
+        if (it == m_decoderStates.end())
+            return false;
+        return it->second.status == QuarantineStatus::Quarantined
+               || it->second.status == QuarantineStatus::PermanentlyDisabled;
     }
 
-    void ReleaseFromQuarantine(const std::wstring& decoderName) {
+    void ReleaseFromQuarantine(const std::wstring& decoderName)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_decoderStates.find(decoderName);
         if (it != m_decoderStates.end() && it->second.status == QuarantineStatus::Quarantined) {
@@ -125,40 +136,45 @@ public:
         }
     }
 
-    DecoderIsolationState GetDecoderState(const std::wstring& decoderName) const {
+    DecoderIsolationState GetDecoderState(const std::wstring& decoderName) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_decoderStates.find(decoderName);
-        if (it != m_decoderStates.end()) return it->second;
+        if (it != m_decoderStates.end())
+            return it->second;
         return {};
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    FaultIsolationStats GetStats() const {
+    FaultIsolationStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_decoderStates.clear();
     }
 
-private:
+  private:
     DecoderFaultIsolator() = default;
     ~DecoderFaultIsolator() = default;
     DecoderFaultIsolator(const DecoderFaultIsolator&) = delete;
     DecoderFaultIsolator& operator=(const DecoderFaultIsolator&) = delete;
 
-    void UpdateQuarantineCount() {
+    void UpdateQuarantineCount()
+    {
         uint64_t count = 0;
         for (const auto& [name, state] : m_decoderStates) {
-            if (state.status == QuarantineStatus::Quarantined ||
-                state.status == QuarantineStatus::PermanentlyDisabled) {
+            if (state.status == QuarantineStatus::Quarantined || state.status == QuarantineStatus::PermanentlyDisabled) {
                 count++;
             }
         }
@@ -172,5 +188,5 @@ private:
     FaultIsolationStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

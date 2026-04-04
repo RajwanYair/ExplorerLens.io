@@ -28,7 +28,8 @@ enum class ReplicationPolicy : uint8_t {
     WriteThrough
 };
 
-struct ReplicationEntry {
+struct ReplicationEntry
+{
     std::wstring cacheKey;
     ReplicationTier sourceTier = ReplicationTier::L1_Memory;
     ReplicationTier targetTier = ReplicationTier::L2_SSD;
@@ -36,7 +37,8 @@ struct ReplicationEntry {
     bool replicated = false;
 };
 
-struct ReplicationMetrics {
+struct ReplicationMetrics
+{
     uint64_t totalReplications = 0;
     uint64_t successfulReplications = 0;
     uint64_t failedReplications = 0;
@@ -44,13 +46,13 @@ struct ReplicationMetrics {
     double avgReplicationTimeMs = 0.0;
 };
 
-class CacheReplicationEngine {
-public:
-    explicit CacheReplicationEngine(ReplicationPolicy policy = ReplicationPolicy::Asynchronous)
-        : m_policy(policy) {
-    }
+class CacheReplicationEngine
+{
+  public:
+    explicit CacheReplicationEngine(ReplicationPolicy policy = ReplicationPolicy::Asynchronous) : m_policy(policy) {}
 
-    bool Replicate(const std::wstring& key, ReplicationTier source, ReplicationTier target, uint64_t size) {
+    bool Replicate(const std::wstring& key, ReplicationTier source, ReplicationTier target, uint64_t size)
+    {
         ReplicationEntry entry;
         entry.cacheKey = key;
         entry.sourceTier = source;
@@ -64,7 +66,8 @@ public:
         return true;
     }
 
-    bool IsReplicated(const std::wstring& key, ReplicationTier tier) const {
+    bool IsReplicated(const std::wstring& key, ReplicationTier tier) const
+    {
         for (const auto& entry : m_entries) {
             if (entry.cacheKey == key && entry.targetTier == tier && entry.replicated)
                 return true;
@@ -72,23 +75,35 @@ public:
         return false;
     }
 
-    ReplicationMetrics GetMetrics() const { return m_metrics; }
-    ReplicationPolicy GetPolicy() const { return m_policy; }
-    void SetPolicy(ReplicationPolicy policy) { m_policy = policy; }
-    size_t GetReplicatedEntryCount() const { return m_entries.size(); }
-
-    void PurgeReplicas(ReplicationTier tier) {
-        m_entries.erase(
-            std::remove_if(m_entries.begin(), m_entries.end(),
-                [tier](const ReplicationEntry& e) { return e.targetTier == tier; }),
-            m_entries.end());
+    ReplicationMetrics GetMetrics() const
+    {
+        return m_metrics;
+    }
+    ReplicationPolicy GetPolicy() const
+    {
+        return m_policy;
+    }
+    void SetPolicy(ReplicationPolicy policy)
+    {
+        m_policy = policy;
+    }
+    size_t GetReplicatedEntryCount() const
+    {
+        return m_entries.size();
     }
 
-private:
+    void PurgeReplicas(ReplicationTier tier)
+    {
+        m_entries.erase(std::remove_if(m_entries.begin(), m_entries.end(),
+                                       [tier](const ReplicationEntry& e) { return e.targetTier == tier; }),
+                        m_entries.end());
+    }
+
+  private:
     std::vector<ReplicationEntry> m_entries;
     ReplicationPolicy m_policy;
     ReplicationMetrics m_metrics;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

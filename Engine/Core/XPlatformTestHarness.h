@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class TestPlatform : uint8_t {
     Windows,
@@ -26,7 +27,8 @@ enum class XPlatVerdict : uint8_t {
     Error
 };
 
-struct PlatformTestCase {
+struct PlatformTestCase
+{
     std::string name;
     TestPlatform platform = TestPlatform::All;
     XPlatVerdict verdict = XPlatVerdict::Skipped;
@@ -34,8 +36,9 @@ struct PlatformTestCase {
     std::string errorMessage;
 };
 
-class XPlatformTestHarness {
-public:
+class XPlatformTestHarness
+{
+  public:
     XPlatformTestHarness() = default;
     ~XPlatformTestHarness() = default;
 
@@ -44,13 +47,15 @@ public:
     XPlatformTestHarness(XPlatformTestHarness&&) noexcept = default;
     XPlatformTestHarness& operator=(XPlatformTestHarness&&) noexcept = default;
 
-    std::vector<PlatformTestCase> RunAll(TestPlatform platform) {
+    std::vector<PlatformTestCase> RunAll(TestPlatform platform)
+    {
         m_currentPlatform = platform;
         m_results.clear();
         return m_results;
     }
 
-    PlatformTestCase RunSingle(std::string const& testName) {
+    PlatformTestCase RunSingle(std::string const& testName)
+    {
         PlatformTestCase result;
         result.name = testName;
         result.platform = m_currentPlatform;
@@ -59,7 +64,8 @@ public:
         return result;
     }
 
-    [[nodiscard]] float GetPassRate() const {
+    [[nodiscard]] float GetPassRate() const
+    {
         if (m_results.empty())
             return 0.0f;
         uint32_t passed = 0;
@@ -70,11 +76,13 @@ public:
         return static_cast<float>(passed) / static_cast<float>(m_results.size());
     }
 
-    [[nodiscard]] uint32_t GetTotalTests() const {
+    [[nodiscard]] uint32_t GetTotalTests() const
+    {
         return static_cast<uint32_t>(m_results.size());
     }
 
-    [[nodiscard]] std::vector<PlatformTestCase> GetFailedTests() const {
+    [[nodiscard]] std::vector<PlatformTestCase> GetFailedTests() const
+    {
         std::vector<PlatformTestCase> failed;
         for (auto const& r : m_results) {
             if (r.verdict == XPlatVerdict::Failed || r.verdict == XPlatVerdict::Error)
@@ -83,14 +91,16 @@ public:
         return failed;
     }
 
-    void Reset() {
+    void Reset()
+    {
         m_results.clear();
         m_currentPlatform = TestPlatform::All;
     }
 
-private:
+  private:
     std::vector<PlatformTestCase> m_results;
     TestPlatform m_currentPlatform = TestPlatform::All;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

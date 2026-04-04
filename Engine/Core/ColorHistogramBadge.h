@@ -6,39 +6,41 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <cmath>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <numeric>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // Histogram bin holding normalized count and representative luminance
-struct ColorHistBin {
+struct ColorHistBin
+{
     uint32_t count = 0;
-    double   normalized = 0.0;   // count / totalPixels
-    uint8_t  luminanceMid = 0;   // midpoint luminance of this bin
+    double normalized = 0.0;   // count / totalPixels
+    uint8_t luminanceMid = 0;  // midpoint luminance of this bin
 };
 
 // Result of a full histogram computation
-struct ColorHistResult {
+struct ColorHistResult
+{
     std::vector<ColorHistBin> bins;
     uint32_t totalPixels = 0;
-    double   meanLuminance = 0.0;
-    double   stdDevLuminance = 0.0;
-    bool     valid = false;
+    double meanLuminance = 0.0;
+    double stdDevLuminance = 0.0;
+    bool valid = false;
 };
 
-class ColorHistogramBadge {
-public:
+class ColorHistogramBadge
+{
+  public:
     // Compute a luminance histogram from BGRA pixel data.
     // binCount is clamped to [2, 256].
-    static ColorHistResult ComputeHistogram(const uint8_t* pixels,
-        uint32_t width,
-        uint32_t height,
-        uint32_t binCount) noexcept {
+    static ColorHistResult ComputeHistogram(const uint8_t* pixels, uint32_t width, uint32_t height,
+                                            uint32_t binCount) noexcept
+    {
         ColorHistResult result{};
         if (!pixels || width == 0 || height == 0)
             return result;
@@ -51,8 +53,7 @@ public:
 
         // Initialize midpoints
         for (uint32_t i = 0; i < binCount; ++i) {
-            result.bins[i].luminanceMid =
-                static_cast<uint8_t>((std::min)(255.0, (i + 0.5) * binWidth));
+            result.bins[i].luminanceMid = static_cast<uint8_t>((std::min)(255.0, (i + 0.5) * binWidth));
         }
 
         // Accumulate luminance values (BT.601 weights on BGRA layout)
@@ -81,15 +82,15 @@ public:
             bin.normalized = static_cast<double>(bin.count) / total;
 
         result.meanLuminance = sumLum / total;
-        const double variance = (sumLum2 / total) -
-            (result.meanLuminance * result.meanLuminance);
+        const double variance = (sumLum2 / total) - (result.meanLuminance * result.meanLuminance);
         result.stdDevLuminance = (variance > 0.0) ? std::sqrt(variance) : 0.0;
         result.valid = true;
         return result;
     }
 
     // Return the index of the bin with the highest count.
-    static uint32_t GetDominantBin(const ColorHistResult& hist) noexcept {
+    static uint32_t GetDominantBin(const ColorHistResult& hist) noexcept
+    {
         if (!hist.valid || hist.bins.empty())
             return 0;
         uint32_t best = 0;
@@ -105,7 +106,8 @@ public:
 
     // Contrast ratio based on min/max occupied luminance bins,
     // following simplified (L1+0.05)/(L2+0.05) formula.
-    static double GetContrastRatio(const ColorHistResult& hist) noexcept {
+    static double GetContrastRatio(const ColorHistResult& hist) noexcept
+    {
         if (!hist.valid || hist.bins.empty())
             return 1.0;
 
@@ -114,8 +116,10 @@ public:
         for (const auto& bin : hist.bins) {
             if (bin.count > 0) {
                 const double mid = static_cast<double>(bin.luminanceMid) / 255.0;
-                if (mid < minL) minL = mid;
-                if (mid > maxL) maxL = mid;
+                if (mid < minL)
+                    minL = mid;
+                if (mid > maxL)
+                    maxL = mid;
             }
         }
         if (maxL < 0.0)
@@ -128,8 +132,8 @@ public:
 
     // Returns true if the standard deviation of luminance is below threshold.
     // threshold is in [0, 128] luminance units.
-    static bool IsMonochrome(const ColorHistResult& hist,
-        double threshold = 10.0) noexcept {
+    static bool IsMonochrome(const ColorHistResult& hist, double threshold = 10.0) noexcept
+    {
         if (!hist.valid)
             return false;
         return hist.stdDevLuminance < (std::max)(0.0, threshold);
@@ -137,9 +141,8 @@ public:
 
     // Colorfulness metric (Hasler & Suesstrunk simplified) on BGRA data.
     // Returns 0.0 for perfectly grey, higher = more colorful.
-    static double GetColorfulness(const uint8_t* pixels,
-        uint32_t width,
-        uint32_t height) noexcept {
+    static double GetColorfulness(const uint8_t* pixels, uint32_t width, uint32_t height) noexcept
+    {
         if (!pixels || width == 0 || height == 0)
             return 0.0;
 
@@ -175,5 +178,5 @@ public:
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -8,14 +8,14 @@
 
 #pragma once
 
+#include <Windows.h>
+#include <atomic>
+#include <memory>
+#include <string>
+#include <thread>
 #include "../Plugin/IPC/PluginIPCProtocol.h"
 #include "../Plugin/IPC/SharedMemoryManager.h"
 #include "../Plugin/PluginManager.h"
-#include <Windows.h>
-#include <string>
-#include <memory>
-#include <atomic>
-#include <thread>
 
 namespace ExplorerLens {
 namespace PluginHost {
@@ -24,15 +24,14 @@ namespace PluginHost {
 // Plugin Host Server
 //============================================================================
 
-class PluginHostServer {
-public:
+class PluginHostServer
+{
+  public:
     PluginHostServer();
     ~PluginHostServer();
 
     // Initialize the server with plugin and pipe name
-    bool Initialize(const std::wstring& plugin_path,
-        const std::wstring& pipe_name,
-        uint32_t timeout_ms);
+    bool Initialize(const std::wstring& plugin_path, const std::wstring& pipe_name, uint32_t timeout_ms);
 
     // Run the message processing loop
     void Run();
@@ -41,9 +40,12 @@ public:
     void Shutdown();
 
     // Check if server is running
-    bool IsRunning() const { return running_; }
+    bool IsRunning() const
+    {
+        return running_;
+    }
 
-private:
+  private:
     // IPC Methods
     bool CreatePipe();
     bool ConnectToPipe();
@@ -81,13 +83,13 @@ private:
     std::unique_ptr<PluginHandle> plugin_;
 
     // State
-    std::atomic<bool> running_{ false };
-    std::atomic<bool> shutdown_requested_{ false };
+    std::atomic<bool> running_{false};
+    std::atomic<bool> shutdown_requested_{false};
 
     // Heartbeat
     std::thread heartbeat_thread_;
-    std::atomic<uint64_t> last_heartbeat_time_{ 0 };
+    std::atomic<uint64_t> last_heartbeat_time_{0};
 };
 
-} // namespace PluginHost
-} // namespace ExplorerLens
+}  // namespace PluginHost
+}  // namespace ExplorerLens

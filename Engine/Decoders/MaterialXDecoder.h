@@ -6,32 +6,33 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstdint>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct MaterialColor {
+struct MaterialColor
+{
     float r = 0.5f, g = 0.5f, b = 0.5f, a = 1.0f;
 
-    inline uint32_t ToRGBA8() const {
+    inline uint32_t ToRGBA8() const
+    {
         auto toByte = [](float v) -> uint8_t {
             return static_cast<uint8_t>((std::max)(0.0f, (std::min)(1.0f, v)) * 255.0f + 0.5f);
-            };
-        return (static_cast<uint32_t>(toByte(r))) |
-            (static_cast<uint32_t>(toByte(g)) << 8) |
-            (static_cast<uint32_t>(toByte(b)) << 16) |
-            (static_cast<uint32_t>(toByte(a)) << 24);
+        };
+        return (static_cast<uint32_t>(toByte(r))) | (static_cast<uint32_t>(toByte(g)) << 8)
+               | (static_cast<uint32_t>(toByte(b)) << 16) | (static_cast<uint32_t>(toByte(a)) << 24);
     }
 };
 
-struct MaterialProperty {
+struct MaterialProperty
+{
     std::string name;
     std::string type;
     MaterialColor color;
@@ -39,7 +40,8 @@ struct MaterialProperty {
     std::string texturePath;
 };
 
-struct MaterialXInfo {
+struct MaterialXInfo
+{
     std::string materialName;
     std::string shaderModel;
     std::vector<MaterialProperty> properties;
@@ -50,31 +52,38 @@ struct MaterialXInfo {
     bool isValid = false;
 };
 
-class MaterialXDecoder {
-public:
-    static MaterialXDecoder& Instance() {
+class MaterialXDecoder
+{
+  public:
+    static MaterialXDecoder& Instance()
+    {
         static MaterialXDecoder instance;
         return instance;
     }
 
-    inline bool IsMaterialXFile(const uint8_t* data, size_t size) const {
-        if (!data || size < 20) return false;
+    inline bool IsMaterialXFile(const uint8_t* data, size_t size) const
+    {
+        if (!data || size < 20)
+            return false;
         std::string header(reinterpret_cast<const char*>(data), (std::min)(size, static_cast<size_t>(512)));
-        return header.find("<?xml") != std::string::npos &&
-            header.find("materialx") != std::string::npos;
+        return header.find("<?xml") != std::string::npos && header.find("materialx") != std::string::npos;
     }
 
-    inline MaterialXInfo ParseMaterial(const uint8_t* data, size_t size) const {
+    inline MaterialXInfo ParseMaterial(const uint8_t* data, size_t size) const
+    {
         MaterialXInfo info;
-        if (!data || size < 20) return info;
+        if (!data || size < 20)
+            return info;
 
         std::string content(reinterpret_cast<const char*>(data), size);
         info.isValid = IsMaterialXFile(data, size);
-        if (!info.isValid) return info;
+        if (!info.isValid)
+            return info;
 
         info.materialName = ExtractAttribute(content, "name=");
         info.shaderModel = ExtractAttribute(content, "shadingmodel=");
-        if (info.shaderModel.empty()) info.shaderModel = "standard_surface";
+        if (info.shaderModel.empty())
+            info.shaderModel = "standard_surface";
 
         auto baseColorStr = ExtractAttribute(content, "base_color=");
         if (!baseColorStr.empty()) {
@@ -82,18 +91,22 @@ public:
         }
 
         auto roughStr = ExtractAttribute(content, "roughness=");
-        if (!roughStr.empty()) info.roughness = ParseFloat(roughStr, 0.5f);
+        if (!roughStr.empty())
+            info.roughness = ParseFloat(roughStr, 0.5f);
 
         auto metalStr = ExtractAttribute(content, "metallic=");
-        if (!metalStr.empty()) info.metallic = ParseFloat(metalStr, 0.0f);
+        if (!metalStr.empty())
+            info.metallic = ParseFloat(metalStr, 0.0f);
 
         return info;
     }
 
-    inline std::vector<uint8_t> GenerateSwatchThumbnail(const MaterialXInfo& material,
-        uint32_t width, uint32_t height) const {
+    inline std::vector<uint8_t> GenerateSwatchThumbnail(const MaterialXInfo& material, uint32_t width,
+                                                        uint32_t height) const
+    {
         std::vector<uint8_t> thumbnail(static_cast<size_t>(width) * height * 3, 0);
-        if (width == 0 || height == 0) return thumbnail;
+        if (width == 0 || height == 0)
+            return thumbnail;
 
         float cx = width / 2.0f, cy = height / 2.0f;
         float radius = (std::min)(width, height) * 0.4f;
@@ -114,7 +127,11 @@ public:
 
                     float halfX = lightX, halfY = lightY, halfZ = lightZ + 1.0f;
                     float halfLen = std::sqrt(halfX * halfX + halfY * halfY + halfZ * halfZ);
-                    if (halfLen > 0.0f) { halfX /= halfLen; halfY /= halfLen; halfZ /= halfLen; }
+                    if (halfLen > 0.0f) {
+                        halfX /= halfLen;
+                        halfY /= halfLen;
+                        halfZ /= halfLen;
+                    }
                     float NdotH = (std::max)(0.0f, nx * halfX + ny * halfY + nz * halfZ);
 
                     float specPow = (1.0f - material.roughness) * 128.0f + 2.0f;
@@ -131,12 +148,11 @@ public:
                     auto gammaCorrect = [](float v) -> uint8_t {
                         v = (std::max)(0.0f, (std::min)(1.0f, v));
                         return static_cast<uint8_t>(std::pow(v, 1.0f / 2.2f) * 255.0f + 0.5f);
-                        };
+                    };
                     thumbnail[idx + 0] = gammaCorrect(r);
                     thumbnail[idx + 1] = gammaCorrect(g);
                     thumbnail[idx + 2] = gammaCorrect(b);
-                }
-                else {
+                } else {
                     uint8_t checker = ((x / 8 + y / 8) % 2 == 0) ? 40 : 50;
                     thumbnail[idx + 0] = checker;
                     thumbnail[idx + 1] = checker;
@@ -147,29 +163,34 @@ public:
         return thumbnail;
     }
 
-    inline std::string FormatMaterialInfo(const MaterialXInfo& info) const {
-        return info.materialName + " (" + info.shaderModel + ") R=" +
-            std::to_string(info.roughness).substr(0, 4) + " M=" +
-            std::to_string(info.metallic).substr(0, 4);
+    inline std::string FormatMaterialInfo(const MaterialXInfo& info) const
+    {
+        return info.materialName + " (" + info.shaderModel + ") R=" + std::to_string(info.roughness).substr(0, 4)
+               + " M=" + std::to_string(info.metallic).substr(0, 4);
     }
 
-private:
+  private:
     MaterialXDecoder() = default;
 
-    inline std::string ExtractAttribute(const std::string& xml, const std::string& attrName) const {
+    inline std::string ExtractAttribute(const std::string& xml, const std::string& attrName) const
+    {
         size_t pos = xml.find(attrName);
-        if (pos == std::string::npos) return "";
+        if (pos == std::string::npos)
+            return "";
         pos += attrName.size();
-        if (pos < xml.size() && xml[pos] == '"') ++pos;
+        if (pos < xml.size() && xml[pos] == '"')
+            ++pos;
         size_t end = xml.find('"', pos);
-        if (end == std::string::npos) return "";
+        if (end == std::string::npos)
+            return "";
         return xml.substr(pos, end - pos);
     }
 
-    inline MaterialColor ParseColorString(const std::string& str) const {
+    inline MaterialColor ParseColorString(const std::string& str) const
+    {
         MaterialColor color;
         size_t idx = 0;
-        float values[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+        float values[4] = {0.5f, 0.5f, 0.5f, 1.0f};
         int vi = 0;
 
         for (size_t i = 0; i <= str.size() && vi < 4; ++i) {
@@ -180,22 +201,32 @@ private:
                 idx = i + 1;
             }
         }
-        color.r = values[0]; color.g = values[1]; color.b = values[2]; color.a = values[3];
+        color.r = values[0];
+        color.g = values[1];
+        color.b = values[2];
+        color.a = values[3];
         return color;
     }
 
-    inline float ParseFloat(const std::string& str, float defaultVal) const {
+    inline float ParseFloat(const std::string& str, float defaultVal) const
+    {
         try {
             size_t pos = 0;
             for (; pos < str.size(); ++pos) {
                 char c = str[pos];
-                if ((c >= '0' && c <= '9') || c == '.' || c == '-' || c == '+') break;
+                if ((c >= '0' && c <= '9') || c == '.' || c == '-' || c == '+')
+                    break;
             }
-            if (pos >= str.size()) return defaultVal;
+            if (pos >= str.size())
+                return defaultVal;
             float result = 0.0f;
             bool negative = false;
-            if (str[pos] == '-') { negative = true; ++pos; }
-            else if (str[pos] == '+') { ++pos; }
+            if (str[pos] == '-') {
+                negative = true;
+                ++pos;
+            } else if (str[pos] == '+') {
+                ++pos;
+            }
             bool hasDot = false;
             float divisor = 1.0f;
             for (; pos < str.size(); ++pos) {
@@ -204,25 +235,21 @@ private:
                     if (hasDot) {
                         divisor *= 10.0f;
                         result += (c - '0') / divisor;
-                    }
-                    else {
+                    } else {
                         result = result * 10.0f + (c - '0');
                     }
-                }
-                else if (c == '.' && !hasDot) {
+                } else if (c == '.' && !hasDot) {
                     hasDot = true;
-                }
-                else {
+                } else {
                     break;
                 }
             }
             return negative ? -result : result;
-        }
-        catch (...) {
+        } catch (...) {
             return defaultVal;
         }
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

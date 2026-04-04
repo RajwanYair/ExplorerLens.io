@@ -14,56 +14,72 @@ namespace ExplorerLens::Decoders {
 
 enum class FLIFColorSpace : uint8_t {
     Grayscale = 1,
-    RGB       = 3,
-    RGBA      = 4,
+    RGB = 3,
+    RGBA = 4,
 };
 
 enum class FLIFInterlace : uint8_t {
     NonInterlaced = 0,
-    Interlaced    = 1,
+    Interlaced = 1,
 };
 
-class FLIFDecoderV2 {
-public:
+class FLIFDecoderV2
+{
+  public:
     FLIFDecoderV2() = default;
 
-    struct DecodeResult {
-        bool        success     = false;
-        uint32_t    width       = 0;
-        uint32_t    height      = 0;
-        uint32_t    frameCount  = 1;
+    struct DecodeResult
+    {
+        bool success = false;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t frameCount = 1;
         FLIFColorSpace colorSpace = FLIFColorSpace::RGBA;
         std::vector<uint8_t> pixelData;  // BGRA32 of first/best frame
         std::string error;
     };
 
-    struct FLIFInfo {
-        uint32_t       width       = 0;
-        uint32_t       height      = 0;
-        uint32_t       frameCount  = 1;
-        uint16_t       bitDepth    = 8;
-        FLIFColorSpace colorSpace  = FLIFColorSpace::RGBA;
-        FLIFInterlace  interlace   = FLIFInterlace::Interlaced;
+    struct FLIFInfo
+    {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t frameCount = 1;
+        uint16_t bitDepth = 8;
+        FLIFColorSpace colorSpace = FLIFColorSpace::RGBA;
+        FLIFInterlace interlace = FLIFInterlace::Interlaced;
 
-        bool IsValid() const { return width > 0 && height > 0; }
-        bool IsAnimated() const { return frameCount > 1; }
+        bool IsValid() const
+        {
+            return width > 0 && height > 0;
+        }
+        bool IsAnimated() const
+        {
+            return frameCount > 1;
+        }
     };
 
-    FLIFInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    FLIFInfo ReadInfo(const std::string& filePath) const
+    {
+        (void)filePath;
+        return {};
+    }
 
     /// Decode with optional quality level (0=fastest thumbnail, 100=full).
-    DecodeResult Decode(const std::string& filePath,
-                        uint32_t targetWidth = 256,
-                        int      quality     = 50) const {
-        (void)filePath; (void)targetWidth; (void)quality; return {};
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256, int quality = 50) const
+    {
+        (void)filePath;
+        (void)targetWidth;
+        (void)quality;
+        return {};
     }
 
-    static bool IsFLIFExtension(const std::string& ext) {
+    static bool IsFLIFExtension(const std::string& ext)
+    {
         return ext == ".flif" || ext == ".FLIF";
     }
-    static constexpr const char* EXTENSIONS[] = { ".flif", nullptr };
+    static constexpr const char* EXTENSIONS[] = {".flif", nullptr};
 
-private:
+  private:
     static bool VerifyFLIFHeader(const uint8_t* header, size_t len);
 };
 

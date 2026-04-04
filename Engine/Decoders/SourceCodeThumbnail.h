@@ -18,11 +18,30 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class SourceLanguage : uint8_t {
-    Unknown, CPP, CSharp, Java, Python, JavaScript, TypeScript,
-    Rust, Go, Ruby, PHP, Swift, Kotlin, Lua, Shell, SQL, HTML, CSS, YAML, JSON
+    Unknown,
+    CPP,
+    CSharp,
+    Java,
+    Python,
+    JavaScript,
+    TypeScript,
+    Rust,
+    Go,
+    Ruby,
+    PHP,
+    Swift,
+    Kotlin,
+    Lua,
+    Shell,
+    SQL,
+    HTML,
+    CSS,
+    YAML,
+    JSON
 };
 
-struct SourceCodeInfo {
+struct SourceCodeInfo
+{
     SourceLanguage language = SourceLanguage::Unknown;
     uint32_t totalLines = 0;
     uint32_t codeLines = 0;
@@ -32,38 +51,51 @@ struct SourceCodeInfo {
     uint32_t functionCount = 0;
 };
 
-struct SourceCodeStats {
+struct SourceCodeStats
+{
     uint32_t filesProcessed = 0;
     uint32_t languagesDetected = 0;
     uint64_t totalLinesScanned = 0;
 };
 
-class SourceCodeThumbnail {
-public:
-    SourceCodeThumbnail() {
+class SourceCodeThumbnail
+{
+  public:
+    SourceCodeThumbnail()
+    {
         InitExtensionMap();
     }
     ~SourceCodeThumbnail() = default;
 
-    static const wchar_t* GetName() { return L"SourceCodeThumbnail"; }
+    static const wchar_t* GetName()
+    {
+        return L"SourceCodeThumbnail";
+    }
 
-    bool CanRender(const wchar_t* ext) const {
-        if (!ext) return false;
+    bool CanRender(const wchar_t* ext) const
+    {
+        if (!ext)
+            return false;
         std::wstring e(ext);
-        for (auto& c : e) c = towlower(c);
+        for (auto& c : e)
+            c = towlower(c);
         return m_extToLang.count(e) > 0;
     }
 
-    SourceLanguage DetectLanguage(const wchar_t* ext) const {
-        if (!ext) return SourceLanguage::Unknown;
+    SourceLanguage DetectLanguage(const wchar_t* ext) const
+    {
+        if (!ext)
+            return SourceLanguage::Unknown;
         std::wstring e(ext);
-        for (auto& c : e) c = towlower(c);
+        for (auto& c : e)
+            c = towlower(c);
         auto it = m_extToLang.find(e);
         return (it != m_extToLang.end()) ? it->second : SourceLanguage::Unknown;
     }
 
     /// Analyze source code to produce metrics.
-    SourceCodeInfo Analyze(const std::wstring& source, SourceLanguage lang) const {
+    SourceCodeInfo Analyze(const std::wstring& source, SourceLanguage lang) const
+    {
         SourceCodeInfo info;
         info.language = lang;
         size_t pos = 0;
@@ -71,7 +103,8 @@ public:
 
         while (pos < source.size()) {
             size_t eol = source.find(L'\n', pos);
-            if (eol == std::wstring::npos) eol = source.size();
+            if (eol == std::wstring::npos)
+                eol = source.size();
             std::wstring line = source.substr(pos, eol - pos);
             info.totalLines++;
 
@@ -80,20 +113,22 @@ public:
             while (!trimmed.empty() && (trimmed.front() == L' ' || trimmed.front() == L'\t'))
                 trimmed.erase(trimmed.begin());
 
-            if (trimmed.empty()) { info.blankLines++; }
-            else if (inBlockComment || trimmed.find(L"//") == 0 || trimmed.find(L"#") == 0) {
+            if (trimmed.empty()) {
+                info.blankLines++;
+            } else if (inBlockComment || trimmed.find(L"//") == 0 || trimmed.find(L"#") == 0) {
                 info.commentLines++;
-                if (trimmed.find(L"*/") != std::wstring::npos) inBlockComment = false;
-            }
-            else {
+                if (trimmed.find(L"*/") != std::wstring::npos)
+                    inBlockComment = false;
+            } else {
                 info.codeLines++;
-                if (trimmed.find(L"/*") != std::wstring::npos) inBlockComment = true;
-                if (trimmed.find(L"import ") == 0 || trimmed.find(L"#include") == 0 ||
-                    trimmed.find(L"using ") == 0 || trimmed.find(L"require(") != std::wstring::npos)
+                if (trimmed.find(L"/*") != std::wstring::npos)
+                    inBlockComment = true;
+                if (trimmed.find(L"import ") == 0 || trimmed.find(L"#include") == 0 || trimmed.find(L"using ") == 0
+                    || trimmed.find(L"require(") != std::wstring::npos)
                     info.importCount++;
-                if (trimmed.find(L"function ") != std::wstring::npos ||
-                    trimmed.find(L"def ") == 0 || trimmed.find(L"fn ") == 0 ||
-                    trimmed.find(L"func ") == 0 || trimmed.find(L"void ") != std::wstring::npos)
+                if (trimmed.find(L"function ") != std::wstring::npos || trimmed.find(L"def ") == 0
+                    || trimmed.find(L"fn ") == 0 || trimmed.find(L"func ") == 0
+                    || trimmed.find(L"void ") != std::wstring::npos)
                     info.functionCount++;
             }
 
@@ -102,14 +137,19 @@ public:
         return info;
     }
 
-    uint32_t GetSupportedExtensionCount() const {
+    uint32_t GetSupportedExtensionCount() const
+    {
         return static_cast<uint32_t>(m_extToLang.size());
     }
 
-    SourceCodeStats GetStats() const { return m_stats; }
+    SourceCodeStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
-    void InitExtensionMap() {
+  private:
+    void InitExtensionMap()
+    {
         m_extToLang[L".cpp"] = SourceLanguage::CPP;
         m_extToLang[L".c"] = SourceLanguage::CPP;
         m_extToLang[L".h"] = SourceLanguage::CPP;
@@ -139,5 +179,5 @@ private:
     mutable SourceCodeStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,12 +6,12 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <memory>
 #include <algorithm>
+#include <cstdint>
+#include <memory>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -25,13 +25,15 @@ enum class NetCDFVariableType : uint8_t {
     Custom
 };
 
-struct NetCDFDimension {
+struct NetCDFDimension
+{
     std::string name;
     uint64_t size = 0;
     bool isUnlimited = false;
 };
 
-struct NetCDFVariable {
+struct NetCDFVariable
+{
     std::string name;
     NetCDFVariableType type = NetCDFVariableType::Custom;
     std::vector<std::string> dimensions;
@@ -43,7 +45,8 @@ struct NetCDFVariable {
     uint32_t rank = 0;
 };
 
-struct NetCDFGlobalAttributes {
+struct NetCDFGlobalAttributes
+{
     std::string title;
     std::string institution;
     std::string source;
@@ -52,14 +55,16 @@ struct NetCDFGlobalAttributes {
     std::string references;
 };
 
-struct NetCDFColorRange {
+struct NetCDFColorRange
+{
     double minValue = 0.0;
     double maxValue = 100.0;
     bool autoScale = true;
 };
 
-class NetCDFDecoder {
-public:
+class NetCDFDecoder
+{
+  public:
     NetCDFDecoder() = default;
     ~NetCDFDecoder() = default;
 
@@ -68,7 +73,8 @@ public:
     NetCDFDecoder(NetCDFDecoder&&) noexcept = default;
     NetCDFDecoder& operator=(NetCDFDecoder&&) noexcept = default;
 
-    bool DecodeFromFile(const std::wstring& filePath, uint32_t targetWidth, uint32_t targetHeight) {
+    bool DecodeFromFile(const std::wstring& filePath, uint32_t targetWidth, uint32_t targetHeight)
+    {
         m_filePath = filePath;
         m_targetWidth = targetWidth;
         m_targetHeight = targetHeight;
@@ -76,52 +82,90 @@ public:
         return m_decoded;
     }
 
-    const std::vector<NetCDFVariable>& ListVariables() const { return m_variables; }
-    const std::vector<NetCDFDimension>& ListDimensions() const { return m_dimensions; }
+    const std::vector<NetCDFVariable>& ListVariables() const
+    {
+        return m_variables;
+    }
+    const std::vector<NetCDFDimension>& ListDimensions() const
+    {
+        return m_dimensions;
+    }
 
-    bool RenderVariable(const std::string& varName, std::vector<uint8_t>& rgbOut) const {
+    bool RenderVariable(const std::string& varName, std::vector<uint8_t>& rgbOut) const
+    {
         auto it = FindVariable(varName);
-        if (it == m_variables.end()) return false;
+        if (it == m_variables.end())
+            return false;
         const size_t pixels = static_cast<size_t>(m_targetWidth) * m_targetHeight;
         rgbOut.resize(pixels * 3);
         return RenderSlice(*it, rgbOut);
     }
 
-    void SetTimeStep(uint32_t step) { m_timeStep = step; }
-    uint32_t GetTimeStep() const { return m_timeStep; }
+    void SetTimeStep(uint32_t step)
+    {
+        m_timeStep = step;
+    }
+    uint32_t GetTimeStep() const
+    {
+        return m_timeStep;
+    }
 
-    uint32_t GetTimeStepCount() const {
+    uint32_t GetTimeStepCount() const
+    {
         for (const auto& dim : m_dimensions)
             if (dim.name == "time" || dim.isUnlimited)
                 return static_cast<uint32_t>(dim.size);
         return 1;
     }
 
-    void SetColorRange(const NetCDFColorRange& range) { m_colorRange = range; }
-    const NetCDFColorRange& GetColorRange() const { return m_colorRange; }
+    void SetColorRange(const NetCDFColorRange& range)
+    {
+        m_colorRange = range;
+    }
+    const NetCDFColorRange& GetColorRange() const
+    {
+        return m_colorRange;
+    }
 
-    const NetCDFGlobalAttributes& GetGlobalAttributes() const { return m_globalAttrs; }
+    const NetCDFGlobalAttributes& GetGlobalAttributes() const
+    {
+        return m_globalAttrs;
+    }
 
-    static NetCDFVariableType InferVariableType(const std::string& units, const std::string& name) {
-        if (units == "K" || units == "degC" || units == "celsius") return NetCDFVariableType::Temperature;
-        if (units == "Pa" || units == "hPa" || units == "mbar") return NetCDFVariableType::Pressure;
-        if (units == "m s-1" || units == "m/s") return NetCDFVariableType::WindSpeed;
-        if (units == "PSU" || units == "psu") return NetCDFVariableType::Salinity;
-        if (name == "elevation" || name == "topo") return NetCDFVariableType::Elevation;
+    static NetCDFVariableType InferVariableType(const std::string& units, const std::string& name)
+    {
+        if (units == "K" || units == "degC" || units == "celsius")
+            return NetCDFVariableType::Temperature;
+        if (units == "Pa" || units == "hPa" || units == "mbar")
+            return NetCDFVariableType::Pressure;
+        if (units == "m s-1" || units == "m/s")
+            return NetCDFVariableType::WindSpeed;
+        if (units == "PSU" || units == "psu")
+            return NetCDFVariableType::Salinity;
+        if (name == "elevation" || name == "topo")
+            return NetCDFVariableType::Elevation;
         return NetCDFVariableType::Custom;
     }
 
-private:
-    bool OpenDataset() { return true; }
-    bool ReadMetadata() { return true; }
-
-    bool RenderSlice(const NetCDFVariable& /*var*/, std::vector<uint8_t>& /*rgbOut*/) const {
+  private:
+    bool OpenDataset()
+    {
+        return true;
+    }
+    bool ReadMetadata()
+    {
         return true;
     }
 
-    std::vector<NetCDFVariable>::const_iterator FindVariable(const std::string& name) const {
+    bool RenderSlice(const NetCDFVariable& /*var*/, std::vector<uint8_t>& /*rgbOut*/) const
+    {
+        return true;
+    }
+
+    std::vector<NetCDFVariable>::const_iterator FindVariable(const std::string& name) const
+    {
         return std::find_if(m_variables.begin(), m_variables.end(),
-            [&](const NetCDFVariable& v) { return v.name == name; });
+                            [&](const NetCDFVariable& v) { return v.name == name; });
     }
 
     std::wstring m_filePath;
@@ -135,5 +179,5 @@ private:
     std::vector<NetCDFVariable> m_variables;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

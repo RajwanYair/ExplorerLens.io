@@ -5,57 +5,62 @@
 //
 #pragma once
 
+#include <chrono>
 #include <cstdint>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-#include <memory>
-#include <chrono>
-#include <optional>
 
 namespace ExplorerLens::Engine {
 
 enum class RatingSource : uint8_t {
-    UserReview   = 0,
-    AutoScan     = 1,
-    CompatTest   = 2,
+    UserReview = 0,
+    AutoScan = 1,
+    CompatTest = 2,
     SecurityScan = 3,
 };
 
-struct RatingEntry {
-    std::string  pluginId;
-    float        score          = 0.0f;
-    RatingSource source         = RatingSource::UserReview;
-    uint32_t     reviewCount    = 0;
-    float        bayesianScore  = 0.0f;
+struct RatingEntry
+{
+    std::string pluginId;
+    float score = 0.0f;
+    RatingSource source = RatingSource::UserReview;
+    uint32_t reviewCount = 0;
+    float bayesianScore = 0.0f;
 
-    [[nodiscard]] bool IsValid() const noexcept {
+    [[nodiscard]] bool IsValid() const noexcept
+    {
         return !pluginId.empty() && score >= 0.0f && score <= 5.0f;
     }
 };
 
-struct RatingThreshold {
-    float trusted    = 3.5f;
+struct RatingThreshold
+{
+    float trusted = 3.5f;
     float suspicious = 2.0f;
-    float blocked    = 1.0f;
+    float blocked = 1.0f;
 };
 
-struct ReviewSubmission {
-    std::string  pluginId;
-    std::string  reviewerToken;
-    float        score     = 0.0f;
-    std::string  comment;
-    RatingSource source    = RatingSource::UserReview;
+struct ReviewSubmission
+{
+    std::string pluginId;
+    std::string reviewerToken;
+    float score = 0.0f;
+    std::string comment;
+    RatingSource source = RatingSource::UserReview;
 };
 
-class PluginRatingEngine {
-public:
+class PluginRatingEngine
+{
+  public:
     explicit PluginRatingEngine(const RatingThreshold& thresholds = {});
     ~PluginRatingEngine() noexcept;
 
-    PluginRatingEngine(const PluginRatingEngine&)            = delete;
+    PluginRatingEngine(const PluginRatingEngine&) = delete;
     PluginRatingEngine& operator=(const PluginRatingEngine&) = delete;
-    PluginRatingEngine(PluginRatingEngine&&)                 = default;
-    PluginRatingEngine& operator=(PluginRatingEngine&&)      = default;
+    PluginRatingEngine(PluginRatingEngine&&) = default;
+    PluginRatingEngine& operator=(PluginRatingEngine&&) = default;
 
     // Retrieve aggregated rating for a plugin, or nullopt if unknown.
     [[nodiscard]] std::optional<RatingEntry> GetRating(const std::string& pluginId) const;
@@ -77,21 +82,25 @@ public:
     void LoadRatings(std::vector<RatingEntry> entries);
 
     void SetThresholds(const RatingThreshold& thresholds) noexcept;
-    [[nodiscard]] const RatingThreshold& GetThresholds() const noexcept { return m_thresholds; }
+    [[nodiscard]] const RatingThreshold& GetThresholds() const noexcept
+    {
+        return m_thresholds;
+    }
 
     // Number of globally tracked ratings.
     [[nodiscard]] uint64_t TotalRatings() const noexcept;
 
-private:
-    RatingThreshold             m_thresholds;
-    float                       m_globalMean  = 3.0f;
-    uint32_t                    m_priorCount  = 10;
+  private:
+    RatingThreshold m_thresholds;
+    float m_globalMean = 3.0f;
+    uint32_t m_priorCount = 10;
 
-    struct Impl {};
-    std::unique_ptr<Impl>       m_impl;
+    struct Impl
+    {};
+    std::unique_ptr<Impl> m_impl;
 
     void RecalculateGlobalMean() noexcept;
     bool IsTokenUsed(const std::string& pluginId, const std::string& token) const;
 };
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

@@ -18,20 +18,27 @@ enum class FormatStatus : uint8_t {
     COUNT = 3
 };
 
-class FormatStatusIndicator {
-public:
-    static size_t StatusCount() noexcept {
+class FormatStatusIndicator
+{
+  public:
+    static size_t StatusCount() noexcept
+    {
         return static_cast<size_t>(FormatStatus::COUNT);
     }
-    static const wchar_t *StatusName(FormatStatus s) noexcept {
+    static const wchar_t* StatusName(FormatStatus s) noexcept
+    {
         switch (s) {
-        case FormatStatus::Active:      return L"Active";
-        case FormatStatus::Degraded:    return L"Degraded";
-        case FormatStatus::Unavailable: return L"Unavailable";
-        default: return L"Unknown";
+            case FormatStatus::Active:
+                return L"Active";
+            case FormatStatus::Degraded:
+                return L"Degraded";
+            case FormatStatus::Unavailable:
+                return L"Unavailable";
+            default:
+                return L"Unknown";
         }
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

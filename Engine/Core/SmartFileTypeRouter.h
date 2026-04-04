@@ -25,7 +25,8 @@ enum class RouteConfidence : uint8_t {
     Verified
 };
 
-struct FileTypeRoute {
+struct FileTypeRoute
+{
     std::wstring extension;
     std::wstring primaryDecoder;
     std::wstring fallbackDecoder;
@@ -35,7 +36,8 @@ struct FileTypeRoute {
     uint32_t failureCount = 0;
 };
 
-struct FileTypeRoutingResult {
+struct FileTypeRoutingResult
+{
     std::wstring selectedDecoder;
     RouteConfidence confidence = RouteConfidence::Unknown;
     float estimatedDecodeMs = 0.0f;
@@ -43,7 +45,8 @@ struct FileTypeRoutingResult {
     std::wstring fallbackDecoder;
 };
 
-struct FileTypeRouterStats {
+struct FileTypeRouterStats
+{
     uint64_t totalRoutingDecisions = 0;
     uint64_t extensionMatches = 0;
     uint64_t fallbacksUsed = 0;
@@ -52,23 +55,26 @@ struct FileTypeRouterStats {
     bool initialized = false;
 };
 
-class SmartFileTypeRouter {
-public:
-    static SmartFileTypeRouter& Instance() {
+class SmartFileTypeRouter
+{
+  public:
+    static SmartFileTypeRouter& Instance()
+    {
         static SmartFileTypeRouter instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_routes.clear();
         m_stats = {};
         m_stats.initialized = true;
     }
 
-    void RegisterRoute(const std::wstring& extension,
-                       const std::wstring& primaryDecoder,
-                       const std::wstring& fallbackDecoder = L"") {
+    void RegisterRoute(const std::wstring& extension, const std::wstring& primaryDecoder,
+                       const std::wstring& fallbackDecoder = L"")
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         FileTypeRoute route;
         route.extension = extension;
@@ -79,7 +85,8 @@ public:
         m_stats.registeredRoutes = static_cast<uint32_t>(m_routes.size());
     }
 
-    FileTypeRoutingResult Route(const std::wstring& extension) {
+    FileTypeRoutingResult Route(const std::wstring& extension)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalRoutingDecisions++;
 
@@ -101,15 +108,15 @@ public:
         return decision;
     }
 
-    void RecordResult(const std::wstring& extension, bool success, float decodeMs) {
+    void RecordResult(const std::wstring& extension, bool success, float decodeMs)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_routes.find(extension);
         if (it != m_routes.end()) {
             if (success) {
                 it->second.successCount++;
                 float n = static_cast<float>(it->second.successCount);
-                it->second.avgDecodeTimeMs =
-                    it->second.avgDecodeTimeMs * ((n - 1.0f) / n) + decodeMs / n;
+                it->second.avgDecodeTimeMs = it->second.avgDecodeTimeMs * ((n - 1.0f) / n) + decodeMs / n;
             } else {
                 it->second.failureCount++;
                 m_stats.fallbacksUsed++;
@@ -117,28 +124,32 @@ public:
         }
     }
 
-    uint32_t GetRegisteredRouteCount() const {
+    uint32_t GetRegisteredRouteCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.registeredRoutes;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    FileTypeRouterStats GetStats() const {
+    FileTypeRouterStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_routes.clear();
     }
 
-private:
+  private:
     SmartFileTypeRouter() = default;
     ~SmartFileTypeRouter() = default;
     SmartFileTypeRouter(const SmartFileTypeRouter&) = delete;
@@ -149,5 +160,5 @@ private:
     FileTypeRouterStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

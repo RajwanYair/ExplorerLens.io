@@ -21,49 +21,62 @@ enum class MetadataDecodeSource : uint8_t {
     None = 255
 };
 
-struct EmbeddedThumbnail {
+struct EmbeddedThumbnail
+{
     MetadataDecodeSource source = MetadataDecodeSource::None;
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t offset = 0;
     uint32_t size = 0;
-    std::string format; // "JPEG", "TIFF", etc.
+    std::string format;  // "JPEG", "TIFF", etc.
     bool isValid = false;
 };
 
-struct MetadataDecodeResult {
+struct MetadataDecodeResult
+{
     bool found = false;
     EmbeddedThumbnail thumbnail;
     std::vector<uint8_t> thumbnailData;
     double extractionMs = 0.0;
     bool isRotated = false;
-    uint16_t orientation = 1; // EXIF orientation tag
+    uint16_t orientation = 1;  // EXIF orientation tag
 };
 
-struct MetadataDecodeConfig {
+struct MetadataDecodeConfig
+{
     bool preferEXIFThumbnail = true;
     uint32_t minThumbnailDimension = 32;
-    uint32_t maxThumbnailSize = 1024 * 1024; // 1MB
+    uint32_t maxThumbnailSize = 1024 * 1024;  // 1MB
     bool respectOrientation = true;
     bool fallbackToICCPreview = false;
 };
 
-struct MetadataDecoderStats {
+struct MetadataDecoderStats
+{
     uint64_t totalChecked = 0;
     uint64_t thumbnailsFound = 0;
     uint64_t exifHits = 0;
     uint64_t xmpHits = 0;
     double avgExtractionMs = 0.0;
-    double foundRate() const { return totalChecked > 0 ? 100.0 * thumbnailsFound / totalChecked : 0.0; }
+    double foundRate() const
+    {
+        return totalChecked > 0 ? 100.0 * thumbnailsFound / totalChecked : 0.0;
+    }
 };
 
-class MetadataOnlyDecoder {
-public:
-    void Configure(const MetadataDecodeConfig& config) { m_config = config; }
+class MetadataOnlyDecoder
+{
+  public:
+    void Configure(const MetadataDecodeConfig& config)
+    {
+        m_config = config;
+    }
 
-    EmbeddedThumbnail FindEXIFThumbnail(const uint8_t* fileData, size_t fileSize) const {
+    EmbeddedThumbnail FindEXIFThumbnail(const uint8_t* fileData, size_t fileSize) const
+    {
         EmbeddedThumbnail result;
-        if (!fileData || fileSize < 12) return result;
+        if (!fileData || fileSize < 12)
+            return result;
 
         // Check for JPEG with EXIF
         if (fileData[0] == 0xFF && fileData[1] == 0xD8) {
@@ -73,9 +86,8 @@ public:
                 if (fileData[pos] == 0xFF && fileData[pos + 1] == 0xE1) {
                     // Found APP1 segment
                     uint32_t segLen = (fileData[pos + 2] << 8) | fileData[pos + 3];
-                    if (pos + 4 + 6 < fileSize &&
-                        fileData[pos + 4] == 'E' && fileData[pos + 5] == 'x' &&
-                        fileData[pos + 6] == 'i' && fileData[pos + 7] == 'f') {
+                    if (pos + 4 + 6 < fileSize && fileData[pos + 4] == 'E' && fileData[pos + 5] == 'x'
+                        && fileData[pos + 6] == 'i' && fileData[pos + 7] == 'f') {
                         result.source = MetadataDecodeSource::EXIF;
                         result.offset = static_cast<uint32_t>(pos + 4);
                         result.size = segLen;
@@ -87,8 +99,7 @@ public:
                 if (fileData[pos] == 0xFF) {
                     uint32_t skip = (fileData[pos + 2] << 8) | fileData[pos + 3];
                     pos += 2 + skip;
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -96,17 +107,20 @@ public:
         return result;
     }
 
-    bool MeetsMinimumSize(const EmbeddedThumbnail& thumb) const {
-        return thumb.width >= m_config.minThumbnailDimension &&
-            thumb.height >= m_config.minThumbnailDimension;
+    bool MeetsMinimumSize(const EmbeddedThumbnail& thumb) const
+    {
+        return thumb.width >= m_config.minThumbnailDimension && thumb.height >= m_config.minThumbnailDimension;
     }
 
-    MetadataDecoderStats GetStats() const { return m_stats; }
+    MetadataDecoderStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     MetadataDecodeConfig m_config;
     MetadataDecoderStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

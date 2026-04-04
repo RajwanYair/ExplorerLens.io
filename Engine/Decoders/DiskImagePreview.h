@@ -15,52 +15,71 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class DiskImageFormat : uint8_t { ISO9660, UDF, VHD, VHDX, Raw, Unknown };
+enum class DiskImageFormat : uint8_t {
+    ISO9660,
+    UDF,
+    VHD,
+    VHDX,
+    Raw,
+    Unknown
+};
 
-struct VolumeDescriptor {
+struct VolumeDescriptor
+{
     std::string volumeLabel;
     std::string systemId;
     std::string publisher;
     std::string application;
-    uint64_t    volumeSize = 0;
-    uint32_t    blockSize = 2048;
-    uint32_t    fileCount = 0;
-    uint32_t    dirCount = 0;
+    uint64_t volumeSize = 0;
+    uint32_t blockSize = 2048;
+    uint32_t fileCount = 0;
+    uint32_t dirCount = 0;
 };
 
-struct DiskImageInfo {
-    bool            isValid = false;
+struct DiskImageInfo
+{
+    bool isValid = false;
     DiskImageFormat format = DiskImageFormat::Unknown;
-    uint64_t        totalSizeBytes = 0;
+    uint64_t totalSizeBytes = 0;
     VolumeDescriptor volume;
-    bool            isBootable = false;
-    bool            isMultiSession = false;
+    bool isBootable = false;
+    bool isMultiSession = false;
 };
 
-struct DiskImageStats {
+struct DiskImageStats
+{
     uint32_t filesProcessed = 0;
     uint64_t totalCapacityGB = 0;
 };
 
-class DiskImagePreview {
-public:
+class DiskImagePreview
+{
+  public:
     DiskImagePreview() = default;
     ~DiskImagePreview() = default;
 
-    static const wchar_t* GetName() { return L"DiskImagePreview"; }
+    static const wchar_t* GetName()
+    {
+        return L"DiskImagePreview";
+    }
 
-    bool CanDecode(const wchar_t* ext) const {
-        if (!ext) return false;
+    bool CanDecode(const wchar_t* ext) const
+    {
+        if (!ext)
+            return false;
         std::wstring e(ext);
-        for (auto& c : e) c = towlower(c);
-        return e == L".iso" || e == L".img" || e == L".vhd" || e == L".vhdx" ||
-            e == L".dmg" || e == L".cue" || e == L".bin" || e == L".nrg";
+        for (auto& c : e)
+            c = towlower(c);
+        return e == L".iso" || e == L".img" || e == L".vhd" || e == L".vhdx" || e == L".dmg" || e == L".cue"
+               || e == L".bin" || e == L".nrg";
     }
 
     /// Detect ISO 9660 by Primary Volume Descriptor at sector 16.
     /// Magic: "CD001" at offset 32769 (0x8001)
-    DiskImageFormat DetectFormat(const uint8_t* data, size_t size) const {
-        if (!data) return DiskImageFormat::Unknown;
+    DiskImageFormat DetectFormat(const uint8_t* data, size_t size) const
+    {
+        if (!data)
+            return DiskImageFormat::Unknown;
 
         // ISO 9660: "CD001" at sector 16 (offset 0x8001)
         if (size >= 0x8006 && memcmp(data + 0x8001, "CD001", 5) == 0)
@@ -78,12 +97,15 @@ public:
     }
 
     /// Parse ISO 9660 Primary Volume Descriptor.
-    DiskImageInfo ParseISO9660(const uint8_t* data, size_t size) const {
+    DiskImageInfo ParseISO9660(const uint8_t* data, size_t size) const
+    {
         DiskImageInfo info;
-        if (size < 0x8800) return info;
+        if (size < 0x8800)
+            return info;
 
-        const uint8_t* pvd = data + 0x8000; // Sector 16
-        if (pvd[0] != 1 || memcmp(pvd + 1, "CD001", 5) != 0) return info;
+        const uint8_t* pvd = data + 0x8000;  // Sector 16
+        if (pvd[0] != 1 || memcmp(pvd + 1, "CD001", 5) != 0)
+            return info;
 
         info.isValid = true;
         info.format = DiskImageFormat::ISO9660;
@@ -114,8 +136,9 @@ public:
 
         // Trim trailing spaces from strings
         auto trim = [](std::string& s) {
-            while (!s.empty() && (s.back() == ' ' || s.back() == '\0')) s.pop_back();
-            };
+            while (!s.empty() && (s.back() == ' ' || s.back() == '\0'))
+                s.pop_back();
+        };
         trim(info.volume.systemId);
         trim(info.volume.volumeLabel);
         trim(info.volume.publisher);
@@ -123,11 +146,14 @@ public:
         return info;
     }
 
-    DiskImageStats GetStats() const { return m_stats; }
+    DiskImageStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     mutable DiskImageStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

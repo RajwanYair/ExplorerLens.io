@@ -8,63 +8,64 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // ---- Pipeline Config --------------------------------------------------------
 
-struct AIPipelineConfig {
-    bool enableClassification    = true;
-    bool enableSmartCrop         = true;    // Uses SmartCropAnalyzer (existing)
-    bool enableBlurDetection     = true;
-    bool enableDeblur            = true;
-    bool enableSynthesisFallback = true;    // Generate if decode failed wholly
-    bool enableNSFWGuard         = false;   // Requires enterprise license
-    bool preferGPU               = true;
-    float blurDeblurThreshold    = 0.35f;
+struct AIPipelineConfig
+{
+    bool enableClassification = true;
+    bool enableSmartCrop = true;  // Uses SmartCropAnalyzer (existing)
+    bool enableBlurDetection = true;
+    bool enableDeblur = true;
+    bool enableSynthesisFallback = true;  // Generate if decode failed wholly
+    bool enableNSFWGuard = false;         // Requires enterprise license
+    bool preferGPU = true;
+    float blurDeblurThreshold = 0.35f;
 };
 
 // ---- Per-Step Diagnostics ---------------------------------------------------
 
-struct AIPipelineDiagnostics {
-    bool  classificationRan     = false;
-    bool  smartCropRan          = false;
-    bool  blurFilterRan         = false;
-    bool  deblurApplied         = false;
-    bool  synthesisFallbackUsed = false;
-    bool  nsfwBlocked           = false;
-    float totalAIMs             = 0.0f;  // Accumulated inference time
+struct AIPipelineDiagnostics
+{
+    bool classificationRan = false;
+    bool smartCropRan = false;
+    bool blurFilterRan = false;
+    bool deblurApplied = false;
+    bool synthesisFallbackUsed = false;
+    bool nsfwBlocked = false;
+    float totalAIMs = 0.0f;  // Accumulated inference time
     std::string contentCategoryName;
-    float blurScore             = 0.0f;
+    float blurScore = 0.0f;
 };
 
 // ---- Pipeline Result --------------------------------------------------------
 
-struct AIPipelineResult {
-    bool                 success      = false;
-    std::vector<uint8_t> pixels;      // Final BGRA
-    uint32_t             width        = 0;
-    uint32_t             height       = 0;
+struct AIPipelineResult
+{
+    bool success = false;
+    std::vector<uint8_t> pixels;  // Final BGRA
+    uint32_t width = 0;
+    uint32_t height = 0;
     AIPipelineDiagnostics diagnostics;
 };
 
 // ---- AIThumbnailPipeline ----------------------------------------------------
 
-class AIThumbnailPipeline {
-public:
+class AIThumbnailPipeline
+{
+  public:
     explicit AIThumbnailPipeline(AIPipelineConfig config = {});
     ~AIThumbnailPipeline();
 
     // Run all enabled AI stages on a decoded BGRA thumbnail.
-    AIPipelineResult Process(
-        const uint8_t*      pixels,
-        uint32_t            width,
-        uint32_t            height,
-        const std::string&  filePath = "") const;
+    AIPipelineResult Process(const uint8_t* pixels, uint32_t width, uint32_t height,
+                             const std::string& filePath = "") const;
 
     // Synthesis-only path for files that couldn't be decoded at all.
     AIPipelineResult Synthesize(const std::string& filePath) const;
@@ -79,10 +80,11 @@ public:
 
     static AIThumbnailPipeline& Instance();
 
-private:
-    struct Impl {};
+  private:
+    struct Impl
+    {};
     std::unique_ptr<Impl> m_impl;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

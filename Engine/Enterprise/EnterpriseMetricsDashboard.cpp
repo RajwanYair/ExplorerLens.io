@@ -8,4 +8,4 @@ namespace ExplorerLens::Engine {
 EnterpriseMetricsDashboard::EnterpriseMetricsDashboard(DashboardConfig) {}
 EnterpriseMetricsDashboard::~EnterpriseMetricsDashboard() = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

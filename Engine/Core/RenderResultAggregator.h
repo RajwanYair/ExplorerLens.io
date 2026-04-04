@@ -6,39 +6,48 @@
 #pragma once
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct RRATile {
-    uint32_t             tileX  = 0;
-    uint32_t             tileY  = 0;
-    uint32_t             width  = 0;
-    uint32_t             height = 0;
+struct RRATile
+{
+    uint32_t tileX = 0;
+    uint32_t tileY = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
     std::vector<uint8_t> rgbaData;
 };
 
-struct RRAAggregateResult {
-    bool                 success      = false;
+struct RRAAggregateResult
+{
+    bool success = false;
     std::vector<uint8_t> rgbaData;
-    uint32_t             width        = 0;
-    uint32_t             height       = 0;
-    uint32_t             tilesComposed = 0;
-    std::string          errorMsg;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t tilesComposed = 0;
+    std::string errorMsg;
 };
 
-class RenderResultAggregator {
-public:
-    void AddTile(const RRATile& tile) {
+class RenderResultAggregator
+{
+  public:
+    void AddTile(const RRATile& tile)
+    {
         m_tiles[tile.tileX * 1000u + tile.tileY] = tile;
     }
 
-    RRAAggregateResult Compose(uint32_t totalWidth, uint32_t totalHeight) {
+    RRAAggregateResult Compose(uint32_t totalWidth, uint32_t totalHeight)
+    {
         RRAAggregateResult r;
-        if (m_tiles.empty()) { r.errorMsg = "No tiles"; return r; }
-        r.width    = totalWidth;
-        r.height   = totalHeight;
+        if (m_tiles.empty()) {
+            r.errorMsg = "No tiles";
+            return r;
+        }
+        r.width = totalWidth;
+        r.height = totalHeight;
         r.rgbaData.assign(static_cast<size_t>(totalWidth) * totalHeight * 4, 0x80u);
         for (const auto& [key, tile] : m_tiles) {
             for (uint32_t row = 0; row < tile.height && (tile.tileY + row) < totalHeight; ++row) {
@@ -56,11 +65,18 @@ public:
         return r;
     }
 
-    uint32_t TileCount() const { return static_cast<uint32_t>(m_tiles.size()); }
-    void Clear() { m_tiles.clear(); }
+    uint32_t TileCount() const
+    {
+        return static_cast<uint32_t>(m_tiles.size());
+    }
+    void Clear()
+    {
+        m_tiles.clear();
+    }
 
-private:
+  private:
     std::unordered_map<uint32_t, RRATile> m_tiles;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

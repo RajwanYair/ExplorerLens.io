@@ -6,13 +6,13 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #ifdef _MSC_VER
-#include <intrin.h>
+    #include <intrin.h>
 #endif
 
 namespace ExplorerLens {
@@ -38,10 +38,12 @@ enum class ISAFeature : uint32_t {
     F16C = 1 << 15
 };
 
-inline ISAFeature operator|(ISAFeature a, ISAFeature b) {
+inline ISAFeature operator|(ISAFeature a, ISAFeature b)
+{
     return static_cast<ISAFeature>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
-inline ISAFeature operator&(ISAFeature a, ISAFeature b) {
+inline ISAFeature operator&(ISAFeature a, ISAFeature b)
+{
     return static_cast<ISAFeature>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 }
 
@@ -53,22 +55,29 @@ enum class ISACodePath : uint8_t {
     NEON = 4
 };
 
-struct CPUFeatureReport {
-    ISAFeature    features = ISAFeature::None;
-    ISACodePath   bestPath = ISACodePath::Scalar;
-    std::string   vendorId;
-    std::string   brandString;
-    uint32_t      family = 0;
-    uint32_t      model = 0;
-    uint32_t      stepping = 0;
-    uint32_t      logicalCores = 0;
+struct CPUFeatureReport
+{
+    ISAFeature features = ISAFeature::None;
+    ISACodePath bestPath = ISACodePath::Scalar;
+    std::string vendorId;
+    std::string brandString;
+    uint32_t family = 0;
+    uint32_t model = 0;
+    uint32_t stepping = 0;
+    uint32_t logicalCores = 0;
 };
 
-class InstructionSetRouter {
-public:
-    static InstructionSetRouter& Instance() { static InstructionSetRouter s; return s; }
+class InstructionSetRouter
+{
+  public:
+    static InstructionSetRouter& Instance()
+    {
+        static InstructionSetRouter s;
+        return s;
+    }
 
-    CPUFeatureReport Detect() {
+    CPUFeatureReport Detect()
+    {
         CPUFeatureReport report{};
 #if defined(_M_ARM64) || defined(__aarch64__)
         report.features = ISAFeature::NEON;
@@ -85,23 +94,38 @@ public:
         report.model = (cpuInfo[0] >> 4) & 0xF;
         report.family = (cpuInfo[0] >> 8) & 0xF;
 
-        if (cpuInfo[3] & (1 << 26)) report.features = report.features | ISAFeature::SSE2;
-        if (cpuInfo[2] & (1 << 0)) report.features = report.features | ISAFeature::SSE3;
-        if (cpuInfo[2] & (1 << 9)) report.features = report.features | ISAFeature::SSSE3;
-        if (cpuInfo[2] & (1 << 19)) report.features = report.features | ISAFeature::SSE41;
-        if (cpuInfo[2] & (1 << 20)) report.features = report.features | ISAFeature::SSE42;
-        if (cpuInfo[2] & (1 << 23)) report.features = report.features | ISAFeature::POPCNT;
-        if (cpuInfo[2] & (1 << 28)) report.features = report.features | ISAFeature::AVX;
-        if (cpuInfo[2] & (1 << 12)) report.features = report.features | ISAFeature::FMA3;
-        if (cpuInfo[2] & (1 << 29)) report.features = report.features | ISAFeature::F16C;
+        if (cpuInfo[3] & (1 << 26))
+            report.features = report.features | ISAFeature::SSE2;
+        if (cpuInfo[2] & (1 << 0))
+            report.features = report.features | ISAFeature::SSE3;
+        if (cpuInfo[2] & (1 << 9))
+            report.features = report.features | ISAFeature::SSSE3;
+        if (cpuInfo[2] & (1 << 19))
+            report.features = report.features | ISAFeature::SSE41;
+        if (cpuInfo[2] & (1 << 20))
+            report.features = report.features | ISAFeature::SSE42;
+        if (cpuInfo[2] & (1 << 23))
+            report.features = report.features | ISAFeature::POPCNT;
+        if (cpuInfo[2] & (1 << 28))
+            report.features = report.features | ISAFeature::AVX;
+        if (cpuInfo[2] & (1 << 12))
+            report.features = report.features | ISAFeature::FMA3;
+        if (cpuInfo[2] & (1 << 29))
+            report.features = report.features | ISAFeature::F16C;
 
         __cpuidex(cpuInfo, 7, 0);
-        if (cpuInfo[1] & (1 << 5)) report.features = report.features | ISAFeature::AVX2;
-        if (cpuInfo[1] & (1 << 3)) report.features = report.features | ISAFeature::BMI1;
-        if (cpuInfo[1] & (1 << 8)) report.features = report.features | ISAFeature::BMI2;
-        if (cpuInfo[1] & (1 << 16)) report.features = report.features | ISAFeature::AVX512F;
-        if (cpuInfo[1] & (1 << 30)) report.features = report.features | ISAFeature::AVX512BW;
-        if (cpuInfo[1] & (1 << 31)) report.features = report.features | ISAFeature::AVX512VL;
+        if (cpuInfo[1] & (1 << 5))
+            report.features = report.features | ISAFeature::AVX2;
+        if (cpuInfo[1] & (1 << 3))
+            report.features = report.features | ISAFeature::BMI1;
+        if (cpuInfo[1] & (1 << 8))
+            report.features = report.features | ISAFeature::BMI2;
+        if (cpuInfo[1] & (1 << 16))
+            report.features = report.features | ISAFeature::AVX512F;
+        if (cpuInfo[1] & (1 << 30))
+            report.features = report.features | ISAFeature::AVX512BW;
+        if (cpuInfo[1] & (1 << 31))
+            report.features = report.features | ISAFeature::AVX512VL;
 
         // Determine best code path
         if (HasFeature(report.features, ISAFeature::AVX512F))
@@ -115,14 +139,22 @@ public:
         return report;
     }
 
-    bool HasFeature(ISAFeature feature) const {
+    bool HasFeature(ISAFeature feature) const
+    {
         return HasFeature(m_report.features, feature);
     }
 
-    ISACodePath GetBestPath() const { return m_report.bestPath; }
-    const CPUFeatureReport& GetReport() const { return m_report; }
+    ISACodePath GetBestPath() const
+    {
+        return m_report.bestPath;
+    }
+    const CPUFeatureReport& GetReport() const
+    {
+        return m_report;
+    }
 
-    bool Validate() const {
+    bool Validate() const
+    {
 #if defined(_M_ARM64)
         return HasFeature(m_report.features, ISAFeature::NEON);
 #elif defined(_M_IX86) || defined(_M_X64)
@@ -132,18 +164,22 @@ public:
 #endif
     }
 
-private:
-    InstructionSetRouter() { Detect(); }
+  private:
+    InstructionSetRouter()
+    {
+        Detect();
+    }
     ~InstructionSetRouter() = default;
     InstructionSetRouter(const InstructionSetRouter&) = delete;
     InstructionSetRouter& operator=(const InstructionSetRouter&) = delete;
 
-    static bool HasFeature(ISAFeature set, ISAFeature test) {
+    static bool HasFeature(ISAFeature set, ISAFeature test)
+    {
         return (static_cast<uint32_t>(set) & static_cast<uint32_t>(test)) != 0;
     }
 
     CPUFeatureReport m_report{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

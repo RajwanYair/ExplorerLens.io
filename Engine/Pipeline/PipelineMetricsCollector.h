@@ -13,15 +13,15 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include <cstdint>
-#include <string>
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <chrono>
-#include <algorithm>
+#include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -38,43 +38,46 @@ enum class PipelineStageId : uint32_t {
     Count = 8
 };
 
-static const wchar_t* PipelineStageName(PipelineStageId id) {
-    static const wchar_t* names[] = {
-        L"FormatDetection", L"Decode", L"GPURender", L"CacheLookup",
-        L"CacheStore", L"PostProcess", L"IORead", L"Validation"
-    };
+static const wchar_t* PipelineStageName(PipelineStageId id)
+{
+    static const wchar_t* names[] = {L"FormatDetection", L"Decode",      L"GPURender", L"CacheLookup",
+                                     L"CacheStore",      L"PostProcess", L"IORead",    L"Validation"};
     auto idx = static_cast<uint32_t>(id);
     return (idx < static_cast<uint32_t>(PipelineStageId::Count)) ? names[idx] : L"Unknown";
 }
 
-struct StageMetricsSnapshot {
+struct StageMetricsSnapshot
+{
     uint64_t totalInvocations = 0;
     uint64_t totalErrors = 0;
-    double   avgLatencyMs = 0.0;
-    double   p99LatencyMs = 0.0;
-    double   maxLatencyMs = 0.0;
-    double   throughputPerSec = 0.0;
+    double avgLatencyMs = 0.0;
+    double p99LatencyMs = 0.0;
+    double maxLatencyMs = 0.0;
+    double throughputPerSec = 0.0;
     uint32_t queueDepth = 0;
 };
 
-struct PipelineMetricsSnapshot {
+struct PipelineMetricsSnapshot
+{
     std::array<StageMetricsSnapshot, static_cast<size_t>(PipelineStageId::Count)> stages;
     uint64_t totalRequests = 0;
     uint64_t totalErrors = 0;
-    double   overallLatencyMs = 0.0;
-    double   overallThroughput = 0.0;
+    double overallLatencyMs = 0.0;
+    double overallThroughput = 0.0;
     uint64_t uptimeSeconds = 0;
     uint64_t snapshotTimestamp = 0;
 };
 
-struct StageCounters {
-    std::atomic<uint64_t> invocations{ 0 };
-    std::atomic<uint64_t> errors{ 0 };
-    std::atomic<uint64_t> totalLatencyUs{ 0 };
-    std::atomic<uint64_t> maxLatencyUs{ 0 };
-    std::atomic<uint32_t> activeCount{ 0 };
+struct StageCounters
+{
+    std::atomic<uint64_t> invocations{0};
+    std::atomic<uint64_t> errors{0};
+    std::atomic<uint64_t> totalLatencyUs{0};
+    std::atomic<uint64_t> maxLatencyUs{0};
+    std::atomic<uint32_t> activeCount{0};
 
-    void RecordLatency(uint64_t microseconds) {
+    void RecordLatency(uint64_t microseconds)
+    {
         invocations.fetch_add(1, std::memory_order_relaxed);
         totalLatencyUs.fetch_add(microseconds, std::memory_order_relaxed);
         uint64_t curMax = maxLatencyUs.load(std::memory_order_relaxed);
@@ -84,25 +87,28 @@ struct StageCounters {
         }
     }
 
-    void RecordError() {
+    void RecordError()
+    {
         errors.fetch_add(1, std::memory_order_relaxed);
     }
 
-    StageMetricsSnapshot ToSnapshot(double elapsedSec) const {
+    StageMetricsSnapshot ToSnapshot(double elapsedSec) const
+    {
         StageMetricsSnapshot s;
         s.totalInvocations = invocations.load(std::memory_order_relaxed);
         s.totalErrors = errors.load(std::memory_order_relaxed);
         s.maxLatencyMs = static_cast<double>(maxLatencyUs.load(std::memory_order_relaxed)) / 1000.0;
-        s.avgLatencyMs = (s.totalInvocations > 0)
-            ? (static_cast<double>(totalLatencyUs.load(std::memory_order_relaxed)) / 1000.0 / static_cast<double>(s.totalInvocations))
-            : 0.0;
-        s.p99LatencyMs = s.maxLatencyMs * 0.95; // Approximation without full histogram
+        s.avgLatencyMs = (s.totalInvocations > 0) ? (static_cast<double>(totalLatencyUs.load(std::memory_order_relaxed))
+                                                     / 1000.0 / static_cast<double>(s.totalInvocations))
+                                                  : 0.0;
+        s.p99LatencyMs = s.maxLatencyMs * 0.95;  // Approximation without full histogram
         s.throughputPerSec = (elapsedSec > 0.0) ? (static_cast<double>(s.totalInvocations) / elapsedSec) : 0.0;
         s.queueDepth = activeCount.load(std::memory_order_relaxed);
         return s;
     }
 
-    void Reset() {
+    void Reset()
+    {
         invocations.store(0, std::memory_order_relaxed);
         errors.store(0, std::memory_order_relaxed);
         totalLatencyUs.store(0, std::memory_order_relaxed);
@@ -111,13 +117,16 @@ struct StageCounters {
     }
 };
 
-class StageTiming {
-public:
-    StageTiming(StageCounters& counters) : m_counters(counters) {
+class StageTiming
+{
+  public:
+    StageTiming(StageCounters& counters) : m_counters(counters)
+    {
         m_counters.activeCount.fetch_add(1, std::memory_order_relaxed);
         QueryPerformanceCounter(&m_start);
     }
-    ~StageTiming() {
+    ~StageTiming()
+    {
         LARGE_INTEGER end, freq;
         QueryPerformanceCounter(&end);
         QueryPerformanceFrequency(&freq);
@@ -125,7 +134,8 @@ public:
         m_counters.RecordLatency(us);
         m_counters.activeCount.fetch_sub(1, std::memory_order_relaxed);
     }
-private:
+
+  private:
     StageCounters& m_counters;
     LARGE_INTEGER m_start{};
 };
@@ -133,39 +143,50 @@ private:
 // ========================================================================
 // PipelineMetricsCollector — Singleton aggregating all stage metrics
 // ========================================================================
-class PipelineMetricsCollector {
-public:
-    static PipelineMetricsCollector& Instance() {
+class PipelineMetricsCollector
+{
+  public:
+    static PipelineMetricsCollector& Instance()
+    {
         static PipelineMetricsCollector instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         QueryPerformanceCounter(&m_startTime);
         m_totalRequests.store(0, std::memory_order_relaxed);
         m_totalErrors.store(0, std::memory_order_relaxed);
-        for (auto& c : m_stageCounters) c.Reset();
+        for (auto& c : m_stageCounters)
+            c.Reset();
         m_initialized = true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
     // Get counters for direct stage timing
-    StageCounters& GetStageCounters(PipelineStageId stage) {
+    StageCounters& GetStageCounters(PipelineStageId stage)
+    {
         return m_stageCounters[static_cast<size_t>(stage)];
     }
 
     // Record a completed request
-    void RecordRequest() {
+    void RecordRequest()
+    {
         m_totalRequests.fetch_add(1, std::memory_order_relaxed);
     }
 
-    void RecordRequestError() {
+    void RecordRequestError()
+    {
         m_totalErrors.fetch_add(1, std::memory_order_relaxed);
     }
 
     // Capture full snapshot
-    PipelineMetricsSnapshot CaptureSnapshot() const {
+    PipelineMetricsSnapshot CaptureSnapshot() const
+    {
         PipelineMetricsSnapshot snap;
         double elapsed = GetElapsedSeconds();
 
@@ -180,7 +201,8 @@ public:
 
         // Overall latency = sum of stage averages
         double totalAvg = 0.0;
-        for (auto& s : snap.stages) totalAvg += s.avgLatencyMs;
+        for (auto& s : snap.stages)
+            totalAvg += s.avgLatencyMs;
         snap.overallLatencyMs = totalAvg;
 
         FILETIME ft;
@@ -191,7 +213,8 @@ public:
     }
 
     // Get stage error rate (0.0 - 1.0)
-    double GetStageErrorRate(PipelineStageId stage) const {
+    double GetStageErrorRate(PipelineStageId stage) const
+    {
         auto& c = m_stageCounters[static_cast<size_t>(stage)];
         uint64_t inv = c.invocations.load(std::memory_order_relaxed);
         uint64_t err = c.errors.load(std::memory_order_relaxed);
@@ -199,24 +222,28 @@ public:
     }
 
     // Get overall error rate
-    double GetOverallErrorRate() const {
+    double GetOverallErrorRate() const
+    {
         uint64_t req = m_totalRequests.load(std::memory_order_relaxed);
         uint64_t err = m_totalErrors.load(std::memory_order_relaxed);
         return (req > 0) ? (static_cast<double>(err) / static_cast<double>(req)) : 0.0;
     }
 
     // Reset all counters
-    void Reset() {
-        for (auto& c : m_stageCounters) c.Reset();
+    void Reset()
+    {
+        for (auto& c : m_stageCounters)
+            c.Reset();
         m_totalRequests.store(0, std::memory_order_relaxed);
         m_totalErrors.store(0, std::memory_order_relaxed);
         QueryPerformanceCounter(&m_startTime);
     }
 
-private:
+  private:
     PipelineMetricsCollector() = default;
 
-    double GetElapsedSeconds() const {
+    double GetElapsedSeconds() const
+    {
         LARGE_INTEGER now, freq;
         QueryPerformanceCounter(&now);
         QueryPerformanceFrequency(&freq);
@@ -224,11 +251,11 @@ private:
     }
 
     mutable std::array<StageCounters, static_cast<size_t>(PipelineStageId::Count)> m_stageCounters;
-    std::atomic<uint64_t> m_totalRequests{ 0 };
-    std::atomic<uint64_t> m_totalErrors{ 0 };
+    std::atomic<uint64_t> m_totalRequests{0};
+    std::atomic<uint64_t> m_totalErrors{0};
     LARGE_INTEGER m_startTime{};
     bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

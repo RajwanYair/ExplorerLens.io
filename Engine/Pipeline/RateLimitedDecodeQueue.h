@@ -7,9 +7,9 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
-#include <queue>
 #include <mutex>
+#include <queue>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,7 +22,8 @@ enum class RateLimitPriority : uint8_t {
     Background
 };
 
-struct DecodeWorkItem {
+struct DecodeWorkItem
+{
     uint64_t itemId = 0;
     std::wstring filePath;
     RateLimitPriority priority = RateLimitPriority::Normal;
@@ -30,7 +31,8 @@ struct DecodeWorkItem {
     uint64_t enqueuedTimestamp = 0;
 };
 
-struct RateLimitQueueStats {
+struct RateLimitQueueStats
+{
     uint64_t totalEnqueued = 0;
     uint64_t totalDequeued = 0;
     uint64_t totalDropped = 0;
@@ -39,13 +41,16 @@ struct RateLimitQueueStats {
     double avgWaitTimeMs = 0.0;
 };
 
-class RateLimitedDecodeQueue {
-public:
+class RateLimitedDecodeQueue
+{
+  public:
     explicit RateLimitedDecodeQueue(uint32_t maxQueueDepth = 256, uint32_t maxPerSecond = 100)
-        : m_maxQueueDepth(maxQueueDepth), m_maxPerSecond(maxPerSecond) {
-    }
+        : m_maxQueueDepth(maxQueueDepth)
+        , m_maxPerSecond(maxPerSecond)
+    {}
 
-    bool Enqueue(const DecodeWorkItem& item) {
+    bool Enqueue(const DecodeWorkItem& item)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (m_queue.size() >= m_maxQueueDepth) {
             m_stats.totalDropped++;
@@ -59,9 +64,11 @@ public:
         return true;
     }
 
-    bool Dequeue(DecodeWorkItem& item) {
+    bool Dequeue(DecodeWorkItem& item)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_queue.empty()) return false;
+        if (m_queue.empty())
+            return false;
         item = m_queue.front();
         m_queue.pop();
         m_stats.totalDequeued++;
@@ -69,25 +76,34 @@ public:
         return true;
     }
 
-    bool IsBackpressured() const {
+    bool IsBackpressured() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_queue.size() > (m_maxQueueDepth * 3 / 4);
     }
 
-    RateLimitQueueStats GetStats() const {
+    RateLimitQueueStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    uint32_t GetDepth() const {
+    uint32_t GetDepth() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return static_cast<uint32_t>(m_queue.size());
     }
 
-    void SetRateLimit(uint32_t maxPerSecond) { m_maxPerSecond = maxPerSecond; }
-    uint32_t GetRateLimit() const { return m_maxPerSecond; }
+    void SetRateLimit(uint32_t maxPerSecond)
+    {
+        m_maxPerSecond = maxPerSecond;
+    }
+    uint32_t GetRateLimit() const
+    {
+        return m_maxPerSecond;
+    }
 
-private:
+  private:
     mutable std::mutex m_mutex;
     std::queue<DecodeWorkItem> m_queue;
     uint32_t m_maxQueueDepth;
@@ -95,5 +111,5 @@ private:
     RateLimitQueueStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

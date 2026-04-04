@@ -6,15 +6,15 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <vector>
 #include <unordered_map>
-#include <algorithm>
+#include <vector>
 
 #ifdef _MSC_VER
-#include <malloc.h>
+    #include <malloc.h>
 #endif
 
 namespace ExplorerLens {
@@ -26,14 +26,16 @@ enum class AlignmentBoundary : uint32_t {
     Align64 = 64
 };
 
-struct AlignedBlock {
+struct AlignedBlock
+{
     void* ptr = nullptr;
-    size_t             size = 0;
-    AlignmentBoundary  alignment = AlignmentBoundary::Align16;
-    bool               inUse = false;
+    size_t size = 0;
+    AlignmentBoundary alignment = AlignmentBoundary::Align16;
+    bool inUse = false;
 };
 
-struct SIMDAllocStats {
+struct SIMDAllocStats
+{
     uint64_t totalAllocations = 0;
     uint64_t totalFrees = 0;
     uint64_t totalBytesAlloc = 0;
@@ -43,21 +45,30 @@ struct SIMDAllocStats {
     uint32_t activeBlocks = 0;
 };
 
-class SIMDMemoryAligner {
-public:
-    static SIMDMemoryAligner& Instance() { static SIMDMemoryAligner s; return s; }
+class SIMDMemoryAligner
+{
+  public:
+    static SIMDMemoryAligner& Instance()
+    {
+        static SIMDMemoryAligner s;
+        return s;
+    }
 
-    void* AllocAligned(size_t size, AlignmentBoundary alignment = AlignmentBoundary::Align32) {
-        if (size == 0) return nullptr;
+    void* AllocAligned(size_t size, AlignmentBoundary alignment = AlignmentBoundary::Align32)
+    {
+        if (size == 0)
+            return nullptr;
         uint32_t align = static_cast<uint32_t>(alignment);
 
 #ifdef _MSC_VER
         void* ptr = _aligned_malloc(size, align);
 #else
         void* ptr = nullptr;
-        if (posix_memalign(&ptr, align, size) != 0) ptr = nullptr;
+        if (posix_memalign(&ptr, align, size) != 0)
+            ptr = nullptr;
 #endif
-        if (!ptr) return nullptr;
+        if (!ptr)
+            return nullptr;
 
         AlignedBlock block;
         block.ptr = ptr;
@@ -76,11 +87,14 @@ public:
         return ptr;
     }
 
-    bool FreeAligned(void* ptr) {
-        if (!ptr) return false;
+    bool FreeAligned(void* ptr)
+    {
+        if (!ptr)
+            return false;
         uintptr_t key = reinterpret_cast<uintptr_t>(ptr);
         auto it = m_blocks.find(key);
-        if (it == m_blocks.end()) return false;
+        if (it == m_blocks.end())
+            return false;
 
         m_stats.totalFrees++;
         m_stats.totalBytesFreed += it->second.size;
@@ -96,9 +110,14 @@ public:
         return true;
     }
 
-    void* ReallocAligned(void* oldPtr, size_t newSize, AlignmentBoundary alignment = AlignmentBoundary::Align32) {
-        if (!oldPtr) return AllocAligned(newSize, alignment);
-        if (newSize == 0) { FreeAligned(oldPtr); return nullptr; }
+    void* ReallocAligned(void* oldPtr, size_t newSize, AlignmentBoundary alignment = AlignmentBoundary::Align32)
+    {
+        if (!oldPtr)
+            return AllocAligned(newSize, alignment);
+        if (newSize == 0) {
+            FreeAligned(oldPtr);
+            return nullptr;
+        }
 
         uintptr_t key = reinterpret_cast<uintptr_t>(oldPtr);
         auto it = m_blocks.find(key);
@@ -112,13 +131,15 @@ public:
         return newPtr;
     }
 
-    static bool IsAligned(const void* ptr, AlignmentBoundary alignment) {
+    static bool IsAligned(const void* ptr, AlignmentBoundary alignment)
+    {
         uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
         uint32_t align = static_cast<uint32_t>(alignment);
         return (addr & (align - 1)) == 0;
     }
 
-    static AlignmentBoundary GetOptimalAlignment() {
+    static AlignmentBoundary GetOptimalAlignment()
+    {
 #if defined(__AVX512F__) || defined(__AVX512BW__)
         return AlignmentBoundary::Align64;
 #elif defined(__AVX2__) || defined(__AVX__)
@@ -128,32 +149,46 @@ public:
 #endif
     }
 
-    const SIMDAllocStats& GetStats() const { return m_stats; }
+    const SIMDAllocStats& GetStats() const
+    {
+        return m_stats;
+    }
 
-    const AlignedBlock* GetBlockInfo(void* ptr) const {
+    const AlignedBlock* GetBlockInfo(void* ptr) const
+    {
         uintptr_t key = reinterpret_cast<uintptr_t>(ptr);
         auto it = m_blocks.find(key);
         return (it != m_blocks.end()) ? &it->second : nullptr;
     }
 
-    uint32_t ActiveBlockCount() const { return m_stats.activeBlocks; }
+    uint32_t ActiveBlockCount() const
+    {
+        return m_stats.activeBlocks;
+    }
 
-    bool Validate() const {
-        if (m_stats.totalAllocations < m_stats.totalFrees) return false;
-        if (m_stats.activeBlocks != static_cast<uint32_t>(m_blocks.size())) return false;
+    bool Validate() const
+    {
+        if (m_stats.totalAllocations < m_stats.totalFrees)
+            return false;
+        if (m_stats.activeBlocks != static_cast<uint32_t>(m_blocks.size()))
+            return false;
         uint64_t expectedCurrent = m_stats.totalBytesAlloc - m_stats.totalBytesFreed;
-        if (m_stats.currentBytes != expectedCurrent) return false;
+        if (m_stats.currentBytes != expectedCurrent)
+            return false;
         // Verify all active blocks are actually aligned
         for (const auto& [key, block] : m_blocks) {
-            if (!IsAligned(block.ptr, block.alignment)) return false;
-            if (!block.inUse) return false;
+            if (!IsAligned(block.ptr, block.alignment))
+                return false;
+            if (!block.inUse)
+                return false;
         }
         return true;
     }
 
-private:
+  private:
     SIMDMemoryAligner() = default;
-    ~SIMDMemoryAligner() {
+    ~SIMDMemoryAligner()
+    {
         // Free all remaining blocks
         for (auto& [key, block] : m_blocks) {
             if (block.ptr) {
@@ -170,8 +205,8 @@ private:
     SIMDMemoryAligner& operator=(const SIMDMemoryAligner&) = delete;
 
     std::unordered_map<uintptr_t, AlignedBlock> m_blocks;
-    SIMDAllocStats                               m_stats{};
+    SIMDAllocStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

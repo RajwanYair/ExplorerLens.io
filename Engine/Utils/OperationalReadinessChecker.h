@@ -12,7 +12,7 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <cstdint>
@@ -29,42 +29,51 @@ enum class SubsystemReadiness : uint32_t {
     NotChecked = 3
 };
 
-struct SubsystemProbeResult {
-    std::wstring         name;
-    SubsystemReadiness   readiness = SubsystemReadiness::NotChecked;
-    std::wstring         detail;
-    uint32_t             latencyMs = 0;
+struct SubsystemProbeResult
+{
+    std::wstring name;
+    SubsystemReadiness readiness = SubsystemReadiness::NotChecked;
+    std::wstring detail;
+    uint32_t latencyMs = 0;
 };
 
-struct OperationalReadinessReport {
-    uint64_t                             timestamp = 0;
-    uint32_t                             totalProbes = 0;
-    uint32_t                             ready = 0;
-    uint32_t                             degraded = 0;
-    uint32_t                             unavailable = 0;
-    bool                                 operational = false;
-    std::vector<SubsystemProbeResult>    probes;
+struct OperationalReadinessReport
+{
+    uint64_t timestamp = 0;
+    uint32_t totalProbes = 0;
+    uint32_t ready = 0;
+    uint32_t degraded = 0;
+    uint32_t unavailable = 0;
+    bool operational = false;
+    std::vector<SubsystemProbeResult> probes;
 };
 
 // ========================================================================
 // OperationalReadinessChecker — Probes all subsystems for readiness
 // ========================================================================
-class OperationalReadinessChecker {
-public:
-    static OperationalReadinessChecker& Instance() {
+class OperationalReadinessChecker
+{
+  public:
+    static OperationalReadinessChecker& Instance()
+    {
         static OperationalReadinessChecker instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         m_totalChecks = 0;
         m_initialized = true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
     // Run all probes
-    OperationalReadinessReport CheckAll() {
+    OperationalReadinessReport CheckAll()
+    {
         OperationalReadinessReport report;
         report.timestamp = GetTickCount64();
 
@@ -78,10 +87,17 @@ public:
         report.totalProbes = static_cast<uint32_t>(report.probes.size());
         for (auto& p : report.probes) {
             switch (p.readiness) {
-            case SubsystemReadiness::Ready:       report.ready++;       break;
-            case SubsystemReadiness::Degraded:    report.degraded++;    break;
-            case SubsystemReadiness::Unavailable: report.unavailable++; break;
-            default: break;
+                case SubsystemReadiness::Ready:
+                    report.ready++;
+                    break;
+                case SubsystemReadiness::Degraded:
+                    report.degraded++;
+                    break;
+                case SubsystemReadiness::Unavailable:
+                    report.unavailable++;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -93,19 +109,20 @@ public:
     }
 
     // Check single subsystem
-    SubsystemProbeResult ProbeGPU() {
+    SubsystemProbeResult ProbeGPU()
+    {
         SubsystemProbeResult result;
         result.name = L"GPU";
         DWORD start = GetTickCount();
 
         HMODULE d3d11 = GetModuleHandleW(L"d3d11.dll");
-        if (!d3d11) d3d11 = LoadLibraryExW(L"d3d11.dll", nullptr, LOAD_LIBRARY_AS_DATAFILE);
+        if (!d3d11)
+            d3d11 = LoadLibraryExW(L"d3d11.dll", nullptr, LOAD_LIBRARY_AS_DATAFILE);
 
         if (d3d11) {
             result.readiness = SubsystemReadiness::Ready;
             result.detail = L"Direct3D 11 available";
-        }
-        else {
+        } else {
             result.readiness = SubsystemReadiness::Degraded;
             result.detail = L"D3D11 not available; CPU fallback active";
         }
@@ -114,7 +131,8 @@ public:
         return result;
     }
 
-    SubsystemProbeResult ProbeDiskIO() {
+    SubsystemProbeResult ProbeDiskIO()
+    {
         SubsystemProbeResult result;
         result.name = L"Disk I/O";
         DWORD start = GetTickCount();
@@ -127,18 +145,15 @@ public:
                 if (freeMB > 50) {
                     result.readiness = SubsystemReadiness::Ready;
                     result.detail = L"Sufficient temp disk space";
-                }
-                else {
+                } else {
                     result.readiness = SubsystemReadiness::Degraded;
                     result.detail = L"Low temp disk space";
                 }
-            }
-            else {
+            } else {
                 result.readiness = SubsystemReadiness::Unavailable;
                 result.detail = L"Cannot query disk space";
             }
-        }
-        else {
+        } else {
             result.readiness = SubsystemReadiness::Unavailable;
             result.detail = L"Cannot determine temp path";
         }
@@ -147,7 +162,8 @@ public:
         return result;
     }
 
-    SubsystemProbeResult ProbeMemory() {
+    SubsystemProbeResult ProbeMemory()
+    {
         SubsystemProbeResult result;
         result.name = L"Memory";
         DWORD start = GetTickCount();
@@ -159,17 +175,14 @@ public:
             if (availMB > 512) {
                 result.readiness = SubsystemReadiness::Ready;
                 result.detail = L"Sufficient physical memory";
-            }
-            else if (availMB > 128) {
+            } else if (availMB > 128) {
                 result.readiness = SubsystemReadiness::Degraded;
                 result.detail = L"Low physical memory - may impact performance";
-            }
-            else {
+            } else {
                 result.readiness = SubsystemReadiness::Unavailable;
                 result.detail = L"Critically low memory";
             }
-        }
-        else {
+        } else {
             result.readiness = SubsystemReadiness::Degraded;
             result.detail = L"Cannot query memory status";
         }
@@ -178,20 +191,21 @@ public:
         return result;
     }
 
-    SubsystemProbeResult ProbeCodecs() {
+    SubsystemProbeResult ProbeCodecs()
+    {
         SubsystemProbeResult result;
         result.name = L"Codecs";
         DWORD start = GetTickCount();
 
         // Check WIC availability (Windows Imaging Component)
         HMODULE wic = GetModuleHandleW(L"windowscodecs.dll");
-        if (!wic) wic = LoadLibraryExW(L"windowscodecs.dll", nullptr, LOAD_LIBRARY_AS_DATAFILE);
+        if (!wic)
+            wic = LoadLibraryExW(L"windowscodecs.dll", nullptr, LOAD_LIBRARY_AS_DATAFILE);
 
         if (wic) {
             result.readiness = SubsystemReadiness::Ready;
             result.detail = L"WIC codecs available";
-        }
-        else {
+        } else {
             result.readiness = SubsystemReadiness::Degraded;
             result.detail = L"WIC unavailable; using built-in decoders only";
         }
@@ -200,7 +214,8 @@ public:
         return result;
     }
 
-    SubsystemProbeResult ProbeCache() {
+    SubsystemProbeResult ProbeCache()
+    {
         SubsystemProbeResult result;
         result.name = L"Cache";
         DWORD start = GetTickCount();
@@ -211,8 +226,7 @@ public:
             VirtualFree(testAlloc, 0, MEM_RELEASE);
             result.readiness = SubsystemReadiness::Ready;
             result.detail = L"Memory allocation functional";
-        }
-        else {
+        } else {
             result.readiness = SubsystemReadiness::Unavailable;
             result.detail = L"Cannot allocate memory for cache";
         }
@@ -222,16 +236,23 @@ public:
     }
 
     // Quick operational check
-    bool IsOperational() {
+    bool IsOperational()
+    {
         auto report = CheckAll();
         return report.operational;
     }
 
     // Stats
-    uint64_t GetTotalChecks() const { return m_totalChecks; }
-    OperationalReadinessReport GetLastReport() const { return m_lastReport; }
+    uint64_t GetTotalChecks() const
+    {
+        return m_totalChecks;
+    }
+    OperationalReadinessReport GetLastReport() const
+    {
+        return m_lastReport;
+    }
 
-private:
+  private:
     OperationalReadinessChecker() = default;
 
     OperationalReadinessReport m_lastReport;
@@ -239,5 +260,5 @@ private:
     bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

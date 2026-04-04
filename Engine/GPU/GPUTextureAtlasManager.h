@@ -45,13 +45,13 @@
 #pragma once
 
 #include <windows.h>
-#include <vector>
-#include <unordered_map>
-#include <mutex>
-#include <cstdint>
 #include <algorithm>
-#include <string>
+#include <cstdint>
 #include <cstring>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -59,24 +59,29 @@ namespace Engine {
 // -----------------------------------------------------------------------
 // AtlasAllocation — handle returned by Allocate()
 // -----------------------------------------------------------------------
-struct AtlasAllocation {
+struct AtlasAllocation
+{
     uint32_t atlasId = UINT32_MAX;
     uint32_t x = 0;
     uint32_t y = 0;
     uint32_t width = 0;
     uint32_t height = 0;
 
-    bool IsValid() const { return atlasId != UINT32_MAX; }
+    bool IsValid() const
+    {
+        return atlasId != UINT32_MAX;
+    }
 };
 
 // -----------------------------------------------------------------------
 // AtlasStats
 // -----------------------------------------------------------------------
-struct AtlasStats {
+struct AtlasStats
+{
     uint32_t atlasesInUse = 0;
     uint32_t totalAllocations = 0;
     uint32_t liveAllocations = 0;
-    std::vector<float> occupancyPerAtlas;   // 0.0 – 1.0 per atlas
+    std::vector<float> occupancyPerAtlas;  // 0.0 – 1.0 per atlas
     uint64_t wastedSpaceBytes = 0;
     uint64_t totalSpaceBytes = 0;
 };
@@ -84,8 +89,9 @@ struct AtlasStats {
 // -----------------------------------------------------------------------
 // GPUTextureAtlasManager
 // -----------------------------------------------------------------------
-class GPUTextureAtlasManager {
-public:
+class GPUTextureAtlasManager
+{
+  public:
     GPUTextureAtlasManager() = default;
     ~GPUTextureAtlasManager() = default;
 
@@ -95,9 +101,8 @@ public:
     // ================================================================
     // Initialize
     // ================================================================
-    inline bool Initialize(uint32_t atlasWidth = 4096,
-        uint32_t atlasHeight = 4096,
-        uint32_t maxAtlases = 16) {
+    inline bool Initialize(uint32_t atlasWidth = 4096, uint32_t atlasHeight = 4096, uint32_t maxAtlases = 16)
+    {
         AcquireExclusive();
         m_atlasW = atlasWidth;
         m_atlasH = atlasHeight;
@@ -113,12 +118,12 @@ public:
     // ================================================================
     // Allocate — shelf-packing algorithm
     // ================================================================
-    inline AtlasAllocation Allocate(uint32_t width, uint32_t height) {
+    inline AtlasAllocation Allocate(uint32_t width, uint32_t height)
+    {
         AcquireExclusive();
         AtlasAllocation result{};
 
-        if (!m_ready || width == 0 || height == 0 ||
-            width > m_atlasW || height > m_atlasH) {
+        if (!m_ready || width == 0 || height == 0 || width > m_atlasW || height > m_atlasH) {
             ReleaseExclusive();
             return result;
         }
@@ -138,7 +143,7 @@ public:
             m_atlases.push_back(AtlasData{});
             auto& ad = m_atlases.back();
             ad.pixels.resize(static_cast<size_t>(m_atlasW) * m_atlasH * 4, 0);
-            ad.shelves.push_back(Shelf{ 0, 0, 0 });
+            ad.shelves.push_back(Shelf{0, 0, 0});
 
             if (TryAllocateInAtlas(newId, width, height, result)) {
                 RecordAllocation(result);
@@ -154,7 +159,8 @@ public:
     // ================================================================
     // Free — mark allocation as dead (lazy; reclaimed on Compact())
     // ================================================================
-    inline void Free(const AtlasAllocation& alloc) {
+    inline void Free(const AtlasAllocation& alloc)
+    {
         AcquireExclusive();
         uint64_t key = MakeKey(alloc);
         auto it = m_allocations.find(key);
@@ -167,19 +173,23 @@ public:
     // ================================================================
     // Compact — re-pack live allocations
     // ================================================================
-    inline void Compact() {
+    inline void Compact()
+    {
         AcquireExclusive();
 
         // Gather live allocations with their pixel data
-        struct LiveRect {
+        struct LiveRect
+        {
             uint32_t w, h;
             std::vector<uint8_t> pixels;
         };
         std::vector<LiveRect> live;
 
         for (auto& [key, rec] : m_allocations) {
-            if (!rec.alive) continue;
-            if (rec.alloc.atlasId >= m_atlases.size()) continue;
+            if (!rec.alive)
+                continue;
+            if (rec.alloc.atlasId >= m_atlases.size())
+                continue;
 
             LiveRect lr;
             lr.w = rec.alloc.width;
@@ -188,26 +198,22 @@ public:
 
             const auto& src = m_atlases[rec.alloc.atlasId].pixels;
             for (uint32_t row = 0; row < lr.h; ++row) {
-                size_t srcOff = (static_cast<size_t>(rec.alloc.y + row) * m_atlasW
-                    + rec.alloc.x) * 4;
+                size_t srcOff = (static_cast<size_t>(rec.alloc.y + row) * m_atlasW + rec.alloc.x) * 4;
                 size_t dstOff = static_cast<size_t>(row) * lr.w * 4;
-                std::memcpy(lr.pixels.data() + dstOff,
-                    src.data() + srcOff,
-                    static_cast<size_t>(lr.w) * 4);
+                std::memcpy(lr.pixels.data() + dstOff, src.data() + srcOff, static_cast<size_t>(lr.w) * 4);
             }
             live.push_back(std::move(lr));
         }
 
         // Sort by height descending for better shelf packing
-        std::sort(live.begin(), live.end(),
-            [](const LiveRect& a, const LiveRect& b) { return a.h > b.h; });
+        std::sort(live.begin(), live.end(), [](const LiveRect& a, const LiveRect& b) { return a.h > b.h; });
 
         // Reset all atlases
         m_allocations.clear();
         for (auto& ad : m_atlases) {
             std::memset(ad.pixels.data(), 0, ad.pixels.size());
             ad.shelves.clear();
-            ad.shelves.push_back(Shelf{ 0, 0, 0 });
+            ad.shelves.push_back(Shelf{0, 0, 0});
             ad.usedPixels = 0;
         }
 
@@ -231,7 +237,8 @@ public:
     // ================================================================
     // Upload — copy pixel data into atlas at the allocated rect
     // ================================================================
-    inline void Upload(const AtlasAllocation& alloc, const uint8_t* rgbaData) {
+    inline void Upload(const AtlasAllocation& alloc, const uint8_t* rgbaData)
+    {
         AcquireExclusive();
         UploadInternal(alloc, rgbaData);
         ReleaseExclusive();
@@ -240,7 +247,8 @@ public:
     // ================================================================
     // GetAtlasData
     // ================================================================
-    inline const uint8_t* GetAtlasData(uint32_t atlasId) {
+    inline const uint8_t* GetAtlasData(uint32_t atlasId)
+    {
         AcquireShared();
         const uint8_t* ptr = nullptr;
         if (atlasId < m_atlases.size()) {
@@ -253,7 +261,8 @@ public:
     // ================================================================
     // GetStats
     // ================================================================
-    inline AtlasStats GetStats() {
+    inline AtlasStats GetStats()
+    {
         AcquireShared();
         AtlasStats s;
         s.atlasesInUse = static_cast<uint32_t>(m_atlases.size());
@@ -268,14 +277,13 @@ public:
             totalAtlasPixels += atlasTotal;
             uint64_t used = m_atlases[ai].usedPixels;
             usedPixels += used;
-            float occ = (atlasTotal > 0)
-                ? static_cast<float>(used) / static_cast<float>(atlasTotal)
-                : 0.0f;
+            float occ = (atlasTotal > 0) ? static_cast<float>(used) / static_cast<float>(atlasTotal) : 0.0f;
             s.occupancyPerAtlas.push_back(occ);
         }
 
         for (auto& [key, rec] : m_allocations) {
-            if (rec.alive) liveCount++;
+            if (rec.alive)
+                liveCount++;
         }
         s.liveAllocations = liveCount;
         s.totalSpaceBytes = totalAtlasPixels * 4;
@@ -285,53 +293,68 @@ public:
         return s;
     }
 
-private:
+  private:
     // ---- shelf structure ----
-    struct Shelf {
-        uint32_t y = 0;   // top row of this shelf
+    struct Shelf
+    {
+        uint32_t y = 0;        // top row of this shelf
         uint32_t height = 0;   // tallest item in this shelf
-        uint32_t cursorX = 0;   // next free X on this shelf
+        uint32_t cursorX = 0;  // next free X on this shelf
     };
 
     // ---- atlas backing store ----
-    struct AtlasData {
+    struct AtlasData
+    {
         std::vector<uint8_t> pixels;
-        std::vector<Shelf>   shelves;
-        uint64_t             usedPixels = 0;
+        std::vector<Shelf> shelves;
+        uint64_t usedPixels = 0;
     };
 
     // ---- allocation record ----
-    struct AllocRecord {
+    struct AllocRecord
+    {
         AtlasAllocation alloc;
-        bool            alive = true;
+        bool alive = true;
     };
 
     // ---- SRWLOCK ----
     SRWLOCK m_srw = SRWLOCK_INIT;
-    inline void AcquireExclusive() { ::AcquireSRWLockExclusive(&m_srw); }
-    inline void ReleaseExclusive() { ::ReleaseSRWLockExclusive(&m_srw); }
-    inline void AcquireShared() { ::AcquireSRWLockShared(&m_srw); }
-    inline void ReleaseShared() { ::ReleaseSRWLockShared(&m_srw); }
+    inline void AcquireExclusive()
+    {
+        ::AcquireSRWLockExclusive(&m_srw);
+    }
+    inline void ReleaseExclusive()
+    {
+        ::ReleaseSRWLockExclusive(&m_srw);
+    }
+    inline void AcquireShared()
+    {
+        ::AcquireSRWLockShared(&m_srw);
+    }
+    inline void ReleaseShared()
+    {
+        ::ReleaseSRWLockShared(&m_srw);
+    }
 
     // ---- state ----
-    bool     m_ready = false;
+    bool m_ready = false;
     uint32_t m_atlasW = 4096;
     uint32_t m_atlasH = 4096;
     uint32_t m_maxAtlases = 16;
     uint64_t m_nextAllocId = 0;
-    std::vector<AtlasData>                       m_atlases;
-    std::unordered_map<uint64_t, AllocRecord>    m_allocations;
+    std::vector<AtlasData> m_atlases;
+    std::unordered_map<uint64_t, AllocRecord> m_allocations;
 
     // ---- key from allocation ----
-    static inline uint64_t MakeKey(const AtlasAllocation& a) {
-        return (static_cast<uint64_t>(a.atlasId) << 32)
-            | (static_cast<uint64_t>(a.y) << 16)
-            | static_cast<uint64_t>(a.x);
+    static inline uint64_t MakeKey(const AtlasAllocation& a)
+    {
+        return (static_cast<uint64_t>(a.atlasId) << 32) | (static_cast<uint64_t>(a.y) << 16)
+               | static_cast<uint64_t>(a.x);
     }
 
     // ---- try to fit rect into shelf in atlas ----
-    inline bool TryAllocateInAtlas(uint32_t atlasId, uint32_t w, uint32_t h,
-        AtlasAllocation& out) {
+    inline bool TryAllocateInAtlas(uint32_t atlasId, uint32_t w, uint32_t h, AtlasAllocation& out)
+    {
         auto& ad = m_atlases[atlasId];
 
         // Try existing shelves
@@ -346,7 +369,8 @@ private:
                     out.height = h;
 
                     shelf.cursorX += w;
-                    if (h > shelf.height) shelf.height = h;
+                    if (h > shelf.height)
+                        shelf.height = h;
                     ad.usedPixels += static_cast<uint64_t>(w) * h;
                     return true;
                 }
@@ -359,7 +383,8 @@ private:
             auto& last = ad.shelves.back();
             newY = last.y + last.height;
         }
-        if (newY + h > m_atlasH || w > m_atlasW) return false;
+        if (newY + h > m_atlasH || w > m_atlasW)
+            return false;
 
         Shelf ns;
         ns.y = newY;
@@ -377,7 +402,8 @@ private:
     }
 
     // ---- internal allocate (no lock) ----
-    inline AtlasAllocation AllocateInternal(uint32_t w, uint32_t h) {
+    inline AtlasAllocation AllocateInternal(uint32_t w, uint32_t h)
+    {
         AtlasAllocation result{};
         for (size_t ai = 0; ai < m_atlases.size(); ++ai) {
             if (TryAllocateInAtlas(static_cast<uint32_t>(ai), w, h, result))
@@ -388,7 +414,7 @@ private:
             m_atlases.push_back(AtlasData{});
             auto& ad = m_atlases.back();
             ad.pixels.resize(static_cast<size_t>(m_atlasW) * m_atlasH * 4, 0);
-            ad.shelves.push_back(Shelf{ 0, 0, 0 });
+            ad.shelves.push_back(Shelf{0, 0, 0});
             if (TryAllocateInAtlas(newId, w, h, result))
                 return result;
         }
@@ -396,25 +422,28 @@ private:
     }
 
     // ---- record allocation ----
-    inline void RecordAllocation(const AtlasAllocation& alloc) {
+    inline void RecordAllocation(const AtlasAllocation& alloc)
+    {
         uint64_t key = MakeKey(alloc);
-        m_allocations[key] = AllocRecord{ alloc, true };
+        m_allocations[key] = AllocRecord{alloc, true};
     }
 
     // ---- upload pixels (no lock) ----
-    inline void UploadInternal(const AtlasAllocation& alloc, const uint8_t* rgbaData) {
-        if (!alloc.IsValid() || !rgbaData) return;
-        if (alloc.atlasId >= m_atlases.size()) return;
+    inline void UploadInternal(const AtlasAllocation& alloc, const uint8_t* rgbaData)
+    {
+        if (!alloc.IsValid() || !rgbaData)
+            return;
+        if (alloc.atlasId >= m_atlases.size())
+            return;
 
         auto& dst = m_atlases[alloc.atlasId].pixels;
         for (uint32_t row = 0; row < alloc.height; ++row) {
             size_t dstOff = (static_cast<size_t>(alloc.y + row) * m_atlasW + alloc.x) * 4;
             size_t srcOff = static_cast<size_t>(row) * alloc.width * 4;
-            std::memcpy(dst.data() + dstOff, rgbaData + srcOff,
-                static_cast<size_t>(alloc.width) * 4);
+            std::memcpy(dst.data() + dstOff, rgbaData + srcOff, static_cast<size_t>(alloc.width) * 4);
         }
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

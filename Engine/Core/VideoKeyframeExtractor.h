@@ -6,12 +6,12 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,7 +23,8 @@ enum class KeyframeExtractionMode : uint8_t {
     Adaptive
 };
 
-struct KeyframeInfo {
+struct KeyframeInfo
+{
     uint32_t index = 0;
     uint64_t timestampMs = 0;
     uint32_t iFrameDistance = 0;
@@ -32,7 +33,8 @@ struct KeyframeInfo {
     bool isIDR = false;
 };
 
-struct VideoMetadata {
+struct VideoMetadata
+{
     uint32_t width = 0;
     uint32_t height = 0;
     uint64_t durationMs = 0;
@@ -44,7 +46,8 @@ struct VideoMetadata {
     std::string containerFormat;
 };
 
-struct ExtractionConfig {
+struct ExtractionConfig
+{
     KeyframeExtractionMode mode = KeyframeExtractionMode::Adaptive;
     uint32_t maxKeyframes = 32;
     float sceneChangeThreshold = 0.35f;
@@ -66,42 +69,52 @@ enum class KeyframeStrategy : uint8_t {
     COUNT
 };
 
-inline const char* KeyframeStrategyToString(KeyframeStrategy s) noexcept {
+inline const char* KeyframeStrategyToString(KeyframeStrategy s) noexcept
+{
     switch (s) {
-    case KeyframeStrategy::SmartSelect:    return "SmartSelect";
-    case KeyframeStrategy::HighestEntropy: return "HighestEntropy";
-    case KeyframeStrategy::SceneCut:      return "SceneCut";
-    case KeyframeStrategy::Uniform:       return "Uniform";
-    default:                              return "Unknown";
+        case KeyframeStrategy::SmartSelect:
+            return "SmartSelect";
+        case KeyframeStrategy::HighestEntropy:
+            return "HighestEntropy";
+        case KeyframeStrategy::SceneCut:
+            return "SceneCut";
+        case KeyframeStrategy::Uniform:
+            return "Uniform";
+        default:
+            return "Unknown";
     }
 }
 
 // Candidate keyframe with perceptual quality metrics
-struct CandidateKeyframe {
-    uint32_t timestampMs   = 0;
-    float    brightness    = 0.0f;
-    float    contrast      = 0.0f;
-    float    entropy       = 0.0f;
-    float    colorfulness  = 0.0f;
-    float    sharpness     = 0.0f;
-    bool     isBlack       = false;
-    bool     isCredits     = false;
+struct CandidateKeyframe
+{
+    uint32_t timestampMs = 0;
+    float brightness = 0.0f;
+    float contrast = 0.0f;
+    float entropy = 0.0f;
+    float colorfulness = 0.0f;
+    float sharpness = 0.0f;
+    bool isBlack = false;
+    bool isCredits = false;
 
-    float ComputeQualityScore() const noexcept {
-        if (isBlack || isCredits) return 0.0f;
+    float ComputeQualityScore() const noexcept
+    {
+        if (isBlack || isCredits)
+            return 0.0f;
         float raw = (brightness + contrast + entropy + colorfulness + sharpness) / 5.0f;
         return raw < 1.0f ? raw : 1.0f;
     }
 };
 
-class VideoKeyframeExtractor {
-public:
-    explicit VideoKeyframeExtractor(ExtractionConfig config = {})
-        : m_config(config) {}
+class VideoKeyframeExtractor
+{
+  public:
+    explicit VideoKeyframeExtractor(ExtractionConfig config = {}) : m_config(config) {}
 
     ~VideoKeyframeExtractor() = default;
 
-    bool OpenVideo(const std::wstring& filePath) {
+    bool OpenVideo(const std::wstring& filePath)
+    {
         m_filePath = filePath;
         m_isOpen = true;
         m_keyframes.clear();
@@ -109,51 +122,89 @@ public:
         return true;
     }
 
-    bool ExtractKeyframes() {
-        if (!m_isOpen) return false;
+    bool ExtractKeyframes()
+    {
+        if (!m_isOpen)
+            return false;
         m_keyframes.reserve(m_config.maxKeyframes);
         BuildKeyframeIndex();
         return !m_keyframes.empty();
     }
 
-    const KeyframeInfo* GetKeyframeAtTime(uint64_t timestampMs) const {
-        if (m_keyframes.empty()) return nullptr;
+    const KeyframeInfo* GetKeyframeAtTime(uint64_t timestampMs) const
+    {
+        if (m_keyframes.empty())
+            return nullptr;
         auto it = std::lower_bound(m_keyframes.begin(), m_keyframes.end(), timestampMs,
-            [](const KeyframeInfo& kf, uint64_t ts) { return kf.timestampMs < ts; });
-        if (it == m_keyframes.end()) return &m_keyframes.back();
+                                   [](const KeyframeInfo& kf, uint64_t ts) { return kf.timestampMs < ts; });
+        if (it == m_keyframes.end())
+            return &m_keyframes.back();
         if (it != m_keyframes.begin() && (it->timestampMs - timestampMs) > (timestampMs - (it - 1)->timestampMs))
             --it;
         return &(*it);
     }
 
-    bool BuildKeyframeIndex() {
-        if (!m_isOpen || m_indexBuilt) return m_indexBuilt;
+    bool BuildKeyframeIndex()
+    {
+        if (!m_isOpen || m_indexBuilt)
+            return m_indexBuilt;
         m_indexBuilt = true;
         return true;
     }
 
-    const VideoMetadata& GetVideoMetadata() const { return m_metadata; }
-    void SetMetadata(const VideoMetadata& meta) { m_metadata = meta; }
+    const VideoMetadata& GetVideoMetadata() const
+    {
+        return m_metadata;
+    }
+    void SetMetadata(const VideoMetadata& meta)
+    {
+        m_metadata = meta;
+    }
 
-    void SetMaxKeyframes(uint32_t max) { m_config.maxKeyframes = max; }
-    void SetExtractionMode(KeyframeExtractionMode mode) { m_config.mode = mode; }
-    void SetKeyframeCallback(KeyframeCallback cb) { m_callback = std::move(cb); }
+    void SetMaxKeyframes(uint32_t max)
+    {
+        m_config.maxKeyframes = max;
+    }
+    void SetExtractionMode(KeyframeExtractionMode mode)
+    {
+        m_config.mode = mode;
+    }
+    void SetKeyframeCallback(KeyframeCallback cb)
+    {
+        m_callback = std::move(cb);
+    }
 
-    const std::vector<KeyframeInfo>& GetKeyframes() const { return m_keyframes; }
-    uint32_t GetKeyframeCount() const { return static_cast<uint32_t>(m_keyframes.size()); }
-    bool IsOpen() const { return m_isOpen; }
+    const std::vector<KeyframeInfo>& GetKeyframes() const
+    {
+        return m_keyframes;
+    }
+    uint32_t GetKeyframeCount() const
+    {
+        return static_cast<uint32_t>(m_keyframes.size());
+    }
+    bool IsOpen() const
+    {
+        return m_isOpen;
+    }
 
-KeyframeStrategy GetStrategy() const noexcept { return m_strategy; }
-    uint32_t GetCandidateCount() const noexcept { return static_cast<uint32_t>(m_candidates.size()); }
+    KeyframeStrategy GetStrategy() const noexcept
+    {
+        return m_strategy;
+    }
+    uint32_t GetCandidateCount() const noexcept
+    {
+        return static_cast<uint32_t>(m_candidates.size());
+    }
 
-    void Close() {
+    void Close()
+    {
         m_isOpen = false;
         m_indexBuilt = false;
         m_keyframes.clear();
         m_metadata = {};
     }
 
-private:
+  private:
     ExtractionConfig m_config;
     VideoMetadata m_metadata;
     std::vector<KeyframeInfo> m_keyframes;
@@ -165,5 +216,5 @@ private:
     bool m_indexBuilt = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

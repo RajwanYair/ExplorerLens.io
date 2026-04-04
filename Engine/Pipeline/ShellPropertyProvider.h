@@ -7,15 +7,15 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
-#include <algorithm>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -38,35 +38,45 @@ enum class ShellPropertyType : uint8_t {
     DateTime = 5
 };
 
-struct ShellPropertyEntry {
-    std::wstring          name;
-    std::wstring          displayName;
-    std::wstring          stringValue;
-    uint64_t              numericValue = 0;
-    double                doubleValue = 0.0;
+struct ShellPropertyEntry
+{
+    std::wstring name;
+    std::wstring displayName;
+    std::wstring stringValue;
+    uint64_t numericValue = 0;
+    double doubleValue = 0.0;
     ShellPropertyCategory category = ShellPropertyCategory::General;
-    ShellPropertyType     type = ShellPropertyType::String;
-    bool                  isReadOnly = true;
+    ShellPropertyType type = ShellPropertyType::String;
+    bool isReadOnly = true;
 };
 
-struct ShellPropertySet {
-    std::wstring                    filePath;
+struct ShellPropertySet
+{
+    std::wstring filePath;
     std::vector<ShellPropertyEntry> entries;
-    ShellPropertyCategory           primaryCategory = ShellPropertyCategory::General;
+    ShellPropertyCategory primaryCategory = ShellPropertyCategory::General;
 };
 
-class ShellPropertyProvider {
-public:
-    static ShellPropertyProvider& Instance() { static ShellPropertyProvider s; return s; }
+class ShellPropertyProvider
+{
+  public:
+    static ShellPropertyProvider& Instance()
+    {
+        static ShellPropertyProvider s;
+        return s;
+    }
 
-    bool SetProperty(const std::wstring& name, const ShellPropertyEntry& entry) {
-        if (name.empty()) return false;
+    bool SetProperty(const std::wstring& name, const ShellPropertyEntry& entry)
+    {
+        if (name.empty())
+            return false;
         m_properties[name] = entry;
         return true;
     }
 
-    bool SetStringProperty(const std::wstring& name, const std::wstring& displayName,
-        const std::wstring& value, ShellPropertyCategory cat = ShellPropertyCategory::General) {
+    bool SetStringProperty(const std::wstring& name, const std::wstring& displayName, const std::wstring& value,
+                           ShellPropertyCategory cat = ShellPropertyCategory::General)
+    {
         ShellPropertyEntry entry;
         entry.name = name;
         entry.displayName = displayName;
@@ -77,8 +87,9 @@ public:
         return true;
     }
 
-    bool SetNumericProperty(const std::wstring& name, const std::wstring& displayName,
-        uint64_t value, ShellPropertyCategory cat = ShellPropertyCategory::General) {
+    bool SetNumericProperty(const std::wstring& name, const std::wstring& displayName, uint64_t value,
+                            ShellPropertyCategory cat = ShellPropertyCategory::General)
+    {
         ShellPropertyEntry entry;
         entry.name = name;
         entry.displayName = displayName;
@@ -89,7 +100,8 @@ public:
         return true;
     }
 
-    ShellPropertySet GetProperties(ShellPropertyCategory filter) const {
+    ShellPropertySet GetProperties(ShellPropertyCategory filter) const
+    {
         ShellPropertySet set;
         set.primaryCategory = filter;
         for (const auto& [name, entry] : m_properties) {
@@ -100,43 +112,55 @@ public:
         return set;
     }
 
-    ShellPropertySet GetAllProperties() const {
+    ShellPropertySet GetAllProperties() const
+    {
         ShellPropertySet set;
         for (const auto& [name, entry] : m_properties)
             set.entries.push_back(entry);
         return set;
     }
 
-    const ShellPropertyEntry* FindProperty(const std::wstring& name) const {
+    const ShellPropertyEntry* FindProperty(const std::wstring& name) const
+    {
         auto it = m_properties.find(name);
-        if (it != m_properties.end()) return &it->second;
+        if (it != m_properties.end())
+            return &it->second;
         return nullptr;
     }
 
-    bool PopulateImageProperties(uint32_t width, uint32_t height, uint32_t bpp,
-        const std::wstring& format) {
+    bool PopulateImageProperties(uint32_t width, uint32_t height, uint32_t bpp, const std::wstring& format)
+    {
         SetNumericProperty(L"System.Image.HorizontalSize", L"Width", width, ShellPropertyCategory::Image);
         SetNumericProperty(L"System.Image.VerticalSize", L"Height", height, ShellPropertyCategory::Image);
         SetNumericProperty(L"System.Image.BitDepth", L"Bit Depth", bpp, ShellPropertyCategory::Image);
         SetStringProperty(L"System.Image.Format", L"Format", format, ShellPropertyCategory::Image);
         SetStringProperty(L"System.Image.Dimensions", L"Dimensions",
-            std::to_wstring(width) + L" x " + std::to_wstring(height), ShellPropertyCategory::Image);
+                          std::to_wstring(width) + L" x " + std::to_wstring(height), ShellPropertyCategory::Image);
         return true;
     }
 
-    size_t Count() const { return m_properties.size(); }
+    size_t Count() const
+    {
+        return m_properties.size();
+    }
 
-    void Clear() { m_properties.clear(); }
+    void Clear()
+    {
+        m_properties.clear();
+    }
 
-    bool Validate() const {
+    bool Validate() const
+    {
         for (const auto& [name, entry] : m_properties) {
-            if (entry.name.empty()) return false;
-            if (entry.displayName.empty()) return false;
+            if (entry.name.empty())
+                return false;
+            if (entry.displayName.empty())
+                return false;
         }
         return true;
     }
 
-private:
+  private:
     ShellPropertyProvider() = default;
     ~ShellPropertyProvider() = default;
     ShellPropertyProvider(const ShellPropertyProvider&) = delete;
@@ -145,5 +169,5 @@ private:
     std::unordered_map<std::wstring, ShellPropertyEntry> m_properties;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

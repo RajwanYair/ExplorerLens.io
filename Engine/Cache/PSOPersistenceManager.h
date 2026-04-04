@@ -7,13 +7,13 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <chrono>
-#include <mutex>
+#include <cstdint>
 #include <functional>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -28,26 +28,27 @@ enum class PSOType : uint8_t {
     RayTracing = 2
 };
 
-inline const char* PSOTypeToString(PSOType type) {
-    static const char* names[] = { "Graphics", "Compute", "RayTracing" };
+inline const char* PSOTypeToString(PSOType type)
+{
+    static const char* names[] = {"Graphics", "Compute", "RayTracing"};
     return names[static_cast<uint8_t>(type)];
 }
 
-struct PersistentPSOEntry {
-    std::string  name;                 // Human-readable pipeline name
-    uint64_t     hash = 0;     // Content-addressable hash (XXH3)
-    PSOType      type = PSOType::Compute;
-    std::vector<uint8_t> blob;         // Serialized PSO binary blob
-    uint64_t     blobSizeBytes = 0;
-    uint64_t     compilationTimeUs = 0;// Original compilation time
-    uint64_t     loadTimeUs = 0;    // Cache load time
-    uint32_t     hitCount = 0;    // Times reused from cache
-    bool         isValid = false;
+struct PersistentPSOEntry
+{
+    std::string name;   // Human-readable pipeline name
+    uint64_t hash = 0;  // Content-addressable hash (XXH3)
+    PSOType type = PSOType::Compute;
+    std::vector<uint8_t> blob;  // Serialized PSO binary blob
+    uint64_t blobSizeBytes = 0;
+    uint64_t compilationTimeUs = 0;  // Original compilation time
+    uint64_t loadTimeUs = 0;         // Cache load time
+    uint32_t hitCount = 0;           // Times reused from cache
+    bool isValid = false;
 
-    double GetSpeedupRatio() const {
-        return (compilationTimeUs > 0 && loadTimeUs > 0)
-            ? static_cast<double>(compilationTimeUs) / loadTimeUs
-            : 0.0;
+    double GetSpeedupRatio() const
+    {
+        return (compilationTimeUs > 0 && loadTimeUs > 0) ? static_cast<double>(compilationTimeUs) / loadTimeUs : 0.0;
     }
 };
 
@@ -55,34 +56,40 @@ struct PersistentPSOEntry {
 // Cache file header (binary format)
 // ============================================================================
 
-struct PSOCacheFileHeader {
+struct PSOCacheFileHeader
+{
     uint32_t magic = 0x4C505343;  // "LPSC" - LENS PSO Cache
     uint32_t version = 1;
     uint32_t entryCount = 0;
     uint64_t totalSize = 0;
-    uint64_t driverHash = 0;    // GPU driver version hash
-    uint64_t adapterHash = 0;    // GPU adapter LUID hash
+    uint64_t driverHash = 0;   // GPU driver version hash
+    uint64_t adapterHash = 0;  // GPU adapter LUID hash
     uint32_t reserved[4] = {};
 
-    bool IsValid() const { return magic == 0x4C505343 && version == 1; }
+    bool IsValid() const
+    {
+        return magic == 0x4C505343 && version == 1;
+    }
 };
 
 // ============================================================================
 // PSO persistence statistics (distinct from PSOCacheStats in PipelineStateCacheV2)
 // ============================================================================
 
-struct PersistenceCacheStats {
+struct PersistenceCacheStats
+{
     uint32_t totalEntries = 0;
     uint32_t validEntries = 0;
-    uint32_t staleEntries = 0;   // Driver version mismatch
+    uint32_t staleEntries = 0;  // Driver version mismatch
     uint64_t totalBlobBytes = 0;
     uint64_t totalHits = 0;
     uint64_t totalMisses = 0;
-    double   avgLoadTimeUs = 0.0;
-    double   avgCompileTimeUs = 0.0;
-    double   totalTimeSavedMs = 0.0; // Time saved by cache
+    double avgLoadTimeUs = 0.0;
+    double avgCompileTimeUs = 0.0;
+    double totalTimeSavedMs = 0.0;  // Time saved by cache
 
-    double GetHitRate() const {
+    double GetHitRate() const
+    {
         uint64_t total = totalHits + totalMisses;
         return (total > 0) ? (static_cast<double>(totalHits) / total * 100.0) : 0.0;
     }
@@ -92,8 +99,9 @@ struct PersistenceCacheStats {
 // PSOPersistenceManager
 // ============================================================================
 
-class PSOPersistenceManager {
-public:
+class PSOPersistenceManager
+{
+  public:
     /// Default cache file path (AppData\Local\ExplorerLens\pso_cache.bin)
     static constexpr const wchar_t* DEFAULT_CACHE_DIR = L"ExplorerLens";
     static constexpr const wchar_t* CACHE_FILENAME = L"pso_cache.bin";
@@ -107,7 +115,8 @@ public:
     // ========================================================================
 
     /// Initialize with GPU adapter info for cache invalidation
-    bool Initialize(uint64_t adapterLUID, uint64_t driverVersion) {
+    bool Initialize(uint64_t adapterLUID, uint64_t driverVersion)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_adapterHash = adapterLUID;
         m_driverHash = driverVersion;
@@ -116,9 +125,11 @@ public:
     }
 
     /// Load cache from disk
-    bool LoadFromDisk(const std::wstring& cacheDir = L"") {
+    bool LoadFromDisk(const std::wstring& cacheDir = L"")
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_initialized) return false;
+        if (!m_initialized)
+            return false;
 
         m_cachePath = cacheDir.empty() ? GetDefaultCachePath() : cacheDir;
 
@@ -129,9 +140,11 @@ public:
     }
 
     /// Save cache to disk
-    bool SaveToDisk() const {
+    bool SaveToDisk() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_initialized || m_entries.empty()) return false;
+        if (!m_initialized || m_entries.empty())
+            return false;
 
         PSOCacheFileHeader header;
         header.entryCount = static_cast<uint32_t>(m_entries.size());
@@ -153,9 +166,9 @@ public:
     // ========================================================================
 
     /// Store a compiled PSO in the cache
-    bool StorePSO(const std::string& name, uint64_t hash, PSOType type,
-        const void* blobData, uint64_t blobSize,
-        uint64_t compilationTimeUs) {
+    bool StorePSO(const std::string& name, uint64_t hash, PSOType type, const void* blobData, uint64_t blobSize,
+                  uint64_t compilationTimeUs)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         if (m_entries.size() >= MAX_CACHE_ENTRIES) {
@@ -180,7 +193,8 @@ public:
     }
 
     /// Look up a cached PSO by hash
-    const PersistentPSOEntry* LookupPSO(uint64_t hash) {
+    const PersistentPSOEntry* LookupPSO(uint64_t hash)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_entries.find(hash);
         if (it != m_entries.end() && it->second.isValid) {
@@ -193,7 +207,8 @@ public:
     }
 
     /// Invalidate all entries (e.g., driver update)
-    void InvalidateAll() {
+    void InvalidateAll()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (auto& [hash, entry] : m_entries) {
             entry.isValid = false;
@@ -202,15 +217,15 @@ public:
     }
 
     /// Remove invalid/stale entries
-    uint32_t PurgeStale() {
+    uint32_t PurgeStale()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint32_t purged = 0;
-        for (auto it = m_entries.begin(); it != m_entries.end(); ) {
+        for (auto it = m_entries.begin(); it != m_entries.end();) {
             if (!it->second.isValid) {
                 it = m_entries.erase(it);
                 purged++;
-            }
-            else {
+            } else {
                 ++it;
             }
         }
@@ -221,35 +236,50 @@ public:
     // Statistics
     // ========================================================================
 
-    PersistenceCacheStats GetStats() const {
+    PersistenceCacheStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         PersistenceCacheStats stats = m_stats;
         stats.totalEntries = static_cast<uint32_t>(m_entries.size());
         stats.validEntries = 0;
         stats.totalBlobBytes = 0;
         for (const auto& [hash, entry] : m_entries) {
-            if (entry.isValid) stats.validEntries++;
+            if (entry.isValid)
+                stats.validEntries++;
             stats.totalBlobBytes += entry.blobSizeBytes;
         }
         return stats;
     }
 
-    uint32_t GetEntryCount() const { return static_cast<uint32_t>(m_entries.size()); }
-    bool IsInitialized() const { return m_initialized; }
-    bool IsLoadedFromDisk() const { return m_loadedFromDisk; }
+    uint32_t GetEntryCount() const
+    {
+        return static_cast<uint32_t>(m_entries.size());
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    bool IsLoadedFromDisk() const
+    {
+        return m_loadedFromDisk;
+    }
 
-private:
-    std::wstring GetDefaultCachePath() const {
+  private:
+    std::wstring GetDefaultCachePath() const
+    {
         // %LOCALAPPDATA%\ExplorerLens\pso_cache.bin
         return std::wstring(DEFAULT_CACHE_DIR) + L"\\" + CACHE_FILENAME;
     }
 
-    void EvictLRU() {
+    void EvictLRU()
+    {
         // Remove the entry with lowest hitCount
-        if (m_entries.empty()) return;
+        if (m_entries.empty())
+            return;
         auto lru = m_entries.begin();
         for (auto it = m_entries.begin(); it != m_entries.end(); ++it) {
-            if (it->second.hitCount < lru->second.hitCount) lru = it;
+            if (it->second.hitCount < lru->second.hitCount)
+                lru = it;
         }
         m_entries.erase(lru);
     }
@@ -264,5 +294,5 @@ private:
     PersistenceCacheStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,12 +6,12 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -25,7 +25,8 @@ enum class NotationFormat : uint8_t {
     Unknown
 };
 
-struct NoteInfo {
+struct NoteInfo
+{
     uint8_t pitch = 60;
     uint8_t octave = 4;
     float duration = 1.0f;
@@ -33,7 +34,8 @@ struct NoteInfo {
     char noteName = 'C';
 };
 
-struct NotationHeader {
+struct NotationHeader
+{
     NotationFormat format = NotationFormat::Unknown;
     std::string title;
     std::string composer;
@@ -45,15 +47,19 @@ struct NotationHeader {
     bool isValid = false;
 };
 
-class NotationDecoder {
-public:
-    static NotationDecoder& Instance() {
+class NotationDecoder
+{
+  public:
+    static NotationDecoder& Instance()
+    {
         static NotationDecoder instance;
         return instance;
     }
 
-    inline NotationFormat DetectFormat(const uint8_t* data, size_t size) const {
-        if (!data || size < 4) return NotationFormat::Unknown;
+    inline NotationFormat DetectFormat(const uint8_t* data, size_t size) const
+    {
+        if (!data || size < 4)
+            return NotationFormat::Unknown;
 
         if (data[0] == 0x4D && data[1] == 0x54 && data[2] == 0x68 && data[3] == 0x64)
             return NotationFormat::MIDI;
@@ -68,21 +74,23 @@ public:
         return NotationFormat::Unknown;
     }
 
-    inline NotationHeader ParseHeader(const uint8_t* data, size_t size) const {
+    inline NotationHeader ParseHeader(const uint8_t* data, size_t size) const
+    {
         NotationHeader header;
         header.format = DetectFormat(data, size);
         header.isValid = header.format != NotationFormat::Unknown;
-        if (!header.isValid) return header;
+        if (!header.isValid)
+            return header;
 
         std::string content(reinterpret_cast<const char*>(data), (std::min)(size, static_cast<size_t>(4096)));
 
         if (header.format == NotationFormat::MusicXML) {
             header.title = ExtractXMLTag(content, "work-title");
-            if (header.title.empty()) header.title = ExtractXMLTag(content, "movement-title");
+            if (header.title.empty())
+                header.title = ExtractXMLTag(content, "movement-title");
             header.composer = ExtractXMLTag(content, "creator");
             header.timeSignature = ExtractXMLTag(content, "beats") + "/" + ExtractXMLTag(content, "beat-type");
-        }
-        else if (header.format == NotationFormat::LilyPond) {
+        } else if (header.format == NotationFormat::LilyPond) {
             header.title = ExtractLilyPondField(content, "title");
             header.composer = ExtractLilyPondField(content, "composer");
         }
@@ -90,11 +98,12 @@ public:
         return header;
     }
 
-    inline std::vector<uint8_t> GenerateStaffPreview(const std::vector<NoteInfo>& notes,
-        uint32_t width, uint32_t height,
-        uint8_t bgColor = 245, uint8_t lineColor = 40) const {
+    inline std::vector<uint8_t> GenerateStaffPreview(const std::vector<NoteInfo>& notes, uint32_t width, uint32_t height,
+                                                     uint8_t bgColor = 245, uint8_t lineColor = 40) const
+    {
         std::vector<uint8_t> thumbnail(static_cast<size_t>(width) * height * 3, bgColor);
-        if (width == 0 || height == 0) return thumbnail;
+        if (width == 0 || height == 0)
+            return thumbnail;
 
         float staffTop = height * 0.25f;
         float staffHeight = height * 0.5f;
@@ -119,11 +128,10 @@ public:
 
                 if (notes[i].isRest) {
                     DrawRect(thumbnail.data(), width, height, nx - 3, ny - 4, 6, 8, 40, 40, 40);
-                }
-                else {
+                } else {
                     bool filled = notes[i].duration <= 0.5f;
-                    DrawNoteHead(thumbnail.data(), width, height, nx, ny,
-                        static_cast<int>(lineSpacing * 0.35f), filled, 10, 10, 10);
+                    DrawNoteHead(thumbnail.data(), width, height, nx, ny, static_cast<int>(lineSpacing * 0.35f), filled,
+                                 10, 10, 10);
 
                     if (notes[i].duration <= 2.0f) {
                         int stemDir = ny < static_cast<int>(staffTop + 2 * lineSpacing) ? 1 : -1;
@@ -137,86 +145,116 @@ public:
         return thumbnail;
     }
 
-    inline std::string FormatToString(NotationFormat fmt) const {
+    inline std::string FormatToString(NotationFormat fmt) const
+    {
         switch (fmt) {
-        case NotationFormat::MusicXML:  return "MusicXML";
-        case NotationFormat::LilyPond:  return "LilyPond";
-        case NotationFormat::MusicJSON: return "MusicJSON";
-        case NotationFormat::MIDI:      return "MIDI";
-        case NotationFormat::ABC:       return "ABC Notation";
-        default:                        return "Unknown";
+            case NotationFormat::MusicXML:
+                return "MusicXML";
+            case NotationFormat::LilyPond:
+                return "LilyPond";
+            case NotationFormat::MusicJSON:
+                return "MusicJSON";
+            case NotationFormat::MIDI:
+                return "MIDI";
+            case NotationFormat::ABC:
+                return "ABC Notation";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     NotationDecoder() = default;
 
-    inline std::string ExtractXMLTag(const std::string& xml, const std::string& tag) const {
+    inline std::string ExtractXMLTag(const std::string& xml, const std::string& tag) const
+    {
         std::string openTag = "<" + tag;
         size_t start = xml.find(openTag);
-        if (start == std::string::npos) return "";
+        if (start == std::string::npos)
+            return "";
         start = xml.find('>', start);
-        if (start == std::string::npos) return "";
+        if (start == std::string::npos)
+            return "";
         ++start;
         size_t end = xml.find("</", start);
-        if (end == std::string::npos) return "";
+        if (end == std::string::npos)
+            return "";
         return xml.substr(start, end - start);
     }
 
-    inline std::string ExtractLilyPondField(const std::string& content, const std::string& field) const {
+    inline std::string ExtractLilyPondField(const std::string& content, const std::string& field) const
+    {
         size_t pos = content.find(field);
-        if (pos == std::string::npos) return "";
+        if (pos == std::string::npos)
+            return "";
         pos = content.find('"', pos);
-        if (pos == std::string::npos) return "";
+        if (pos == std::string::npos)
+            return "";
         size_t end = content.find('"', pos + 1);
-        if (end == std::string::npos) return "";
+        if (end == std::string::npos)
+            return "";
         return content.substr(pos + 1, end - pos - 1);
     }
 
-    inline void DrawHLine(uint8_t* p, uint32_t w, uint32_t h, int x0, int x1, int y, uint8_t c) const {
-        if (y < 0 || y >= static_cast<int>(h)) return;
+    inline void DrawHLine(uint8_t* p, uint32_t w, uint32_t h, int x0, int x1, int y, uint8_t c) const
+    {
+        if (y < 0 || y >= static_cast<int>(h))
+            return;
         for (int x = (std::max)(0, x0); x <= (std::min)(static_cast<int>(w) - 1, x1); ++x) {
             size_t idx = (static_cast<size_t>(y) * w + x) * 3;
-            p[idx] = c; p[idx + 1] = c; p[idx + 2] = c;
+            p[idx] = c;
+            p[idx + 1] = c;
+            p[idx + 2] = c;
         }
     }
 
-    inline void DrawVLine(uint8_t* p, uint32_t w, uint32_t h, int x, int y0, int y1, uint8_t c) const {
-        if (x < 0 || x >= static_cast<int>(w)) return;
+    inline void DrawVLine(uint8_t* p, uint32_t w, uint32_t h, int x, int y0, int y1, uint8_t c) const
+    {
+        if (x < 0 || x >= static_cast<int>(w))
+            return;
         int yStart = (std::min)(y0, y1), yEnd = (std::max)(y0, y1);
         for (int y = (std::max)(0, yStart); y <= (std::min)(static_cast<int>(h) - 1, yEnd); ++y) {
             size_t idx = (static_cast<size_t>(y) * w + x) * 3;
-            p[idx] = c; p[idx + 1] = c; p[idx + 2] = c;
+            p[idx] = c;
+            p[idx + 1] = c;
+            p[idx + 2] = c;
         }
     }
 
-    inline void DrawDot(uint8_t* p, uint32_t w, uint32_t h, int cx, int cy, int r,
-        uint8_t cr, uint8_t cg, uint8_t cb) const {
+    inline void DrawDot(uint8_t* p, uint32_t w, uint32_t h, int cx, int cy, int r, uint8_t cr, uint8_t cg,
+                        uint8_t cb) const
+    {
         for (int dy = -r; dy <= r; ++dy)
             for (int dx = -r; dx <= r; ++dx)
                 if (dx * dx + dy * dy <= r * r) {
                     int px = cx + dx, py = cy + dy;
                     if (px >= 0 && px < static_cast<int>(w) && py >= 0 && py < static_cast<int>(h)) {
                         size_t idx = (static_cast<size_t>(py) * w + px) * 3;
-                        p[idx] = cr; p[idx + 1] = cg; p[idx + 2] = cb;
+                        p[idx] = cr;
+                        p[idx + 1] = cg;
+                        p[idx + 2] = cb;
                     }
                 }
     }
 
-    inline void DrawRect(uint8_t* p, uint32_t w, uint32_t h, int x, int y, int rw, int rh,
-        uint8_t cr, uint8_t cg, uint8_t cb) const {
+    inline void DrawRect(uint8_t* p, uint32_t w, uint32_t h, int x, int y, int rw, int rh, uint8_t cr, uint8_t cg,
+                         uint8_t cb) const
+    {
         for (int dy = 0; dy < rh; ++dy)
             for (int dx = 0; dx < rw; ++dx) {
                 int px = x + dx, py = y + dy;
                 if (px >= 0 && px < static_cast<int>(w) && py >= 0 && py < static_cast<int>(h)) {
                     size_t idx = (static_cast<size_t>(py) * w + px) * 3;
-                    p[idx] = cr; p[idx + 1] = cg; p[idx + 2] = cb;
+                    p[idx] = cr;
+                    p[idx + 1] = cg;
+                    p[idx + 2] = cb;
                 }
             }
     }
 
-    inline void DrawNoteHead(uint8_t* p, uint32_t w, uint32_t h, int cx, int cy, int r, bool filled,
-        uint8_t cr, uint8_t cg, uint8_t cb) const {
+    inline void DrawNoteHead(uint8_t* p, uint32_t w, uint32_t h, int cx, int cy, int r, bool filled, uint8_t cr,
+                             uint8_t cg, uint8_t cb) const
+    {
         for (int dy = -r; dy <= r; ++dy)
             for (int dx = -r - 1; dx <= r + 1; ++dx) {
                 float ex = static_cast<float>(dx) / (r + 1);
@@ -227,7 +265,9 @@ private:
                         int px = cx + dx, py = cy + dy;
                         if (px >= 0 && px < static_cast<int>(w) && py >= 0 && py < static_cast<int>(h)) {
                             size_t idx = (static_cast<size_t>(py) * w + px) * 3;
-                            p[idx] = cr; p[idx + 1] = cg; p[idx + 2] = cb;
+                            p[idx] = cr;
+                            p[idx + 1] = cg;
+                            p[idx + 2] = cb;
                         }
                     }
                 }
@@ -235,5 +275,5 @@ private:
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,12 +6,13 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class LSHandlerRole : uint8_t {
     Viewer,
@@ -26,7 +27,8 @@ enum class LSRegistrationScope : uint8_t {
     Temporary
 };
 
-struct LaunchServicesConfig {
+struct LaunchServicesConfig
+{
     LSHandlerRole role = LSHandlerRole::Viewer;
     LSRegistrationScope scope = LSRegistrationScope::User;
     std::string bundleId;
@@ -34,8 +36,9 @@ struct LaunchServicesConfig {
     std::string iconName;
 };
 
-class MacOSLaunchServicesAdapter {
-public:
+class MacOSLaunchServicesAdapter
+{
+  public:
     MacOSLaunchServicesAdapter() = default;
     ~MacOSLaunchServicesAdapter() = default;
 
@@ -44,7 +47,8 @@ public:
     MacOSLaunchServicesAdapter(MacOSLaunchServicesAdapter&&) noexcept = default;
     MacOSLaunchServicesAdapter& operator=(MacOSLaunchServicesAdapter&&) noexcept = default;
 
-    bool RegisterHandler(LaunchServicesConfig const& config) {
+    bool RegisterHandler(LaunchServicesConfig const& config)
+    {
         m_config = config;
         if (!IsHandlerRegistered(config.uti)) {
             m_registeredUTIs.push_back(config.uti);
@@ -52,7 +56,8 @@ public:
         return true;
     }
 
-    bool UnregisterHandler(std::string const& uti) {
+    bool UnregisterHandler(std::string const& uti)
+    {
         auto it = std::find(m_registeredUTIs.begin(), m_registeredUTIs.end(), uti);
         if (it != m_registeredUTIs.end()) {
             m_registeredUTIs.erase(it);
@@ -60,28 +65,32 @@ public:
         return true;
     }
 
-    [[nodiscard]] bool IsHandlerRegistered(std::string const& uti) const {
-        return std::find(m_registeredUTIs.begin(), m_registeredUTIs.end(), uti)
-            != m_registeredUTIs.end();
+    [[nodiscard]] bool IsHandlerRegistered(std::string const& uti) const
+    {
+        return std::find(m_registeredUTIs.begin(), m_registeredUTIs.end(), uti) != m_registeredUTIs.end();
     }
 
-    [[nodiscard]] std::vector<std::string> GetRegisteredUTIs() const {
+    [[nodiscard]] std::vector<std::string> GetRegisteredUTIs() const
+    {
         return m_registeredUTIs;
     }
 
-    bool SetDefaultHandler(std::string const& uti) {
+    bool SetDefaultHandler(std::string const& uti)
+    {
         if (!IsHandlerRegistered(uti))
             return false;
         return true;
     }
 
-    [[nodiscard]] LaunchServicesConfig const& GetConfig() const {
+    [[nodiscard]] LaunchServicesConfig const& GetConfig() const
+    {
         return m_config;
     }
 
-private:
+  private:
     LaunchServicesConfig m_config;
     std::vector<std::string> m_registeredUTIs;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

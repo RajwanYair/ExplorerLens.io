@@ -37,14 +37,14 @@
 #pragma once
 
 #include <windows.h>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <string>
+#include <vector>
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include <vector>
-#include <cstdint>
-#include <cmath>
-#include <algorithm>
-#include <string>
-#include <chrono>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -59,12 +59,17 @@ enum class ToneMapKernelOp : uint8_t {
     Exposure = 3
 };
 
-inline const char* ToneMapKernelOpName(ToneMapKernelOp op) {
+inline const char* ToneMapKernelOpName(ToneMapKernelOp op)
+{
     switch (op) {
-    case ToneMapKernelOp::Reinhard: return "Reinhard";
-    case ToneMapKernelOp::ACES:     return "ACES";
-    case ToneMapKernelOp::Hable:    return "Hable";
-    case ToneMapKernelOp::Exposure: return "Exposure";
+        case ToneMapKernelOp::Reinhard:
+            return "Reinhard";
+        case ToneMapKernelOp::ACES:
+            return "ACES";
+        case ToneMapKernelOp::Hable:
+            return "Hable";
+        case ToneMapKernelOp::Exposure:
+            return "Exposure";
     }
     return "Unknown";
 }
@@ -72,23 +77,28 @@ inline const char* ToneMapKernelOpName(ToneMapKernelOp op) {
 // -----------------------------------------------------------------------
 // ToneMapStats
 // -----------------------------------------------------------------------
-struct ToneMapStats {
+struct ToneMapStats
+{
     ToneMapKernelOp operatorUsed = ToneMapKernelOp::ACES;
-    bool            usedGPU = false;
-    double          processingTimeUs = 0.0;
-    uint64_t        pixelsProcessed = 0;
-    uint64_t        totalCalls = 0;
-    uint64_t        gpuCalls = 0;
-    uint64_t        cpuCalls = 0;
+    bool usedGPU = false;
+    double processingTimeUs = 0.0;
+    uint64_t pixelsProcessed = 0;
+    uint64_t totalCalls = 0;
+    uint64_t gpuCalls = 0;
+    uint64_t cpuCalls = 0;
 };
 
 // -----------------------------------------------------------------------
 // HDRToneMapKernel
 // -----------------------------------------------------------------------
-class HDRToneMapKernel {
-public:
+class HDRToneMapKernel
+{
+  public:
     HDRToneMapKernel() = default;
-    ~HDRToneMapKernel() { Shutdown(); }
+    ~HDRToneMapKernel()
+    {
+        Shutdown();
+    }
 
     HDRToneMapKernel(const HDRToneMapKernel&) = delete;
     HDRToneMapKernel& operator=(const HDRToneMapKernel&) = delete;
@@ -96,12 +106,15 @@ public:
     // ================================================================
     // Initialize — create D3D device, compile all 4 shader variants
     // ================================================================
-    inline bool Initialize() {
-        if (m_ready) return true;
+    inline bool Initialize()
+    {
+        if (m_ready)
+            return true;
 
         m_hD3D11 = ::LoadLibraryW(L"d3d11.dll");
         m_hCompiler = ::LoadLibraryW(L"d3dcompiler_47.dll");
-        if (!m_hCompiler) m_hCompiler = ::LoadLibraryW(L"d3dcompiler_46.dll");
+        if (!m_hCompiler)
+            m_hCompiler = ::LoadLibraryW(L"d3dcompiler_46.dll");
 
         CreateDevice();
 
@@ -118,9 +131,9 @@ public:
     // ================================================================
     // ToneMap — main entry
     // ================================================================
-    inline bool ToneMap(const float* srcHDR, uint32_t width, uint32_t height,
-        uint32_t channels, uint8_t* dstSDR,
-        ToneMapKernelOp op = ToneMapKernelOp::ACES) {
+    inline bool ToneMap(const float* srcHDR, uint32_t width, uint32_t height, uint32_t channels, uint8_t* dstSDR,
+                        ToneMapKernelOp op = ToneMapKernelOp::ACES)
+    {
         if (!srcHDR || !dstSDR || width == 0 || height == 0 || channels < 3)
             return false;
 
@@ -141,33 +154,46 @@ public:
         m_stats.operatorUsed = op;
         m_stats.usedGPU = gpu;
         m_stats.totalCalls++;
-        if (gpu) m_stats.gpuCalls++; else m_stats.cpuCalls++;
+        if (gpu)
+            m_stats.gpuCalls++;
+        else
+            m_stats.cpuCalls++;
         return true;
     }
 
-    inline void SetExposure(float ev) { m_exposureEV = ev; }
-    inline void SetGamma(float gamma) { m_gamma = (gamma > 0.1f) ? gamma : 2.2f; }
-    inline ToneMapStats GetStats() const { return m_stats; }
+    inline void SetExposure(float ev)
+    {
+        m_exposureEV = ev;
+    }
+    inline void SetGamma(float gamma)
+    {
+        m_gamma = (gamma > 0.1f) ? gamma : 2.2f;
+    }
+    inline ToneMapStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     // ---- state ----
-    bool               m_ready = false;
-    float              m_exposureEV = 0.0f;
-    float              m_gamma = 2.2f;
-    HMODULE            m_hD3D11 = nullptr;
-    HMODULE            m_hCompiler = nullptr;
+    bool m_ready = false;
+    float m_exposureEV = 0.0f;
+    float m_gamma = 2.2f;
+    HMODULE m_hD3D11 = nullptr;
+    HMODULE m_hCompiler = nullptr;
     ID3D11Device* m_device = nullptr;
     ID3D11DeviceContext* m_ctx = nullptr;
     ID3D11ComputeShader* m_shaders[4] = {};
     ID3D11Buffer* m_cbToneMap = nullptr;
-    ToneMapStats       m_stats{};
+    ToneMapStats m_stats{};
 
-    struct alignas(16) CBToneMap {
+    struct alignas(16) CBToneMap
+    {
         uint32_t width;
         uint32_t height;
-        float    exposure;
-        float    gamma;
-        float    whitePoint;
+        float exposure;
+        float gamma;
+        float whitePoint;
         uint32_t opIndex;
         uint32_t channels;
         uint32_t _pad;
@@ -176,7 +202,8 @@ private:
     // ================================================================
     // HLSL — all 4 operators in one source, macro-switched
     // ================================================================
-    static const char* HLSLSource() {
+    static const char* HLSLSource()
+    {
         return R"HLSL(
 cbuffer CB : register(b0) {
     uint  imgWidth;
@@ -255,21 +282,22 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ================================================================
     // CreateDevice
     // ================================================================
-    inline void CreateDevice() {
-        if (!m_hD3D11) return;
-        using PFN = HRESULT(WINAPI*)(IDXGIAdapter*, D3D_DRIVER_TYPE, HMODULE,
-            UINT, const D3D_FEATURE_LEVEL*, UINT, UINT,
-            ID3D11Device**, D3D_FEATURE_LEVEL*, ID3D11DeviceContext**);
+    inline void CreateDevice()
+    {
+        if (!m_hD3D11)
+            return;
+        using PFN = HRESULT(WINAPI*)(IDXGIAdapter*, D3D_DRIVER_TYPE, HMODULE, UINT, const D3D_FEATURE_LEVEL*, UINT,
+                                     UINT, ID3D11Device**, D3D_FEATURE_LEVEL*, ID3D11DeviceContext**);
         auto pfn = reinterpret_cast<PFN>(::GetProcAddress(m_hD3D11, "D3D11CreateDevice"));
-        if (!pfn) return;
+        if (!pfn)
+            return;
 
-        D3D_FEATURE_LEVEL fl[] = { D3D_FEATURE_LEVEL_11_0 };
+        D3D_FEATURE_LEVEL fl[] = {D3D_FEATURE_LEVEL_11_0};
         D3D_FEATURE_LEVEL got{};
-        HRESULT hr = pfn(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
-            fl, 1, D3D11_SDK_VERSION, &m_device, &got, &m_ctx);
+        HRESULT hr =
+            pfn(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, fl, 1, D3D11_SDK_VERSION, &m_device, &got, &m_ctx);
         if (FAILED(hr)) {
-            pfn(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, 0,
-                fl, 1, D3D11_SDK_VERSION, &m_device, &got, &m_ctx);
+            pfn(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, 0, fl, 1, D3D11_SDK_VERSION, &m_device, &got, &m_ctx);
         }
         if (m_device) {
             D3D11_BUFFER_DESC bd{};
@@ -284,14 +312,13 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ================================================================
     // CompileVariant — compile one tone-map shader variant
     // ================================================================
-    inline void CompileVariant(const char* define, uint32_t idx) {
-        using PFN_Compile = HRESULT(WINAPI*)(LPCVOID, SIZE_T, LPCSTR,
-            const D3D_SHADER_MACRO*, ID3DInclude*,
-            LPCSTR, LPCSTR, UINT, UINT,
-            ID3DBlob**, ID3DBlob**);
-        auto pfn = reinterpret_cast<PFN_Compile>(
-            ::GetProcAddress(m_hCompiler, "D3DCompile"));
-        if (!pfn) return;
+    inline void CompileVariant(const char* define, uint32_t idx)
+    {
+        using PFN_Compile = HRESULT(WINAPI*)(LPCVOID, SIZE_T, LPCSTR, const D3D_SHADER_MACRO*, ID3DInclude*, LPCSTR,
+                                             LPCSTR, UINT, UINT, ID3DBlob**, ID3DBlob**);
+        auto pfn = reinterpret_cast<PFN_Compile>(::GetProcAddress(m_hCompiler, "D3DCompile"));
+        if (!pfn)
+            return;
 
         D3D_SHADER_MACRO macros[2] = {};
         macros[0].Name = define;
@@ -302,13 +329,11 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
         const char* src = HLSLSource();
         ID3DBlob* blob = nullptr;
         ID3DBlob* err = nullptr;
-        HRESULT hr = pfn(src, strlen(src), "ToneMapCS", macros,
-            nullptr, "CSMain", "cs_5_0", 0, 0, &blob, &err);
-        if (err) err->Release();
+        HRESULT hr = pfn(src, strlen(src), "ToneMapCS", macros, nullptr, "CSMain", "cs_5_0", 0, 0, &blob, &err);
+        if (err)
+            err->Release();
         if (SUCCEEDED(hr) && blob) {
-            m_device->CreateComputeShader(blob->GetBufferPointer(),
-                blob->GetBufferSize(), nullptr,
-                &m_shaders[idx]);
+            m_device->CreateComputeShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &m_shaders[idx]);
             blob->Release();
         }
     }
@@ -316,8 +341,8 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ================================================================
     // ToneMapGPU — upload float tex → dispatch → readback RGBA8
     // ================================================================
-    inline bool ToneMapGPU(const float* srcHDR, uint32_t w, uint32_t h,
-        uint32_t ch, uint8_t* dstSDR, uint32_t opIdx) {
+    inline bool ToneMapGPU(const float* srcHDR, uint32_t w, uint32_t h, uint32_t ch, uint8_t* dstSDR, uint32_t opIdx)
+    {
         // -- HDR source as R32G32B32A32_FLOAT texture --
         // Convert to 4-channel if needed
         std::vector<float> rgba;
@@ -334,40 +359,62 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
         }
 
         D3D11_TEXTURE2D_DESC td{};
-        td.Width = w; td.Height = h; td.MipLevels = 1; td.ArraySize = 1;
+        td.Width = w;
+        td.Height = h;
+        td.MipLevels = 1;
+        td.ArraySize = 1;
         td.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-        td.SampleDesc.Count = 1; td.Usage = D3D11_USAGE_IMMUTABLE;
+        td.SampleDesc.Count = 1;
+        td.Usage = D3D11_USAGE_IMMUTABLE;
         td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
-        D3D11_SUBRESOURCE_DATA init{}; init.pSysMem = texData; init.SysMemPitch = w * 16;
+        D3D11_SUBRESOURCE_DATA init{};
+        init.pSysMem = texData;
+        init.SysMemPitch = w * 16;
         ID3D11Texture2D* srcTex = nullptr;
-        if (FAILED(m_device->CreateTexture2D(&td, &init, &srcTex))) return false;
+        if (FAILED(m_device->CreateTexture2D(&td, &init, &srcTex)))
+            return false;
 
         ID3D11ShaderResourceView* srv = nullptr;
         m_device->CreateShaderResourceView(srcTex, nullptr, &srv);
 
         // -- output RGBA8 texture + UAV --
         D3D11_TEXTURE2D_DESC otd{};
-        otd.Width = w; otd.Height = h; otd.MipLevels = 1; otd.ArraySize = 1;
-        otd.Format = DXGI_FORMAT_R8G8B8A8_UNORM; otd.SampleDesc.Count = 1;
-        otd.Usage = D3D11_USAGE_DEFAULT; otd.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+        otd.Width = w;
+        otd.Height = h;
+        otd.MipLevels = 1;
+        otd.ArraySize = 1;
+        otd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        otd.SampleDesc.Count = 1;
+        otd.Usage = D3D11_USAGE_DEFAULT;
+        otd.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 
         ID3D11Texture2D* outTex = nullptr;
         if (FAILED(m_device->CreateTexture2D(&otd, nullptr, &outTex))) {
-            srv->Release(); srcTex->Release(); return false;
+            srv->Release();
+            srcTex->Release();
+            return false;
         }
         ID3D11UnorderedAccessView* uav = nullptr;
         m_device->CreateUnorderedAccessView(outTex, nullptr, &uav);
 
         // -- staging for readback --
         D3D11_TEXTURE2D_DESC stg{};
-        stg.Width = w; stg.Height = h; stg.MipLevels = 1; stg.ArraySize = 1;
-        stg.Format = DXGI_FORMAT_R8G8B8A8_UNORM; stg.SampleDesc.Count = 1;
-        stg.Usage = D3D11_USAGE_STAGING; stg.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        stg.Width = w;
+        stg.Height = h;
+        stg.MipLevels = 1;
+        stg.ArraySize = 1;
+        stg.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        stg.SampleDesc.Count = 1;
+        stg.Usage = D3D11_USAGE_STAGING;
+        stg.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 
         ID3D11Texture2D* stageTex = nullptr;
         if (FAILED(m_device->CreateTexture2D(&stg, nullptr, &stageTex))) {
-            uav->Release(); outTex->Release(); srv->Release(); srcTex->Release();
+            uav->Release();
+            outTex->Release();
+            srv->Release();
+            srcTex->Release();
             return false;
         }
 
@@ -408,16 +455,19 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
         ID3D11UnorderedAccessView* nullUAV = nullptr;
         m_ctx->CSSetShaderResources(0, 1, &nullSRV);
         m_ctx->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
-        stageTex->Release(); uav->Release(); outTex->Release();
-        srv->Release(); srcTex->Release();
+        stageTex->Release();
+        uav->Release();
+        outTex->Release();
+        srv->Release();
+        srcTex->Release();
         return SUCCEEDED(hr);
     }
 
     // ================================================================
     // ToneMapCPU — all 4 operators in software
     // ================================================================
-    inline void ToneMapCPU(const float* srcHDR, uint32_t w, uint32_t h,
-        uint32_t ch, uint8_t* dstSDR, ToneMapKernelOp op) {
+    inline void ToneMapCPU(const float* srcHDR, uint32_t w, uint32_t h, uint32_t ch, uint8_t* dstSDR, ToneMapKernelOp op)
+    {
         const float exposureMul = std::pow(2.0f, m_exposureEV);
         const float invGamma = 1.0f / m_gamma;
         const float whitePoint = 4.0f;
@@ -430,47 +480,49 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
             float a = (ch >= 4) ? srcHDR[i * ch + 3] : 1.0f;
 
             switch (op) {
-            case ToneMapKernelOp::Reinhard: {
-                float lum = 0.2126f * r + 0.7152f * g + 0.0722f * b;
-                float num = lum * (1.0f + lum / (whitePoint * whitePoint));
-                float den = 1.0f + lum;
-                float mapped = (den > 1e-7f) ? (num / den) : 0.0f;
-                float scale = (lum > 1e-7f) ? (mapped / lum) : 1.0f;
-                r *= scale; g *= scale; b *= scale;
-            } break;
+                case ToneMapKernelOp::Reinhard: {
+                    float lum = 0.2126f * r + 0.7152f * g + 0.0722f * b;
+                    float num = lum * (1.0f + lum / (whitePoint * whitePoint));
+                    float den = 1.0f + lum;
+                    float mapped = (den > 1e-7f) ? (num / den) : 0.0f;
+                    float scale = (lum > 1e-7f) ? (mapped / lum) : 1.0f;
+                    r *= scale;
+                    g *= scale;
+                    b *= scale;
+                } break;
 
-            case ToneMapKernelOp::ACES: {
-                // Stephen Hill's fit:  (x*(2.51x+0.03)) / (x*(2.43x+0.59)+0.14)
-                auto aces = [](float x) -> float {
-                    float v = (x * (2.51f * x + 0.03f)) /
-                        (x * (2.43f * x + 0.59f) + 0.14f);
-                    return (std::max)(0.0f, (std::min)(1.0f, v));
+                case ToneMapKernelOp::ACES: {
+                    // Stephen Hill's fit:  (x*(2.51x+0.03)) / (x*(2.43x+0.59)+0.14)
+                    auto aces = [](float x) -> float {
+                        float v = (x * (2.51f * x + 0.03f)) / (x * (2.43f * x + 0.59f) + 0.14f);
+                        return (std::max)(0.0f, (std::min)(1.0f, v));
                     };
-                r = aces(r); g = aces(g); b = aces(b);
-            } break;
+                    r = aces(r);
+                    g = aces(g);
+                    b = aces(b);
+                } break;
 
-            case ToneMapKernelOp::Hable: {
-                // Hable / Uncharted 2
-                auto hable = [](float x) -> float {
-                    const float A = 0.15f, B = 0.50f, C = 0.10f;
-                    const float D = 0.20f, E = 0.02f, F = 0.30f;
-                    return ((x * (A * x + C * B) + D * E) /
-                        (x * (A * x + B) + D * F)) - E / F;
+                case ToneMapKernelOp::Hable: {
+                    // Hable / Uncharted 2
+                    auto hable = [](float x) -> float {
+                        const float A = 0.15f, B = 0.50f, C = 0.10f;
+                        const float D = 0.20f, E = 0.02f, F = 0.30f;
+                        return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
                     };
-                const float W = 11.2f;
-                float denom = hable(W);
-                r = hable(r * 2.0f) / denom;
-                g = hable(g * 2.0f) / denom;
-                b = hable(b * 2.0f) / denom;
-            } break;
+                    const float W = 11.2f;
+                    float denom = hable(W);
+                    r = hable(r * 2.0f) / denom;
+                    g = hable(g * 2.0f) / denom;
+                    b = hable(b * 2.0f) / denom;
+                } break;
 
-            case ToneMapKernelOp::Exposure:
-            default:
-                // Simple clamp (exposure already applied)
-                r = (std::min)(1.0f, (std::max)(0.0f, r));
-                g = (std::min)(1.0f, (std::max)(0.0f, g));
-                b = (std::min)(1.0f, (std::max)(0.0f, b));
-                break;
+                case ToneMapKernelOp::Exposure:
+                default:
+                    // Simple clamp (exposure already applied)
+                    r = (std::min)(1.0f, (std::max)(0.0f, r));
+                    g = (std::min)(1.0f, (std::max)(0.0f, g));
+                    b = (std::min)(1.0f, (std::max)(0.0f, b));
+                    break;
             }
 
             // Gamma
@@ -489,16 +541,37 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ================================================================
     // Shutdown
     // ================================================================
-    inline void Shutdown() {
-        if (m_cbToneMap) { m_cbToneMap->Release(); m_cbToneMap = nullptr; }
-        for (auto& s : m_shaders) { if (s) { s->Release(); s = nullptr; } }
-        if (m_ctx) { m_ctx->Release();    m_ctx = nullptr; }
-        if (m_device) { m_device->Release(); m_device = nullptr; }
-        if (m_hCompiler) { ::FreeLibrary(m_hCompiler); m_hCompiler = nullptr; }
-        if (m_hD3D11) { ::FreeLibrary(m_hD3D11);    m_hD3D11 = nullptr; }
+    inline void Shutdown()
+    {
+        if (m_cbToneMap) {
+            m_cbToneMap->Release();
+            m_cbToneMap = nullptr;
+        }
+        for (auto& s : m_shaders) {
+            if (s) {
+                s->Release();
+                s = nullptr;
+            }
+        }
+        if (m_ctx) {
+            m_ctx->Release();
+            m_ctx = nullptr;
+        }
+        if (m_device) {
+            m_device->Release();
+            m_device = nullptr;
+        }
+        if (m_hCompiler) {
+            ::FreeLibrary(m_hCompiler);
+            m_hCompiler = nullptr;
+        }
+        if (m_hD3D11) {
+            ::FreeLibrary(m_hD3D11);
+            m_hD3D11 = nullptr;
+        }
         m_ready = false;
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

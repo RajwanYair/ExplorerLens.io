@@ -13,49 +13,65 @@
 namespace ExplorerLens::Decoders {
 
 enum class PTEXDataType : uint8_t {
-    UInt8   = 0,
-    UInt16  = 1,
+    UInt8 = 0,
+    UInt16 = 1,
     Float16 = 2,
     Float32 = 3,
 };
 
 enum class PTEXMeshType : uint8_t {
-    Triangle   = 0,
+    Triangle = 0,
     Quadrilateral = 1,
 };
 
-class PIXARDecoder {
-public:
+class PIXARDecoder
+{
+  public:
     PIXARDecoder() = default;
 
-    struct DecodeResult {
-        bool     success   = false;
-        uint32_t width     = 0;
-        uint32_t height    = 0;
-        uint32_t channels  = 0;
+    struct DecodeResult
+    {
+        bool success = false;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t channels = 0;
         std::vector<uint8_t> pixelData;  // BGRA32
         std::string error;
     };
 
-    struct TextureInfo {
-        uint32_t       faceCount    = 0;
-        uint32_t       channels     = 0;
-        PTEXDataType   dataType     = PTEXDataType::UInt8;
-        PTEXMeshType   meshType     = PTEXMeshType::Quadrilateral;
-        uint32_t       mipLevels    = 0;
+    struct TextureInfo
+    {
+        uint32_t faceCount = 0;
+        uint32_t channels = 0;
+        PTEXDataType dataType = PTEXDataType::UInt8;
+        PTEXMeshType meshType = PTEXMeshType::Quadrilateral;
+        uint32_t mipLevels = 0;
 
-        bool IsValid() const { return faceCount > 0 && channels > 0; }
+        bool IsValid() const
+        {
+            return faceCount > 0 && channels > 0;
+        }
     };
 
-    TextureInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
+    TextureInfo ReadInfo(const std::string& filePath) const
+    {
+        (void)filePath;
+        return {};
+    }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const
+    {
+        (void)filePath;
+        (void)targetWidth;
+        return {};
+    }
 
-    static bool IsPIXARExtension(const std::string& ext) {
+    static bool IsPIXARExtension(const std::string& ext)
+    {
         return ext == ".ptex" || ext == ".PTEX" || ext == ".tx" || ext == ".TX";
     }
-    static constexpr const char* EXTENSIONS[] = { ".ptex", ".tx", nullptr };
+    static constexpr const char* EXTENSIONS[] = {".ptex", ".tx", nullptr};
 
-private:
+  private:
     static bool VerifyPtexMagic(const uint8_t* header, size_t len);
 };
 

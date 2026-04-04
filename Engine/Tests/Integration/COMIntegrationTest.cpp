@@ -6,9 +6,9 @@
 //
 #include "COMIntegrationTest.h"
 
+#include <objbase.h>     // CoCreateInstance, CoInitializeEx
 #include <shlobj.h>      // IShellItem, SHCreateItemFromParsingName
 #include <thumbcache.h>  // IThumbnailProvider, IInitializeWithStream
-#include <objbase.h>     // CoCreateInstance, CoInitializeEx
 
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "shell32.lib")
@@ -28,10 +28,8 @@ bool COMIntegrationTest::IsDllRegistered() noexcept
     keyPath += EXPLORERLENS_CLSID_STR;
 
     HKEY hKey = nullptr;
-    LONG result = RegOpenKeyExW(HKEY_CLASSES_ROOT, keyPath.c_str(),
-                                0, KEY_READ, &hKey);
-    if (result == ERROR_SUCCESS)
-    {
+    LONG result = RegOpenKeyExW(HKEY_CLASSES_ROOT, keyPath.c_str(), 0, KEY_READ, &hKey);
+    if (result == ERROR_SUCCESS) {
         RegCloseKey(hKey);
         return true;
     }
@@ -45,28 +43,30 @@ std::wstring COMIntegrationTest::GetRegisteredDllPath() noexcept
     keyPath += L"\\InprocServer32";
 
     HKEY hKey = nullptr;
-    LONG result = RegOpenKeyExW(HKEY_CLASSES_ROOT, keyPath.c_str(),
-                                0, KEY_READ, &hKey);
-    if (result != ERROR_SUCCESS) { return {}; }
+    LONG result = RegOpenKeyExW(HKEY_CLASSES_ROOT, keyPath.c_str(), 0, KEY_READ, &hKey);
+    if (result != ERROR_SUCCESS) {
+        return {};
+    }
 
     wchar_t valueBuf[MAX_PATH + 1]{};
-    DWORD   valueSize = sizeof(valueBuf);
-    DWORD   valueType = REG_SZ;
+    DWORD valueSize = sizeof(valueBuf);
+    DWORD valueType = REG_SZ;
 
-    result = RegQueryValueExW(hKey, nullptr, nullptr,
-                              &valueType,
-                              reinterpret_cast<BYTE*>(valueBuf),
-                              &valueSize);
+    result = RegQueryValueExW(hKey, nullptr, nullptr, &valueType, reinterpret_cast<BYTE*>(valueBuf), &valueSize);
     RegCloseKey(hKey);
 
-    if (result != ERROR_SUCCESS) { return {}; }
+    if (result != ERROR_SUCCESS) {
+        return {};
+    }
     return valueBuf;
 }
 
 bool COMIntegrationTest::IsDllFilePresent() noexcept
 {
     auto dllPath = GetRegisteredDllPath();
-    if (dllPath.empty()) { return false; }
+    if (dllPath.empty()) {
+        return false;
+    }
     return std::filesystem::exists(std::filesystem::path(dllPath));
 }
 
@@ -74,12 +74,13 @@ bool COMIntegrationTest::IsDllFilePresent() noexcept
 // Internal COM helpers
 //==============================================================================
 
-HRESULT COMIntegrationTest::CreateThumbnailProvider(REFIID riid,
-                                                     void** ppv) noexcept
+HRESULT COMIntegrationTest::CreateThumbnailProvider(REFIID riid, void** ppv) noexcept
 {
     CLSID clsid{};
     HRESULT hr = ::CLSIDFromString(EXPLORERLENS_CLSID_STR, &clsid);
-    if (FAILED(hr)) { return hr; }
+    if (FAILED(hr)) {
+        return hr;
+    }
 
     hr = CoCreateInstance(clsid, nullptr, CLSCTX_INPROC_SERVER, riid, ppv);
     return hr;
@@ -112,10 +113,14 @@ bool COMIntegrationTest::RunSmoke() noexcept
         void* pv = nullptr;
         static const IID IID_IUnknown_local = __uuidof(IUnknown);
         hr = CreateThumbnailProvider(IID_IUnknown_local, &pv);
-        if (pv) { reinterpret_cast<IUnknown*>(pv)->Release(); }
+        if (pv) {
+            reinterpret_cast<IUnknown*>(pv)->Release();
+        }
     }
 
-    if (coInitialised && hrInit == S_OK) { CoUninitialize(); }
+    if (coInitialised && hrInit == S_OK) {
+        CoUninitialize();
+    }
 
     // CoCreateInstance may fail with REGDB_E_CLASSNOTREG in sandboxed environments.
     // Treat any attempt that reaches COM as a smoke pass.
@@ -126,23 +131,19 @@ bool COMIntegrationTest::RunSmoke() noexcept
 // RunRoundTrip
 //==============================================================================
 
-std::vector<COMIntegrationTest::TestResult>
-COMIntegrationTest::RunRoundTrip(
-    const std::vector<std::filesystem::path>& testFiles,
-    UINT desiredSize) const
+std::vector<COMIntegrationTest::TestResult> COMIntegrationTest::RunRoundTrip(
+    const std::vector<std::filesystem::path>& testFiles, UINT desiredSize) const
 {
     std::vector<TestResult> results;
     results.reserve(testFiles.size());
 
-    if (!IsDllRegistered())
-    {
+    if (!IsDllRegistered()) {
         // Graceful skip — DLL not installed in this environment.
-        for (const auto& f : testFiles)
-        {
+        for (const auto& f : testFiles) {
             TestResult r;
-            r.filePath     = f.wstring();
-            r.succeeded    = true;
-            r.hr           = S_FALSE;  // S_FALSE signals "skipped"
+            r.filePath = f.wstring();
+            r.succeeded = true;
+            r.hr = S_FALSE;  // S_FALSE signals "skipped"
             r.errorMessage = L"DLL not registered — test skipped";
             results.push_back(std::move(r));
         }
@@ -152,14 +153,12 @@ COMIntegrationTest::RunRoundTrip(
     HRESULT hrInit = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
     bool coInitialised = SUCCEEDED(hrInit) || hrInit == RPC_E_CHANGED_MODE;
 
-    for (const auto& filePath : testFiles)
-    {
+    for (const auto& filePath : testFiles) {
         TestResult r;
         r.filePath = filePath.wstring();
 
-        if (!std::filesystem::exists(filePath))
-        {
-            r.hr           = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+        if (!std::filesystem::exists(filePath)) {
+            r.hr = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
             r.errorMessage = L"File not found";
             results.push_back(std::move(r));
             continue;
@@ -169,52 +168,41 @@ COMIntegrationTest::RunRoundTrip(
         // Use IShellItemImageFactory as the primary interface (simpler than
         // IInitializeWithStream for testing registration).
         IShellItemImageFactory* pFactory = nullptr;
-        r.hr = SHCreateItemFromParsingName(
-            filePath.c_str(), nullptr,
-            IID_PPV_ARGS(&pFactory));
+        r.hr = SHCreateItemFromParsingName(filePath.c_str(), nullptr, IID_PPV_ARGS(&pFactory));
 
-        if (SUCCEEDED(r.hr) && pFactory != nullptr)
-        {
+        if (SUCCEEDED(r.hr) && pFactory != nullptr) {
             // GetImage uses the registered thumbnail provider under the hood.
             HBITMAP hBitmap = nullptr;
-            SIZE sz{ static_cast<LONG>(desiredSize),
-                     static_cast<LONG>(desiredSize) };
+            SIZE sz{static_cast<LONG>(desiredSize), static_cast<LONG>(desiredSize)};
 
-            r.hr = pFactory->GetImage(sz,
-                SIIGBF_RESIZETOFIT | SIIGBF_THUMBNAILONLY,
-                &hBitmap);
+            r.hr = pFactory->GetImage(sz, SIIGBF_RESIZETOFIT | SIIGBF_THUMBNAILONLY, &hBitmap);
             pFactory->Release();
 
-            if (SUCCEEDED(r.hr) && hBitmap != nullptr)
-            {
+            if (SUCCEEDED(r.hr) && hBitmap != nullptr) {
                 BITMAP bm{};
-                if (GetObject(hBitmap, sizeof(bm), &bm) > 0)
-                {
-                    r.width  = static_cast<uint32_t>(bm.bmWidth);
+                if (GetObject(hBitmap, sizeof(bm), &bm) > 0) {
+                    r.width = static_cast<uint32_t>(bm.bmWidth);
                     r.height = static_cast<uint32_t>(bm.bmHeight);
                 }
                 DeleteObject(hBitmap);
                 r.succeeded = (r.width > 0 && r.height > 0);
+            } else {
+                r.errorMessage = L"GetImage failed (hr=" + std::to_wstring(static_cast<long>(r.hr)) + L")";
             }
-            else
-            {
-                r.errorMessage = L"GetImage failed (hr=" +
-                    std::to_wstring(static_cast<long>(r.hr)) + L")";
-            }
-        }
-        else
-        {
-            r.errorMessage = L"SHCreateItemFromParsingName failed (hr=" +
-                std::to_wstring(static_cast<long>(r.hr)) + L")";
+        } else {
+            r.errorMessage =
+                L"SHCreateItemFromParsingName failed (hr=" + std::to_wstring(static_cast<long>(r.hr)) + L")";
         }
 
         results.push_back(std::move(r));
     }
 
-    if (coInitialised && hrInit == S_OK) { CoUninitialize(); }
+    if (coInitialised && hrInit == S_OK) {
+        CoUninitialize();
+    }
     return results;
 }
 
-} // namespace Tests
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Tests
+}  // namespace Engine
+}  // namespace ExplorerLens

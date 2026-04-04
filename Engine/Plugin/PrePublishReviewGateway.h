@@ -5,61 +5,68 @@
 //
 #pragma once
 
+#include <chrono>
 #include <cstdint>
+#include <functional>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
-#include <chrono>
-#include <optional>
 
 namespace ExplorerLens::Engine {
 
 enum class ReviewStatus : uint8_t {
-    Pending      = 0,
-    Approved     = 1,
-    Rejected     = 2,
+    Pending = 0,
+    Approved = 1,
+    Rejected = 2,
     NeedsRevision = 3,
-    Suspended    = 4,
+    Suspended = 4,
 };
 
 enum class ReviewCheck : uint8_t {
-    StaticAnalysis  = 0,
+    StaticAnalysis = 0,
     SignatureVerify = 1,
-    WAsmSandbox     = 2,
-    CVEScan         = 3,
-    LicenseCheck    = 4,
+    WAsmSandbox = 2,
+    CVEScan = 3,
+    LicenseCheck = 4,
 };
 
-struct CheckResult {
-    ReviewCheck check    = ReviewCheck::StaticAnalysis;
-    bool        passed   = false;
+struct CheckResult
+{
+    ReviewCheck check = ReviewCheck::StaticAnalysis;
+    bool passed = false;
     std::string detail;
 };
 
-struct ReviewReport {
-    ReviewStatus             status     = ReviewStatus::Pending;
+struct ReviewReport
+{
+    ReviewStatus status = ReviewStatus::Pending;
     std::vector<CheckResult> checks;
     std::vector<std::string> issues;
-    std::string              reviewerId;
+    std::string reviewerId;
     std::chrono::system_clock::time_point timestamp{};
 
-    [[nodiscard]] bool AllChecksPassed() const noexcept {
+    [[nodiscard]] bool AllChecksPassed() const noexcept
+    {
         for (const auto& c : checks) {
-            if (!c.passed) return false;
+            if (!c.passed)
+                return false;
         }
         return true;
     }
 
-    [[nodiscard]] bool HasCheck(ReviewCheck c) const noexcept {
+    [[nodiscard]] bool HasCheck(ReviewCheck c) const noexcept
+    {
         for (const auto& r : checks) {
-            if (r.check == c) return true;
+            if (r.check == c)
+                return true;
         }
         return false;
     }
 };
 
-struct SubmissionPackage {
+struct SubmissionPackage
+{
     std::string pluginId;
     std::string version;
     std::string archivePath;  // local path to the plugin archive
@@ -69,36 +76,31 @@ struct SubmissionPackage {
 
 using ReviewCallback = std::function<void(const std::string& pluginId, ReviewStatus status)>;
 
-class PrePublishReviewGateway {
-public:
-    PrePublishReviewGateway()  = default;
+class PrePublishReviewGateway
+{
+  public:
+    PrePublishReviewGateway() = default;
     ~PrePublishReviewGateway() = default;
 
-    PrePublishReviewGateway(const PrePublishReviewGateway&)            = delete;
+    PrePublishReviewGateway(const PrePublishReviewGateway&) = delete;
     PrePublishReviewGateway& operator=(const PrePublishReviewGateway&) = delete;
-    PrePublishReviewGateway(PrePublishReviewGateway&&)                 = default;
-    PrePublishReviewGateway& operator=(PrePublishReviewGateway&&)      = default;
+    PrePublishReviewGateway(PrePublishReviewGateway&&) = default;
+    PrePublishReviewGateway& operator=(PrePublishReviewGateway&&) = default;
 
     // Queue a plugin submission; returns a review ticket ID.
-    [[nodiscard]] std::string SubmitForReview(const SubmissionPackage& pkg,
-                                              ReviewCallback           onComplete = nullptr);
+    [[nodiscard]] std::string SubmitForReview(const SubmissionPackage& pkg, ReviewCallback onComplete = nullptr);
 
     // Retrieve the latest review report for a plugin version.
-    [[nodiscard]] std::optional<ReviewReport> GetStatus(const std::string& pluginId,
-                                                        const std::string& version) const;
+    [[nodiscard]] std::optional<ReviewReport> GetStatus(const std::string& pluginId, const std::string& version) const;
 
     // Execute all automated checks synchronously; returns the populated report.
     [[nodiscard]] ReviewReport RunChecks(const SubmissionPackage& pkg) const;
 
     // Approve a pending submission (requires reviewer credentials).
-    bool ApprovePlugin(const std::string& pluginId,
-                       const std::string& version,
-                       const std::string& reviewerId);
+    bool ApprovePlugin(const std::string& pluginId, const std::string& version, const std::string& reviewerId);
 
     // Reject a pending submission with a reason string.
-    bool RejectPlugin(const std::string& pluginId,
-                      const std::string& version,
-                      const std::string& reviewerId,
+    bool RejectPlugin(const std::string& pluginId, const std::string& version, const std::string& reviewerId,
                       const std::string& reason);
 
     // Suspend a previously-approved plugin (e.g. after a CVE report).
@@ -110,11 +112,12 @@ public:
     void SetReviewerEndpoint(const std::string& url);
     void EnableCheck(ReviewCheck check, bool enabled) noexcept;
 
-private:
+  private:
     std::string m_reviewerEndpoint = "https://review.explorerlens.io/v4";
-    uint32_t    m_enabledCheckMask = 0xFF;
+    uint32_t m_enabledCheckMask = 0xFF;
 
-    struct Impl {};
+    struct Impl
+    {};
     std::unique_ptr<Impl> m_impl;
 
     [[nodiscard]] CheckResult RunStaticAnalysis(const SubmissionPackage& pkg) const;
@@ -124,4 +127,4 @@ private:
     [[nodiscard]] CheckResult RunLicenseCheck(const SubmissionPackage& pkg) const;
 };
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

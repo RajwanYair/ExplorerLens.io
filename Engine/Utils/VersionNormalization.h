@@ -8,16 +8,16 @@
 
 #pragma once
 
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
+#include <functional>
+#include <regex>
+#include <sstream>
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <cstdint>
-#include <regex>
-#include <chrono>
-#include <functional>
-#include <sstream>
-#include <algorithm>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -26,49 +26,59 @@ namespace Docs {
 //==============================================================================
 // Canonical Version
 //==============================================================================
-struct VersionInfo {
+struct VersionInfo
+{
     uint32_t major = 7;
     uint32_t minor = 0;
     uint32_t patch = 0;
-    std::string preRelease; // e.g., "rc1", "beta2", ""
-    std::string buildMeta; // e.g., "build.1234"
+    std::string preRelease;  // e.g., "rc1", "beta2", ""
+    std::string buildMeta;   // e.g., "build.1234"
 
-    std::string ToString() const {
-        std::string v = "v" + std::to_string(major) + "." +
-            std::to_string(minor) + "." +
-            std::to_string(patch);
-        if (!preRelease.empty()) v += "-" + preRelease;
-        if (!buildMeta.empty()) v += "+" + buildMeta;
+    std::string ToString() const
+    {
+        std::string v = "v" + std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
+        if (!preRelease.empty())
+            v += "-" + preRelease;
+        if (!buildMeta.empty())
+            v += "+" + buildMeta;
         return v;
     }
 
-    std::string ToShort() const {
+    std::string ToShort() const
+    {
         return "v" + std::to_string(major) + "." + std::to_string(minor);
     }
 
-    bool operator==(const VersionInfo& other) const {
+    bool operator==(const VersionInfo& other) const
+    {
         return major == other.major && minor == other.minor && patch == other.patch;
     }
 
-    bool operator!=(const VersionInfo& other) const { return !(*this == other); }
+    bool operator!=(const VersionInfo& other) const
+    {
+        return !(*this == other);
+    }
 
-    static VersionInfo Current() {
-        return { 7, 0, 0, "", "" };
+    static VersionInfo Current()
+    {
+        return {7, 0, 0, "", ""};
     }
 };
 
 //==============================================================================
 // Version Reference Found in Documentation
 //==============================================================================
-struct NormVersionRef {
+struct NormVersionRef
+{
     std::string filePath;
     uint32_t lineNumber = 0;
     std::string lineText;
-    std::string detectedVersion; // What version was found
-    bool isStale = false; // Doesn't match canonical
-    std::string suggestedFix; // How to fix
+    std::string detectedVersion;  // What version was found
+    bool isStale = false;         // Doesn't match canonical
+    std::string suggestedFix;     // How to fix
 
-    std::string Location() const {
+    std::string Location() const
+    {
         return filePath + ":" + std::to_string(lineNumber);
     }
 };
@@ -76,43 +86,39 @@ struct NormVersionRef {
 //==============================================================================
 // Version Scanner Configuration
 //==============================================================================
-struct ScannerConfig {
+struct ScannerConfig
+{
     VersionInfo canonicalVersion = VersionInfo::Current();
-    std::vector<std::string> staleVersionPatterns = {
-    "v5.0", "v5.1", "v5.2", "v5.3", "v5.4",
-    "v6.0", "v6.1", "v6.2",
-    "5.0.0", "5.4.0", "6.0.0", "6.2.0", "15.0.0"
-    };
+    std::vector<std::string> staleVersionPatterns = {"v5.0", "v5.1",  "v5.2",  "v5.3",  "v5.4",  "v6.0",  "v6.1",
+                                                     "v6.2", "5.0.0", "5.4.0", "6.0.0", "6.2.0", "15.0.0"};
     std::vector<std::string> excludePatterns = {
-    "CHANGELOG.md", // Changelog intentionally has old versions
-    ".git/", // Git internal
-    "node_modules/", // Dependencies
-    "build/", // Build artifacts
-    "x64/", // Build output
-    "packages/" // Packages
+        "CHANGELOG.md",   // Changelog intentionally has old versions
+        ".git/",          // Git internal
+        "node_modules/",  // Dependencies
+        "build/",         // Build artifacts
+        "x64/",           // Build output
+        "packages/"       // Packages
     };
-    std::vector<std::string> targetExtensions = {
-    ".md", ".h", ".cpp", ".ps1", ".yml", ".yaml", ".json"
-    };
+    std::vector<std::string> targetExtensions = {".md", ".h", ".cpp", ".ps1", ".yml", ".yaml", ".json"};
 };
 
 //==============================================================================
 // Version Scanner
 //==============================================================================
-class VersionScanner {
-public:
-    explicit VersionScanner(const ScannerConfig& config = {})
-        : m_config(config) {
-    }
+class VersionScanner
+{
+  public:
+    explicit VersionScanner(const ScannerConfig& config = {}) : m_config(config) {}
 
     // Scan a single file content for stale references
-    std::vector<NormVersionRef> ScanContent(const std::string& filePath,
-        const std::string& content) const {
+    std::vector<NormVersionRef> ScanContent(const std::string& filePath, const std::string& content) const
+    {
         std::vector<NormVersionRef> refs;
 
         // Check exclusions
         for (auto& excl : m_config.excludePatterns) {
-            if (filePath.find(excl) != std::string::npos) return refs;
+            if (filePath.find(excl) != std::string::npos)
+                return refs;
         }
 
         std::istringstream stream(content);
@@ -129,8 +135,7 @@ public:
                     ref.lineText = line;
                     ref.detectedVersion = pattern;
                     ref.isStale = true;
-                    ref.suggestedFix = "Update to " +
-                        m_config.canonicalVersion.ToString();
+                    ref.suggestedFix = "Update to " + m_config.canonicalVersion.ToString();
                     refs.push_back(std::move(ref));
                 }
             }
@@ -140,17 +145,18 @@ public:
     }
 
     // Check if a version string matches canonical
-    bool IsCanonical(const std::string& version) const {
+    bool IsCanonical(const std::string& version) const
+    {
         auto& curr = m_config.canonicalVersion;
-        return version == curr.ToString() ||
-            version == curr.ToShort() ||
-            version == std::to_string(curr.major) + "." +
-            std::to_string(curr.minor) + "." +
-            std::to_string(curr.patch);
+        return version == curr.ToString() || version == curr.ToShort()
+               || version
+                      == std::to_string(curr.major) + "." + std::to_string(curr.minor) + "."
+                             + std::to_string(curr.patch);
     }
 
     // Count stale references in content
-    size_t CountStaleReferences(const std::string& content) const {
+    size_t CountStaleReferences(const std::string& content) const
+    {
         size_t count = 0;
         for (auto& pattern : m_config.staleVersionPatterns) {
             size_t pos = 0;
@@ -162,9 +168,12 @@ public:
         return count;
     }
 
-    const ScannerConfig& Config() const { return m_config; }
+    const ScannerConfig& Config() const
+    {
+        return m_config;
+    }
 
-private:
+  private:
     ScannerConfig m_config;
 };
 
@@ -172,37 +181,45 @@ private:
 // Decoder Status for Documentation
 //==============================================================================
 enum class NormDecoderStatus : uint32_t {
-    Stable = 0, // Production ready
-    Beta = 1, // Working but needs testing
-    Experimental = 2, // Early stage
-    Planned = 3, // Not yet implemented
-    Deprecated = 4, // Being removed
-    External = 5 // Handled by external library
+    Stable = 0,        // Production ready
+    Beta = 1,          // Working but needs testing
+    Experimental = 2,  // Early stage
+    Planned = 3,       // Not yet implemented
+    Deprecated = 4,    // Being removed
+    External = 5       // Handled by external library
 };
 
-inline const char* DecoderStatusName(NormDecoderStatus s) {
-    static const char* names[] = {
-    "Stable", "Beta", "Experimental", "Planned", "Deprecated", "External"
-    };
+inline const char* DecoderStatusName(NormDecoderStatus s)
+{
+    static const char* names[] = {"Stable", "Beta", "Experimental", "Planned", "Deprecated", "External"};
     return names[static_cast<uint32_t>(s) <= 5 ? static_cast<uint32_t>(s) : 5];
 }
 
-struct NormDocEntry {
+struct NormDocEntry
+{
     std::string name;
     NormDecoderStatus status = NormDecoderStatus::Planned;
-    std::string library; // e.g., "libwebp 1.5.0"
+    std::string library;  // e.g., "libwebp 1.5.0"
     std::vector<std::string> formats;
     std::string notes;
 
-    std::string StatusBadge() const {
+    std::string StatusBadge() const
+    {
         switch (status) {
-        case NormDecoderStatus::Stable: return "[STABLE]";
-        case NormDecoderStatus::Beta: return "[BETA]";
-        case NormDecoderStatus::Experimental: return "[EXPERIMENTAL]";
-        case NormDecoderStatus::Planned: return "[PLANNED]";
-        case NormDecoderStatus::Deprecated: return "[DEPRECATED]";
-        case NormDecoderStatus::External: return "[EXTERNAL]";
-        default: return "[UNKNOWN]";
+            case NormDecoderStatus::Stable:
+                return "[STABLE]";
+            case NormDecoderStatus::Beta:
+                return "[BETA]";
+            case NormDecoderStatus::Experimental:
+                return "[EXPERIMENTAL]";
+            case NormDecoderStatus::Planned:
+                return "[PLANNED]";
+            case NormDecoderStatus::Deprecated:
+                return "[DEPRECATED]";
+            case NormDecoderStatus::External:
+                return "[EXTERNAL]";
+            default:
+                return "[UNKNOWN]";
         }
     }
 };
@@ -210,105 +227,107 @@ struct NormDocEntry {
 //==============================================================================
 // Decoder Status Registry
 //==============================================================================
-class DecoderStatusRegistry {
-public:
-    DecoderStatusRegistry() { RegisterAllDecoders(); }
+class DecoderStatusRegistry
+{
+  public:
+    DecoderStatusRegistry()
+    {
+        RegisterAllDecoders();
+    }
 
-    const std::vector<NormDocEntry>& AllDecoders() const { return m_decoders; }
+    const std::vector<NormDocEntry>& AllDecoders() const
+    {
+        return m_decoders;
+    }
 
-    std::vector<NormDocEntry> GetByStatus(NormDecoderStatus status) const {
+    std::vector<NormDocEntry> GetByStatus(NormDecoderStatus status) const
+    {
         std::vector<NormDocEntry> result;
         for (auto& d : m_decoders) {
-            if (d.status == status) result.push_back(d);
+            if (d.status == status)
+                result.push_back(d);
         }
         return result;
     }
 
-    size_t TotalCount() const { return m_decoders.size(); }
-
-    size_t StableCount() const {
-        return std::count_if(m_decoders.begin(), m_decoders.end(),
-            [](const NormDocEntry& d) { return d.status == NormDecoderStatus::Stable; });
+    size_t TotalCount() const
+    {
+        return m_decoders.size();
     }
 
-    size_t FormatCount() const {
+    size_t StableCount() const
+    {
+        return std::count_if(m_decoders.begin(), m_decoders.end(),
+                             [](const NormDocEntry& d) { return d.status == NormDecoderStatus::Stable; });
+    }
+
+    size_t FormatCount() const
+    {
         std::unordered_set<std::string> formats;
         for (auto& d : m_decoders)
-            for (auto& f : d.formats) formats.insert(f);
+            for (auto& f : d.formats)
+                formats.insert(f);
         return formats.size();
     }
 
     // Generate markdown decoder status table
-    std::string GenerateMarkdownTable() const {
+    std::string GenerateMarkdownTable() const
+    {
         std::string md;
         md += "| Decoder | Status | Library | Formats |\n";
         md += "|---------|--------|---------|---------|\n";
         for (auto& d : m_decoders) {
-            md += "| " + d.name + " | " + d.StatusBadge() + " | " +
-                d.library + " | ";
+            md += "| " + d.name + " | " + d.StatusBadge() + " | " + d.library + " | ";
             for (size_t i = 0; i < d.formats.size(); ++i) {
                 md += d.formats[i];
-                if (i + 1 < d.formats.size()) md += ", ";
+                if (i + 1 < d.formats.size())
+                    md += ", ";
             }
             md += " |\n";
         }
         return md;
     }
 
-private:
-    void RegisterAllDecoders() {
+  private:
+    void RegisterAllDecoders()
+    {
         m_decoders = {
-        {"JPEG/JFIF", NormDecoderStatus::Stable, "WIC (built-in)",
-        {".jpg", ".jpeg", ".jpe", ".jfif"}, "Windows Imaging Component"},
-        {"PNG", NormDecoderStatus::Stable, "WIC (built-in)",
-        {".png"}, ""},
-        {"BMP", NormDecoderStatus::Stable, "WIC (built-in)",
-        {".bmp", ".dib"}, ""},
-        {"GIF", NormDecoderStatus::Stable, "WIC (built-in)",
-        {".gif"}, "First frame only"},
-        {"TIFF", NormDecoderStatus::Stable, "WIC (built-in)",
-        {".tif", ".tiff"}, "Multi-page via multi-frame"},
-        {"ICO/CUR", NormDecoderStatus::Stable, "Custom",
-        {".ico", ".cur"}, "Best-size extraction"},
-        {"WebP", NormDecoderStatus::Stable, "libwebp 1.5.0",
-        {".webp"}, "Animated first frame"},
-        {"JPEG XL", NormDecoderStatus::Stable, "libjxl 0.11.1",
-        {".jxl"}, "Animated first frame"},
-        {"HEIF/HEIC", NormDecoderStatus::Stable, "libheif 1.19.5",
-        {".heif", ".heic", ".hif"}, "libde265 backend"},
-        {"AVIF", NormDecoderStatus::Stable, "libavif 1.3.0",
-        {".avif"}, "dav1d backend"},
-        {"RAW (Camera)", NormDecoderStatus::Stable, "LibRaw 0.21.3",
-        {".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2",
-        ".raf", ".dng", ".srw", ".pef", ".gpr", ".raw"},
-        "Embedded preview extraction"},
-        {"PSD", NormDecoderStatus::Stable, "Custom",
-        {".psd", ".psb"}, "Composite preview"},
-        {"TGA", NormDecoderStatus::Stable, "Custom",
-        {".tga", ".targa"}, "Truevision"},
-        {"DDS", NormDecoderStatus::Stable, "WIC + D3D11",
-        {".dds"}, "GPU-accelerated BC decompression"},
-        {"QOI", NormDecoderStatus::Stable, "Custom",
-        {".qoi"}, "Quite OK Image format"},
-        {"SVG", NormDecoderStatus::Stable, "Direct2D",
-        {".svg", ".svgz"}, "Vector rasterization"},
-        {"EXR", NormDecoderStatus::Stable, "Custom",
-        {".exr"}, "OpenEXR HDR"},
-        {"HDR", NormDecoderStatus::Stable, "Custom",
-        {".hdr"}, "Radiance HDR"},
-        {"PDF", NormDecoderStatus::Stable, "WIC/Shell",
-        {".pdf"}, "First page thumbnail"},
-        {"ZIP Archives", NormDecoderStatus::Stable, "minizip-ng 4.0.10",
-        {".zip", ".cbz"}, "First image extraction"},
-        {"RAR Archives", NormDecoderStatus::Stable, "UnRAR 7.2.2",
-        {".rar", ".cbr"}, "First image extraction"},
-        {"7z Archives", NormDecoderStatus::Stable, "LZMA 26.00",
-        {".7z", ".cb7"}, "First image extraction"},
-        {"TAR Archives", NormDecoderStatus::Stable, "Custom",
-        {".tar", ".tar.gz", ".tar.bz2", ".tar.xz"}, "Streaming"},
-        {"Video", NormDecoderStatus::External, "Media Foundation",
-        {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm"},
-        "Scene frame selection"},
+            {"JPEG/JFIF",
+             NormDecoderStatus::Stable,
+             "WIC (built-in)",
+             {".jpg", ".jpeg", ".jpe", ".jfif"},
+             "Windows Imaging Component"},
+            {"PNG", NormDecoderStatus::Stable, "WIC (built-in)", {".png"}, ""},
+            {"BMP", NormDecoderStatus::Stable, "WIC (built-in)", {".bmp", ".dib"}, ""},
+            {"GIF", NormDecoderStatus::Stable, "WIC (built-in)", {".gif"}, "First frame only"},
+            {"TIFF", NormDecoderStatus::Stable, "WIC (built-in)", {".tif", ".tiff"}, "Multi-page via multi-frame"},
+            {"ICO/CUR", NormDecoderStatus::Stable, "Custom", {".ico", ".cur"}, "Best-size extraction"},
+            {"WebP", NormDecoderStatus::Stable, "libwebp 1.5.0", {".webp"}, "Animated first frame"},
+            {"JPEG XL", NormDecoderStatus::Stable, "libjxl 0.11.1", {".jxl"}, "Animated first frame"},
+            {"HEIF/HEIC", NormDecoderStatus::Stable, "libheif 1.19.5", {".heif", ".heic", ".hif"}, "libde265 backend"},
+            {"AVIF", NormDecoderStatus::Stable, "libavif 1.3.0", {".avif"}, "dav1d backend"},
+            {"RAW (Camera)",
+             NormDecoderStatus::Stable,
+             "LibRaw 0.21.3",
+             {".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2", ".raf", ".dng", ".srw", ".pef", ".gpr", ".raw"},
+             "Embedded preview extraction"},
+            {"PSD", NormDecoderStatus::Stable, "Custom", {".psd", ".psb"}, "Composite preview"},
+            {"TGA", NormDecoderStatus::Stable, "Custom", {".tga", ".targa"}, "Truevision"},
+            {"DDS", NormDecoderStatus::Stable, "WIC + D3D11", {".dds"}, "GPU-accelerated BC decompression"},
+            {"QOI", NormDecoderStatus::Stable, "Custom", {".qoi"}, "Quite OK Image format"},
+            {"SVG", NormDecoderStatus::Stable, "Direct2D", {".svg", ".svgz"}, "Vector rasterization"},
+            {"EXR", NormDecoderStatus::Stable, "Custom", {".exr"}, "OpenEXR HDR"},
+            {"HDR", NormDecoderStatus::Stable, "Custom", {".hdr"}, "Radiance HDR"},
+            {"PDF", NormDecoderStatus::Stable, "WIC/Shell", {".pdf"}, "First page thumbnail"},
+            {"ZIP Archives", NormDecoderStatus::Stable, "minizip-ng 4.0.10", {".zip", ".cbz"}, "First image extraction"},
+            {"RAR Archives", NormDecoderStatus::Stable, "UnRAR 7.2.2", {".rar", ".cbr"}, "First image extraction"},
+            {"7z Archives", NormDecoderStatus::Stable, "LZMA 26.00", {".7z", ".cb7"}, "First image extraction"},
+            {"TAR Archives", NormDecoderStatus::Stable, "Custom", {".tar", ".tar.gz", ".tar.bz2", ".tar.xz"}, "Streaming"},
+            {"Video",
+             NormDecoderStatus::External,
+             "Media Foundation",
+             {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm"},
+             "Scene frame selection"},
         };
     }
 
@@ -318,38 +337,44 @@ private:
 //==============================================================================
 // Release Notes Generator
 //==============================================================================
-struct ReleaseNote {
-    std::string category; // e.g., "New Features", "Bug Fixes"
+struct ReleaseNote
+{
+    std::string category;  // e.g., "New Features", "Bug Fixes"
     std::string description;
 };
 
-class ReleaseNotesGenerator {
-public:
-    explicit ReleaseNotesGenerator(const VersionInfo& version = VersionInfo::Current())
-        : m_version(version) {
+class ReleaseNotesGenerator
+{
+  public:
+    explicit ReleaseNotesGenerator(const VersionInfo& version = VersionInfo::Current()) : m_version(version) {}
+
+    void AddNote(const std::string& category, const std::string& description)
+    {
+        m_notes.push_back({category, description});
     }
 
-    void AddNote(const std::string& category, const std::string& description) {
-        m_notes.push_back({ category, description });
-    }
-
-    void AddFeature(const std::string& desc) {
+    void AddFeature(const std::string& desc)
+    {
         AddNote("New Features", desc);
     }
 
-    void AddBugFix(const std::string& desc) {
+    void AddBugFix(const std::string& desc)
+    {
         AddNote("Bug Fixes", desc);
     }
 
-    void AddImprovement(const std::string& desc) {
+    void AddImprovement(const std::string& desc)
+    {
         AddNote("Improvements", desc);
     }
 
-    void AddBreakingChange(const std::string& desc) {
+    void AddBreakingChange(const std::string& desc)
+    {
         AddNote("Breaking Changes", desc);
     }
 
-    std::string Generate() const {
+    std::string Generate() const
+    {
         std::string md;
         md += "# Release Notes — ExplorerLens " + m_version.ToString() + "\n\n";
         md += "**Release Date:** " + CurrentDateString() + "\n\n";
@@ -375,21 +400,30 @@ public:
         return md;
     }
 
-    size_t NoteCount() const { return m_notes.size(); }
+    size_t NoteCount() const
+    {
+        return m_notes.size();
+    }
 
-    size_t CategoryCount() const {
+    size_t CategoryCount() const
+    {
         std::unordered_set<std::string> cats;
-        for (auto& n : m_notes) cats.insert(n.category);
+        for (auto& n : m_notes)
+            cats.insert(n.category);
         return cats.size();
     }
 
-    const VersionInfo& Version() const { return m_version; }
+    const VersionInfo& Version() const
+    {
+        return m_version;
+    }
 
-private:
-    static std::string CurrentDateString() {
+  private:
+    static std::string CurrentDateString()
+    {
         auto now = std::chrono::system_clock::now();
         auto time = std::chrono::system_clock::to_time_t(now);
-        struct tm tm_buf {};
+        struct tm tm_buf{};
         localtime_s(&tm_buf, &time);
         char buf[32]{};
         strftime(buf, sizeof(buf), "%Y-%m-%d", &tm_buf);
@@ -403,81 +437,101 @@ private:
 //==============================================================================
 // Documentation Integrity Report
 //==============================================================================
-struct DocIntegrityReport {
+struct DocIntegrityReport
+{
     size_t filesScanned = 0;
     size_t staleReferences = 0;
-    size_t staleDocs = 0; // Files with any stale ref
+    size_t staleDocs = 0;  // Files with any stale ref
     size_t cleanDocs = 0;
     std::vector<NormVersionRef> allReferences;
 
-    double IntegrityPercent() const {
-        if (filesScanned == 0) return 100.0;
+    double IntegrityPercent() const
+    {
+        if (filesScanned == 0)
+            return 100.0;
         return 100.0 * cleanDocs / filesScanned;
     }
 
-    bool IsClean() const { return staleReferences == 0; }
+    bool IsClean() const
+    {
+        return staleReferences == 0;
+    }
 };
 
 //==============================================================================
 // Stale Document Tracker
 //==============================================================================
-class StaleDocTracker {
-public:
+class StaleDocTracker
+{
+  public:
     // Register the 12 stale docs identified in audit
-    void RegisterKnownStaleDocs() {
-        m_staleDocs = {
-        "DECODER_STATUS.md",
-        "TESTING_GUIDE.md",
-        "README.md",
-        "DEVELOPER_GUIDE.md",
-        "USER_GUIDE.md",
-        "KNOWN_ISSUES.md",
-        "docs/FORMAT_SUPPORT_ANALYSIS.md",
-        "docs/WINDOWS_BUILD_TOOLS.md",
-        "docs/BUILD_METHOD_COMPARISON.md",
-        "SDK/README.md",
-        ".github/COMPLETE_PROJECT_SUMMARY.md"
-        };
+    void RegisterKnownStaleDocs()
+    {
+        m_staleDocs = {"DECODER_STATUS.md",
+                       "TESTING_GUIDE.md",
+                       "README.md",
+                       "DEVELOPER_GUIDE.md",
+                       "USER_GUIDE.md",
+                       "KNOWN_ISSUES.md",
+                       "docs/FORMAT_SUPPORT_ANALYSIS.md",
+                       "docs/WINDOWS_BUILD_TOOLS.md",
+                       "docs/BUILD_METHOD_COMPARISON.md",
+                       "SDK/README.md",
+                       ".github/COMPLETE_PROJECT_SUMMARY.md"};
     }
 
-    void MarkFixed(const std::string& doc) {
+    void MarkFixed(const std::string& doc)
+    {
         m_fixedDocs.insert(doc);
     }
 
-    bool IsFixed(const std::string& doc) const {
+    bool IsFixed(const std::string& doc) const
+    {
         return m_fixedDocs.count(doc) > 0;
     }
 
-    size_t TotalStale() const { return m_staleDocs.size(); }
+    size_t TotalStale() const
+    {
+        return m_staleDocs.size();
+    }
 
-    size_t FixedCount() const {
+    size_t FixedCount() const
+    {
         size_t c = 0;
         for (auto& d : m_staleDocs) {
-            if (m_fixedDocs.count(d)) ++c;
+            if (m_fixedDocs.count(d))
+                ++c;
         }
         return c;
     }
 
-    size_t RemainingCount() const { return TotalStale() - FixedCount(); }
+    size_t RemainingCount() const
+    {
+        return TotalStale() - FixedCount();
+    }
 
-    std::vector<std::string> GetRemaining() const {
+    std::vector<std::string> GetRemaining() const
+    {
         std::vector<std::string> remaining;
         for (auto& d : m_staleDocs) {
-            if (!m_fixedDocs.count(d)) remaining.push_back(d);
+            if (!m_fixedDocs.count(d))
+                remaining.push_back(d);
         }
         return remaining;
     }
 
-    double ProgressPercent() const {
-        if (TotalStale() == 0) return 100.0;
+    double ProgressPercent() const
+    {
+        if (TotalStale() == 0)
+            return 100.0;
         return 100.0 * FixedCount() / TotalStale();
     }
 
-private:
+  private:
     std::vector<std::string> m_staleDocs;
     std::unordered_set<std::string> m_fixedDocs;
 };
 
-} // namespace Docs
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Docs
+}  // namespace Engine
+}  // namespace ExplorerLens

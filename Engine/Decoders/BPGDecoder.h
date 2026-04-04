@@ -16,51 +16,67 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class BPGColorSpace : uint8_t {
-    YCbCr = 0, RGB = 1, YCgCo = 2, YCbCrBT709 = 3,
-    YCbCrBT2020 = 4, Unknown = 255
+    YCbCr = 0,
+    RGB = 1,
+    YCgCo = 2,
+    YCbCrBT709 = 3,
+    YCbCrBT2020 = 4,
+    Unknown = 255
 };
 
-struct BPGHeader {
+struct BPGHeader
+{
     uint32_t width = 0;
     uint32_t height = 0;
-    uint8_t  bitDepth = 8;
+    uint8_t bitDepth = 8;
     BPGColorSpace colorSpace = BPGColorSpace::YCbCr;
     bool hasAlpha = false;
     bool hasAnimation = false;
     uint32_t frameCount = 1;
 };
 
-struct BPGStats {
+struct BPGStats
+{
     uint32_t filesDetected = 0;
     uint32_t headersParsed = 0;
     uint32_t animatedFiles = 0;
 };
 
-class BPGDecoder {
-public:
+class BPGDecoder
+{
+  public:
     BPGDecoder() = default;
     ~BPGDecoder() = default;
 
-    static const wchar_t* GetName() { return L"BPGDecoder"; }
+    static const wchar_t* GetName()
+    {
+        return L"BPGDecoder";
+    }
 
-    bool CanDecode(const wchar_t* ext) const {
-        if (!ext) return false;
+    bool CanDecode(const wchar_t* ext) const
+    {
+        if (!ext)
+            return false;
         std::wstring e(ext);
-        for (auto& c : e) c = towlower(c);
+        for (auto& c : e)
+            c = towlower(c);
         return e == L".bpg";
     }
 
     /// Detect BPG magic: 0x42 0x50 0x47 0xFB
-    bool DetectMagic(const uint8_t* data, size_t size) const {
-        if (!data || size < 6) return false;
-        return data[0] == 0x42 && data[1] == 0x50 &&
-            data[2] == 0x47 && data[3] == 0xFB;
+    bool DetectMagic(const uint8_t* data, size_t size) const
+    {
+        if (!data || size < 6)
+            return false;
+        return data[0] == 0x42 && data[1] == 0x50 && data[2] == 0x47 && data[3] == 0xFB;
     }
 
     /// Parse BPG header from file data.
-    BPGHeader ParseHeader(const uint8_t* data, size_t size) const {
+    BPGHeader ParseHeader(const uint8_t* data, size_t size) const
+    {
         BPGHeader hdr;
-        if (!DetectMagic(data, size) || size < 10) return hdr;
+        if (!DetectMagic(data, size) || size < 10)
+            return hdr;
 
         uint8_t flags = data[4];
         hdr.bitDepth = ((flags >> 5) & 0x07) + 8;
@@ -73,19 +89,25 @@ public:
         // Parse variable-length width/height (simplified)
         hdr.width = (data[6] << 8) | data[7];
         hdr.height = (data[8] << 8) | data[9];
-        if (hdr.width == 0) hdr.width = 1;
-        if (hdr.height == 0) hdr.height = 1;
+        if (hdr.width == 0)
+            hdr.width = 1;
+        if (hdr.height == 0)
+            hdr.height = 1;
 
-        if (hdr.hasAnimation) hdr.frameCount = 2;
+        if (hdr.hasAnimation)
+            hdr.frameCount = 2;
 
         return hdr;
     }
 
-    BPGStats GetStats() const { return m_stats; }
+    BPGStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     mutable BPGStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

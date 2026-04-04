@@ -9,7 +9,8 @@
 #include <cstdint>
 #include <string>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class WaylandProtocol : uint8_t {
     WlrLayerShell,
@@ -26,7 +27,8 @@ enum class CompositorType : uint8_t {
     Weston
 };
 
-struct WaylandConfig {
+struct WaylandConfig
+{
     WaylandProtocol protocol = WaylandProtocol::WlrLayerShell;
     CompositorType compositor = CompositorType::Mutter;
     std::string displayName;
@@ -34,8 +36,9 @@ struct WaylandConfig {
     bool enableHiDPI = true;
 };
 
-class WaylandShellExtension {
-public:
+class WaylandShellExtension
+{
+  public:
     WaylandShellExtension() = default;
     ~WaylandShellExtension() = default;
 
@@ -44,38 +47,45 @@ public:
     WaylandShellExtension(WaylandShellExtension&&) noexcept = default;
     WaylandShellExtension& operator=(WaylandShellExtension&&) noexcept = default;
 
-    bool Initialize(WaylandConfig const& config) {
+    bool Initialize(WaylandConfig const& config)
+    {
         m_config = config;
         return true;
     }
 
-    bool Connect() {
+    bool Connect()
+    {
         if (m_connected)
             return false;
         m_connected = true;
         return true;
     }
 
-    bool Disconnect() {
+    bool Disconnect()
+    {
         m_connected = false;
         return true;
     }
 
-    [[nodiscard]] bool IsConnected() const {
+    [[nodiscard]] bool IsConnected() const
+    {
         return m_connected;
     }
 
-    [[nodiscard]] CompositorType GetCompositorType() const {
+    [[nodiscard]] CompositorType GetCompositorType() const
+    {
         return m_config.compositor;
     }
 
-    [[nodiscard]] WaylandConfig const& GetConfig() const {
+    [[nodiscard]] WaylandConfig const& GetConfig() const
+    {
         return m_config;
     }
 
-private:
+  private:
     WaylandConfig m_config;
     bool m_connected = false;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

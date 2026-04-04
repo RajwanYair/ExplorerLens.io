@@ -13,28 +13,30 @@
 //
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 // FIPS enforcement level.
 enum class FIPSLevel : uint8_t {
-    Disabled       = 0,  // FIPS policy not set — use fast non-certified algorithms
-    Compliant      = 1,  // FIPS 140-2 via Windows BCrypt (system policy active)
-    Strict         = 2,  // FIPS 140-3 — additional constraints (no RSA-2048 signing)
+    Disabled = 0,   // FIPS policy not set — use fast non-certified algorithms
+    Compliant = 1,  // FIPS 140-2 via Windows BCrypt (system policy active)
+    Strict = 2,     // FIPS 140-3 — additional constraints (no RSA-2048 signing)
 };
 
 // Summary of active FIPS constraints.
-struct FIPSConstraints {
+struct FIPSConstraints
+{
     FIPSLevel level;
-    bool      sha256CacheRequired  { false };
-    bool      aes256Only           { false };
-    bool      noMd5Allowed         { false };
-    bool      noSha1Allowed        { false };
-    bool      tls12MinRequired     { false };
-    bool      pluginSignMinSha256  { false };
+    bool sha256CacheRequired{false};
+    bool aes256Only{false};
+    bool noMd5Allowed{false};
+    bool noSha1Allowed{false};
+    bool tls12MinRequired{false};
+    bool pluginSignMinSha256{false};
     std::string detectedBySource;  // "Registry", "EnterprisePolicy", "Default"
 };
 
@@ -42,20 +44,27 @@ struct FIPSConstraints {
 //
 // Query at startup; engine components check IsAlgorithmAllowed() before using
 // any non-BCrypt hash/crypto primitive.
-class FIPSComplianceMode {
-public:
+class FIPSComplianceMode
+{
+  public:
     FIPSComplianceMode() noexcept : m_constraints{} {}
     ~FIPSComplianceMode() noexcept = default;
 
-    FIPSComplianceMode(const FIPSComplianceMode&)            = delete;
+    FIPSComplianceMode(const FIPSComplianceMode&) = delete;
     FIPSComplianceMode& operator=(const FIPSComplianceMode&) = delete;
 
     // Detect FIPS policy from Windows registry.
     void Detect() noexcept;
 
-    FIPSLevel GetLevel() const noexcept { return m_constraints.level; }
+    FIPSLevel GetLevel() const noexcept
+    {
+        return m_constraints.level;
+    }
 
-    const FIPSConstraints& GetConstraints() const noexcept { return m_constraints; }
+    const FIPSConstraints& GetConstraints() const noexcept
+    {
+        return m_constraints;
+    }
 
     // Returns false if the named algorithm is prohibited in current FIPS mode.
     // algorithmName: "MD5", "SHA1", "SHA256", "SHA384", "SHA512", "XXH3", ...
@@ -65,16 +74,21 @@ public:
     std::string GetPreferredHashAlgorithm() const noexcept;
 
     // Returns the Windows FIPS registry key value.
-    static bool IsWindowsFIPSPolicyEnabled() noexcept { return false; }
+    static bool IsWindowsFIPSPolicyEnabled() noexcept
+    {
+        return false;
+    }
 
     // Singleton.
-    static FIPSComplianceMode& Instance() noexcept {
+    static FIPSComplianceMode& Instance() noexcept
+    {
         static FIPSComplianceMode s_instance;
         return s_instance;
     }
 
-private:
+  private:
     FIPSConstraints m_constraints;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

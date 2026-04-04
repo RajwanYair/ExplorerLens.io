@@ -4,17 +4,17 @@
 // tile streaming, colour-space conversion, 256 MB memory ceiling.
 // Provides thumbnail extraction from JPEG 2000 wavelet-compressed images.
 
-#include <cstdint>
-#include <cstddef>
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cctype>
-#include <fstream>
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
+#include <fstream>
+#include <string>
+#include <vector>
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 
@@ -22,74 +22,94 @@ namespace ExplorerLens::Decoders {
 
 // ─── JPEG 2000 sub-formats ────────────────────────────────────────
 enum class JP2Format : uint8_t {
-    JP2 = 0, // JPEG 2000 Part 1 (.jp2)
-    J2K = 1, // JPEG 2000 codestream (.j2k, .j2c)
-    JPX = 2, // JPEG 2000 Part 2 extended (.jpx, .jpf)
-    JPH = 3, // JPEG 2000 High-Throughput (.jph)
+    JP2 = 0,  // JPEG 2000 Part 1 (.jp2)
+    J2K = 1,  // JPEG 2000 codestream (.j2k, .j2c)
+    JPX = 2,  // JPEG 2000 Part 2 extended (.jpx, .jpf)
+    JPH = 3,  // JPEG 2000 High-Throughput (.jph)
     Unknown = 255
 };
 
-inline const char* JP2FormatName(JP2Format f) {
+inline const char* JP2FormatName(JP2Format f)
+{
     switch (f) {
-    case JP2Format::JP2: return "JPEG 2000 (.jp2)";
-    case JP2Format::J2K: return "J2K Codestream (.j2k)";
-    case JP2Format::JPX: return "JPEG 2000 Extended (.jpx)";
-    case JP2Format::JPH: return "JPEG 2000 HTJ2K (.jph)";
-    default: return "Unknown";
+        case JP2Format::JP2:
+            return "JPEG 2000 (.jp2)";
+        case JP2Format::J2K:
+            return "J2K Codestream (.j2k)";
+        case JP2Format::JPX:
+            return "JPEG 2000 Extended (.jpx)";
+        case JP2Format::JPH:
+            return "JPEG 2000 HTJ2K (.jph)";
+        default:
+            return "Unknown";
     }
 }
 
 // ─── Supported extensions ─────────────────────────────────────────
-struct JP2Extensions {
+struct JP2Extensions
+{
     static constexpr size_t COUNT = 8;
-    static constexpr std::array<const char*, COUNT> ALL = {
-    ".jp2", ".j2k", ".j2c", ".jpf", ".jpx", ".jph", ".jhc", ".jpc"
-    };
+    static constexpr std::array<const char*, COUNT> ALL = {".jp2", ".j2k", ".j2c", ".jpf",
+                                                           ".jpx", ".jph", ".jhc", ".jpc"};
 
-    static bool IsSupported(const std::string& ext) {
+    static bool IsSupported(const std::string& ext)
+    {
         std::string lower = ext;
         std::transform(lower.begin(), lower.end(), lower.begin(),
-            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         for (auto& e : ALL) {
-            if (lower == e) return true;
+            if (lower == e)
+                return true;
         }
         return false;
     }
 
-    static JP2Format ClassifyExtension(const std::string& ext) {
+    static JP2Format ClassifyExtension(const std::string& ext)
+    {
         std::string lower = ext;
         std::transform(lower.begin(), lower.end(), lower.begin(),
-            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        if (lower == ".jp2") return JP2Format::JP2;
-        if (lower == ".j2k" || lower == ".j2c" || lower == ".jpc") return JP2Format::J2K;
-        if (lower == ".jpx" || lower == ".jpf") return JP2Format::JPX;
-        if (lower == ".jph" || lower == ".jhc") return JP2Format::JPH;
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (lower == ".jp2")
+            return JP2Format::JP2;
+        if (lower == ".j2k" || lower == ".j2c" || lower == ".jpc")
+            return JP2Format::J2K;
+        if (lower == ".jpx" || lower == ".jpf")
+            return JP2Format::JPX;
+        if (lower == ".jph" || lower == ".jhc")
+            return JP2Format::JPH;
         return JP2Format::Unknown;
     }
 };
 
 // ─── JPEG 2000 image info ─────────────────────────────────────────
-struct JP2ImageInfo {
+struct JP2ImageInfo
+{
     uint32_t width = 0;
     uint32_t height = 0;
-    uint8_t numComponents = 0; // 1=Gray, 3=RGB, 4=RGBA
+    uint8_t numComponents = 0;  // 1=Gray, 3=RGB, 4=RGBA
     uint8_t bitsPerComponent = 8;
     uint8_t numResolutionLevels = 0;
     JP2Format format = JP2Format::Unknown;
     bool isSigned = false;
     bool hasAlpha = false;
-    std::string colorSpace; // "sRGB", "sYCC", "Grayscale"
+    std::string colorSpace;  // "sRGB", "sYCC", "Grayscale"
 
-    bool IsValid() const { return width > 0 && height > 0 && numComponents > 0; }
+    bool IsValid() const
+    {
+        return width > 0 && height > 0 && numComponents > 0;
+    }
 
-    uint32_t BestReductionLevel(uint32_t targetWidth, uint32_t targetHeight) const {
-        if (numResolutionLevels <= 1) return 0;
+    uint32_t BestReductionLevel(uint32_t targetWidth, uint32_t targetHeight) const
+    {
+        if (numResolutionLevels <= 1)
+            return 0;
         uint32_t level = 0;
         uint32_t w = width, h = height;
         while (level + 1 < static_cast<uint32_t>(numResolutionLevels)) {
             uint32_t nextW = w / 2;
             uint32_t nextH = h / 2;
-            if (nextW < targetWidth || nextH < targetHeight) break;
+            if (nextW < targetWidth || nextH < targetHeight)
+                break;
             w = nextW;
             h = nextH;
             level++;
@@ -97,29 +117,35 @@ struct JP2ImageInfo {
         return level;
     }
 
-    size_t EstimateDecodedSize() const {
+    size_t EstimateDecodedSize() const
+    {
         return static_cast<size_t>(width) * height * numComponents * ((bitsPerComponent + 7) / 8);
     }
 
-    size_t EstimateReducedSize(uint32_t reductionLevel) const {
+    size_t EstimateReducedSize(uint32_t reductionLevel) const
+    {
         uint32_t w = width >> reductionLevel;
         uint32_t h = height >> reductionLevel;
-        if (w == 0) w = 1;
-        if (h == 0) h = 1;
+        if (w == 0)
+            w = 1;
+        if (h == 0)
+            h = 1;
         return static_cast<size_t>(w) * h * numComponents * ((bitsPerComponent + 7) / 8);
     }
 };
 
 // ─── Decode options ───────────────────────────────────────────────
-struct JP2DecodeOptions {
-    uint32_t maxWidth = 0; // 0 = no limit
+struct JP2DecodeOptions
+{
+    uint32_t maxWidth = 0;  // 0 = no limit
     uint32_t maxHeight = 0;
-    uint32_t reductionLevel = 0; // 0 = full res
+    uint32_t reductionLevel = 0;  // 0 = full res
     bool autoSelectLevel = true;
-    bool forceRGB = true; // convert to RGB even if YCC
-    size_t memoryLimitBytes = 256 * 1024 * 1024; // 256 MB
+    bool forceRGB = true;                         // convert to RGB even if YCC
+    size_t memoryLimitBytes = 256 * 1024 * 1024;  // 256 MB
 
-    static JP2DecodeOptions Thumbnail(uint32_t size = 256) {
+    static JP2DecodeOptions Thumbnail(uint32_t size = 256)
+    {
         JP2DecodeOptions opt;
         opt.maxWidth = size;
         opt.maxHeight = size;
@@ -128,7 +154,8 @@ struct JP2DecodeOptions {
         return opt;
     }
 
-    static JP2DecodeOptions FullResolution() {
+    static JP2DecodeOptions FullResolution()
+    {
         JP2DecodeOptions opt;
         opt.autoSelectLevel = false;
         opt.reductionLevel = 0;
@@ -148,48 +175,66 @@ enum class JP2DecodeStatus : uint8_t {
     InternalError
 };
 
-inline const char* JP2StatusName(JP2DecodeStatus s) {
+inline const char* JP2StatusName(JP2DecodeStatus s)
+{
     switch (s) {
-    case JP2DecodeStatus::Success: return "Success";
-    case JP2DecodeStatus::FileNotFound: return "File not found";
-    case JP2DecodeStatus::InvalidFormat: return "Invalid JPEG 2000 format";
-    case JP2DecodeStatus::CorruptData: return "Corrupt codestream data";
-    case JP2DecodeStatus::UnsupportedFeature: return "Unsupported J2K feature";
-    case JP2DecodeStatus::MemoryLimitExceeded: return "Memory limit exceeded";
-    case JP2DecodeStatus::LibraryNotAvailable: return "OpenJPEG library not available";
-    case JP2DecodeStatus::InternalError: return "Internal decoder error";
-    default: return "Unknown";
+        case JP2DecodeStatus::Success:
+            return "Success";
+        case JP2DecodeStatus::FileNotFound:
+            return "File not found";
+        case JP2DecodeStatus::InvalidFormat:
+            return "Invalid JPEG 2000 format";
+        case JP2DecodeStatus::CorruptData:
+            return "Corrupt codestream data";
+        case JP2DecodeStatus::UnsupportedFeature:
+            return "Unsupported J2K feature";
+        case JP2DecodeStatus::MemoryLimitExceeded:
+            return "Memory limit exceeded";
+        case JP2DecodeStatus::LibraryNotAvailable:
+            return "OpenJPEG library not available";
+        case JP2DecodeStatus::InternalError:
+            return "Internal decoder error";
+        default:
+            return "Unknown";
     }
 }
 
-struct J2KDecodeResult {
+struct J2KDecodeResult
+{
     JP2DecodeStatus status = JP2DecodeStatus::InternalError;
     JP2ImageInfo info;
-    std::vector<uint8_t> pixelData; // decoded BGRA/RGB pixels
+    std::vector<uint8_t> pixelData;  // decoded BGRA/RGB pixels
     uint32_t decodedWidth = 0;
     uint32_t decodedHeight = 0;
     uint32_t usedReductionLevel = 0;
     double decodeTimeMs = 0.0;
 
-    bool IsSuccess() const { return status == JP2DecodeStatus::Success; }
-    bool HasPixels() const { return !pixelData.empty() && decodedWidth > 0; }
+    bool IsSuccess() const
+    {
+        return status == JP2DecodeStatus::Success;
+    }
+    bool HasPixels() const
+    {
+        return !pixelData.empty() && decodedWidth > 0;
+    }
 };
 
 // ─── JPEG 2000 Decoder ───────────────────────────────────────────
-class JPEG2000Decoder {
-public:
+class JPEG2000Decoder
+{
+  public:
     JPEG2000Decoder() = default;
 
     /// Checks whether openjp2.dll can be loaded on this system.
     /// Performs a probe load/unload each call; result is cached in m_available.
-    bool IsAvailable() const {
+    bool IsAvailable() const
+    {
         if (!m_probed) {
             HMODULE hLib = ::LoadLibraryW(L"openjp2.dll");
             if (hLib) {
                 m_available = true;
                 ::FreeLibrary(hLib);
-            }
-            else {
+            } else {
                 m_available = false;
             }
             m_probed = true;
@@ -197,7 +242,8 @@ public:
         return m_available;
     }
 
-    JP2ImageInfo ReadInfo(const std::string& filePath) const {
+    JP2ImageInfo ReadInfo(const std::string& filePath) const
+    {
         JP2ImageInfo info;
         // Detect format from extension
         size_t dot = filePath.rfind('.');
@@ -207,15 +253,13 @@ public:
 
         // Read file header bytes for box parsing
         std::ifstream file(filePath, std::ios::binary);
-        if (!file.is_open()) return info;
+        if (!file.is_open())
+            return info;
 
         // JP2 signature: 12 bytes — 0x0000000C 6A502020 0D0A870A
-        constexpr uint8_t JP2_SIG[12] = {
-        0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50,
-        0x20, 0x20, 0x0D, 0x0A, 0x87, 0x0A
-        };
+        constexpr uint8_t JP2_SIG[12] = {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20, 0x0D, 0x0A, 0x87, 0x0A};
         // J2K codestream marker: FF 4F FF 51
-        constexpr uint8_t J2K_SOC[2] = { 0xFF, 0x4F };
+        constexpr uint8_t J2K_SOC[2] = {0xFF, 0x4F};
 
         uint8_t header[12] = {};
         file.read(reinterpret_cast<char*>(header), 12);
@@ -235,12 +279,11 @@ public:
                 file.read(reinterpret_cast<char*>(siz), 36);
                 if (file.gcount() >= 36) {
                     auto readBE32 = [](const uint8_t* p) -> uint32_t {
-                        return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) |
-                            (uint32_t(p[2]) << 8) | uint32_t(p[3]);
-                        };
+                        return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | uint32_t(p[3]);
+                    };
                     auto readBE16 = [](const uint8_t* p) -> uint16_t {
                         return (uint16_t(p[0]) << 8) | uint16_t(p[1]);
-                        };
+                    };
                     // SIZ layout after marker: Lsiz(2), Rsiz(2), Xsiz(4), Ysiz(4),
                     // XOsiz(4), YOsiz(4), XTsiz(4), YTsiz(4), XTOsiz(4), YTOsiz(4), Csiz(2)
                     uint32_t xSiz = readBE32(siz + 4);
@@ -261,44 +304,47 @@ public:
                         info.isSigned = (ssizByte & 0x80) != 0;
                         info.bitsPerComponent = static_cast<uint8_t>((ssizByte & 0x7F) + 1);
                     }
-                    info.numResolutionLevels = 6; // default; exact value needs COD parse
+                    info.numResolutionLevels = 6;  // default; exact value needs COD parse
                     info.colorSpace = (cSiz == 1) ? "Grayscale" : "sRGB";
                     info.hasAlpha = (cSiz >= 4);
                 }
             }
-            if (info.format == JP2Format::Unknown) info.format = JP2Format::J2K;
-        }
-        else if (isJP2Box) {
+            if (info.format == JP2Format::Unknown)
+                info.format = JP2Format::J2K;
+        } else if (isJP2Box) {
             // JP2 box format — iterate boxes looking for 'ihdr' inside 'jp2h'
-            file.seekg(12, std::ios::beg); // past signature box
+            file.seekg(12, std::ios::beg);  // past signature box
 
             auto readBE32 = [](const uint8_t* p) -> uint32_t {
-                return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) |
-                    (uint32_t(p[2]) << 8) | uint32_t(p[3]);
-                };
+                return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | uint32_t(p[3]);
+            };
 
-            constexpr uint32_t BOX_JP2H = 0x6A703268; // 'jp2h'
-            constexpr uint32_t BOX_IHDR = 0x69686472; // 'ihdr'
+            constexpr uint32_t BOX_JP2H = 0x6A703268;  // 'jp2h'
+            constexpr uint32_t BOX_IHDR = 0x69686472;  // 'ihdr'
 
             bool foundInfo = false;
             for (int boxCount = 0; boxCount < 64 && !foundInfo; ++boxCount) {
                 uint8_t boxHdr[8] = {};
                 file.read(reinterpret_cast<char*>(boxHdr), 8);
-                if (file.gcount() < 8) break;
+                if (file.gcount() < 8)
+                    break;
 
                 uint32_t boxLen = readBE32(boxHdr);
                 uint32_t boxType = readBE32(boxHdr + 4);
 
-                if (boxLen < 8 && boxLen != 0) break; // malformed
+                if (boxLen < 8 && boxLen != 0)
+                    break;  // malformed
                 uint64_t dataLen = (boxLen == 0) ? 0 : (boxLen - 8);
 
                 // Extended length (boxLen == 1): 8-byte length follows
                 if (boxLen == 1) {
                     uint8_t ext[8] = {};
                     file.read(reinterpret_cast<char*>(ext), 8);
-                    if (file.gcount() < 8) break;
+                    if (file.gcount() < 8)
+                        break;
                     uint64_t xl = (uint64_t(readBE32(ext)) << 32) | readBE32(ext + 4);
-                    if (xl < 16) break;
+                    if (xl < 16)
+                        break;
                     dataLen = xl - 16;
                 }
 
@@ -306,10 +352,12 @@ public:
                     // Parse sub-boxes within jp2h to find ihdr
                     auto jp2hEnd = static_cast<uint64_t>(file.tellg()) + dataLen;
                     for (int sub = 0; sub < 32; ++sub) {
-                        if (static_cast<uint64_t>(file.tellg()) >= jp2hEnd) break;
+                        if (static_cast<uint64_t>(file.tellg()) >= jp2hEnd)
+                            break;
                         uint8_t subHdr[8] = {};
                         file.read(reinterpret_cast<char*>(subHdr), 8);
-                        if (file.gcount() < 8) break;
+                        if (file.gcount() < 8)
+                            break;
 
                         uint32_t subLen = readBE32(subHdr);
                         uint32_t subType = readBE32(subHdr + 4);
@@ -324,13 +372,13 @@ public:
                                 uint16_t nc = (uint16_t(ihdr[8]) << 8) | ihdr[9];
                                 info.numComponents = static_cast<uint8_t>(nc > 255 ? 255 : nc);
                                 uint8_t bpc = ihdr[10];
-                                if (bpc != 255) { // 255 = varying per component
+                                if (bpc != 255) {  // 255 = varying per component
                                     info.isSigned = (bpc & 0x80) != 0;
                                     info.bitsPerComponent = static_cast<uint8_t>((bpc & 0x7F) + 1);
                                 }
                                 info.hasAlpha = (nc >= 4);
                                 info.colorSpace = (nc == 1) ? "Grayscale" : "sRGB";
-                                info.numResolutionLevels = 6; // default; exact needs COD marker
+                                info.numResolutionLevels = 6;  // default; exact needs COD marker
                                 foundInfo = true;
                             }
                             break;
@@ -339,22 +387,23 @@ public:
                             file.seekg(static_cast<std::streamoff>(subLen - 8), std::ios::cur);
                         }
                     }
-                    break; // done with jp2h
-                }
-                else {
+                    break;  // done with jp2h
+                } else {
                     // Skip this box
-                    if (boxLen == 0) break; // box extends to EOF
+                    if (boxLen == 0)
+                        break;  // box extends to EOF
                     file.seekg(static_cast<std::streamoff>(dataLen), std::ios::cur);
                 }
             }
-            if (info.format == JP2Format::Unknown) info.format = JP2Format::JP2;
+            if (info.format == JP2Format::Unknown)
+                info.format = JP2Format::JP2;
         }
 
         return info;
     }
 
-    J2KDecodeResult DecodeThumbnail(const std::string& filePath,
-        uint32_t maxSize = 256) const {
+    J2KDecodeResult DecodeThumbnail(const std::string& filePath, uint32_t maxSize = 256) const
+    {
         J2KDecodeResult result;
 
         if (!IsAvailable()) {
@@ -375,8 +424,10 @@ public:
         result.usedReductionLevel = level;
         result.decodedWidth = info.width >> level;
         result.decodedHeight = info.height >> level;
-        if (result.decodedWidth == 0) result.decodedWidth = 1;
-        if (result.decodedHeight == 0) result.decodedHeight = 1;
+        if (result.decodedWidth == 0)
+            result.decodedWidth = 1;
+        if (result.decodedHeight == 0)
+            result.decodedHeight = 1;
 
         auto t0 = std::chrono::high_resolution_clock::now();
 
@@ -384,20 +435,20 @@ public:
         // These mirror the OpenJPEG 2.x C API pointer types.
         using opj_codec_t = void*;
         using opj_stream_t = void*;
-        using opj_image_t = void*; // actually a struct, accessed via offset-safe helpers
+        using opj_image_t = void*;  // actually a struct, accessed via offset-safe helpers
 
         // ── Function pointer types matching OpenJPEG public API ──
-        using fn_opj_create_decompress = opj_codec_t(*)(int /*codec_format*/);
-        using fn_opj_destroy_codec = void(*)(opj_codec_t);
-        using fn_opj_stream_create_default_file_stream = opj_stream_t(*)(const char*, int /*is_read*/);
-        using fn_opj_stream_destroy = void(*)(opj_stream_t);
-        using fn_opj_setup_decoder = int(*)(opj_codec_t, void* /*opj_dparameters_t*/);
-        using fn_opj_set_default_decoder_parameters = void(*)(void* /*opj_dparameters_t*/);
-        using fn_opj_read_header = int(*)(opj_stream_t, opj_codec_t, opj_image_t*);
-        using fn_opj_set_decoded_resolution_factor = int(*)(opj_codec_t, uint32_t);
-        using fn_opj_decode = int(*)(opj_codec_t, opj_stream_t, opj_image_t);
-        using fn_opj_end_decompress = int(*)(opj_codec_t, opj_stream_t);
-        using fn_opj_image_destroy = void(*)(opj_image_t);
+        using fn_opj_create_decompress = opj_codec_t (*)(int /*codec_format*/);
+        using fn_opj_destroy_codec = void (*)(opj_codec_t);
+        using fn_opj_stream_create_default_file_stream = opj_stream_t (*)(const char*, int /*is_read*/);
+        using fn_opj_stream_destroy = void (*)(opj_stream_t);
+        using fn_opj_setup_decoder = int (*)(opj_codec_t, void* /*opj_dparameters_t*/);
+        using fn_opj_set_default_decoder_parameters = void (*)(void* /*opj_dparameters_t*/);
+        using fn_opj_read_header = int (*)(opj_stream_t, opj_codec_t, opj_image_t*);
+        using fn_opj_set_decoded_resolution_factor = int (*)(opj_codec_t, uint32_t);
+        using fn_opj_decode = int (*)(opj_codec_t, opj_stream_t, opj_image_t);
+        using fn_opj_end_decompress = int (*)(opj_codec_t, opj_stream_t);
+        using fn_opj_image_destroy = void (*)(opj_image_t);
 
         // ── Load openjp2.dll dynamically ──
         HMODULE hOpenJP2 = ::LoadLibraryW(L"openjp2.dll");
@@ -407,9 +458,8 @@ public:
             const uint32_t thumbH = (std::min)(maxSize, result.decodedHeight);
             result.decodedWidth = thumbW > 0 ? thumbW : 1;
             result.decodedHeight = thumbH > 0 ? thumbH : 1;
-            result.pixelData.assign(
-                static_cast<size_t>(result.decodedWidth) * result.decodedHeight * 4,
-                0x80); // mid-gray BGRA placeholder
+            result.pixelData.assign(static_cast<size_t>(result.decodedWidth) * result.decodedHeight * 4,
+                                    0x80);  // mid-gray BGRA placeholder
             // Stamp alpha channel to 0xFF for every pixel
             for (size_t i = 3; i < result.pixelData.size(); i += 4)
                 result.pixelData[i] = 0xFF;
@@ -420,32 +470,26 @@ public:
         }
 
         // Resolve required entry points
-        auto pfnCreateDecompress = reinterpret_cast<fn_opj_create_decompress>(
-            ::GetProcAddress(hOpenJP2, "opj_create_decompress"));
-        auto pfnDestroyCodec = reinterpret_cast<fn_opj_destroy_codec>(
-            ::GetProcAddress(hOpenJP2, "opj_destroy_codec"));
+        auto pfnCreateDecompress =
+            reinterpret_cast<fn_opj_create_decompress>(::GetProcAddress(hOpenJP2, "opj_create_decompress"));
+        auto pfnDestroyCodec = reinterpret_cast<fn_opj_destroy_codec>(::GetProcAddress(hOpenJP2, "opj_destroy_codec"));
         auto pfnStreamCreate = reinterpret_cast<fn_opj_stream_create_default_file_stream>(
             ::GetProcAddress(hOpenJP2, "opj_stream_create_default_file_stream"));
-        auto pfnStreamDestroy = reinterpret_cast<fn_opj_stream_destroy>(
-            ::GetProcAddress(hOpenJP2, "opj_stream_destroy"));
-        auto pfnSetupDecoder = reinterpret_cast<fn_opj_setup_decoder>(
-            ::GetProcAddress(hOpenJP2, "opj_setup_decoder"));
+        auto pfnStreamDestroy =
+            reinterpret_cast<fn_opj_stream_destroy>(::GetProcAddress(hOpenJP2, "opj_stream_destroy"));
+        auto pfnSetupDecoder = reinterpret_cast<fn_opj_setup_decoder>(::GetProcAddress(hOpenJP2, "opj_setup_decoder"));
         auto pfnSetDefaultParams = reinterpret_cast<fn_opj_set_default_decoder_parameters>(
             ::GetProcAddress(hOpenJP2, "opj_set_default_decoder_parameters"));
-        auto pfnReadHeader = reinterpret_cast<fn_opj_read_header>(
-            ::GetProcAddress(hOpenJP2, "opj_read_header"));
+        auto pfnReadHeader = reinterpret_cast<fn_opj_read_header>(::GetProcAddress(hOpenJP2, "opj_read_header"));
         auto pfnSetResFactor = reinterpret_cast<fn_opj_set_decoded_resolution_factor>(
             ::GetProcAddress(hOpenJP2, "opj_set_decoded_resolution_factor"));
-        auto pfnDecode = reinterpret_cast<fn_opj_decode>(
-            ::GetProcAddress(hOpenJP2, "opj_decode"));
-        auto pfnEndDecompress = reinterpret_cast<fn_opj_end_decompress>(
-            ::GetProcAddress(hOpenJP2, "opj_end_decompress"));
-        auto pfnImageDestroy = reinterpret_cast<fn_opj_image_destroy>(
-            ::GetProcAddress(hOpenJP2, "opj_image_destroy"));
+        auto pfnDecode = reinterpret_cast<fn_opj_decode>(::GetProcAddress(hOpenJP2, "opj_decode"));
+        auto pfnEndDecompress =
+            reinterpret_cast<fn_opj_end_decompress>(::GetProcAddress(hOpenJP2, "opj_end_decompress"));
+        auto pfnImageDestroy = reinterpret_cast<fn_opj_image_destroy>(::GetProcAddress(hOpenJP2, "opj_image_destroy"));
 
-        if (!pfnCreateDecompress || !pfnDestroyCodec || !pfnStreamCreate ||
-            !pfnStreamDestroy || !pfnSetupDecoder || !pfnSetDefaultParams ||
-            !pfnReadHeader || !pfnDecode || !pfnEndDecompress || !pfnImageDestroy) {
+        if (!pfnCreateDecompress || !pfnDestroyCodec || !pfnStreamCreate || !pfnStreamDestroy || !pfnSetupDecoder
+            || !pfnSetDefaultParams || !pfnReadHeader || !pfnDecode || !pfnEndDecompress || !pfnImageDestroy) {
             ::FreeLibrary(hOpenJP2);
             result.status = JP2DecodeStatus::LibraryNotAvailable;
             auto t1 = std::chrono::high_resolution_clock::now();
@@ -454,9 +498,11 @@ public:
         }
 
         // Determine codec format: 0 = J2K codestream, 1 = JP2 boxed, 2 = JPT/JPP
-        int codecFmt = 1; // default to JP2
-        if (info.format == JP2Format::J2K) codecFmt = 0;
-        else if (info.format == JP2Format::JPX) codecFmt = 2;
+        int codecFmt = 1;  // default to JP2
+        if (info.format == JP2Format::J2K)
+            codecFmt = 0;
+        else if (info.format == JP2Format::JPX)
+            codecFmt = 2;
 
         // Create codec
         opj_codec_t codec = pfnCreateDecompress(codecFmt);
@@ -568,13 +614,12 @@ public:
                 const int32_t* b = compData[2];
                 const int32_t* a = (numComps >= 4) ? compData[3] : nullptr;
                 for (size_t i = 0; i < pixelCount; ++i) {
-                    dst[i * 4 + 0] = static_cast<uint8_t>((std::min)((std::max)(b[i], 0), 255)); // B
-                    dst[i * 4 + 1] = static_cast<uint8_t>((std::min)((std::max)(g[i], 0), 255)); // G
-                    dst[i * 4 + 2] = static_cast<uint8_t>((std::min)((std::max)(r[i], 0), 255)); // R
+                    dst[i * 4 + 0] = static_cast<uint8_t>((std::min)((std::max)(b[i], 0), 255));  // B
+                    dst[i * 4 + 1] = static_cast<uint8_t>((std::min)((std::max)(g[i], 0), 255));  // G
+                    dst[i * 4 + 2] = static_cast<uint8_t>((std::min)((std::max)(r[i], 0), 255));  // R
                     dst[i * 4 + 3] = a ? static_cast<uint8_t>((std::min)((std::max)(a[i], 0), 255)) : 0xFF;
                 }
-            }
-            else if (numComps == 1 && compData[0]) {
+            } else if (numComps == 1 && compData[0]) {
                 const int32_t* gray = compData[0];
                 for (size_t i = 0; i < pixelCount; ++i) {
                     uint8_t v = static_cast<uint8_t>((std::min)((std::max)(gray[i], 0), 255));
@@ -585,8 +630,7 @@ public:
                 }
             }
             result.status = JP2DecodeStatus::Success;
-        }
-        else {
+        } else {
             result.status = JP2DecodeStatus::CorruptData;
         }
 
@@ -601,17 +645,19 @@ public:
         return result;
     }
 
-    static bool IsJP2Extension(const std::string& ext) {
+    static bool IsJP2Extension(const std::string& ext)
+    {
         return JP2Extensions::IsSupported(ext);
     }
 
-    static JPEG2000Decoder Create() {
+    static JPEG2000Decoder Create()
+    {
         return JPEG2000Decoder();
     }
 
-private:
-    mutable bool m_available = false; ///< Cached result of openjp2.dll probe
-    mutable bool m_probed = false; ///< Whether the probe has been performed
+  private:
+    mutable bool m_available = false;  ///< Cached result of openjp2.dll probe
+    mutable bool m_probed = false;     ///< Whether the probe has been performed
 };
 
-} // namespace ExplorerLens::Decoders
+}  // namespace ExplorerLens::Decoders

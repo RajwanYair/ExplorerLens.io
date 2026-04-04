@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <windows.h> // For wchar_t and __DATE__/__TIME__ macros
+#include <windows.h>  // For wchar_t and __DATE__/__TIME__ macros
 
 // Core types and interfaces
 #include "Core/ICacheProvider.h"
@@ -23,26 +23,25 @@ namespace Engine {
 
 // Define version macros if not already defined by CMake
 #ifndef EXPLORERLENS_ENGINE_VERSION_MAJOR
-#define EXPLORERLENS_ENGINE_VERSION_MAJOR 25
+    #define EXPLORERLENS_ENGINE_VERSION_MAJOR 25
 #endif
 
 #ifndef EXPLORERLENS_ENGINE_VERSION_MINOR
-#define EXPLORERLENS_ENGINE_VERSION_MINOR 3
+    #define EXPLORERLENS_ENGINE_VERSION_MINOR 3
 #endif
 
 #ifndef EXPLORERLENS_ENGINE_VERSION_PATCH
-#define EXPLORERLENS_ENGINE_VERSION_PATCH 0
+    #define EXPLORERLENS_ENGINE_VERSION_PATCH 0
 #endif
 
 #ifndef EXPLORERLENS_ENGINE_VERSION
-#define EXPLORERLENS_ENGINE_VERSION \
- ((EXPLORERLENS_ENGINE_VERSION_MAJOR << 16) | \
- (EXPLORERLENS_ENGINE_VERSION_MINOR << 8) | \
- EXPLORERLENS_ENGINE_VERSION_PATCH)
+    #define EXPLORERLENS_ENGINE_VERSION                                                       \
+        ((EXPLORERLENS_ENGINE_VERSION_MAJOR << 16) | (EXPLORERLENS_ENGINE_VERSION_MINOR << 8) \
+         | EXPLORERLENS_ENGINE_VERSION_PATCH)
 #endif
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 // Function declarations (implemented in EngineAPI.cpp) - included at global
 // scope to avoid creating nested ExplorerLens::Engine::ExplorerLens namespace
@@ -56,17 +55,19 @@ namespace Engine {
 //==============================================================================
 
 /// Get engine name
-inline const wchar_t *GetEngineName() {
- return L"ExplorerLens Thumbnail Engine";
+inline const wchar_t* GetEngineName()
+{
+    return L"ExplorerLens Thumbnail Engine";
 }
 
 /// Get engine copyright
-inline const wchar_t *GetEngineCopyright() {
- return L"Copyright (c) 2026 - ExplorerLens Project";
+inline const wchar_t* GetEngineCopyright()
+{
+    return L"Copyright (c) 2026 - ExplorerLens Project";
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 //==============================================================================
 // Usage Example:

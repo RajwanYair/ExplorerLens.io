@@ -12,16 +12,14 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class InpaintAlgorithm : uint8_t
-{
+enum class InpaintAlgorithm : uint8_t {
     PatchMatch,
     DeepFill,
     LaMa,
     Stable
 };
 
-enum class InpaintQuality : uint8_t
-{
+enum class InpaintQuality : uint8_t {
     Draft,
     Standard,
     High,
@@ -30,43 +28,39 @@ enum class InpaintQuality : uint8_t
 
 struct InpaintRegion
 {
-    uint32_t        x          = 0;
-    uint32_t        y          = 0;
-    uint32_t        width      = 0;
-    uint32_t        height     = 0;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
     InpaintAlgorithm algorithm = InpaintAlgorithm::LaMa;
-    InpaintQuality  quality    = InpaintQuality::Standard;
+    InpaintQuality quality = InpaintQuality::Standard;
 };
 
 class ContentAwareInpainter
 {
-public:
+  public:
     ContentAwareInpainter() = default;
     ~ContentAwareInpainter() = default;
 
-    ContentAwareInpainter(ContentAwareInpainter const&)            = delete;
+    ContentAwareInpainter(ContentAwareInpainter const&) = delete;
     ContentAwareInpainter& operator=(ContentAwareInpainter const&) = delete;
-    ContentAwareInpainter(ContentAwareInpainter&&)                 = default;
-    ContentAwareInpainter& operator=(ContentAwareInpainter&&)      = default;
+    ContentAwareInpainter(ContentAwareInpainter&&) = default;
+    ContentAwareInpainter& operator=(ContentAwareInpainter&&) = default;
 
-    bool Inpaint(
-        void const*           imageData,
-        uint32_t              width,
-        uint32_t              height,
-        InpaintRegion const&  region);
+    bool Inpaint(void const* imageData, uint32_t width, uint32_t height, InpaintRegion const& region);
 
     void SetQuality(InpaintQuality quality);
 
     [[nodiscard]] uint32_t GetEstimatedDurationMs(InpaintRegion const& region) const;
-    [[nodiscard]] bool     IsProcessing() const;
+    [[nodiscard]] bool IsProcessing() const;
 
     void Cancel();
 
-private:
-    InpaintQuality              m_quality          = InpaintQuality::Standard;
-    bool                        m_cancelRequested  = false;
+  private:
+    InpaintQuality m_quality = InpaintQuality::Standard;
+    bool m_cancelRequested = false;
     std::optional<InpaintRegion> m_processingRegion;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

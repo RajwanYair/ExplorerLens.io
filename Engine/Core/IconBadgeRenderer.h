@@ -14,15 +14,26 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class BadgeType : uint8_t {
-    FormatIcon, DecoderType, ErrorStatus, ProtectedContent,
-    HDRContent, AnimatedContent, MultiPage, COUNT
+    FormatIcon,
+    DecoderType,
+    ErrorStatus,
+    ProtectedContent,
+    HDRContent,
+    AnimatedContent,
+    MultiPage,
+    COUNT
 };
 
 enum class BadgeShape : uint8_t {
-    Circle, RoundedRect, Pill, Diamond, COUNT
+    Circle,
+    RoundedRect,
+    Pill,
+    Diamond,
+    COUNT
 };
 
-struct BadgeStyle {
+struct BadgeStyle
+{
     BadgeShape shape = BadgeShape::RoundedRect;
     uint32_t backgroundColor = 0xCC000000;
     uint32_t foregroundColor = 0xFFFFFFFF;
@@ -32,7 +43,8 @@ struct BadgeStyle {
     float opacity = 0.9f;
 };
 
-struct BadgeConfig {
+struct BadgeConfig
+{
     BadgeType type = BadgeType::FormatIcon;
     BadgeStyle style;
     std::wstring label;
@@ -42,7 +54,8 @@ struct BadgeConfig {
     float dpiScale = 1.0f;
 };
 
-struct BadgePlacement {
+struct BadgePlacement
+{
     uint32_t x = 0;
     uint32_t y = 0;
     uint32_t width = 0;
@@ -51,20 +64,23 @@ struct BadgePlacement {
     bool visible = false;
 };
 
-class IconBadgeRenderer {
-public:
-    void SetStyle(const BadgeStyle& style) { m_style = style; }
-    const BadgeStyle& GetStyle() const { return m_style; }
+class IconBadgeRenderer
+{
+  public:
+    void SetStyle(const BadgeStyle& style)
+    {
+        m_style = style;
+    }
+    const BadgeStyle& GetStyle() const
+    {
+        return m_style;
+    }
 
-    BadgePlacement ComputePlacement(const BadgeConfig& cfg,
-        uint32_t thumbWidth, uint32_t thumbHeight) const {
+    BadgePlacement ComputePlacement(const BadgeConfig& cfg, uint32_t thumbWidth, uint32_t thumbHeight) const
+    {
         BadgePlacement p;
-        uint32_t size = cfg.dpiAware
-            ? static_cast<uint32_t>(cfg.sizePx * cfg.dpiScale)
-            : cfg.sizePx;
-        uint32_t margin = cfg.dpiAware
-            ? static_cast<uint32_t>(cfg.marginPx * cfg.dpiScale)
-            : cfg.marginPx;
+        uint32_t size = cfg.dpiAware ? static_cast<uint32_t>(cfg.sizePx * cfg.dpiScale) : cfg.sizePx;
+        uint32_t margin = cfg.dpiAware ? static_cast<uint32_t>(cfg.marginPx * cfg.dpiScale) : cfg.marginPx;
 
         p.width = size;
         p.height = size;
@@ -75,21 +91,28 @@ public:
         return p;
     }
 
-    bool ShouldRenderBadge(uint32_t thumbWidth, uint32_t thumbHeight,
-        uint32_t minThumbSize = 48) const {
+    bool ShouldRenderBadge(uint32_t thumbWidth, uint32_t thumbHeight, uint32_t minThumbSize = 48) const
+    {
         return (thumbWidth >= minThumbSize && thumbHeight >= minThumbSize);
     }
 
-    uint32_t ScaledSize(uint32_t basePx, float dpiScale) const {
+    uint32_t ScaledSize(uint32_t basePx, float dpiScale) const
+    {
         return static_cast<uint32_t>(basePx * dpiScale);
     }
 
-    static size_t TypeCount() { return static_cast<size_t>(BadgeType::COUNT); }
-    static size_t ShapeCount() { return static_cast<size_t>(BadgeShape::COUNT); }
+    static size_t TypeCount()
+    {
+        return static_cast<size_t>(BadgeType::COUNT);
+    }
+    static size_t ShapeCount()
+    {
+        return static_cast<size_t>(BadgeShape::COUNT);
+    }
 
-private:
+  private:
     BadgeStyle m_style;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

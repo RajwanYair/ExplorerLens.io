@@ -15,14 +15,28 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class SilentUpdateChannel : uint8_t {
-    Stable, Beta, Canary, Enterprise, LTS, COUNT
+    Stable,
+    Beta,
+    Canary,
+    Enterprise,
+    LTS,
+    COUNT
 };
 
 enum class SilentUpdateState : uint8_t {
-    Idle, Checking, Downloading, Verifying, Staging, Applying, Complete, Failed, COUNT
+    Idle,
+    Checking,
+    Downloading,
+    Verifying,
+    Staging,
+    Applying,
+    Complete,
+    Failed,
+    COUNT
 };
 
-struct UpdatePackage {
+struct UpdatePackage
+{
     std::wstring version;
     std::wstring downloadUrl;
     std::wstring sha256Hash;
@@ -32,7 +46,8 @@ struct UpdatePackage {
     bool requiresRestart = false;
 };
 
-struct UpdateProgress {
+struct UpdateProgress
+{
     SilentUpdateState state = SilentUpdateState::Idle;
     float progressPercent = 0.0f;
     uint64_t bytesDownloaded = 0;
@@ -41,7 +56,8 @@ struct UpdateProgress {
     std::wstring statusMessage;
 };
 
-struct UpdateConfig {
+struct UpdateConfig
+{
     SilentUpdateChannel channel = SilentUpdateChannel::Stable;
     uint32_t checkIntervalHrs = 24;
     bool silentInstall = true;
@@ -50,29 +66,41 @@ struct UpdateConfig {
     uint32_t maxRetries = 3;
 };
 
-class SilentUpdateOrchestrator {
-public:
-    void Configure(const UpdateConfig& cfg) { m_config = cfg; }
-    const UpdateConfig& GetConfig() const { return m_config; }
+class SilentUpdateOrchestrator
+{
+  public:
+    void Configure(const UpdateConfig& cfg)
+    {
+        m_config = cfg;
+    }
+    const UpdateConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-    bool CheckForUpdates(const std::wstring& currentVersion) {
+    bool CheckForUpdates(const std::wstring& currentVersion)
+    {
         m_progress.state = SilentUpdateState::Checking;
         // Simulated check
         m_progress.state = SilentUpdateState::Idle;
         m_lastCheckVersion = currentVersion;
-        return false; // No update available in simulation
+        return false;  // No update available in simulation
     }
 
-    bool StartDownload(const UpdatePackage& pkg) {
-        if (m_progress.state != SilentUpdateState::Idle) return false;
+    bool StartDownload(const UpdatePackage& pkg)
+    {
+        if (m_progress.state != SilentUpdateState::Idle)
+            return false;
         m_package = pkg;
         m_progress.state = SilentUpdateState::Downloading;
         m_progress.bytesTotal = pkg.sizeBytes;
         return true;
     }
 
-    bool Apply() {
-        if (m_progress.state != SilentUpdateState::Downloading) return false;
+    bool Apply()
+    {
+        if (m_progress.state != SilentUpdateState::Downloading)
+            return false;
         m_progress.state = SilentUpdateState::Verifying;
         m_progress.state = SilentUpdateState::Staging;
         m_progress.state = SilentUpdateState::Applying;
@@ -81,23 +109,36 @@ public:
         return true;
     }
 
-    const UpdateProgress& GetProgress() const { return m_progress; }
-    SilentUpdateState GetState() const { return m_progress.state; }
+    const UpdateProgress& GetProgress() const
+    {
+        return m_progress;
+    }
+    SilentUpdateState GetState() const
+    {
+        return m_progress.state;
+    }
 
-    void Reset() {
+    void Reset()
+    {
         m_progress = {};
         m_package = {};
     }
 
-    static size_t ChannelCount() { return static_cast<size_t>(SilentUpdateChannel::COUNT); }
-    static size_t StateCount() { return static_cast<size_t>(SilentUpdateState::COUNT); }
+    static size_t ChannelCount()
+    {
+        return static_cast<size_t>(SilentUpdateChannel::COUNT);
+    }
+    static size_t StateCount()
+    {
+        return static_cast<size_t>(SilentUpdateState::COUNT);
+    }
 
-private:
+  private:
     UpdateConfig m_config;
     UpdatePackage m_package;
     UpdateProgress m_progress;
     std::wstring m_lastCheckVersion;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

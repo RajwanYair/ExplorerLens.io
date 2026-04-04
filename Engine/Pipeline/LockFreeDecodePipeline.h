@@ -5,7 +5,7 @@
 //
 // Suppress C4324 — intentional cache-line alignment padding
 #pragma warning(push)
-#pragma warning(disable: 4324)
+#pragma warning(disable : 4324)
 //
 // PURPOSE:
 //   Lock-free multi-producer multi-consumer decode queue using Compare-And-Swap
@@ -36,12 +36,12 @@
 // ============================================================================
 
 #include <atomic>
-#include <vector>
-#include <thread>
-#include <functional>
-#include <string>
 #include <cstdint>
+#include <functional>
 #include <memory>
+#include <string>
+#include <thread>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -67,29 +67,32 @@ enum class OverflowPolicy : uint8_t {
     COUNT
 };
 
-struct LockFreePipelineConfig {
+struct LockFreePipelineConfig
+{
     uint32_t queueCapacity = 256;
     uint32_t workerThreads = 4;
     OverflowPolicy overflowPolicy = OverflowPolicy::DropOldest;
-    bool     useAffinity = false;
+    bool useAffinity = false;
     uint32_t batchSize = 8;
 };
 
-struct LockFreePipelineStats {
+struct LockFreePipelineStats
+{
     uint64_t itemsProcessed = 0;
     uint64_t itemsDropped = 0;
     uint64_t contentionEvents = 0;
-    double   avgLatencyUs = 0.0;
-    double   p99LatencyUs = 0.0;
-    double   throughputPerSec = 0.0;
+    double avgLatencyUs = 0.0;
+    double p99LatencyUs = 0.0;
+    double throughputPerSec = 0.0;
 };
 
 /// Decode task submitted to the lock-free queue.
-struct DecodeTask {
+struct DecodeTask
+{
     std::wstring filePath;
-    uint32_t     targetWidth = 256;
-    uint32_t     targetHeight = 256;
-    uint64_t     priority = 0;
+    uint32_t targetWidth = 256;
+    uint32_t targetHeight = 256;
+    uint64_t priority = 0;
     std::function<void(bool, std::vector<uint8_t>&)> callback;
 };
 
@@ -100,45 +103,64 @@ struct DecodeTask {
 /// slot, write the task, then advance the slot's sequence. Consumers CAS the
 /// tail index, read the task, then advance the sequence by the buffer capacity
 /// to mark it free for reuse. No mutexes are required.
-class LockFreeDecodePipeline {
-public:
+class LockFreeDecodePipeline
+{
+  public:
     // ====================================================================
     // Backward-compatible static API (v14)
     // ====================================================================
 
-    static constexpr size_t StageStateCount() {
+    static constexpr size_t StageStateCount()
+    {
         return static_cast<size_t>(PipelineStageState::COUNT);
     }
 
-    static constexpr size_t PolicyCount() {
+    static constexpr size_t PolicyCount()
+    {
         return static_cast<size_t>(OverflowPolicy::COUNT);
     }
 
-    static inline const wchar_t* StageStateName(PipelineStageState s) {
+    static inline const wchar_t* StageStateName(PipelineStageState s)
+    {
         switch (s) {
-        case PipelineStageState::Idle:     return L"Idle";
-        case PipelineStageState::Queued:   return L"Queued";
-        case PipelineStageState::Decoding: return L"Decoding";
-        case PipelineStageState::Scaling:  return L"Scaling";
-        case PipelineStageState::Caching:  return L"Caching";
-        case PipelineStageState::Complete: return L"Complete";
-        case PipelineStageState::Failed:   return L"Failed";
-        default:                           return L"Unknown";
+            case PipelineStageState::Idle:
+                return L"Idle";
+            case PipelineStageState::Queued:
+                return L"Queued";
+            case PipelineStageState::Decoding:
+                return L"Decoding";
+            case PipelineStageState::Scaling:
+                return L"Scaling";
+            case PipelineStageState::Caching:
+                return L"Caching";
+            case PipelineStageState::Complete:
+                return L"Complete";
+            case PipelineStageState::Failed:
+                return L"Failed";
+            default:
+                return L"Unknown";
         }
     }
 
-    static inline const wchar_t* PolicyName(OverflowPolicy p) {
+    static inline const wchar_t* PolicyName(OverflowPolicy p)
+    {
         switch (p) {
-        case OverflowPolicy::Block:        return L"Block";
-        case OverflowPolicy::DropOldest:   return L"Drop Oldest";
-        case OverflowPolicy::DropNewest:   return L"Drop Newest";
-        case OverflowPolicy::ExpandBuffer: return L"Expand Buffer";
-        default:                           return L"Unknown";
+            case OverflowPolicy::Block:
+                return L"Block";
+            case OverflowPolicy::DropOldest:
+                return L"Drop Oldest";
+            case OverflowPolicy::DropNewest:
+                return L"Drop Newest";
+            case OverflowPolicy::ExpandBuffer:
+                return L"Expand Buffer";
+            default:
+                return L"Unknown";
         }
     }
 
     /// Round up to next power of 2 (for ring buffer sizing).
-    static inline uint32_t NextPowerOf2(uint32_t v) {
+    static inline uint32_t NextPowerOf2(uint32_t v)
+    {
         v--;
         v |= v >> 1;
         v |= v >> 2;
@@ -150,7 +172,8 @@ public:
     }
 
     /// Check if value is a power of 2.
-    static inline bool IsPowerOf2(uint32_t v) {
+    static inline bool IsPowerOf2(uint32_t v)
+    {
         return v > 0 && (v & (v - 1)) == 0;
     }
 
@@ -163,15 +186,16 @@ public:
         , m_tail(0)
         , m_stopFlag(false)
         , m_itemsProcessed(0)
-        , m_itemsDropped(0) {
+        , m_itemsDropped(0)
+    {
         m_slots = std::make_unique<Slot[]>(m_capacity);
         for (uint32_t i = 0; i < m_capacity; ++i) {
-            m_slots[i].sequence.store(static_cast<uint64_t>(i),
-                std::memory_order_relaxed);
+            m_slots[i].sequence.store(static_cast<uint64_t>(i), std::memory_order_relaxed);
         }
     }
 
-    ~LockFreeDecodePipeline() {
+    ~LockFreeDecodePipeline()
+    {
         StopWorkers();
     }
 
@@ -180,7 +204,8 @@ public:
 
     /// CAS-based lock-free enqueue. Returns false if the queue is full.
     /// The task is moved into the ring buffer slot on success.
-    inline bool TryEnqueue(DecodeTask&& task) {
+    inline bool TryEnqueue(DecodeTask&& task)
+    {
         uint64_t pos = m_head.load(std::memory_order_relaxed);
         for (;;) {
             Slot& slot = m_slots[static_cast<size_t>(pos & m_mask)];
@@ -189,20 +214,17 @@ public:
 
             if (diff == 0) {
                 // Slot is free at this position — attempt to claim it
-                if (m_head.compare_exchange_weak(pos, pos + 1,
-                    std::memory_order_relaxed)) {
+                if (m_head.compare_exchange_weak(pos, pos + 1, std::memory_order_relaxed)) {
                     slot.task = std::move(task);
                     slot.sequence.store(pos + 1, std::memory_order_release);
                     return true;
                 }
                 // CAS failed — another producer won; pos is reloaded by CAS
-            }
-            else if (diff < 0) {
+            } else if (diff < 0) {
                 // Queue is full — the slot hasn't been consumed yet
                 m_itemsDropped.fetch_add(1, std::memory_order_relaxed);
                 return false;
-            }
-            else {
+            } else {
                 // Slot sequence is ahead of pos — reload head
                 pos = m_head.load(std::memory_order_relaxed);
             }
@@ -211,7 +233,8 @@ public:
 
     /// CAS-based lock-free dequeue. Returns false if the queue is empty.
     /// The task is moved out of the ring buffer slot on success.
-    inline bool TryDequeue(DecodeTask& outTask) {
+    inline bool TryDequeue(DecodeTask& outTask)
+    {
         uint64_t pos = m_tail.load(std::memory_order_relaxed);
         for (;;) {
             Slot& slot = m_slots[static_cast<size_t>(pos & m_mask)];
@@ -220,26 +243,23 @@ public:
 
             if (diff == 0) {
                 // Slot has data ready — attempt to claim it
-                if (m_tail.compare_exchange_weak(pos, pos + 1,
-                    std::memory_order_relaxed)) {
+                if (m_tail.compare_exchange_weak(pos, pos + 1, std::memory_order_relaxed)) {
                     outTask = std::move(slot.task);
-                    slot.sequence.store(pos + m_capacity,
-                        std::memory_order_release);
+                    slot.sequence.store(pos + m_capacity, std::memory_order_release);
                     return true;
                 }
-            }
-            else if (diff < 0) {
+            } else if (diff < 0) {
                 // Queue is empty
                 return false;
-            }
-            else {
+            } else {
                 pos = m_tail.load(std::memory_order_relaxed);
             }
         }
     }
 
     /// Approximate pending count (lock-free snapshot of head and tail).
-    inline uint32_t QueueDepth() const {
+    inline uint32_t QueueDepth() const
+    {
         uint64_t h = m_head.load(std::memory_order_acquire);
         uint64_t t = m_tail.load(std::memory_order_acquire);
         return static_cast<uint32_t>(h >= t ? h - t : 0u);
@@ -247,12 +267,14 @@ public:
 
     /// Set the decode function that worker threads invoke for each task.
     /// If not set, workers invoke the task's callback with (false, empty).
-    inline void SetDecodeFunction(std::function<void(DecodeTask&)> fn) {
+    inline void SetDecodeFunction(std::function<void(DecodeTask&)> fn)
+    {
         m_decodeFn = std::move(fn);
     }
 
     /// Spawn the specified number of worker threads that drain the queue.
-    inline void StartWorkers(uint32_t count) {
+    inline void StartWorkers(uint32_t count)
+    {
         m_stopFlag.store(false, std::memory_order_release);
         m_workers.reserve(count);
         for (uint32_t i = 0; i < count; ++i) {
@@ -261,58 +283,66 @@ public:
     }
 
     /// Signal all workers to stop and join their threads.
-    inline void StopWorkers() {
+    inline void StopWorkers()
+    {
         m_stopFlag.store(true, std::memory_order_release);
         for (auto& w : m_workers) {
-            if (w.joinable()) w.join();
+            if (w.joinable())
+                w.join();
         }
         m_workers.clear();
     }
 
     /// Total tasks successfully dequeued and processed by workers.
-    inline uint64_t GetItemsProcessed() const {
+    inline uint64_t GetItemsProcessed() const
+    {
         return m_itemsProcessed.load(std::memory_order_acquire);
     }
 
     /// Total tasks dropped because the queue was full.
-    inline uint64_t GetItemsDropped() const {
+    inline uint64_t GetItemsDropped() const
+    {
         return m_itemsDropped.load(std::memory_order_acquire);
     }
 
     /// Ring buffer capacity (always a power of 2).
-    inline uint32_t Capacity() const { return m_capacity; }
+    inline uint32_t Capacity() const
+    {
+        return m_capacity;
+    }
 
     /// Check whether worker threads are running.
-    inline bool IsRunning() const {
+    inline bool IsRunning() const
+    {
         return !m_stopFlag.load(std::memory_order_acquire) && !m_workers.empty();
     }
 
-private:
+  private:
     /// Cache-line-aligned slot with per-slot sequence counter.
     /// The sequence counter coordinates producers and consumers without
     /// a global lock. Each slot cycles through:
     ///   writable(pos) → readable(pos+1) → writable(pos+capacity) → ...
-    struct alignas(64) Slot {
-        std::atomic<uint64_t> sequence{ 0 };
-        DecodeTask            task;
+    struct alignas(64) Slot
+    {
+        std::atomic<uint64_t> sequence{0};
+        DecodeTask task;
     };
 
     /// Worker thread main loop: dequeue tasks and invoke the decode function
     /// or the per-task callback. Yields on empty queue to avoid busy-spinning.
-    inline void WorkerLoop() {
+    inline void WorkerLoop()
+    {
         DecodeTask task;
         while (!m_stopFlag.load(std::memory_order_acquire)) {
             if (TryDequeue(task)) {
                 if (m_decodeFn) {
                     m_decodeFn(task);
-                }
-                else if (task.callback) {
+                } else if (task.callback) {
                     std::vector<uint8_t> emptyResult;
                     task.callback(false, emptyResult);
                 }
                 m_itemsProcessed.fetch_add(1, std::memory_order_relaxed);
-            }
-            else {
+            } else {
                 // No work available — yield to avoid burning CPU
                 std::this_thread::yield();
             }
@@ -321,8 +351,7 @@ private:
         while (TryDequeue(task)) {
             if (m_decodeFn) {
                 m_decodeFn(task);
-            }
-            else if (task.callback) {
+            } else if (task.callback) {
                 std::vector<uint8_t> emptyResult;
                 task.callback(false, emptyResult);
             }
@@ -331,23 +360,23 @@ private:
     }
 
     // Ring buffer storage
-    uint32_t                          m_capacity;
-    uint32_t                          m_mask;
-    std::unique_ptr<Slot[]>           m_slots;
+    uint32_t m_capacity;
+    uint32_t m_mask;
+    std::unique_ptr<Slot[]> m_slots;
 
     // Head and tail on separate cache lines to prevent false sharing
     alignas(64) std::atomic<uint64_t> m_head;
     alignas(64) std::atomic<uint64_t> m_tail;
 
     // Control and stats
-    std::atomic<bool>                 m_stopFlag;
-    std::atomic<uint64_t>             m_itemsProcessed;
-    std::atomic<uint64_t>             m_itemsDropped;
-    std::function<void(DecodeTask&)>  m_decodeFn;
-    std::vector<std::thread>          m_workers;
+    std::atomic<bool> m_stopFlag;
+    std::atomic<uint64_t> m_itemsProcessed;
+    std::atomic<uint64_t> m_itemsDropped;
+    std::function<void(DecodeTask&)> m_decodeFn;
+    std::vector<std::thread> m_workers;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 #pragma warning(pop)

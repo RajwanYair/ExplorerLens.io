@@ -18,7 +18,7 @@ namespace Engine {
 //==============================================================================
 class IGPURenderer
 {
-public:
+  public:
     virtual ~IGPURenderer() = default;
 
     //==========================================================================
@@ -52,13 +52,8 @@ public:
     /// @note imageData must be in RGBA format (4 bytes per pixel)
     /// @note outBitmap will be created as a device-compatible bitmap
     //==========================================================================
-    virtual HRESULT RenderThumbnail(
-        const uint8_t* imageData,
-        uint32_t imageWidth,
-        uint32_t imageHeight,
-        uint32_t thumbWidth,
-        uint32_t thumbHeight,
-        HBITMAP* outBitmap) = 0;
+    virtual HRESULT RenderThumbnail(const uint8_t* imageData, uint32_t imageWidth, uint32_t imageHeight,
+                                    uint32_t thumbWidth, uint32_t thumbHeight, HBITMAP* outBitmap) = 0;
 
     //==========================================================================
     /// Shutdown the GPU renderer and release resources
@@ -73,10 +68,7 @@ public:
     /// @param outMemoryMB Output: GPU memory in MB (can be nullptr)
     /// @return S_OK on success, error HRESULT on failure
     //==========================================================================
-    virtual HRESULT GetGPUInfo(
-        wchar_t* outName,
-        uint32_t nameSize,
-        uint32_t* outMemoryMB) const = 0;
+    virtual HRESULT GetGPUInfo(wchar_t* outName, uint32_t nameSize, uint32_t* outMemoryMB) const = 0;
 
     //==========================================================================
     /// Get renderer type
@@ -86,5 +78,5 @@ public:
     virtual const wchar_t* GetRendererType() const = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -27,14 +27,16 @@ enum class CrossMetadataSource : uint8_t {
     Custom
 };
 
-struct CrossFormatMetadataField {
+struct CrossFormatMetadataField
+{
     std::wstring key;
     std::wstring value;
     CrossMetadataSource source = CrossMetadataSource::None;
     float confidence = 1.0f;
 };
 
-struct CrossFormatMetadata {
+struct CrossFormatMetadata
+{
     std::wstring title;
     std::wstring author;
     std::wstring description;
@@ -46,7 +48,8 @@ struct CrossFormatMetadata {
     CrossMetadataSource primarySource = CrossMetadataSource::None;
 };
 
-struct MetadataExtractionStats {
+struct MetadataExtractionStats
+{
     uint64_t totalExtractions = 0;
     uint64_t exifFound = 0;
     uint64_t xmpFound = 0;
@@ -54,21 +57,24 @@ struct MetadataExtractionStats {
     bool initialized = false;
 };
 
-class CrossFormatMetadataEngine {
-public:
-    static CrossFormatMetadataEngine& Instance() {
+class CrossFormatMetadataEngine
+{
+  public:
+    static CrossFormatMetadataEngine& Instance()
+    {
         static CrossFormatMetadataEngine instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats = {};
         m_stats.initialized = true;
     }
 
-    CrossFormatMetadata Extract(const std::wstring& /*filePath*/,
-                                const std::wstring& extension) {
+    CrossFormatMetadata Extract(const std::wstring& /*filePath*/, const std::wstring& extension)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalExtractions++;
 
@@ -96,22 +102,25 @@ public:
         return meta;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    MetadataExtractionStats GetStats() const {
+    MetadataExtractionStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
     }
 
-private:
+  private:
     CrossFormatMetadataEngine() = default;
     ~CrossFormatMetadataEngine() = default;
     CrossFormatMetadataEngine(const CrossFormatMetadataEngine&) = delete;
@@ -121,5 +130,5 @@ private:
     MetadataExtractionStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

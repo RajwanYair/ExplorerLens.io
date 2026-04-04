@@ -4,9 +4,9 @@
  *****************************************************************************/
 
 #include "PluginHostServer.h"
-#include "../Plugin/IPC/SharedMemoryManager.h"
 #include <chrono>
 #include <iostream>
+#include "../Plugin/IPC/SharedMemoryManager.h"
 
 namespace ExplorerLens {
 namespace PluginHost {
@@ -17,11 +17,13 @@ namespace PluginHost {
 
 PluginHostServer::PluginHostServer() = default;
 
-PluginHostServer::~PluginHostServer() { Shutdown(); }
+PluginHostServer::~PluginHostServer()
+{
+    Shutdown();
+}
 
-bool PluginHostServer::Initialize(const std::wstring& plugin_path,
-    const std::wstring& pipe_name,
-    uint32_t timeout_ms) {
+bool PluginHostServer::Initialize(const std::wstring& plugin_path, const std::wstring& pipe_name, uint32_t timeout_ms)
+{
     plugin_path_ = plugin_path;
     pipe_name_ = pipe_name;
     timeout_ms_ = timeout_ms;
@@ -47,7 +49,8 @@ bool PluginHostServer::Initialize(const std::wstring& plugin_path,
     return true;
 }
 
-void PluginHostServer::Run() {
+void PluginHostServer::Run()
+{
     if (!running_) {
         return;
     }
@@ -78,39 +81,38 @@ void PluginHostServer::Run() {
         auto msg_type = static_cast<IPC::MessageType>(header.messageType);
 
         switch (msg_type) {
-        case IPC::MessageType::REQUEST_THUMBNAIL:
-            HandleRequestThumbnail(header.correlationId, payload);
-            break;
+            case IPC::MessageType::REQUEST_THUMBNAIL:
+                HandleRequestThumbnail(header.correlationId, payload);
+                break;
 
-        case IPC::MessageType::CAN_DECODE_QUERY:
-            HandleCanDecodeQuery(header.correlationId, payload);
-            break;
+            case IPC::MessageType::CAN_DECODE_QUERY:
+                HandleCanDecodeQuery(header.correlationId, payload);
+                break;
 
-        case IPC::MessageType::GET_PLUGIN_INFO:
-            HandleGetPluginInfo(header.correlationId);
-            break;
+            case IPC::MessageType::GET_PLUGIN_INFO:
+                HandleGetPluginInfo(header.correlationId);
+                break;
 
-        case IPC::MessageType::SHUTDOWN:
-            HandleShutdown();
-            break;
+            case IPC::MessageType::SHUTDOWN:
+                HandleShutdown();
+                break;
 
-        case IPC::MessageType::HEARTBEAT_PING:
-            HandleHeartbeatPing(header.correlationId);
-            break;
+            case IPC::MessageType::HEARTBEAT_PING:
+                HandleHeartbeatPing(header.correlationId);
+                break;
 
-        default:
-            std::wcerr << L"Unknown message type: " << header.messageType << L"\n";
-            SendErrorResponse(header.correlationId,
-                IPC::IPCErrorCode::INVALID_MESSAGE_TYPE,
-                "Unknown message type");
-            break;
+            default:
+                std::wcerr << L"Unknown message type: " << header.messageType << L"\n";
+                SendErrorResponse(header.correlationId, IPC::IPCErrorCode::INVALID_MESSAGE_TYPE, "Unknown message type");
+                break;
         }
     }
 
     std::wcout << L"Message loop exited\n";
 }
 
-void PluginHostServer::Shutdown() {
+void PluginHostServer::Shutdown()
+{
     if (!running_) {
         return;
     }
@@ -136,32 +138,32 @@ void PluginHostServer::Shutdown() {
 // IPC Methods
 //============================================================================
 
-bool PluginHostServer::CreatePipe() {
+bool PluginHostServer::CreatePipe()
+{
     std::wstring full_pipe_name = L"\\\\.\\pipe\\" + pipe_name_;
 
-    pipe_handle_ =
-        CreateNamedPipeW(full_pipe_name.c_str(), PIPE_ACCESS_DUPLEX,
-            PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-            1, // Max instances
-            IPC::MAX_MESSAGE_SIZE, // Out buffer size
-            IPC::MAX_MESSAGE_SIZE, // In buffer size
-            0, // Default timeout
-            nullptr); // Default security
+    pipe_handle_ = CreateNamedPipeW(full_pipe_name.c_str(), PIPE_ACCESS_DUPLEX,
+                                    PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+                                    1,                      // Max instances
+                                    IPC::MAX_MESSAGE_SIZE,  // Out buffer size
+                                    IPC::MAX_MESSAGE_SIZE,  // In buffer size
+                                    0,                      // Default timeout
+                                    nullptr);               // Default security
 
     return pipe_handle_ != INVALID_HANDLE_VALUE;
 }
 
-bool PluginHostServer::ConnectToPipe() {
+bool PluginHostServer::ConnectToPipe()
+{
     if (pipe_handle_ == INVALID_HANDLE_VALUE) {
         return false;
     }
 
-    return ConnectNamedPipe(pipe_handle_, nullptr) != 0 ||
-        GetLastError() == ERROR_PIPE_CONNECTED;
+    return ConnectNamedPipe(pipe_handle_, nullptr) != 0 || GetLastError() == ERROR_PIPE_CONNECTED;
 }
 
-bool PluginHostServer::ReadMessage(IPC::MessageHeader& header,
-    std::vector<uint8_t>& payload) {
+bool PluginHostServer::ReadMessage(IPC::MessageHeader& header, std::vector<uint8_t>& payload)
+{
     // Read header
     DWORD bytes_read = 0;
     if (!ReadFile(pipe_handle_, &header, sizeof(header), &bytes_read, nullptr)) {
@@ -181,8 +183,7 @@ bool PluginHostServer::ReadMessage(IPC::MessageHeader& header,
     // Read payload if present
     if (header.dataSize > 0) {
         payload.resize(header.dataSize);
-        if (!ReadFile(pipe_handle_, payload.data(), header.dataSize, &bytes_read,
-            nullptr)) {
+        if (!ReadFile(pipe_handle_, payload.data(), header.dataSize, &bytes_read, nullptr)) {
             return false;
         }
 
@@ -194,12 +195,11 @@ bool PluginHostServer::ReadMessage(IPC::MessageHeader& header,
     return true;
 }
 
-bool PluginHostServer::WriteMessage(const IPC::MessageHeader& header,
-    const void* payload, uint32_t size) {
+bool PluginHostServer::WriteMessage(const IPC::MessageHeader& header, const void* payload, uint32_t size)
+{
     // Write header
     DWORD bytes_written = 0;
-    if (!WriteFile(pipe_handle_, &header, sizeof(header), &bytes_written,
-        nullptr)) {
+    if (!WriteFile(pipe_handle_, &header, sizeof(header), &bytes_written, nullptr)) {
         return false;
     }
 
@@ -217,29 +217,24 @@ bool PluginHostServer::WriteMessage(const IPC::MessageHeader& header,
 // Message Handlers
 //============================================================================
 
-void PluginHostServer::HandleRequestThumbnail(
-    uint64_t correlation_id, const std::vector<uint8_t>& payload) {
-    std::wcout << L"Processing thumbnail request (ID: " << correlation_id
-        << L")\n";
+void PluginHostServer::HandleRequestThumbnail(uint64_t correlation_id, const std::vector<uint8_t>& payload)
+{
+    std::wcout << L"Processing thumbnail request (ID: " << correlation_id << L")\n";
 
     // Parse request
     if (payload.size() < sizeof(IPC::IPCThumbnailRequest)) {
-        SendErrorResponse(correlation_id, IPC::IPCErrorCode::MALFORMED_MESSAGE,
-            "Thumbnail request too small");
+        SendErrorResponse(correlation_id, IPC::IPCErrorCode::MALFORMED_MESSAGE, "Thumbnail request too small");
         return;
     }
 
-    const auto* request =
-        reinterpret_cast<const IPC::IPCThumbnailRequest*>(payload.data());
+    const auto* request = reinterpret_cast<const IPC::IPCThumbnailRequest*>(payload.data());
 
     // Extract file path
-    const wchar_t* file_path_ptr = reinterpret_cast<const wchar_t*>(
-        payload.data() + sizeof(IPC::IPCThumbnailRequest));
+    const wchar_t* file_path_ptr = reinterpret_cast<const wchar_t*>(payload.data() + sizeof(IPC::IPCThumbnailRequest));
     std::wstring file_path(file_path_ptr, request->filePathLength);
 
     std::wcout << L" File: " << file_path << L"\n";
-    std::wcout << L" Size: " << request->targetWidth << L"x"
-        << request->targetHeight << L"\n";
+    std::wcout << L" Size: " << request->targetWidth << L"x" << request->targetHeight << L"\n";
 
     // Implement actual plugin decoding
     IPC::ThumbnailResponse response;
@@ -247,18 +242,14 @@ void PluginHostServer::HandleRequestThumbnail(
 
     if (!plugin_) {
         // No plugin loaded
-        response.resultCode =
-            static_cast<uint32_t>(IPC::IPCErrorCode::PLUGIN_LOAD_FAILED);
-    }
-    else {
+        response.resultCode = static_cast<uint32_t>(IPC::IPCErrorCode::PLUGIN_LOAD_FAILED);
+    } else {
         // Call plugin decode function
         DecodeRequest decode_req{};
         // Convert wide string to UTF-8 for plugin API
-        int utf8_length = WideCharToMultiByte(CP_UTF8, 0, file_path.c_str(), -1,
-            nullptr, 0, nullptr, nullptr);
+        int utf8_length = WideCharToMultiByte(CP_UTF8, 0, file_path.c_str(), -1, nullptr, 0, nullptr, nullptr);
         std::vector<char> utf8_path(utf8_length);
-        WideCharToMultiByte(CP_UTF8, 0, file_path.c_str(), -1, utf8_path.data(),
-            utf8_length, nullptr, nullptr);
+        WideCharToMultiByte(CP_UTF8, 0, file_path.c_str(), -1, utf8_path.data(), utf8_length, nullptr, nullptr);
 
         decode_req.file_path = utf8_path.data();
         decode_req.target_width = request->targetWidth;
@@ -272,45 +263,38 @@ void PluginHostServer::HandleRequestThumbnail(
             response.resultCode = static_cast<uint32_t>(IPC::IPCErrorCode::SUCCESS);
             response.width = decode_result.width;
             response.height = decode_result.height;
-            response.pixelFormat = 0; // BGRA32
+            response.pixelFormat = 0;  // BGRA32
             response.stride = decode_result.stride;
 
             // Copy pixel buffer directly
-            size_t data_size =
-                static_cast<size_t>(decode_result.stride) * decode_result.height;
-            if (decode_result.buffer_size > 0 &&
-                decode_result.buffer_size < data_size) {
+            size_t data_size = static_cast<size_t>(decode_result.stride) * decode_result.height;
+            if (decode_result.buffer_size > 0 && decode_result.buffer_size < data_size) {
                 data_size = decode_result.buffer_size;
             }
-            bitmap_data.assign(decode_result.pixels,
-                decode_result.pixels + data_size);
+            bitmap_data.assign(decode_result.pixels, decode_result.pixels + data_size);
 
             response.bitmapDataSize = static_cast<uint32_t>(bitmap_data.size());
 
             // Use shared memory for bitmaps larger than threshold to avoid
             // pipe throughput bottleneck (named pipes serialize large writes)
             if (IPC::SharedMemoryManager::RequiresSharedMemory(bitmap_data.size())) {
-                auto sharedMem = IPC::SharedMemoryManager::CreateForBitmap(
-                    correlation_id, bitmap_data.data(), bitmap_data.size());
+                auto sharedMem =
+                    IPC::SharedMemoryManager::CreateForBitmap(correlation_id, bitmap_data.data(), bitmap_data.size());
                 if (sharedMem && sharedMem->IsValid()) {
                     response.useSharedMemory = 1;
-                    bitmap_data.clear(); // Don't send inline — reader uses shared mem
+                    bitmap_data.clear();  // Don't send inline — reader uses shared mem
+                } else {
+                    response.useSharedMemory = 0;  // Fallback to inline
                 }
-                else {
-                    response.useSharedMemory = 0; // Fallback to inline
-                }
-            }
-            else {
-                response.useSharedMemory = 0; // Small bitmap — inline is faster
+            } else {
+                response.useSharedMemory = 0;  // Small bitmap — inline is faster
             }
 
             // Clean up plugin result
             plugin_->FreeResult(&decode_result);
-        }
-        else {
+        } else {
             // Decode failed
-            response.resultCode =
-                static_cast<uint32_t>(IPC::IPCErrorCode::PLUGIN_DECODE_FAILED);
+            response.resultCode = static_cast<uint32_t>(IPC::IPCErrorCode::PLUGIN_DECODE_FAILED);
             response.width = 0;
             response.height = 0;
         }
@@ -318,42 +302,35 @@ void PluginHostServer::HandleRequestThumbnail(
 
     // Send response with bitmap data
     IPC::MessageHeader header;
-    header.messageType =
-        static_cast<uint32_t>(IPC::MessageType::RESPONSE_THUMBNAIL);
+    header.messageType = static_cast<uint32_t>(IPC::MessageType::RESPONSE_THUMBNAIL);
     header.correlationId = correlation_id;
-    header.dataSize =
-        sizeof(response) + static_cast<uint32_t>(bitmap_data.size());
+    header.dataSize = sizeof(response) + static_cast<uint32_t>(bitmap_data.size());
 
     // Combine response and bitmap data into single payload
     std::vector<uint8_t> full_payload(sizeof(response) + bitmap_data.size());
     memcpy(full_payload.data(), &response, sizeof(response));
     if (!bitmap_data.empty()) {
-        memcpy(full_payload.data() + sizeof(response), bitmap_data.data(),
-            bitmap_data.size());
+        memcpy(full_payload.data() + sizeof(response), bitmap_data.data(), bitmap_data.size());
     }
 
     // Write message
-    if (!WriteMessage(header, full_payload.data(),
-        static_cast<uint32_t>(full_payload.size()))) {
+    if (!WriteMessage(header, full_payload.data(), static_cast<uint32_t>(full_payload.size()))) {
         std::wcerr << L"Failed to send thumbnail response\n";
     }
 }
 
-void PluginHostServer::HandleCanDecodeQuery(
-    uint64_t correlation_id, const std::vector<uint8_t>& payload) {
+void PluginHostServer::HandleCanDecodeQuery(uint64_t correlation_id, const std::vector<uint8_t>& payload)
+{
     // Parse query
     if (payload.size() < sizeof(IPC::CanDecodeQuery)) {
-        SendErrorResponse(correlation_id, IPC::IPCErrorCode::MALFORMED_MESSAGE,
-            "CanDecode query too small");
+        SendErrorResponse(correlation_id, IPC::IPCErrorCode::MALFORMED_MESSAGE, "CanDecode query too small");
         return;
     }
 
-    const auto* query =
-        reinterpret_cast<const IPC::CanDecodeQuery*>(payload.data());
+    const auto* query = reinterpret_cast<const IPC::CanDecodeQuery*>(payload.data());
 
     // Extract file path
-    const wchar_t* file_path_ptr = reinterpret_cast<const wchar_t*>(
-        payload.data() + sizeof(IPC::CanDecodeQuery));
+    const wchar_t* file_path_ptr = reinterpret_cast<const wchar_t*>(payload.data() + sizeof(IPC::CanDecodeQuery));
     std::wstring file_path(file_path_ptr, query->filePathLength);
 
     // Check with plugin
@@ -368,18 +345,17 @@ void PluginHostServer::HandleCanDecodeQuery(
     response.confidence = can_decode ? 100 : 0;
 
     IPC::MessageHeader header;
-    header.messageType =
-        static_cast<uint32_t>(IPC::MessageType::CAN_DECODE_RESPONSE);
+    header.messageType = static_cast<uint32_t>(IPC::MessageType::CAN_DECODE_RESPONSE);
     header.correlationId = correlation_id;
     header.dataSize = sizeof(response);
 
     WriteMessage(header, &response, sizeof(response));
 }
 
-void PluginHostServer::HandleGetPluginInfo(uint64_t correlation_id) {
+void PluginHostServer::HandleGetPluginInfo(uint64_t correlation_id)
+{
     if (!plugin_ || !plugin_->GetInfo()) {
-        SendErrorResponse(correlation_id, IPC::IPCErrorCode::PLUGIN_LOAD_FAILED,
-            "Plugin not loaded");
+        SendErrorResponse(correlation_id, IPC::IPCErrorCode::PLUGIN_LOAD_FAILED, "Plugin not loaded");
         return;
     }
 
@@ -387,12 +363,9 @@ void PluginHostServer::HandleGetPluginInfo(uint64_t correlation_id) {
 
     IPC::PluginInfoResponse response;
     response.apiVersion = info->api_version;
-    strncpy_s(response.pluginId, info->plugin_name,
-        sizeof(response.pluginId) - 1);
-    strncpy_s(response.pluginName, info->plugin_name,
-        sizeof(response.pluginName) - 1);
-    strncpy_s(response.pluginVersion, info->plugin_version,
-        sizeof(response.pluginVersion) - 1);
+    strncpy_s(response.pluginId, info->plugin_name, sizeof(response.pluginId) - 1);
+    strncpy_s(response.pluginName, info->plugin_name, sizeof(response.pluginName) - 1);
+    strncpy_s(response.pluginVersion, info->plugin_version, sizeof(response.pluginVersion) - 1);
     strncpy_s(response.vendor, info->plugin_author, sizeof(response.vendor) - 1);
     response.capabilities = info->capabilities;
 
@@ -416,21 +389,22 @@ void PluginHostServer::HandleGetPluginInfo(uint64_t correlation_id) {
     }
 
     IPC::MessageHeader header;
-    header.messageType =
-        static_cast<uint32_t>(IPC::MessageType::PLUGIN_INFO_RESPONSE);
+    header.messageType = static_cast<uint32_t>(IPC::MessageType::PLUGIN_INFO_RESPONSE);
     header.correlationId = correlation_id;
     header.dataSize = static_cast<uint32_t>(payload.size());
 
     WriteMessage(header, payload.data(), header.dataSize);
 }
 
-void PluginHostServer::HandleShutdown() {
+void PluginHostServer::HandleShutdown()
+{
     std::wcout << L"Received shutdown request\n";
     shutdown_requested_ = true;
     running_ = false;
 }
 
-void PluginHostServer::HandleHeartbeatPing(uint64_t correlation_id) {
+void PluginHostServer::HandleHeartbeatPing(uint64_t correlation_id)
+{
     // Update last heartbeat time
     auto now = std::chrono::high_resolution_clock::now();
     last_heartbeat_time_ = now.time_since_epoch().count();
@@ -448,9 +422,9 @@ void PluginHostServer::HandleHeartbeatPing(uint64_t correlation_id) {
     WriteMessage(header, &pong, sizeof(pong));
 }
 
-void PluginHostServer::SendErrorResponse(uint64_t correlation_id,
-    IPC::IPCErrorCode error_code,
-    const std::string& message) {
+void PluginHostServer::SendErrorResponse(uint64_t correlation_id, IPC::IPCErrorCode error_code,
+                                         const std::string& message)
+{
     IPC::ErrorResponse error;
     error.errorCode = static_cast<uint32_t>(error_code);
     error.messageLength = static_cast<uint32_t>(message.size());
@@ -473,7 +447,8 @@ void PluginHostServer::SendErrorResponse(uint64_t correlation_id,
 // Plugin Management
 //============================================================================
 
-bool PluginHostServer::LoadPlugin() {
+bool PluginHostServer::LoadPlugin()
+{
     try {
         plugin_ = std::make_unique<PluginHandle>(plugin_path_);
 
@@ -485,41 +460,44 @@ bool PluginHostServer::LoadPlugin() {
 
         const auto* info = plugin_->GetInfo();
         if (info) {
-            std::wcout << L"Plugin loaded: " << info->plugin_name << L" v"
-                << info->plugin_version << L"\n";
+            std::wcout << L"Plugin loaded: " << info->plugin_name << L" v" << info->plugin_version << L"\n";
             std::wcout << L" Author: " << info->plugin_author << L"\n";
         }
 
         return true;
-    }
-    catch (const std::exception& ex) {
+    } catch (const std::exception& ex) {
         std::cerr << "Exception loading plugin: " << ex.what() << "\n";
         plugin_.reset();
         return false;
     }
 }
 
-void PluginHostServer::UnloadPlugin() { plugin_.reset(); }
+void PluginHostServer::UnloadPlugin()
+{
+    plugin_.reset();
+}
 
 //============================================================================
 // Heartbeat Management
 //============================================================================
 
-void PluginHostServer::StartHeartbeatThread() {
+void PluginHostServer::StartHeartbeatThread()
+{
     heartbeat_thread_ = std::thread(&PluginHostServer::HeartbeatThreadProc, this);
 }
 
-void PluginHostServer::StopHeartbeatThread() {
+void PluginHostServer::StopHeartbeatThread()
+{
     if (heartbeat_thread_.joinable()) {
         heartbeat_thread_.join();
     }
 }
 
-void PluginHostServer::HeartbeatThreadProc() {
+void PluginHostServer::HeartbeatThreadProc()
+{
     while (running_ && !shutdown_requested_) {
         // Sleep for heartbeat interval
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(IPC::HEARTBEAT_INTERVAL));
+        std::this_thread::sleep_for(std::chrono::milliseconds(IPC::HEARTBEAT_INTERVAL));
 
         // Check if we've received a heartbeat recently
         auto now = std::chrono::high_resolution_clock::now();
@@ -540,5 +518,5 @@ void PluginHostServer::HeartbeatThreadProc() {
     }
 }
 
-} // namespace PluginHost
-} // namespace ExplorerLens
+}  // namespace PluginHost
+}  // namespace ExplorerLens

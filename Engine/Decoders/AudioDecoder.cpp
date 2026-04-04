@@ -3,10 +3,6 @@
 // Project
 
 #include "AudioDecoder.h"
-#include "../Utils/PerformanceProfiler.h"
-#include <algorithm>
-#include <cstring>
-#include <cwchar>
 #include <windows.h>
 #include <objidl.h>
 #include <gdiplus.h>
@@ -15,6 +11,10 @@
 #include <shlwapi.h>
 #include <shobjidl.h>
 #include <wincodec.h>
+#include <algorithm>
+#include <cstring>
+#include <cwchar>
+#include "../Utils/PerformanceProfiler.h"
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
@@ -24,23 +24,24 @@
 namespace ExplorerLens {
 namespace Engine {
 
-const wchar_t* AudioDecoder::m_extensions[] = {
- L".mp3", L".flac", L".wma", L".aac", L".m4a", L".ogg", L".opus", L".wav",
- L".aiff", L".aif", L".ape", L".wv", L".alac", L".mpc", nullptr };
+const wchar_t* AudioDecoder::m_extensions[] = {L".mp3", L".flac", L".wma",  L".aac",  L".m4a",
+                                               L".ogg", L".opus", L".wav",  L".aiff", L".aif",
+                                               L".ape", L".wv",   L".alac", L".mpc",  nullptr};
 const uint32_t AudioDecoder::m_extensionCount = 14;
 
 AudioDecoder::AudioDecoder() = default;
 AudioDecoder::~AudioDecoder() = default;
 
-bool AudioDecoder::CanDecode(const wchar_t* filePath) {
+bool AudioDecoder::CanDecode(const wchar_t* filePath)
+{
     if (filePath == nullptr) {
         return false;
     }
     return IsAudioFormat(filePath);
 }
 
-HRESULT AudioDecoder::Decode(const ThumbnailRequest& request,
-    ThumbnailResult& result) {
+HRESULT AudioDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result)
+{
     PROFILE_SCOPE(ProfileComponent::DECODE_AUDIO);
 
     result.hBitmap = nullptr;
@@ -56,8 +57,7 @@ HRESULT AudioDecoder::Decode(const ThumbnailRequest& request,
     // Fallback: generate waveform visualization placeholder
     if (FAILED(hr) || result.hBitmap == nullptr) {
         const wchar_t* ext = PathFindExtensionW(request.filePath);
-        result.hBitmap =
-            GenerateWaveformPlaceholder(request.width, request.height, ext);
+        result.hBitmap = GenerateWaveformPlaceholder(request.width, request.height, ext);
         hr = (result.hBitmap != nullptr) ? S_OK : E_FAIL;
     }
 
@@ -71,7 +71,8 @@ HRESULT AudioDecoder::Decode(const ThumbnailRequest& request,
     return hr;
 }
 
-DecoderInfo AudioDecoder::GetInfo() const {
+DecoderInfo AudioDecoder::GetInfo() const
+{
     DecoderInfo info{};
     info.name = L"Audio Decoder";
     info.version = L"1.0.0";
@@ -82,7 +83,8 @@ DecoderInfo AudioDecoder::GetInfo() const {
     return info;
 }
 
-const wchar_t** AudioDecoder::GetSupportedExtensions() const {
+const wchar_t** AudioDecoder::GetSupportedExtensions() const
+{
     return const_cast<const wchar_t**>(m_extensions);
 }
 
@@ -90,8 +92,8 @@ const wchar_t** AudioDecoder::GetSupportedExtensions() const {
 // Album Art Extraction
 // ============================================================================
 
-HRESULT AudioDecoder::ExtractAlbumArt(const wchar_t* filePath,
-    HBITMAP* phBitmap) {
+HRESULT AudioDecoder::ExtractAlbumArt(const wchar_t* filePath, HBITMAP* phBitmap)
+{
     if (phBitmap == nullptr) {
         return E_INVALIDARG;
     }
@@ -113,8 +115,7 @@ HRESULT AudioDecoder::ExtractAlbumArt(const wchar_t* filePath,
     }
 
     // Try FLAC
-    if (fileSize >= 4 && data[0] == 'f' && data[1] == 'L' && data[2] == 'a' &&
-        data[3] == 'C') {
+    if (fileSize >= 4 && data[0] == 'f' && data[1] == 'L' && data[2] == 'a' && data[3] == 'C') {
         const HRESULT hr = ExtractAlbumArtFLAC(data.get(), fileSize, phBitmap);
         if (SUCCEEDED(hr) && *phBitmap != nullptr) {
             return S_OK;
@@ -122,8 +123,7 @@ HRESULT AudioDecoder::ExtractAlbumArt(const wchar_t* filePath,
     }
 
     // Try OGG Vorbis/Opus
-    if (fileSize >= 4 && data[0] == 'O' && data[1] == 'g' && data[2] == 'g' &&
-        data[3] == 'S') {
+    if (fileSize >= 4 && data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S') {
         const HRESULT hr = ExtractAlbumArtOGG(data.get(), fileSize, phBitmap);
         if (SUCCEEDED(hr) && *phBitmap != nullptr) {
             return S_OK;
@@ -131,8 +131,7 @@ HRESULT AudioDecoder::ExtractAlbumArt(const wchar_t* filePath,
     }
 
     // Try M4A/AAC (ftyp signature)
-    if (fileSize >= 12 && data[4] == 'f' && data[5] == 't' && data[6] == 'y' &&
-        data[7] == 'p') {
+    if (fileSize >= 12 && data[4] == 'f' && data[5] == 't' && data[6] == 'y' && data[7] == 'p') {
         const HRESULT hr = ExtractAlbumArtM4A(data.get(), fileSize, phBitmap);
         if (SUCCEEDED(hr) && *phBitmap != nullptr) {
             return S_OK;
@@ -152,8 +151,8 @@ HRESULT AudioDecoder::ExtractAlbumArt(const wchar_t* filePath,
     return ExtractAlbumArtPropertySystem(filePath, phBitmap);
 }
 
-HRESULT AudioDecoder::ExtractAlbumArtMP3(const uint8_t* data, size_t size,
-    HBITMAP* phBitmap) {
+HRESULT AudioDecoder::ExtractAlbumArtMP3(const uint8_t* data, size_t size, HBITMAP* phBitmap)
+{
     // Parse ID3v2 header
     if (size < 10) {
         return E_FAIL;
@@ -164,8 +163,7 @@ HRESULT AudioDecoder::ExtractAlbumArtMP3(const uint8_t* data, size_t size,
     // uint8_t flags = data[5];
 
     // ID3v2 size (syncsafe integer)
-    uint32_t tagSize = ((data[6] & 0x7F) << 21) | ((data[7] & 0x7F) << 14) |
-        ((data[8] & 0x7F) << 7) | (data[9] & 0x7F);
+    uint32_t tagSize = ((data[6] & 0x7F) << 21) | ((data[7] & 0x7F) << 14) | ((data[8] & 0x7F) << 7) | (data[9] & 0x7F);
 
     if (tagSize + 10 > size) {
         tagSize = static_cast<uint32_t>(size - 10);
@@ -184,14 +182,12 @@ HRESULT AudioDecoder::ExtractAlbumArtMP3(const uint8_t* data, size_t size,
         uint32_t frameSize = 0;
         if (majorVersion >= 4) {
             // v2.4: syncsafe integer
-            frameSize = ((data[offset + 4] & 0x7F) << 21) |
-                ((data[offset + 5] & 0x7F) << 14) |
-                ((data[offset + 6] & 0x7F) << 7) | (data[offset + 7] & 0x7F);
-        }
-        else {
+            frameSize = ((data[offset + 4] & 0x7F) << 21) | ((data[offset + 5] & 0x7F) << 14)
+                        | ((data[offset + 6] & 0x7F) << 7) | (data[offset + 7] & 0x7F);
+        } else {
             // v2.3: regular big-endian
-            frameSize = (data[offset + 4] << 24) | (data[offset + 5] << 16) |
-                (data[offset + 6] << 8) | data[offset + 7];
+            frameSize =
+                (data[offset + 4] << 24) | (data[offset + 5] << 16) | (data[offset + 6] << 8) | data[offset + 7];
         }
 
         if (frameSize == 0 || offset + 10 + frameSize > size)
@@ -202,21 +198,21 @@ HRESULT AudioDecoder::ExtractAlbumArtMP3(const uint8_t* data, size_t size,
             // data
             size_t apicOffset = offset + 10;
             // uint8_t encoding = data[apicOffset];
-            apicOffset++; // skip encoding
+            apicOffset++;  // skip encoding
 
             // Skip MIME type
             while (apicOffset < offset + 10 + frameSize && data[apicOffset] != 0)
                 apicOffset++;
-            apicOffset++; // skip null
+            apicOffset++;  // skip null
 
             if (apicOffset < offset + 10 + frameSize) {
                 // uint8_t pictureType = data[apicOffset];
-                apicOffset++; // skip picture type
+                apicOffset++;  // skip picture type
 
                 // Skip description
                 while (apicOffset < offset + 10 + frameSize && data[apicOffset] != 0)
                     apicOffset++;
-                apicOffset++; // skip null
+                apicOffset++;  // skip null
 
                 size_t imageSize = (offset + 10 + frameSize) - apicOffset;
                 if (imageSize > 0 && apicOffset + imageSize <= size) {
@@ -233,16 +229,15 @@ HRESULT AudioDecoder::ExtractAlbumArtMP3(const uint8_t* data, size_t size,
     return E_FAIL;
 }
 
-HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size,
-    HBITMAP* phBitmap) {
+HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size, HBITMAP* phBitmap)
+{
     // Parse FLAC metadata blocks
-    size_t offset = 4; // Skip "fLaC"
+    size_t offset = 4;  // Skip "fLaC"
 
     while (offset + 4 < size) {
         bool isLast = (data[offset] & 0x80) != 0;
         uint8_t blockType = data[offset] & 0x7F;
-        uint32_t blockSize =
-            (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
+        uint32_t blockSize = (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
         offset += 4;
 
         if (offset + blockSize > size)
@@ -252,11 +247,11 @@ HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size,
         if (blockType == 6 && blockSize > 32) {
             size_t picOffset = offset;
             // uint32_t pictureType = (big endian)
-            picOffset += 4; // skip picture type
+            picOffset += 4;  // skip picture type
 
             // MIME type length + string
-            uint32_t mimeLen = (data[picOffset] << 24) | (data[picOffset + 1] << 16) |
-                (data[picOffset + 2] << 8) | data[picOffset + 3];
+            uint32_t mimeLen = (data[picOffset] << 24) | (data[picOffset + 1] << 16) | (data[picOffset + 2] << 8)
+                               | data[picOffset + 3];
             picOffset += 4 + mimeLen;
 
             // Description length + string
@@ -264,8 +259,8 @@ HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size,
                 offset += blockSize;
                 continue;
             }
-            uint32_t descLen = (data[picOffset] << 24) | (data[picOffset + 1] << 16) |
-                (data[picOffset + 2] << 8) | data[picOffset + 3];
+            uint32_t descLen = (data[picOffset] << 24) | (data[picOffset + 1] << 16) | (data[picOffset + 2] << 8)
+                               | data[picOffset + 3];
             picOffset += 4 + descLen;
 
             // Width, height, color depth, indexed colors = 4*4 = 16 bytes
@@ -276,9 +271,8 @@ HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size,
                 offset += blockSize;
                 continue;
             }
-            uint32_t imageLen = (data[picOffset] << 24) |
-                (data[picOffset + 1] << 16) |
-                (data[picOffset + 2] << 8) | data[picOffset + 3];
+            uint32_t imageLen = (data[picOffset] << 24) | (data[picOffset + 1] << 16) | (data[picOffset + 2] << 8)
+                                | data[picOffset + 3];
             picOffset += 4;
 
             if (imageLen > 0 && picOffset + imageLen <= size) {
@@ -300,12 +294,12 @@ HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size,
 // OGG Album Art Extraction
 // ============================================================================
 
-HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size,
-    HBITMAP* phBitmap) {
+HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size, HBITMAP* phBitmap)
+{
     // OGG Vorbis: Parse Vorbis comment headers for METADATA_BLOCK_PICTURE
     // The picture tag is base64-encoded FLAC picture block (RFC 7845)
     if (size < 58)
-        return E_FAIL; // Minimum OGG page header
+        return E_FAIL;  // Minimum OGG page header
 
     // Search for METADATA_BLOCK_PICTURE= in Vorbis comments
     const char* searchKey = "METADATA_BLOCK_PICTURE=";
@@ -330,8 +324,7 @@ HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size,
             // Decode base64 data following the key
             offset += keyLen;
             size_t b64End = offset;
-            while (b64End < size && data[b64End] != '\0' && data[b64End] != '\n' &&
-                data[b64End] != '\r') {
+            while (b64End < size && data[b64End] != '\0' && data[b64End] != '\n' && data[b64End] != '\r') {
                 ++b64End;
             }
 
@@ -343,25 +336,19 @@ HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size,
 
             // Base64 decode
             static const uint8_t b64Table[256] = {
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 62, 255, 255, 255, 63, 52, 53, 54, 55, 56, 57, 58, 59,
-            60, 61, 255, 255, 255, 0, 255, 255, 255, 0, 1, 2, 3, 4,
-            5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-            19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255, 255, 26,
-            27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-            41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 62,  255, 255, 255, 63,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  255, 255,
+                255, 0,   255, 255, 255, 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,
+                15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  255, 255, 255, 255, 255, 255, 26,  27,  28,
+                29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,
+                49,  50,  51,  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
             };
 
             std::vector<uint8_t> decoded;
@@ -391,26 +378,24 @@ HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size,
             // [4] width, [4] height, [4] bit depth, [4] colors,
             // [4] data length, [data] image data
             auto readBE32 = [&](size_t off) -> uint32_t {
-                return (static_cast<uint32_t>(decoded[off]) << 24) |
-                    (static_cast<uint32_t>(decoded[off + 1]) << 16) |
-                    (static_cast<uint32_t>(decoded[off + 2]) << 8) |
-                    static_cast<uint32_t>(decoded[off + 3]);
-                };
+                return (static_cast<uint32_t>(decoded[off]) << 24) | (static_cast<uint32_t>(decoded[off + 1]) << 16)
+                       | (static_cast<uint32_t>(decoded[off + 2]) << 8) | static_cast<uint32_t>(decoded[off + 3]);
+            };
 
             size_t pos = 0;
             /*uint32_t pictureType =*/readBE32(pos);
             pos += 4;
             uint32_t mimeLen = readBE32(pos);
             pos += 4;
-            pos += mimeLen; // skip MIME type
+            pos += mimeLen;  // skip MIME type
             if (pos + 4 > decoded.size()) {
                 ++offset;
                 continue;
             }
             uint32_t descLen = readBE32(pos);
             pos += 4;
-            pos += descLen; // skip description
-            pos += 16; // skip width(4) + height(4) + bitdepth(4) + colors(4)
+            pos += descLen;  // skip description
+            pos += 16;       // skip width(4) + height(4) + bitdepth(4) + colors(4)
             if (pos + 4 > decoded.size()) {
                 ++offset;
                 continue;
@@ -436,24 +421,22 @@ HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size,
 // M4A/AAC Album Art Extraction
 // ============================================================================
 
-HRESULT AudioDecoder::ExtractAlbumArtM4A(const uint8_t* data, size_t size,
-    HBITMAP* phBitmap) {
+HRESULT AudioDecoder::ExtractAlbumArtM4A(const uint8_t* data, size_t size, HBITMAP* phBitmap)
+{
     // M4A uses MP4 container with 'covr' atom in 'meta' > 'ilst'
     // Parse atom hierarchy to find cover art
     size_t offset = 0;
 
     while (offset + 8 < size) {
-        uint32_t atomSize = (data[offset] << 24) | (data[offset + 1] << 16) |
-            (data[offset + 2] << 8) | data[offset + 3];
+        uint32_t atomSize =
+            (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
 
         if (atomSize < 8 || offset + atomSize > size)
             break;
 
         // Check for 'covr' atom
-        if (offset + 8 <= size && data[offset + 4] == 'c' &&
-            data[offset + 5] == 'o' && data[offset + 6] == 'v' &&
-            data[offset + 7] == 'r') {
-
+        if (offset + 8 <= size && data[offset + 4] == 'c' && data[offset + 5] == 'o' && data[offset + 6] == 'v'
+            && data[offset + 7] == 'r') {
             // Skip atom header and data header (typically 16 bytes)
             size_t imgOffset = offset + 16;
             if (imgOffset < offset + atomSize) {
@@ -474,8 +457,8 @@ HRESULT AudioDecoder::ExtractAlbumArtM4A(const uint8_t* data, size_t size,
 // WMA Album Art Extraction
 // ============================================================================
 
-HRESULT AudioDecoder::ExtractAlbumArtWMA(const wchar_t* filePath,
-    HBITMAP* phBitmap) {
+HRESULT AudioDecoder::ExtractAlbumArtWMA(const wchar_t* filePath, HBITMAP* phBitmap)
+{
     // WMA uses Property System - delegate to PropertySystem method
     return ExtractAlbumArtPropertySystem(filePath, phBitmap);
 }
@@ -484,8 +467,8 @@ HRESULT AudioDecoder::ExtractAlbumArtWMA(const wchar_t* filePath,
 // Property System Album Art Extraction
 // ============================================================================
 
-HRESULT AudioDecoder::ExtractAlbumArtPropertySystem(const wchar_t* filePath,
-    HBITMAP* phBitmap) {
+HRESULT AudioDecoder::ExtractAlbumArtPropertySystem(const wchar_t* filePath, HBITMAP* phBitmap)
+{
     // Use Windows Property System to get thumbnail
     HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     bool comInit = SUCCEEDED(hr) || hr == S_FALSE || hr == RPC_E_CHANGED_MODE;
@@ -493,8 +476,7 @@ HRESULT AudioDecoder::ExtractAlbumArtPropertySystem(const wchar_t* filePath,
         return hr;
 
     IPropertyStore* pStore = nullptr;
-    hr = SHGetPropertyStoreFromParsingName(filePath, nullptr, GPS_DEFAULT,
-        IID_PPV_ARGS(&pStore));
+    hr = SHGetPropertyStoreFromParsingName(filePath, nullptr, GPS_DEFAULT, IID_PPV_ARGS(&pStore));
 
     if (SUCCEEDED(hr) && pStore) {
         PROPVARIANT pv;
@@ -508,8 +490,7 @@ HRESULT AudioDecoder::ExtractAlbumArtPropertySystem(const wchar_t* filePath,
                 if (imgSize > 0 && imgSize < 10 * 1024 * 1024) {
                     auto imgData = std::make_unique<uint8_t[]>(imgSize);
                     ULONG bytesRead = 0;
-                    if (SUCCEEDED(pv.pStream->Read(
-                        imgData.get(), static_cast<ULONG>(imgSize), &bytesRead))) {
+                    if (SUCCEEDED(pv.pStream->Read(imgData.get(), static_cast<ULONG>(imgSize), &bytesRead))) {
                         *phBitmap = CreateBitmapFromImageData(imgData.get(), bytesRead);
                     }
                 }
@@ -527,16 +508,14 @@ HRESULT AudioDecoder::ExtractAlbumArtPropertySystem(const wchar_t* filePath,
 // Waveform Placeholder
 // ============================================================================
 
-HBITMAP AudioDecoder::GenerateWaveformPlaceholder(uint32_t width,
-    uint32_t height,
-    const wchar_t* ext) {
+HBITMAP AudioDecoder::GenerateWaveformPlaceholder(uint32_t width, uint32_t height, const wchar_t* ext)
+{
     Gdiplus::GdiplusStartupInput gdipInput;
     ULONG_PTR gdipToken = 0;
     if (Gdiplus::GdiplusStartup(&gdipToken, &gdipInput, nullptr) != Gdiplus::Ok)
         return nullptr;
 
-    auto bmp =
-        std::make_unique<Gdiplus::Bitmap>(width, height, PixelFormat32bppARGB);
+    auto bmp = std::make_unique<Gdiplus::Bitmap>(width, height, PixelFormat32bppARGB);
     Gdiplus::Graphics g(bmp.get());
     g.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
 
@@ -568,11 +547,10 @@ HBITMAP AudioDecoder::GenerateWaveformPlaceholder(uint32_t width,
     float fontSize = height * 0.1f;
     if (fontSize < 8)
         fontSize = 8;
-    Gdiplus::Font font(&fontFamily, fontSize, Gdiplus::FontStyleBold,
-        Gdiplus::UnitPixel);
+    Gdiplus::Font font(&fontFamily, fontSize, Gdiplus::FontStyleBold, Gdiplus::UnitPixel);
     Gdiplus::SolidBrush textBrush(Gdiplus::Color(200, 255, 255, 255));
 
-    std::wstring label = L"\xD83C\xDFB5"; // Music note
+    std::wstring label = L"\xD83C\xDFB5";  // Music note
     if (ext && ext[0] == L'.') {
         label = ext + 1;
         // Uppercase
@@ -582,8 +560,7 @@ HBITMAP AudioDecoder::GenerateWaveformPlaceholder(uint32_t width,
 
     Gdiplus::StringFormat fmt;
     fmt.SetAlignment(Gdiplus::StringAlignmentCenter);
-    Gdiplus::RectF labelRect(0, height * 0.82f, static_cast<float>(width),
-        fontSize * 1.5f);
+    Gdiplus::RectF labelRect(0, height * 0.82f, static_cast<float>(width), fontSize * 1.5f);
     g.DrawString(label.c_str(), -1, &font, labelRect, &fmt, &textBrush);
 
     HBITMAP hBitmap = nullptr;
@@ -596,8 +573,8 @@ HBITMAP AudioDecoder::GenerateWaveformPlaceholder(uint32_t width,
 // WIC Image Data to HBITMAP
 // ============================================================================
 
-HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
-    size_t size) {
+HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data, size_t size)
+{
     if (data == nullptr || size == 0) {
         return nullptr;
     }
@@ -608,8 +585,7 @@ HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
         return nullptr;
 
     IWICImagingFactory* pFactory = nullptr;
-    hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER,
-        IID_PPV_ARGS(&pFactory));
+    hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFactory));
     if (FAILED(hr) || !pFactory) {
         CoUninitialize();
         return nullptr;
@@ -623,8 +599,7 @@ HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
         return nullptr;
     }
 
-    hr = pStream->InitializeFromMemory(const_cast<BYTE*>(data),
-        static_cast<DWORD>(size));
+    hr = pStream->InitializeFromMemory(const_cast<BYTE*>(data), static_cast<DWORD>(size));
     if (FAILED(hr)) {
         pStream->Release();
         pFactory->Release();
@@ -633,8 +608,7 @@ HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
     }
 
     IWICBitmapDecoder* pDecoder = nullptr;
-    hr = pFactory->CreateDecoderFromStream(
-        pStream, nullptr, WICDecodeMetadataCacheOnDemand, &pDecoder);
+    hr = pFactory->CreateDecoderFromStream(pStream, nullptr, WICDecodeMetadataCacheOnDemand, &pDecoder);
 
     HBITMAP hBitmap = nullptr;
 
@@ -645,9 +619,8 @@ HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
             IWICFormatConverter* pConverter = nullptr;
             hr = pFactory->CreateFormatConverter(&pConverter);
             if (SUCCEEDED(hr) && pConverter) {
-                hr = pConverter->Initialize(pFrame, GUID_WICPixelFormat32bppBGRA,
-                    WICBitmapDitherTypeNone, nullptr, 0.0,
-                    WICBitmapPaletteTypeCustom);
+                hr = pConverter->Initialize(pFrame, GUID_WICPixelFormat32bppBGRA, WICBitmapDitherTypeNone, nullptr, 0.0,
+                                            WICBitmapPaletteTypeCustom);
                 if (SUCCEEDED(hr)) {
                     UINT w = 0, h = 0;
                     pConverter->GetSize(&w, &h);
@@ -655,7 +628,7 @@ HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
                         BITMAPINFO bmi = {};
                         bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
                         bmi.bmiHeader.biWidth = w;
-                        bmi.bmiHeader.biHeight = -(LONG)h; // top-down
+                        bmi.bmiHeader.biHeight = -(LONG)h;  // top-down
                         bmi.bmiHeader.biPlanes = 1;
                         bmi.bmiHeader.biBitCount = 32;
                         bmi.bmiHeader.biCompression = BI_RGB;
@@ -663,8 +636,7 @@ HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
                         BYTE* pBits = nullptr;
                         HDC hdc = GetDC(nullptr);
                         hBitmap =
-                            CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS,
-                                reinterpret_cast<void**>(&pBits), nullptr, 0);
+                            CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, reinterpret_cast<void**>(&pBits), nullptr, 0);
                         ReleaseDC(nullptr, hdc);
 
                         if (hBitmap && pBits) {
@@ -694,29 +666,26 @@ HBITMAP AudioDecoder::CreateBitmapFromImageData(const uint8_t* data,
 // Utilities
 // ============================================================================
 
-std::unique_ptr<uint8_t[]> AudioDecoder::ReadFileData(const wchar_t* path,
-    size_t& fileSize) {
+std::unique_ptr<uint8_t[]> AudioDecoder::ReadFileData(const wchar_t* path, size_t& fileSize)
+{
     fileSize = 0;
-    HANDLE hFile = CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE hFile =
+        CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE)
         return nullptr;
 
     LARGE_INTEGER size;
-    if (!GetFileSizeEx(hFile, &size) ||
-        size.QuadPart > 200 * 1024 * 1024) { // 200MB limit for audio
+    if (!GetFileSizeEx(hFile, &size) || size.QuadPart > 200 * 1024 * 1024) {  // 200MB limit for audio
         CloseHandle(hFile);
         return nullptr;
     }
 
     // Only read first 2MB for tag parsing (album art is usually in header)
-    size_t readSize = static_cast<size_t>(
-        (std::min)(size.QuadPart, (LONGLONG)(2 * 1024 * 1024)));
+    size_t readSize = static_cast<size_t>((std::min)(size.QuadPart, (LONGLONG)(2 * 1024 * 1024)));
     fileSize = readSize;
     auto buffer = std::make_unique<uint8_t[]>(readSize);
     DWORD bytesRead = 0;
-    if (!ReadFile(hFile, buffer.get(), static_cast<DWORD>(readSize), &bytesRead,
-        nullptr)) {
+    if (!ReadFile(hFile, buffer.get(), static_cast<DWORD>(readSize), &bytesRead, nullptr)) {
         CloseHandle(hFile);
         return nullptr;
     }
@@ -725,7 +694,8 @@ std::unique_ptr<uint8_t[]> AudioDecoder::ReadFileData(const wchar_t* path,
     return buffer;
 }
 
-bool AudioDecoder::IsAudioFormat(const wchar_t* path) {
+bool AudioDecoder::IsAudioFormat(const wchar_t* path)
+{
     if (path == nullptr) {
         return false;
     }
@@ -744,8 +714,8 @@ bool AudioDecoder::IsAudioFormat(const wchar_t* path) {
 // Audio Metadata Extraction
 // ============================================================================
 
-bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath,
-    AudioMetadata& metadata) {
+bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath, AudioMetadata& metadata)
+{
     if (filePath == nullptr) {
         return false;
     }
@@ -756,24 +726,21 @@ bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath,
         return false;
 
     IPropertyStore* pStore = nullptr;
-    hr = SHGetPropertyStoreFromParsingName(filePath, nullptr, GPS_DEFAULT,
-        IID_PPV_ARGS(&pStore));
+    hr = SHGetPropertyStoreFromParsingName(filePath, nullptr, GPS_DEFAULT, IID_PPV_ARGS(&pStore));
 
     if (SUCCEEDED(hr) && pStore) {
         PROPVARIANT pv;
 
         // Artist
         PropVariantInit(&pv);
-        if (SUCCEEDED(pStore->GetValue(PKEY_Music_Artist, &pv)) &&
-            pv.vt == VT_LPWSTR) {
+        if (SUCCEEDED(pStore->GetValue(PKEY_Music_Artist, &pv)) && pv.vt == VT_LPWSTR) {
             metadata.artist = pv.pwszVal;
         }
         PropVariantClear(&pv);
 
         // Album
         PropVariantInit(&pv);
-        if (SUCCEEDED(pStore->GetValue(PKEY_Music_AlbumTitle, &pv)) &&
-            pv.vt == VT_LPWSTR) {
+        if (SUCCEEDED(pStore->GetValue(PKEY_Music_AlbumTitle, &pv)) && pv.vt == VT_LPWSTR) {
             metadata.album = pv.pwszVal;
         }
         PropVariantClear(&pv);
@@ -787,17 +754,14 @@ bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath,
 
         // Duration (in 100-nanosecond units)
         PropVariantInit(&pv);
-        if (SUCCEEDED(pStore->GetValue(PKEY_Media_Duration, &pv)) &&
-            pv.vt == VT_UI8) {
-            metadata.durationSec =
-                static_cast<uint32_t>(pv.uhVal.QuadPart / 10000000);
+        if (SUCCEEDED(pStore->GetValue(PKEY_Media_Duration, &pv)) && pv.vt == VT_UI8) {
+            metadata.durationSec = static_cast<uint32_t>(pv.uhVal.QuadPart / 10000000);
         }
         PropVariantClear(&pv);
 
         // Bitrate (in bits per second)
         PropVariantInit(&pv);
-        if (SUCCEEDED(pStore->GetValue(PKEY_Audio_EncodingBitrate, &pv)) &&
-            pv.vt == VT_UI4) {
+        if (SUCCEEDED(pStore->GetValue(PKEY_Audio_EncodingBitrate, &pv)) && pv.vt == VT_UI4) {
             metadata.bitrate = pv.ulVal;
         }
         PropVariantClear(&pv);
@@ -806,9 +770,8 @@ bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath,
     }
 
     CoUninitialize();
-    return !metadata.artist.empty() || !metadata.album.empty() ||
-        !metadata.title.empty();
+    return !metadata.artist.empty() || !metadata.album.empty() || !metadata.title.empty();
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -5,45 +5,65 @@
 // files. Delivers incremental updates to the preview panel without full reload.
 //
 #pragma once
+#include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
-#include <cstdint>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-enum class LiveFileChangeType { Modified, Created, Deleted, Renamed };
+enum class LiveFileChangeType {
+    Modified,
+    Created,
+    Deleted,
+    Renamed
+};
 
-struct LiveFileChangeEvent {
-    std::string       filePath;
-    std::string       oldPath;  // non-empty on rename
-    LiveFileChangeType type      = LiveFileChangeType::Modified;
-    int64_t           timestampMs = 0;
+struct LiveFileChangeEvent
+{
+    std::string filePath;
+    std::string oldPath;  // non-empty on rename
+    LiveFileChangeType type = LiveFileChangeType::Modified;
+    int64_t timestampMs = 0;
 };
 
 using LivePreviewCallback = std::function<void(const LiveFileChangeEvent&)>;
 
-class LivePreviewUpdater {
-public:
+class LivePreviewUpdater
+{
+  public:
     LivePreviewUpdater() = default;
 
-    bool Initialize(uint32_t debounceMs = 300) {
+    bool Initialize(uint32_t debounceMs = 300)
+    {
         m_debounceMs = debounceMs;
-        m_ready      = true;
+        m_ready = true;
         return true;
     }
-    bool IsReady() const { return m_ready; }
+    bool IsReady() const
+    {
+        return m_ready;
+    }
 
-    void SetCallback(LivePreviewCallback cb) { m_callback = std::move(cb); }
+    void SetCallback(LivePreviewCallback cb)
+    {
+        m_callback = std::move(cb);
+    }
 
-    bool WatchPath(const std::string& dirPath) {
-        if (dirPath.empty()) return false;
-        for (const auto& p : m_watchedPaths) if (p == dirPath) return true;
+    bool WatchPath(const std::string& dirPath)
+    {
+        if (dirPath.empty())
+            return false;
+        for (const auto& p : m_watchedPaths)
+            if (p == dirPath)
+                return true;
         m_watchedPaths.push_back(dirPath);
         return true;
     }
 
-    bool UnwatchPath(const std::string& dirPath) {
+    bool UnwatchPath(const std::string& dirPath)
+    {
         for (size_t i = 0; i < m_watchedPaths.size(); ++i) {
             if (m_watchedPaths[i] == dirPath) {
                 m_watchedPaths.erase(m_watchedPaths.begin() + static_cast<ptrdiff_t>(i));
@@ -53,15 +73,18 @@ public:
         return false;
     }
 
-    void SimulateChange(const LiveFileChangeEvent& evt) {
+    void SimulateChange(const LiveFileChangeEvent& evt)
+    {
         m_pendingEvents.push_back(evt);
     }
 
-    uint32_t Flush(int64_t nowMs) {
+    uint32_t Flush(int64_t nowMs)
+    {
         uint32_t fired = 0;
         for (const auto& evt : m_pendingEvents) {
             if (nowMs - evt.timestampMs >= m_debounceMs) {
-                if (m_callback) m_callback(evt);
+                if (m_callback)
+                    m_callback(evt);
                 ++fired;
             }
         }
@@ -69,18 +92,24 @@ public:
         return fired;
     }
 
-    uint32_t GetWatchCount() const {
+    uint32_t GetWatchCount() const
+    {
         return static_cast<uint32_t>(m_watchedPaths.size());
     }
 
-    void Shutdown() { m_watchedPaths.clear(); m_ready = false; }
+    void Shutdown()
+    {
+        m_watchedPaths.clear();
+        m_ready = false;
+    }
 
-private:
-    bool                      m_ready      = false;
-    uint32_t                  m_debounceMs = 300;
-    std::vector<std::string>  m_watchedPaths;
+  private:
+    bool m_ready = false;
+    uint32_t m_debounceMs = 300;
+    std::vector<std::string> m_watchedPaths;
     std::vector<LiveFileChangeEvent> m_pendingEvents;
-    LivePreviewCallback       m_callback;
+    LivePreviewCallback m_callback;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

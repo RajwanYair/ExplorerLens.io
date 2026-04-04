@@ -14,51 +14,55 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class DegradationMode
-{
-    NullBitmap,           // Return an empty transparent bitmap
-    PlaceholderIcon,      // Return the Windows file-type icon (shell fallback)
-    CorruptFileOverlay,   // Return a placeholder with a "corrupt" badge overlay
-    TimeoutFallback,      // Return a clock/timeout badge overlay
-    PasswordProtected,    // Return a lock-icon placeholder
-    UnsupportedFormat     // Return a question-mark placeholder
+enum class DegradationMode {
+    NullBitmap,          // Return an empty transparent bitmap
+    PlaceholderIcon,     // Return the Windows file-type icon (shell fallback)
+    CorruptFileOverlay,  // Return a placeholder with a "corrupt" badge overlay
+    TimeoutFallback,     // Return a clock/timeout badge overlay
+    PasswordProtected,   // Return a lock-icon placeholder
+    UnsupportedFormat    // Return a question-mark placeholder
 };
 
 struct DegradationResult
 {
-    DegradationMode mode     = DegradationMode::NullBitmap;
-    bool            occupied = false;
+    DegradationMode mode = DegradationMode::NullBitmap;
+    bool occupied = false;
 };
 
 using DegradationHandler = std::function<DegradationResult(DegradationMode)>;
 
 class GracefulDegradation
 {
-public:
+  public:
     static constexpr int MODE_COUNT = 6;
 
     static std::string_view ModeName(DegradationMode mode) noexcept
     {
-        switch (mode)
-        {
-            case DegradationMode::NullBitmap:         return "NullBitmap";
-            case DegradationMode::PlaceholderIcon:    return "PlaceholderIcon";
-            case DegradationMode::CorruptFileOverlay: return "CorruptFileOverlay";
-            case DegradationMode::TimeoutFallback:    return "TimeoutFallback";
-            case DegradationMode::PasswordProtected:  return "PasswordProtected";
-            case DegradationMode::UnsupportedFormat:  return "UnsupportedFormat";
-            default:                                  return "Unknown";
+        switch (mode) {
+            case DegradationMode::NullBitmap:
+                return "NullBitmap";
+            case DegradationMode::PlaceholderIcon:
+                return "PlaceholderIcon";
+            case DegradationMode::CorruptFileOverlay:
+                return "CorruptFileOverlay";
+            case DegradationMode::TimeoutFallback:
+                return "TimeoutFallback";
+            case DegradationMode::PasswordProtected:
+                return "PasswordProtected";
+            case DegradationMode::UnsupportedFormat:
+                return "UnsupportedFormat";
+            default:
+                return "Unknown";
         }
     }
 
-    static DegradationResult Degrade(
-        DegradationMode mode,
-        const DegradationHandler& customHandler = nullptr) noexcept
+    static DegradationResult Degrade(DegradationMode mode, const DegradationHandler& customHandler = nullptr) noexcept
     {
-        if (customHandler)
-        {
-            try { return customHandler(mode); }
-            catch (...) { /* fall through to default */ }
+        if (customHandler) {
+            try {
+                return customHandler(mode);
+            } catch (...) { /* fall through to default */
+            }
         }
         return DefaultDegrade(mode);
     }
@@ -68,15 +72,15 @@ public:
         return Degrade(mode);
     }
 
-private:
+  private:
     static DegradationResult DefaultDegrade(DegradationMode mode) noexcept
     {
         DegradationResult result;
-        result.mode     = mode;
+        result.mode = mode;
         result.occupied = true;
         return result;
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

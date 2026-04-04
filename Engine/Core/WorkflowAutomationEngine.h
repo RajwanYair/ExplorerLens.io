@@ -8,10 +8,10 @@
 //
 #pragma once
 
-#include <string>
-#include <vector>
 #include <cstdint>
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -46,7 +46,8 @@ enum class WorkflowAction : uint8_t {
     UpdateIndex
 };
 
-struct WorkflowRule {
+struct WorkflowRule
+{
     uint32_t id = 0;
     std::wstring name;
     WorkflowTrigger trigger = WorkflowTrigger::FileCreated;
@@ -56,27 +57,33 @@ struct WorkflowRule {
     uint64_t executionCount = 0;
 };
 
-struct WorkflowStats {
+struct WorkflowStats
+{
     uint64_t totalRules = 0;
     uint64_t enabledRules = 0;
     uint64_t totalExecutions = 0;
     uint64_t failedExecutions = 0;
 };
 
-class WorkflowAutomationEngine {
-public:
-    static WorkflowAutomationEngine& Instance() {
+class WorkflowAutomationEngine
+{
+  public:
+    static WorkflowAutomationEngine& Instance()
+    {
         static WorkflowAutomationEngine instance;
         return instance;
     }
 
-    bool Initialize() {
+    bool Initialize()
+    {
         m_initialized = true;
         return true;
     }
 
-    uint32_t AddRule(const WorkflowRule& rule) {
-        if (!m_initialized) return 0;
+    uint32_t AddRule(const WorkflowRule& rule)
+    {
+        if (!m_initialized)
+            return 0;
         WorkflowRule r = rule;
         r.id = m_nextId++;
         m_rules.push_back(r);
@@ -85,10 +92,12 @@ public:
         return r.id;
     }
 
-    bool RemoveRule(uint32_t ruleId) {
+    bool RemoveRule(uint32_t ruleId)
+    {
         for (auto it = m_rules.begin(); it != m_rules.end(); ++it) {
             if (it->id == ruleId) {
-                if (it->enabled) m_stats.enabledRules--;
+                if (it->enabled)
+                    m_stats.enabledRules--;
                 m_stats.totalRules--;
                 m_rules.erase(it);
                 return true;
@@ -97,7 +106,8 @@ public:
         return false;
     }
 
-    bool EnableRule(uint32_t ruleId, bool enable) {
+    bool EnableRule(uint32_t ruleId, bool enable)
+    {
         for (auto& r : m_rules) {
             if (r.id == ruleId) {
                 if (r.enabled != enable) {
@@ -110,16 +120,26 @@ public:
         return false;
     }
 
-    size_t GetRuleCount() const { return m_rules.size(); }
-    WorkflowStats GetStats() const { return m_stats; }
-    bool IsInitialized() const { return m_initialized; }
+    size_t GetRuleCount() const
+    {
+        return m_rules.size();
+    }
+    WorkflowStats GetStats() const
+    {
+        return m_stats;
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         m_rules.clear();
         m_initialized = false;
     }
 
-private:
+  private:
     WorkflowAutomationEngine() = default;
     bool m_initialized = false;
     uint32_t m_nextId = 1;
@@ -127,5 +147,5 @@ private:
     WorkflowStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

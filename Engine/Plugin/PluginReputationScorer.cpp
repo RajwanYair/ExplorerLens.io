@@ -8,4 +8,4 @@ namespace ExplorerLens::Engine {
 PluginReputationScorer::PluginReputationScorer() = default;
 PluginReputationScorer::~PluginReputationScorer() noexcept = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

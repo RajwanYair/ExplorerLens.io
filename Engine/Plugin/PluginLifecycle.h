@@ -51,39 +51,52 @@ enum class PluginLifecyclePhase : uint32_t {
 };
 
 /// Returns human-readable name for a lifecycle phase
-inline const wchar_t* LifecyclePhaseName(PluginLifecyclePhase phase) {
+inline const wchar_t* LifecyclePhaseName(PluginLifecyclePhase phase)
+{
     switch (phase) {
-    case PluginLifecyclePhase::Discovery:      return L"Discovery";
-    case PluginLifecyclePhase::FlagEvaluation: return L"FlagEvaluation";
-    case PluginLifecyclePhase::IPCConnect:     return L"IPCConnect";
-    case PluginLifecyclePhase::Activation:     return L"Activation";
-    case PluginLifecyclePhase::Running:        return L"Running";
-    case PluginLifecyclePhase::HotReloading:   return L"HotReloading";
-    case PluginLifecyclePhase::Suspended:      return L"Suspended";
-    case PluginLifecyclePhase::Unloading:      return L"Unloading";
-    case PluginLifecyclePhase::Terminated:     return L"Terminated";
-    case PluginLifecyclePhase::Faulted:        return L"Faulted";
-    default:                                   return L"Unknown";
+        case PluginLifecyclePhase::Discovery:
+            return L"Discovery";
+        case PluginLifecyclePhase::FlagEvaluation:
+            return L"FlagEvaluation";
+        case PluginLifecyclePhase::IPCConnect:
+            return L"IPCConnect";
+        case PluginLifecyclePhase::Activation:
+            return L"Activation";
+        case PluginLifecyclePhase::Running:
+            return L"Running";
+        case PluginLifecyclePhase::HotReloading:
+            return L"HotReloading";
+        case PluginLifecyclePhase::Suspended:
+            return L"Suspended";
+        case PluginLifecyclePhase::Unloading:
+            return L"Unloading";
+        case PluginLifecyclePhase::Terminated:
+            return L"Terminated";
+        case PluginLifecyclePhase::Faulted:
+            return L"Faulted";
+        default:
+            return L"Unknown";
     }
 }
 
 /// Returns the total number of lifecycle phases
-inline constexpr uint32_t LifecyclePhaseCount() {
+inline constexpr uint32_t LifecyclePhaseCount()
+{
     return static_cast<uint32_t>(PluginLifecyclePhase::COUNT);
 }
 
 /// Check if a phase represents an active (loaded) plugin
-inline bool IsActivePhase(PluginLifecyclePhase phase) {
-    return phase == PluginLifecyclePhase::Running ||
-        phase == PluginLifecyclePhase::HotReloading ||
-        phase == PluginLifecyclePhase::Suspended;
+inline bool IsActivePhase(PluginLifecyclePhase phase)
+{
+    return phase == PluginLifecyclePhase::Running || phase == PluginLifecyclePhase::HotReloading
+           || phase == PluginLifecyclePhase::Suspended;
 }
 
 /// Check if a phase represents a terminal state
-inline bool IsTerminalPhase(PluginLifecyclePhase phase) {
-    return phase == PluginLifecyclePhase::Terminated ||
-        phase == PluginLifecyclePhase::Faulted;
+inline bool IsTerminalPhase(PluginLifecyclePhase phase)
+{
+    return phase == PluginLifecyclePhase::Terminated || phase == PluginLifecyclePhase::Faulted;
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

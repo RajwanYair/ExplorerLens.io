@@ -11,7 +11,8 @@
 #include <vector>
 #include "QuickLookIntegration.h"
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class QuickLookAPI : uint8_t {
     Legacy,
@@ -26,8 +27,9 @@ enum class QuickLookScale : uint8_t {
     ProMotion
 };
 
-class MacOSQuickLookV3 {
-public:
+class MacOSQuickLookV3
+{
+  public:
     MacOSQuickLookV3() = default;
     ~MacOSQuickLookV3() = default;
 
@@ -36,43 +38,50 @@ public:
     MacOSQuickLookV3(MacOSQuickLookV3&&) noexcept = default;
     MacOSQuickLookV3& operator=(MacOSQuickLookV3&&) noexcept = default;
 
-    bool Initialize(QuickLookConfig const& config) {
+    bool Initialize(QuickLookConfig const& config)
+    {
         m_config = config;
         return true;
     }
 
-    bool RegisterExtension() {
+    bool RegisterExtension()
+    {
         if (m_extensionActive)
             return false;
         m_extensionActive = true;
         return true;
     }
 
-    bool UnregisterExtension() {
+    bool UnregisterExtension()
+    {
         m_extensionActive = false;
         return true;
     }
 
-    [[nodiscard]] bool IsExtensionActive() const {
+    [[nodiscard]] bool IsExtensionActive() const
+    {
         return m_extensionActive;
     }
 
-    [[nodiscard]] std::vector<std::string> GetSupportedUTIs() const {
-        return {
-            "public.image", "public.jpeg", "public.png", "public.tiff",
-            "public.heif", "public.avif", "org.webmproject.webp",
-            "public.camera-raw-image", "com.adobe.pdf",
-            "org.khronos.glTF.binary", "public.svg-image"
-        };
+    [[nodiscard]] std::vector<std::string> GetSupportedUTIs() const
+    {
+        return {"public.image",         "public.jpeg",
+                "public.png",           "public.tiff",
+                "public.heif",          "public.avif",
+                "org.webmproject.webp", "public.camera-raw-image",
+                "com.adobe.pdf",        "org.khronos.glTF.binary",
+                "public.svg-image"};
     }
 
-    [[nodiscard]] QuickLookConfig const& GetConfig() const {
+    [[nodiscard]] QuickLookConfig const& GetConfig() const
+    {
         return m_config;
     }
 
-private:
+  private:
     QuickLookConfig m_config;
     bool m_extensionActive = false;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

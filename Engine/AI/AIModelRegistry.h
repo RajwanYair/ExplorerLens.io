@@ -8,10 +8,10 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -19,40 +19,42 @@ namespace Engine {
 // ---- Model Descriptor -------------------------------------------------------
 
 enum class AIModelRole : uint8_t {
-    ContentClassifier       = 0,
-    SmartCrop               = 1,
-    BlurDetector            = 2,
-    Deblur                  = 3,
-    ThumbnailSynthesizer    = 4,
-    NSFWGuard               = 5,
-    SearchEmbedding         = 6,
-    SceneUnderstanding      = 7,
-    IQAScorer               = 8,
+    ContentClassifier = 0,
+    SmartCrop = 1,
+    BlurDetector = 2,
+    Deblur = 3,
+    ThumbnailSynthesizer = 4,
+    NSFWGuard = 5,
+    SearchEmbedding = 6,
+    SceneUnderstanding = 7,
+    IQAScorer = 8,
 };
 
 enum class AIBackend : uint8_t {
-    DirectML    = 0,   // Windows ML / DirectX 12 GPU
-    ONNXCPU     = 1,   // ONNX Runtime CPU EP
-    OpenVINO    = 2,   // Intel iGPU / NPU
-    CUDA        = 3,   // NVIDIA CUDA EP (optional)
+    DirectML = 0,  // Windows ML / DirectX 12 GPU
+    ONNXCPU = 1,   // ONNX Runtime CPU EP
+    OpenVINO = 2,  // Intel iGPU / NPU
+    CUDA = 3,      // NVIDIA CUDA EP (optional)
 };
 
-struct AIModelDescriptor {
-    AIModelRole   role;
-    std::string   modelId;        // "explorerlens-classifier-v2"
-    std::string   modelPath;      // Absolute path to .onnx file
-    std::string   version;        // SemVer
-    std::string   checksum;       // SHA-256
-    uint64_t      fileSizeBytes   = 0;
-    uint64_t      vramEstimateKB  = 0;
-    bool          isLoaded        = false;
-    AIBackend     preferredBackend = AIBackend::DirectML;
+struct AIModelDescriptor
+{
+    AIModelRole role;
+    std::string modelId;    // "explorerlens-classifier-v2"
+    std::string modelPath;  // Absolute path to .onnx file
+    std::string version;    // SemVer
+    std::string checksum;   // SHA-256
+    uint64_t fileSizeBytes = 0;
+    uint64_t vramEstimateKB = 0;
+    bool isLoaded = false;
+    AIBackend preferredBackend = AIBackend::DirectML;
 };
 
 // ---- Registry ---------------------------------------------------------------
 
-class AIModelRegistry {
-public:
+class AIModelRegistry
+{
+  public:
     AIModelRegistry();
     ~AIModelRegistry();
 
@@ -86,10 +88,11 @@ public:
 
     static AIModelRegistry& Instance();
 
-private:
-    struct Impl {};
+  private:
+    struct Impl
+    {};
     std::unique_ptr<Impl> m_impl;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

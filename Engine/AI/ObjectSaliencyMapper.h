@@ -6,16 +6,17 @@
 //
 #pragma once
 
+#include <algorithm>
+#include <array>
+#include <cmath>
 #include <cstdint>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-#include <array>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct ObjectSaliencyMap {
+struct ObjectSaliencyMap
+{
     std::vector<float> data;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -23,7 +24,8 @@ struct ObjectSaliencyMap {
     float avgSaliency = 0.0f;
 };
 
-struct ObjectSaliencyRegion {
+struct ObjectSaliencyRegion
+{
     int32_t x = 0;
     int32_t y = 0;
     uint32_t width = 0;
@@ -31,7 +33,8 @@ struct ObjectSaliencyRegion {
     float saliency = 0.0f;
 };
 
-struct SaliencyConfig {
+struct SaliencyConfig
+{
     float intensityWeight = 0.33f;
     float colorWeight = 0.33f;
     float orientationWeight = 0.34f;
@@ -39,21 +42,25 @@ struct SaliencyConfig {
     float normalizationPower = 2.0f;
 };
 
-class ObjectSaliencyMapper {
-public:
-    static ObjectSaliencyMapper& Instance() {
+class ObjectSaliencyMapper
+{
+  public:
+    static ObjectSaliencyMapper& Instance()
+    {
         static ObjectSaliencyMapper instance;
         return instance;
     }
 
     inline ObjectSaliencyMap ComputeSaliency(const uint8_t* pixels, uint32_t width, uint32_t height,
-        uint32_t channels = 4, const SaliencyConfig& config = {}) const {
+                                             uint32_t channels = 4, const SaliencyConfig& config = {}) const
+    {
         ObjectSaliencyMap result;
         result.width = width;
         result.height = height;
         size_t pixelCount = static_cast<size_t>(width) * height;
         result.data.resize(pixelCount, 0.0f);
-        if (!pixels || pixelCount == 0) return result;
+        if (!pixels || pixelCount == 0)
+            return result;
 
         auto intensityMap = ComputeIntensityChannel(pixels, width, height, channels);
         auto colorMap = ComputeColorChannel(pixels, width, height, channels);
@@ -62,24 +69,28 @@ public:
         float maxVal = 0.0f;
         double sumVal = 0.0;
         for (size_t i = 0; i < pixelCount; ++i) {
-            result.data[i] = config.intensityWeight * intensityMap[i] +
-                config.colorWeight * colorMap[i] +
-                config.orientationWeight * orientationMap[i];
-            if (result.data[i] > maxVal) maxVal = result.data[i];
+            result.data[i] = config.intensityWeight * intensityMap[i] + config.colorWeight * colorMap[i]
+                             + config.orientationWeight * orientationMap[i];
+            if (result.data[i] > maxVal)
+                maxVal = result.data[i];
             sumVal += result.data[i];
         }
 
         if (maxVal > 0.0f) {
-            for (auto& v : result.data) v /= maxVal;
+            for (auto& v : result.data)
+                v /= maxVal;
         }
         result.maxSaliency = 1.0f;
         result.avgSaliency = static_cast<float>(sumVal / pixelCount / (std::max)(0.001f, maxVal));
         return result;
     }
 
-    inline ObjectSaliencyRegion FindMostSalientRegion(const ObjectSaliencyMap& map, uint32_t regionW, uint32_t regionH) const {
+    inline ObjectSaliencyRegion FindMostSalientRegion(const ObjectSaliencyMap& map, uint32_t regionW,
+                                                      uint32_t regionH) const
+    {
         ObjectSaliencyRegion best;
-        if (map.data.empty()) return best;
+        if (map.data.empty())
+            return best;
 
         uint32_t stepX = (std::max)(1u, regionW / 4);
         uint32_t stepY = (std::max)(1u, regionH / 4);
@@ -106,7 +117,8 @@ public:
         return best;
     }
 
-    inline std::vector<uint8_t> RenderHeatmap(const ObjectSaliencyMap& map) const {
+    inline std::vector<uint8_t> RenderHeatmap(const ObjectSaliencyMap& map) const
+    {
         std::vector<uint8_t> heatmap(static_cast<size_t>(map.width) * map.height * 3);
         for (size_t i = 0; i < map.data.size(); ++i) {
             float v = (std::max)(0.0f, (std::min)(1.0f, map.data[i]));
@@ -115,18 +127,15 @@ public:
                 heatmap[idx] = 0;
                 heatmap[idx + 1] = static_cast<uint8_t>(v * 4 * 255);
                 heatmap[idx + 2] = 255;
-            }
-            else if (v < 0.5f) {
+            } else if (v < 0.5f) {
                 heatmap[idx] = 0;
                 heatmap[idx + 1] = 255;
                 heatmap[idx + 2] = static_cast<uint8_t>((1.0f - (v - 0.25f) * 4) * 255);
-            }
-            else if (v < 0.75f) {
+            } else if (v < 0.75f) {
                 heatmap[idx] = static_cast<uint8_t>((v - 0.5f) * 4 * 255);
                 heatmap[idx + 1] = 255;
                 heatmap[idx + 2] = 0;
-            }
-            else {
+            } else {
                 heatmap[idx] = 255;
                 heatmap[idx + 1] = static_cast<uint8_t>((1.0f - (v - 0.75f) * 4) * 255);
                 heatmap[idx + 2] = 0;
@@ -135,20 +144,23 @@ public:
         return heatmap;
     }
 
-private:
+  private:
     ObjectSaliencyMapper() = default;
 
-    inline std::vector<float> ComputeIntensityChannel(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const {
+    inline std::vector<float> ComputeIntensityChannel(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const
+    {
         size_t count = static_cast<size_t>(w) * h;
         std::vector<float> intensity(count);
         for (size_t i = 0; i < count; ++i) {
             size_t idx = i * c;
-            intensity[i] = (0.299f * pixels[idx] + 0.587f * pixels[idx + (std::min)(1u, c - 1)] +
-                0.114f * pixels[idx + (std::min)(2u, c - 1)]) / 255.0f;
+            intensity[i] = (0.299f * pixels[idx] + 0.587f * pixels[idx + (std::min)(1u, c - 1)]
+                            + 0.114f * pixels[idx + (std::min)(2u, c - 1)])
+                           / 255.0f;
         }
 
         float mean = 0.0f;
-        for (auto v : intensity) mean += v;
+        for (auto v : intensity)
+            mean += v;
         mean /= count;
 
         for (auto& v : intensity) {
@@ -157,10 +169,12 @@ private:
         return intensity;
     }
 
-    inline std::vector<float> ComputeColorChannel(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const {
+    inline std::vector<float> ComputeColorChannel(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const
+    {
         size_t count = static_cast<size_t>(w) * h;
         std::vector<float> colorSaliency(count, 0.0f);
-        if (c < 3) return colorSaliency;
+        if (c < 3)
+            return colorSaliency;
 
         float meanR = 0.0f, meanG = 0.0f, meanB = 0.0f;
         for (size_t i = 0; i < count; ++i) {
@@ -169,7 +183,9 @@ private:
             meanG += pixels[idx + 1];
             meanB += pixels[idx + 2];
         }
-        meanR /= count; meanG /= count; meanB /= count;
+        meanR /= count;
+        meanG /= count;
+        meanB /= count;
 
         for (size_t i = 0; i < count; ++i) {
             size_t idx = i * c;
@@ -181,11 +197,13 @@ private:
         return colorSaliency;
     }
 
-    inline std::vector<float> ComputeOrientationChannel(const std::vector<float>& intensity,
-        uint32_t w, uint32_t h) const {
+    inline std::vector<float> ComputeOrientationChannel(const std::vector<float>& intensity, uint32_t w,
+                                                        uint32_t h) const
+    {
         size_t count = static_cast<size_t>(w) * h;
         std::vector<float> orientation(count, 0.0f);
-        if (w < 3 || h < 3) return orientation;
+        if (w < 3 || h < 3)
+            return orientation;
 
         for (uint32_t y = 1; y < h - 1; ++y) {
             for (uint32_t x = 1; x < w - 1; ++x) {
@@ -198,5 +216,5 @@ private:
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

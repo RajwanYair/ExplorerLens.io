@@ -3,34 +3,39 @@
 //==============================================================================
 
 #include "PCXDecoder.h"
-#include "DecoderSecurityHardening.h"
-#include <fstream>
 #include <algorithm>
+#include <fstream>
+#include "DecoderSecurityHardening.h"
 
 namespace ExplorerLens {
 namespace Engine {
 
-bool PCXDecoder::CanDecode(const wchar_t* filePath) const {
-    if (!filePath) return false;
+bool PCXDecoder::CanDecode(const wchar_t* filePath) const
+{
+    if (!filePath)
+        return false;
     std::wstring path(filePath);
     std::transform(path.begin(), path.end(), path.begin(), ::towlower);
-    return path.length() >= 4 &&
-        path.compare(path.length() - 4, 4, L".pcx") == 0;
+    return path.length() >= 4 && path.compare(path.length() - 4, 4, L".pcx") == 0;
 }
 
-HRESULT PCXDecoder::Decode(const wchar_t* filePath, uint32_t requestedSize,
-    HBITMAP& hBitmap) {
-    if (!filePath || requestedSize == 0) return E_INVALIDARG;
+HRESULT PCXDecoder::Decode(const wchar_t* filePath, uint32_t requestedSize, HBITMAP& hBitmap)
+{
+    if (!filePath || requestedSize == 0)
+        return E_INVALIDARG;
 
     // Read entire file
     std::ifstream file(filePath, std::ios::binary | std::ios::ate);
-    if (!file.is_open()) return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+    if (!file.is_open())
+        return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
 
     size_t fileSize = static_cast<size_t>(file.tellg());
-    if (fileSize < sizeof(PCXHeader)) return E_FAIL;
+    if (fileSize < sizeof(PCXHeader))
+        return E_FAIL;
 
     // Security: File size limit
-    if (!Security::ValidateFileSize(fileSize, Security::MAX_IMAGE_FILE_SIZE)) return E_FAIL;
+    if (!Security::ValidateFileSize(fileSize, Security::MAX_IMAGE_FILE_SIZE))
+        return E_FAIL;
 
     file.seekg(0);
     std::vector<uint8_t> data(fileSize);
@@ -41,27 +46,29 @@ HRESULT PCXDecoder::Decode(const wchar_t* filePath, uint32_t requestedSize,
     std::vector<uint8_t> pixels;
     uint32_t width = 0, height = 0;
     HRESULT hr = DecodePCXData(data.data(), data.size(), pixels, width, height);
-    if (FAILED(hr)) return hr;
+    if (FAILED(hr))
+        return hr;
 
     // Create HBITMAP
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = static_cast<LONG>(width);
-    bmi.bmiHeader.biHeight = -static_cast<LONG>(height); // top-down
+    bmi.bmiHeader.biHeight = -static_cast<LONG>(height);  // top-down
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
 
     void* bits = nullptr;
     hBitmap = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
-    if (!hBitmap || !bits) return E_OUTOFMEMORY;
+    if (!hBitmap || !bits)
+        return E_OUTOFMEMORY;
 
     memcpy(bits, pixels.data(), width * height * 4);
     return S_OK;
 }
 
-size_t PCXDecoder::DecodeRLEScanline(const uint8_t* src, size_t srcSize,
-    uint8_t* dst, uint32_t bytesPerLine) {
+size_t PCXDecoder::DecodeRLEScanline(const uint8_t* src, size_t srcSize, uint8_t* dst, uint32_t bytesPerLine)
+{
     size_t srcPos = 0;
     uint32_t dstPos = 0;
 
@@ -70,13 +77,13 @@ size_t PCXDecoder::DecodeRLEScanline(const uint8_t* src, size_t srcSize,
         if ((byte & 0xC0) == 0xC0) {
             // RLE run
             uint32_t count = byte & 0x3F;
-            if (srcPos >= srcSize) break;
+            if (srcPos >= srcSize)
+                break;
             uint8_t value = src[srcPos++];
             for (uint32_t i = 0; i < count && dstPos < bytesPerLine; ++i) {
                 dst[dstPos++] = value;
             }
-        }
-        else {
+        } else {
             // Literal byte
             dst[dstPos++] = byte;
         }
@@ -84,23 +91,28 @@ size_t PCXDecoder::DecodeRLEScanline(const uint8_t* src, size_t srcSize,
     return srcPos;
 }
 
-HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
-    std::vector<uint8_t>& pixels,
-    uint32_t& width, uint32_t& height) {
-    if (!Security::ValidatePtr(data)) return E_POINTER;
-    if (dataSize < sizeof(PCXHeader)) return E_FAIL;
+HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize, std::vector<uint8_t>& pixels, uint32_t& width,
+                                  uint32_t& height)
+{
+    if (!Security::ValidatePtr(data))
+        return E_POINTER;
+    if (dataSize < sizeof(PCXHeader))
+        return E_FAIL;
 
     const auto* header = reinterpret_cast<const PCXHeader*>(data);
 
     // Security: Magic number validation
-    if (header->manufacturer != 0x0A) return E_FAIL;
-    if (header->encoding != 1) return E_FAIL; // Must be RLE
+    if (header->manufacturer != 0x0A)
+        return E_FAIL;
+    if (header->encoding != 1)
+        return E_FAIL;  // Must be RLE
 
     width = header->xMax - header->xMin + 1;
     height = header->yMax - header->yMin + 1;
 
     // Security: Dimension validation
-    if (!Security::ValidateDimensions(width, height)) return E_FAIL;
+    if (!Security::ValidateDimensions(width, height))
+        return E_FAIL;
 
     uint32_t bpp = header->bitsPerPixel;
     uint32_t planes = header->numPlanes;
@@ -108,15 +120,17 @@ HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
     uint32_t scanlineSize = bytesPerLine * planes;
 
     // Security: Validate scanline size is reasonable
-    if (bytesPerLine == 0 || bytesPerLine > 65535 || planes == 0 || planes > 4) return E_FAIL;
+    if (bytesPerLine == 0 || bytesPerLine > 65535 || planes == 0 || planes > 4)
+        return E_FAIL;
 
     // Security: Safe pixel buffer allocation
     size_t pixBufSize = 0;
-    if (!Security::ValidatePixelAllocation(width, height, 4, pixBufSize)) return E_FAIL;
+    if (!Security::ValidatePixelAllocation(width, height, 4, pixBufSize))
+        return E_FAIL;
     pixels.resize(pixBufSize);
 
     std::vector<uint8_t> scanline(scanlineSize);
-    const uint8_t* src = data + 128; // Skip header
+    const uint8_t* src = data + 128;  // Skip header
     size_t remaining = dataSize - 128;
 
     for (uint32_t y = 0; y < height; ++y) {
@@ -130,13 +144,12 @@ HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
         if (planes == 3 && bpp == 8) {
             // 24-bit RGB (3 planes, 8 bits each)
             for (uint32_t x = 0; x < width; ++x) {
-                pixels[rowOffset + x * 4 + 0] = scanline[bytesPerLine * 2 + x]; // B
-                pixels[rowOffset + x * 4 + 1] = scanline[bytesPerLine * 1 + x]; // G
-                pixels[rowOffset + x * 4 + 2] = scanline[bytesPerLine * 0 + x]; // R
-                pixels[rowOffset + x * 4 + 3] = 255; // A
+                pixels[rowOffset + x * 4 + 0] = scanline[bytesPerLine * 2 + x];  // B
+                pixels[rowOffset + x * 4 + 1] = scanline[bytesPerLine * 1 + x];  // G
+                pixels[rowOffset + x * 4 + 2] = scanline[bytesPerLine * 0 + x];  // R
+                pixels[rowOffset + x * 4 + 3] = 255;                             // A
             }
-        }
-        else if (planes == 1 && bpp == 8) {
+        } else if (planes == 1 && bpp == 8) {
             // 8-bit indexed — palette at end of file
             const uint8_t* palette = nullptr;
             if (dataSize >= 769 && data[dataSize - 769] == 0x0C) {
@@ -146,11 +159,10 @@ HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
             for (uint32_t x = 0; x < width; ++x) {
                 uint8_t index = scanline[x];
                 if (palette) {
-                    pixels[rowOffset + x * 4 + 0] = palette[index * 3 + 2]; // B
-                    pixels[rowOffset + x * 4 + 1] = palette[index * 3 + 1]; // G
-                    pixels[rowOffset + x * 4 + 2] = palette[index * 3 + 0]; // R
-                }
-                else {
+                    pixels[rowOffset + x * 4 + 0] = palette[index * 3 + 2];  // B
+                    pixels[rowOffset + x * 4 + 1] = palette[index * 3 + 1];  // G
+                    pixels[rowOffset + x * 4 + 2] = palette[index * 3 + 0];  // R
+                } else {
                     // Grayscale fallback
                     pixels[rowOffset + x * 4 + 0] = index;
                     pixels[rowOffset + x * 4 + 1] = index;
@@ -158,8 +170,7 @@ HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
                 }
                 pixels[rowOffset + x * 4 + 3] = 255;
             }
-        }
-        else if (planes == 1 && bpp == 1) {
+        } else if (planes == 1 && bpp == 1) {
             // 1-bit monochrome
             for (uint32_t x = 0; x < width; ++x) {
                 uint8_t bit = (scanline[x / 8] >> (7 - (x % 8))) & 1;
@@ -169,8 +180,7 @@ HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
                 pixels[rowOffset + x * 4 + 2] = val;
                 pixels[rowOffset + x * 4 + 3] = 255;
             }
-        }
-        else {
+        } else {
             // Unsupported depth — fill white
             for (uint32_t x = 0; x < width; ++x) {
                 pixels[rowOffset + x * 4 + 0] = 255;
@@ -184,5 +194,5 @@ HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
     return S_OK;
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

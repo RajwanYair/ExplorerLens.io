@@ -21,33 +21,42 @@ namespace ExplorerLens::Engine::Utils {
 // Portable Mode Detection & Configuration
 //------------------------------------------------------------------------------
 enum class DeploymentMode : uint8_t {
-    Installed = 0, // Normal installed mode (registry + %LocalAppData%)
-    Portable, // Portable mode (portable.ini + local cache)
-    Enterprise // Enterprise GPO mode (HKLM policies override)
+    Installed = 0,  // Normal installed mode (registry + %LocalAppData%)
+    Portable,       // Portable mode (portable.ini + local cache)
+    Enterprise      // Enterprise GPO mode (HKLM policies override)
 };
 
-inline const char* DeploymentModeName(DeploymentMode mode) {
+inline const char* DeploymentModeName(DeploymentMode mode)
+{
     switch (mode) {
-    case DeploymentMode::Installed: return "Installed";
-    case DeploymentMode::Portable: return "Portable";
-    case DeploymentMode::Enterprise: return "Enterprise (GPO)";
-    default: return "Unknown";
+        case DeploymentMode::Installed:
+            return "Installed";
+        case DeploymentMode::Portable:
+            return "Portable";
+        case DeploymentMode::Enterprise:
+            return "Enterprise (GPO)";
+        default:
+            return "Unknown";
     }
 }
 
 // Check for portable.ini adjacent to the DLL
-struct PortableDetector {
-    std::string dllDirectory; // Directory containing LENSShell.dll
-    std::string iniFilePath; // Full path to portable.ini
+struct PortableDetector
+{
+    std::string dllDirectory;  // Directory containing LENSShell.dll
+    std::string iniFilePath;   // Full path to portable.ini
 
     // Detect portable mode: look for portable.ini next to the DLL
-    bool IsPortable() const {
+    bool IsPortable() const
+    {
         // In real implementation: GetModuleFileName → extract dir → check file exists
         return !iniFilePath.empty();
     }
 
-    DeploymentMode Detect() const {
-        if (IsPortable()) return DeploymentMode::Portable;
+    DeploymentMode Detect() const
+    {
+        if (IsPortable())
+            return DeploymentMode::Portable;
         // In real implementation: check HKLM policies for enterprise
         return DeploymentMode::Installed;
     }
@@ -56,25 +65,32 @@ struct PortableDetector {
 //------------------------------------------------------------------------------
 // INI File Configuration — replaces registry in portable mode
 //------------------------------------------------------------------------------
-struct INISection {
+struct INISection
+{
     std::string name;
     std::unordered_map<std::string, std::string> values;
 
-    std::string Get(const std::string& key, const std::string& defaultVal = "") const {
+    std::string Get(const std::string& key, const std::string& defaultVal = "") const
+    {
         auto it = values.find(key);
         return (it != values.end()) ? it->second : defaultVal;
     }
 
-    int GetInt(const std::string& key, int defaultVal = 0) const {
+    int GetInt(const std::string& key, int defaultVal = 0) const
+    {
         auto it = values.find(key);
         if (it != values.end()) {
-            try { return std::stoi(it->second); }
-            catch (const std::exception&) { return defaultVal; }
+            try {
+                return std::stoi(it->second);
+            } catch (const std::exception&) {
+                return defaultVal;
+            }
         }
         return defaultVal;
     }
 
-    bool GetBool(const std::string& key, bool defaultVal = false) const {
+    bool GetBool(const std::string& key, bool defaultVal = false) const
+    {
         auto it = values.find(key);
         if (it != values.end()) {
             std::string v = it->second;
@@ -83,37 +99,55 @@ struct INISection {
         return defaultVal;
     }
 
-    void Set(const std::string& key, const std::string& val) { values[key] = val; }
-    bool HasKey(const std::string& key) const { return values.count(key) > 0; }
-    uint32_t KeyCount() const { return static_cast<uint32_t>(values.size()); }
+    void Set(const std::string& key, const std::string& val)
+    {
+        values[key] = val;
+    }
+    bool HasKey(const std::string& key) const
+    {
+        return values.count(key) > 0;
+    }
+    uint32_t KeyCount() const
+    {
+        return static_cast<uint32_t>(values.size());
+    }
 };
 
-struct PortableConfig {
+struct PortableConfig
+{
     std::vector<INISection> sections;
     std::string filePath;
     bool loaded = false;
 
     // Get a section by name
-    const INISection* GetSection(const std::string& name) const {
+    const INISection* GetSection(const std::string& name) const
+    {
         for (auto& s : sections) {
-            if (s.name == name) return &s;
+            if (s.name == name)
+                return &s;
         }
         return nullptr;
     }
 
     // Add or get mutable section
-    INISection& EnsureSection(const std::string& name) {
+    INISection& EnsureSection(const std::string& name)
+    {
         for (auto& s : sections) {
-            if (s.name == name) return s;
+            if (s.name == name)
+                return s;
         }
-        sections.push_back({ name, {} });
+        sections.push_back({name, {}});
         return sections.back();
     }
 
-    uint32_t SectionCount() const { return static_cast<uint32_t>(sections.size()); }
+    uint32_t SectionCount() const
+    {
+        return static_cast<uint32_t>(sections.size());
+    }
 
     // Default portable.ini template
-    static PortableConfig DefaultTemplate() {
+    static PortableConfig DefaultTemplate()
+    {
         PortableConfig cfg;
         cfg.loaded = true;
 
@@ -159,14 +193,16 @@ struct PortableConfig {
 //------------------------------------------------------------------------------
 // Portable Cache Paths
 //------------------------------------------------------------------------------
-struct PortablePaths {
-    std::string baseDirectory; // DLL directory
-    std::string cacheDirectory; // ./cache/
-    std::string configFile; // ./portable.ini
-    std::string logDirectory; // ./logs/
-    std::string pluginDirectory; // ./plugins/
+struct PortablePaths
+{
+    std::string baseDirectory;    // DLL directory
+    std::string cacheDirectory;   // ./cache/
+    std::string configFile;       // ./portable.ini
+    std::string logDirectory;     // ./logs/
+    std::string pluginDirectory;  // ./plugins/
 
-    static PortablePaths FromDllDir(const std::string& dllDir) {
+    static PortablePaths FromDllDir(const std::string& dllDir)
+    {
         PortablePaths p;
         p.baseDirectory = dllDir;
         p.cacheDirectory = dllDir + "\\cache";
@@ -176,11 +212,12 @@ struct PortablePaths {
         return p;
     }
 
-    static PortablePaths FromLocalAppData(const std::string& appDataDir) {
+    static PortablePaths FromLocalAppData(const std::string& appDataDir)
+    {
         PortablePaths p;
         p.baseDirectory = appDataDir + "\\ExplorerLens";
         p.cacheDirectory = p.baseDirectory + "\\Cache";
-        p.configFile = ""; // Uses registry
+        p.configFile = "";  // Uses registry
         p.logDirectory = p.baseDirectory + "\\Logs";
         p.pluginDirectory = p.baseDirectory + "\\Plugins";
         return p;
@@ -197,74 +234,105 @@ enum class BadgePosition : uint8_t {
     BottomRight
 };
 
-inline const char* BadgePositionName(BadgePosition pos) {
+inline const char* BadgePositionName(BadgePosition pos)
+{
     switch (pos) {
-    case BadgePosition::TopLeft: return "Top-Left";
-    case BadgePosition::TopRight: return "Top-Right";
-    case BadgePosition::BottomLeft: return "Bottom-Left";
-    case BadgePosition::BottomRight: return "Bottom-Right";
-    default: return "Unknown";
+        case BadgePosition::TopLeft:
+            return "Top-Left";
+        case BadgePosition::TopRight:
+            return "Top-Right";
+        case BadgePosition::BottomLeft:
+            return "Bottom-Left";
+        case BadgePosition::BottomRight:
+            return "Bottom-Right";
+        default:
+            return "Unknown";
     }
 }
 
 // Format badge: shows codec name (e.g., "JXL", "HEIF", "RAW")
-struct FormatBadge {
-    std::string formatLabel; // "JXL", "HEIF", "RAW", "PSD", etc.
+struct FormatBadge
+{
+    std::string formatLabel;  // "JXL", "HEIF", "RAW", "PSD", etc.
     BadgePosition position = BadgePosition::BottomLeft;
     uint32_t fontSize = 10;
-    uint32_t bgColor = 0x80000000; // Semi-transparent black
-    uint32_t fgColor = 0xFFFFFFFF; // White text
+    uint32_t bgColor = 0x80000000;  // Semi-transparent black
+    uint32_t fgColor = 0xFFFFFFFF;  // White text
     float cornerRadius = 3.0f;
     float paddingX = 4.0f;
     float paddingY = 2.0f;
 
-    bool IsEmpty() const { return formatLabel.empty(); }
+    bool IsEmpty() const
+    {
+        return formatLabel.empty();
+    }
 
     // Determine format label from file extension
-    static std::string LabelForExtension(const std::string& ext) {
+    static std::string LabelForExtension(const std::string& ext)
+    {
         std::string lower = ext;
         std::transform(lower.begin(), lower.end(), lower.begin(),
-            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
-        if (lower == ".jxl") return "JXL";
-        if (lower == ".heif" || lower == ".heic") return "HEIF";
-        if (lower == ".avif") return "AVIF";
-        if (lower == ".webp") return "WebP";
-        if (lower == ".psd" || lower == ".psb") return "PSD";
-        if (lower == ".dds") return "DDS";
-        if (lower == ".hdr") return "HDR";
-        if (lower == ".exr") return "EXR";
-        if (lower == ".svg") return "SVG";
-        if (lower == ".qoi") return "QOI";
-        if (lower == ".dng" || lower == ".cr2" || lower == ".cr3" ||
-            lower == ".nef" || lower == ".arw" || lower == ".orf" ||
-            lower == ".gpr") return "RAW";
-        if (lower == ".cbz" || lower == ".cbr" || lower == ".cb7") return "LENS";
-        if (lower == ".epub") return "EPUB";
-        if (lower == ".pdf") return "PDF";
-        if (lower == ".mp4" || lower == ".mkv" || lower == ".avi" ||
-            lower == ".mov" || lower == ".webm") return "VID";
-        if (lower == ".mp3" || lower == ".flac" || lower == ".wav" ||
-            lower == ".ogg") return "AUD";
-        if (lower == ".ttf" || lower == ".otf" || lower == ".woff") return "FONT";
-        if (lower == ".obj" || lower == ".stl" || lower == ".fbx" ||
-            lower == ".gltf") return "3D";
+        if (lower == ".jxl")
+            return "JXL";
+        if (lower == ".heif" || lower == ".heic")
+            return "HEIF";
+        if (lower == ".avif")
+            return "AVIF";
+        if (lower == ".webp")
+            return "WebP";
+        if (lower == ".psd" || lower == ".psb")
+            return "PSD";
+        if (lower == ".dds")
+            return "DDS";
+        if (lower == ".hdr")
+            return "HDR";
+        if (lower == ".exr")
+            return "EXR";
+        if (lower == ".svg")
+            return "SVG";
+        if (lower == ".qoi")
+            return "QOI";
+        if (lower == ".dng" || lower == ".cr2" || lower == ".cr3" || lower == ".nef" || lower == ".arw"
+            || lower == ".orf" || lower == ".gpr")
+            return "RAW";
+        if (lower == ".cbz" || lower == ".cbr" || lower == ".cb7")
+            return "LENS";
+        if (lower == ".epub")
+            return "EPUB";
+        if (lower == ".pdf")
+            return "PDF";
+        if (lower == ".mp4" || lower == ".mkv" || lower == ".avi" || lower == ".mov" || lower == ".webm")
+            return "VID";
+        if (lower == ".mp3" || lower == ".flac" || lower == ".wav" || lower == ".ogg")
+            return "AUD";
+        if (lower == ".ttf" || lower == ".otf" || lower == ".woff")
+            return "FONT";
+        if (lower == ".obj" || lower == ".stl" || lower == ".fbx" || lower == ".gltf")
+            return "3D";
         return "";
     }
 };
 
 // File size badge: shows human-readable size (e.g., "2.4 MB")
-struct FileSizeBadge {
+struct FileSizeBadge
+{
     uint64_t fileSize = 0;
     BadgePosition position = BadgePosition::BottomRight;
     uint32_t fontSize = 9;
     uint32_t bgColor = 0x80333333;
     uint32_t fgColor = 0xFFCCCCCC;
 
-    bool ShouldShow() const { return fileSize > 0; }
+    bool ShouldShow() const
+    {
+        return fileSize > 0;
+    }
 
-    std::string SizeText() const {
-        if (fileSize < 1024) return std::to_string(fileSize) + " B";
+    std::string SizeText() const
+    {
+        if (fileSize < 1024)
+            return std::to_string(fileSize) + " B";
         if (fileSize < 1048576) {
             double kb = fileSize / 1024.0;
             char buf[32];
@@ -287,61 +355,71 @@ struct FileSizeBadge {
 //------------------------------------------------------------------------------
 // Badge Overlay Configuration
 //------------------------------------------------------------------------------
-struct BadgeOverlayConfig {
+struct BadgeOverlayConfig
+{
     bool showFormatBadge = true;
     bool showSizeBadge = false;
     BadgePosition formatPosition = BadgePosition::BottomLeft;
     BadgePosition sizePosition = BadgePosition::BottomRight;
-    uint32_t minThumbnailSize = 128; // Don't show badges on very small thumbs
+    uint32_t minThumbnailSize = 128;  // Don't show badges on very small thumbs
     float opacity = 0.8f;
 
-    static BadgeOverlayConfig Default() { return {}; }
+    static BadgeOverlayConfig Default()
+    {
+        return {};
+    }
 
-    static BadgeOverlayConfig Disabled() {
+    static BadgeOverlayConfig Disabled()
+    {
         BadgeOverlayConfig c;
         c.showFormatBadge = false;
         c.showSizeBadge = false;
         return c;
     }
 
-    static BadgeOverlayConfig AllBadges() {
+    static BadgeOverlayConfig AllBadges()
+    {
         BadgeOverlayConfig c;
         c.showFormatBadge = true;
         c.showSizeBadge = true;
         return c;
     }
 
-    bool HasAnyBadge() const { return showFormatBadge || showSizeBadge; }
+    bool HasAnyBadge() const
+    {
+        return showFormatBadge || showSizeBadge;
+    }
 };
 
 //------------------------------------------------------------------------------
 // No-Install Deployment Info
 //------------------------------------------------------------------------------
-struct DeploymentInfo {
+struct DeploymentInfo
+{
     DeploymentMode mode = DeploymentMode::Installed;
     std::string version = "15.0.0";
     std::string dllPath;
     std::string cacheLocation;
-    std::string configSource; // "Registry" or "portable.ini"
-    bool registeredWithShell = false; // regsvr32 done?
+    std::string configSource;          // "Registry" or "portable.ini"
+    bool registeredWithShell = false;  // regsvr32 done?
 
-    std::string Summary() const {
-        return "ExplorerLens v" + version + " [" +
-            DeploymentModeName(mode) + "] config=" + configSource +
-            " registered=" + (registeredWithShell ? "yes" : "no");
+    std::string Summary() const
+    {
+        return "ExplorerLens v" + version + " [" + DeploymentModeName(mode) + "] config=" + configSource
+               + " registered=" + (registeredWithShell ? "yes" : "no");
     }
 };
 
-} // namespace ExplorerLens::Engine::Utils
+}  // namespace ExplorerLens::Engine::Utils
 
 // ─── PortableModeManager ───────────────────────────────────────────────────
 namespace ExplorerLens {
 namespace Engine {
 
 enum class PortableStatus : uint8_t {
-    Installed = 0, // Normal registry-based installation
-    Portable = 1, // Running from portable directory
-    Hybrid = 2, // Installed + portable config override
+    Installed = 0,  // Normal registry-based installation
+    Portable = 1,   // Running from portable directory
+    Hybrid = 2,     // Installed + portable config override
     Unknown = 3
 };
 
@@ -354,7 +432,8 @@ enum class StorageLocation : uint8_t {
     LocationCount = 5
 };
 
-struct PortableConfig {
+struct PortableConfig
+{
     PortableStatus status = PortableStatus::Unknown;
     StorageLocation configLocation = StorageLocation::IniFile;
     std::wstring basePath;
@@ -365,7 +444,8 @@ struct PortableConfig {
     uint64_t availableSpaceBytes = 0;
 };
 
-struct PortableDetectionResult {
+struct PortableDetectionResult
+{
     bool isPortable = false;
     PortableStatus status = PortableStatus::Unknown;
     std::wstring exePath;
@@ -374,28 +454,41 @@ struct PortableDetectionResult {
     bool hasIniFile = false;
 };
 
-class PortableModeManager {
-public:
+class PortableModeManager
+{
+  public:
     PortableModeManager();
 
     PortableDetectionResult Detect() const;
-    PortableConfig GetConfig() const { return m_config; }
+    PortableConfig GetConfig() const
+    {
+        return m_config;
+    }
 
     bool InitializePortableMode(const std::wstring& basePath);
     bool SaveConfig(const std::map<std::wstring, std::wstring>& settings);
     std::map<std::wstring, std::wstring> LoadConfig() const;
 
-    void SetCacheSize(uint64_t maxBytes) { m_maxCacheBytes = maxBytes; }
-    uint64_t GetCacheSize() const { return m_maxCacheBytes; }
+    void SetCacheSize(uint64_t maxBytes)
+    {
+        m_maxCacheBytes = maxBytes;
+    }
+    uint64_t GetCacheSize() const
+    {
+        return m_maxCacheBytes;
+    }
 
     static const wchar_t* GetStatusName(PortableStatus status);
     static const wchar_t* GetLocationName(StorageLocation location);
-    static uint32_t GetLocationCount() { return static_cast<uint32_t>(StorageLocation::LocationCount); }
+    static uint32_t GetLocationCount()
+    {
+        return static_cast<uint32_t>(StorageLocation::LocationCount);
+    }
 
-private:
+  private:
     PortableConfig m_config;
-    uint64_t m_maxCacheBytes = 256 * 1024 * 1024; // 256 MB default
+    uint64_t m_maxCacheBytes = 256 * 1024 * 1024;  // 256 MB default
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

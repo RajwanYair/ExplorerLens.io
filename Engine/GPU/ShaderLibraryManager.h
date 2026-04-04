@@ -6,12 +6,12 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -25,32 +25,41 @@ enum class ShaderLibraryStage : uint8_t {
     Domain = 5
 };
 
-struct CompiledShaderEntry {
-    std::string          name;
-    ShaderLibraryStage   stage = ShaderLibraryStage::Vertex;
+struct CompiledShaderEntry
+{
+    std::string name;
+    ShaderLibraryStage stage = ShaderLibraryStage::Vertex;
     std::vector<uint8_t> bytecode;
-    uint64_t             hashKey = 0;
-    uint64_t             compiledAtMs = 0;
-    uint32_t             shaderModel = 50;  // SM 5.0
-    bool                 isValid = false;
-    std::string          entryPoint = "main";
-    std::string          sourceHash;
+    uint64_t hashKey = 0;
+    uint64_t compiledAtMs = 0;
+    uint32_t shaderModel = 50;  // SM 5.0
+    bool isValid = false;
+    std::string entryPoint = "main";
+    std::string sourceHash;
 };
 
-struct ShaderLibraryStats {
+struct ShaderLibraryStats
+{
     uint32_t totalShaders = 0;
     uint32_t cacheHits = 0;
     uint32_t cacheMisses = 0;
     uint64_t totalBytecode = 0;
 };
 
-class ShaderLibraryManager {
-public:
-    static ShaderLibraryManager& Instance() { static ShaderLibraryManager s; return s; }
+class ShaderLibraryManager
+{
+  public:
+    static ShaderLibraryManager& Instance()
+    {
+        static ShaderLibraryManager s;
+        return s;
+    }
 
-    bool CompileShader(const std::string& name, ShaderLibraryStage stage,
-        const std::string& source, const std::string& entryPoint = "main") {
-        if (name.empty() || source.empty()) return false;
+    bool CompileShader(const std::string& name, ShaderLibraryStage stage, const std::string& source,
+                       const std::string& entryPoint = "main")
+    {
+        if (name.empty() || source.empty())
+            return false;
 
         uint64_t hash = ComputeHash(source);
         auto it = m_cache.find(hash);
@@ -65,8 +74,8 @@ public:
         entry.hashKey = hash;
         entry.entryPoint = entryPoint;
         entry.compiledAtMs = static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count());
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+                .count());
         entry.sourceHash = std::to_string(hash);
 
         // Simulated bytecode (actual D3DCompile would go here)
@@ -82,7 +91,8 @@ public:
         return true;
     }
 
-    const CompiledShaderEntry* GetCachedShader(const std::string& source) const {
+    const CompiledShaderEntry* GetCachedShader(const std::string& source) const
+    {
         uint64_t hash = ComputeHash(source);
         auto it = m_cache.find(hash);
         if (it != m_cache.end() && it->second.isValid)
@@ -90,20 +100,24 @@ public:
         return nullptr;
     }
 
-    const CompiledShaderEntry* GetShaderByName(const std::string& name) const {
+    const CompiledShaderEntry* GetShaderByName(const std::string& name) const
+    {
         for (const auto& [k, v] : m_cache) {
-            if (v.name == name) return &v;
+            if (v.name == name)
+                return &v;
         }
         return nullptr;
     }
 
-    void InvalidateCache() {
+    void InvalidateCache()
+    {
         m_cache.clear();
         m_stats.totalShaders = 0;
         m_stats.totalBytecode = 0;
     }
 
-    void InvalidateShader(const std::string& source) {
+    void InvalidateShader(const std::string& source)
+    {
         uint64_t hash = ComputeHash(source);
         auto it = m_cache.find(hash);
         if (it != m_cache.end()) {
@@ -113,39 +127,60 @@ public:
         }
     }
 
-    const ShaderLibraryStats& GetStats() const { return m_stats; }
-    size_t CacheSize() const { return m_cache.size(); }
+    const ShaderLibraryStats& GetStats() const
+    {
+        return m_stats;
+    }
+    size_t CacheSize() const
+    {
+        return m_cache.size();
+    }
 
-    static const char* StageToString(ShaderLibraryStage stage) {
+    static const char* StageToString(ShaderLibraryStage stage)
+    {
         switch (stage) {
-        case ShaderLibraryStage::Vertex:   return "vs";
-        case ShaderLibraryStage::Pixel:    return "ps";
-        case ShaderLibraryStage::Compute:  return "cs";
-        case ShaderLibraryStage::Geometry: return "gs";
-        case ShaderLibraryStage::Hull:     return "hs";
-        case ShaderLibraryStage::Domain:   return "ds";
-        default:                    return "unknown";
+            case ShaderLibraryStage::Vertex:
+                return "vs";
+            case ShaderLibraryStage::Pixel:
+                return "ps";
+            case ShaderLibraryStage::Compute:
+                return "cs";
+            case ShaderLibraryStage::Geometry:
+                return "gs";
+            case ShaderLibraryStage::Hull:
+                return "hs";
+            case ShaderLibraryStage::Domain:
+                return "ds";
+            default:
+                return "unknown";
         }
     }
 
-    bool Validate() const {
+    bool Validate() const
+    {
         for (const auto& [k, v] : m_cache) {
-            if (v.hashKey != k) return false;
-            if (!v.isValid) return false;
-            if (v.name.empty()) return false;
-            if (v.bytecode.empty()) return false;
+            if (v.hashKey != k)
+                return false;
+            if (!v.isValid)
+                return false;
+            if (v.name.empty())
+                return false;
+            if (v.bytecode.empty())
+                return false;
         }
-        if (m_stats.totalShaders != static_cast<uint32_t>(m_cache.size())) return false;
+        if (m_stats.totalShaders != static_cast<uint32_t>(m_cache.size()))
+            return false;
         return true;
     }
 
-private:
+  private:
     ShaderLibraryManager() = default;
     ~ShaderLibraryManager() = default;
     ShaderLibraryManager(const ShaderLibraryManager&) = delete;
     ShaderLibraryManager& operator=(const ShaderLibraryManager&) = delete;
 
-    static uint64_t ComputeHash(const std::string& s) {
+    static uint64_t ComputeHash(const std::string& s)
+    {
         // FNV-1a 64-bit
         uint64_t hash = 14695981039346656037ULL;
         for (char c : s) {
@@ -159,5 +194,5 @@ private:
     ShaderLibraryStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -7,16 +7,15 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
-#include <vector>
 #include <optional>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-enum class PersonalisationSignal : uint8_t
-{
+enum class PersonalisationSignal : uint8_t {
     RecentlyViewed,
     Starred,
     SharedWith,
@@ -24,8 +23,7 @@ enum class PersonalisationSignal : uint8_t
     ViewDuration
 };
 
-enum class AdaptationStrategy : uint8_t
-{
+enum class AdaptationStrategy : uint8_t {
     Conservative,
     Balanced,
     Aggressive,
@@ -34,44 +32,36 @@ enum class AdaptationStrategy : uint8_t
 
 struct UserPersonalisationProfile
 {
-    std::string                      userId;
+    std::string userId;
     std::vector<PersonalisationSignal> signals;
-    AdaptationStrategy               strategy            = AdaptationStrategy::Balanced;
-    float                            confidenceThreshold = 0.7f;
-    uint32_t                         maxHistoryDays      = 30;
+    AdaptationStrategy strategy = AdaptationStrategy::Balanced;
+    float confidenceThreshold = 0.7f;
+    uint32_t maxHistoryDays = 30;
 };
 
 class ThumbnailPersonalisationEngine
 {
-public:
+  public:
     ThumbnailPersonalisationEngine() = default;
     ~ThumbnailPersonalisationEngine() = default;
 
-    ThumbnailPersonalisationEngine(ThumbnailPersonalisationEngine const&)            = delete;
+    ThumbnailPersonalisationEngine(ThumbnailPersonalisationEngine const&) = delete;
     ThumbnailPersonalisationEngine& operator=(ThumbnailPersonalisationEngine const&) = delete;
-    ThumbnailPersonalisationEngine(ThumbnailPersonalisationEngine&&)                 = default;
-    ThumbnailPersonalisationEngine& operator=(ThumbnailPersonalisationEngine&&)      = default;
+    ThumbnailPersonalisationEngine(ThumbnailPersonalisationEngine&&) = default;
+    ThumbnailPersonalisationEngine& operator=(ThumbnailPersonalisationEngine&&) = default;
 
-    bool ApplyPersonalisation(
-        UserPersonalisationProfile const& profile,
-        void*                             imageData,
-        uint32_t                          w,
-        uint32_t                          h);
+    bool ApplyPersonalisation(UserPersonalisationProfile const& profile, void* imageData, uint32_t w, uint32_t h);
 
-    void UpdateSignal(
-        std::string const&   userId,
-        PersonalisationSignal signal,
-        float                weight);
+    void UpdateSignal(std::string const& userId, PersonalisationSignal signal, float weight);
 
     void ResetProfile(std::string const& userId);
 
-    [[nodiscard]] std::optional<UserPersonalisationProfile>
-        GetProfile(std::string const& userId) const;
+    [[nodiscard]] std::optional<UserPersonalisationProfile> GetProfile(std::string const& userId) const;
 
-private:
+  private:
     std::unordered_map<std::string, UserPersonalisationProfile> m_profiles;
-    AdaptationStrategy                                          m_strategy = AdaptationStrategy::Balanced;
+    AdaptationStrategy m_strategy = AdaptationStrategy::Balanced;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

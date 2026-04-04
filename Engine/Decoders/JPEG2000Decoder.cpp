@@ -8,13 +8,13 @@
 //==============================================================================
 
 #include "JPEG2000Decoder.h"
-#include <fstream>
+#include <windows.h>
 #include <algorithm>
 #include <cstring>
-#include <windows.h>
+#include <fstream>
 
 #ifdef HAS_OPENJPEG
-#include <openjpeg.h>
+    #include <openjpeg.h>
 #endif
 
 namespace ExplorerLens::Decoders {
@@ -24,20 +24,20 @@ namespace ExplorerLens::Decoders {
 //==============================================================================
 
 /// Create HBITMAP from raw BGRA pixel buffer
-static HBITMAP CreateHBITMAPFromBGRA(const uint8_t* pixels,
-    uint32_t width, uint32_t height) {
+static HBITMAP CreateHBITMAPFromBGRA(const uint8_t* pixels, uint32_t width, uint32_t height)
+{
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = static_cast<LONG>(width);
-    bmi.bmiHeader.biHeight = -static_cast<LONG>(height); // top-down
+    bmi.bmiHeader.biHeight = -static_cast<LONG>(height);  // top-down
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
 
     void* bits = nullptr;
-    HBITMAP hBitmap = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS,
-        &bits, nullptr, 0);
-    if (!hBitmap || !bits) return nullptr;
+    HBITMAP hBitmap = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
+    if (!hBitmap || !bits)
+        return nullptr;
     memcpy(bits, pixels, static_cast<size_t>(width) * height * 4);
     return hBitmap;
 }
@@ -47,19 +47,20 @@ static HBITMAP CreateHBITMAPFromBGRA(const uint8_t* pixels,
 //==============================================================================
 
 /// Detect JP2 format from file magic bytes
-static JP2Format DetectFormatFromMagic(const uint8_t* data, size_t size) {
-    if (size < 12) return JP2Format::Unknown;
+static JP2Format DetectFormatFromMagic(const uint8_t* data, size_t size)
+{
+    if (size < 12)
+        return JP2Format::Unknown;
 
     // JP2 box-based format: starts with JP2 signature box
     // 00 00 00 0C 6A 50 20 20 0D 0A 87 0A
-    static constexpr uint8_t JP2_SIG[] = {
-    0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20,
-    0x0D, 0x0A, 0x87, 0x0A
-    };
-    if (memcmp(data, JP2_SIG, 12) == 0) return JP2Format::JP2;
+    static constexpr uint8_t JP2_SIG[] = {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20, 0x0D, 0x0A, 0x87, 0x0A};
+    if (memcmp(data, JP2_SIG, 12) == 0)
+        return JP2Format::JP2;
 
     // Raw J2K codestream: starts with SOC marker FF 4F
-    if (size >= 2 && data[0] == 0xFF && data[1] == 0x4F) return JP2Format::J2K;
+    if (size >= 2 && data[0] == 0xFF && data[1] == 0x4F)
+        return JP2Format::J2K;
 
     return JP2Format::Unknown;
 }
@@ -74,15 +75,18 @@ static JP2Format DetectFormatFromMagic(const uint8_t* data, size_t size) {
  * Memory buffer context for OpenJPEG stream callbacks.
  * Wraps a raw pointer+size into a seekable read stream.
  */
-struct OPJMemoryStream {
+struct OPJMemoryStream
+{
     const uint8_t* data;
     OPJ_SIZE_T size;
     OPJ_SIZE_T offset;
 };
 
-static OPJ_SIZE_T opjMemRead(void* buffer, OPJ_SIZE_T nbBytes, void* userData) {
+static OPJ_SIZE_T opjMemRead(void* buffer, OPJ_SIZE_T nbBytes, void* userData)
+{
     auto* ms = static_cast<OPJMemoryStream*>(userData);
-    if (ms->offset >= ms->size) return static_cast<OPJ_SIZE_T>(-1);
+    if (ms->offset >= ms->size)
+        return static_cast<OPJ_SIZE_T>(-1);
     OPJ_SIZE_T avail = ms->size - ms->offset;
     OPJ_SIZE_T toRead = (nbBytes < avail) ? nbBytes : avail;
     memcpy(buffer, ms->data + ms->offset, toRead);
@@ -90,43 +94,48 @@ static OPJ_SIZE_T opjMemRead(void* buffer, OPJ_SIZE_T nbBytes, void* userData) {
     return toRead;
 }
 
-static OPJ_OFF_T opjMemSkip(OPJ_OFF_T nbBytes, void* userData) {
+static OPJ_OFF_T opjMemSkip(OPJ_OFF_T nbBytes, void* userData)
+{
     auto* ms = static_cast<OPJMemoryStream*>(userData);
     if (nbBytes < 0) {
         if (static_cast<OPJ_SIZE_T>(-nbBytes) > ms->offset) {
             ms->offset = 0;
-        }
-        else {
+        } else {
             ms->offset -= static_cast<OPJ_SIZE_T>(-nbBytes);
         }
-    }
-    else {
+    } else {
         ms->offset += static_cast<OPJ_SIZE_T>(nbBytes);
-        if (ms->offset > ms->size) ms->offset = ms->size;
+        if (ms->offset > ms->size)
+            ms->offset = ms->size;
     }
     return static_cast<OPJ_OFF_T>(ms->offset);
 }
 
-static OPJ_BOOL opjMemSeek(OPJ_OFF_T nbBytes, void* userData) {
+static OPJ_BOOL opjMemSeek(OPJ_OFF_T nbBytes, void* userData)
+{
     auto* ms = static_cast<OPJMemoryStream*>(userData);
-    if (nbBytes < 0 || static_cast<OPJ_SIZE_T>(nbBytes) > ms->size) return OPJ_FALSE;
+    if (nbBytes < 0 || static_cast<OPJ_SIZE_T>(nbBytes) > ms->size)
+        return OPJ_FALSE;
     ms->offset = static_cast<OPJ_SIZE_T>(nbBytes);
     return OPJ_TRUE;
 }
 
-static void opjMemFree(void* userData) {
+static void opjMemFree(void* userData)
+{
     delete static_cast<OPJMemoryStream*>(userData);
 }
 
 /// Decode JPEG 2000 using OpenJPEG library
-static J2KDecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize,
-    JP2Format format,
-    const JP2DecodeOptions& opts) {
+static J2KDecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize, JP2Format format,
+                                          const JP2DecodeOptions& opts)
+{
     J2KDecodeResult result;
 
     OPJ_CODEC_FORMAT codecFormat = OPJ_CODEC_JP2;
-    if (format == JP2Format::J2K) codecFormat = OPJ_CODEC_J2K;
-    else if (format == JP2Format::JPX) codecFormat = OPJ_CODEC_JPX;
+    if (format == JP2Format::J2K)
+        codecFormat = OPJ_CODEC_J2K;
+    else if (format == JP2Format::JPX)
+        codecFormat = OPJ_CODEC_JPX;
 
     opj_codec_t* codec = opj_create_decompress(codecFormat);
     if (!codec) {
@@ -145,7 +154,7 @@ static J2KDecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize,
     }
 
     // Create memory stream with OpenJPEG callbacks
-    auto* memStream = new OPJMemoryStream{ data, static_cast<OPJ_SIZE_T>(dataSize), 0 };
+    auto* memStream = new OPJMemoryStream{data, static_cast<OPJ_SIZE_T>(dataSize), 0};
     opj_stream_t* stream = opj_stream_create(OPJ_J2K_STREAM_CHUNK_SIZE, OPJ_TRUE);
     if (!stream) {
         delete memStream;
@@ -195,13 +204,11 @@ static J2KDecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize,
             size_t idx = static_cast<size_t>(y) * w + x;
             size_t out = idx * 4;
             if (nc >= 3) {
-                result.pixelData[out + 2] = static_cast<uint8_t>(image->comps[0].data[idx]); // R
-                result.pixelData[out + 1] = static_cast<uint8_t>(image->comps[1].data[idx]); // G
-                result.pixelData[out + 0] = static_cast<uint8_t>(image->comps[2].data[idx]); // B
-                result.pixelData[out + 3] = (nc >= 4) ?
-                    static_cast<uint8_t>(image->comps[3].data[idx]) : 255; // A
-            }
-            else {
+                result.pixelData[out + 2] = static_cast<uint8_t>(image->comps[0].data[idx]);                    // R
+                result.pixelData[out + 1] = static_cast<uint8_t>(image->comps[1].data[idx]);                    // G
+                result.pixelData[out + 0] = static_cast<uint8_t>(image->comps[2].data[idx]);                    // B
+                result.pixelData[out + 3] = (nc >= 4) ? static_cast<uint8_t>(image->comps[3].data[idx]) : 255;  // A
+            } else {
                 // Grayscale
                 uint8_t v = static_cast<uint8_t>(image->comps[0].data[idx]);
                 result.pixelData[out + 0] = v;
@@ -220,15 +227,15 @@ static J2KDecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize,
     return result;
 }
 
-#endif // HAS_OPENJPEG
+#endif  // HAS_OPENJPEG
 
 //==============================================================================
 // JPEG 2000 Decode — Fallback (header parsing only, no pixel data)
 //==============================================================================
 
 #ifndef HAS_OPENJPEG
-static J2KDecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
-    JP2Format format) {
+static J2KDecodeResult DecodeFallback(const uint8_t* data, size_t dataSize, JP2Format format)
+{
     J2KDecodeResult result;
 
     if (format == JP2Format::J2K && dataSize >= 10) {
@@ -237,15 +244,17 @@ static J2KDecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
         size_t pos = 2;
         while (pos + 2 < dataSize) {
             uint8_t m1 = data[pos], m2 = data[pos + 1];
-            if (m1 == 0xFF && m2 == 0x51) { // SIZ marker
-                if (pos + 10 >= dataSize) break;
+            if (m1 == 0xFF && m2 == 0x51) {  // SIZ marker
+                if (pos + 10 >= dataSize)
+                    break;
                 uint16_t lsiz = (uint16_t(data[pos + 2]) << 8) | data[pos + 3];
-                if (pos + lsiz + 2 > dataSize) break;
+                if (pos + lsiz + 2 > dataSize)
+                    break;
                 // Skip Rsiz(2), read Xsiz(4), Ysiz(4)
-                uint32_t xsiz = (uint32_t(data[pos + 6]) << 24) | (uint32_t(data[pos + 7]) << 16) |
-                    (uint32_t(data[pos + 8]) << 8) | data[pos + 9];
-                uint32_t ysiz = (uint32_t(data[pos + 10]) << 24) | (uint32_t(data[pos + 11]) << 16) |
-                    (uint32_t(data[pos + 12]) << 8) | data[pos + 13];
+                uint32_t xsiz = (uint32_t(data[pos + 6]) << 24) | (uint32_t(data[pos + 7]) << 16)
+                                | (uint32_t(data[pos + 8]) << 8) | data[pos + 9];
+                uint32_t ysiz = (uint32_t(data[pos + 10]) << 24) | (uint32_t(data[pos + 11]) << 16)
+                                | (uint32_t(data[pos + 12]) << 8) | data[pos + 13];
                 result.decodedWidth = xsiz;
                 result.decodedHeight = ysiz;
                 result.info.width = xsiz;
@@ -255,8 +264,7 @@ static J2KDecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
             if (m1 == 0xFF) {
                 uint16_t len = (uint16_t(data[pos + 2]) << 8) | data[pos + 3];
                 pos += 2 + len;
-            }
-            else {
+            } else {
                 pos++;
             }
         }
@@ -268,10 +276,10 @@ static J2KDecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
     for (uint32_t y = 0; y < h; ++y) {
         for (uint32_t x = 0; x < w; ++x) {
             size_t idx = (static_cast<size_t>(y) * w + x) * 4;
-            result.pixelData[idx + 0] = static_cast<uint8_t>(200 * y / h); // B
-            result.pixelData[idx + 1] = static_cast<uint8_t>(100 * x / w); // G
-            result.pixelData[idx + 2] = 40; // R
-            result.pixelData[idx + 3] = 255; // A
+            result.pixelData[idx + 0] = static_cast<uint8_t>(200 * y / h);  // B
+            result.pixelData[idx + 1] = static_cast<uint8_t>(100 * x / w);  // G
+            result.pixelData[idx + 2] = 40;                                 // R
+            result.pixelData[idx + 3] = 255;                                // A
         }
     }
     result.decodedWidth = w;
@@ -279,23 +287,26 @@ static J2KDecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
     result.status = JP2DecodeStatus::Success;
     return result;
 }
-#endif // !HAS_OPENJPEG
+#endif  // !HAS_OPENJPEG
 
 //==============================================================================
 // IThumbnailDecoder-compatible interface
 //==============================================================================
 
 /// Standalone function for shell extension integration
-HRESULT DecodeJPEG2000Thumbnail(const wchar_t* filePath, uint32_t requestedSize,
-    HBITMAP& hBitmap) {
-    if (!filePath || requestedSize == 0) return E_INVALIDARG;
+HRESULT DecodeJPEG2000Thumbnail(const wchar_t* filePath, uint32_t requestedSize, HBITMAP& hBitmap)
+{
+    if (!filePath || requestedSize == 0)
+        return E_INVALIDARG;
 
     // Read file
     std::ifstream file(filePath, std::ios::binary | std::ios::ate);
-    if (!file.is_open()) return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+    if (!file.is_open())
+        return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
 
     size_t fileSize = static_cast<size_t>(file.tellg());
-    if (fileSize < 12) return E_FAIL;
+    if (fileSize < 12)
+        return E_FAIL;
 
     file.seekg(0);
     std::vector<uint8_t> data(fileSize);
@@ -330,12 +341,12 @@ HRESULT DecodeJPEG2000Thumbnail(const wchar_t* filePath, uint32_t requestedSize,
     result = DecodeFallback(data.data(), data.size(), format);
 #endif
 
-    if (!result.IsSuccess() || !result.HasPixels()) return E_FAIL;
+    if (!result.IsSuccess() || !result.HasPixels())
+        return E_FAIL;
 
     // Create HBITMAP
-    hBitmap = CreateHBITMAPFromBGRA(result.pixelData.data(),
-        result.decodedWidth, result.decodedHeight);
+    hBitmap = CreateHBITMAPFromBGRA(result.pixelData.data(), result.decodedWidth, result.decodedHeight);
     return hBitmap ? S_OK : E_OUTOFMEMORY;
 }
 
-} // namespace ExplorerLens::Decoders
+}  // namespace ExplorerLens::Decoders

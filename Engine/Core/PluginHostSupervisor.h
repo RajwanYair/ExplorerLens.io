@@ -7,15 +7,15 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 
+#include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <chrono>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -29,36 +29,50 @@ enum class SupervisorHostState : uint8_t {
     Terminated = 5
 };
 
-struct HostProcessInfo {
-    DWORD              processId = 0;
-    HANDLE             processHandle = nullptr;
+struct HostProcessInfo
+{
+    DWORD processId = 0;
+    HANDLE processHandle = nullptr;
     SupervisorHostState state = SupervisorHostState::NotStarted;
-    std::wstring       exePath;
-    std::wstring       arguments;
-    uint32_t           restartCount = 0;
-    uint32_t           maxRestarts = 3;
-    uint64_t           startTimeMs = 0;
-    uint64_t           uptimeMs = 0;
-    int32_t            exitCode = 0;
+    std::wstring exePath;
+    std::wstring arguments;
+    uint32_t restartCount = 0;
+    uint32_t maxRestarts = 3;
+    uint64_t startTimeMs = 0;
+    uint64_t uptimeMs = 0;
+    int32_t exitCode = 0;
 };
 
-struct PluginHostPolicy {
-    uint32_t  maxRestarts = 3;
-    uint32_t  restartDelayMs = 1000;
-    uint32_t  healthCheckIntervalMs = 5000;
-    uint32_t  gracefulShutdownMs = 3000;
-    bool      autoRestart = true;
-    bool      isolateMemory = true;
+struct PluginHostPolicy
+{
+    uint32_t maxRestarts = 3;
+    uint32_t restartDelayMs = 1000;
+    uint32_t healthCheckIntervalMs = 5000;
+    uint32_t gracefulShutdownMs = 3000;
+    bool autoRestart = true;
+    bool isolateMemory = true;
 };
 
-class PluginHostSupervisor {
-public:
-    static PluginHostSupervisor& Instance() { static PluginHostSupervisor s; return s; }
+class PluginHostSupervisor
+{
+  public:
+    static PluginHostSupervisor& Instance()
+    {
+        static PluginHostSupervisor s;
+        return s;
+    }
 
-    void SetPolicy(const PluginHostPolicy& policy) { m_policy = policy; }
-    const PluginHostPolicy& GetPolicy() const { return m_policy; }
+    void SetPolicy(const PluginHostPolicy& policy)
+    {
+        m_policy = policy;
+    }
+    const PluginHostPolicy& GetPolicy() const
+    {
+        return m_policy;
+    }
 
-    bool Launch(const std::wstring& exePath, const std::wstring& args = L"") {
+    bool Launch(const std::wstring& exePath, const std::wstring& args = L"")
+    {
         HostProcessInfo info{};
         info.exePath = exePath;
         info.arguments = args;
@@ -70,7 +84,7 @@ public:
         PROCESS_INFORMATION pi{};
         std::wstring cmdLine = exePath + L" " + args;
         BOOL ok = ::CreateProcessW(nullptr, &cmdLine[0], nullptr, nullptr, FALSE,
-            CREATE_NEW_PROCESS_GROUP | CREATE_SUSPENDED, nullptr, nullptr, &si, &pi);
+                                   CREATE_NEW_PROCESS_GROUP | CREATE_SUSPENDED, nullptr, nullptr, &si, &pi);
         if (!ok) {
             info.state = SupervisorHostState::Terminated;
             m_hosts.push_back(info);
@@ -86,17 +100,19 @@ public:
         return true;
     }
 
-    SupervisorHostState Monitor(size_t index) {
-        if (index >= m_hosts.size()) return SupervisorHostState::NotStarted;
+    SupervisorHostState Monitor(size_t index)
+    {
+        if (index >= m_hosts.size())
+            return SupervisorHostState::NotStarted;
         auto& host = m_hosts[index];
-        if (host.processHandle == nullptr) return host.state;
+        if (host.processHandle == nullptr)
+            return host.state;
         DWORD exitCode = 0;
         if (::GetExitCodeProcess(host.processHandle, &exitCode)) {
             if (exitCode == STILL_ACTIVE) {
                 host.state = SupervisorHostState::Running;
                 host.uptimeMs = GetTickCount64() - host.startTimeMs;
-            }
-            else {
+            } else {
                 host.exitCode = static_cast<int32_t>(exitCode);
                 host.state = (exitCode == 0) ? SupervisorHostState::Terminated : SupervisorHostState::Crashed;
                 ::CloseHandle(host.processHandle);
@@ -106,17 +122,22 @@ public:
         return host.state;
     }
 
-    bool Restart(size_t index) {
-        if (index >= m_hosts.size()) return false;
+    bool Restart(size_t index)
+    {
+        if (index >= m_hosts.size())
+            return false;
         auto& host = m_hosts[index];
-        if (host.restartCount >= host.maxRestarts) return false;
+        if (host.restartCount >= host.maxRestarts)
+            return false;
         Kill(index);
         ++host.restartCount;
         return Launch(host.exePath, host.arguments);
     }
 
-    bool Kill(size_t index) {
-        if (index >= m_hosts.size()) return false;
+    bool Kill(size_t index)
+    {
+        if (index >= m_hosts.size())
+            return false;
         auto& host = m_hosts[index];
         if (host.processHandle) {
             ::TerminateProcess(host.processHandle, 1);
@@ -128,32 +149,43 @@ public:
         return true;
     }
 
-    size_t HostCount() const { return m_hosts.size(); }
+    size_t HostCount() const
+    {
+        return m_hosts.size();
+    }
 
-    const HostProcessInfo* GetHostInfo(size_t index) const {
+    const HostProcessInfo* GetHostInfo(size_t index) const
+    {
         return (index < m_hosts.size()) ? &m_hosts[index] : nullptr;
     }
 
-    uint32_t CountByState(SupervisorHostState state) const {
+    uint32_t CountByState(SupervisorHostState state) const
+    {
         uint32_t count = 0;
         for (const auto& h : m_hosts) {
-            if (h.state == state) ++count;
+            if (h.state == state)
+                ++count;
         }
         return count;
     }
 
-    bool Validate() const {
-        if (m_policy.maxRestarts > 100) return false;
-        if (m_policy.gracefulShutdownMs > 60000) return false;
+    bool Validate() const
+    {
+        if (m_policy.maxRestarts > 100)
+            return false;
+        if (m_policy.gracefulShutdownMs > 60000)
+            return false;
         for (const auto& h : m_hosts) {
-            if (h.restartCount > h.maxRestarts + 1) return false;
+            if (h.restartCount > h.maxRestarts + 1)
+                return false;
         }
         return true;
     }
 
-private:
+  private:
     PluginHostSupervisor() = default;
-    ~PluginHostSupervisor() {
+    ~PluginHostSupervisor()
+    {
         for (auto& h : m_hosts) {
             if (h.processHandle) {
                 ::TerminateProcess(h.processHandle, 1);
@@ -164,9 +196,9 @@ private:
     PluginHostSupervisor(const PluginHostSupervisor&) = delete;
     PluginHostSupervisor& operator=(const PluginHostSupervisor&) = delete;
 
-    PluginHostPolicy              m_policy;
-    std::vector<HostProcessInfo>  m_hosts;
+    PluginHostPolicy m_policy;
+    std::vector<HostProcessInfo> m_hosts;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

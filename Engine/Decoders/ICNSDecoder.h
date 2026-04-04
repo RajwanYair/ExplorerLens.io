@@ -24,39 +24,55 @@ enum class ICNSIconType : uint32_t {
     Unknown = 0,
 };
 
-class ICNSDecoder {
-public:
+class ICNSDecoder
+{
+  public:
     ICNSDecoder() = default;
 
-    struct DecodeResult {
-        bool    success  = false;
-        uint32_t width   = 0;
-        uint32_t height  = 0;
+    struct DecodeResult
+    {
+        bool success = false;
+        uint32_t width = 0;
+        uint32_t height = 0;
         std::vector<uint8_t> pixelData;  // BGRA32
         std::string error;
     };
 
-    struct IconInfo {
-        uint32_t    variantCount = 0;
-        uint32_t    bestWidth    = 0;
-        uint32_t    bestHeight   = 0;
-        ICNSIconType bestType    = ICNSIconType::Unknown;
+    struct IconInfo
+    {
+        uint32_t variantCount = 0;
+        uint32_t bestWidth = 0;
+        uint32_t bestHeight = 0;
+        ICNSIconType bestType = ICNSIconType::Unknown;
 
-        bool IsValid() const { return variantCount > 0 && bestWidth > 0; }
+        bool IsValid() const
+        {
+            return variantCount > 0 && bestWidth > 0;
+        }
     };
 
     /// Probe the ICNS file and return metadata about the best available icon.
-    IconInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    IconInfo ReadInfo(const std::string& filePath) const
+    {
+        (void)filePath;
+        return {};
+    }
 
     /// Decode the highest-resolution icon variant to BGRA32.
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const
+    {
+        (void)filePath;
+        (void)targetWidth;
+        return {};
+    }
 
-    static bool IsICNSExtension(const std::string& ext) {
+    static bool IsICNSExtension(const std::string& ext)
+    {
         return ext == ".icns" || ext == ".ICNS";
     }
-    static constexpr const char* EXTENSIONS[] = { ".icns", nullptr };
+    static constexpr const char* EXTENSIONS[] = {".icns", nullptr};
 
-private:
+  private:
     static ICNSIconType BestVariant(const std::vector<ICNSIconType>& variants);
 };
 

@@ -70,7 +70,8 @@ enum class HealthDimension : uint8_t {
 };
 
 /// Single telemetry event
-struct TelemetryEvent {
+struct TelemetryEvent
+{
     uint64_t timestamp = 0;
     TelemetrySeverity severity = TelemetrySeverity::Info;
     TelemetryCategory category = TelemetryCategory::System;
@@ -78,19 +79,21 @@ struct TelemetryEvent {
     std::wstring message;
     double value = 0.0;
     std::wstring unit;
-    bool piiSafe = true; // No personally identifiable info
+    bool piiSafe = true;  // No personally identifiable info
 };
 
 /// Health score result
-struct HealthScore {
+struct HealthScore
+{
     double scores[static_cast<int>(HealthDimension::DimensionCount)] = {};
     double overallScore = 0.0;
-    std::wstring grade; // A+, A, B, C, D, F
+    std::wstring grade;  // A+, A, B, C, D, F
     std::vector<std::wstring> recommendations;
 };
 
 /// Telemetry summary for a session
-struct TelemetrySummary {
+struct TelemetrySummary
+{
     uint64_t totalEvents = 0;
     uint64_t errorCount = 0;
     uint64_t warningCount = 0;
@@ -103,15 +106,16 @@ struct TelemetrySummary {
 };
 
 //------------------------------------------------------------------------------
-class TelemetryEngine {
-public:
+class TelemetryEngine
+{
+  public:
     TelemetryEngine();
     ~TelemetryEngine() = default;
 
     // Event recording
     void RecordEvent(const TelemetryEvent& event);
-    void RecordMetric(TelemetryCategory category, const std::wstring& name,
-        double value, const std::wstring& unit = L"");
+    void RecordMetric(TelemetryCategory category, const std::wstring& name, double value,
+                      const std::wstring& unit = L"");
     void RecordError(TelemetryCategory category, const std::wstring& message);
 
     // Query
@@ -129,8 +133,14 @@ public:
     std::wstring ExportJSON() const;
 
     // Privacy
-    void EnablePrivacyMode(bool enable) { m_privacyMode = enable; }
-    bool IsPrivacyMode() const { return m_privacyMode; }
+    void EnablePrivacyMode(bool enable)
+    {
+        m_privacyMode = enable;
+    }
+    bool IsPrivacyMode() const
+    {
+        return m_privacyMode;
+    }
     void PurgeEvents();
 
     // Helpers
@@ -138,15 +148,15 @@ public:
     static const wchar_t* GetCategoryName(TelemetryCategory category);
     static const wchar_t* GetDimensionName(HealthDimension dimension);
 
-private:
+  private:
     mutable std::mutex m_mutex;
     std::vector<TelemetryEvent> m_events;
     bool m_privacyMode = false;
     uint64_t m_sessionStartMs = 0;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 //==============================================================================
 // Section 2: Telemetry Pipeline
@@ -184,7 +194,8 @@ enum class TimeWindow : uint8_t {
 };
 
 /// A single telemetry sample
-struct TelemetrySample {
+struct TelemetrySample
+{
     PipelineTelemetryCategory category = PipelineTelemetryCategory::DecodePerformance;
     double value = 0.0;
     uint64_t timestampMs = 0;
@@ -193,7 +204,8 @@ struct TelemetrySample {
 };
 
 /// Aggregated telemetry statistics for a time window
-struct TelemetryAggregate {
+struct TelemetryAggregate
+{
     PipelineTelemetryCategory category = PipelineTelemetryCategory::DecodePerformance;
     TimeWindow window = TimeWindow::Last1Min;
     double min = 0.0;
@@ -207,7 +219,8 @@ struct TelemetryAggregate {
 };
 
 /// System health snapshot
-struct SystemHealthSnapshot {
+struct SystemHealthSnapshot
+{
     double cpuUsagePercent = 0.0;
     uint64_t availableMemoryMB = 0;
     uint64_t peakWorkingSetMB = 0;
@@ -223,57 +236,80 @@ struct SystemHealthSnapshot {
 };
 
 /// Telemetry Pipeline
-class TelemetryPipeline {
-public:
-    static const wchar_t* CategoryName(PipelineTelemetryCategory c) {
+class TelemetryPipeline
+{
+  public:
+    static const wchar_t* CategoryName(PipelineTelemetryCategory c)
+    {
         switch (c) {
-        case PipelineTelemetryCategory::DecodePerformance: return L"Decode Performance";
-        case PipelineTelemetryCategory::CacheHitRate:      return L"Cache Hit Rate";
-        case PipelineTelemetryCategory::GPUUtilization:    return L"GPU Utilization";
-        case PipelineTelemetryCategory::MemoryPressure:    return L"Memory Pressure";
-        case PipelineTelemetryCategory::ErrorRate:          return L"Error Rate";
-        case PipelineTelemetryCategory::FormatDistribution: return L"Format Distribution";
-        case PipelineTelemetryCategory::PluginHealth:       return L"Plugin Health";
-        case PipelineTelemetryCategory::ShellIntegration:   return L"Shell Integration";
-        case PipelineTelemetryCategory::UserInteraction:    return L"User Interaction";
-        case PipelineTelemetryCategory::SystemHealth:       return L"System Health";
-        default: return L"Unknown";
+            case PipelineTelemetryCategory::DecodePerformance:
+                return L"Decode Performance";
+            case PipelineTelemetryCategory::CacheHitRate:
+                return L"Cache Hit Rate";
+            case PipelineTelemetryCategory::GPUUtilization:
+                return L"GPU Utilization";
+            case PipelineTelemetryCategory::MemoryPressure:
+                return L"Memory Pressure";
+            case PipelineTelemetryCategory::ErrorRate:
+                return L"Error Rate";
+            case PipelineTelemetryCategory::FormatDistribution:
+                return L"Format Distribution";
+            case PipelineTelemetryCategory::PluginHealth:
+                return L"Plugin Health";
+            case PipelineTelemetryCategory::ShellIntegration:
+                return L"Shell Integration";
+            case PipelineTelemetryCategory::UserInteraction:
+                return L"User Interaction";
+            case PipelineTelemetryCategory::SystemHealth:
+                return L"System Health";
+            default:
+                return L"Unknown";
         }
     }
 
-    static const wchar_t* WindowName(TimeWindow w) {
+    static const wchar_t* WindowName(TimeWindow w)
+    {
         switch (w) {
-        case TimeWindow::Last1Min:   return L"1 Minute";
-        case TimeWindow::Last5Min:   return L"5 Minutes";
-        case TimeWindow::Last15Min:  return L"15 Minutes";
-        case TimeWindow::Last1Hour:  return L"1 Hour";
-        case TimeWindow::Last24Hour: return L"24 Hours";
-        case TimeWindow::Lifetime:   return L"Lifetime";
-        default: return L"Unknown";
+            case TimeWindow::Last1Min:
+                return L"1 Minute";
+            case TimeWindow::Last5Min:
+                return L"5 Minutes";
+            case TimeWindow::Last15Min:
+                return L"15 Minutes";
+            case TimeWindow::Last1Hour:
+                return L"1 Hour";
+            case TimeWindow::Last24Hour:
+                return L"24 Hours";
+            case TimeWindow::Lifetime:
+                return L"Lifetime";
+            default:
+                return L"Unknown";
         }
     }
 
-    static constexpr size_t CategoryCount() {
+    static constexpr size_t CategoryCount()
+    {
         return static_cast<size_t>(PipelineTelemetryCategory::COUNT);
     }
 
-    static constexpr size_t WindowCount() {
+    static constexpr size_t WindowCount()
+    {
         return static_cast<size_t>(TimeWindow::COUNT);
     }
 
     /// Generate a health snapshot from current system state
-    static SystemHealthSnapshot CaptureHealth() {
+    static SystemHealthSnapshot CaptureHealth()
+    {
         SystemHealthSnapshot snap;
         snap.uptimeSeconds = static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::seconds>(
-                std::chrono::steady_clock::now().time_since_epoch())
-            .count());
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now().time_since_epoch())
+                .count());
         return snap;
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 //==============================================================================
 // Section 3: Telemetry Pipeline V2
@@ -286,25 +322,26 @@ namespace Engine {
 
 /// Telemetry data classification
 enum class TelemetryLevel : uint8_t {
-    Off = 0,             // No telemetry
-    DiagnosticsOnly,     // Crash/error data only
-    BasicUsage,          // Feature usage counts (anonymized)
-    Enhanced,            // Performance metrics + usage
-    Full,                // All data (opt-in only)
+    Off = 0,          // No telemetry
+    DiagnosticsOnly,  // Crash/error data only
+    BasicUsage,       // Feature usage counts (anonymized)
+    Enhanced,         // Performance metrics + usage
+    Full,             // All data (opt-in only)
     COUNT
 };
 
 /// Privacy mechanism applied
 enum class PrivacyMechanism : uint8_t {
-    None = 0,               // Raw data (Full mode only)
-    LocalAggregation,       // Aggregate before send
-    KAnonymity,             // k-anonymity grouping
-    DifferentialPrivacy,    // Laplace noise injection
-    SecureAggregation,      // Encrypted aggregation
+    None = 0,             // Raw data (Full mode only)
+    LocalAggregation,     // Aggregate before send
+    KAnonymity,           // k-anonymity grouping
+    DifferentialPrivacy,  // Laplace noise injection
+    SecureAggregation,    // Encrypted aggregation
     COUNT
 };
 
-struct TelemetryV2Event {
+struct TelemetryV2Event
+{
     uint64_t eventId = 0;
     const wchar_t* category = nullptr;
     const wchar_t* action = nullptr;
@@ -315,19 +352,21 @@ struct TelemetryV2Event {
     bool isSampled = false;
 };
 
-struct TelemetryPipelineConfig {
+struct TelemetryPipelineConfig
+{
     TelemetryLevel level = TelemetryLevel::BasicUsage;
     PrivacyMechanism defaultPrivacy = PrivacyMechanism::LocalAggregation;
-    double samplingRate = 0.1;          // 10% sampling
+    double samplingRate = 0.1;  // 10% sampling
     uint32_t batchSize = 100;
-    uint32_t flushIntervalSec = 300;    // 5 minutes
+    uint32_t flushIntervalSec = 300;  // 5 minutes
     uint32_t retentionDays = 30;
-    double epsilonDP = 1.0;             // Differential privacy epsilon
+    double epsilonDP = 1.0;  // Differential privacy epsilon
     bool consentRequired = true;
     bool offlineBuffer = true;
 };
 
-struct TelemetryStats {
+struct TelemetryStats
+{
     uint64_t eventsCollected = 0;
     uint64_t eventsSent = 0;
     uint64_t eventsDropped = 0;
@@ -336,57 +375,82 @@ struct TelemetryStats {
     size_t bufferUsedBytes = 0;
 };
 
-class TelemetryPipelineV2 {
-public:
-    static constexpr size_t LevelCount() {
+class TelemetryPipelineV2
+{
+  public:
+    static constexpr size_t LevelCount()
+    {
         return static_cast<size_t>(TelemetryLevel::COUNT);
     }
-    static constexpr size_t PrivacyCount() {
+    static constexpr size_t PrivacyCount()
+    {
         return static_cast<size_t>(PrivacyMechanism::COUNT);
     }
 
-    static const wchar_t* LevelName(TelemetryLevel l) {
+    static const wchar_t* LevelName(TelemetryLevel l)
+    {
         switch (l) {
-        case TelemetryLevel::Off:              return L"Off";
-        case TelemetryLevel::DiagnosticsOnly:  return L"Diagnostics Only";
-        case TelemetryLevel::BasicUsage:       return L"Basic Usage";
-        case TelemetryLevel::Enhanced:         return L"Enhanced";
-        case TelemetryLevel::Full:             return L"Full";
-        default: return L"Unknown";
+            case TelemetryLevel::Off:
+                return L"Off";
+            case TelemetryLevel::DiagnosticsOnly:
+                return L"Diagnostics Only";
+            case TelemetryLevel::BasicUsage:
+                return L"Basic Usage";
+            case TelemetryLevel::Enhanced:
+                return L"Enhanced";
+            case TelemetryLevel::Full:
+                return L"Full";
+            default:
+                return L"Unknown";
         }
     }
 
-    static const wchar_t* PrivacyName(PrivacyMechanism p) {
+    static const wchar_t* PrivacyName(PrivacyMechanism p)
+    {
         switch (p) {
-        case PrivacyMechanism::None:                return L"None";
-        case PrivacyMechanism::LocalAggregation:    return L"Local Aggregation";
-        case PrivacyMechanism::KAnonymity:          return L"k-Anonymity";
-        case PrivacyMechanism::DifferentialPrivacy: return L"Differential Privacy";
-        case PrivacyMechanism::SecureAggregation:   return L"Secure Aggregation";
-        default: return L"Unknown";
+            case PrivacyMechanism::None:
+                return L"None";
+            case PrivacyMechanism::LocalAggregation:
+                return L"Local Aggregation";
+            case PrivacyMechanism::KAnonymity:
+                return L"k-Anonymity";
+            case PrivacyMechanism::DifferentialPrivacy:
+                return L"Differential Privacy";
+            case PrivacyMechanism::SecureAggregation:
+                return L"Secure Aggregation";
+            default:
+                return L"Unknown";
         }
     }
 
     /// Check if level requires explicit consent
-    static bool RequiresConsent(TelemetryLevel level) {
+    static bool RequiresConsent(TelemetryLevel level)
+    {
         return level >= TelemetryLevel::Enhanced;
     }
 
     /// Minimum privacy for given level
-    static PrivacyMechanism MinPrivacy(TelemetryLevel level) {
+    static PrivacyMechanism MinPrivacy(TelemetryLevel level)
+    {
         switch (level) {
-        case TelemetryLevel::Off:              return PrivacyMechanism::None;
-        case TelemetryLevel::DiagnosticsOnly:  return PrivacyMechanism::LocalAggregation;
-        case TelemetryLevel::BasicUsage:       return PrivacyMechanism::KAnonymity;
-        case TelemetryLevel::Enhanced:         return PrivacyMechanism::DifferentialPrivacy;
-        case TelemetryLevel::Full:             return PrivacyMechanism::LocalAggregation;
-        default: return PrivacyMechanism::DifferentialPrivacy;
+            case TelemetryLevel::Off:
+                return PrivacyMechanism::None;
+            case TelemetryLevel::DiagnosticsOnly:
+                return PrivacyMechanism::LocalAggregation;
+            case TelemetryLevel::BasicUsage:
+                return PrivacyMechanism::KAnonymity;
+            case TelemetryLevel::Enhanced:
+                return PrivacyMechanism::DifferentialPrivacy;
+            case TelemetryLevel::Full:
+                return PrivacyMechanism::LocalAggregation;
+            default:
+                return PrivacyMechanism::DifferentialPrivacy;
         }
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 //==============================================================================
 // Section 4: Telemetry Hooks
@@ -410,7 +474,8 @@ enum class TelemetryEventType {
 };
 
 /// Telemetry data point (hooks)
-struct TelemetryData {
+struct TelemetryData
+{
     TelemetryEventType event;
     std::wstring category;
     std::wstring detail;
@@ -419,21 +484,25 @@ struct TelemetryData {
 };
 
 /// Lightweight telemetry collection system (singleton)
-class TelemetryCollector {
-public:
-    static TelemetryCollector& GetInstance() {
+class TelemetryCollector
+{
+  public:
+    static TelemetryCollector& GetInstance()
+    {
         static TelemetryCollector instance;
         return instance;
     }
 
     using TelemetryCallback = std::function<void(const TelemetryData&)>;
 
-    void SetCallback(TelemetryCallback callback) {
+    void SetCallback(TelemetryCallback callback)
+    {
         m_callback = callback;
     }
 
-    void Record(TelemetryEventType event, const wchar_t* category = nullptr,
-        const wchar_t* detail = nullptr, uint64_t value = 0) {
+    void Record(TelemetryEventType event, const wchar_t* category = nullptr, const wchar_t* detail = nullptr,
+                uint64_t value = 0)
+    {
         TelemetryData data;
         data.event = event;
         data.category = category ? category : L"";
@@ -450,19 +519,24 @@ public:
         UpdateEventCounter(event);
     }
 
-    uint64_t GetTotalEvents() const { return m_totalEvents.load(); }
-    uint64_t GetEventCount(TelemetryEventType event) const {
+    uint64_t GetTotalEvents() const
+    {
+        return m_totalEvents.load();
+    }
+    uint64_t GetEventCount(TelemetryEventType event) const
+    {
         size_t idx = static_cast<size_t>(event);
         return idx < m_eventCounts.size() ? m_eventCounts[idx].load() : 0;
     }
 
-private:
-    TelemetryCollector() : m_eventCounts(8) {} // 8 event types
+  private:
+    TelemetryCollector() : m_eventCounts(8) {}  // 8 event types
     ~TelemetryCollector() = default;
     TelemetryCollector(const TelemetryCollector&) = delete;
     TelemetryCollector& operator=(const TelemetryCollector&) = delete;
 
-    void UpdateEventCounter(TelemetryEventType event) {
+    void UpdateEventCounter(TelemetryEventType event)
+    {
         size_t idx = static_cast<size_t>(event);
         if (idx < m_eventCounts.size()) {
             m_eventCounts[idx]++;
@@ -470,39 +544,39 @@ private:
     }
 
     TelemetryCallback m_callback;
-    std::atomic<uint64_t> m_totalEvents{ 0 };
+    std::atomic<uint64_t> m_totalEvents{0};
     std::vector<std::atomic<uint64_t>> m_eventCounts;
 };
 
 /// RAII telemetry scope for measuring duration
-class TelemetryScope {
-public:
+class TelemetryScope
+{
+  public:
     TelemetryScope(TelemetryEventType event, const wchar_t* category)
-        : m_event(event), m_category(category),
-        m_start(std::chrono::high_resolution_clock::now()) {
-    }
+        : m_event(event)
+        , m_category(category)
+        , m_start(std::chrono::high_resolution_clock::now())
+    {}
 
-    ~TelemetryScope() {
+    ~TelemetryScope()
+    {
         auto end = std::chrono::high_resolution_clock::now();
-        auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-            end - m_start).count();
+        auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - m_start).count();
 
-        TelemetryCollector::GetInstance().Record(
-            m_event, m_category.c_str(), L"duration",
-            static_cast<uint64_t>(durationMs));
+        TelemetryCollector::GetInstance().Record(m_event, m_category.c_str(), L"duration",
+                                                 static_cast<uint64_t>(durationMs));
     }
 
-private:
+  private:
     TelemetryEventType m_event;
     std::wstring m_category;
     std::chrono::high_resolution_clock::time_point m_start;
 };
 
-#define DT_TELEMETRY(event, category) \
-    ExplorerLens::Engine::TelemetryScope __dtTelem(event, category)
+#define DT_TELEMETRY(event, category) ExplorerLens::Engine::TelemetryScope __dtTelem(event, category)
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 //==============================================================================
 // Section 5: Telemetry Dashboard
@@ -524,25 +598,39 @@ enum class HealthLevel : uint8_t {
     Unknown     // Grey — insufficient data
 };
 
-inline const char* HealthLevelName(HealthLevel h) {
+inline const char* HealthLevelName(HealthLevel h)
+{
     switch (h) {
-    case HealthLevel::Healthy:   return "Healthy";
-    case HealthLevel::Degraded:  return "Degraded";
-    case HealthLevel::Unhealthy: return "Unhealthy";
-    case HealthLevel::Critical:  return "Critical";
-    case HealthLevel::Unknown:   return "Unknown";
-    default: return "Unknown";
+        case HealthLevel::Healthy:
+            return "Healthy";
+        case HealthLevel::Degraded:
+            return "Degraded";
+        case HealthLevel::Unhealthy:
+            return "Unhealthy";
+        case HealthLevel::Critical:
+            return "Critical";
+        case HealthLevel::Unknown:
+            return "Unknown";
+        default:
+            return "Unknown";
     }
 }
 
-inline int HealthScore(HealthLevel h) {
+inline int HealthScore(HealthLevel h)
+{
     switch (h) {
-    case HealthLevel::Healthy:   return 100;
-    case HealthLevel::Degraded:  return 70;
-    case HealthLevel::Unhealthy: return 30;
-    case HealthLevel::Critical:  return 0;
-    case HealthLevel::Unknown:   return -1;
-    default: return -1;
+        case HealthLevel::Healthy:
+            return 100;
+        case HealthLevel::Degraded:
+            return 70;
+        case HealthLevel::Unhealthy:
+            return 30;
+        case HealthLevel::Critical:
+            return 0;
+        case HealthLevel::Unknown:
+            return -1;
+        default:
+            return -1;
     }
 }
 
@@ -557,13 +645,19 @@ enum class MetricType : uint8_t {
     Timer       // Duration measurement
 };
 
-inline const char* MetricTypeName(MetricType t) {
+inline const char* MetricTypeName(MetricType t)
+{
     switch (t) {
-    case MetricType::Counter:   return "Counter";
-    case MetricType::Gauge:     return "Gauge";
-    case MetricType::Histogram: return "Histogram";
-    case MetricType::Timer:     return "Timer";
-    default: return "Unknown";
+        case MetricType::Counter:
+            return "Counter";
+        case MetricType::Gauge:
+            return "Gauge";
+        case MetricType::Histogram:
+            return "Histogram";
+        case MetricType::Timer:
+            return "Timer";
+        default:
+            return "Unknown";
     }
 }
 
@@ -571,35 +665,33 @@ inline const char* MetricTypeName(MetricType t) {
 // Metric Sample — Single data point
 //------------------------------------------------------------------------------
 
-struct TelemetryMetricSample {
+struct TelemetryMetricSample
+{
     std::string name;
     double value = 0.0;
-    int64_t timestamp = 0; // Unix ms
+    int64_t timestamp = 0;  // Unix ms
     MetricType type = MetricType::Gauge;
-    std::string unit; // "ms", "bytes", "count", "%"
+    std::string unit;  // "ms", "bytes", "count", "%"
 
-    std::string FormattedValue() const {
+    std::string FormattedValue() const
+    {
         std::ostringstream ss;
         if (type == MetricType::Timer) {
             ss << std::fixed << std::setprecision(2) << value << " ms";
-        }
-        else if (unit == "%") {
+        } else if (unit == "%") {
             ss << std::fixed << std::setprecision(1) << value << "%";
-        }
-        else if (unit == "bytes") {
+        } else if (unit == "bytes") {
             if (value >= 1024.0 * 1024.0) {
                 ss << std::fixed << std::setprecision(1) << (value / (1024.0 * 1024.0)) << " MB";
-            }
-            else if (value >= 1024.0) {
+            } else if (value >= 1024.0) {
                 ss << std::fixed << std::setprecision(1) << (value / 1024.0) << " KB";
-            }
-            else {
+            } else {
                 ss << std::fixed << std::setprecision(0) << value << " B";
             }
-        }
-        else {
+        } else {
             ss << std::fixed << std::setprecision(0) << value;
-            if (!unit.empty()) ss << " " << unit;
+            if (!unit.empty())
+                ss << " " << unit;
         }
         return ss.str();
     }
@@ -609,7 +701,8 @@ struct TelemetryMetricSample {
 // Statistics — Computed distribution stats
 //------------------------------------------------------------------------------
 
-struct Statistics {
+struct Statistics
+{
     double min = 0.0;
     double max = 0.0;
     double mean = 0.0;
@@ -619,11 +712,16 @@ struct Statistics {
     double stddev = 0.0;
     size_t count = 0;
 
-    bool IsEmpty() const { return count == 0; }
+    bool IsEmpty() const
+    {
+        return count == 0;
+    }
 
-    static Statistics Compute(std::vector<double> values) {
+    static Statistics Compute(std::vector<double> values)
+    {
         Statistics s;
-        if (values.empty()) return s;
+        if (values.empty())
+            return s;
 
         s.count = values.size();
         std::sort(values.begin(), values.end());
@@ -648,15 +746,11 @@ struct Statistics {
         return s;
     }
 
-    std::string Summary() const {
+    std::string Summary() const
+    {
         std::ostringstream ss;
-        ss << std::fixed << std::setprecision(2)
-            << "n=" << count
-            << " min=" << min
-            << " max=" << max
-            << " mean=" << mean
-            << " p95=" << p95
-            << " p99=" << p99;
+        ss << std::fixed << std::setprecision(2) << "n=" << count << " min=" << min << " max=" << max
+           << " mean=" << mean << " p95=" << p95 << " p99=" << p99;
         return ss.str();
     }
 };
@@ -665,7 +759,8 @@ struct Statistics {
 // Decoder Telemetry — Per-decoder performance data
 //------------------------------------------------------------------------------
 
-struct DecoderTelemetry {
+struct DecoderTelemetry
+{
     std::string decoderName;
     size_t totalDecodes = 0;
     size_t successCount = 0;
@@ -677,22 +772,31 @@ struct DecoderTelemetry {
     uint64_t totalBytesIn = 0;
     uint64_t totalBytesOut = 0;
 
-    double SuccessRate() const {
-        if (totalDecodes == 0) return 0.0;
+    double SuccessRate() const
+    {
+        if (totalDecodes == 0)
+            return 0.0;
         return (static_cast<double>(successCount) / static_cast<double>(totalDecodes)) * 100.0;
     }
 
-    double FailureRate() const {
-        if (totalDecodes == 0) return 0.0;
+    double FailureRate() const
+    {
+        if (totalDecodes == 0)
+            return 0.0;
         return (static_cast<double>(failureCount) / static_cast<double>(totalDecodes)) * 100.0;
     }
 
-    HealthLevel Health() const {
-        if (totalDecodes == 0) return HealthLevel::Unknown;
+    HealthLevel Health() const
+    {
+        if (totalDecodes == 0)
+            return HealthLevel::Unknown;
         double failRate = FailureRate();
-        if (failRate > 50.0) return HealthLevel::Critical;
-        if (failRate > 20.0) return HealthLevel::Unhealthy;
-        if (failRate > 5.0) return HealthLevel::Degraded;
+        if (failRate > 50.0)
+            return HealthLevel::Critical;
+        if (failRate > 20.0)
+            return HealthLevel::Unhealthy;
+        if (failRate > 5.0)
+            return HealthLevel::Degraded;
         return HealthLevel::Healthy;
     }
 };
@@ -701,7 +805,8 @@ struct DecoderTelemetry {
 // Cache Telemetry — Cache performance metrics
 //------------------------------------------------------------------------------
 
-struct CacheTelemetry {
+struct CacheTelemetry
+{
     size_t totalRequests = 0;
     size_t hits = 0;
     size_t misses = 0;
@@ -711,25 +816,34 @@ struct CacheTelemetry {
     size_t entryCount = 0;
     double avgLookupMs = 0.0;
 
-    double HitRate() const {
-        if (totalRequests == 0) return 0.0;
+    double HitRate() const
+    {
+        if (totalRequests == 0)
+            return 0.0;
         return (static_cast<double>(hits) / static_cast<double>(totalRequests)) * 100.0;
     }
 
-    double MissRate() const {
+    double MissRate() const
+    {
         return 100.0 - HitRate();
     }
 
-    double Utilization() const {
-        if (maxSizeBytes == 0) return 0.0;
+    double Utilization() const
+    {
+        if (maxSizeBytes == 0)
+            return 0.0;
         return (static_cast<double>(currentSizeBytes) / static_cast<double>(maxSizeBytes)) * 100.0;
     }
 
-    HealthLevel Health() const {
-        if (totalRequests == 0) return HealthLevel::Unknown;
+    HealthLevel Health() const
+    {
+        if (totalRequests == 0)
+            return HealthLevel::Unknown;
         double hitRate = HitRate();
-        if (hitRate >= 80.0) return HealthLevel::Healthy;
-        if (hitRate >= 50.0) return HealthLevel::Degraded;
+        if (hitRate >= 80.0)
+            return HealthLevel::Healthy;
+        if (hitRate >= 50.0)
+            return HealthLevel::Degraded;
         return HealthLevel::Unhealthy;
     }
 };
@@ -738,7 +852,8 @@ struct CacheTelemetry {
 // System Metrics — Resource usage
 //------------------------------------------------------------------------------
 
-struct SystemMetrics {
+struct SystemMetrics
+{
     double cpuUsagePercent = 0.0;
     uint64_t memoryUsedBytes = 0;
     uint64_t memoryTotalBytes = 0;
@@ -749,17 +864,22 @@ struct SystemMetrics {
     double gpuUsagePercent = 0.0;
     uint64_t gpuMemoryUsed = 0;
 
-    double MemoryUsagePercent() const {
-        if (memoryTotalBytes == 0) return 0.0;
+    double MemoryUsagePercent() const
+    {
+        if (memoryTotalBytes == 0)
+            return 0.0;
         return (static_cast<double>(memoryUsedBytes) / static_cast<double>(memoryTotalBytes)) * 100.0;
     }
 
-    double DiskUsagePercent() const {
-        if (diskTotalBytes == 0) return 0.0;
+    double DiskUsagePercent() const
+    {
+        if (diskTotalBytes == 0)
+            return 0.0;
         return (static_cast<double>(diskUsedBytes) / static_cast<double>(diskTotalBytes)) * 100.0;
     }
 
-    HealthLevel OverallHealth() const {
+    HealthLevel OverallHealth() const
+    {
         if (cpuUsagePercent > 90.0 || MemoryUsagePercent() > 95.0)
             return HealthLevel::Critical;
         if (cpuUsagePercent > 75.0 || MemoryUsagePercent() > 85.0)
@@ -772,7 +892,8 @@ struct SystemMetrics {
 // Dashboard Data — Complete diagnostic snapshot
 //------------------------------------------------------------------------------
 
-struct DashboardData {
+struct DashboardData
+{
     // Timestamps
     int64_t snapshotTime = 0;
     int64_t uptimeMs = 0;
@@ -788,7 +909,8 @@ struct DashboardData {
     size_t totalErrors = 0;
     double overallSuccessRate = 0.0;
 
-    HealthLevel OverallHealth() const {
+    HealthLevel OverallHealth() const
+    {
         if (totalErrors > 100 || system.OverallHealth() == HealthLevel::Critical)
             return HealthLevel::Critical;
         if (cache.Health() == HealthLevel::Unhealthy)
@@ -796,21 +918,25 @@ struct DashboardData {
         return HealthLevel::Healthy;
     }
 
-    std::string UptimeHuman() const {
+    std::string UptimeHuman() const
+    {
         int64_t seconds = uptimeMs / 1000;
         int64_t hours = seconds / 3600;
         int64_t minutes = (seconds % 3600) / 60;
         int64_t secs = seconds % 60;
         std::ostringstream ss;
-        if (hours > 0) ss << hours << "h ";
-        if (minutes > 0 || hours > 0) ss << minutes << "m ";
+        if (hours > 0)
+            ss << hours << "h ";
+        if (minutes > 0 || hours > 0)
+            ss << minutes << "m ";
         ss << secs << "s";
         return ss.str();
     }
 
-    size_t HealthyDecoderCount() const {
+    size_t HealthyDecoderCount() const
+    {
         return std::count_if(decoders.begin(), decoders.end(),
-            [](const DecoderTelemetry& d) { return d.Health() == HealthLevel::Healthy; });
+                             [](const DecoderTelemetry& d) { return d.Health() == HealthLevel::Healthy; });
     }
 };
 
@@ -818,48 +944,49 @@ struct DashboardData {
 // Diagnostic Export — Serialize dashboard data for reporting
 //------------------------------------------------------------------------------
 
-struct DiagnosticExport {
-    static std::string ToText(const DashboardData& data) {
+struct DiagnosticExport
+{
+    static std::string ToText(const DashboardData& data)
+    {
         std::ostringstream ss;
         ss << "=== ExplorerLens Diagnostics ===" << "\n"
-            << "Version: " << data.version << "\n"
-            << "Uptime: " << data.UptimeHuman() << "\n"
-            << "Overall Health: " << HealthLevelName(data.OverallHealth()) << "\n"
-            << "Thumbnails Generated: " << data.totalThumbnailsGenerated << "\n"
-            << "Total Errors: " << data.totalErrors << "\n"
-            << "\n--- Cache ---\n"
-            << "Hit Rate: " << std::fixed << std::setprecision(1)
-            << data.cache.HitRate() << "%" << "\n"
-            << "Entries: " << data.cache.entryCount << "\n"
-            << "Utilization: " << data.cache.Utilization() << "%" << "\n"
-            << "\n--- Decoders (" << data.decoders.size() << ") ---\n";
+           << "Version: " << data.version << "\n"
+           << "Uptime: " << data.UptimeHuman() << "\n"
+           << "Overall Health: " << HealthLevelName(data.OverallHealth()) << "\n"
+           << "Thumbnails Generated: " << data.totalThumbnailsGenerated << "\n"
+           << "Total Errors: " << data.totalErrors << "\n"
+           << "\n--- Cache ---\n"
+           << "Hit Rate: " << std::fixed << std::setprecision(1) << data.cache.HitRate() << "%" << "\n"
+           << "Entries: " << data.cache.entryCount << "\n"
+           << "Utilization: " << data.cache.Utilization() << "%" << "\n"
+           << "\n--- Decoders (" << data.decoders.size() << ") ---\n";
 
         for (const auto& dec : data.decoders) {
-            ss << "  " << dec.decoderName << ": "
-                << dec.successCount << "/" << dec.totalDecodes
-                << " (" << std::setprecision(1) << dec.SuccessRate() << "%), "
-                << std::setprecision(2) << dec.avgDecodeMs << " ms avg"
-                << " [" << HealthLevelName(dec.Health()) << "]" << "\n";
+            ss << "  " << dec.decoderName << ": " << dec.successCount << "/" << dec.totalDecodes << " ("
+               << std::setprecision(1) << dec.SuccessRate() << "%), " << std::setprecision(2) << dec.avgDecodeMs
+               << " ms avg"
+               << " [" << HealthLevelName(dec.Health()) << "]" << "\n";
         }
 
         return ss.str();
     }
 
-    static std::string ToJSON(const DashboardData& data) {
+    static std::string ToJSON(const DashboardData& data)
+    {
         std::ostringstream ss;
         ss << "{\n"
-            << "  \"version\": \"" << data.version << "\",\n"
-            << "  \"uptime_ms\": " << data.uptimeMs << ",\n"
-            << "  \"health\": \"" << HealthLevelName(data.OverallHealth()) << "\",\n"
-            << "  \"thumbnails_generated\": " << data.totalThumbnailsGenerated << ",\n"
-            << "  \"total_errors\": " << data.totalErrors << ",\n"
-            << "  \"cache\": {\n"
-            << "    \"hit_rate\": " << std::fixed << std::setprecision(1) << data.cache.HitRate() << ",\n"
-            << "    \"entries\": " << data.cache.entryCount << ",\n"
-            << "    \"utilization\": " << data.cache.Utilization() << "\n"
-            << "  },\n"
-            << "  \"decoders\": " << data.decoders.size() << "\n"
-            << "}\n";
+           << "  \"version\": \"" << data.version << "\",\n"
+           << "  \"uptime_ms\": " << data.uptimeMs << ",\n"
+           << "  \"health\": \"" << HealthLevelName(data.OverallHealth()) << "\",\n"
+           << "  \"thumbnails_generated\": " << data.totalThumbnailsGenerated << ",\n"
+           << "  \"total_errors\": " << data.totalErrors << ",\n"
+           << "  \"cache\": {\n"
+           << "    \"hit_rate\": " << std::fixed << std::setprecision(1) << data.cache.HitRate() << ",\n"
+           << "    \"entries\": " << data.cache.entryCount << ",\n"
+           << "    \"utilization\": " << data.cache.Utilization() << "\n"
+           << "  },\n"
+           << "  \"decoders\": " << data.decoders.size() << "\n"
+           << "}\n";
         return ss.str();
     }
 };
@@ -868,18 +995,23 @@ struct DiagnosticExport {
 // Diagnostics Config — What telemetry to collect
 //------------------------------------------------------------------------------
 
-struct DiagnosticsConfig {
+struct DiagnosticsConfig
+{
     bool enabled = true;
     bool collectTimings = true;
     bool collectMemory = true;
     bool collectGPU = false;
     bool collectDecoderStats = true;
-    uint32_t sampleIntervalMs = 5000;   // 5 seconds
-    uint32_t retentionMinutes = 60;     // 1 hour of history
+    uint32_t sampleIntervalMs = 5000;  // 5 seconds
+    uint32_t retentionMinutes = 60;    // 1 hour of history
 
-    static DiagnosticsConfig Default() { return {}; }
+    static DiagnosticsConfig Default()
+    {
+        return {};
+    }
 
-    static DiagnosticsConfig Detailed() {
+    static DiagnosticsConfig Detailed()
+    {
         DiagnosticsConfig c;
         c.collectGPU = true;
         c.sampleIntervalMs = 1000;
@@ -887,7 +1019,8 @@ struct DiagnosticsConfig {
         return c;
     }
 
-    static DiagnosticsConfig Minimal() {
+    static DiagnosticsConfig Minimal()
+    {
         DiagnosticsConfig c;
         c.collectTimings = false;
         c.collectMemory = false;
@@ -896,11 +1029,12 @@ struct DiagnosticsConfig {
         return c;
     }
 
-    static DiagnosticsConfig Disabled() {
+    static DiagnosticsConfig Disabled()
+    {
         DiagnosticsConfig c;
         c.enabled = false;
         return c;
     }
 };
 
-} // namespace ExplorerLens::Engine::Core
+}  // namespace ExplorerLens::Engine::Core

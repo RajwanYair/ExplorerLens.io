@@ -12,13 +12,13 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -31,34 +31,36 @@ enum class PluginRecoveryState : uint32_t {
     Disabled = 4
 };
 
-static const wchar_t* PluginRecoveryStateName(PluginRecoveryState s) {
-    static const wchar_t* names[] = {
-        L"Healthy", L"Crashed", L"Quarantined", L"Recovering", L"Disabled"
-    };
+static const wchar_t* PluginRecoveryStateName(PluginRecoveryState s)
+{
+    static const wchar_t* names[] = {L"Healthy", L"Crashed", L"Quarantined", L"Recovering", L"Disabled"};
     return names[static_cast<uint32_t>(s)];
 }
 
-struct PluginCrashRecord {
-    std::wstring         pluginId;
-    PluginRecoveryState  state = PluginRecoveryState::Healthy;
-    uint32_t             crashCount = 0;
-    uint64_t             lastCrashTime = 0;
-    uint64_t             quarantineUntil = 0;
-    uint32_t             recoveryAttempts = 0;
-    uint32_t             exitCode = 0;
-    std::wstring         lastCrashReason;
+struct PluginCrashRecord
+{
+    std::wstring pluginId;
+    PluginRecoveryState state = PluginRecoveryState::Healthy;
+    uint32_t crashCount = 0;
+    uint64_t lastCrashTime = 0;
+    uint64_t quarantineUntil = 0;
+    uint32_t recoveryAttempts = 0;
+    uint32_t exitCode = 0;
+    std::wstring lastCrashReason;
 };
 
-struct PluginCrashRecoveryConfig {
+struct PluginCrashRecoveryConfig
+{
     uint32_t maxCrashesBeforeQuarantine = 3;
     uint32_t quarantineDurationMs = 300000;  // 5 minutes
     uint32_t maxRecoveryAttempts = 5;
-    uint32_t crashCountResetMs = 3600000; // 1 hour
-    bool     autoRestart = true;
-    bool     permanentDisableOnExceed = true;    // Disable after max attempts
+    uint32_t crashCountResetMs = 3600000;  // 1 hour
+    bool autoRestart = true;
+    bool permanentDisableOnExceed = true;  // Disable after max attempts
 };
 
-struct PluginCrashRecoveryStats {
+struct PluginCrashRecoveryStats
+{
     uint64_t totalCrashes = 0;
     uint64_t totalRecoveries = 0;
     uint64_t totalQuarantines = 0;
@@ -70,24 +72,31 @@ struct PluginCrashRecoveryStats {
 // ========================================================================
 // PluginCrashRecovery — Detects and recovers from plugin crashes
 // ========================================================================
-class PluginCrashRecovery {
-public:
-    static PluginCrashRecovery& Instance() {
+class PluginCrashRecovery
+{
+  public:
+    static PluginCrashRecovery& Instance()
+    {
         static PluginCrashRecovery instance;
         return instance;
     }
 
-    void Initialize(const PluginCrashRecoveryConfig& config = {}) {
+    void Initialize(const PluginCrashRecoveryConfig& config = {})
+    {
         m_config = config;
         m_records.clear();
         m_stats = {};
         m_initialized = true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
     // Register a plugin for monitoring
-    void RegisterPlugin(const std::wstring& pluginId) {
+    void RegisterPlugin(const std::wstring& pluginId)
+    {
         PluginCrashRecord record;
         record.pluginId = pluginId;
         m_records[pluginId] = record;
@@ -95,7 +104,8 @@ public:
 
     // Report a plugin crash
     PluginRecoveryState ReportCrash(const std::wstring& pluginId, uint32_t exitCode = 0,
-        const std::wstring& reason = L"") {
+                                    const std::wstring& reason = L"")
+    {
         auto it = m_records.find(pluginId);
         if (it == m_records.end()) {
             RegisterPlugin(pluginId);
@@ -141,7 +151,8 @@ public:
     }
 
     // Mark plugin as recovered
-    void MarkRecovered(const std::wstring& pluginId) {
+    void MarkRecovered(const std::wstring& pluginId)
+    {
         auto it = m_records.find(pluginId);
         if (it != m_records.end()) {
             it->second.state = PluginRecoveryState::Healthy;
@@ -150,14 +161,17 @@ public:
     }
 
     // Check if a plugin can be loaded/used
-    bool IsPluginAvailable(const std::wstring& pluginId) {
+    bool IsPluginAvailable(const std::wstring& pluginId)
+    {
         auto it = m_records.find(pluginId);
-        if (it == m_records.end()) return true; // Unknown = available
+        if (it == m_records.end())
+            return true;  // Unknown = available
 
         auto& record = it->second;
         uint64_t now = GetTickCount64();
 
-        if (record.state == PluginRecoveryState::Disabled) return false;
+        if (record.state == PluginRecoveryState::Disabled)
+            return false;
 
         if (record.state == PluginRecoveryState::Quarantined) {
             if (now >= record.quarantineUntil) {
@@ -168,45 +182,52 @@ public:
             return false;
         }
 
-        return (record.state == PluginRecoveryState::Healthy ||
-            record.state == PluginRecoveryState::Recovering);
+        return (record.state == PluginRecoveryState::Healthy || record.state == PluginRecoveryState::Recovering);
     }
 
     // Get plugin state
-    PluginRecoveryState GetPluginState(const std::wstring& pluginId) const {
+    PluginRecoveryState GetPluginState(const std::wstring& pluginId) const
+    {
         auto it = m_records.find(pluginId);
         return (it != m_records.end()) ? it->second.state : PluginRecoveryState::Healthy;
     }
 
     // Get crash count for a plugin
-    uint32_t GetCrashCount(const std::wstring& pluginId) const {
+    uint32_t GetCrashCount(const std::wstring& pluginId) const
+    {
         auto it = m_records.find(pluginId);
         return (it != m_records.end()) ? it->second.crashCount : 0;
     }
 
     // Get stats
-    PluginCrashRecoveryStats GetStats() const {
+    PluginCrashRecoveryStats GetStats() const
+    {
         PluginCrashRecoveryStats stats = m_stats;
         stats.currentQuarantined = 0;
         stats.currentDisabled = 0;
         for (auto& [id, rec] : m_records) {
-            if (rec.state == PluginRecoveryState::Quarantined) stats.currentQuarantined++;
-            if (rec.state == PluginRecoveryState::Disabled) stats.currentDisabled++;
+            if (rec.state == PluginRecoveryState::Quarantined)
+                stats.currentQuarantined++;
+            if (rec.state == PluginRecoveryState::Disabled)
+                stats.currentDisabled++;
         }
         return stats;
     }
 
     // Get registered plugin count
-    uint32_t GetMonitoredCount() const { return static_cast<uint32_t>(m_records.size()); }
+    uint32_t GetMonitoredCount() const
+    {
+        return static_cast<uint32_t>(m_records.size());
+    }
 
-private:
+  private:
     PluginCrashRecovery() = default;
 
     PluginCrashRecoveryConfig m_config;
-    PluginCrashRecoveryStats  m_stats;
+    PluginCrashRecoveryStats m_stats;
     std::unordered_map<std::wstring, PluginCrashRecord> m_records;
     bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

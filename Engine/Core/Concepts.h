@@ -8,11 +8,11 @@
 #pragma once
 
 #include <concepts>
-#include <type_traits>
 #include <cstdint>
 #include <span>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 struct HBITMAP__;
 typedef HBITMAP__* HBITMAP;
@@ -32,26 +32,21 @@ struct DecoderInfo;
 // decode pipeline without virtual dispatch overhead.
 //==============================================================================
 template <typename T>
-concept ThumbnailDecoderConcept = requires(T decoder,
-                                           const wchar_t* path,
-                                           const ConceptsThumbnailReq& req,
-                                           ThumbnailResult& res) {
-    { decoder.CanDecode(path) } -> std::convertible_to<bool>;
-    { decoder.Decode(req, res) } -> std::convertible_to<long>;
-    { decoder.GetName() } -> std::convertible_to<const wchar_t*>;
-    { decoder.GetExtensionCount() } -> std::convertible_to<uint32_t>;
-    { decoder.SupportsGPU() } -> std::convertible_to<bool>;
-    { decoder.IsArchiveDecoder() } -> std::convertible_to<bool>;
-};
+concept ThumbnailDecoderConcept =
+    requires(T decoder, const wchar_t* path, const ConceptsThumbnailReq& req, ThumbnailResult& res) {
+        { decoder.CanDecode(path) } -> std::convertible_to<bool>;
+        { decoder.Decode(req, res) } -> std::convertible_to<long>;
+        { decoder.GetName() } -> std::convertible_to<const wchar_t*>;
+        { decoder.GetExtensionCount() } -> std::convertible_to<uint32_t>;
+        { decoder.SupportsGPU() } -> std::convertible_to<bool>;
+        { decoder.IsArchiveDecoder() } -> std::convertible_to<bool>;
+    };
 
 //==============================================================================
 // Format Detector Concept
 //==============================================================================
 template <typename T>
-concept FormatDetectorConcept = requires(T detector,
-                                         const wchar_t* path,
-                                         const uint8_t* header,
-                                         size_t headerSize) {
+concept FormatDetectorConcept = requires(T detector, const wchar_t* path, const uint8_t* header, size_t headerSize) {
     { detector.DetectFromExtension(path) } -> std::convertible_to<uint32_t>;
     { detector.DetectFromMagicBytes(header, headerSize) } -> std::convertible_to<uint32_t>;
 };
@@ -60,10 +55,7 @@ concept FormatDetectorConcept = requires(T detector,
 // Cache Provider Concept
 //==============================================================================
 template <typename T>
-concept CacheProviderConcept = requires(T cache,
-                                         const wchar_t* key,
-                                         uint32_t width,
-                                         uint32_t height) {
+concept CacheProviderConcept = requires(T cache, const wchar_t* key, uint32_t width, uint32_t height) {
     { cache.Lookup(key, width, height) } -> std::convertible_to<HBITMAP>;
     { cache.Store(key, HBITMAP{}, width, height) } -> std::convertible_to<bool>;
     { cache.Invalidate(key) } -> std::convertible_to<void>;
@@ -126,5 +118,5 @@ concept PoolAllocator = requires(T alloc, size_t size) {
     { alloc.GetPoolSize() } -> std::convertible_to<size_t>;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

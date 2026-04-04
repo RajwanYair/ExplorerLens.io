@@ -17,47 +17,61 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct WaveformSample {
+struct WaveformSample
+{
     float rmsAmplitude = 0.0f;
     float peakAmplitude = 0.0f;
     float spectralCentroid = 0.0f;
 };
 
-struct WAVHeader {
+struct WAVHeader
+{
     uint16_t audioFormat = 0;
     uint16_t numChannels = 0;
     uint32_t sampleRate = 0;
     uint16_t bitsPerSample = 0;
     uint32_t dataSize = 0;
-    double   durationSeconds = 0.0;
+    double durationSeconds = 0.0;
 };
 
-struct WaveformStats {
+struct WaveformStats
+{
     uint32_t filesProcessed = 0;
     uint64_t totalSamplesProcessed = 0;
-    double   avgDuration = 0.0;
+    double avgDuration = 0.0;
 };
 
-class WaveformGenerator {
-public:
+class WaveformGenerator
+{
+  public:
     WaveformGenerator() = default;
     ~WaveformGenerator() = default;
 
-    static const wchar_t* GetName() { return L"WaveformGenerator"; }
+    static const wchar_t* GetName()
+    {
+        return L"WaveformGenerator";
+    }
 
-    bool CanProcess(const wchar_t* ext) const {
-        if (!ext) return false;
+    bool CanProcess(const wchar_t* ext) const
+    {
+        if (!ext)
+            return false;
         std::wstring e(ext);
-        for (auto& c : e) c = towlower(c);
+        for (auto& c : e)
+            c = towlower(c);
         return e == L".wav" || e == L".wave" || e == L".aif" || e == L".aiff";
     }
 
     /// Parse WAV header (RIFF/WAVE format).
-    WAVHeader ParseWAV(const uint8_t* data, size_t size) const {
+    WAVHeader ParseWAV(const uint8_t* data, size_t size) const
+    {
         WAVHeader hdr;
-        if (!data || size < 44) return hdr;
-        if (memcmp(data, "RIFF", 4) != 0) return hdr;
-        if (memcmp(data + 8, "WAVE", 4) != 0) return hdr;
+        if (!data || size < 44)
+            return hdr;
+        if (memcmp(data, "RIFF", 4) != 0)
+            return hdr;
+        if (memcmp(data + 8, "WAVE", 4) != 0)
+            return hdr;
 
         // Find "fmt " chunk
         size_t offset = 12;
@@ -90,10 +104,12 @@ public:
     }
 
     /// Generate waveform data (amplitude buckets) from 16-bit PCM.
-    std::vector<WaveformSample> GenerateWaveform(const int16_t* samples,
-        uint32_t sampleCount, uint32_t bucketCount) const {
+    std::vector<WaveformSample> GenerateWaveform(const int16_t* samples, uint32_t sampleCount,
+                                                 uint32_t bucketCount) const
+    {
         std::vector<WaveformSample> waveform(bucketCount);
-        if (!samples || sampleCount == 0 || bucketCount == 0) return waveform;
+        if (!samples || sampleCount == 0 || bucketCount == 0)
+            return waveform;
 
         uint32_t samplesPerBucket = std::max(1u, sampleCount / bucketCount);
         for (uint32_t b = 0; b < bucketCount; ++b) {
@@ -112,11 +128,14 @@ public:
         return waveform;
     }
 
-    WaveformStats GetStats() const { return m_stats; }
+    WaveformStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     mutable WaveformStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

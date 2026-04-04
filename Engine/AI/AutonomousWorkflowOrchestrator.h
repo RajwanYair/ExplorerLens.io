@@ -10,47 +10,80 @@
 #include <cstdint>
 #include <functional>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-enum class WorkflowPriority : uint8_t { Idle = 0, Background, Normal, Elevated, Critical };
-enum class OrchestrationPolicy : uint8_t { FIFO, MLOptimized, UserDriven, Adaptive };
-
-struct WorkflowJobStats {
-    uint32_t jobsQueued     = 0;
-    uint32_t jobsCompleted  = 0;
-    uint32_t jobsEvicted    = 0;
-    float    avgLatencyMs   = 0.0f;
-    float    throughputPerSec = 0.0f;
-    float    policyGainPct  = 0.0f;  // improvement vs. FIFO baseline
+enum class WorkflowPriority : uint8_t {
+    Idle = 0,
+    Background,
+    Normal,
+    Elevated,
+    Critical
+};
+enum class OrchestrationPolicy : uint8_t {
+    FIFO,
+    MLOptimized,
+    UserDriven,
+    Adaptive
 };
 
-class AutonomousWorkflowOrchestrator {
-public:
-    explicit AutonomousWorkflowOrchestrator(OrchestrationPolicy policy = OrchestrationPolicy::Adaptive)
-        : m_policy(policy) {}
+struct WorkflowJobStats
+{
+    uint32_t jobsQueued = 0;
+    uint32_t jobsCompleted = 0;
+    uint32_t jobsEvicted = 0;
+    float avgLatencyMs = 0.0f;
+    float throughputPerSec = 0.0f;
+    float policyGainPct = 0.0f;  // improvement vs. FIFO baseline
+};
 
-    void  Enqueue(uint64_t /*jobId*/, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/) {
+class AutonomousWorkflowOrchestrator
+{
+  public:
+    explicit AutonomousWorkflowOrchestrator(OrchestrationPolicy policy = OrchestrationPolicy::Adaptive)
+        : m_policy(policy)
+    {}
+
+    void Enqueue(uint64_t /*jobId*/, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/)
+    {
         ++m_stats.jobsQueued;
     }
-    bool  Dispatch(uint64_t& outJobId) {
-        if (m_stats.jobsQueued == 0) return false;
+    bool Dispatch(uint64_t& outJobId)
+    {
+        if (m_stats.jobsQueued == 0)
+            return false;
         outJobId = 0;
         return true;
     }
-    void  Complete(uint64_t /*jobId*/, float latencyMs) {
-        if (m_stats.jobsQueued > 0) --m_stats.jobsQueued;
+    void Complete(uint64_t /*jobId*/, float latencyMs)
+    {
+        if (m_stats.jobsQueued > 0)
+            --m_stats.jobsQueued;
         ++m_stats.jobsCompleted;
         m_stats.avgLatencyMs = latencyMs;
     }
-    void  SetPolicy(OrchestrationPolicy policy) { m_policy = policy; }
-    void  SetConcurrencyLimit(uint32_t limit)   { m_concurrencyLimit = limit; }
-    WorkflowJobStats GetStats() const { return m_stats; }
-    void  Reset() { m_stats = {}; }
+    void SetPolicy(OrchestrationPolicy policy)
+    {
+        m_policy = policy;
+    }
+    void SetConcurrencyLimit(uint32_t limit)
+    {
+        m_concurrencyLimit = limit;
+    }
+    WorkflowJobStats GetStats() const
+    {
+        return m_stats;
+    }
+    void Reset()
+    {
+        m_stats = {};
+    }
 
-private:
+  private:
     OrchestrationPolicy m_policy;
-    uint32_t            m_concurrencyLimit = 4;
-    WorkflowJobStats    m_stats;
+    uint32_t m_concurrencyLimit = 4;
+    WorkflowJobStats m_stats;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

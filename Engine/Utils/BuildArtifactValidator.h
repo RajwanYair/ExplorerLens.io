@@ -30,7 +30,8 @@ enum class Architecture : uint8_t {
     ARM
 };
 
-struct ValidatedBuildArtifact {
+struct ValidatedBuildArtifact
+{
     std::wstring path;
     BuildArtifactType type = BuildArtifactType::DLL;
     Architecture arch = Architecture::x64;
@@ -40,7 +41,8 @@ struct ValidatedBuildArtifact {
     std::string version;
 };
 
-struct BuildValidationResult {
+struct BuildValidationResult
+{
     bool allValid = true;
     uint32_t totalArtifacts = 0;
     uint32_t validArtifacts = 0;
@@ -50,13 +52,13 @@ struct BuildValidationResult {
     std::vector<std::wstring> errors;
 };
 
-class BuildArtifactValidator {
-public:
-    explicit BuildArtifactValidator(Architecture expectedArch = Architecture::x64)
-        : m_expectedArch(expectedArch) {
-    }
+class BuildArtifactValidator
+{
+  public:
+    explicit BuildArtifactValidator(Architecture expectedArch = Architecture::x64) : m_expectedArch(expectedArch) {}
 
-    void AddExpectedArtifact(const std::wstring& path, BuildArtifactType type) {
+    void AddExpectedArtifact(const std::wstring& path, BuildArtifactType type)
+    {
         ValidatedBuildArtifact artifact;
         artifact.path = path;
         artifact.type = type;
@@ -64,23 +66,21 @@ public:
         m_expectedArtifacts.push_back(artifact);
     }
 
-    BuildValidationResult Validate() const {
+    BuildValidationResult Validate() const
+    {
         BuildValidationResult result;
         result.totalArtifacts = static_cast<uint32_t>(m_expectedArtifacts.size());
         for (const auto& artifact : m_expectedArtifacts) {
             if (!artifact.exists) {
                 result.missingArtifacts++;
                 result.errors.push_back(L"Missing: " + artifact.path);
-            }
-            else if (!artifact.isValid) {
+            } else if (!artifact.isValid) {
                 result.invalidArtifacts++;
                 result.errors.push_back(L"Invalid: " + artifact.path);
-            }
-            else if (artifact.arch != m_expectedArch) {
+            } else if (artifact.arch != m_expectedArch) {
                 result.archMismatches++;
                 result.errors.push_back(L"Arch mismatch: " + artifact.path);
-            }
-            else {
+            } else {
                 result.validArtifacts++;
             }
         }
@@ -88,8 +88,8 @@ public:
         return result;
     }
 
-    void MarkArtifactPresent(const std::wstring& path, uint64_t sizeBytes,
-        Architecture arch = Architecture::x64) {
+    void MarkArtifactPresent(const std::wstring& path, uint64_t sizeBytes, Architecture arch = Architecture::x64)
+    {
         for (auto& artifact : m_expectedArtifacts) {
             if (artifact.path == path) {
                 artifact.exists = true;
@@ -101,14 +101,23 @@ public:
         }
     }
 
-    size_t GetExpectedCount() const { return m_expectedArtifacts.size(); }
-    Architecture GetExpectedArchitecture() const { return m_expectedArch; }
-    void SetExpectedArchitecture(Architecture arch) { m_expectedArch = arch; }
+    size_t GetExpectedCount() const
+    {
+        return m_expectedArtifacts.size();
+    }
+    Architecture GetExpectedArchitecture() const
+    {
+        return m_expectedArch;
+    }
+    void SetExpectedArchitecture(Architecture arch)
+    {
+        m_expectedArch = arch;
+    }
 
-private:
+  private:
     std::vector<ValidatedBuildArtifact> m_expectedArtifacts;
     Architecture m_expectedArch;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

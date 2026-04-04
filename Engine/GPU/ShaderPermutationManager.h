@@ -8,8 +8,8 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -25,14 +25,17 @@ enum class ShaderPermFeature : uint32_t {
     RayQuery = 1 << 6
 };
 
-inline ShaderPermFeature operator|(ShaderPermFeature a, ShaderPermFeature b) {
+inline ShaderPermFeature operator|(ShaderPermFeature a, ShaderPermFeature b)
+{
     return static_cast<ShaderPermFeature>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
-inline ShaderPermFeature operator&(ShaderPermFeature a, ShaderPermFeature b) {
+inline ShaderPermFeature operator&(ShaderPermFeature a, ShaderPermFeature b)
+{
     return static_cast<ShaderPermFeature>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 }
 
-struct ShaderPermutation {
+struct ShaderPermutation
+{
     uint32_t permutationId = 0;
     std::string shaderName;
     ShaderPermFeature requiredFeatures = ShaderPermFeature::None;
@@ -41,19 +44,23 @@ struct ShaderPermutation {
     uint32_t binarySize = 0;
 };
 
-struct PermutationKey {
+struct PermutationKey
+{
     std::string shaderBase;
     ShaderPermFeature features = ShaderPermFeature::None;
-    bool operator==(const PermutationKey& other) const {
+    bool operator==(const PermutationKey& other) const
+    {
         return shaderBase == other.shaderBase && features == other.features;
     }
 };
 
-class ShaderPermutationManager {
-public:
+class ShaderPermutationManager
+{
+  public:
     ShaderPermutationManager() = default;
 
-    uint32_t RegisterPermutation(const ShaderPermutation& perm) {
+    uint32_t RegisterPermutation(const ShaderPermutation& perm)
+    {
         uint32_t id = m_nextId++;
         ShaderPermutation registered = perm;
         registered.permutationId = id;
@@ -62,12 +69,15 @@ public:
     }
 
     const ShaderPermutation* FindBestPermutation(const std::string& shaderName,
-        ShaderPermFeature availableFeatures) const {
+                                                 ShaderPermFeature availableFeatures) const
+    {
         const ShaderPermutation* best = nullptr;
         uint32_t bestScore = 0;
         for (const auto& perm : m_permutations) {
-            if (perm.shaderName != shaderName) continue;
-            if ((perm.requiredFeatures & availableFeatures) != perm.requiredFeatures) continue;
+            if (perm.shaderName != shaderName)
+                continue;
+            if ((perm.requiredFeatures & availableFeatures) != perm.requiredFeatures)
+                continue;
             uint32_t score = CountBits(static_cast<uint32_t>(perm.requiredFeatures));
             if (score >= bestScore) {
                 bestScore = score;
@@ -77,14 +87,21 @@ public:
         return best;
     }
 
-    size_t GetPermutationCount() const { return m_permutations.size(); }
-    size_t GetCompiledCount() const {
+    size_t GetPermutationCount() const
+    {
+        return m_permutations.size();
+    }
+    size_t GetCompiledCount() const
+    {
         size_t count = 0;
-        for (const auto& p : m_permutations) if (p.isCompiled) count++;
+        for (const auto& p : m_permutations)
+            if (p.isCompiled)
+                count++;
         return count;
     }
 
-    void MarkCompiled(uint32_t permutationId, uint32_t binarySize) {
+    void MarkCompiled(uint32_t permutationId, uint32_t binarySize)
+    {
         for (auto& p : m_permutations) {
             if (p.permutationId == permutationId) {
                 p.isCompiled = true;
@@ -94,10 +111,14 @@ public:
         }
     }
 
-private:
-    static uint32_t CountBits(uint32_t v) {
+  private:
+    static uint32_t CountBits(uint32_t v)
+    {
         uint32_t c = 0;
-        while (v) { c += v & 1; v >>= 1; }
+        while (v) {
+            c += v & 1;
+            v >>= 1;
+        }
         return c;
     }
 
@@ -105,5 +126,5 @@ private:
     uint32_t m_nextId = 1;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

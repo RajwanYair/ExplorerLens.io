@@ -11,13 +11,13 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -29,67 +29,80 @@ enum class ConfigDriftSeverity : uint32_t {
     Critical = 3
 };
 
-struct ConfigDriftFinding {
-    std::wstring        key;
-    std::wstring        expectedValue;
-    std::wstring        actualValue;
+struct ConfigDriftFinding
+{
+    std::wstring key;
+    std::wstring expectedValue;
+    std::wstring actualValue;
     ConfigDriftSeverity severity = ConfigDriftSeverity::Warning;
-    std::wstring        description;
+    std::wstring description;
 };
 
-struct ConfigSnapshot {
+struct ConfigSnapshot
+{
     uint64_t timestamp = 0;
     uint32_t entryCount = 0;
     std::unordered_map<std::wstring, std::wstring> values;
 };
 
-struct ConfigDriftReport {
-    uint64_t                          checkTimestamp = 0;
-    uint32_t                          totalKeys = 0;
-    uint32_t                          driftedKeys = 0;
-    ConfigDriftSeverity               maxSeverity = ConfigDriftSeverity::None;
-    std::vector<ConfigDriftFinding>   findings;
-    bool                              hasDrift = false;
+struct ConfigDriftReport
+{
+    uint64_t checkTimestamp = 0;
+    uint32_t totalKeys = 0;
+    uint32_t driftedKeys = 0;
+    ConfigDriftSeverity maxSeverity = ConfigDriftSeverity::None;
+    std::vector<ConfigDriftFinding> findings;
+    bool hasDrift = false;
 };
 
 // ========================================================================
 // ConfigDriftDetector — Detects settings changes between runs
 // ========================================================================
-class ConfigDriftDetector {
-public:
-    static ConfigDriftDetector& Instance() {
+class ConfigDriftDetector
+{
+  public:
+    static ConfigDriftDetector& Instance()
+    {
         static ConfigDriftDetector instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         m_baseline = {};
         m_checksPerformed = 0;
         m_driftsDetected = 0;
         m_initialized = true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
     // Capture baseline (expected state)
-    void CaptureBaseline() {
+    void CaptureBaseline()
+    {
         m_baseline.timestamp = GetTickCount64();
         m_baseline.entryCount = static_cast<uint32_t>(m_baseline.values.size());
     }
 
     // Set baseline value
-    void SetBaselineValue(const std::wstring& key, const std::wstring& value) {
+    void SetBaselineValue(const std::wstring& key, const std::wstring& value)
+    {
         m_baseline.values[key] = value;
         m_baseline.entryCount = static_cast<uint32_t>(m_baseline.values.size());
     }
 
     // Set current runtime value
-    void SetCurrentValue(const std::wstring& key, const std::wstring& value) {
+    void SetCurrentValue(const std::wstring& key, const std::wstring& value)
+    {
         m_current[key] = value;
     }
 
     // Check for drift
-    ConfigDriftReport CheckDrift() {
+    ConfigDriftReport CheckDrift()
+    {
         ConfigDriftReport report;
         report.checkTimestamp = GetTickCount64();
         report.totalKeys = static_cast<uint32_t>(m_baseline.values.size());
@@ -106,8 +119,7 @@ public:
                 finding.severity = ConfigDriftSeverity::Warning;
                 finding.description = L"Configuration key missing from runtime";
                 report.findings.push_back(finding);
-            }
-            else if (it->second != expectedValue) {
+            } else if (it->second != expectedValue) {
                 // Value changed
                 ConfigDriftFinding finding;
                 finding.key = key;
@@ -149,17 +161,27 @@ public:
     }
 
     // Quick check: any drift?
-    bool HasDrift() {
+    bool HasDrift()
+    {
         auto report = CheckDrift();
         return report.hasDrift;
     }
 
     // Stats
-    uint64_t GetChecksPerformed() const { return m_checksPerformed; }
-    uint64_t GetDriftsDetected() const { return m_driftsDetected; }
-    uint32_t GetBaselineKeyCount() const { return static_cast<uint32_t>(m_baseline.values.size()); }
+    uint64_t GetChecksPerformed() const
+    {
+        return m_checksPerformed;
+    }
+    uint64_t GetDriftsDetected() const
+    {
+        return m_driftsDetected;
+    }
+    uint32_t GetBaselineKeyCount() const
+    {
+        return static_cast<uint32_t>(m_baseline.values.size());
+    }
 
-private:
+  private:
     ConfigDriftDetector() = default;
 
     ConfigSnapshot m_baseline;
@@ -169,5 +191,5 @@ private:
     bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

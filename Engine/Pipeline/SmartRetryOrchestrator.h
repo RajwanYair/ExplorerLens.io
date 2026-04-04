@@ -35,7 +35,8 @@ enum class SmartRetryDecision : uint8_t {
     NotRetryable
 };
 
-struct SmartRetryConfig {
+struct SmartRetryConfig
+{
     uint32_t maxRetries = 3;
     float baseDelayMs = 50.0f;
     float maxDelayMs = 5000.0f;
@@ -44,7 +45,8 @@ struct SmartRetryConfig {
     float circuitBreakerResetMs = 30000.0f;
 };
 
-struct SmartRetryAttempt {
+struct SmartRetryAttempt
+{
     std::wstring decoderName;
     SmartRetryReason reason = SmartRetryReason::Unknown;
     SmartRetryDecision decision = SmartRetryDecision::Retry;
@@ -52,7 +54,8 @@ struct SmartRetryAttempt {
     float delayMs = 0.0f;
 };
 
-struct SmartRetryStats {
+struct SmartRetryStats
+{
     uint64_t totalRetryRequests = 0;
     uint64_t retriesExecuted = 0;
     uint64_t circuitBreakerTrips = 0;
@@ -61,14 +64,17 @@ struct SmartRetryStats {
     bool initialized = false;
 };
 
-class SmartRetryOrchestrator {
-public:
-    static SmartRetryOrchestrator& Instance() {
+class SmartRetryOrchestrator
+{
+  public:
+    static SmartRetryOrchestrator& Instance()
+    {
         static SmartRetryOrchestrator instance;
         return instance;
     }
 
-    void Initialize(const SmartRetryConfig& config = {}) {
+    void Initialize(const SmartRetryConfig& config = {})
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_config = config;
         m_decoderAttempts.clear();
@@ -77,7 +83,8 @@ public:
         m_stats.initialized = true;
     }
 
-    SmartRetryAttempt EvaluateRetry(const std::wstring& decoderName, SmartRetryReason reason) {
+    SmartRetryAttempt EvaluateRetry(const std::wstring& decoderName, SmartRetryReason reason)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalRetryRequests++;
 
@@ -126,30 +133,34 @@ public:
         return attempt;
     }
 
-    void ResetDecoder(const std::wstring& decoderName) {
+    void ResetDecoder(const std::wstring& decoderName)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_decoderAttempts.erase(decoderName);
         m_decoderFailureCounts.erase(decoderName);
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    SmartRetryStats GetStats() const {
+    SmartRetryStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_decoderAttempts.clear();
         m_decoderFailureCounts.clear();
     }
 
-private:
+  private:
     SmartRetryOrchestrator() = default;
     ~SmartRetryOrchestrator() = default;
     SmartRetryOrchestrator(const SmartRetryOrchestrator&) = delete;
@@ -162,5 +173,5 @@ private:
     SmartRetryStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

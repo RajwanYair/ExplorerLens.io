@@ -224,7 +224,7 @@ graph TD
     ENG --> MEM["🧠 <b>Memory/</b><br/>BitmapPool · Pressure Ctrl"]
     ENG --> PLUGIN["🔩 <b>Plugin/</b><br/>Plugin Ecosystem · Sandbox"]
     ENG --> AI["🤖 <b>AI/</b><br/>Smart Crop · IQA · Scene"]
-    ENG --> TESTS["✅ <b>Tests/</b><br/>3,564 Unit Tests · 5 Benchmarks"]
+    ENG --> TESTS["✅ <b>Tests/</b><br/>4,483 Unit Tests · 5 Benchmarks"]
 
     style ROOT fill:#1e3a5f,color:#fff,stroke:#4a9eff,stroke-width:2px
     style ENG  fill:#1b4332,color:#fff,stroke:#40916c,stroke-width:2px
@@ -264,10 +264,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 25.0.0 "Rigel"
+**Current Version:** 32.3.0 "Fomalhaut-T"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 3,564 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Rigel — WebAssembly Plugin Sandbox (Sprints 561–570)
+**Test Status:** 4,483 unit tests, 5 benchmarks (100% pass rate)
+**Codename:** Fomalhaut-T — Annotation, HDR Tone Mapping & Format Detection
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 

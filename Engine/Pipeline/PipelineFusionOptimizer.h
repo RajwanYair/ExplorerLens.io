@@ -23,7 +23,8 @@ enum class PipelineStageType : uint8_t {
     Upload
 };
 
-struct FusionCandidate {
+struct FusionCandidate
+{
     uint32_t stageA = 0;
     uint32_t stageB = 0;
     PipelineStageType typeA = PipelineStageType::Decode;
@@ -32,22 +33,26 @@ struct FusionCandidate {
     bool isCompatible = false;
 };
 
-struct FusionResult {
+struct FusionResult
+{
     uint32_t originalStageCount = 0;
     uint32_t fusedStageCount = 0;
     uint32_t fusionsMade = 0;
     double estimatedTotalSpeedupMs = 0.0;
 };
 
-class PipelineFusionOptimizer {
-public:
+class PipelineFusionOptimizer
+{
+  public:
     PipelineFusionOptimizer() = default;
 
-    void AddStage(PipelineStageType type) {
+    void AddStage(PipelineStageType type)
+    {
         m_stages.push_back(type);
     }
 
-    std::vector<FusionCandidate> AnalyzeFusionOpportunities() const {
+    std::vector<FusionCandidate> AnalyzeFusionOpportunities() const
+    {
         std::vector<FusionCandidate> candidates;
         for (size_t i = 0; i + 1 < m_stages.size(); i++) {
             FusionCandidate fc;
@@ -56,18 +61,21 @@ public:
             fc.typeA = m_stages[i];
             fc.typeB = m_stages[i + 1];
             fc.isCompatible = AreFusionCompatible(m_stages[i], m_stages[i + 1]);
-            if (fc.isCompatible) fc.estimatedSpeedupMs = 0.5;
+            if (fc.isCompatible)
+                fc.estimatedSpeedupMs = 0.5;
             candidates.push_back(fc);
         }
         return candidates;
     }
 
-    FusionResult ApplyFusions() {
+    FusionResult ApplyFusions()
+    {
         FusionResult result;
         result.originalStageCount = static_cast<uint32_t>(m_stages.size());
         auto candidates = AnalyzeFusionOpportunities();
         for (const auto& c : candidates) {
-            if (c.isCompatible) result.fusionsMade++;
+            if (c.isCompatible)
+                result.fusionsMade++;
         }
         result.fusedStageCount = result.originalStageCount - result.fusionsMade;
         result.estimatedTotalSpeedupMs = result.fusionsMade * 0.5;
@@ -75,19 +83,29 @@ public:
         return result;
     }
 
-    uint32_t GetStageCount() const { return static_cast<uint32_t>(m_stages.size()); }
-    uint64_t GetTotalFusions() const { return m_totalFusions; }
-    void ClearStages() { m_stages.clear(); }
+    uint32_t GetStageCount() const
+    {
+        return static_cast<uint32_t>(m_stages.size());
+    }
+    uint64_t GetTotalFusions() const
+    {
+        return m_totalFusions;
+    }
+    void ClearStages()
+    {
+        m_stages.clear();
+    }
 
-private:
-    bool AreFusionCompatible(PipelineStageType a, PipelineStageType b) const {
-        return (a == PipelineStageType::ColorConvert && b == PipelineStageType::Resize) ||
-            (a == PipelineStageType::Resize && b == PipelineStageType::Sharpen);
+  private:
+    bool AreFusionCompatible(PipelineStageType a, PipelineStageType b) const
+    {
+        return (a == PipelineStageType::ColorConvert && b == PipelineStageType::Resize)
+               || (a == PipelineStageType::Resize && b == PipelineStageType::Sharpen);
     }
 
     std::vector<PipelineStageType> m_stages;
     uint64_t m_totalFusions = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

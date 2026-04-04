@@ -6,12 +6,12 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <array>
-#include <string>
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <cstring>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,45 +22,50 @@ enum class QuantumHashAlgorithm : uint8_t {
     SHA3_256
 };
 
-struct QuantumHashResult {
+struct QuantumHashResult
+{
     std::vector<uint8_t> digest;
     QuantumHashAlgorithm algorithm = QuantumHashAlgorithm::SHAKE256;
     size_t inputSize = 0;
 };
 
-class QuantumSafeHasher {
-public:
-    static QuantumSafeHasher& Instance() {
+class QuantumSafeHasher
+{
+  public:
+    static QuantumSafeHasher& Instance()
+    {
         static QuantumSafeHasher instance;
         return instance;
     }
 
     inline QuantumHashResult ComputeHash(const uint8_t* data, size_t size,
-        QuantumHashAlgorithm algo = QuantumHashAlgorithm::BLAKE3Like,
-        size_t digestLen = 32) const {
+                                         QuantumHashAlgorithm algo = QuantumHashAlgorithm::BLAKE3Like,
+                                         size_t digestLen = 32) const
+    {
         QuantumHashResult result;
         result.algorithm = algo;
         result.inputSize = size;
 
         switch (algo) {
-        case QuantumHashAlgorithm::SHAKE256:
-            result.digest = ComputeSHAKE256(data, size, digestLen);
-            break;
-        case QuantumHashAlgorithm::BLAKE3Like:
-            result.digest = ComputeBLAKE3Like(data, size, digestLen);
-            break;
-        case QuantumHashAlgorithm::SHA3_256:
-            result.digest = ComputeSHAKE256(data, size, 32);
-            break;
+            case QuantumHashAlgorithm::SHAKE256:
+                result.digest = ComputeSHAKE256(data, size, digestLen);
+                break;
+            case QuantumHashAlgorithm::BLAKE3Like:
+                result.digest = ComputeBLAKE3Like(data, size, digestLen);
+                break;
+            case QuantumHashAlgorithm::SHA3_256:
+                result.digest = ComputeSHAKE256(data, size, 32);
+                break;
         }
         return result;
     }
 
-    inline bool VerifyIntegrity(const uint8_t* data, size_t size,
-        const std::vector<uint8_t>& expectedDigest,
-        QuantumHashAlgorithm algo = QuantumHashAlgorithm::BLAKE3Like) const {
+    inline bool VerifyIntegrity(const uint8_t* data, size_t size, const std::vector<uint8_t>& expectedDigest,
+                                QuantumHashAlgorithm algo = QuantumHashAlgorithm::BLAKE3Like) const
+    {
         auto result = ComputeHash(data, size, algo, expectedDigest.size());
-        if (result.digest.size() != expectedDigest.size()) return false;
+        if (result.digest.size() != expectedDigest.size())
+            return false;
         uint8_t diff = 0;
         for (size_t i = 0; i < result.digest.size(); ++i) {
             diff |= result.digest[i] ^ expectedDigest[i];
@@ -68,7 +73,8 @@ public:
         return diff == 0;
     }
 
-    inline std::string DigestToHex(const std::vector<uint8_t>& digest) const {
+    inline std::string DigestToHex(const std::vector<uint8_t>& digest) const
+    {
         static const char hexChars[] = "0123456789abcdef";
         std::string result;
         result.reserve(digest.size() * 2);
@@ -79,19 +85,25 @@ public:
         return result;
     }
 
-    inline std::string GetAlgorithmName(QuantumHashAlgorithm algo) const {
+    inline std::string GetAlgorithmName(QuantumHashAlgorithm algo) const
+    {
         switch (algo) {
-        case QuantumHashAlgorithm::SHAKE256:  return "SHAKE-256";
-        case QuantumHashAlgorithm::BLAKE3Like: return "BLAKE3-Like";
-        case QuantumHashAlgorithm::SHA3_256:   return "SHA3-256";
-        default:                               return "Unknown";
+            case QuantumHashAlgorithm::SHAKE256:
+                return "SHAKE-256";
+            case QuantumHashAlgorithm::BLAKE3Like:
+                return "BLAKE3-Like";
+            case QuantumHashAlgorithm::SHA3_256:
+                return "SHA3-256";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     QuantumSafeHasher() = default;
 
-    inline std::vector<uint8_t> ComputeSHAKE256(const uint8_t* data, size_t size, size_t digestLen) const {
+    inline std::vector<uint8_t> ComputeSHAKE256(const uint8_t* data, size_t size, size_t digestLen) const
+    {
         std::array<uint64_t, 25> state{};
 
         size_t rate = 136;
@@ -142,11 +154,10 @@ private:
         return digest;
     }
 
-    inline std::vector<uint8_t> ComputeBLAKE3Like(const uint8_t* data, size_t size, size_t digestLen) const {
-        static constexpr std::array<uint32_t, 8> IV = {
-            0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
-            0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
-        };
+    inline std::vector<uint8_t> ComputeBLAKE3Like(const uint8_t* data, size_t size, size_t digestLen) const
+    {
+        static constexpr std::array<uint32_t, 8> IV = {0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+                                                       0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19};
 
         std::array<uint32_t, 8> h = IV;
         uint64_t counter = 0;
@@ -155,10 +166,10 @@ private:
         while (offset + 64 <= size) {
             std::array<uint32_t, 16> block{};
             for (int i = 0; i < 16; ++i) {
-                block[i] = static_cast<uint32_t>(data[offset + i * 4]) |
-                    (static_cast<uint32_t>(data[offset + i * 4 + 1]) << 8) |
-                    (static_cast<uint32_t>(data[offset + i * 4 + 2]) << 16) |
-                    (static_cast<uint32_t>(data[offset + i * 4 + 3]) << 24);
+                block[i] = static_cast<uint32_t>(data[offset + i * 4])
+                           | (static_cast<uint32_t>(data[offset + i * 4 + 1]) << 8)
+                           | (static_cast<uint32_t>(data[offset + i * 4 + 2]) << 16)
+                           | (static_cast<uint32_t>(data[offset + i * 4 + 3]) << 24);
             }
             CompressBLAKE(h, block, counter, 64, false);
             counter++;
@@ -171,10 +182,9 @@ private:
             std::array<uint8_t, 64> padded{};
             std::memcpy(padded.data(), data + offset, remaining);
             for (int i = 0; i < 16; ++i) {
-                lastBlock[i] = static_cast<uint32_t>(padded[i * 4]) |
-                    (static_cast<uint32_t>(padded[i * 4 + 1]) << 8) |
-                    (static_cast<uint32_t>(padded[i * 4 + 2]) << 16) |
-                    (static_cast<uint32_t>(padded[i * 4 + 3]) << 24);
+                lastBlock[i] = static_cast<uint32_t>(padded[i * 4]) | (static_cast<uint32_t>(padded[i * 4 + 1]) << 8)
+                               | (static_cast<uint32_t>(padded[i * 4 + 2]) << 16)
+                               | (static_cast<uint32_t>(padded[i * 4 + 3]) << 24);
             }
         }
         CompressBLAKE(h, lastBlock, counter, static_cast<uint32_t>(remaining), true);
@@ -186,17 +196,15 @@ private:
         return digest;
     }
 
-    inline void KeccakPermutation(std::array<uint64_t, 25>& state) const {
+    inline void KeccakPermutation(std::array<uint64_t, 25>& state) const
+    {
         static constexpr uint64_t RC[] = {
-            0x0000000000000001ULL, 0x0000000000008082ULL, 0x800000000000808AULL,
-            0x8000000080008000ULL, 0x000000000000808BULL, 0x0000000080000001ULL,
-            0x8000000080008081ULL, 0x8000000000008009ULL, 0x000000000000008AULL,
-            0x0000000000000088ULL, 0x0000000080008009ULL, 0x000000008000000AULL,
-            0x000000008000808BULL, 0x800000000000008BULL, 0x8000000000008089ULL,
-            0x8000000000008003ULL, 0x8000000000008002ULL, 0x8000000000000080ULL,
-            0x000000000000800AULL, 0x800000008000000AULL, 0x8000000080008081ULL,
-            0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL
-        };
+            0x0000000000000001ULL, 0x0000000000008082ULL, 0x800000000000808AULL, 0x8000000080008000ULL,
+            0x000000000000808BULL, 0x0000000080000001ULL, 0x8000000080008081ULL, 0x8000000000008009ULL,
+            0x000000000000008AULL, 0x0000000000000088ULL, 0x0000000080008009ULL, 0x000000008000000AULL,
+            0x000000008000808BULL, 0x800000000000008BULL, 0x8000000000008089ULL, 0x8000000000008003ULL,
+            0x8000000000008002ULL, 0x8000000000000080ULL, 0x000000000000800AULL, 0x800000008000000AULL,
+            0x8000000080008081ULL, 0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL};
 
         for (int round = 0; round < 24; ++round) {
             std::array<uint64_t, 5> c{};
@@ -215,23 +223,26 @@ private:
         }
     }
 
-    static inline uint64_t RotateLeft64(uint64_t val, int shift) {
+    static inline uint64_t RotateLeft64(uint64_t val, int shift)
+    {
         return (val << shift) | (val >> (64 - shift));
     }
 
-    inline void CompressBLAKE(std::array<uint32_t, 8>& h, const std::array<uint32_t, 16>& block,
-        uint64_t counter, uint32_t blockLen, bool isLast) const {
+    inline void CompressBLAKE(std::array<uint32_t, 8>& h, const std::array<uint32_t, 16>& block, uint64_t counter,
+                              uint32_t blockLen, bool isLast) const
+    {
         std::array<uint32_t, 16> v{};
-        for (int i = 0; i < 8; ++i) v[i] = h[i];
-        static constexpr uint32_t IV[] = {
-            0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
-            0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
-        };
-        for (int i = 0; i < 4; ++i) v[8 + i] = IV[i];
+        for (int i = 0; i < 8; ++i)
+            v[i] = h[i];
+        static constexpr uint32_t IV[] = {0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+                                          0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19};
+        for (int i = 0; i < 4; ++i)
+            v[8 + i] = IV[i];
         v[12] ^= static_cast<uint32_t>(counter);
         v[13] ^= static_cast<uint32_t>(counter >> 32);
         v[14] ^= blockLen;
-        if (isLast) v[15] ^= 0xFFFFFFFF;
+        if (isLast)
+            v[15] ^= 0xFFFFFFFF;
 
         for (int r = 0; r < 7; ++r) {
             v[0] = v[0] + v[4] + block[r % 16];
@@ -243,13 +254,15 @@ private:
             v[8] += v[12];
             v[4] = RotateRight32(v[4] ^ v[8], 7);
         }
-        for (int i = 0; i < 8; ++i) h[i] ^= v[i] ^ v[i + 8];
+        for (int i = 0; i < 8; ++i)
+            h[i] ^= v[i] ^ v[i + 8];
     }
 
-    static inline uint32_t RotateRight32(uint32_t val, int shift) {
+    static inline uint32_t RotateRight32(uint32_t val, int shift)
+    {
         return (val >> shift) | (val << (32 - shift));
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

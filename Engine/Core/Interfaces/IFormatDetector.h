@@ -16,8 +16,9 @@ namespace Engine {
 /// Detects file formats based on extensions and file signatures (magic bytes).
 /// Used by the pipeline to route files to appropriate decoders.
 //==============================================================================
-class IFormatDetector {
-public:
+class IFormatDetector
+{
+  public:
     virtual ~IFormatDetector() = default;
 
     //==========================================================================
@@ -91,5 +92,5 @@ public:
     virtual const wchar_t* GetExtension(const wchar_t* filePath) const = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

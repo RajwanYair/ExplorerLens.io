@@ -10,28 +10,32 @@
 #include <cstdint>
 #include <string>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class ShellDeliveryMode : uint8_t {
     Unknown = 0,
-    IThumbnailProvider,   // Windows COM
-    IExplorerTileProvider,// Windows WinRT
-    QuickLookGenerator,   // macOS QL
-    GIOThumbnailer,       // Linux GIO
-    DBusThumbnailSpec,    // Linux XDG/D-Bus
-    DolphinKIO            // KDE Dolphin
+    IThumbnailProvider,     // Windows COM
+    IExplorerTileProvider,  // Windows WinRT
+    QuickLookGenerator,     // macOS QL
+    GIOThumbnailer,         // Linux GIO
+    DBusThumbnailSpec,      // Linux XDG/D-Bus
+    DolphinKIO              // KDE Dolphin
 };
 
-struct AdaptiveShellStats {
+struct AdaptiveShellStats
+{
     ShellDeliveryMode activeMode = ShellDeliveryMode::Unknown;
-    uint32_t          probeCount = 0;
-    uint32_t          fallbacks  = 0;
-    float             avgAdaptMs = 0.0f;
+    uint32_t probeCount = 0;
+    uint32_t fallbacks = 0;
+    float avgAdaptMs = 0.0f;
 };
 
-class AdaptiveShellIntegrationEngine {
-public:
-    AdaptiveShellIntegrationEngine() {
+class AdaptiveShellIntegrationEngine
+{
+  public:
+    AdaptiveShellIntegrationEngine()
+    {
 #ifdef _WIN32
         m_activeMode = ShellDeliveryMode::IThumbnailProvider;
 #elif defined(__APPLE__)
@@ -42,23 +46,33 @@ public:
         m_stats.activeMode = m_activeMode;
     }
 
-    ShellDeliveryMode Probe() {
+    ShellDeliveryMode Probe()
+    {
         ++m_stats.probeCount;
         return m_activeMode;
     }
-    ShellDeliveryMode GetActiveMode() const { return m_activeMode; }
-    bool IsCompatible(ShellDeliveryMode mode) const {
+    ShellDeliveryMode GetActiveMode() const
+    {
+        return m_activeMode;
+    }
+    bool IsCompatible(ShellDeliveryMode mode) const
+    {
         return mode == m_activeMode || mode == ShellDeliveryMode::Unknown;
     }
-    void ForceMode(ShellDeliveryMode mode) {
-        m_activeMode       = mode;
+    void ForceMode(ShellDeliveryMode mode)
+    {
+        m_activeMode = mode;
         m_stats.activeMode = mode;
     }
-    AdaptiveShellStats GetStats() const { return m_stats; }
+    AdaptiveShellStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
-    ShellDeliveryMode  m_activeMode = ShellDeliveryMode::Unknown;
+  private:
+    ShellDeliveryMode m_activeMode = ShellDeliveryMode::Unknown;
     AdaptiveShellStats m_stats;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

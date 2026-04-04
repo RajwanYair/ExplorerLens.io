@@ -8,16 +8,17 @@
 #pragma once
 
 #include <windows.h>
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // Average color of a mosaic tile stored as packed ARGB
-struct MosaicTileColor {
+struct MosaicTileColor
+{
     uint8_t r = 0;
     uint8_t g = 0;
     uint8_t b = 0;
@@ -25,7 +26,8 @@ struct MosaicTileColor {
 };
 
 // Rectangle describing a tile's position and size within the mosaic
-struct MosaicTileRect {
+struct MosaicTileRect
+{
     int x = 0;
     int y = 0;
     int width = 0;
@@ -33,20 +35,23 @@ struct MosaicTileRect {
 };
 
 // Describes one tile in the mosaic grid
-struct MosaicTile {
+struct MosaicTile
+{
     int index = -1;
     MosaicTileColor avgColor{};
     MosaicTileRect rect{};
     bool occupied = false;
 };
 
-class PhotoMosaicThumbnail {
-public:
+class PhotoMosaicThumbnail
+{
+  public:
     PhotoMosaicThumbnail() = default;
     ~PhotoMosaicThumbnail() = default;
 
     // Sets the grid dimensions (columns x rows). Returns false if either is <= 0 or > 256.
-    bool SetGridSize(int cols, int rows) {
+    bool SetGridSize(int cols, int rows)
+    {
         if (cols <= 0 || rows <= 0 || cols > 256 || rows > 256)
             return false;
         m_cols = cols;
@@ -60,7 +65,8 @@ public:
     }
 
     // Assigns an average color to a tile at the given index. Returns false if out of range.
-    bool AddTile(int index, MosaicTileColor color) {
+    bool AddTile(int index, MosaicTileColor color)
+    {
         if (index < 0 || index >= static_cast<int>(m_tiles.size()))
             return false;
         m_tiles[index].avgColor = color;
@@ -71,7 +77,8 @@ public:
 
     // Computes mosaic layout for the given target canvas size.
     // Returns false if grid is not configured or dimensions are invalid.
-    bool ComputeMosaicLayout(int targetWidth, int targetHeight) {
+    bool ComputeMosaicLayout(int targetWidth, int targetHeight)
+    {
         if (m_cols <= 0 || m_rows <= 0 || targetWidth <= 0 || targetHeight <= 0)
             return false;
 
@@ -105,44 +112,59 @@ public:
     }
 
     // Returns the rect for a tile at the given index. Returns zero rect if invalid.
-    MosaicTileRect GetTileRect(int index) const {
+    MosaicTileRect GetTileRect(int index) const
+    {
         if (index < 0 || index >= static_cast<int>(m_tiles.size()))
             return {};
         return m_tiles[index].rect;
     }
 
     // Returns the total number of tiles in the grid (cols * rows).
-    int GetTileCount() const {
+    int GetTileCount() const
+    {
         return static_cast<int>(m_tiles.size());
     }
 
     // Returns the number of tiles that have been assigned a color.
-    int GetOccupiedTileCount() const {
+    int GetOccupiedTileCount() const
+    {
         int count = 0;
         for (const auto& t : m_tiles) {
-            if (t.occupied) ++count;
+            if (t.occupied)
+                ++count;
         }
         return count;
     }
 
     // Gets the current grid columns.
-    int GetCols() const { return m_cols; }
+    int GetCols() const
+    {
+        return m_cols;
+    }
 
     // Gets the current grid rows.
-    int GetRows() const { return m_rows; }
+    int GetRows() const
+    {
+        return m_rows;
+    }
 
     // Sets the gap (in pixels) between tiles. Returns false if negative.
-    bool SetGap(int gap) {
-        if (gap < 0) return false;
+    bool SetGap(int gap)
+    {
+        if (gap < 0)
+            return false;
         m_gap = gap;
         m_layoutDirty = true;
         return true;
     }
 
     // Returns true if layout needs recomputation.
-    bool IsLayoutDirty() const { return m_layoutDirty; }
+    bool IsLayoutDirty() const
+    {
+        return m_layoutDirty;
+    }
 
-private:
+  private:
     int m_cols = 0;
     int m_rows = 0;
     int m_gap = 2;
@@ -152,5 +174,5 @@ private:
     std::vector<MosaicTile> m_tiles;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

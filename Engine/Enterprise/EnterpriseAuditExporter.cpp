@@ -7,4 +7,4 @@ namespace ExplorerLens::Engine {
 
 EnterpriseAuditExporter::~EnterpriseAuditExporter() = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

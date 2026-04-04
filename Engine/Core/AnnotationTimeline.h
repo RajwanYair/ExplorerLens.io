@@ -6,51 +6,68 @@
 #pragma once
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct ATLSnapshot {
-    uint64_t    version     = 0;
+struct ATLSnapshot
+{
+    uint64_t version = 0;
     std::string description;
     std::string stateHash;
 };
 
-struct ATLDelta {
-    uint64_t    fromVersion = 0;
-    uint64_t    toVersion   = 0;
+struct ATLDelta
+{
+    uint64_t fromVersion = 0;
+    uint64_t toVersion = 0;
     std::string patch;
 };
 
-class AnnotationTimeline {
-public:
-    uint64_t AddSnapshot(const std::string& description, const std::string& stateHash) {
+class AnnotationTimeline
+{
+  public:
+    uint64_t AddSnapshot(const std::string& description, const std::string& stateHash)
+    {
         ATLSnapshot s;
-        s.version     = ++m_version;
+        s.version = ++m_version;
         s.description = description;
-        s.stateHash   = stateHash;
+        s.stateHash = stateHash;
         m_snapshots.push_back(s);
         return s.version;
     }
-    bool Revert(uint64_t toVersion) {
+    bool Revert(uint64_t toVersion)
+    {
         for (const auto& s : m_snapshots)
-            if (s.version == toVersion) { m_version = toVersion; return true; }
+            if (s.version == toVersion) {
+                m_version = toVersion;
+                return true;
+            }
         return false;
     }
-    ATLDelta GetDelta(uint64_t fromVersion, uint64_t toVersion) const {
+    ATLDelta GetDelta(uint64_t fromVersion, uint64_t toVersion) const
+    {
         ATLDelta d;
         d.fromVersion = fromVersion;
-        d.toVersion   = toVersion;
-        d.patch       = "delta-" + std::to_string(fromVersion) + "->" + std::to_string(toVersion);
+        d.toVersion = toVersion;
+        d.patch = "delta-" + std::to_string(fromVersion) + "->" + std::to_string(toVersion);
         return d;
     }
-    std::vector<ATLSnapshot> GetHistory() const { return m_snapshots; }
-    uint64_t CurrentVersion() const { return m_version; }
+    std::vector<ATLSnapshot> GetHistory() const
+    {
+        return m_snapshots;
+    }
+    uint64_t CurrentVersion() const
+    {
+        return m_version;
+    }
 
-private:
+  private:
     std::vector<ATLSnapshot> m_snapshots;
-    uint64_t                 m_version = 0;
+    uint64_t m_version = 0;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

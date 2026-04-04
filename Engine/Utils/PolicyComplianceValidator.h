@@ -15,18 +15,32 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class CompliancePolicySource : uint8_t {
-    GroupPolicy, Intune, SCCM, LocalAdmin, Default, COUNT
+    GroupPolicy,
+    Intune,
+    SCCM,
+    LocalAdmin,
+    Default,
+    COUNT
 };
 
 enum class PolicySeverity : uint8_t {
-    Informational, Warning, Required, Mandatory, COUNT
+    Informational,
+    Warning,
+    Required,
+    Mandatory,
+    COUNT
 };
 
 enum class ComplianceStatus : uint8_t {
-    Compliant, NonCompliant, Unknown, NotApplicable, COUNT
+    Compliant,
+    NonCompliant,
+    Unknown,
+    NotApplicable,
+    COUNT
 };
 
-struct PolicyRule {
+struct PolicyRule
+{
     std::wstring ruleName;
     std::wstring description;
     CompliancePolicySource source = CompliancePolicySource::Default;
@@ -35,14 +49,16 @@ struct PolicyRule {
     std::wstring actualValue;
 };
 
-struct ComplianceResult {
+struct ComplianceResult
+{
     std::wstring ruleName;
     ComplianceStatus status = ComplianceStatus::Unknown;
     std::wstring detail;
     bool autoRemediated = false;
 };
 
-struct ValidatorComplianceReport {
+struct ValidatorComplianceReport
+{
     uint32_t totalRules = 0;
     uint32_t compliantCount = 0;
     uint32_t violationCount = 0;
@@ -50,38 +66,39 @@ struct ValidatorComplianceReport {
     bool overallCompliant = true;
 };
 
-class PolicyComplianceValidator {
-public:
-    void AddRule(const PolicyRule& rule) {
+class PolicyComplianceValidator
+{
+  public:
+    void AddRule(const PolicyRule& rule)
+    {
         m_rules.push_back(rule);
     }
 
-    ComplianceResult Validate(const PolicyRule& rule) const {
+    ComplianceResult Validate(const PolicyRule& rule) const
+    {
         ComplianceResult result;
         result.ruleName = rule.ruleName;
         if (rule.expectedValue == rule.actualValue) {
             result.status = ComplianceStatus::Compliant;
-        }
-        else if (rule.severity == PolicySeverity::Mandatory) {
+        } else if (rule.severity == PolicySeverity::Mandatory) {
             result.status = ComplianceStatus::NonCompliant;
             result.detail = L"Mandatory policy violation: expected '" + rule.expectedValue + L"'";
-        }
-        else {
+        } else {
             result.status = ComplianceStatus::NonCompliant;
             result.detail = L"Policy mismatch";
         }
         return result;
     }
 
-    ValidatorComplianceReport ValidateAll() const {
+    ValidatorComplianceReport ValidateAll() const
+    {
         ValidatorComplianceReport report;
         report.totalRules = static_cast<uint32_t>(m_rules.size());
         for (auto& rule : m_rules) {
             auto result = Validate(rule);
             if (result.status == ComplianceStatus::Compliant) {
                 report.compliantCount++;
-            }
-            else {
+            } else {
                 report.violationCount++;
                 report.overallCompliant = false;
             }
@@ -89,15 +106,27 @@ public:
         return report;
     }
 
-    size_t RuleCount() const { return m_rules.size(); }
-    void Clear() { m_rules.clear(); }
+    size_t RuleCount() const
+    {
+        return m_rules.size();
+    }
+    void Clear()
+    {
+        m_rules.clear();
+    }
 
-    static size_t SourceCount() { return static_cast<size_t>(CompliancePolicySource::COUNT); }
-    static size_t SeverityLevelCount() { return static_cast<size_t>(PolicySeverity::COUNT); }
+    static size_t SourceCount()
+    {
+        return static_cast<size_t>(CompliancePolicySource::COUNT);
+    }
+    static size_t SeverityLevelCount()
+    {
+        return static_cast<size_t>(PolicySeverity::COUNT);
+    }
 
-private:
+  private:
     std::vector<PolicyRule> m_rules;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

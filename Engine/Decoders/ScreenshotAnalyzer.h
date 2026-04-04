@@ -22,7 +22,8 @@ enum class ScreenshotType : uint8_t {
     GameCapture
 };
 
-struct UIRegion {
+struct UIRegion
+{
     float x = 0.0f;
     float y = 0.0f;
     float width = 0.0f;
@@ -33,7 +34,8 @@ struct UIRegion {
     float importance = 0.0f;
 };
 
-struct ScreenshotAnalysis {
+struct ScreenshotAnalysis
+{
     ScreenshotType type = ScreenshotType::Unknown;
     float textDensity = 0.0f;
     float contentRegionCoverage = 0.0f;
@@ -44,7 +46,8 @@ struct ScreenshotAnalysis {
     float uniformityScore = 0.0f;
 };
 
-struct ScreenshotThumbnailHint {
+struct ScreenshotThumbnailHint
+{
     float cropX = 0.0f;
     float cropY = 0.0f;
     float cropWidth = 1.0f;
@@ -53,27 +56,27 @@ struct ScreenshotThumbnailHint {
     float contrastBoost = 0.0f;
 };
 
-class ScreenshotAnalyzer {
-public:
+class ScreenshotAnalyzer
+{
+  public:
     ScreenshotAnalyzer() = default;
 
-    ScreenshotAnalysis Analyze(const uint8_t* pixels, uint32_t width, uint32_t height) {
+    ScreenshotAnalysis Analyze(const uint8_t* pixels, uint32_t width, uint32_t height)
+    {
         ScreenshotAnalysis analysis;
-        if (!pixels || width == 0 || height == 0) return analysis;
+        if (!pixels || width == 0 || height == 0)
+            return analysis;
 
         // Detect screenshot type from edge patterns
         uint32_t topEdgeVariance = CalculateEdgeVariance(pixels, width, true);
-        uint32_t bottomEdgeVariance = CalculateEdgeVariance(
-            pixels + (height - 1) * width * 3, width, true);
+        uint32_t bottomEdgeVariance = CalculateEdgeVariance(pixels + (height - 1) * width * 3, width, true);
 
         if (topEdgeVariance < 10 && bottomEdgeVariance < 10) {
             analysis.type = ScreenshotType::FullScreen;
-        }
-        else if (topEdgeVariance < 10) {
+        } else if (topEdgeVariance < 10) {
             analysis.type = ScreenshotType::WindowCapture;
             analysis.hasTitleBar = true;
-        }
-        else {
+        } else {
             analysis.type = ScreenshotType::RegionCapture;
         }
 
@@ -91,7 +94,8 @@ public:
         return analysis;
     }
 
-    ScreenshotThumbnailHint GetThumbnailHint(const ScreenshotAnalysis& analysis) const {
+    ScreenshotThumbnailHint GetThumbnailHint(const ScreenshotAnalysis& analysis) const
+    {
         ScreenshotThumbnailHint hint;
         if (analysis.hasTitleBar) {
             hint.cropY = 0.05f;
@@ -103,11 +107,16 @@ public:
         return hint;
     }
 
-    uint64_t GetTotalAnalyzed() const { return m_totalAnalyzed; }
+    uint64_t GetTotalAnalyzed() const
+    {
+        return m_totalAnalyzed;
+    }
 
-private:
-    uint32_t CalculateEdgeVariance(const uint8_t* row, uint32_t width, bool isHorizontal) const {
-        if (!row || width < 2) return 0;
+  private:
+    uint32_t CalculateEdgeVariance(const uint8_t* row, uint32_t width, bool isHorizontal) const
+    {
+        if (!row || width < 2)
+            return 0;
         uint32_t variance = 0;
         uint32_t samples = width < 100 ? width : 100;
         for (uint32_t i = 1; i < samples; i++) {
@@ -121,5 +130,5 @@ private:
     uint64_t m_totalAnalyzed = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

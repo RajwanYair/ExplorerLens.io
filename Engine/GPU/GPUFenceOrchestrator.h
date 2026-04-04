@@ -7,9 +7,9 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,7 +22,8 @@ enum class OrchestratorFenceState : uint8_t {
     Retired
 };
 
-struct GPUFence {
+struct GPUFence
+{
     uint64_t fenceId = 0;
     uint64_t fenceValue = 0;
     OrchestratorFenceState state = OrchestratorFenceState::Unsignaled;
@@ -30,7 +31,8 @@ struct GPUFence {
     uint64_t signaledTimestamp = 0;
 };
 
-struct FenceOrchestratorMetrics {
+struct FenceOrchestratorMetrics
+{
     uint64_t totalFencesCreated = 0;
     uint64_t totalFencesSignaled = 0;
     uint64_t totalWaitsIssued = 0;
@@ -39,11 +41,13 @@ struct FenceOrchestratorMetrics {
     uint32_t activeFences = 0;
 };
 
-class GPUFenceOrchestrator {
-public:
+class GPUFenceOrchestrator
+{
+  public:
     GPUFenceOrchestrator() = default;
 
-    uint64_t CreateFence() {
+    uint64_t CreateFence()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint64_t id = ++m_nextFenceId;
         GPUFence fence;
@@ -55,7 +59,8 @@ public:
         return id;
     }
 
-    bool Signal(uint64_t fenceId) {
+    bool Signal(uint64_t fenceId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (auto& fence : m_fences) {
             if (fence.fenceId == fenceId && fence.state == OrchestratorFenceState::Unsignaled) {
@@ -67,15 +72,18 @@ public:
         return false;
     }
 
-    bool IsSignaled(uint64_t fenceId) const {
+    bool IsSignaled(uint64_t fenceId) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (const auto& fence : m_fences) {
-            if (fence.fenceId == fenceId) return fence.state == OrchestratorFenceState::Signaled;
+            if (fence.fenceId == fenceId)
+                return fence.state == OrchestratorFenceState::Signaled;
         }
         return false;
     }
 
-    void RetireFence(uint64_t fenceId) {
+    void RetireFence(uint64_t fenceId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (auto& fence : m_fences) {
             if (fence.fenceId == fenceId) {
@@ -86,7 +94,8 @@ public:
         }
     }
 
-    void RetireAllSignaled() {
+    void RetireAllSignaled()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (auto& fence : m_fences) {
             if (fence.state == OrchestratorFenceState::Signaled) {
@@ -96,22 +105,24 @@ public:
         }
     }
 
-    FenceOrchestratorMetrics GetMetrics() const {
+    FenceOrchestratorMetrics GetMetrics() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_metrics;
     }
 
-    uint32_t GetActiveFenceCount() const {
+    uint32_t GetActiveFenceCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_metrics.activeFences;
     }
 
-private:
+  private:
     mutable std::mutex m_mutex;
     std::vector<GPUFence> m_fences;
     uint64_t m_nextFenceId = 0;
     FenceOrchestratorMetrics m_metrics;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,15 +6,15 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <unordered_map>
 #include <algorithm>
-#include <mutex>
-#include <chrono>
 #include <array>
 #include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -32,7 +32,8 @@ enum class PluginTelemetryEventType : uint8_t {
     GPUComplete
 };
 
-struct PluginTelemetryEvent {
+struct PluginTelemetryEvent
+{
     PluginTelemetryEventType type = PluginTelemetryEventType::DecodeStart;
     uint64_t timestamp = 0;
     uint32_t pluginId = 0;
@@ -42,7 +43,8 @@ struct PluginTelemetryEvent {
     std::string metadata;
 };
 
-struct PluginMetrics {
+struct PluginMetrics
+{
     std::string pluginName;
     uint32_t pluginId = 0;
     uint64_t decodeCount = 0;
@@ -55,7 +57,8 @@ struct PluginMetrics {
     uint64_t memoryAllocatedBytes = 0;
 };
 
-struct AggregateMetrics {
+struct AggregateMetrics
+{
     uint64_t totalEvents = 0;
     double uptimeSeconds = 0.0;
     double avgDecodeTimeMs = 0.0;
@@ -64,14 +67,17 @@ struct AggregateMetrics {
     uint32_t activePlugins = 0;
 };
 
-class PluginTelemetryBridge {
-public:
-    static PluginTelemetryBridge& Instance() {
+class PluginTelemetryBridge
+{
+  public:
+    static PluginTelemetryBridge& Instance()
+    {
         static PluginTelemetryBridge instance;
         return instance;
     }
 
-    inline void RegisterPlugin(uint32_t pluginId, const std::string& name) {
+    inline void RegisterPlugin(uint32_t pluginId, const std::string& name)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         PluginMetrics metrics;
         metrics.pluginId = pluginId;
@@ -79,7 +85,8 @@ public:
         m_pluginMetrics[pluginId] = metrics;
     }
 
-    inline void RecordEvent(const PluginTelemetryEvent& event) {
+    inline void RecordEvent(const PluginTelemetryEvent& event)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         m_ringBuffer[m_writePos % RING_BUFFER_SIZE] = event;
@@ -87,44 +94,48 @@ public:
         m_totalEvents++;
 
         auto it = m_pluginMetrics.find(event.pluginId);
-        if (it == m_pluginMetrics.end()) return;
+        if (it == m_pluginMetrics.end())
+            return;
 
         auto& metrics = it->second;
         switch (event.type) {
-        case PluginTelemetryEventType::DecodeEnd:
-            metrics.decodeCount++;
-            metrics.totalDecodeTimeMs += event.valueMs;
-            metrics.avgDecodeTimeMs = metrics.totalDecodeTimeMs / metrics.decodeCount;
-            if (event.valueMs > metrics.peakDecodeTimeMs) metrics.peakDecodeTimeMs = event.valueMs;
-            break;
-        case PluginTelemetryEventType::CacheHit:
-            metrics.cacheHits++;
-            break;
-        case PluginTelemetryEventType::CacheMiss:
-            metrics.cacheMisses++;
-            break;
-        case PluginTelemetryEventType::Error:
-            metrics.errorCount++;
-            break;
-        case PluginTelemetryEventType::MemoryAlloc:
-            metrics.memoryAllocatedBytes += event.valueBytes;
-            break;
-        case PluginTelemetryEventType::MemoryFree:
-            if (metrics.memoryAllocatedBytes >= event.valueBytes)
-                metrics.memoryAllocatedBytes -= event.valueBytes;
-            break;
-        default:
-            break;
+            case PluginTelemetryEventType::DecodeEnd:
+                metrics.decodeCount++;
+                metrics.totalDecodeTimeMs += event.valueMs;
+                metrics.avgDecodeTimeMs = metrics.totalDecodeTimeMs / metrics.decodeCount;
+                if (event.valueMs > metrics.peakDecodeTimeMs)
+                    metrics.peakDecodeTimeMs = event.valueMs;
+                break;
+            case PluginTelemetryEventType::CacheHit:
+                metrics.cacheHits++;
+                break;
+            case PluginTelemetryEventType::CacheMiss:
+                metrics.cacheMisses++;
+                break;
+            case PluginTelemetryEventType::Error:
+                metrics.errorCount++;
+                break;
+            case PluginTelemetryEventType::MemoryAlloc:
+                metrics.memoryAllocatedBytes += event.valueBytes;
+                break;
+            case PluginTelemetryEventType::MemoryFree:
+                if (metrics.memoryAllocatedBytes >= event.valueBytes)
+                    metrics.memoryAllocatedBytes -= event.valueBytes;
+                break;
+            default:
+                break;
         }
     }
 
-    inline PluginMetrics GetPluginMetrics(uint32_t pluginId) const {
+    inline PluginMetrics GetPluginMetrics(uint32_t pluginId) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_pluginMetrics.find(pluginId);
         return it != m_pluginMetrics.end() ? it->second : PluginMetrics{};
     }
 
-    inline AggregateMetrics GetAggregateMetrics() const {
+    inline AggregateMetrics GetAggregateMetrics() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         AggregateMetrics agg;
         agg.totalEvents = m_totalEvents;
@@ -142,7 +153,8 @@ public:
             agg.totalErrorCount += metrics.errorCount;
         }
 
-        if (totalDecodes > 0) agg.avgDecodeTimeMs = totalDecodeTime / totalDecodes;
+        if (totalDecodes > 0)
+            agg.avgDecodeTimeMs = totalDecodeTime / totalDecodes;
         if (totalHits + totalMisses > 0)
             agg.overallCacheHitRate = static_cast<double>(totalHits) / (totalHits + totalMisses);
 
@@ -151,7 +163,8 @@ public:
         return agg;
     }
 
-    inline std::vector<PluginTelemetryEvent> GetRecentEvents(uint32_t count = 100) const {
+    inline std::vector<PluginTelemetryEvent> GetRecentEvents(uint32_t count = 100) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::vector<PluginTelemetryEvent> events;
         uint64_t start = m_writePos > count ? m_writePos - count : 0;
@@ -161,23 +174,35 @@ public:
         return events;
     }
 
-    inline std::string EventTypeToString(PluginTelemetryEventType type) const {
+    inline std::string EventTypeToString(PluginTelemetryEventType type) const
+    {
         switch (type) {
-        case PluginTelemetryEventType::DecodeStart: return "DecodeStart";
-        case PluginTelemetryEventType::DecodeEnd:   return "DecodeEnd";
-        case PluginTelemetryEventType::CacheHit:    return "CacheHit";
-        case PluginTelemetryEventType::CacheMiss:   return "CacheMiss";
-        case PluginTelemetryEventType::Error:       return "Error";
-        case PluginTelemetryEventType::Warning:     return "Warning";
-        case PluginTelemetryEventType::MemoryAlloc: return "MemoryAlloc";
-        case PluginTelemetryEventType::MemoryFree:  return "MemoryFree";
-        case PluginTelemetryEventType::GPUSubmit:   return "GPUSubmit";
-        case PluginTelemetryEventType::GPUComplete: return "GPUComplete";
-        default:                              return "Unknown";
+            case PluginTelemetryEventType::DecodeStart:
+                return "DecodeStart";
+            case PluginTelemetryEventType::DecodeEnd:
+                return "DecodeEnd";
+            case PluginTelemetryEventType::CacheHit:
+                return "CacheHit";
+            case PluginTelemetryEventType::CacheMiss:
+                return "CacheMiss";
+            case PluginTelemetryEventType::Error:
+                return "Error";
+            case PluginTelemetryEventType::Warning:
+                return "Warning";
+            case PluginTelemetryEventType::MemoryAlloc:
+                return "MemoryAlloc";
+            case PluginTelemetryEventType::MemoryFree:
+                return "MemoryFree";
+            case PluginTelemetryEventType::GPUSubmit:
+                return "GPUSubmit";
+            case PluginTelemetryEventType::GPUComplete:
+                return "GPUComplete";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     PluginTelemetryBridge() : m_startTime(std::chrono::steady_clock::now()) {}
 
     static constexpr size_t RING_BUFFER_SIZE = 8192;
@@ -190,5 +215,5 @@ private:
     std::chrono::steady_clock::time_point m_startTime;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

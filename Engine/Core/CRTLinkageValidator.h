@@ -6,18 +6,18 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 // Compile-time assertion: we must be using /MD (dynamic CRT)
 #ifdef _MSC_VER
-#if defined(_MT) && defined(_DLL)
+    #if defined(_MT) && defined(_DLL)
     // Correct: /MD or /MDd
-#elif defined(_MT)
+    #elif defined(_MT)
 static_assert(false, "ExplorerLens requires /MD (dynamic CRT). Detected /MT (static CRT).");
-#endif
+    #endif
 #endif
 
 namespace ExplorerLens {
@@ -26,9 +26,9 @@ namespace Engine {
 enum class CRTLinkageType : uint8_t {
     Unknown = 0,
     StaticMT = 1,   // /MT
-    StaticMTd = 2,   // /MTd
-    DynamicMD = 3,   // /MD
-    DynamicMDd = 4    // /MDd
+    StaticMTd = 2,  // /MTd
+    DynamicMD = 3,  // /MD
+    DynamicMDd = 4  // /MDd
 };
 
 enum class CRTMismatchSeverity : uint8_t {
@@ -38,46 +38,55 @@ enum class CRTMismatchSeverity : uint8_t {
     Critical = 3
 };
 
-struct CRTLinkageReport {
-    CRTLinkageType       detected = CRTLinkageType::Unknown;
-    CRTLinkageType       expected = CRTLinkageType::DynamicMD;
-    CRTMismatchSeverity  severity = CRTMismatchSeverity::None;
-    bool                 isDebugBuild = false;
-    bool                 isValid = false;
-    uint32_t             mismatchCount = 0;
-    std::string          details;
+struct CRTLinkageReport
+{
+    CRTLinkageType detected = CRTLinkageType::Unknown;
+    CRTLinkageType expected = CRTLinkageType::DynamicMD;
+    CRTMismatchSeverity severity = CRTMismatchSeverity::None;
+    bool isDebugBuild = false;
+    bool isValid = false;
+    uint32_t mismatchCount = 0;
+    std::string details;
 };
 
-struct CRTModuleInfo {
-    std::string    moduleName;
+struct CRTModuleInfo
+{
+    std::string moduleName;
     CRTLinkageType linkage = CRTLinkageType::Unknown;
-    bool           isExternal = false;
+    bool isExternal = false;
 };
 
-class CRTLinkageValidator {
-public:
-    static CRTLinkageValidator& Instance() { static CRTLinkageValidator s; return s; }
+class CRTLinkageValidator
+{
+  public:
+    static CRTLinkageValidator& Instance()
+    {
+        static CRTLinkageValidator s;
+        return s;
+    }
 
-    CRTLinkageType DetectCurrentLinkage() const {
+    CRTLinkageType DetectCurrentLinkage() const
+    {
 #ifdef _MSC_VER
-#ifdef _DEBUG
-#if defined(_MT) && defined(_DLL)
+    #ifdef _DEBUG
+        #if defined(_MT) && defined(_DLL)
         return CRTLinkageType::DynamicMDd;
-#elif defined(_MT)
+        #elif defined(_MT)
         return CRTLinkageType::StaticMTd;
-#endif
-#else
-#if defined(_MT) && defined(_DLL)
+        #endif
+    #else
+        #if defined(_MT) && defined(_DLL)
         return CRTLinkageType::DynamicMD;
-#elif defined(_MT)
+        #elif defined(_MT)
         return CRTLinkageType::StaticMT;
-#endif
-#endif
+        #endif
+    #endif
 #endif
         return CRTLinkageType::Unknown;
     }
 
-    CRTLinkageReport ValidateLinkage() const {
+    CRTLinkageReport ValidateLinkage() const
+    {
         CRTLinkageReport report{};
         report.detected = DetectCurrentLinkage();
 #ifdef _DEBUG
@@ -93,19 +102,21 @@ public:
         return report;
     }
 
-    bool CheckMismatch(const std::vector<CRTModuleInfo>& modules) const {
-        if (modules.empty()) return true;
+    bool CheckMismatch(const std::vector<CRTModuleInfo>& modules) const
+    {
+        if (modules.empty())
+            return true;
         CRTLinkageType baseline = modules[0].linkage;
         for (size_t i = 1; i < modules.size(); ++i) {
-            if (modules[i].linkage != baseline &&
-                modules[i].linkage != CRTLinkageType::Unknown) {
+            if (modules[i].linkage != baseline && modules[i].linkage != CRTLinkageType::Unknown) {
                 return false;
             }
         }
         return true;
     }
 
-    void RegisterModule(const std::string& name, CRTLinkageType linkage, bool external = false) {
+    void RegisterModule(const std::string& name, CRTLinkageType linkage, bool external = false)
+    {
         CRTModuleInfo info;
         info.moduleName = name;
         info.linkage = linkage;
@@ -113,8 +124,10 @@ public:
         m_modules.push_back(info);
     }
 
-    uint32_t CountMismatches() const {
-        if (m_modules.empty()) return 0;
+    uint32_t CountMismatches() const
+    {
+        if (m_modules.empty())
+            return 0;
         CRTLinkageType expected = DetectCurrentLinkage();
         uint32_t count = 0;
         for (const auto& mod : m_modules) {
@@ -125,16 +138,22 @@ public:
         return count;
     }
 
-    const std::vector<CRTModuleInfo>& GetModules() const { return m_modules; }
+    const std::vector<CRTModuleInfo>& GetModules() const
+    {
+        return m_modules;
+    }
 
-    bool Validate() const {
+    bool Validate() const
+    {
         auto report = ValidateLinkage();
-        if (!report.isValid) return false;
-        if (!m_modules.empty() && !CheckMismatch(m_modules)) return false;
+        if (!report.isValid)
+            return false;
+        if (!m_modules.empty() && !CheckMismatch(m_modules))
+            return false;
         return true;
     }
 
-private:
+  private:
     CRTLinkageValidator() = default;
     ~CRTLinkageValidator() = default;
     CRTLinkageValidator(const CRTLinkageValidator&) = delete;
@@ -143,5 +162,5 @@ private:
     std::vector<CRTModuleInfo> m_modules;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

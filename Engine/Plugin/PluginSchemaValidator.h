@@ -5,47 +5,63 @@
 // required fields, version compatibility, and permission declarations.
 //
 #pragma once
-#include <string>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct PluginSchemaValidatorConfig {
+struct PluginSchemaValidatorConfig
+{
     bool enabled = true;
     uint32_t schemaVersion = 2;
     std::string label = "PluginSchemaValidator";
 };
 
-class PluginSchemaValidator {
-public:
-    bool Initialize() {
-        if (m_initialized) return true;
+class PluginSchemaValidator
+{
+  public:
+    bool Initialize()
+    {
+        if (m_initialized)
+            return true;
         m_initialized = true;
         return true;
     }
-    bool IsInitialized() const { return m_initialized; }
-    PluginSchemaValidatorConfig GetConfig() const { return m_config; }
-    std::string GetName() const { return m_config.label; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    PluginSchemaValidatorConfig GetConfig() const
+    {
+        return m_config;
+    }
+    std::string GetName() const
+    {
+        return m_config.label;
+    }
 
-    struct ValidationResult {
+    struct ValidationResult
+    {
         bool valid = false;
         std::vector<std::string> errors;
     };
 
-    bool ValidateRequiredField(const std::string& /*fieldName*/, const std::string& value) const {
+    bool ValidateRequiredField(const std::string& /*fieldName*/, const std::string& value) const
+    {
         return !value.empty();
     }
 
-    bool IsVersionCompatible(uint32_t manifestVersion) const {
+    bool IsVersionCompatible(uint32_t manifestVersion) const
+    {
         return manifestVersion <= m_config.schemaVersion;
     }
 
-private:
+  private:
     bool m_initialized = false;
     PluginSchemaValidatorConfig m_config;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

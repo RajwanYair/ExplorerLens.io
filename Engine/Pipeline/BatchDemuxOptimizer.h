@@ -12,9 +12,11 @@
 namespace ExplorerLens {
 namespace Engine {
 
-class BatchDemuxOptimizer {
-public:
-    struct Config {
+class BatchDemuxOptimizer
+{
+  public:
+    struct Config
+    {
         bool enabled = true;
         uint32_t maxEntries = 1024;
         std::string label = "BatchDemuxOptimizer";
@@ -23,20 +25,31 @@ public:
     BatchDemuxOptimizer() = default;
     explicit BatchDemuxOptimizer(const Config& cfg) : m_config(cfg) {}
 
-    bool Initialize() {
-        if (!m_config.enabled) return false;
+    bool Initialize()
+    {
+        if (!m_config.enabled)
+            return false;
         m_initialized = true;
         return true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
-    const Config& GetConfig() const { return m_config; }
-    const std::string& GetName() const { return m_config.label; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    const Config& GetConfig() const
+    {
+        return m_config;
+    }
+    const std::string& GetName() const
+    {
+        return m_config.label;
+    }
 
-private:
+  private:
     Config m_config{};
     bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -35,42 +35,46 @@
 // ============================================================================
 
 #include <windows.h>
-#include <vector>
-#include <mutex>
+#include <algorithm>
 #include <atomic>
 #include <cstdint>
-#include <algorithm>
+#include <mutex>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // ── Region descriptor ────────────────────────────────────────────────────────
 
-struct VirtualRegion {
+struct VirtualRegion
+{
     void* base = nullptr;
-    size_t  reserved = 0;
-    size_t  committed = 0;
-    DWORD   protect = PAGE_READWRITE;
-    bool    autoCommit = false;  // true when VEH auto-commit is active
+    size_t reserved = 0;
+    size_t committed = 0;
+    DWORD protect = PAGE_READWRITE;
+    bool autoCommit = false;  // true when VEH auto-commit is active
 };
 
 // ── Aggregate statistics ─────────────────────────────────────────────────────
 
-struct CommitStats {
+struct CommitStats
+{
     uint32_t regionsTracked = 0;
-    size_t   totalReserved = 0;
-    size_t   totalCommitted = 0;
-    double   commitRatio = 0.0;   // committed / reserved
+    size_t totalReserved = 0;
+    size_t totalCommitted = 0;
+    double commitRatio = 0.0;  // committed / reserved
     uint64_t guardPageFaultsHandled = 0;
 };
 using VAllocRegion = VirtualRegion;
-using VAllocStats  = CommitStats;
+using VAllocStats = CommitStats;
 
 // ── Main class ───────────────────────────────────────────────────────────────
 
-class VirtualAllocOptimizer {
-public:
-    VirtualAllocOptimizer() noexcept {
+class VirtualAllocOptimizer
+{
+  public:
+    VirtualAllocOptimizer() noexcept
+    {
         InitializeSRWLock(&m_lock);
 
         // Query system page info once
@@ -80,11 +84,11 @@ public:
         m_allocationGranularity = si.dwAllocationGranularity;
 
         // Install vectored exception handler for auto-commit guard pages
-        m_vehHandle = AddVectoredExceptionHandler(
-            1 /*first handler*/, &VirtualAllocOptimizer::VehHandler);
+        m_vehHandle = AddVectoredExceptionHandler(1 /*first handler*/, &VirtualAllocOptimizer::VehHandler);
     }
 
-    ~VirtualAllocOptimizer() {
+    ~VirtualAllocOptimizer()
+    {
         // Release all regions
         AcquireSRWLockExclusive(&m_lock);
         for (auto& region : m_regions) {
@@ -108,12 +112,14 @@ public:
 
     // ── Reserve ──────────────────────────────────────────────────
 
-    VirtualRegion Reserve(size_t size, DWORD protect = PAGE_READWRITE) {
+    VirtualRegion Reserve(size_t size, DWORD protect = PAGE_READWRITE)
+    {
         VirtualRegion region{};
         size_t aligned = AlignUp(size, m_allocationGranularity);
 
         void* base = VirtualAlloc(nullptr, aligned, MEM_RESERVE, protect);
-        if (!base) return region;
+        if (!base)
+            return region;
 
         region.base = base;
         region.reserved = aligned;
@@ -130,8 +136,10 @@ public:
 
     // ── Commit a sub-range ───────────────────────────────────────
 
-    bool Commit(VirtualRegion& region, size_t offset, size_t size) {
-        if (!region.base || size == 0) return false;
+    bool Commit(VirtualRegion& region, size_t offset, size_t size)
+    {
+        if (!region.base || size == 0)
+            return false;
 
         size_t alignedOffset = AlignDown(offset, m_pageSize);
         size_t alignedEnd = AlignUp(offset + size, m_pageSize);
@@ -143,9 +151,9 @@ public:
         }
 
         void* addr = static_cast<uint8_t*>(region.base) + alignedOffset;
-        void* result = VirtualAlloc(addr, commitSize,
-            MEM_COMMIT, region.protect);
-        if (!result) return false;
+        void* result = VirtualAlloc(addr, commitSize, MEM_COMMIT, region.protect);
+        if (!result)
+            return false;
 
         // Track committed range (approximate — overlaps are idempotent)
         AcquireSRWLockExclusive(&m_lock);
@@ -164,8 +172,10 @@ public:
 
     // ── Decommit a sub-range ─────────────────────────────────────
 
-    bool Decommit(VirtualRegion& region, size_t offset, size_t size) {
-        if (!region.base || size == 0) return false;
+    bool Decommit(VirtualRegion& region, size_t offset, size_t size)
+    {
+        if (!region.base || size == 0)
+            return false;
 
         size_t alignedOffset = AlignDown(offset, m_pageSize);
         size_t alignedEnd = AlignUp(offset + size, m_pageSize);
@@ -177,13 +187,13 @@ public:
 
         void* addr = static_cast<uint8_t*>(region.base) + alignedOffset;
         BOOL ok = VirtualFree(addr, decommitSize, MEM_DECOMMIT);
-        if (!ok) return false;
+        if (!ok)
+            return false;
 
         AcquireSRWLockExclusive(&m_lock);
         if (region.committed >= decommitSize) {
             region.committed -= decommitSize;
-        }
-        else {
+        } else {
             region.committed = 0;
         }
         for (auto& r : m_regions) {
@@ -199,14 +209,15 @@ public:
 
     // ── Release ──────────────────────────────────────────────────
 
-    void Release(VirtualRegion& region) {
-        if (!region.base) return;
+    void Release(VirtualRegion& region)
+    {
+        if (!region.base)
+            return;
 
         AcquireSRWLockExclusive(&m_lock);
-        m_regions.erase(
-            std::remove_if(m_regions.begin(), m_regions.end(),
-                [&](const VirtualRegion& r) { return r.base == region.base; }),
-            m_regions.end());
+        m_regions.erase(std::remove_if(m_regions.begin(), m_regions.end(),
+                                       [&](const VirtualRegion& r) { return r.base == region.base; }),
+                        m_regions.end());
         ReleaseSRWLockExclusive(&m_lock);
 
         VirtualFree(region.base, 0, MEM_RELEASE);
@@ -217,11 +228,14 @@ public:
 
     // ── Guard page ───────────────────────────────────────────────
 
-    bool SetGuardPage(VirtualRegion& region, size_t offset) {
-        if (!region.base) return false;
+    bool SetGuardPage(VirtualRegion& region, size_t offset)
+    {
+        if (!region.base)
+            return false;
 
         size_t alignedOffset = AlignDown(offset, m_pageSize);
-        if (alignedOffset >= region.reserved) return false;
+        if (alignedOffset >= region.reserved)
+            return false;
 
         void* addr = static_cast<uint8_t*>(region.base) + alignedOffset;
 
@@ -229,17 +243,17 @@ public:
         VirtualAlloc(addr, m_pageSize, MEM_COMMIT, region.protect);
 
         DWORD oldProtect = 0;
-        BOOL ok = VirtualProtect(addr, m_pageSize,
-            region.protect | PAGE_GUARD, &oldProtect);
+        BOOL ok = VirtualProtect(addr, m_pageSize, region.protect | PAGE_GUARD, &oldProtect);
         return ok != FALSE;
     }
 
     // ── Reserve with auto-commit on guard-page fault ─────────────
 
-    VirtualRegion ReserveWithAutoCommit(size_t maxSize,
-        size_t initialCommit) {
+    VirtualRegion ReserveWithAutoCommit(size_t maxSize, size_t initialCommit)
+    {
         VirtualRegion region = Reserve(maxSize);
-        if (!region.base) return region;
+        if (!region.base)
+            return region;
 
         // Commit initial range
         if (initialCommit > 0) {
@@ -256,8 +270,7 @@ public:
 
             // Apply PAGE_GUARD
             DWORD oldProtect = 0;
-            VirtualProtect(guardAddr, m_pageSize,
-                PAGE_READWRITE | PAGE_GUARD, &oldProtect);
+            VirtualProtect(guardAddr, m_pageSize, PAGE_READWRITE | PAGE_GUARD, &oldProtect);
         }
 
         region.autoCommit = true;
@@ -277,7 +290,8 @@ public:
 
     // ── Statistics ───────────────────────────────────────────────
 
-    CommitStats GetStats() {
+    CommitStats GetStats()
+    {
         AcquireSRWLockExclusive(&m_lock);
         CommitStats stats{};
         stats.regionsTracked = static_cast<uint32_t>(m_regions.size());
@@ -286,16 +300,15 @@ public:
             stats.totalCommitted += r.committed;
         }
         stats.commitRatio = stats.totalReserved > 0
-            ? static_cast<double>(stats.totalCommitted) /
-            static_cast<double>(stats.totalReserved)
-            : 0.0;
-        stats.guardPageFaultsHandled =
-            s_guardFaultsHandled.load(std::memory_order_relaxed);
+                                ? static_cast<double>(stats.totalCommitted) / static_cast<double>(stats.totalReserved)
+                                : 0.0;
+        stats.guardPageFaultsHandled = s_guardFaultsHandled.load(std::memory_order_relaxed);
         ReleaseSRWLockExclusive(&m_lock);
         return stats;
     }
 
-    std::vector<VirtualRegion> GetActiveRegions() {
+    std::vector<VirtualRegion> GetActiveRegions()
+    {
         AcquireSRWLockExclusive(&m_lock);
         auto copy = m_regions;
         ReleaseSRWLockExclusive(&m_lock);
@@ -304,25 +317,36 @@ public:
 
     // ── System page info ─────────────────────────────────────────
 
-    size_t GetPageSize()             const noexcept { return m_pageSize; }
-    size_t GetAllocationGranularity() const noexcept { return m_allocationGranularity; }
+    size_t GetPageSize() const noexcept
+    {
+        return m_pageSize;
+    }
+    size_t GetAllocationGranularity() const noexcept
+    {
+        return m_allocationGranularity;
+    }
 
-private:
+  private:
     // ── Alignment helpers ────────────────────────────────────────
 
-    static size_t AlignUp(size_t value, size_t alignment) noexcept {
-        if (alignment == 0) return value;
+    static size_t AlignUp(size_t value, size_t alignment) noexcept
+    {
+        if (alignment == 0)
+            return value;
         return (value + alignment - 1) & ~(alignment - 1);
     }
 
-    static size_t AlignDown(size_t value, size_t alignment) noexcept {
-        if (alignment == 0) return value;
+    static size_t AlignDown(size_t value, size_t alignment) noexcept
+    {
+        if (alignment == 0)
+            return value;
         return value & ~(alignment - 1);
     }
 
     // ── Vectored exception handler (auto-commit) ─────────────────
 
-    static LONG CALLBACK VehHandler(PEXCEPTION_POINTERS pExInfo) {
+    static LONG CALLBACK VehHandler(PEXCEPTION_POINTERS pExInfo)
+    {
         if (pExInfo->ExceptionRecord->ExceptionCode != STATUS_GUARD_PAGE_VIOLATION) {
             return EXCEPTION_CONTINUE_SEARCH;
         }
@@ -330,20 +354,17 @@ private:
         // A guard page was hit — the system automatically removes the
         // PAGE_GUARD attribute.  We commit the next page and set a new
         // guard page one page ahead to allow further growth.
-        void* faultAddr =
-            reinterpret_cast<void*>(pExInfo->ExceptionRecord->ExceptionInformation[1]);
+        void* faultAddr = reinterpret_cast<void*>(pExInfo->ExceptionRecord->ExceptionInformation[1]);
 
         // Round to page boundary
         SYSTEM_INFO si{};
         GetSystemInfo(&si);
-        uintptr_t pageBase = reinterpret_cast<uintptr_t>(faultAddr)
-            & ~(static_cast<uintptr_t>(si.dwPageSize) - 1);
+        uintptr_t pageBase = reinterpret_cast<uintptr_t>(faultAddr) & ~(static_cast<uintptr_t>(si.dwPageSize) - 1);
         uintptr_t nextPage = pageBase + si.dwPageSize;
 
         // Commit next page and set its guard flag
-        void* committed = VirtualAlloc(reinterpret_cast<void*>(nextPage),
-            si.dwPageSize, MEM_COMMIT,
-            PAGE_READWRITE | PAGE_GUARD);
+        void* committed =
+            VirtualAlloc(reinterpret_cast<void*>(nextPage), si.dwPageSize, MEM_COMMIT, PAGE_READWRITE | PAGE_GUARD);
         if (committed) {
             s_guardFaultsHandled.fetch_add(1, std::memory_order_relaxed);
         }
@@ -353,15 +374,15 @@ private:
 
     // ── Data members ─────────────────────────────────────────────
 
-    SRWLOCK                     m_lock{};
-    std::vector<VirtualRegion>  m_regions;
-    PVOID                       m_vehHandle = nullptr;
+    SRWLOCK m_lock{};
+    std::vector<VirtualRegion> m_regions;
+    PVOID m_vehHandle = nullptr;
 
     size_t m_pageSize = 4096;
     size_t m_allocationGranularity = 65536;
 
-    inline static std::atomic<uint64_t> s_guardFaultsHandled{ 0 };
+    inline static std::atomic<uint64_t> s_guardFaultsHandled{0};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

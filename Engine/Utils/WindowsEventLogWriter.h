@@ -32,7 +32,8 @@ enum class EventCategory : uint16_t {
     Security = 7
 };
 
-struct EventLogEntry {
+struct EventLogEntry
+{
     uint32_t eventId = 0;
     EventSeverity severity = EventSeverity::Information;
     EventCategory category = EventCategory::General;
@@ -41,7 +42,8 @@ struct EventLogEntry {
     uint64_t timestamp = 0;
 };
 
-struct EventLogConfig {
+struct EventLogConfig
+{
     std::wstring logName = L"Application";
     std::wstring sourceName = L"ExplorerLens";
     bool enableEventLog = true;
@@ -49,7 +51,8 @@ struct EventLogConfig {
     uint32_t maxEventsPerMinute = 60;
 };
 
-struct EventLogMetrics {
+struct EventLogMetrics
+{
     uint64_t totalEventsWritten = 0;
     uint64_t eventsDropped = 0;
     uint64_t errorEvents = 0;
@@ -57,52 +60,71 @@ struct EventLogMetrics {
     uint64_t infoEvents = 0;
 };
 
-class WindowsEventLogWriter {
-public:
-    explicit WindowsEventLogWriter(EventLogConfig config = {})
-        : m_config(config) {
-    }
+class WindowsEventLogWriter
+{
+  public:
+    explicit WindowsEventLogWriter(EventLogConfig config = {}) : m_config(config) {}
 
-    bool WriteEvent(const EventLogEntry& entry) {
-        if (!m_config.enableEventLog) return false;
-        if (entry.severity < m_config.minimumSeverity) return false;
+    bool WriteEvent(const EventLogEntry& entry)
+    {
+        if (!m_config.enableEventLog)
+            return false;
+        if (entry.severity < m_config.minimumSeverity)
+            return false;
 
         m_metrics.totalEventsWritten++;
         switch (entry.severity) {
-        case EventSeverity::Error:
-        case EventSeverity::Critical: m_metrics.errorEvents++; break;
-        case EventSeverity::Warning: m_metrics.warningEvents++; break;
-        default: m_metrics.infoEvents++; break;
+            case EventSeverity::Error:
+            case EventSeverity::Critical:
+                m_metrics.errorEvents++;
+                break;
+            case EventSeverity::Warning:
+                m_metrics.warningEvents++;
+                break;
+            default:
+                m_metrics.infoEvents++;
+                break;
         }
         m_recentEvents.push_back(entry);
-        if (m_recentEvents.size() > 100) m_recentEvents.erase(m_recentEvents.begin());
+        if (m_recentEvents.size() > 100)
+            m_recentEvents.erase(m_recentEvents.begin());
         return true;
     }
 
-    bool WriteError(uint32_t eventId, const std::wstring& message) {
-        return WriteEvent({ eventId, EventSeverity::Error, EventCategory::General,
-                           m_config.sourceName, message, 0 });
+    bool WriteError(uint32_t eventId, const std::wstring& message)
+    {
+        return WriteEvent({eventId, EventSeverity::Error, EventCategory::General, m_config.sourceName, message, 0});
     }
 
-    bool WriteWarning(uint32_t eventId, const std::wstring& message) {
-        return WriteEvent({ eventId, EventSeverity::Warning, EventCategory::General,
-                           m_config.sourceName, message, 0 });
+    bool WriteWarning(uint32_t eventId, const std::wstring& message)
+    {
+        return WriteEvent({eventId, EventSeverity::Warning, EventCategory::General, m_config.sourceName, message, 0});
     }
 
-    bool WriteInfo(uint32_t eventId, const std::wstring& message) {
-        return WriteEvent({ eventId, EventSeverity::Information, EventCategory::General,
-                           m_config.sourceName, message, 0 });
+    bool WriteInfo(uint32_t eventId, const std::wstring& message)
+    {
+        return WriteEvent(
+            {eventId, EventSeverity::Information, EventCategory::General, m_config.sourceName, message, 0});
     }
 
-    EventLogMetrics GetMetrics() const { return m_metrics; }
-    void SetConfig(const EventLogConfig& config) { m_config = config; }
-    EventLogConfig GetConfig() const { return m_config; }
+    EventLogMetrics GetMetrics() const
+    {
+        return m_metrics;
+    }
+    void SetConfig(const EventLogConfig& config)
+    {
+        m_config = config;
+    }
+    EventLogConfig GetConfig() const
+    {
+        return m_config;
+    }
 
-private:
+  private:
     EventLogConfig m_config;
     EventLogMetrics m_metrics;
     std::vector<EventLogEntry> m_recentEvents;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

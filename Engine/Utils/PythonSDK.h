@@ -17,144 +17,150 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 /// Python SDK configuration
-struct PythonSDKConfig {
- uint32_t maxThumbnailWidth = 512;
- uint32_t maxThumbnailHeight = 512;
- bool enableGPU = true;
- bool enableCache = true;
- bool enablePlugins = false;
- uint32_t maxConcurrency = 4;
- std::wstring cachePath;
- std::wstring pluginPath;
+struct PythonSDKConfig
+{
+    uint32_t maxThumbnailWidth = 512;
+    uint32_t maxThumbnailHeight = 512;
+    bool enableGPU = true;
+    bool enableCache = true;
+    bool enablePlugins = false;
+    uint32_t maxConcurrency = 4;
+    std::wstring cachePath;
+    std::wstring pluginPath;
 };
 
 /// Thumbnail result for Python
-struct PythonThumbnailResult {
- std::vector<uint8_t> pixelData; ///< BGRA pixel data
- uint32_t width = 0;
- uint32_t height = 0;
- uint32_t channels = 4;
- std::wstring format; ///< Detected format name
- double decodeTimeMs = 0.0;
- bool success = false;
- std::wstring error;
+struct PythonThumbnailResult
+{
+    std::vector<uint8_t> pixelData;  ///< BGRA pixel data
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t channels = 4;
+    std::wstring format;  ///< Detected format name
+    double decodeTimeMs = 0.0;
+    bool success = false;
+    std::wstring error;
 };
 
 /// Decoder info for Python
-struct PythonDecoderInfo {
- std::wstring name;
- std::wstring description;
- std::vector<std::wstring> extensions;
- bool isAvailable = true;
- bool requiresExternalLib = false;
- std::wstring libraryVersion;
+struct PythonDecoderInfo
+{
+    std::wstring name;
+    std::wstring description;
+    std::vector<std::wstring> extensions;
+    bool isAvailable = true;
+    bool requiresExternalLib = false;
+    std::wstring libraryVersion;
 };
 
 /// Batch processing entry
-struct BatchEntry {
- std::wstring inputPath;
- std::wstring outputPath;
- uint32_t width = 256;
- uint32_t height = 256;
- bool completed = false;
- bool success = false;
- double timeMs = 0.0;
- std::wstring error;
+struct BatchEntry
+{
+    std::wstring inputPath;
+    std::wstring outputPath;
+    uint32_t width = 256;
+    uint32_t height = 256;
+    bool completed = false;
+    bool success = false;
+    double timeMs = 0.0;
+    std::wstring error;
 };
 
 /// Batch result
-struct PythonBatchResult {
- uint32_t total = 0;
- uint32_t succeeded = 0;
- uint32_t failed = 0;
- double totalTimeMs = 0.0;
- double avgTimeMs = 0.0;
- std::vector<BatchEntry> entries;
+struct PythonBatchResult
+{
+    uint32_t total = 0;
+    uint32_t succeeded = 0;
+    uint32_t failed = 0;
+    double totalTimeMs = 0.0;
+    double avgTimeMs = 0.0;
+    std::vector<BatchEntry> entries;
 };
 
 /// Progress callback type
-using ProgressCallback = void(*)(uint32_t current, uint32_t total, const wchar_t* currentFile);
+using ProgressCallback = void (*)(uint32_t current, uint32_t total, const wchar_t* currentFile);
 
 //==============================================================================
 // PythonSDK
 //==============================================================================
-class PythonSDK {
-public:
- PythonSDK();
- explicit PythonSDK(const PythonSDKConfig& config);
+class PythonSDK
+{
+  public:
+    PythonSDK();
+    explicit PythonSDK(const PythonSDKConfig& config);
 
- /// Initialize SDK
- bool Initialize();
+    /// Initialize SDK
+    bool Initialize();
 
- /// Generate thumbnail from file path
- PythonThumbnailResult GenerateThumbnail(const std::wstring& filePath,
- uint32_t width = 256,
- uint32_t height = 256);
+    /// Generate thumbnail from file path
+    PythonThumbnailResult GenerateThumbnail(const std::wstring& filePath, uint32_t width = 256, uint32_t height = 256);
 
- /// Generate thumbnail from memory buffer
- PythonThumbnailResult GenerateFromBuffer(const uint8_t* data, size_t size,
- const std::wstring& formatHint,
- uint32_t width = 256,
- uint32_t height = 256);
+    /// Generate thumbnail from memory buffer
+    PythonThumbnailResult GenerateFromBuffer(const uint8_t* data, size_t size, const std::wstring& formatHint,
+                                             uint32_t width = 256, uint32_t height = 256);
 
- /// Detect format from file path
- std::wstring DetectFormat(const std::wstring& filePath) const;
+    /// Detect format from file path
+    std::wstring DetectFormat(const std::wstring& filePath) const;
 
- /// Detect format from buffer
- std::wstring DetectFormatFromBuffer(const uint8_t* data, size_t size) const;
+    /// Detect format from buffer
+    std::wstring DetectFormatFromBuffer(const uint8_t* data, size_t size) const;
 
- /// Get available decoders
- std::vector<PythonDecoderInfo> GetDecoders() const;
+    /// Get available decoders
+    std::vector<PythonDecoderInfo> GetDecoders() const;
 
- /// Get decoder count
- uint32_t GetDecoderCount() const;
+    /// Get decoder count
+    uint32_t GetDecoderCount() const;
 
- /// Check if format is supported
- bool IsFormatSupported(const std::wstring& extension) const;
+    /// Check if format is supported
+    bool IsFormatSupported(const std::wstring& extension) const;
 
- /// Batch process files
- PythonBatchResult ProcessBatch(std::vector<BatchEntry>& entries,
- ProgressCallback callback = nullptr);
+    /// Batch process files
+    PythonBatchResult ProcessBatch(std::vector<BatchEntry>& entries, ProgressCallback callback = nullptr);
 
- /// Get SDK version
- static std::wstring GetVersion();
+    /// Get SDK version
+    static std::wstring GetVersion();
 
- /// Get SDK config
- const PythonSDKConfig& GetConfig() const { return m_config; }
+    /// Get SDK config
+    const PythonSDKConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
- /// Generate Python bindings stub code
- static std::wstring GenerateCtypesStub();
+    /// Generate Python bindings stub code
+    static std::wstring GenerateCtypesStub();
 
- /// Generate pybind11 wrapper code
- static std::wstring GeneratePybindWrapper();
+    /// Generate pybind11 wrapper code
+    static std::wstring GeneratePybindWrapper();
 
-private:
- PythonSDKConfig m_config;
- bool m_initialized = false;
- std::vector<PythonDecoderInfo> m_decoders;
+  private:
+    PythonSDKConfig m_config;
+    bool m_initialized = false;
+    std::vector<PythonDecoderInfo> m_decoders;
 
- void PopulateDecoders();
+    void PopulateDecoders();
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 //==============================================================================
 // C ABI Exports (for ctypes)
 //==============================================================================
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /// Initialize the SDK (returns handle)
 void* ExplorerLens_Init(void);
 
 /// Generate thumbnail from file (returns pixel data via out params)
-int ExplorerLens_GenerateThumbnail(void* handle, const wchar_t* path,
- uint32_t width, uint32_t height,
- uint8_t** outPixels, uint32_t* outSize);
+int ExplorerLens_GenerateThumbnail(void* handle, const wchar_t* path, uint32_t width, uint32_t height,
+                                   uint8_t** outPixels, uint32_t* outSize);
 
 /// Free pixel data
 void ExplorerLens_FreePixels(uint8_t* pixels);
@@ -171,4 +177,3 @@ void ExplorerLens_Destroy(void* handle);
 #ifdef __cplusplus
 }
 #endif
-

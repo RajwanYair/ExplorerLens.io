@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class NautilusIntegrationMode : uint8_t {
     Native,
@@ -27,7 +28,8 @@ enum class NautilusVersion : uint8_t {
     V46
 };
 
-struct NautilusConfig {
+struct NautilusConfig
+{
     NautilusIntegrationMode mode = NautilusIntegrationMode::Native;
     NautilusVersion version = NautilusVersion::V46;
     std::string extensionPath;
@@ -35,8 +37,9 @@ struct NautilusConfig {
     bool enableCaching = true;
 };
 
-class LinuxNautilusExtension {
-public:
+class LinuxNautilusExtension
+{
+  public:
     LinuxNautilusExtension() = default;
     ~LinuxNautilusExtension() = default;
 
@@ -45,42 +48,46 @@ public:
     LinuxNautilusExtension(LinuxNautilusExtension&&) noexcept = default;
     LinuxNautilusExtension& operator=(LinuxNautilusExtension&&) noexcept = default;
 
-    bool Initialize(NautilusConfig const& config) {
+    bool Initialize(NautilusConfig const& config)
+    {
         m_config = config;
         return true;
     }
 
-    bool RegisterProvider() {
+    bool RegisterProvider()
+    {
         if (m_registered)
             return false;
         m_registered = true;
         return true;
     }
 
-    bool UnregisterProvider() {
+    bool UnregisterProvider()
+    {
         m_registered = false;
         return true;
     }
 
-    [[nodiscard]] bool IsRegistered() const {
+    [[nodiscard]] bool IsRegistered() const
+    {
         return m_registered;
     }
 
-    [[nodiscard]] std::vector<std::string> GetSupportedFormats() const {
-        return {
-            "image/png", "image/jpeg", "image/webp", "image/avif",
-            "image/heif", "image/jxl", "image/tiff", "image/bmp",
-            "application/pdf", "image/x-raw", "model/gltf-binary"
-        };
+    [[nodiscard]] std::vector<std::string> GetSupportedFormats() const
+    {
+        return {"image/png",  "image/jpeg", "image/webp",      "image/avif",  "image/heif",       "image/jxl",
+                "image/tiff", "image/bmp",  "application/pdf", "image/x-raw", "model/gltf-binary"};
     }
 
-    [[nodiscard]] NautilusConfig const& GetConfig() const {
+    [[nodiscard]] NautilusConfig const& GetConfig() const
+    {
         return m_config;
     }
 
-private:
+  private:
     NautilusConfig m_config;
     bool m_registered = false;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -8,57 +8,66 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct ReporterBatchProgress {
+struct ReporterBatchProgress
+{
     uint32_t totalItems = 0;
     uint32_t completedItems = 0;
     uint32_t failedItems = 0;
     uint32_t skippedItems = 0;
-    double   progressPercent = 0.0;
-    double   throughputPerSec = 0.0;
-    double   estimatedRemainingMs = 0.0;
-    double   elapsedMs = 0.0;
-    bool     isComplete = false;
+    double progressPercent = 0.0;
+    double throughputPerSec = 0.0;
+    double estimatedRemainingMs = 0.0;
+    double elapsedMs = 0.0;
+    bool isComplete = false;
     std::wstring currentFile;
 };
 
-struct ReporterItemResult {
+struct ReporterItemResult
+{
     std::wstring filePath;
-    bool         success = false;
-    double       decodeMs = 0.0;
-    uint32_t     errorCode = 0;
+    bool success = false;
+    double decodeMs = 0.0;
+    uint32_t errorCode = 0;
 };
 
-struct BatchReporterStats {
+struct BatchReporterStats
+{
     uint32_t batchesStarted = 0;
     uint32_t batchesCompleted = 0;
     uint64_t totalItemsProcessed = 0;
-    double   bestThroughput = 0.0;
-    double   avgThroughput = 0.0;
+    double bestThroughput = 0.0;
+    double avgThroughput = 0.0;
 };
 
-class BatchProgressReporter {
-public:
-    BatchProgressReporter() {
+class BatchProgressReporter
+{
+  public:
+    BatchProgressReporter()
+    {
         InitializeSRWLock(&m_lock);
         QueryPerformanceFrequency(&m_freq);
     }
     ~BatchProgressReporter() = default;
 
-    static const wchar_t* GetName() { return L"BatchProgressReporter"; }
+    static const wchar_t* GetName()
+    {
+        return L"BatchProgressReporter";
+    }
 
     /// Start a new batch operation.
-    void BeginBatch(uint32_t totalItems) {
+    void BeginBatch(uint32_t totalItems)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_progress = {};
         m_progress.totalItems = totalItems;
@@ -71,13 +80,18 @@ public:
     }
 
     /// Report an individual item completion.
-    void ReportItem(const ReporterItemResult& result) {
+    void ReportItem(const ReporterItemResult& result)
+    {
         AcquireSRWLockExclusive(&m_lock);
-        if (!m_isActive) { ReleaseSRWLockExclusive(&m_lock); return; }
+        if (!m_isActive) {
+            ReleaseSRWLockExclusive(&m_lock);
+            return;
+        }
 
         m_results.push_back(result);
         m_progress.completedItems++;
-        if (!result.success) m_progress.failedItems++;
+        if (!result.success)
+            m_progress.failedItems++;
         m_progress.currentFile = result.filePath;
 
         // Update metrics
@@ -94,11 +108,10 @@ public:
             m_progress.estimatedRemainingMs = 1000.0 * remaining / m_progress.throughputPerSec;
         }
 
-        m_progress.progressPercent = m_progress.totalItems > 0 ?
-            100.0 * m_progress.completedItems / m_progress.totalItems : 0.0;
+        m_progress.progressPercent =
+            m_progress.totalItems > 0 ? 100.0 * m_progress.completedItems / m_progress.totalItems : 0.0;
 
-        m_progress.isComplete = (m_progress.completedItems + m_progress.skippedItems
-            >= m_progress.totalItems);
+        m_progress.isComplete = (m_progress.completedItems + m_progress.skippedItems >= m_progress.totalItems);
         if (m_progress.isComplete) {
             m_isActive = false;
             m_stats.batchesCompleted++;
@@ -111,18 +124,21 @@ public:
     }
 
     /// Skip an item (already cached, unsupported, etc.)
-    void SkipItem([[maybe_unused]] const std::wstring& filePath) {
+    void SkipItem([[maybe_unused]] const std::wstring& filePath)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_progress.skippedItems++;
-        m_progress.progressPercent = m_progress.totalItems > 0 ?
-            100.0 * (m_progress.completedItems + m_progress.skippedItems) / m_progress.totalItems : 0.0;
-        m_progress.isComplete = (m_progress.completedItems + m_progress.skippedItems
-            >= m_progress.totalItems);
+        m_progress.progressPercent =
+            m_progress.totalItems > 0
+                ? 100.0 * (m_progress.completedItems + m_progress.skippedItems) / m_progress.totalItems
+                : 0.0;
+        m_progress.isComplete = (m_progress.completedItems + m_progress.skippedItems >= m_progress.totalItems);
         ReleaseSRWLockExclusive(&m_lock);
     }
 
     /// Get current progress snapshot.
-    ReporterBatchProgress GetProgress() const {
+    ReporterBatchProgress GetProgress() const
+    {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
         ReporterBatchProgress p = m_progress;
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
@@ -130,16 +146,22 @@ public:
     }
 
     /// Format remaining time as human-readable string.
-    static std::wstring FormatETA(double remainingMs) {
-        if (remainingMs < 1000)   return std::to_wstring(static_cast<int>(remainingMs)) + L" ms";
-        if (remainingMs < 60000)  return std::to_wstring(static_cast<int>(remainingMs / 1000)) + L" sec";
+    static std::wstring FormatETA(double remainingMs)
+    {
+        if (remainingMs < 1000)
+            return std::to_wstring(static_cast<int>(remainingMs)) + L" ms";
+        if (remainingMs < 60000)
+            return std::to_wstring(static_cast<int>(remainingMs / 1000)) + L" sec";
         double mins = remainingMs / 60000.0;
         return std::to_wstring(static_cast<int>(mins)) + L" min";
     }
 
-    BatchReporterStats GetStats() const { return m_stats; }
+    BatchReporterStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     SRWLOCK m_lock{};
     LARGE_INTEGER m_freq{};
     LARGE_INTEGER m_startTime{};
@@ -149,5 +171,5 @@ private:
     mutable BatchReporterStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

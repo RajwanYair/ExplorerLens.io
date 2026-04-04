@@ -8,4 +8,4 @@ namespace ExplorerLens::Engine {
 EnterpriseConsoleV3::EnterpriseConsoleV3(ConsoleEndpoint) {}
 EnterpriseConsoleV3::~EnterpriseConsoleV3() = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

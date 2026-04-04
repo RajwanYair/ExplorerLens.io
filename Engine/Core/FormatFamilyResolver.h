@@ -14,24 +14,26 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class FormatFamily : uint8_t {
-    Image      = 0,
-    Video      = 1,
-    Audio      = 2,
-    Document   = 3,
-    Archive    = 4,
+    Image = 0,
+    Video = 1,
+    Audio = 2,
+    Document = 3,
+    Archive = 4,
     Scientific = 5
 };
 
-struct FormatNode {
-    std::string              name;
-    FormatFamily             family     = FormatFamily::Image;
+struct FormatNode
+{
+    std::string name;
+    FormatFamily family = FormatFamily::Image;
     std::vector<std::string> extensions;
 };
 
-class FormatFamilyResolver {
-public:
+class FormatFamilyResolver
+{
+  public:
     FormatFamilyResolver() = default;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

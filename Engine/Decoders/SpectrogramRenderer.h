@@ -15,34 +15,42 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct SpectrogramConfig {
+struct SpectrogramConfig
+{
     uint32_t fftSize = 1024;
     uint32_t hopSize = 512;
-    uint32_t numBins = 128;      // Output frequency bins
-    float    minFreqHz = 20.0f;
-    float    maxFreqHz = 20000.0f;
-    float    dynamicRangeDB = 80.0f;
+    uint32_t numBins = 128;  // Output frequency bins
+    float minFreqHz = 20.0f;
+    float maxFreqHz = 20000.0f;
+    float dynamicRangeDB = 80.0f;
 };
 
-struct SpectrogramFrame {
-    std::vector<float> magnitudes; // [0..1] per bin
+struct SpectrogramFrame
+{
+    std::vector<float> magnitudes;  // [0..1] per bin
 };
 
-struct SpectrogramStats {
+struct SpectrogramStats
+{
     uint32_t framesComputed = 0;
     uint32_t fftSize = 0;
     uint32_t totalFrames = 0;
 };
 
-class SpectrogramRenderer {
-public:
+class SpectrogramRenderer
+{
+  public:
     SpectrogramRenderer() = default;
     ~SpectrogramRenderer() = default;
 
-    static const wchar_t* GetName() { return L"SpectrogramRenderer"; }
+    static const wchar_t* GetName()
+    {
+        return L"SpectrogramRenderer";
+    }
 
     /// Apply Hann window to a frame of samples.
-    void ApplyHannWindow(std::vector<float>& frame) const {
+    void ApplyHannWindow(std::vector<float>& frame) const
+    {
         const size_t N = frame.size();
         constexpr double PI = 3.14159265358979323846;
         for (size_t i = 0; i < N; ++i) {
@@ -52,7 +60,8 @@ public:
     }
 
     /// Compute magnitude spectrum using DFT (O(N^2) — suitable for small FFT sizes).
-    std::vector<float> ComputeDFT(const std::vector<float>& frame) const {
+    std::vector<float> ComputeDFT(const std::vector<float>& frame) const
+    {
         const size_t N = frame.size();
         const size_t halfN = N / 2 + 1;
         std::vector<float> mags(halfN);
@@ -71,18 +80,21 @@ public:
     }
 
     /// Convert magnitude to dB scale, clamped to dynamic range.
-    float MagnitudeToDB(float mag, float dynamicRangeDB) const {
-        if (mag <= 0.0f) return 0.0f;
+    float MagnitudeToDB(float mag, float dynamicRangeDB) const
+    {
+        if (mag <= 0.0f)
+            return 0.0f;
         float db = 20.0f * std::log10(mag);
         float normalized = 1.0f + db / dynamicRangeDB;
         return std::clamp(normalized, 0.0f, 1.0f);
     }
 
     /// Compute full spectrogram from sample buffer.
-    std::vector<SpectrogramFrame> Compute(const float* samples, uint32_t count,
-        const SpectrogramConfig& config) const {
+    std::vector<SpectrogramFrame> Compute(const float* samples, uint32_t count, const SpectrogramConfig& config) const
+    {
         std::vector<SpectrogramFrame> result;
-        if (!samples || count < config.fftSize) return result;
+        if (!samples || count < config.fftSize)
+            return result;
 
         for (uint32_t offset = 0; offset + config.fftSize <= count; offset += config.hopSize) {
             std::vector<float> frame(samples + offset, samples + offset + config.fftSize);
@@ -99,11 +111,14 @@ public:
         return result;
     }
 
-    SpectrogramStats GetStats() const { return m_stats; }
+    SpectrogramStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     mutable SpectrogramStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

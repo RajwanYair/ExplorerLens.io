@@ -13,5 +13,5 @@ namespace Engine {
 // Alias for backward compatibility
 using SettingsImportExport = SettingsExportImport;
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

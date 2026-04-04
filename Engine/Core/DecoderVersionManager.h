@@ -16,7 +16,8 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct DecoderVersionInfo {
+struct DecoderVersionInfo
+{
     std::wstring decoderName;
     uint32_t majorVersion = 0;
     uint32_t minorVersion = 0;
@@ -34,14 +35,16 @@ enum class VersionCompatibility : uint8_t {
     Unsupported
 };
 
-struct VersionCheckResult {
+struct VersionCheckResult
+{
     std::wstring decoderName;
     VersionCompatibility compatibility = VersionCompatibility::FullyCompatible;
     bool upgradeAvailable = false;
     std::wstring upgradeMessage;
 };
 
-struct DecoderVersionStats {
+struct DecoderVersionStats
+{
     uint64_t totalChecks = 0;
     uint32_t registeredDecoders = 0;
     uint32_t deprecatedDecoders = 0;
@@ -49,31 +52,37 @@ struct DecoderVersionStats {
     bool initialized = false;
 };
 
-class DecoderVersionManager {
-public:
-    static DecoderVersionManager& Instance() {
+class DecoderVersionManager
+{
+  public:
+    static DecoderVersionManager& Instance()
+    {
         static DecoderVersionManager instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_decoders.clear();
         m_stats = {};
         m_stats.initialized = true;
     }
 
-    void RegisterDecoder(const DecoderVersionInfo& info) {
+    void RegisterDecoder(const DecoderVersionInfo& info)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_decoders[info.decoderName] = info;
         m_stats.registeredDecoders = static_cast<uint32_t>(m_decoders.size());
-        if (info.deprecated) m_stats.deprecatedDecoders++;
-        if (info.supportsGPU) m_stats.gpuCapableDecoders++;
+        if (info.deprecated)
+            m_stats.deprecatedDecoders++;
+        if (info.supportsGPU)
+            m_stats.gpuCapableDecoders++;
     }
 
-    VersionCheckResult CheckCompatibility(const std::wstring& decoderName,
-                                           uint32_t requiredMajor,
-                                           uint32_t requiredMinor = 0) {
+    VersionCheckResult CheckCompatibility(const std::wstring& decoderName, uint32_t requiredMajor,
+                                          uint32_t requiredMinor = 0)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalChecks++;
 
@@ -106,30 +115,35 @@ public:
         return result;
     }
 
-    DecoderVersionInfo GetDecoderInfo(const std::wstring& decoderName) const {
+    DecoderVersionInfo GetDecoderInfo(const std::wstring& decoderName) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_decoders.find(decoderName);
-        if (it != m_decoders.end()) return it->second;
+        if (it != m_decoders.end())
+            return it->second;
         return {};
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    DecoderVersionStats GetStats() const {
+    DecoderVersionStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_decoders.clear();
     }
 
-private:
+  private:
     DecoderVersionManager() = default;
     ~DecoderVersionManager() = default;
     DecoderVersionManager(const DecoderVersionManager&) = delete;
@@ -140,5 +154,5 @@ private:
     DecoderVersionStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

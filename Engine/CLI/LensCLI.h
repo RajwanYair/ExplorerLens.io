@@ -6,26 +6,27 @@
 //
 #pragma once
 #include <windows.h>
+#include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
-#include <cstdint>
 
 // Opaque SDK handle types for the lens.exe C API.
 // Full definitions live in SDK/plugin_api.h at runtime.
-using LENS_ENGINE_HANDLE    = void*;
+using LENS_ENGINE_HANDLE = void*;
 using LENS_THUMBNAIL_HANDLE = void*;
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 // Exit codes for lens.exe
 enum class CLIExitCode : int {
-    Success        = 0,
-    GeneralError   = 1,
-    InvalidArgs    = 2,
-    FormatUnknown  = 3,
-    LicenseError   = 4,
-    IOError        = 5,
+    Success = 0,
+    GeneralError = 1,
+    InvalidArgs = 2,
+    FormatUnknown = 3,
+    LicenseError = 4,
+    IOError = 5,
     PartialFailure = 6,  // Batch: some files failed
 };
 
@@ -42,34 +43,37 @@ enum class CLICommand {
 };
 
 // Parsed options for the 'generate' subcommand
-struct GenerateOptions {
+struct GenerateOptions
+{
     std::wstring inputPath;
-    std::wstring outputPath;   // If empty: <input>_thumb.png
-    uint32_t     width       = 256;
-    uint32_t     height      = 256;
-    bool         highQuality = false;
-    bool         forceCPU    = false;
-    uint32_t     timeoutMs   = 15000;
+    std::wstring outputPath;  // If empty: <input>_thumb.png
+    uint32_t width = 256;
+    uint32_t height = 256;
+    bool highQuality = false;
+    bool forceCPU = false;
+    uint32_t timeoutMs = 15000;
 };
 
 // Parsed options for the 'batch' subcommand
-struct BatchOptions {
+struct BatchOptions
+{
     std::wstring inputDir;
     std::wstring outputDir;
-    std::wstring filter;      // Glob or extension e.g. "*.psd"
-    uint32_t     width       = 256;
-    uint32_t     height      = 256;
-    uint32_t     threads     = 0;    // 0 = auto
-    bool         recursive   = false;
-    bool         skipExisting= true;
-    bool         progressBar = true;
+    std::wstring filter;  // Glob or extension e.g. "*.psd"
+    uint32_t width = 256;
+    uint32_t height = 256;
+    uint32_t threads = 0;  // 0 = auto
+    bool recursive = false;
+    bool skipExisting = true;
+    bool progressBar = true;
 };
 
 // Progress callback for batch operations: (done, total, currentFile)
 using ProgressCallback = std::function<void(uint32_t, uint32_t, const std::wstring&)>;
 
-class LensCLI {
-public:
+class LensCLI
+{
+  public:
     explicit LensCLI(LENS_ENGINE_HANDLE hEngine) : m_hEngine(hEngine) {}
 
     // Entry point — call from wmain() with argc/argv
@@ -90,13 +94,14 @@ public:
     static void PrintInfo(const wchar_t* msg);
     static void PrintProgressBar(uint32_t done, uint32_t total, uint32_t width = 40);
 
-private:
+  private:
     LENS_ENGINE_HANDLE m_hEngine;
 
     static bool SaveBitmapToPNG(LENS_THUMBNAIL_HANDLE hThumb, const std::wstring& outPath);
     static std::wstring DefaultOutputPath(const std::wstring& inputPath);
 
-    static void PrintUsage() {
+    static void PrintUsage()
+    {
         wprintf(L"\n");
         wprintf(L"  ExplorerLens CLI — GPU-accelerated thumbnail generator\n");
         wprintf(L"  Version 32.1.0 (Fomalhaut-R)\n");
@@ -138,39 +143,57 @@ private:
 
 bool LensCLI::s_ansiEnabled = LensCLI::EnableAnsiIfPossible();
 
-inline bool LensCLI::EnableAnsiIfPossible() {
+inline bool LensCLI::EnableAnsiIfPossible()
+{
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
-    if (!GetConsoleMode(hOut, &mode)) return false;
+    if (!GetConsoleMode(hOut, &mode))
+        return false;
     return SetConsoleMode(hOut, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0;
 }
 
-inline void LensCLI::PrintSuccess(const wchar_t* msg) {
-    if (s_ansiEnabled) wprintf(L"\033[32m✔ %s\033[0m\n", msg);
-    else               wprintf(L"[OK] %s\n", msg);
+inline void LensCLI::PrintSuccess(const wchar_t* msg)
+{
+    if (s_ansiEnabled)
+        wprintf(L"\033[32m✔ %s\033[0m\n", msg);
+    else
+        wprintf(L"[OK] %s\n", msg);
 }
-inline void LensCLI::PrintError(const wchar_t* msg) {
-    if (s_ansiEnabled) fwprintf(stderr, L"\033[31m✖ %s\033[0m\n", msg);
-    else               fwprintf(stderr, L"[ERR] %s\n", msg);
+inline void LensCLI::PrintError(const wchar_t* msg)
+{
+    if (s_ansiEnabled)
+        fwprintf(stderr, L"\033[31m✖ %s\033[0m\n", msg);
+    else
+        fwprintf(stderr, L"[ERR] %s\n", msg);
 }
-inline void LensCLI::PrintWarning(const wchar_t* msg) {
-    if (s_ansiEnabled) wprintf(L"\033[33m⚠ %s\033[0m\n", msg);
-    else               wprintf(L"[WARN] %s\n", msg);
+inline void LensCLI::PrintWarning(const wchar_t* msg)
+{
+    if (s_ansiEnabled)
+        wprintf(L"\033[33m⚠ %s\033[0m\n", msg);
+    else
+        wprintf(L"[WARN] %s\n", msg);
 }
-inline void LensCLI::PrintInfo(const wchar_t* msg) {
-    if (s_ansiEnabled) wprintf(L"\033[36mℹ %s\033[0m\n", msg);
-    else               wprintf(L"[INFO] %s\n", msg);
+inline void LensCLI::PrintInfo(const wchar_t* msg)
+{
+    if (s_ansiEnabled)
+        wprintf(L"\033[36mℹ %s\033[0m\n", msg);
+    else
+        wprintf(L"[INFO] %s\n", msg);
 }
 
-inline void LensCLI::PrintProgressBar(uint32_t done, uint32_t total, uint32_t width) {
-    if (!total) return;
+inline void LensCLI::PrintProgressBar(uint32_t done, uint32_t total, uint32_t width)
+{
+    if (!total)
+        return;
     uint32_t filled = (done * width) / total;
     wprintf(L"\r[");
     for (uint32_t i = 0; i < width; ++i)
         wprintf(i < filled ? L"█" : L"░");
     wprintf(L"] %u/%u", done, total);
-    if (done == total) wprintf(L"\n");
+    if (done == total)
+        wprintf(L"\n");
     fflush(stdout);
 }
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

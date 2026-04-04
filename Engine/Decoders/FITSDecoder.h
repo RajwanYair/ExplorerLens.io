@@ -6,13 +6,13 @@
 //
 #pragma once
 
+#include <algorithm>
+#include <array>
+#include <cmath>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
-#include <array>
-#include <memory>
-#include <cmath>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -33,7 +33,8 @@ enum class FITSColorLUT : uint8_t {
     STScIDefault
 };
 
-struct FITSHeaderInfo {
+struct FITSHeaderInfo
+{
     int32_t bitpix = 16;
     uint32_t naxis = 2;
     uint32_t naxis1 = 0;
@@ -47,7 +48,8 @@ struct FITSHeaderInfo {
     std::string bunit;
 };
 
-struct FITSPixelStatistics {
+struct FITSPixelStatistics
+{
     double minValue = 0.0;
     double maxValue = 0.0;
     double meanValue = 0.0;
@@ -57,8 +59,9 @@ struct FITSPixelStatistics {
     uint64_t nanCount = 0;
 };
 
-class FITSDecoder {
-public:
+class FITSDecoder
+{
+  public:
     FITSDecoder() = default;
     ~FITSDecoder() = default;
 
@@ -67,23 +70,34 @@ public:
     FITSDecoder(FITSDecoder&&) noexcept = default;
     FITSDecoder& operator=(FITSDecoder&&) noexcept = default;
 
-    bool DecodeFromFile(const std::wstring& filePath, uint32_t targetWidth, uint32_t targetHeight) {
+    bool DecodeFromFile(const std::wstring& filePath, uint32_t targetWidth, uint32_t targetHeight)
+    {
         m_filePath = filePath;
         m_targetWidth = targetWidth;
         m_targetHeight = targetHeight;
         m_decoded = ParseHeader() && ReadImageData();
-        if (m_decoded) ComputeStatistics();
+        if (m_decoded)
+            ComputeStatistics();
         return m_decoded;
     }
 
-    const FITSHeaderInfo& GetHeaderInfo() const { return m_header; }
-    const FITSPixelStatistics& GetPixelStatistics() const { return m_stats; }
+    const FITSHeaderInfo& GetHeaderInfo() const
+    {
+        return m_header;
+    }
+    const FITSPixelStatistics& GetPixelStatistics() const
+    {
+        return m_stats;
+    }
 
-    bool ApplyStretch(std::vector<uint8_t>& output) const {
-        if (m_rawData.empty()) return false;
+    bool ApplyStretch(std::vector<uint8_t>& output) const
+    {
+        if (m_rawData.empty())
+            return false;
         output.resize(m_rawData.size());
         const double range = m_stats.maxValue - m_stats.minValue;
-        if (range <= 0.0) return false;
+        if (range <= 0.0)
+            return false;
         for (size_t i = 0; i < m_rawData.size(); ++i) {
             double norm = (m_rawData[i] - m_stats.minValue) / range;
             norm = ApplyStretchFunction(norm);
@@ -92,42 +106,72 @@ public:
         return true;
     }
 
-    void SetColorLUT(FITSColorLUT lut) { m_colorLUT = lut; }
-    FITSColorLUT GetColorLUT() const { return m_colorLUT; }
-    void SetStretchMode(FITSStretchMode mode) { m_stretchMode = mode; }
-    FITSStretchMode GetStretchMode() const { return m_stretchMode; }
+    void SetColorLUT(FITSColorLUT lut)
+    {
+        m_colorLUT = lut;
+    }
+    FITSColorLUT GetColorLUT() const
+    {
+        return m_colorLUT;
+    }
+    void SetStretchMode(FITSStretchMode mode)
+    {
+        m_stretchMode = mode;
+    }
+    FITSStretchMode GetStretchMode() const
+    {
+        return m_stretchMode;
+    }
 
-    bool RenderWithAnnotations(std::vector<uint8_t>& rgbOut, bool showObjectLabel = true) const {
-        if (!m_decoded) return false;
+    bool RenderWithAnnotations(std::vector<uint8_t>& rgbOut, bool showObjectLabel = true) const
+    {
+        if (!m_decoded)
+            return false;
         const size_t pixels = static_cast<size_t>(m_targetWidth) * m_targetHeight;
         rgbOut.resize(pixels * 3, 0);
         std::vector<uint8_t> stretched;
-        if (!ApplyStretch(stretched)) return false;
+        if (!ApplyStretch(stretched))
+            return false;
         ApplyLUT(stretched, rgbOut);
-        if (showObjectLabel && !m_header.objectName.empty()) OverlayAnnotation(rgbOut);
+        if (showObjectLabel && !m_header.objectName.empty())
+            OverlayAnnotation(rgbOut);
         return true;
     }
 
-private:
-    bool ParseHeader() { return true; }
-    bool ReadImageData() { return true; }
+  private:
+    bool ParseHeader()
+    {
+        return true;
+    }
+    bool ReadImageData()
+    {
+        return true;
+    }
 
-    void ComputeStatistics() {
-        if (m_rawData.empty()) return;
+    void ComputeStatistics()
+    {
+        if (m_rawData.empty())
+            return;
         m_stats.totalPixels = m_rawData.size();
         m_stats.minValue = *std::min_element(m_rawData.begin(), m_rawData.end());
         m_stats.maxValue = *std::max_element(m_rawData.begin(), m_rawData.end());
         double sum = 0.0;
-        for (double v : m_rawData) sum += v;
+        for (double v : m_rawData)
+            sum += v;
         m_stats.meanValue = sum / static_cast<double>(m_rawData.size());
     }
 
-    double ApplyStretchFunction(double norm) const {
+    double ApplyStretchFunction(double norm) const
+    {
         switch (m_stretchMode) {
-            case FITSStretchMode::Logarithmic: return std::log1p(norm * 1000.0) / std::log1p(1000.0);
-            case FITSStretchMode::Sqrt:        return std::sqrt(norm);
-            case FITSStretchMode::Asinh:       return std::asinh(norm * 10.0) / std::asinh(10.0);
-            default:                           return norm;
+            case FITSStretchMode::Logarithmic:
+                return std::log1p(norm * 1000.0) / std::log1p(1000.0);
+            case FITSStretchMode::Sqrt:
+                return std::sqrt(norm);
+            case FITSStretchMode::Asinh:
+                return std::asinh(norm * 10.0) / std::asinh(10.0);
+            default:
+                return norm;
         }
     }
 
@@ -145,5 +189,5 @@ private:
     std::vector<double> m_rawData;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

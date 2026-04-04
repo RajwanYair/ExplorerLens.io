@@ -8,9 +8,9 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -29,17 +29,20 @@ enum class ThemeTransition : uint8_t {
 using ThemeChangeCallback = std::function<void(ThemeTransition)>;
 
 /// System theme monitor — watches for OS theme changes
-class SystemThemeMonitor {
-public:
+class SystemThemeMonitor
+{
+  public:
     /// Register a callback for theme changes
-    uint32_t RegisterCallback(ThemeChangeCallback cb) {
+    uint32_t RegisterCallback(ThemeChangeCallback cb)
+    {
         uint32_t id = m_nextId++;
-        m_callbacks.push_back({ id, std::move(cb) });
+        m_callbacks.push_back({id, std::move(cb)});
         return id;
     }
 
     /// Unregister a callback by ID
-    bool UnregisterCallback(uint32_t id) {
+    bool UnregisterCallback(uint32_t id)
+    {
         for (auto it = m_callbacks.begin(); it != m_callbacks.end(); ++it) {
             if (it->id == id) {
                 m_callbacks.erase(it);
@@ -50,38 +53,66 @@ public:
     }
 
     /// Simulate a theme change (for testing)
-    void SimulateTransition(ThemeTransition t) {
+    void SimulateTransition(ThemeTransition t)
+    {
         m_lastTransition = t;
         m_transitionCount++;
         for (auto& entry : m_callbacks) {
-            if (entry.callback) entry.callback(t);
+            if (entry.callback)
+                entry.callback(t);
         }
     }
 
     /// Get current detected theme state
-    bool IsDarkMode() const { return m_isDark; }
-    void SetDarkMode(bool dark) { m_isDark = dark; }
+    bool IsDarkMode() const
+    {
+        return m_isDark;
+    }
+    void SetDarkMode(bool dark)
+    {
+        m_isDark = dark;
+    }
 
     /// Stats
-    uint32_t TransitionCount() const { return m_transitionCount; }
-    uint32_t CallbackCount()   const { return static_cast<uint32_t>(m_callbacks.size()); }
-    ThemeTransition LastTransition() const { return m_lastTransition; }
+    uint32_t TransitionCount() const
+    {
+        return m_transitionCount;
+    }
+    uint32_t CallbackCount() const
+    {
+        return static_cast<uint32_t>(m_callbacks.size());
+    }
+    ThemeTransition LastTransition() const
+    {
+        return m_lastTransition;
+    }
 
-    static const wchar_t* TransitionName(ThemeTransition t) {
+    static const wchar_t* TransitionName(ThemeTransition t)
+    {
         switch (t) {
-        case ThemeTransition::LightToDark:        return L"LightToDark";
-        case ThemeTransition::DarkToLight:        return L"DarkToLight";
-        case ThemeTransition::ToHighContrast:     return L"ToHighContrast";
-        case ThemeTransition::FromHighContrast:   return L"FromHighContrast";
-        case ThemeTransition::AccentColorChanged: return L"AccentColorChanged";
-        default: return L"Unknown";
+            case ThemeTransition::LightToDark:
+                return L"LightToDark";
+            case ThemeTransition::DarkToLight:
+                return L"DarkToLight";
+            case ThemeTransition::ToHighContrast:
+                return L"ToHighContrast";
+            case ThemeTransition::FromHighContrast:
+                return L"FromHighContrast";
+            case ThemeTransition::AccentColorChanged:
+                return L"AccentColorChanged";
+            default:
+                return L"Unknown";
         }
     }
 
-    static size_t TransitionTypeCount() { return static_cast<size_t>(ThemeTransition::COUNT); }
+    static size_t TransitionTypeCount()
+    {
+        return static_cast<size_t>(ThemeTransition::COUNT);
+    }
 
-private:
-    struct CallbackEntry {
+  private:
+    struct CallbackEntry
+    {
         uint32_t id;
         ThemeChangeCallback callback;
     };
@@ -92,5 +123,5 @@ private:
     ThemeTransition m_lastTransition = ThemeTransition::LightToDark;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

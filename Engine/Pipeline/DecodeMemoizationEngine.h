@@ -8,33 +8,36 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <cstdint>
-#include <vector>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct MemoKey {
+struct MemoKey
+{
     std::wstring path;
-    uint64_t     fileSize = 0;
-    uint64_t     lastWriteTime = 0;
-    uint32_t     thumbWidth = 0;
-    uint32_t     thumbHeight = 0;
+    uint64_t fileSize = 0;
+    uint64_t lastWriteTime = 0;
+    uint32_t thumbWidth = 0;
+    uint32_t thumbHeight = 0;
 
-    bool operator==(const MemoKey& other) const {
-        return path == other.path && fileSize == other.fileSize &&
-            lastWriteTime == other.lastWriteTime &&
-            thumbWidth == other.thumbWidth && thumbHeight == other.thumbHeight;
+    bool operator==(const MemoKey& other) const
+    {
+        return path == other.path && fileSize == other.fileSize && lastWriteTime == other.lastWriteTime
+               && thumbWidth == other.thumbWidth && thumbHeight == other.thumbHeight;
     }
 };
 
-struct MemoKeyHash {
-    size_t operator()(const MemoKey& k) const {
+struct MemoKeyHash
+{
+    size_t operator()(const MemoKey& k) const
+    {
         size_t h = std::hash<std::wstring>{}(k.path);
         h ^= std::hash<uint64_t>{}(k.fileSize) + 0x9e3779b9 + (h << 6) + (h >> 2);
         h ^= std::hash<uint64_t>{}(k.lastWriteTime) + 0x9e3779b9 + (h << 6) + (h >> 2);
@@ -43,7 +46,8 @@ struct MemoKeyHash {
     }
 };
 
-struct MemoEntry {
+struct MemoEntry
+{
     std::vector<uint8_t> bgraData;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -51,28 +55,38 @@ struct MemoEntry {
     uint64_t lastAccessTick = 0;
 };
 
-struct MemoStats {
+struct MemoStats
+{
     uint32_t entries = 0;
     uint64_t hits = 0;
     uint64_t misses = 0;
     uint64_t evictions = 0;
     uint64_t memoryUsedBytes = 0;
-    double   hitRatePercent = 0.0;
+    double hitRatePercent = 0.0;
 };
 
-class DecodeMemoizationEngine {
-public:
-    DecodeMemoizationEngine() : m_maxMemoryBytes(64 * 1024 * 1024) {
+class DecodeMemoizationEngine
+{
+  public:
+    DecodeMemoizationEngine() : m_maxMemoryBytes(64 * 1024 * 1024)
+    {
         InitializeSRWLock(&m_lock);
     }
     ~DecodeMemoizationEngine() = default;
 
-    static const wchar_t* GetName() { return L"DecodeMemoizationEngine"; }
+    static const wchar_t* GetName()
+    {
+        return L"DecodeMemoizationEngine";
+    }
 
-    void SetMaxMemory(uint64_t bytes) { m_maxMemoryBytes = bytes; }
+    void SetMaxMemory(uint64_t bytes)
+    {
+        m_maxMemoryBytes = bytes;
+    }
 
     /// Look up cached decode result.
-    bool Lookup(const MemoKey& key, MemoEntry& out) {
+    bool Lookup(const MemoKey& key, MemoEntry& out)
+    {
         AcquireSRWLockShared(&m_lock);
         auto it = m_cache.find(key);
         if (it == m_cache.end()) {
@@ -97,7 +111,8 @@ public:
     }
 
     /// Store a decode result.
-    void Store(const MemoKey& key, const MemoEntry& entry) {
+    void Store(const MemoKey& key, const MemoEntry& entry)
+    {
         uint64_t entrySize = entry.bgraData.size();
 
         AcquireSRWLockExclusive(&m_lock);
@@ -114,7 +129,8 @@ public:
     }
 
     /// Clear all cached entries.
-    void Clear() {
+    void Clear()
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_cache.clear();
         m_stats.memoryUsedBytes = 0;
@@ -122,15 +138,17 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    MemoStats GetStats() const {
+    MemoStats GetStats() const
+    {
         MemoStats s = m_stats;
         uint64_t total = s.hits + s.misses;
         s.hitRatePercent = total > 0 ? (100.0 * s.hits / total) : 0.0;
         return s;
     }
 
-private:
-    void EvictLRU() {
+  private:
+    void EvictLRU()
+    {
         // Find entry with oldest access tick
         auto oldest = m_cache.begin();
         for (auto it = m_cache.begin(); it != m_cache.end(); ++it) {
@@ -150,5 +168,5 @@ private:
     mutable MemoStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

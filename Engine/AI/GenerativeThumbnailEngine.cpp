@@ -5,10 +5,19 @@
 
 namespace ExplorerLens::Engine {
 
-bool GenerativeThumbnailEngine::Generate(const GenerationRequest&) { return false; }
+bool GenerativeThumbnailEngine::Generate(const GenerationRequest&)
+{
+    return false;
+}
 void GenerativeThumbnailEngine::SetBackend(GenerativeBackend) {}
-std::vector<GenerationMode> GenerativeThumbnailEngine::GetSupportedModes() const { return {}; }
-bool GenerativeThumbnailEngine::IsAcceleratorAvailable(GenerativeBackend) const { return false; }
+std::vector<GenerationMode> GenerativeThumbnailEngine::GetSupportedModes() const
+{
+    return {};
+}
+bool GenerativeThumbnailEngine::IsAcceleratorAvailable(GenerativeBackend) const
+{
+    return false;
+}
 void GenerativeThumbnailEngine::Shutdown() {}
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

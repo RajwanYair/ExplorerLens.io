@@ -14,48 +14,61 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct ZstdFrameInfo {
+struct ZstdFrameInfo
+{
     uint32_t magicNumber = 0;
     uint64_t frameContentSize = 0;
     uint32_t windowSize = 0;
-    uint8_t  dictionaryId = 0;
-    bool     hasChecksum = false;
-    bool     singleSegment = false;
-    double   compressionRatio = 0.0;
+    uint8_t dictionaryId = 0;
+    bool hasChecksum = false;
+    bool singleSegment = false;
+    double compressionRatio = 0.0;
 };
 
-struct ZstdStats {
+struct ZstdStats
+{
     uint32_t framesInspected = 0;
     uint64_t totalOriginalSize = 0;
     uint64_t totalCompressedSize = 0;
-    double   avgCompressionRatio = 0.0;
+    double avgCompressionRatio = 0.0;
 };
 
-class ZstdFrameDecoder {
-public:
+class ZstdFrameDecoder
+{
+  public:
     ZstdFrameDecoder() = default;
     ~ZstdFrameDecoder() = default;
 
-    static const wchar_t* GetName() { return L"ZstdFrameDecoder"; }
+    static const wchar_t* GetName()
+    {
+        return L"ZstdFrameDecoder";
+    }
 
-    bool CanDecode(const wchar_t* ext) const {
-        if (!ext) return false;
+    bool CanDecode(const wchar_t* ext) const
+    {
+        if (!ext)
+            return false;
         std::wstring e(ext);
-        for (auto& c : e) c = towlower(c);
+        for (auto& c : e)
+            c = towlower(c);
         return e == L".zst" || e == L".zstd";
     }
 
     /// Detect Zstandard magic: 0xFD2FB528
-    bool DetectMagic(const uint8_t* data, size_t size) const {
-        if (!data || size < 4) return false;
+    bool DetectMagic(const uint8_t* data, size_t size) const
+    {
+        if (!data || size < 4)
+            return false;
         uint32_t magic = data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
         return magic == 0xFD2FB528;
     }
 
     /// Parse Zstandard frame header.
-    ZstdFrameInfo ParseFrame(const uint8_t* data, size_t size) const {
+    ZstdFrameInfo ParseFrame(const uint8_t* data, size_t size) const
+    {
         ZstdFrameInfo info;
-        if (!DetectMagic(data, size) || size < 6) return info;
+        if (!DetectMagic(data, size) || size < 6)
+            return info;
 
         info.magicNumber = 0xFD2FB528;
         uint8_t desc = data[4];
@@ -79,10 +92,19 @@ public:
 
         if (fcsFlag > 0 && offset < size) {
             switch (fcsFlag) {
-            case 1: info.frameContentSize = data[offset] + 256; break;
-            case 2: if (offset + 1 < size) info.frameContentSize = data[offset] | (data[offset + 1] << 8); break;
-            case 3: if (offset + 3 < size) info.frameContentSize = data[offset] | (data[offset + 1] << 8) |
-                (static_cast<uint64_t>(data[offset + 2]) << 16) | (static_cast<uint64_t>(data[offset + 3]) << 24); break;
+                case 1:
+                    info.frameContentSize = data[offset] + 256;
+                    break;
+                case 2:
+                    if (offset + 1 < size)
+                        info.frameContentSize = data[offset] | (data[offset + 1] << 8);
+                    break;
+                case 3:
+                    if (offset + 3 < size)
+                        info.frameContentSize = data[offset] | (data[offset + 1] << 8)
+                                                | (static_cast<uint64_t>(data[offset + 2]) << 16)
+                                                | (static_cast<uint64_t>(data[offset + 3]) << 24);
+                    break;
             }
         }
 
@@ -92,11 +114,14 @@ public:
         return info;
     }
 
-    ZstdStats GetStats() const { return m_stats; }
+    ZstdStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     mutable ZstdStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

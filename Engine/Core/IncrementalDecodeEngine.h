@@ -21,7 +21,8 @@ enum class RefinementLevel : uint8_t {
     Final
 };
 
-struct RefinementStep {
+struct RefinementStep
+{
     RefinementLevel level = RefinementLevel::Placeholder;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -29,7 +30,8 @@ struct RefinementStep {
     double decodeTimeMs = 0.0;
 };
 
-struct IncrementalConfig {
+struct IncrementalConfig
+{
     uint32_t targetWidth = 256;
     uint32_t targetHeight = 256;
     uint32_t maxRefinements = 4;
@@ -37,21 +39,26 @@ struct IncrementalConfig {
     bool skipPlaceholder = false;
 };
 
-class IncrementalDecodeEngine {
-public:
+class IncrementalDecodeEngine
+{
+  public:
     IncrementalDecodeEngine() = default;
 
-    bool StartDecode(const std::wstring& filePath, const IncrementalConfig& config) {
-        if (filePath.empty()) return false;
+    bool StartDecode(const std::wstring& filePath, const IncrementalConfig& config)
+    {
+        if (filePath.empty())
+            return false;
         m_config = config;
         m_currentLevel = RefinementLevel::Placeholder;
         m_active = true;
         return true;
     }
 
-    RefinementStep RefineNext() {
+    RefinementStep RefineNext()
+    {
         RefinementStep step;
-        if (!m_active) return step;
+        if (!m_active)
+            return step;
         step.level = m_currentLevel;
         step.width = m_config.targetWidth;
         step.height = m_config.targetHeight;
@@ -62,18 +69,25 @@ public:
         return step;
     }
 
-    bool IsComplete() const {
+    bool IsComplete() const
+    {
         return m_currentLevel == RefinementLevel::Final;
     }
 
-    RefinementLevel GetCurrentLevel() const { return m_currentLevel; }
-    void Cancel() { m_active = false; }
+    RefinementLevel GetCurrentLevel() const
+    {
+        return m_currentLevel;
+    }
+    void Cancel()
+    {
+        m_active = false;
+    }
 
-private:
+  private:
     IncrementalConfig m_config;
     RefinementLevel m_currentLevel = RefinementLevel::Placeholder;
     bool m_active = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -5,32 +5,46 @@
 // to optimize cache line utilization and minimize pipeline stalls.
 //
 #pragma once
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct AdaptiveChunkSizerConfig {
+struct AdaptiveChunkSizerConfig
+{
     bool enabled = true;
     uint32_t minChunkKB = 4;
     uint32_t maxChunkKB = 256;
     std::string label = "AdaptiveChunkSizer";
 };
 
-class AdaptiveChunkSizer {
-public:
-    bool Initialize() {
-        if (m_initialized) return true;
+class AdaptiveChunkSizer
+{
+  public:
+    bool Initialize()
+    {
+        if (m_initialized)
+            return true;
         m_currentChunkKB = m_config.minChunkKB;
         m_initialized = true;
         return true;
     }
-    bool IsInitialized() const { return m_initialized; }
-    AdaptiveChunkSizerConfig GetConfig() const { return m_config; }
-    std::string GetName() const { return m_config.label; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    AdaptiveChunkSizerConfig GetConfig() const
+    {
+        return m_config;
+    }
+    std::string GetName() const
+    {
+        return m_config.label;
+    }
 
-    void RecordThroughput(double mbPerSec) {
+    void RecordThroughput(double mbPerSec)
+    {
         if (mbPerSec > m_lastThroughput && m_currentChunkKB < m_config.maxChunkKB)
             m_currentChunkKB *= 2;
         else if (mbPerSec < m_lastThroughput * 0.8 && m_currentChunkKB > m_config.minChunkKB)
@@ -38,14 +52,17 @@ public:
         m_lastThroughput = mbPerSec;
     }
 
-    uint32_t GetCurrentChunkKB() const { return m_currentChunkKB; }
+    uint32_t GetCurrentChunkKB() const
+    {
+        return m_currentChunkKB;
+    }
 
-private:
+  private:
     bool m_initialized = false;
     AdaptiveChunkSizerConfig m_config;
     uint32_t m_currentChunkKB = 16;
     double m_lastThroughput = 0.0;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

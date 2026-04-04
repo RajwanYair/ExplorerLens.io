@@ -12,63 +12,82 @@
 #include <vector>
 #include "PlatformBuildMatrix.h"
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 // Severity levels for build validation checks.
 // Uses distinct name to avoid collision with MalformedInputHandler::ValidationSeverity.
-enum class BuildValidationSeverity : uint8_t { Pass = 0, Warning, Error, Fatal };
+enum class BuildValidationSeverity : uint8_t {
+    Pass = 0,
+    Warning,
+    Error,
+    Fatal
+};
 
-struct CrossPlatformCheckResult {
-    std::string             checkName;
+struct CrossPlatformCheckResult
+{
+    std::string checkName;
     BuildValidationSeverity severity = BuildValidationSeverity::Pass;
-    std::string             message;
+    std::string message;
 };
 
-struct BuildMatrixReport {
-    BuildPlatform                           platform = BuildPlatform::Unknown;
-    std::vector<CrossPlatformCheckResult>   results;
-    uint32_t                            errorCount   = 0;
-    uint32_t                            warningCount = 0;
+struct BuildMatrixReport
+{
+    BuildPlatform platform = BuildPlatform::Unknown;
+    std::vector<CrossPlatformCheckResult> results;
+    uint32_t errorCount = 0;
+    uint32_t warningCount = 0;
 };
 
-class CrossPlatformBuildValidator {
-public:
-    static CrossPlatformBuildValidator& Instance() {
+class CrossPlatformBuildValidator
+{
+  public:
+    static CrossPlatformBuildValidator& Instance()
+    {
         static CrossPlatformBuildValidator inst;
         return inst;
     }
 
-    BuildMatrixReport Validate() {
+    BuildMatrixReport Validate()
+    {
         BuildMatrixReport r;
         r.platform = DetectPlatform();
         return r;
     }
-    bool HasErrors() const { return false; }
-    std::string GetSummary() const { return "Build matrix: OK"; }
-    BuildPlatform DetectPlatform() const {
+    bool HasErrors() const
+    {
+        return false;
+    }
+    std::string GetSummary() const
+    {
+        return "Build matrix: OK";
+    }
+    BuildPlatform DetectPlatform() const
+    {
 #if defined(_WIN64)
         return BuildPlatform::Win64;
 #elif defined(_WIN32)
         return BuildPlatform::Win32;
 #elif defined(__APPLE__)
-  #if defined(__aarch64__)
+    #if defined(__aarch64__)
         return BuildPlatform::macOS_ARM64;
-  #else
+    #else
         return BuildPlatform::macOS_x64;
-  #endif
+    #endif
 #elif defined(__linux__)
-  #if defined(__aarch64__)
+    #if defined(__aarch64__)
         return BuildPlatform::Linux_ARM64;
-  #else
+    #else
         return BuildPlatform::Linux_x64;
-  #endif
+    #endif
 #else
         return BuildPlatform::Unknown;
 #endif
     }
 
-private:
+  private:
     CrossPlatformBuildValidator() = default;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

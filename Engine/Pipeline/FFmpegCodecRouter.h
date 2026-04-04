@@ -6,11 +6,11 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
-#include <algorithm>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,50 +22,60 @@ enum class VideoCodecPath : uint8_t {
     Unsupported = 3
 };
 
-struct CodecRouteDecision {
-    std::string      codecName;
-    std::string      container;
-    VideoCodecPath   selectedPath = VideoCodecPath::Unsupported;
-    VideoCodecPath   fallbackPath = VideoCodecPath::FFmpeg;
-    bool             hwAccelAvail = false;
-    uint32_t         priorityScore = 0;
-    std::string      reason;
+struct CodecRouteDecision
+{
+    std::string codecName;
+    std::string container;
+    VideoCodecPath selectedPath = VideoCodecPath::Unsupported;
+    VideoCodecPath fallbackPath = VideoCodecPath::FFmpeg;
+    bool hwAccelAvail = false;
+    uint32_t priorityScore = 0;
+    std::string reason;
 };
 
-struct VideoCodecCapability {
-    std::string    codecId;
-    bool           ffmpegSupport = false;
-    bool           mediaFoundationSupport = false;
-    bool           gpuDecodeSupport = false;
-    uint32_t       ffmpegPriority = 50;
-    uint32_t       mfPriority = 50;
+struct VideoCodecCapability
+{
+    std::string codecId;
+    bool ffmpegSupport = false;
+    bool mediaFoundationSupport = false;
+    bool gpuDecodeSupport = false;
+    uint32_t ffmpegPriority = 50;
+    uint32_t mfPriority = 50;
 };
 
-class FFmpegCodecRouter {
-public:
-    static FFmpegCodecRouter& Instance() { static FFmpegCodecRouter s; return s; }
+class FFmpegCodecRouter
+{
+  public:
+    static FFmpegCodecRouter& Instance()
+    {
+        static FFmpegCodecRouter s;
+        return s;
+    }
 
-    void RegisterCodec(const VideoCodecCapability& cap) {
+    void RegisterCodec(const VideoCodecCapability& cap)
+    {
         m_codecs[cap.codecId] = cap;
     }
 
-    void InitializeDefaultCodecs() {
-        RegisterCodec({ "h264",  true, true,  true,  60, 80 });
-        RegisterCodec({ "h265",  true, true,  true,  60, 70 });
-        RegisterCodec({ "vp8",   true, false, false, 80, 0 });
-        RegisterCodec({ "vp9",   true, true,  true,  70, 60 });
-        RegisterCodec({ "av1",   true, true,  true,  50, 70 });
-        RegisterCodec({ "mpeg2", true, true,  false, 70, 60 });
-        RegisterCodec({ "mpeg4", true, true,  false, 70, 50 });
-        RegisterCodec({ "wmv3",  false, true,  false, 0, 90 });
-        RegisterCodec({ "mjpeg", true, false, false, 90, 0 });
-        RegisterCodec({ "prores", true, false, false, 80, 0 });
-        RegisterCodec({ "dnxhd", true, false, false, 80, 0 });
-        RegisterCodec({ "theora", true, false, false, 80, 0 });
+    void InitializeDefaultCodecs()
+    {
+        RegisterCodec({"h264", true, true, true, 60, 80});
+        RegisterCodec({"h265", true, true, true, 60, 70});
+        RegisterCodec({"vp8", true, false, false, 80, 0});
+        RegisterCodec({"vp9", true, true, true, 70, 60});
+        RegisterCodec({"av1", true, true, true, 50, 70});
+        RegisterCodec({"mpeg2", true, true, false, 70, 60});
+        RegisterCodec({"mpeg4", true, true, false, 70, 50});
+        RegisterCodec({"wmv3", false, true, false, 0, 90});
+        RegisterCodec({"mjpeg", true, false, false, 90, 0});
+        RegisterCodec({"prores", true, false, false, 80, 0});
+        RegisterCodec({"dnxhd", true, false, false, 80, 0});
+        RegisterCodec({"theora", true, false, false, 80, 0});
         m_initialized = true;
     }
 
-    CodecRouteDecision RouteFormat(const std::string& codecId, const std::string& container = "") const {
+    CodecRouteDecision RouteFormat(const std::string& codecId, const std::string& container = "") const
+    {
         CodecRouteDecision decision{};
         decision.codecName = codecId;
         decision.container = container;
@@ -96,25 +106,21 @@ public:
                 decision.fallbackPath = VideoCodecPath::MediaFoundation;
                 decision.priorityScore = cap.ffmpegPriority;
                 decision.reason = "FFmpeg preferred (priority " + std::to_string(cap.ffmpegPriority) + ")";
-            }
-            else {
+            } else {
                 decision.selectedPath = VideoCodecPath::MediaFoundation;
                 decision.fallbackPath = VideoCodecPath::FFmpeg;
                 decision.priorityScore = cap.mfPriority;
                 decision.reason = "MF preferred (priority " + std::to_string(cap.mfPriority) + ")";
             }
-        }
-        else if (cap.ffmpegSupport) {
+        } else if (cap.ffmpegSupport) {
             decision.selectedPath = VideoCodecPath::FFmpeg;
             decision.priorityScore = cap.ffmpegPriority;
             decision.reason = "FFmpeg only";
-        }
-        else if (cap.mediaFoundationSupport) {
+        } else if (cap.mediaFoundationSupport) {
             decision.selectedPath = VideoCodecPath::MediaFoundation;
             decision.priorityScore = cap.mfPriority;
             decision.reason = "MediaFoundation only";
-        }
-        else {
+        } else {
             decision.selectedPath = VideoCodecPath::Unsupported;
             decision.reason = "No decoder available";
         }
@@ -122,7 +128,8 @@ public:
         return decision;
     }
 
-    std::vector<std::string> GetSupportedFormats() const {
+    std::vector<std::string> GetSupportedFormats() const
+    {
         std::vector<std::string> formats;
         for (const auto& [id, cap] : m_codecs) {
             if (cap.ffmpegSupport || cap.mediaFoundationSupport || cap.gpuDecodeSupport)
@@ -132,7 +139,8 @@ public:
         return formats;
     }
 
-    std::vector<std::string> GetFFmpegOnlyFormats() const {
+    std::vector<std::string> GetFFmpegOnlyFormats() const
+    {
         std::vector<std::string> formats;
         for (const auto& [id, cap] : m_codecs) {
             if (cap.ffmpegSupport && !cap.mediaFoundationSupport)
@@ -141,22 +149,35 @@ public:
         return formats;
     }
 
-    void SetPreferGPU(bool prefer) { m_preferGPU = prefer; }
-    bool IsInitialized() const { return m_initialized; }
-    size_t CodecCount() const { return m_codecs.size(); }
+    void SetPreferGPU(bool prefer)
+    {
+        m_preferGPU = prefer;
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    size_t CodecCount() const
+    {
+        return m_codecs.size();
+    }
 
-    bool Validate() const {
-        if (!m_initialized) return true; // not initialized is valid initial state
-        if (m_codecs.empty()) return false;
+    bool Validate() const
+    {
+        if (!m_initialized)
+            return true;  // not initialized is valid initial state
+        if (m_codecs.empty())
+            return false;
         for (const auto& [id, cap] : m_codecs) {
-            if (id.empty()) return false;
+            if (id.empty())
+                return false;
             if (!cap.ffmpegSupport && !cap.mediaFoundationSupport && !cap.gpuDecodeSupport)
-                return false; // all-disabled codec shouldn't be registered
+                return false;  // all-disabled codec shouldn't be registered
         }
         return true;
     }
 
-private:
+  private:
     FFmpegCodecRouter() = default;
     ~FFmpegCodecRouter() = default;
     FFmpegCodecRouter(const FFmpegCodecRouter&) = delete;
@@ -167,5 +188,5 @@ private:
     bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

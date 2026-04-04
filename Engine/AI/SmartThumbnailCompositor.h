@@ -33,14 +33,16 @@ enum class LayerSelectionStrategy : uint8_t {
     CoverAndSample
 };
 
-struct CompositeLayer {
+struct CompositeLayer
+{
     uint32_t pageIndex = 0;
     uint32_t layerIndex = 0;
     float weight = 1.0f;
     bool isSelected = false;
 };
 
-struct CompositeRequest {
+struct CompositeRequest
+{
     std::wstring filePath;
     uint32_t totalPages = 1;
     uint32_t totalLayers = 1;
@@ -49,7 +51,8 @@ struct CompositeRequest {
     uint32_t maxLayersToComposite = 4;
 };
 
-struct CompositeResult {
+struct CompositeResult
+{
     bool success = false;
     CompositeLayout appliedLayout = CompositeLayout::Single;
     uint32_t layersUsed = 0;
@@ -57,7 +60,8 @@ struct CompositeResult {
     float compositeTimeMs = 0.0f;
 };
 
-struct CompositorStats {
+struct CompositorStats
+{
     uint64_t totalComposites = 0;
     uint64_t singlePageResults = 0;
     uint64_t multiLayerResults = 0;
@@ -65,21 +69,25 @@ struct CompositorStats {
     bool initialized = false;
 };
 
-class SmartThumbnailCompositor {
-public:
-    static SmartThumbnailCompositor& Instance() {
+class SmartThumbnailCompositor
+{
+  public:
+    static SmartThumbnailCompositor& Instance()
+    {
         static SmartThumbnailCompositor instance;
         return instance;
     }
 
-    void Initialize(uint32_t maxLayers = 4) {
+    void Initialize(uint32_t maxLayers = 4)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_maxLayers = maxLayers;
         m_stats = {};
         m_stats.initialized = true;
     }
 
-    CompositeResult Composite(const CompositeRequest& request) {
+    CompositeResult Composite(const CompositeRequest& request)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalComposites++;
 
@@ -108,9 +116,12 @@ public:
             result.selectedLayers.push_back({idx, 0, 1.0f / count, true});
         }
 
-        if (count <= 1) result.appliedLayout = CompositeLayout::Single;
-        else if (count <= 4) result.appliedLayout = CompositeLayout::Grid2x2;
-        else result.appliedLayout = CompositeLayout::Grid3x3;
+        if (count <= 1)
+            result.appliedLayout = CompositeLayout::Single;
+        else if (count <= 4)
+            result.appliedLayout = CompositeLayout::Grid2x2;
+        else
+            result.appliedLayout = CompositeLayout::Grid3x3;
 
         result.success = true;
         result.layersUsed = count;
@@ -118,22 +129,25 @@ public:
         return result;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    CompositorStats GetStats() const {
+    CompositorStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
     }
 
-private:
+  private:
     SmartThumbnailCompositor() = default;
     ~SmartThumbnailCompositor() = default;
     SmartThumbnailCompositor(const SmartThumbnailCompositor&) = delete;
@@ -144,5 +158,5 @@ private:
     CompositorStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

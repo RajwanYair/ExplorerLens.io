@@ -4,14 +4,14 @@
 //==============================================================================
 
 #include "HardwareCapabilities.h"
-#include <windows.h>
 #include <intrin.h>
-#include <dxgi1_4.h>
+#include <windows.h>
+#include <iomanip>
+#include <sstream>
 #include <d3d11.h>
 #include <d3d12.h>
+#include <dxgi1_4.h>
 #include <wrl/client.h>
-#include <sstream>
-#include <iomanip>
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -25,26 +25,40 @@ namespace Engine {
 // CPUCapabilities Implementation
 //==============================================================================
 
-std::string CPUCapabilities::GetBestSIMD() const {
-    if (hasAVX512F) return "AVX-512";
-    if (hasAVX2) return "AVX2";
-    if (hasAVX) return "AVX";
-    if (hasSSE42) return "SSE4.2";
-    if (hasSSE41) return "SSE4.1";
-    if (hasSSSE3) return "SSSE3";
-    if (hasSSE3) return "SSE3";
-    if (hasSSE2) return "SSE2";
-    if (hasSSE) return "SSE";
-    if (hasMMX) return "MMX";
+std::string CPUCapabilities::GetBestSIMD() const
+{
+    if (hasAVX512F)
+        return "AVX-512";
+    if (hasAVX2)
+        return "AVX2";
+    if (hasAVX)
+        return "AVX";
+    if (hasSSE42)
+        return "SSE4.2";
+    if (hasSSE41)
+        return "SSE4.1";
+    if (hasSSSE3)
+        return "SSSE3";
+    if (hasSSE3)
+        return "SSE3";
+    if (hasSSE2)
+        return "SSE2";
+    if (hasSSE)
+        return "SSE";
+    if (hasMMX)
+        return "MMX";
     return "x87";
 }
 
-std::string CPUCapabilities::GetSummary() const {
+std::string CPUCapabilities::GetSummary() const
+{
     std::ostringstream oss;
     oss << brandString << " (" << physicalCores << "C/" << logicalCores << "T)";
     oss << " - " << GetBestSIMD();
-    if (hasAESNI) oss << " + AES-NI";
-    if (hasFMA) oss << " + FMA";
+    if (hasAESNI)
+        oss << " + AES-NI";
+    if (hasFMA)
+        oss << " + FMA";
     return oss.str();
 }
 
@@ -52,17 +66,24 @@ std::string CPUCapabilities::GetSummary() const {
 // GPUInfo Implementation
 //==============================================================================
 
-GPUVendor GPUInfo::GetVendorFromID(uint32_t vendorID) {
+GPUVendor GPUInfo::GetVendorFromID(uint32_t vendorID)
+{
     switch (vendorID) {
-    case 0x8086: return GPUVendor::Intel;
-    case 0x10DE: return GPUVendor::NVIDIA;
-    case 0x1002: return GPUVendor::AMD;
-    case 0x1414: return GPUVendor::Microsoft;
-    default: return GPUVendor::Unknown;
+        case 0x8086:
+            return GPUVendor::Intel;
+        case 0x10DE:
+            return GPUVendor::NVIDIA;
+        case 0x1002:
+            return GPUVendor::AMD;
+        case 0x1414:
+            return GPUVendor::Microsoft;
+        default:
+            return GPUVendor::Unknown;
     }
 }
 
-std::string GPUInfo::GetSummary() const {
+std::string GPUInfo::GetSummary() const
+{
     std::ostringstream oss;
     oss << name;
     if (dedicatedMemoryMB > 0) {
@@ -73,9 +94,12 @@ std::string GPUInfo::GetSummary() const {
         oss << ")";
     }
     oss << " - D3D";
-    if (supportsD3D12) oss << "12";
-    else if (supportsD3D11) oss << "11";
-    else oss << "?";
+    if (supportsD3D12)
+        oss << "12";
+    else if (supportsD3D11)
+        oss << "11";
+    else
+        oss << "?";
     return oss.str();
 }
 
@@ -83,40 +107,44 @@ std::string GPUInfo::GetSummary() const {
 // HardwareCapabilities Implementation
 //==============================================================================
 
-HardwareCapabilities& HardwareCapabilities::Get() {
+HardwareCapabilities& HardwareCapabilities::Get()
+{
     static HardwareCapabilities instance;
     return instance;
 }
 
-HardwareCapabilities::HardwareCapabilities()
-    : m_totalMemoryMB(0) {
+HardwareCapabilities::HardwareCapabilities() : m_totalMemoryMB(0)
+{
     DetectCPU();
     DetectGPUs();
     DetectMemory();
 }
 
-void HardwareCapabilities::CPUID(int function, int subfunction, int* regs) {
+void HardwareCapabilities::CPUID(int function, int subfunction, int* regs)
+{
     __cpuidex(regs, function, subfunction);
 }
 
-uint64_t HardwareCapabilities::XGETBV(uint32_t xcr) {
+uint64_t HardwareCapabilities::XGETBV(uint32_t xcr)
+{
     return _xgetbv(xcr);
 }
 
-void HardwareCapabilities::DetectCPU() {
-    int regs[4] = { 0 };
+void HardwareCapabilities::DetectCPU()
+{
+    int regs[4] = {0};
 
     // Get vendor string
     CPUID(0, 0, regs);
     int max_function = regs[0];
-    char vendor[13] = { 0 };
+    char vendor[13] = {0};
     *reinterpret_cast<int*>(vendor) = regs[1];
     *reinterpret_cast<int*>(vendor + 4) = regs[3];
     *reinterpret_cast<int*>(vendor + 8) = regs[2];
     m_cpu.vendor = vendor;
 
     // Get brand string
-    char brand[49] = { 0 };
+    char brand[49] = {0};
     for (int i = 0; i < 3; i++) {
         CPUID(0x80000002 + i, 0, regs);
         memcpy(brand + i * 16, regs, 16);
@@ -167,7 +195,7 @@ void HardwareCapabilities::DetectCPU() {
         bool osSupportsAVX = false;
         if (m_cpu.hasAVX) {
             uint64_t xcr0 = XGETBV(0);
-            osSupportsAVX = (xcr0 & 0x6) == 0x6; // XMM and YMM state
+            osSupportsAVX = (xcr0 & 0x6) == 0x6;  // XMM and YMM state
         }
         m_cpu.hasAVX = m_cpu.hasAVX && osSupportsAVX;
     }
@@ -204,7 +232,7 @@ void HardwareCapabilities::DetectCPU() {
         // Check OS support for AVX-512 via XGETBV
         if (m_cpu.hasAVX512F) {
             uint64_t xcr0 = XGETBV(0);
-            bool osSupportsAVX512 = (xcr0 & 0xE6) == 0xE6; // XMM, YMM, ZMM state
+            bool osSupportsAVX512 = (xcr0 & 0xE6) == 0xE6;  // XMM, YMM, ZMM state
             if (!osSupportsAVX512) {
                 // OS doesn't support AVX-512, disable all AVX-512 features
                 m_cpu.hasAVX512F = false;
@@ -242,7 +270,7 @@ void HardwareCapabilities::DetectCPU() {
         CPUID(0x80000006, 0, regs);
         m_cpu.cacheLineSize = regs[2] & 0xFF;
         m_cpu.l2CacheKB = (regs[2] >> 16) & 0xFFFF;
-        m_cpu.l3CacheKB = ((regs[3] >> 18) & 0x3FFF) * 512; // In 512KB units
+        m_cpu.l3CacheKB = ((regs[3] >> 18) & 0x3FFF) * 512;  // In 512KB units
     }
 
     // Core count
@@ -261,11 +289,12 @@ void HardwareCapabilities::DetectCPU() {
 
     // Default cache line size if not detected
     if (m_cpu.cacheLineSize == 0) {
-        m_cpu.cacheLineSize = 64; // Common default
+        m_cpu.cacheLineSize = 64;  // Common default
     }
 }
 
-void HardwareCapabilities::DetectGPUs() {
+void HardwareCapabilities::DetectGPUs()
+{
     m_gpus.clear();
 
     ComPtr<IDXGIFactory4> factory;
@@ -290,8 +319,7 @@ void HardwareCapabilities::DetectGPUs() {
 
             // Convert wide string to narrow
             char nameBuffer[256];
-            WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1,
-                nameBuffer, sizeof(nameBuffer), nullptr, nullptr);
+            WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1, nameBuffer, sizeof(nameBuffer), nullptr, nullptr);
             info.name = nameBuffer;
 
             info.dedicatedMemoryMB = desc.DedicatedVideoMemory / (1024 * 1024);
@@ -303,30 +331,15 @@ void HardwareCapabilities::DetectGPUs() {
             // Test D3D11 support
             ComPtr<ID3D11Device> d3d11Device;
             D3D_FEATURE_LEVEL featureLevel;
-            hr = D3D11CreateDevice(
-                adapter.Get(),
-                D3D_DRIVER_TYPE_UNKNOWN,
-                nullptr,
-                0,
-                nullptr,
-                0,
-                D3D11_SDK_VERSION,
-                &d3d11Device,
-                &featureLevel,
-                nullptr
-            );
+            hr = D3D11CreateDevice(adapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION,
+                                   &d3d11Device, &featureLevel, nullptr);
             info.supportsD3D11 = SUCCEEDED(hr);
             if (info.supportsD3D11) {
                 info.featureLevel = static_cast<uint32_t>(featureLevel);
             }
 
             // Test D3D12 support
-            hr = D3D12CreateDevice(
-                adapter.Get(),
-                D3D_FEATURE_LEVEL_11_0,
-                _uuidof(ID3D12Device),
-                nullptr
-            );
+            hr = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr);
             info.supportsD3D12 = SUCCEEDED(hr);
 
             // Query compute unit count via D3D12 if available
@@ -334,22 +347,23 @@ void HardwareCapabilities::DetectGPUs() {
             info.computeUnits = 0;
             if (info.supportsD3D12) {
                 ComPtr<ID3D12Device> d3d12Device;
-                HRESULT hrDev = D3D12CreateDevice(
-                    adapter.Get(),
-                    D3D_FEATURE_LEVEL_11_0,
-                    IID_PPV_ARGS(&d3d12Device)
-                );
+                HRESULT hrDev = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3d12Device));
                 if (SUCCEEDED(hrDev) && d3d12Device) {
                     D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-                    hrDev = d3d12Device->CheckFeatureSupport(
-                        D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options));
+                    hrDev = d3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options));
                     if (SUCCEEDED(hrDev)) {
                         // Use resource binding tier as a proxy for GPU capability class
                         // Tier 3 = high-end (64+ CUs), Tier 2 = mid (16-64), Tier 1 = low (<16)
                         switch (options.ResourceBindingTier) {
-                        case D3D12_RESOURCE_BINDING_TIER_3: info.computeUnits = 64; break;
-                        case D3D12_RESOURCE_BINDING_TIER_2: info.computeUnits = 32; break;
-                        default: info.computeUnits = 8; break;
+                            case D3D12_RESOURCE_BINDING_TIER_3:
+                                info.computeUnits = 64;
+                                break;
+                            case D3D12_RESOURCE_BINDING_TIER_2:
+                                info.computeUnits = 32;
+                                break;
+                            default:
+                                info.computeUnits = 8;
+                                break;
                         }
                     }
                     info.supportsCompute = true;
@@ -363,7 +377,8 @@ void HardwareCapabilities::DetectGPUs() {
     }
 }
 
-void HardwareCapabilities::DetectMemory() {
+void HardwareCapabilities::DetectMemory()
+{
     MEMORYSTATUSEX memStatus;
     memStatus.dwLength = sizeof(memStatus);
     if (GlobalMemoryStatusEx(&memStatus)) {
@@ -371,7 +386,8 @@ void HardwareCapabilities::DetectMemory() {
     }
 }
 
-uint64_t HardwareCapabilities::GetAvailableMemoryMB() const {
+uint64_t HardwareCapabilities::GetAvailableMemoryMB() const
+{
     MEMORYSTATUSEX memStatus;
     memStatus.dwLength = sizeof(memStatus);
     if (GlobalMemoryStatusEx(&memStatus)) {
@@ -380,15 +396,17 @@ uint64_t HardwareCapabilities::GetAvailableMemoryMB() const {
     return 0;
 }
 
-const GPUInfo* HardwareCapabilities::GetPrimaryGPU() const {
+const GPUInfo* HardwareCapabilities::GetPrimaryGPU() const
+{
     return m_gpus.empty() ? nullptr : &m_gpus[0];
 }
 
-const GPUInfo* HardwareCapabilities::GetPreferredGPU() const {
+const GPUInfo* HardwareCapabilities::GetPreferredGPU() const
+{
     // Prefer discrete GPU over integrated
     for (const auto& gpu : m_gpus) {
         if (gpu.vendor == GPUVendor::NVIDIA || gpu.vendor == GPUVendor::AMD) {
-            if (gpu.dedicatedMemoryMB > 512) { // At least 512MB VRAM
+            if (gpu.dedicatedMemoryMB > 512) {  // At least 512MB VRAM
                 return &gpu;
             }
         }
@@ -398,7 +416,8 @@ const GPUInfo* HardwareCapabilities::GetPreferredGPU() const {
     return GetPrimaryGPU();
 }
 
-std::string HardwareCapabilities::GetFullReport() const {
+std::string HardwareCapabilities::GetFullReport() const
+{
     std::ostringstream oss;
 
     oss << "=== ExplorerLens Hardware Report ===\n\n";
@@ -407,12 +426,9 @@ std::string HardwareCapabilities::GetFullReport() const {
     oss << "CPU:\n";
     oss << " Vendor: " << m_cpu.vendor << "\n";
     oss << " Model: " << m_cpu.brandString << "\n";
-    oss << " Cores: " << m_cpu.physicalCores << " physical, "
-        << m_cpu.logicalCores << " logical\n";
-    oss << " Family/Model/Stepping: " << m_cpu.family << "/"
-        << m_cpu.model << "/" << m_cpu.stepping << "\n";
-    oss << " Cache: L1=" << m_cpu.l1CacheKB << "KB, L2="
-        << m_cpu.l2CacheKB << "KB, L3=" << m_cpu.l3CacheKB << "KB\n";
+    oss << " Cores: " << m_cpu.physicalCores << " physical, " << m_cpu.logicalCores << " logical\n";
+    oss << " Family/Model/Stepping: " << m_cpu.family << "/" << m_cpu.model << "/" << m_cpu.stepping << "\n";
+    oss << " Cache: L1=" << m_cpu.l1CacheKB << "KB, L2=" << m_cpu.l2CacheKB << "KB, L3=" << m_cpu.l3CacheKB << "KB\n";
     oss << " Cache Line: " << m_cpu.cacheLineSize << " bytes\n\n";
 
     oss << " SIMD Instructions:\n";
@@ -439,8 +455,7 @@ std::string HardwareCapabilities::GetFullReport() const {
     oss << " SHA: " << (m_cpu.hasSHA ? "Yes" : "No") << "\n";
     oss << " FMA: " << (m_cpu.hasFMA ? "Yes" : "No") << "\n";
     oss << " F16C: " << (m_cpu.hasF16C ? "Yes" : "No") << "\n";
-    oss << " BMI1/2: " << (m_cpu.hasBMI1 ? "Yes" : "No")
-        << "/" << (m_cpu.hasBMI2 ? "Yes" : "No") << "\n";
+    oss << " BMI1/2: " << (m_cpu.hasBMI1 ? "Yes" : "No") << "/" << (m_cpu.hasBMI2 ? "Yes" : "No") << "\n";
     oss << " POPCNT: " << (m_cpu.hasPOPCNT ? "Yes" : "No") << "\n";
     oss << " RDRAND: " << (m_cpu.hasRDRAND ? "Yes" : "No") << "\n";
 
@@ -451,22 +466,34 @@ std::string HardwareCapabilities::GetFullReport() const {
         oss << " [" << i << "] " << gpu.name << "\n";
         oss << " Vendor: ";
         switch (gpu.vendor) {
-        case GPUVendor::Intel: oss << "Intel"; break;
-        case GPUVendor::NVIDIA: oss << "NVIDIA"; break;
-        case GPUVendor::AMD: oss << "AMD"; break;
-        case GPUVendor::Microsoft: oss << "Microsoft (Software)"; break;
-        default: oss << "Unknown"; break;
+            case GPUVendor::Intel:
+                oss << "Intel";
+                break;
+            case GPUVendor::NVIDIA:
+                oss << "NVIDIA";
+                break;
+            case GPUVendor::AMD:
+                oss << "AMD";
+                break;
+            case GPUVendor::Microsoft:
+                oss << "Microsoft (Software)";
+                break;
+            default:
+                oss << "Unknown";
+                break;
         }
-        oss << " (0x" << std::hex << std::setw(4) << std::setfill('0')
-            << gpu.vendorID << ":" << gpu.deviceID << std::dec << ")\n";
+        oss << " (0x" << std::hex << std::setw(4) << std::setfill('0') << gpu.vendorID << ":" << gpu.deviceID
+            << std::dec << ")\n";
         oss << " VRAM: " << gpu.dedicatedMemoryMB << " MB dedicated";
         if (gpu.sharedMemoryMB > 0) {
             oss << " + " << gpu.sharedMemoryMB << " MB shared";
         }
         oss << "\n";
         oss << " DirectX: ";
-        if (gpu.supportsD3D12) oss << "D3D12 ";
-        if (gpu.supportsD3D11) oss << "D3D11 ";
+        if (gpu.supportsD3D12)
+            oss << "D3D12 ";
+        if (gpu.supportsD3D11)
+            oss << "D3D11 ";
         oss << "(Feature Level " << std::hex << gpu.featureLevel << std::dec << ")\n";
         oss << " Compute: " << (gpu.supportsCompute ? "Yes" : "No") << "\n";
     }
@@ -479,7 +506,8 @@ std::string HardwareCapabilities::GetFullReport() const {
     return oss.str();
 }
 
-std::string HardwareCapabilities::GetSummary() const {
+std::string HardwareCapabilities::GetSummary() const
+{
     std::ostringstream oss;
     oss << m_cpu.GetSummary();
 
@@ -492,42 +520,59 @@ std::string HardwareCapabilities::GetSummary() const {
     return oss.str();
 }
 
-bool HardwareCapabilities::HasFeature(const char* feature) const {
+bool HardwareCapabilities::HasFeature(const char* feature) const
+{
     std::string feat = feature;
 
     // CPU features
-    if (feat == "AVX512" || feat == "AVX-512") return m_cpu.hasAVX512F;
-    if (feat == "AVX2") return m_cpu.hasAVX2;
-    if (feat == "AVX") return m_cpu.hasAVX;
-    if (feat == "SSE4.2") return m_cpu.hasSSE42;
-    if (feat == "SSE4.1") return m_cpu.hasSSE41;
-    if (feat == "SSSE3") return m_cpu.hasSSSE3;
-    if (feat == "SSE3") return m_cpu.hasSSE3;
-    if (feat == "SSE2") return m_cpu.hasSSE2;
-    if (feat == "SSE") return m_cpu.hasSSE;
-    if (feat == "MMX") return m_cpu.hasMMX;
-    if (feat == "AES" || feat == "AES-NI") return m_cpu.hasAESNI;
-    if (feat == "SHA") return m_cpu.hasSHA;
-    if (feat == "FMA") return m_cpu.hasFMA;
+    if (feat == "AVX512" || feat == "AVX-512")
+        return m_cpu.hasAVX512F;
+    if (feat == "AVX2")
+        return m_cpu.hasAVX2;
+    if (feat == "AVX")
+        return m_cpu.hasAVX;
+    if (feat == "SSE4.2")
+        return m_cpu.hasSSE42;
+    if (feat == "SSE4.1")
+        return m_cpu.hasSSE41;
+    if (feat == "SSSE3")
+        return m_cpu.hasSSSE3;
+    if (feat == "SSE3")
+        return m_cpu.hasSSE3;
+    if (feat == "SSE2")
+        return m_cpu.hasSSE2;
+    if (feat == "SSE")
+        return m_cpu.hasSSE;
+    if (feat == "MMX")
+        return m_cpu.hasMMX;
+    if (feat == "AES" || feat == "AES-NI")
+        return m_cpu.hasAESNI;
+    if (feat == "SHA")
+        return m_cpu.hasSHA;
+    if (feat == "FMA")
+        return m_cpu.hasFMA;
 
     // GPU features
     if (feat == "D3D11") {
         for (const auto& gpu : m_gpus) {
-            if (gpu.supportsD3D11) return true;
+            if (gpu.supportsD3D11)
+                return true;
         }
     }
     if (feat == "D3D12") {
         for (const auto& gpu : m_gpus) {
-            if (gpu.supportsD3D12) return true;
+            if (gpu.supportsD3D12)
+                return true;
         }
     }
 
     return false;
 }
 
-void HardwareCapabilities::RefreshGPUs() {
+void HardwareCapabilities::RefreshGPUs()
+{
     DetectGPUs();
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

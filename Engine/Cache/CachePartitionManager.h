@@ -7,41 +7,51 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <unordered_map>
-#include <mutex>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct CachePartition {
+struct CachePartition
+{
     std::string name;
     uint64_t maxBytes = 64ULL * 1024 * 1024;
     uint64_t usedBytes = 0;
     uint32_t entryCount = 0;
     uint32_t hitCount = 0;
     uint32_t missCount = 0;
-    double hitRate() const {
+    double hitRate() const
+    {
         uint32_t total = hitCount + missCount;
         return total > 0 ? 100.0 * hitCount / total : 0.0;
     }
 };
 
-struct PartitionConfig {
+struct PartitionConfig
+{
     uint64_t totalBudgetBytes = 512ULL * 1024 * 1024;
     uint32_t maxPartitions = 16;
     bool autoBalance = true;
-    double rebalanceThreshold = 0.2; // Rebalance when utilization differs by 20%
+    double rebalanceThreshold = 0.2;  // Rebalance when utilization differs by 20%
 };
 
-class CachePartitionManager {
-public:
-    void Configure(const PartitionConfig& config) { m_config = config; }
+class CachePartitionManager
+{
+  public:
+    void Configure(const PartitionConfig& config)
+    {
+        m_config = config;
+    }
 
-    bool CreatePartition(const std::string& name, uint64_t maxBytes) {
+    bool CreatePartition(const std::string& name, uint64_t maxBytes)
+    {
         std::lock_guard lock(m_mutex);
-        if (m_partitions.size() >= m_config.maxPartitions) return false;
-        if (m_partitions.count(name)) return false;
+        if (m_partitions.size() >= m_config.maxPartitions)
+            return false;
+        if (m_partitions.count(name))
+            return false;
         CachePartition p;
         p.name = name;
         p.maxBytes = maxBytes;
@@ -49,14 +59,17 @@ public:
         return true;
     }
 
-    bool CanAllocate(const std::string& partition, uint64_t bytes) const {
+    bool CanAllocate(const std::string& partition, uint64_t bytes) const
+    {
         std::lock_guard lock(m_mutex);
         auto it = m_partitions.find(partition);
-        if (it == m_partitions.end()) return false;
+        if (it == m_partitions.end())
+            return false;
         return it->second.usedBytes + bytes <= it->second.maxBytes;
     }
 
-    void RecordAllocation(const std::string& partition, uint64_t bytes) {
+    void RecordAllocation(const std::string& partition, uint64_t bytes)
+    {
         std::lock_guard lock(m_mutex);
         auto it = m_partitions.find(partition);
         if (it != m_partitions.end()) {
@@ -65,35 +78,42 @@ public:
         }
     }
 
-    void RecordHit(const std::string& partition) {
+    void RecordHit(const std::string& partition)
+    {
         std::lock_guard lock(m_mutex);
         auto it = m_partitions.find(partition);
-        if (it != m_partitions.end()) it->second.hitCount++;
+        if (it != m_partitions.end())
+            it->second.hitCount++;
     }
 
-    void RecordMiss(const std::string& partition) {
+    void RecordMiss(const std::string& partition)
+    {
         std::lock_guard lock(m_mutex);
         auto it = m_partitions.find(partition);
-        if (it != m_partitions.end()) it->second.missCount++;
+        if (it != m_partitions.end())
+            it->second.missCount++;
     }
 
-    uint64_t TotalUsed() const {
+    uint64_t TotalUsed() const
+    {
         std::lock_guard lock(m_mutex);
         uint64_t total = 0;
-        for (const auto& [k, v] : m_partitions) total += v.usedBytes;
+        for (const auto& [k, v] : m_partitions)
+            total += v.usedBytes;
         return total;
     }
 
-    size_t PartitionCount() const {
+    size_t PartitionCount() const
+    {
         std::lock_guard lock(m_mutex);
         return m_partitions.size();
     }
 
-private:
+  private:
     mutable std::mutex m_mutex;
     PartitionConfig m_config;
     std::unordered_map<std::string, CachePartition> m_partitions;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

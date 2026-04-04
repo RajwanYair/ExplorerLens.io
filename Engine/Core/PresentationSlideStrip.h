@@ -8,16 +8,17 @@
 #pragma once
 
 #include <windows.h>
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // Rectangle describing a slide's position within the strip
-struct SlideStripRect {
+struct SlideStripRect
+{
     int x = 0;
     int y = 0;
     int width = 0;
@@ -25,22 +26,25 @@ struct SlideStripRect {
 };
 
 // Result of a strip layout calculation
-struct StripLayoutResult {
+struct StripLayoutResult
+{
     int visibleSlides = 0;
     int slideWidth = 0;
     int slideHeight = 0;
     int totalStripWidth = 0;
     int gapBetweenSlides = 0;
-    bool truncated = false; // true if some slides are not visible
+    bool truncated = false;  // true if some slides are not visible
 };
 
-class PresentationSlideStrip {
-public:
+class PresentationSlideStrip
+{
+  public:
     PresentationSlideStrip() = default;
     ~PresentationSlideStrip() = default;
 
     // Sets the total number of slides. Returns false if count <= 0 or > 10000.
-    bool SetSlideCount(int count) {
+    bool SetSlideCount(int count)
+    {
         if (count <= 0 || count > 10000)
             return false;
         m_slideCount = count;
@@ -50,7 +54,8 @@ public:
 
     // Computes horizontal strip layout. maxSlides caps the visible count.
     // Returns the layout result. Fails (returns zero result) if invalid input.
-    StripLayoutResult CalculateStripLayout(int canvasW, int canvasH, int maxSlides) const {
+    StripLayoutResult CalculateStripLayout(int canvasW, int canvasH, int maxSlides) const
+    {
         StripLayoutResult result{};
         if (m_slideCount <= 0 || canvasW <= 0 || canvasH <= 0 || maxSlides <= 0)
             return result;
@@ -64,8 +69,8 @@ public:
         result.slideHeight = (std::max)(1, canvasH - 2 * marginY);
 
         // Slide width from aspect ratio
-        result.slideWidth = (std::max)(1,
-            static_cast<int>(result.slideHeight * m_aspectW / static_cast<double>(m_aspectH)));
+        result.slideWidth =
+            (std::max)(1, static_cast<int>(result.slideHeight * m_aspectW / static_cast<double>(m_aspectH)));
 
         // Gap between slides
         result.gapBetweenSlides = (std::max)(1, canvasW / 80);
@@ -76,8 +81,8 @@ public:
             // Shrink slide width proportionally
             const int totalGaps = (visible - 1) * result.gapBetweenSlides;
             result.slideWidth = (std::max)(1, (canvasW - totalGaps) / visible);
-            result.slideHeight = (std::max)(1,
-                static_cast<int>(result.slideWidth * m_aspectH / static_cast<double>(m_aspectW)));
+            result.slideHeight =
+                (std::max)(1, static_cast<int>(result.slideWidth * m_aspectH / static_cast<double>(m_aspectW)));
             neededW = visible * result.slideWidth + (visible - 1) * result.gapBetweenSlides;
         }
 
@@ -86,18 +91,18 @@ public:
     }
 
     // Returns the bounding rect for slide at given index. Returns zero rect if invalid.
-    SlideStripRect GetSlideRect(int index) const {
+    SlideStripRect GetSlideRect(int index) const
+    {
         if (index < 0 || index >= m_slideCount)
             return {};
 
         // Use a default canvas if not explicitly set
-        auto layout = CalculateStripLayout(m_canvasW, m_canvasH,
-            (std::min)(m_slideCount, m_maxVisibleSlides));
+        auto layout = CalculateStripLayout(m_canvasW, m_canvasH, (std::min)(m_slideCount, m_maxVisibleSlides));
         if (layout.visibleSlides <= 0 || index >= layout.visibleSlides)
             return {};
 
         const int totalW = layout.totalStripWidth;
-        const int startX = (m_canvasW - totalW) / 2; // center horizontally
+        const int startX = (m_canvasW - totalW) / 2;  // center horizontally
         const int startY = (m_canvasH - layout.slideHeight) / 2;
 
         SlideStripRect rect;
@@ -109,21 +114,25 @@ public:
     }
 
     // Returns how many slides are visible within the canvas.
-    int GetVisibleSlideCount() const {
-        auto layout = CalculateStripLayout(m_canvasW, m_canvasH,
-            (std::min)(m_slideCount, m_maxVisibleSlides));
+    int GetVisibleSlideCount() const
+    {
+        auto layout = CalculateStripLayout(m_canvasW, m_canvasH, (std::min)(m_slideCount, m_maxVisibleSlides));
         return layout.visibleSlides;
     }
 
     // Returns the slide aspect ratio as width/height.
-    double GetSlideAspectRatio() const {
-        if (m_aspectH <= 0) return 0.0;
+    double GetSlideAspectRatio() const
+    {
+        if (m_aspectH <= 0)
+            return 0.0;
         return static_cast<double>(m_aspectW) / m_aspectH;
     }
 
     // Sets the slide aspect ratio (e.g., 16:9, 4:3). Returns false if invalid.
-    bool SetSlideAspectRatio(int w, int h) {
-        if (w <= 0 || h <= 0) return false;
+    bool SetSlideAspectRatio(int w, int h)
+    {
+        if (w <= 0 || h <= 0)
+            return false;
         m_aspectW = w;
         m_aspectH = h;
         m_layoutDirty = true;
@@ -131,8 +140,10 @@ public:
     }
 
     // Sets the canvas dimensions. Returns false if invalid.
-    bool SetCanvasSize(int w, int h) {
-        if (w <= 0 || h <= 0) return false;
+    bool SetCanvasSize(int w, int h)
+    {
+        if (w <= 0 || h <= 0)
+            return false;
         m_canvasW = w;
         m_canvasH = h;
         m_layoutDirty = true;
@@ -140,16 +151,21 @@ public:
     }
 
     // Sets the maximum visible slides cap. Returns false if <= 0.
-    bool SetMaxVisibleSlides(int max) {
-        if (max <= 0) return false;
+    bool SetMaxVisibleSlides(int max)
+    {
+        if (max <= 0)
+            return false;
         m_maxVisibleSlides = max;
         return true;
     }
 
     // Returns total slide count.
-    int GetSlideCount() const { return m_slideCount; }
+    int GetSlideCount() const
+    {
+        return m_slideCount;
+    }
 
-private:
+  private:
     int m_slideCount = 0;
     int m_aspectW = 16;
     int m_aspectH = 9;
@@ -159,5 +175,5 @@ private:
     bool m_layoutDirty = true;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,63 +6,66 @@
 //
 #pragma once
 
-#include <string>
-#include <vector>
-#include <functional>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <optional>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace ExplorerLens::Engine {
 
 enum class MetricType : uint8_t {
-    Latency        = 0,
-    ErrorRate      = 1,
-    Throughput     = 2,
-    CacheHit       = 3,
+    Latency = 0,
+    ErrorRate = 1,
+    Throughput = 2,
+    CacheHit = 3,
     PluginAdoption = 4
 };
 
-struct PercentileSet {
+struct PercentileSet
+{
     double p50{0.0};
     double p95{0.0};
     double p99{0.0};
     double p999{0.0};
 };
 
-struct MetricSnapshot {
-    std::string   name;
-    MetricType    type{MetricType::Latency};
-    double        value{0.0};
+struct MetricSnapshot
+{
+    std::string name;
+    MetricType type{MetricType::Latency};
+    double value{0.0};
     PercentileSet percentiles;
-    uint64_t      sampleCount{0};
+    uint64_t sampleCount{0};
     std::chrono::system_clock::time_point timestamp;
 };
 
-struct DashboardConfig {
-    uint32_t    aggregationWindowMs{5000};
-    uint32_t    maxSamplesPerMetric{10000};
-    bool        streamingEnabled{false};
+struct DashboardConfig
+{
+    uint32_t aggregationWindowMs{5000};
+    uint32_t maxSamplesPerMetric{10000};
+    bool streamingEnabled{false};
     std::string outputEndpoint;
 };
 
-class EnterpriseMetricsDashboard {
-public:
+class EnterpriseMetricsDashboard
+{
+  public:
     explicit EnterpriseMetricsDashboard(DashboardConfig config = {});
     ~EnterpriseMetricsDashboard();
 
-    EnterpriseMetricsDashboard(const EnterpriseMetricsDashboard&)            = delete;
+    EnterpriseMetricsDashboard(const EnterpriseMetricsDashboard&) = delete;
     EnterpriseMetricsDashboard& operator=(const EnterpriseMetricsDashboard&) = delete;
 
     // Metric ingestion
     void RecordMetric(const std::string& name, MetricType type, double value);
-    void RecordMetricBatch(
-        const std::vector<std::pair<std::string, double>>& samples, MetricType type);
+    void RecordMetricBatch(const std::vector<std::pair<std::string, double>>& samples, MetricType type);
 
     // Snapshot queries
     std::optional<MetricSnapshot> GetSnapshot(const std::string& name) const;
-    std::vector<MetricSnapshot>   GetAllSnapshots() const;
+    std::vector<MetricSnapshot> GetAllSnapshots() const;
 
     // Percentile computation
     PercentileSet GetPercentiles(const std::string& name) const;
@@ -82,14 +85,14 @@ public:
     bool ResetMetric(const std::string& name);
     void ResetAll();
 
-private:
+  private:
     DashboardConfig m_config;
-    bool            m_streaming{false};
-    StreamCallback  m_streamCallback;
+    bool m_streaming{false};
+    StreamCallback m_streamCallback;
 
     PercentileSet ComputePercentiles(const std::vector<double>& samples) const;
-    void          FlushToStream(const MetricSnapshot& snapshot);
-    bool          ValidateMetricName(const std::string& name) const;
+    void FlushToStream(const MetricSnapshot& snapshot);
+    bool ValidateMetricName(const std::string& name) const;
 };
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

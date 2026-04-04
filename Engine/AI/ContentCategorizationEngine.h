@@ -7,10 +7,10 @@
 //
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
-#include <array>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -32,71 +32,101 @@ enum class ContentCategory : uint8_t {
     COUNT
 };
 
-inline const wchar_t* ToString(ContentCategory cat) {
+inline const wchar_t* ToString(ContentCategory cat)
+{
     switch (cat) {
-    case ContentCategory::Photo:        return L"Photo";
-    case ContentCategory::Document:     return L"Document";
-    case ContentCategory::SourceCode:   return L"Source Code";
-    case ContentCategory::Video:        return L"Video";
-    case ContentCategory::Audio:        return L"Audio";
-    case ContentCategory::ThreeDModel:  return L"3D Model";
-    case ContentCategory::Scientific:   return L"Scientific";
-    case ContentCategory::Archive:      return L"Archive";
-    case ContentCategory::Vector:       return L"Vector";
-    case ContentCategory::Font:         return L"Font";
-    case ContentCategory::Spreadsheet:  return L"Spreadsheet";
-    case ContentCategory::Presentation: return L"Presentation";
-    default:                            return L"Unknown";
+        case ContentCategory::Photo:
+            return L"Photo";
+        case ContentCategory::Document:
+            return L"Document";
+        case ContentCategory::SourceCode:
+            return L"Source Code";
+        case ContentCategory::Video:
+            return L"Video";
+        case ContentCategory::Audio:
+            return L"Audio";
+        case ContentCategory::ThreeDModel:
+            return L"3D Model";
+        case ContentCategory::Scientific:
+            return L"Scientific";
+        case ContentCategory::Archive:
+            return L"Archive";
+        case ContentCategory::Vector:
+            return L"Vector";
+        case ContentCategory::Font:
+            return L"Font";
+        case ContentCategory::Spreadsheet:
+            return L"Spreadsheet";
+        case ContentCategory::Presentation:
+            return L"Presentation";
+        default:
+            return L"Unknown";
     }
 }
 
-struct CategorizationResult {
+struct CategorizationResult
+{
     ContentCategory primary = ContentCategory::Unknown;
     double confidence = 0.0;
     std::vector<std::pair<ContentCategory, double>> topK;
 };
 
-struct CategorizationStats {
+struct CategorizationStats
+{
     uint64_t totalClassified = 0;
     uint64_t highConfidenceCount = 0;
     std::array<uint64_t, static_cast<size_t>(ContentCategory::COUNT)> perCategory{};
 };
 
-class ContentCategorizationEngine {
-public:
-    static ContentCategorizationEngine& Instance() {
+class ContentCategorizationEngine
+{
+  public:
+    static ContentCategorizationEngine& Instance()
+    {
         static ContentCategorizationEngine instance;
         return instance;
     }
 
-    bool Initialize() {
+    bool Initialize()
+    {
         m_initialized = true;
         return true;
     }
 
-    CategorizationResult Categorize(const std::wstring& /*filePath*/) {
-        if (!m_initialized) return {};
+    CategorizationResult Categorize(const std::wstring& /*filePath*/)
+    {
+        if (!m_initialized)
+            return {};
         CategorizationResult result;
         result.primary = ContentCategory::Photo;
         result.confidence = 0.92;
-        result.topK.push_back({ ContentCategory::Photo, 0.92 });
-        result.topK.push_back({ ContentCategory::Document, 0.05 });
+        result.topK.push_back({ContentCategory::Photo, 0.92});
+        result.topK.push_back({ContentCategory::Document, 0.05});
         m_stats.totalClassified++;
         m_stats.highConfidenceCount++;
         m_stats.perCategory[static_cast<size_t>(ContentCategory::Photo)]++;
         return result;
     }
 
-    CategorizationStats GetStats() const { return m_stats; }
-    bool IsInitialized() const { return m_initialized; }
+    CategorizationStats GetStats() const
+    {
+        return m_stats;
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
-    void Shutdown() { m_initialized = false; }
+    void Shutdown()
+    {
+        m_initialized = false;
+    }
 
-private:
+  private:
     ContentCategorizationEngine() = default;
     bool m_initialized = false;
     CategorizationStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

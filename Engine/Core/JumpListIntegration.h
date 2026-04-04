@@ -6,24 +6,24 @@
 //
 #pragma once
 
+#include <algorithm>
+#include <chrono>
 #include <cstdint>
-#include <string>
-#include <vector>
 #include <deque>
 #include <mutex>
-#include <chrono>
-#include <algorithm>
+#include <string>
+#include <vector>
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #include <objbase.h>
+#include <objectarray.h>
+#include <propkey.h>
+#include <propsys.h>
 #include <shlguid.h>
 #include <shobjidl_core.h>
-#include <objectarray.h>
-#include <propsys.h>
-#include <propkey.h>
+#include <windows.h>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -32,17 +32,18 @@ namespace Engine {
 // Jump List entry representing a recently accessed item
 // ============================================================================
 
-struct JumpListEntry {
-    std::wstring filePath;          // Full path to archive or folder
-    std::wstring displayName;       // User-visible title
-    std::wstring formatType;        // e.g., L"ZIP", L"RAR", L"RAW"
-    std::wstring iconPath;          // Custom icon path (empty = default)
-    int32_t      iconIndex = 0;     // Icon resource index
-    uint64_t     lastAccessTime = 0; // FILETIME as uint64
-    uint32_t     accessCount = 0; // Number of times accessed
-    uint32_t     entryCount = 0; // Number of items in archive
-    uint64_t     fileSize = 0; // Archive size in bytes
-    bool         pinned = false;
+struct JumpListEntry
+{
+    std::wstring filePath;        // Full path to archive or folder
+    std::wstring displayName;     // User-visible title
+    std::wstring formatType;      // e.g., L"ZIP", L"RAR", L"RAW"
+    std::wstring iconPath;        // Custom icon path (empty = default)
+    int32_t iconIndex = 0;        // Icon resource index
+    uint64_t lastAccessTime = 0;  // FILETIME as uint64
+    uint32_t accessCount = 0;     // Number of times accessed
+    uint32_t entryCount = 0;      // Number of items in archive
+    uint64_t fileSize = 0;        // Archive size in bytes
+    bool pinned = false;
 };
 
 // ============================================================================
@@ -50,14 +51,15 @@ struct JumpListEntry {
 // ============================================================================
 
 enum class JumpListCategory : uint8_t {
-    Recent,          // Recently opened archives
-    Frequent,        // Most frequently accessed
-    Pinned,          // User-pinned entries
-    Tasks            // Custom action tasks
+    Recent,    // Recently opened archives
+    Frequent,  // Most frequently accessed
+    Pinned,    // User-pinned entries
+    Tasks      // Custom action tasks
 };
 
-inline const char* JumpListCategoryToString(JumpListCategory cat) {
-    static const char* names[] = { "Recent", "Frequent", "Pinned", "Tasks" };
+inline const char* JumpListCategoryToString(JumpListCategory cat)
+{
+    static const char* names[] = {"Recent", "Frequent", "Pinned", "Tasks"};
     return names[static_cast<uint8_t>(cat)];
 }
 
@@ -65,21 +67,23 @@ inline const char* JumpListCategoryToString(JumpListCategory cat) {
 // Jump List task (custom action in Tasks category)
 // ============================================================================
 
-struct JumpListTask {
-    std::wstring title;             // Task display name
-    std::wstring description;       // Tooltip text
-    std::wstring commandPath;       // Executable path
-    std::wstring arguments;         // Command-line arguments
-    std::wstring iconPath;          // Icon path
-    int32_t      iconIndex = 0;
+struct JumpListTask
+{
+    std::wstring title;        // Task display name
+    std::wstring description;  // Tooltip text
+    std::wstring commandPath;  // Executable path
+    std::wstring arguments;    // Command-line arguments
+    std::wstring iconPath;     // Icon path
+    int32_t iconIndex = 0;
 };
 
 // ============================================================================
 // JumpListIntegration — manages Jump List entries for ExplorerLens
 // ============================================================================
 
-class JumpListIntegration {
-public:
+class JumpListIntegration
+{
+  public:
     /// Maximum entries per category
     static constexpr uint32_t MAX_RECENT_ENTRIES = 20;
     static constexpr uint32_t MAX_FREQUENT_ENTRIES = 10;
@@ -103,7 +107,8 @@ public:
     // ========================================================================
 
     /// Initialize Jump List integration with an App User Model ID
-    bool Initialize(const std::wstring& appUserModelId) {
+    bool Initialize(const std::wstring& appUserModelId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_appUserModelId = appUserModelId;
         m_initialized = true;
@@ -113,7 +118,8 @@ public:
         return true;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_recentEntries.clear();
         m_frequentEntries.clear();
@@ -127,13 +133,12 @@ public:
     // ========================================================================
 
     /// Record that a file was accessed (updates both recent and frequent lists)
-    void RecordAccess(const std::wstring& filePath,
-        const std::wstring& displayName,
-        const std::wstring& formatType,
-        uint64_t fileSize = 0,
-        uint32_t entryCount = 0) {
+    void RecordAccess(const std::wstring& filePath, const std::wstring& displayName, const std::wstring& formatType,
+                      uint64_t fileSize = 0, uint32_t entryCount = 0)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_initialized) return;
+        if (!m_initialized)
+            return;
 
         uint64_t now = GetCurrentFileTime();
 
@@ -142,8 +147,7 @@ public:
         if (it != m_recentEntries.end()) {
             it->lastAccessTime = now;
             it->accessCount++;
-        }
-        else {
+        } else {
             JumpListEntry entry;
             entry.filePath = filePath;
             entry.displayName = displayName;
@@ -172,9 +176,11 @@ public:
     // ========================================================================
 
     /// Pin an entry so it persists across sessions
-    bool PinEntry(const std::wstring& filePath) {
+    bool PinEntry(const std::wstring& filePath)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_pinnedEntries.size() >= MAX_PINNED_ENTRIES) return false;
+        if (m_pinnedEntries.size() >= MAX_PINNED_ENTRIES)
+            return false;
 
         // Find in recent or frequent
         auto it = FindEntryLocked(m_recentEntries, filePath);
@@ -189,16 +195,18 @@ public:
     }
 
     /// Unpin an entry
-    bool UnpinEntry(const std::wstring& filePath) {
+    bool UnpinEntry(const std::wstring& filePath)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = std::find_if(m_pinnedEntries.begin(), m_pinnedEntries.end(),
-            [&](const JumpListEntry& e) { return e.filePath == filePath; });
+                               [&](const JumpListEntry& e) { return e.filePath == filePath; });
         if (it != m_pinnedEntries.end()) {
             m_pinnedEntries.erase(it);
 
             // Also unpin in recent list
             auto rit = FindEntryLocked(m_recentEntries, filePath);
-            if (rit != m_recentEntries.end()) rit->pinned = false;
+            if (rit != m_recentEntries.end())
+                rit->pinned = false;
 
             MaybeUpdateJumpListLocked();
             return true;
@@ -211,9 +219,11 @@ public:
     // ========================================================================
 
     /// Add a custom task to the Tasks category
-    bool AddTask(const JumpListTask& task) {
+    bool AddTask(const JumpListTask& task)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_tasks.size() >= MAX_TASKS) return false;
+        if (m_tasks.size() >= MAX_TASKS)
+            return false;
         m_tasks.push_back(task);
         MaybeUpdateJumpListLocked();
         return true;
@@ -224,56 +234,67 @@ public:
     // ========================================================================
 
     /// Get entries for a specific category
-    std::vector<JumpListEntry> GetEntries(JumpListCategory category) const {
+    std::vector<JumpListEntry> GetEntries(JumpListCategory category) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         switch (category) {
-        case JumpListCategory::Recent:
-            return { m_recentEntries.begin(), m_recentEntries.end() };
-        case JumpListCategory::Frequent:
-            return m_frequentEntries;
-        case JumpListCategory::Pinned:
-            return m_pinnedEntries;
-        default:
-            return {};
+            case JumpListCategory::Recent:
+                return {m_recentEntries.begin(), m_recentEntries.end()};
+            case JumpListCategory::Frequent:
+                return m_frequentEntries;
+            case JumpListCategory::Pinned:
+                return m_pinnedEntries;
+            default:
+                return {};
         }
     }
 
-    std::vector<JumpListTask> GetTasks() const {
+    std::vector<JumpListTask> GetTasks() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_tasks;
     }
 
-    uint32_t GetRecentCount() const {
+    uint32_t GetRecentCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return static_cast<uint32_t>(m_recentEntries.size());
     }
 
-    uint32_t GetPinnedCount() const {
+    uint32_t GetPinnedCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return static_cast<uint32_t>(m_pinnedEntries.size());
     }
 
-    bool IsInitialized() const { return m_initialized; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
     // ========================================================================
     // Serialization (for persistence across sessions)
     // ========================================================================
 
     /// Export entries as a flat list (for JSON/registry serialization)
-    std::vector<JumpListEntry> ExportAllEntries() const {
+    std::vector<JumpListEntry> ExportAllEntries() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::vector<JumpListEntry> all;
         all.reserve(m_recentEntries.size() + m_pinnedEntries.size());
 
-        for (const auto& e : m_pinnedEntries) all.push_back(e);
+        for (const auto& e : m_pinnedEntries)
+            all.push_back(e);
         for (const auto& e : m_recentEntries) {
-            if (!e.pinned) all.push_back(e);
+            if (!e.pinned)
+                all.push_back(e);
         }
         return all;
     }
 
     /// Import entries (typically from persisted storage)
-    void ImportEntries(const std::vector<JumpListEntry>& entries) {
+    void ImportEntries(const std::vector<JumpListEntry>& entries)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_recentEntries.clear();
         m_pinnedEntries.clear();
@@ -299,25 +320,26 @@ public:
 
     /// Force update the Windows Jump List via COM
     /// Returns true if the COM call succeeded
-    bool ForceUpdate() {
+    bool ForceUpdate()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return UpdateJumpListCOMLocked();
     }
 
-private:
+  private:
     // ========================================================================
     // Internal helpers
     // ========================================================================
 
     using EntryIterator = std::deque<JumpListEntry>::iterator;
 
-    EntryIterator FindEntryLocked(std::deque<JumpListEntry>& list,
-        const std::wstring& filePath) {
-        return std::find_if(list.begin(), list.end(),
-            [&](const JumpListEntry& e) { return e.filePath == filePath; });
+    EntryIterator FindEntryLocked(std::deque<JumpListEntry>& list, const std::wstring& filePath)
+    {
+        return std::find_if(list.begin(), list.end(), [&](const JumpListEntry& e) { return e.filePath == filePath; });
     }
 
-    void UpdateFrequentListLocked() {
+    void UpdateFrequentListLocked()
+    {
         m_frequentEntries.clear();
         m_frequentEntries.reserve(m_recentEntries.size());
         for (const auto& e : m_recentEntries) {
@@ -326,15 +348,14 @@ private:
             }
         }
         std::sort(m_frequentEntries.begin(), m_frequentEntries.end(),
-            [](const JumpListEntry& a, const JumpListEntry& b) {
-                return a.accessCount > b.accessCount;
-            });
+                  [](const JumpListEntry& a, const JumpListEntry& b) { return a.accessCount > b.accessCount; });
         if (m_frequentEntries.size() > MAX_FREQUENT_ENTRIES) {
             m_frequentEntries.resize(MAX_FREQUENT_ENTRIES);
         }
     }
 
-    void AddDefaultTasksLocked() {
+    void AddDefaultTasksLocked()
+    {
         // "Open ExplorerLens Manager" task
         JumpListTask managerTask;
         managerTask.title = L"Open ExplorerLens Manager";
@@ -353,10 +374,10 @@ private:
         m_tasks.push_back(std::move(clearCacheTask));
     }
 
-    void MaybeUpdateJumpListLocked() {
+    void MaybeUpdateJumpListLocked()
+    {
         auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now - m_lastUpdateTime).count();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdateTime).count();
         if (elapsed >= MIN_UPDATE_INTERVAL_MS) {
             UpdateJumpListCOMLocked();
         }
@@ -366,48 +387,43 @@ private:
     /// Creates ICustomDestinationList, populates Recent/Pinned categories
     /// and Tasks via IShellLink items, then commits.  Returns false if any
     /// critical COM call fails; non-critical failures are logged and skipped.
-    bool UpdateJumpListCOMLocked() {
+    bool UpdateJumpListCOMLocked()
+    {
         m_lastUpdateTime = std::chrono::steady_clock::now();
         m_updateCount++;
 
         // Helper — create an IShellLinkW with target path, display title,
         // description, and optional icon.  Caller owns the returned pointer.
-        auto MakeShellLink = [](const std::wstring& target,
-            const std::wstring& title,
-            const std::wstring& desc,
-            const std::wstring& icon,
-            int32_t iconIdx) -> IShellLinkW* {
-                IShellLinkW* pLink = nullptr;
-                HRESULT hr = CoCreateInstance(CLSID_ShellLink, nullptr,
-                    CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pLink));
-                if (FAILED(hr)) return nullptr;
-                pLink->SetPath(target.c_str());
-                pLink->SetDescription(desc.c_str());
-                if (!icon.empty())
-                    pLink->SetIconLocation(icon.c_str(), iconIdx);
-                // Set the display title via IPropertyStore on the shell link
-                IPropertyStore* pPS = nullptr;
-                if (SUCCEEDED(pLink->QueryInterface(IID_PPV_ARGS(&pPS)))) {
-                    PROPVARIANT pv = {};
-                    pv.vt = VT_LPWSTR;
-                    pv.pwszVal = static_cast<LPWSTR>(
-                        CoTaskMemAlloc((title.size() + 1) * sizeof(wchar_t)));
-                    if (pv.pwszVal) {
-                        memcpy(pv.pwszVal, title.c_str(),
-                            (title.size() + 1) * sizeof(wchar_t));
-                        pPS->SetValue(PKEY_Title, pv);
-                        pPS->Commit();
-                        CoTaskMemFree(pv.pwszVal);
-                    }
-                    pPS->Release();
+        auto MakeShellLink = [](const std::wstring& target, const std::wstring& title, const std::wstring& desc,
+                                const std::wstring& icon, int32_t iconIdx) -> IShellLinkW* {
+            IShellLinkW* pLink = nullptr;
+            HRESULT hr = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pLink));
+            if (FAILED(hr))
+                return nullptr;
+            pLink->SetPath(target.c_str());
+            pLink->SetDescription(desc.c_str());
+            if (!icon.empty())
+                pLink->SetIconLocation(icon.c_str(), iconIdx);
+            // Set the display title via IPropertyStore on the shell link
+            IPropertyStore* pPS = nullptr;
+            if (SUCCEEDED(pLink->QueryInterface(IID_PPV_ARGS(&pPS)))) {
+                PROPVARIANT pv = {};
+                pv.vt = VT_LPWSTR;
+                pv.pwszVal = static_cast<LPWSTR>(CoTaskMemAlloc((title.size() + 1) * sizeof(wchar_t)));
+                if (pv.pwszVal) {
+                    memcpy(pv.pwszVal, title.c_str(), (title.size() + 1) * sizeof(wchar_t));
+                    pPS->SetValue(PKEY_Title, pv);
+                    pPS->Commit();
+                    CoTaskMemFree(pv.pwszVal);
                 }
-                return pLink;
-            };
+                pPS->Release();
+            }
+            return pLink;
+        };
 
         // Step 1 — Create the ICustomDestinationList COM object
         ICustomDestinationList* pDest = nullptr;
-        HRESULT hr = CoCreateInstance(CLSID_DestinationList, nullptr,
-            CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDest));
+        HRESULT hr = CoCreateInstance(CLSID_DestinationList, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDest));
         if (FAILED(hr)) {
             OutputDebugStringW(L"[ExplorerLens] CoCreateInstance(CLSID_DestinationList) failed\n");
             return false;
@@ -432,20 +448,21 @@ private:
             pDest->Release();
             return false;
         }
-        if (pRemoved) pRemoved->Release();
+        if (pRemoved)
+            pRemoved->Release();
 
         // Step 4 — Append "Recent Archives" custom category
         if (!m_recentEntries.empty()) {
             IObjectCollection* pColl = nullptr;
-            hr = CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr,
-                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
+            hr =
+                CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
             if (SUCCEEDED(hr)) {
                 uint32_t added = 0;
                 for (const auto& e : m_recentEntries) {
-                    if (added >= maxSlots) break;
-                    IShellLinkW* pLink = MakeShellLink(
-                        e.filePath, e.displayName, e.displayName,
-                        e.iconPath, e.iconIndex);
+                    if (added >= maxSlots)
+                        break;
+                    IShellLinkW* pLink =
+                        MakeShellLink(e.filePath, e.displayName, e.displayName, e.iconPath, e.iconIndex);
                     if (pLink) {
                         pColl->AddObject(pLink);
                         pLink->Release();
@@ -464,13 +481,12 @@ private:
         // Step 5 — Append "Pinned Archives" custom category
         if (!m_pinnedEntries.empty()) {
             IObjectCollection* pColl = nullptr;
-            hr = CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr,
-                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
+            hr =
+                CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
             if (SUCCEEDED(hr)) {
                 for (const auto& e : m_pinnedEntries) {
-                    IShellLinkW* pLink = MakeShellLink(
-                        e.filePath, e.displayName, e.displayName,
-                        e.iconPath, e.iconIndex);
+                    IShellLinkW* pLink =
+                        MakeShellLink(e.filePath, e.displayName, e.displayName, e.iconPath, e.iconIndex);
                     if (pLink) {
                         pColl->AddObject(pLink);
                         pLink->Release();
@@ -488,13 +504,12 @@ private:
         // Step 6 — Add user tasks (Open Manager, Clear Cache, etc.)
         if (!m_tasks.empty()) {
             IObjectCollection* pColl = nullptr;
-            hr = CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr,
-                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
+            hr =
+                CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
             if (SUCCEEDED(hr)) {
                 for (const auto& t : m_tasks) {
                     IShellLinkW* pLink = nullptr;
-                    hr = CoCreateInstance(CLSID_ShellLink, nullptr,
-                        CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pLink));
+                    hr = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pLink));
                     if (SUCCEEDED(hr)) {
                         pLink->SetPath(t.commandPath.c_str());
                         pLink->SetArguments(t.arguments.c_str());
@@ -505,11 +520,9 @@ private:
                         if (SUCCEEDED(pLink->QueryInterface(IID_PPV_ARGS(&pPS)))) {
                             PROPVARIANT pv = {};
                             pv.vt = VT_LPWSTR;
-                            pv.pwszVal = static_cast<LPWSTR>(
-                                CoTaskMemAlloc((t.title.size() + 1) * sizeof(wchar_t)));
+                            pv.pwszVal = static_cast<LPWSTR>(CoTaskMemAlloc((t.title.size() + 1) * sizeof(wchar_t)));
                             if (pv.pwszVal) {
-                                memcpy(pv.pwszVal, t.title.c_str(),
-                                    (t.title.size() + 1) * sizeof(wchar_t));
+                                memcpy(pv.pwszVal, t.title.c_str(), (t.title.size() + 1) * sizeof(wchar_t));
                                 pPS->SetValue(PKEY_Title, pv);
                                 pPS->Commit();
                                 CoTaskMemFree(pv.pwszVal);
@@ -539,7 +552,8 @@ private:
         return true;
     }
 
-    static uint64_t GetCurrentFileTime() {
+    static uint64_t GetCurrentFileTime()
+    {
         auto now = std::chrono::system_clock::now();
         auto duration = now.time_since_epoch();
         auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
@@ -553,15 +567,15 @@ private:
     std::wstring m_appUserModelId;
 
     // Entry lists
-    std::deque<JumpListEntry>  m_recentEntries;
+    std::deque<JumpListEntry> m_recentEntries;
     std::vector<JumpListEntry> m_frequentEntries;
     std::vector<JumpListEntry> m_pinnedEntries;
-    std::vector<JumpListTask>  m_tasks;
+    std::vector<JumpListTask> m_tasks;
 
     // Throttling
     std::chrono::steady_clock::time_point m_lastUpdateTime;
     uint32_t m_updateCount = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,36 +6,62 @@
 // require Windows Hello verification before granting access.
 //
 #pragma once
-#include <string>
-#include <functional>
 #include <chrono>
+#include <functional>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
 
-enum class HelloAuthMethod    { Fingerprint, FaceRecognition, PIN, None };
-enum class HelloAuthStatus    { Approved, Denied, Cancelled, NotEnrolled, Unavailable };
-enum class HelloProtectedScope { Annotations, PrivateSettings, PluginAdmin };
-
-struct HelloAuthRequest {
-    HelloProtectedScope scope       = HelloProtectedScope::Annotations;
-    std::string         promptText  = "Authenticate to access this feature";
-    bool                allowFallback = true;
+enum class HelloAuthMethod {
+    Fingerprint,
+    FaceRecognition,
+    PIN,
+    None
+};
+enum class HelloAuthStatus {
+    Approved,
+    Denied,
+    Cancelled,
+    NotEnrolled,
+    Unavailable
+};
+enum class HelloProtectedScope {
+    Annotations,
+    PrivateSettings,
+    PluginAdmin
 };
 
-struct HelloAuthResult {
-    HelloAuthStatus  status    = HelloAuthStatus::Unavailable;
-    HelloAuthMethod  method    = HelloAuthMethod::None;
-    std::string      errorMsg;
-    bool Ok() const noexcept { return status == HelloAuthStatus::Approved; }
+struct HelloAuthRequest
+{
+    HelloProtectedScope scope = HelloProtectedScope::Annotations;
+    std::string promptText = "Authenticate to access this feature";
+    bool allowFallback = true;
+};
 
-    std::string StatusName() const noexcept {
+struct HelloAuthResult
+{
+    HelloAuthStatus status = HelloAuthStatus::Unavailable;
+    HelloAuthMethod method = HelloAuthMethod::None;
+    std::string errorMsg;
+    bool Ok() const noexcept
+    {
+        return status == HelloAuthStatus::Approved;
+    }
+
+    std::string StatusName() const noexcept
+    {
         switch (status) {
-        case HelloAuthStatus::Approved:    return "Approved";
-        case HelloAuthStatus::Denied:      return "Denied";
-        case HelloAuthStatus::Cancelled:   return "Cancelled";
-        case HelloAuthStatus::NotEnrolled: return "NotEnrolled";
-        case HelloAuthStatus::Unavailable: return "Unavailable";
+            case HelloAuthStatus::Approved:
+                return "Approved";
+            case HelloAuthStatus::Denied:
+                return "Denied";
+            case HelloAuthStatus::Cancelled:
+                return "Cancelled";
+            case HelloAuthStatus::NotEnrolled:
+                return "NotEnrolled";
+            case HelloAuthStatus::Unavailable:
+                return "Unavailable";
         }
         return "Unknown";
     }
@@ -43,44 +69,64 @@ struct HelloAuthResult {
 
 using HelloAuthFn = std::function<HelloAuthResult(const HelloAuthRequest&)>;
 
-class WindowsHelloAuthBridge {
-public:
+class WindowsHelloAuthBridge
+{
+  public:
     explicit WindowsHelloAuthBridge() = default;
-    void SetAuthFunction(HelloAuthFn fn) { m_authFn = std::move(fn); }
-    void SetAvailable(bool available) noexcept { m_available = available; }
-    bool IsAvailable() const noexcept { return m_available; }
+    void SetAuthFunction(HelloAuthFn fn)
+    {
+        m_authFn = std::move(fn);
+    }
+    void SetAvailable(bool available) noexcept
+    {
+        m_available = available;
+    }
+    bool IsAvailable() const noexcept
+    {
+        return m_available;
+    }
 
-    HelloAuthResult Authenticate(const HelloAuthRequest& req) const {
+    HelloAuthResult Authenticate(const HelloAuthRequest& req) const
+    {
         if (!m_available)
-            return { HelloAuthStatus::Unavailable, HelloAuthMethod::None, "Windows Hello not available" };
+            return {HelloAuthStatus::Unavailable, HelloAuthMethod::None, "Windows Hello not available"};
         if (!m_authFn)
-            return { HelloAuthStatus::Unavailable, HelloAuthMethod::None, "No auth function configured" };
+            return {HelloAuthStatus::Unavailable, HelloAuthMethod::None, "No auth function configured"};
         return m_authFn(req);
     }
 
-    static std::string MethodName(HelloAuthMethod m) noexcept {
+    static std::string MethodName(HelloAuthMethod m) noexcept
+    {
         switch (m) {
-        case HelloAuthMethod::Fingerprint:     return "Fingerprint";
-        case HelloAuthMethod::FaceRecognition: return "FaceRecognition";
-        case HelloAuthMethod::PIN:             return "PIN";
-        case HelloAuthMethod::None:            return "None";
+            case HelloAuthMethod::Fingerprint:
+                return "Fingerprint";
+            case HelloAuthMethod::FaceRecognition:
+                return "FaceRecognition";
+            case HelloAuthMethod::PIN:
+                return "PIN";
+            case HelloAuthMethod::None:
+                return "None";
         }
         return "Unknown";
     }
 
-    static std::string ScopeName(HelloProtectedScope s) noexcept {
+    static std::string ScopeName(HelloProtectedScope s) noexcept
+    {
         switch (s) {
-        case HelloProtectedScope::Annotations:    return "Annotations";
-        case HelloProtectedScope::PrivateSettings: return "PrivateSettings";
-        case HelloProtectedScope::PluginAdmin:    return "PluginAdmin";
+            case HelloProtectedScope::Annotations:
+                return "Annotations";
+            case HelloProtectedScope::PrivateSettings:
+                return "PrivateSettings";
+            case HelloProtectedScope::PluginAdmin:
+                return "PluginAdmin";
         }
         return "Unknown";
     }
 
-private:
-    bool         m_available = false;
-    HelloAuthFn  m_authFn;
+  private:
+    bool m_available = false;
+    HelloAuthFn m_authFn;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

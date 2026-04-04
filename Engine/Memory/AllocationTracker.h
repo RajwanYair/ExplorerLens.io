@@ -12,28 +12,30 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <algorithm>
+#include <atomic>
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <atomic>
-#include <mutex>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct AllocationTag {
+struct AllocationTag
+{
     const char* file = nullptr;
-    int         line = 0;
+    int line = 0;
     const char* function = nullptr;
     const char* component = nullptr;  // e.g., "JPEG2000Decoder", "BitmapPool"
 };
 
-struct AllocationSiteRecord {
+struct AllocationSiteRecord
+{
     AllocationTag tag;
     uint64_t currentBytes = 0;
     uint64_t peakBytes = 0;
@@ -42,21 +44,24 @@ struct AllocationSiteRecord {
     uint32_t totalFrees = 0;
 };
 
-struct TrackedAllocation {
+struct TrackedAllocation
+{
     void* address = nullptr;
     uint64_t size = 0;
     uint32_t siteId = 0;
     uint64_t timestamp = 0;
 };
 
-struct ComponentMemorySummary {
+struct ComponentMemorySummary
+{
     std::string component;
-    uint64_t    currentBytes = 0;
-    uint64_t    peakBytes = 0;
-    uint32_t    activeCount = 0;
+    uint64_t currentBytes = 0;
+    uint64_t peakBytes = 0;
+    uint32_t activeCount = 0;
 };
 
-struct AllocationTrackerStats {
+struct AllocationTrackerStats
+{
     uint64_t totalAllocated = 0;
     uint64_t totalFreed = 0;
     uint64_t currentOutstanding = 0;
@@ -68,14 +73,17 @@ struct AllocationTrackerStats {
 // ========================================================================
 // AllocationTracker — Debug-mode memory attribution tracker
 // ========================================================================
-class AllocationTracker {
-public:
-    static AllocationTracker& Instance() {
+class AllocationTracker
+{
+  public:
+    static AllocationTracker& Instance()
+    {
         static AllocationTracker instance;
         return instance;
     }
 
-    void Initialize(bool enableTracking = true) {
+    void Initialize(bool enableTracking = true)
+    {
         m_enabled = enableTracking;
         m_stats = {};
         m_siteRecords.clear();
@@ -83,12 +91,20 @@ public:
         m_initialized = true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
-    bool IsEnabled() const { return m_enabled; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    bool IsEnabled() const
+    {
+        return m_enabled;
+    }
 
     // Register a call site (returns site ID)
-    uint32_t RegisterSite(const AllocationTag& tag) {
-        if (!m_enabled) return 0;
+    uint32_t RegisterSite(const AllocationTag& tag)
+    {
+        if (!m_enabled)
+            return 0;
         std::lock_guard<std::mutex> lock(m_mutex);
         uint32_t id = static_cast<uint32_t>(m_siteRecords.size());
         AllocationSiteRecord record;
@@ -98,8 +114,10 @@ public:
     }
 
     // Track an allocation
-    void TrackAlloc(void* address, uint64_t size, uint32_t siteId) {
-        if (!m_enabled || !address) return;
+    void TrackAlloc(void* address, uint64_t size, uint32_t siteId)
+    {
+        if (!m_enabled || !address)
+            return;
         std::lock_guard<std::mutex> lock(m_mutex);
 
         TrackedAllocation alloc;
@@ -125,8 +143,10 @@ public:
     }
 
     // Track a deallocation
-    void TrackFree(void* address) {
-        if (!m_enabled || !address) return;
+    void TrackFree(void* address)
+    {
+        if (!m_enabled || !address)
+            return;
         std::lock_guard<std::mutex> lock(m_mutex);
 
         auto it = m_allocations.find(address);
@@ -139,14 +159,15 @@ public:
                 site.totalFrees++;
             }
             m_stats.totalFreed += alloc.size;
-            m_stats.currentOutstanding = (alloc.size <= m_stats.currentOutstanding)
-                ? (m_stats.currentOutstanding - alloc.size) : 0;
+            m_stats.currentOutstanding =
+                (alloc.size <= m_stats.currentOutstanding) ? (m_stats.currentOutstanding - alloc.size) : 0;
             m_allocations.erase(it);
         }
     }
 
     // Get top N memory consumers by component
-    std::vector<ComponentMemorySummary> GetTopConsumers(uint32_t maxCount = 10) {
+    std::vector<ComponentMemorySummary> GetTopConsumers(uint32_t maxCount = 10)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::unordered_map<std::string, ComponentMemorySummary> byComponent;
 
@@ -167,14 +188,16 @@ public:
 
         std::sort(result.begin(), result.end(), [](const ComponentMemorySummary& a, const ComponentMemorySummary& b) {
             return a.currentBytes > b.currentBytes;
-            });
+        });
 
-        if (result.size() > maxCount) result.resize(maxCount);
+        if (result.size() > maxCount)
+            result.resize(maxCount);
         return result;
     }
 
     // Get stats
-    AllocationTrackerStats GetStats() {
+    AllocationTrackerStats GetStats()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.activeSiteCount = static_cast<uint32_t>(m_siteRecords.size());
         m_stats.leakSuspectCount = 0;
@@ -187,7 +210,8 @@ public:
     }
 
     // Get sites with potential leaks
-    std::vector<AllocationSiteRecord> GetLeakSuspects() {
+    std::vector<AllocationSiteRecord> GetLeakSuspects()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::vector<AllocationSiteRecord> suspects;
         for (auto& site : m_siteRecords) {
@@ -198,12 +222,12 @@ public:
         return suspects;
     }
 
-private:
+  private:
     AllocationTracker() = default;
 
-    bool                   m_enabled = false;
-    bool                   m_initialized = false;
-    std::mutex             m_mutex;
+    bool m_enabled = false;
+    bool m_initialized = false;
+    std::mutex m_mutex;
     AllocationTrackerStats m_stats;
     std::vector<AllocationSiteRecord> m_siteRecords;
     std::unordered_map<void*, TrackedAllocation> m_allocations;
@@ -211,7 +235,8 @@ private:
 
 // Macro for easy site registration
 #define ALLOC_TRACK_SITE(component) \
-        static uint32_t s_allocSiteId = AllocationTracker::Instance().RegisterSite({__FILE__, __LINE__, __FUNCTION__, component})
+    static uint32_t s_allocSiteId = \
+        AllocationTracker::Instance().RegisterSite({__FILE__, __LINE__, __FUNCTION__, component})
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

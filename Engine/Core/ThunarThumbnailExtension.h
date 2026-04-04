@@ -9,7 +9,8 @@
 #include <cstdint>
 #include <string>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class ThunarInterfaceVersion : uint8_t {
     V1,
@@ -23,7 +24,8 @@ enum class TumblerSchedulerType : uint8_t {
     Urgent
 };
 
-struct ThunarTumblerConfig {
+struct ThunarTumblerConfig
+{
     ThunarInterfaceVersion interfaceVersion = ThunarInterfaceVersion::V3;
     TumblerSchedulerType schedulerType = TumblerSchedulerType::Background;
     std::string cachePath;
@@ -31,8 +33,9 @@ struct ThunarTumblerConfig {
     uint32_t timeoutMs = 5000;
 };
 
-class ThunarThumbnailExtension {
-public:
+class ThunarThumbnailExtension
+{
+  public:
     ThunarThumbnailExtension() = default;
     ~ThunarThumbnailExtension() = default;
 
@@ -41,39 +44,46 @@ public:
     ThunarThumbnailExtension(ThunarThumbnailExtension&&) noexcept = default;
     ThunarThumbnailExtension& operator=(ThunarThumbnailExtension&&) noexcept = default;
 
-    bool Initialize(ThunarTumblerConfig const& config) {
+    bool Initialize(ThunarTumblerConfig const& config)
+    {
         m_config = config;
         return true;
     }
 
-    bool RegisterTumbler() {
+    bool RegisterTumbler()
+    {
         if (m_registered)
             return false;
         m_registered = true;
         return true;
     }
 
-    bool UnregisterTumbler() {
+    bool UnregisterTumbler()
+    {
         m_registered = false;
         return true;
     }
 
-    [[nodiscard]] bool IsRegistered() const {
+    [[nodiscard]] bool IsRegistered() const
+    {
         return m_registered;
     }
 
-    bool SetScheduler(TumblerSchedulerType schedulerType) {
+    bool SetScheduler(TumblerSchedulerType schedulerType)
+    {
         m_config.schedulerType = schedulerType;
         return true;
     }
 
-    [[nodiscard]] ThunarTumblerConfig const& GetConfig() const {
+    [[nodiscard]] ThunarTumblerConfig const& GetConfig() const
+    {
         return m_config;
     }
 
-private:
+  private:
     ThunarTumblerConfig m_config;
     bool m_registered = false;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

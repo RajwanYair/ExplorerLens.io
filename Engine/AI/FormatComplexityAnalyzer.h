@@ -25,7 +25,8 @@ enum class FormatComplexityLevel : uint8_t {
     Extreme
 };
 
-struct FormatComplexityResult {
+struct FormatComplexityResult
+{
     FormatComplexityLevel level = FormatComplexityLevel::Moderate;
     float estimatedDecodeMs = 10.0f;
     float confidenceScore = 0.5f;
@@ -34,7 +35,8 @@ struct FormatComplexityResult {
     bool hasEmbeddedResources = false;
 };
 
-struct ComplexityAnalyzerStats {
+struct ComplexityAnalyzerStats
+{
     uint64_t totalAnalyses = 0;
     uint64_t trivialCount = 0;
     uint64_t extremeCount = 0;
@@ -42,20 +44,24 @@ struct ComplexityAnalyzerStats {
     bool initialized = false;
 };
 
-class FormatComplexityAnalyzer {
-public:
-    static FormatComplexityAnalyzer& Instance() {
+class FormatComplexityAnalyzer
+{
+  public:
+    static FormatComplexityAnalyzer& Instance()
+    {
         static FormatComplexityAnalyzer instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats = {};
         m_stats.initialized = true;
     }
 
-    FormatComplexityResult Analyze(const std::wstring& /*filePath*/, uint64_t fileSize) {
+    FormatComplexityResult Analyze(const std::wstring& /*filePath*/, uint64_t fileSize)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalAnalyses++;
 
@@ -93,29 +99,30 @@ public:
         }
 
         float n = static_cast<float>(m_stats.totalAnalyses);
-        m_stats.averageEstimatedMs =
-            m_stats.averageEstimatedMs * ((n - 1.0f) / n) +
-            result.estimatedDecodeMs / n;
+        m_stats.averageEstimatedMs = m_stats.averageEstimatedMs * ((n - 1.0f) / n) + result.estimatedDecodeMs / n;
 
         return result;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    ComplexityAnalyzerStats GetStats() const {
+    ComplexityAnalyzerStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
     }
 
-private:
+  private:
     FormatComplexityAnalyzer() = default;
     ~FormatComplexityAnalyzer() = default;
     FormatComplexityAnalyzer(const FormatComplexityAnalyzer&) = delete;
@@ -125,5 +132,5 @@ private:
     ComplexityAnalyzerStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

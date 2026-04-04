@@ -11,38 +11,60 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class ConflictResolutionStrategy { LastWriteWins, ThreeWayMerge, PromptUser, OwnerPriority };
-enum class ConflictType               { StarRating, ColorLabel, Tag, Comment, Deletion };
-enum class MergeOutcome               { Resolved, Conflicted, Deferred };
-
-struct ConflictEntry {
-    ConflictType  type        = ConflictType::StarRating;
-    std::wstring  filePath;
-    std::string   field;
-    std::string   localValue;
-    std::string   remoteValue;
-    std::string   baseValue;    // common ancestor (3-way)
-    std::string   localAuthor;
-    std::string   remoteAuthor;
-    int64_t       localTimestamp  = 0;
-    int64_t       remoteTimestamp = 0;
+enum class ConflictResolutionStrategy {
+    LastWriteWins,
+    ThreeWayMerge,
+    PromptUser,
+    OwnerPriority
+};
+enum class ConflictType {
+    StarRating,
+    ColorLabel,
+    Tag,
+    Comment,
+    Deletion
+};
+enum class MergeOutcome {
+    Resolved,
+    Conflicted,
+    Deferred
 };
 
-struct CRMergeResult {
-    MergeOutcome                    outcome = MergeOutcome::Resolved;
-    std::string                     resolvedValue;
-    std::vector<ConflictEntry>      remainingConflicts;
-    int                             resolvedCount = 0;
-    bool Ok() const noexcept { return outcome == MergeOutcome::Resolved; }
+struct ConflictEntry
+{
+    ConflictType type = ConflictType::StarRating;
+    std::wstring filePath;
+    std::string field;
+    std::string localValue;
+    std::string remoteValue;
+    std::string baseValue;  // common ancestor (3-way)
+    std::string localAuthor;
+    std::string remoteAuthor;
+    int64_t localTimestamp = 0;
+    int64_t remoteTimestamp = 0;
 };
 
-class ConflictResolutionMerger {
-public:
-    explicit ConflictResolutionMerger(
-        ConflictResolutionStrategy strategy = ConflictResolutionStrategy::LastWriteWins)
-        : m_strategy(strategy) {}
+struct CRMergeResult
+{
+    MergeOutcome outcome = MergeOutcome::Resolved;
+    std::string resolvedValue;
+    std::vector<ConflictEntry> remainingConflicts;
+    int resolvedCount = 0;
+    bool Ok() const noexcept
+    {
+        return outcome == MergeOutcome::Resolved;
+    }
+};
 
-    CRMergeResult Resolve(const std::vector<ConflictEntry>& conflicts) const {
+class ConflictResolutionMerger
+{
+  public:
+    explicit ConflictResolutionMerger(ConflictResolutionStrategy strategy = ConflictResolutionStrategy::LastWriteWins)
+        : m_strategy(strategy)
+    {}
+
+    CRMergeResult Resolve(const std::vector<ConflictEntry>& conflicts) const
+    {
         CRMergeResult result;
         for (const auto& c : conflicts) {
             std::string resolved = ResolveOne(c);
@@ -53,37 +75,50 @@ public:
                 result.remainingConflicts.push_back(c);
             }
         }
-        result.outcome = result.remainingConflicts.empty()
-            ? MergeOutcome::Resolved : MergeOutcome::Conflicted;
+        result.outcome = result.remainingConflicts.empty() ? MergeOutcome::Resolved : MergeOutcome::Conflicted;
         return result;
     }
 
-    ConflictResolutionStrategy GetStrategy() const noexcept { return m_strategy; }
-    void SetStrategy(ConflictResolutionStrategy s) noexcept { m_strategy = s; }
+    ConflictResolutionStrategy GetStrategy() const noexcept
+    {
+        return m_strategy;
+    }
+    void SetStrategy(ConflictResolutionStrategy s) noexcept
+    {
+        m_strategy = s;
+    }
 
-    static std::string StrategyName(ConflictResolutionStrategy s) noexcept {
+    static std::string StrategyName(ConflictResolutionStrategy s) noexcept
+    {
         switch (s) {
-        case ConflictResolutionStrategy::LastWriteWins: return "LastWriteWins";
-        case ConflictResolutionStrategy::ThreeWayMerge: return "ThreeWayMerge";
-        case ConflictResolutionStrategy::PromptUser:    return "PromptUser";
-        case ConflictResolutionStrategy::OwnerPriority: return "OwnerPriority";
+            case ConflictResolutionStrategy::LastWriteWins:
+                return "LastWriteWins";
+            case ConflictResolutionStrategy::ThreeWayMerge:
+                return "ThreeWayMerge";
+            case ConflictResolutionStrategy::PromptUser:
+                return "PromptUser";
+            case ConflictResolutionStrategy::OwnerPriority:
+                return "OwnerPriority";
         }
         return "Unknown";
     }
 
-private:
-    std::string ResolveOne(const ConflictEntry& c) const {
+  private:
+    std::string ResolveOne(const ConflictEntry& c) const
+    {
         switch (m_strategy) {
-        case ConflictResolutionStrategy::LastWriteWins:
-            return (c.remoteTimestamp >= c.localTimestamp) ? c.remoteValue : c.localValue;
-        case ConflictResolutionStrategy::ThreeWayMerge:
-            if (c.localValue == c.baseValue)  return c.remoteValue;
-            if (c.remoteValue == c.baseValue) return c.localValue;
-            return {}; // genuine conflict → defer
-        case ConflictResolutionStrategy::OwnerPriority:
-            return c.localValue; // owner wins
-        case ConflictResolutionStrategy::PromptUser:
-            return {}; // deferred to UI
+            case ConflictResolutionStrategy::LastWriteWins:
+                return (c.remoteTimestamp >= c.localTimestamp) ? c.remoteValue : c.localValue;
+            case ConflictResolutionStrategy::ThreeWayMerge:
+                if (c.localValue == c.baseValue)
+                    return c.remoteValue;
+                if (c.remoteValue == c.baseValue)
+                    return c.localValue;
+                return {};  // genuine conflict → defer
+            case ConflictResolutionStrategy::OwnerPriority:
+                return c.localValue;  // owner wins
+            case ConflictResolutionStrategy::PromptUser:
+                return {};  // deferred to UI
         }
         return {};
     }
@@ -91,5 +126,5 @@ private:
     ConflictResolutionStrategy m_strategy;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

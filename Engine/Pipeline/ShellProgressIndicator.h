@@ -6,13 +6,13 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <atomic>
-#include <functional>
-#include <chrono>
-#include <string>
-#include <mutex>
 #include <array>
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <functional>
+#include <mutex>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,21 +22,20 @@ namespace Engine {
 // ============================================================================
 
 enum class ThumbnailStage : uint8_t {
-    Detection = 0,  // Format detection / magic-byte check
+    Detection = 0,   // Format detection / magic-byte check
     Extraction = 1,  // Archive extraction or stream open
-    Decode = 2,  // Image/video/document decode
-    Transform = 3,  // Resize, crop, color-space conversion
-    Render = 4,  // GPU render pass (if applicable)
-    Cache = 5,  // Cache write (persistent / in-memory)
-    Complete = 6,  // Done
-    Failed = 7   // Error occurred
+    Decode = 2,      // Image/video/document decode
+    Transform = 3,   // Resize, crop, color-space conversion
+    Render = 4,      // GPU render pass (if applicable)
+    Cache = 5,       // Cache write (persistent / in-memory)
+    Complete = 6,    // Done
+    Failed = 7       // Error occurred
 };
 
-inline const char* ThumbnailStageToString(ThumbnailStage stage) {
-    static const char* names[] = {
-        "Detection", "Extraction", "Decode", "Transform",
-        "Render", "Cache", "Complete", "Failed"
-    };
+inline const char* ThumbnailStageToString(ThumbnailStage stage)
+{
+    static const char* names[] = {"Detection", "Extraction", "Decode",   "Transform",
+                                  "Render",    "Cache",      "Complete", "Failed"};
     auto idx = static_cast<uint8_t>(stage);
     return (idx < 8) ? names[idx] : "Unknown";
 }
@@ -46,33 +45,31 @@ inline const char* ThumbnailStageToString(ThumbnailStage stage) {
 // ============================================================================
 
 /// Callback: (stage, progressPercent [0..100], estimatedRemainingMs, message)
-using ShellProgressCallback = std::function<void(
-    ThumbnailStage stage,
-    uint32_t       percentComplete,
-    uint32_t       estimatedRemainingMs,
-    const char* statusMessage
-    )>;
+using ShellProgressCallback = std::function<void(ThumbnailStage stage, uint32_t percentComplete,
+                                                 uint32_t estimatedRemainingMs, const char* statusMessage)>;
 
 // ============================================================================
 // Per-file progress tracker
 // ============================================================================
 
-struct FileProgress {
-    uint64_t        fileSize = 0;      // Total file size in bytes
-    uint64_t        bytesProcessed = 0;      // Bytes processed so far
-    ThumbnailStage  currentStage = ThumbnailStage::Detection;
-    uint32_t        percentComplete = 0;     // 0..100
+struct FileProgress
+{
+    uint64_t fileSize = 0;        // Total file size in bytes
+    uint64_t bytesProcessed = 0;  // Bytes processed so far
+    ThumbnailStage currentStage = ThumbnailStage::Detection;
+    uint32_t percentComplete = 0;  // 0..100
     std::chrono::steady_clock::time_point startTime;
     std::chrono::steady_clock::time_point stageStartTime;
-    bool            cancelled = false;
+    bool cancelled = false;
 };
 
 // ============================================================================
 // ShellProgressIndicator — main progress reporting engine
 // ============================================================================
 
-class ShellProgressIndicator {
-public:
+class ShellProgressIndicator
+{
+  public:
     // Estimated decode time thresholds (in bytes):
     //   Files < SMALL_FILE_THRESHOLD: no progress reporting (too fast)
     //   Files >= LARGE_FILE_THRESHOLD: full progress dialog
@@ -96,7 +93,8 @@ public:
     // ========================================================================
 
     /// Begin tracking progress for a file
-    void BeginFile(const std::wstring& filePath, uint64_t fileSize) {
+    void BeginFile(const std::wstring& filePath, uint64_t fileSize)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_progress.fileSize = fileSize;
         m_progress.bytesProcessed = 0;
@@ -110,7 +108,8 @@ public:
     }
 
     /// End tracking (success or failure)
-    void EndFile(bool success) {
+    void EndFile(bool success)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_progress.currentStage = success ? ThumbnailStage::Complete : ThumbnailStage::Failed;
         m_progress.percentComplete = success ? 100 : m_progress.percentComplete;
@@ -123,13 +122,14 @@ public:
     // ========================================================================
 
     /// Advance to the next pipeline stage
-    void AdvanceStage(ThumbnailStage newStage) {
+    void AdvanceStage(ThumbnailStage newStage)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_progress.currentStage = newStage;
         m_progress.stageStartTime = std::chrono::steady_clock::now();
 
         // Approximate percentage by stage
-        static constexpr uint32_t stagePercent[] = { 5, 15, 50, 75, 90, 95, 100, 0 };
+        static constexpr uint32_t stagePercent[] = {5, 15, 50, 75, 90, 95, 100, 0};
         auto idx = static_cast<uint8_t>(newStage);
         if (idx < 8) {
             m_progress.percentComplete = stagePercent[idx];
@@ -139,22 +139,19 @@ public:
     }
 
     /// Report byte-level progress within the current stage
-    void ReportBytes(uint64_t additionalBytes) {
+    void ReportBytes(uint64_t additionalBytes)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_progress.bytesProcessed += additionalBytes;
 
         if (m_progress.fileSize > 0) {
-            uint32_t rawPercent = static_cast<uint32_t>(
-                (m_progress.bytesProcessed * 100) / m_progress.fileSize
-                );
+            uint32_t rawPercent = static_cast<uint32_t>((m_progress.bytesProcessed * 100) / m_progress.fileSize);
             m_progress.percentComplete = (rawPercent > 100) ? 100 : rawPercent;
         }
 
         // Throttle updates
         auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now - m_lastNotifyTime
-        ).count();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastNotifyTime).count();
 
         if (elapsed >= MIN_UPDATE_INTERVAL_MS) {
             NotifyLocked("Processing...");
@@ -165,12 +162,14 @@ public:
     // Cancellation
     // ========================================================================
 
-    void RequestCancel() {
+    void RequestCancel()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_progress.cancelled = true;
     }
 
-    bool IsCancelled() const {
+    bool IsCancelled() const
+    {
         return m_progress.cancelled;
     }
 
@@ -178,7 +177,8 @@ public:
     // Callback registration
     // ========================================================================
 
-    void SetCallback(ShellProgressCallback callback) {
+    void SetCallback(ShellProgressCallback callback)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_callback = std::move(callback);
     }
@@ -187,19 +187,20 @@ public:
     // Queries
     // ========================================================================
 
-    FileProgress GetProgress() const {
+    FileProgress GetProgress() const
+    {
         // No lock needed — reads of aligned atomics are safe
         return m_progress;
     }
 
     /// Estimated time remaining in milliseconds
-    uint32_t EstimateRemainingMs() const {
+    uint32_t EstimateRemainingMs() const
+    {
         auto now = std::chrono::steady_clock::now();
-        auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now - m_progress.startTime
-        ).count();
+        auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_progress.startTime).count();
 
-        if (m_progress.percentComplete == 0 || m_progress.percentComplete >= 100) return 0;
+        if (m_progress.percentComplete == 0 || m_progress.percentComplete >= 100)
+            return 0;
 
         double totalEstimateMs = (elapsedMs * 100.0) / m_progress.percentComplete;
         double remainingMs = totalEstimateMs - elapsedMs;
@@ -207,32 +208,33 @@ public:
     }
 
     /// Get human-readable ETA string (e.g., "~3s remaining")
-    std::string GetETAString() const {
+    std::string GetETAString() const
+    {
         uint32_t ms = EstimateRemainingMs();
-        if (ms == 0) return "";
-        if (ms < 1000) return "<1s remaining";
+        if (ms == 0)
+            return "";
+        if (ms < 1000)
+            return "<1s remaining";
         uint32_t sec = ms / 1000;
-        if (sec < 60) return "~" + std::to_string(sec) + "s remaining";
+        if (sec < 60)
+            return "~" + std::to_string(sec) + "s remaining";
         return "~" + std::to_string(sec / 60) + "m " + std::to_string(sec % 60) + "s remaining";
     }
 
-private:
-    void NotifyLocked(const char* message) {
-        if (!m_shouldReport || !m_callback) return;
+  private:
+    void NotifyLocked(const char* message)
+    {
+        if (!m_shouldReport || !m_callback)
+            return;
         m_lastNotifyTime = std::chrono::steady_clock::now();
-        m_callback(
-            m_progress.currentStage,
-            m_progress.percentComplete,
-            EstimateRemainingMs(),
-            message
-        );
+        m_callback(m_progress.currentStage, m_progress.percentComplete, EstimateRemainingMs(), message);
     }
 
-    FileProgress     m_progress;
+    FileProgress m_progress;
     ShellProgressCallback m_callback;
-    std::wstring     m_filePath;
-    std::mutex       m_mutex;
-    bool             m_shouldReport = false;
+    std::wstring m_filePath;
+    std::mutex m_mutex;
+    bool m_shouldReport = false;
     std::chrono::steady_clock::time_point m_lastNotifyTime;
 };
 
@@ -240,45 +242,61 @@ private:
 // Batch progress aggregator (for directory thumbnail generation)
 // ============================================================================
 
-class BatchProgressTracker {
-public:
-    void Begin(uint32_t totalFiles) {
+class BatchProgressTracker
+{
+  public:
+    void Begin(uint32_t totalFiles)
+    {
         m_totalFiles.store(totalFiles, std::memory_order_relaxed);
         m_completedFiles.store(0, std::memory_order_relaxed);
         m_failedFiles.store(0, std::memory_order_relaxed);
         m_startTime = std::chrono::steady_clock::now();
     }
 
-    void OnFileComplete(bool success) {
+    void OnFileComplete(bool success)
+    {
         m_completedFiles.fetch_add(1, std::memory_order_relaxed);
         if (!success) {
             m_failedFiles.fetch_add(1, std::memory_order_relaxed);
         }
     }
 
-    uint32_t GetTotalFiles() const { return m_totalFiles.load(std::memory_order_relaxed); }
-    uint32_t GetCompletedFiles() const { return m_completedFiles.load(std::memory_order_relaxed); }
-    uint32_t GetFailedFiles() const { return m_failedFiles.load(std::memory_order_relaxed); }
+    uint32_t GetTotalFiles() const
+    {
+        return m_totalFiles.load(std::memory_order_relaxed);
+    }
+    uint32_t GetCompletedFiles() const
+    {
+        return m_completedFiles.load(std::memory_order_relaxed);
+    }
+    uint32_t GetFailedFiles() const
+    {
+        return m_failedFiles.load(std::memory_order_relaxed);
+    }
 
-    double GetThroughput() const {
+    double GetThroughput() const
+    {
         auto now = std::chrono::steady_clock::now();
         double elapsedSec = std::chrono::duration<double>(now - m_startTime).count();
-        if (elapsedSec < 0.001) return 0.0;
+        if (elapsedSec < 0.001)
+            return 0.0;
         return m_completedFiles.load(std::memory_order_relaxed) / elapsedSec;
     }
 
-    uint32_t GetBatchPercentComplete() const {
+    uint32_t GetBatchPercentComplete() const
+    {
         uint32_t total = m_totalFiles.load(std::memory_order_relaxed);
-        if (total == 0) return 100;
+        if (total == 0)
+            return 100;
         return (m_completedFiles.load(std::memory_order_relaxed) * 100) / total;
     }
 
-private:
-    std::atomic<uint32_t> m_totalFiles{ 0 };
-    std::atomic<uint32_t> m_completedFiles{ 0 };
-    std::atomic<uint32_t> m_failedFiles{ 0 };
+  private:
+    std::atomic<uint32_t> m_totalFiles{0};
+    std::atomic<uint32_t> m_completedFiles{0};
+    std::atomic<uint32_t> m_failedFiles{0};
     std::chrono::steady_clock::time_point m_startTime;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

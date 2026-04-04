@@ -5,10 +5,19 @@
 
 namespace ExplorerLens::Engine {
 
-bool ContentAwareInpainter::Inpaint(const void*, uint32_t, uint32_t, const InpaintRegion&) { return false; }
+bool ContentAwareInpainter::Inpaint(const void*, uint32_t, uint32_t, const InpaintRegion&)
+{
+    return false;
+}
 void ContentAwareInpainter::SetQuality(InpaintQuality) {}
-uint32_t ContentAwareInpainter::GetEstimatedDurationMs(const InpaintRegion&) const { return 0; }
-bool ContentAwareInpainter::IsProcessing() const { return false; }
+uint32_t ContentAwareInpainter::GetEstimatedDurationMs(const InpaintRegion&) const
+{
+    return 0;
+}
+bool ContentAwareInpainter::IsProcessing() const
+{
+    return false;
+}
 void ContentAwareInpainter::Cancel() {}
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

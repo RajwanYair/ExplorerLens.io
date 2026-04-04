@@ -48,10 +48,10 @@
 
 #pragma once
 
-#include "ICodecModule.h"
+#include <cstring>
 #include <string>
 #include <vector>
-#include <cstring>
+#include "ICodecModule.h"
 
 namespace ExplorerLens {
 namespace Engine {
@@ -62,14 +62,14 @@ namespace Codec {
 //==============================================================================
 struct CodecModuleSpec
 {
-    const char* codecId; ///< e.g. "explorerlens.codec.webp"
-    const wchar_t* dllName; ///< e.g. L"ExplorerLens_Codec_WebP.dll"
-    const wchar_t* displayName; ///< e.g. L"WebP Codec"
-    const wchar_t* version; ///< e.g. L"1.5.0 (libwebp)"
-    uint64_t estimatedMemoryMB; ///< Working-set when loaded
-    int priority; ///< Lower = higher priority
-    uint32_t capabilities; ///< DtCodecCaps bitmask
-    bool requiresExternalLib;///< true if links against 3rd-party lib
+    const char* codecId;         ///< e.g. "explorerlens.codec.webp"
+    const wchar_t* dllName;      ///< e.g. L"ExplorerLens_Codec_WebP.dll"
+    const wchar_t* displayName;  ///< e.g. L"WebP Codec"
+    const wchar_t* version;      ///< e.g. L"1.5.0 (libwebp)"
+    uint64_t estimatedMemoryMB;  ///< Working-set when loaded
+    int priority;                ///< Lower = higher priority
+    uint32_t capabilities;       ///< DtCodecCaps bitmask
+    bool requiresExternalLib;    ///< true if links against 3rd-party lib
 
     /// Extensions this codec handles (with dots, lowercase)
     std::vector<std::wstring> extensions;
@@ -81,7 +81,8 @@ struct CodecModuleSpec
 //==============================================================================
 // Complete Codec Module Registry — all 17 codec DLLs
 //==============================================================================
-inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
+inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
+{
     std::vector<CodecModuleSpec> specs;
     specs.reserve(17);
 
@@ -96,8 +97,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 10;
         s.capabilities = DT_CAP_ANIMATION | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = true;
-        s.extensions = { L".webp" };
-        s.dependencies = { L"libwebp.dll", L"libsharpyuv.dll" };
+        s.extensions = {L".webp"};
+        s.dependencies = {L"libwebp.dll", L"libsharpyuv.dll"};
         specs.push_back(std::move(s));
     }
 
@@ -112,8 +113,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 10;
         s.capabilities = DT_CAP_METADATA | DT_CAP_ICC_PROFILE | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = true;
-        s.extensions = { L".heif", L".heic", L".hif", L".avci", L".heifs", L".heics" };
-        s.dependencies = { L"libheif.dll", L"libde265.dll" };
+        s.extensions = {L".heif", L".heic", L".hif", L".avci", L".heifs", L".heics"};
+        s.dependencies = {L"libheif.dll", L"libde265.dll"};
         specs.push_back(std::move(s));
     }
 
@@ -128,9 +129,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 10;
         s.capabilities = DT_CAP_ANIMATION | DT_CAP_HDR | DT_CAP_ICC_PROFILE | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = true;
-        s.extensions = { L".jxl" };
-        s.dependencies = { L"jxl.dll", L"jxl_threads.dll", L"brotlicommon.dll",
-        L"brotlidec.dll", L"hwy.dll" };
+        s.extensions = {L".jxl"};
+        s.dependencies = {L"jxl.dll", L"jxl_threads.dll", L"brotlicommon.dll", L"brotlidec.dll", L"hwy.dll"};
         specs.push_back(std::move(s));
     }
 
@@ -145,13 +145,10 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 20;
         s.capabilities = DT_CAP_METADATA | DT_CAP_ICC_PROFILE | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = true;
-        s.extensions = {
-        L".cr2", L".cr3", L".nef", L".nrw", L".arw", L".srf", L".sr2",
-        L".dng", L".orf", L".rw2", L".pef", L".raf", L".x3f", L".3fr",
-        L".dcr", L".kdc", L".mrw", L".erf", L".mef", L".mos", L".iiq",
-        L".rwl", L".srw"
-        };
-        s.dependencies = { L"libraw.dll" };
+        s.extensions = {L".cr2", L".cr3", L".nef", L".nrw", L".arw", L".srf", L".sr2", L".dng",
+                        L".orf", L".rw2", L".pef", L".raf", L".x3f", L".3fr", L".dcr", L".kdc",
+                        L".mrw", L".erf", L".mef", L".mos", L".iiq", L".rwl", L".srw"};
+        s.dependencies = {L"libraw.dll"};
         specs.push_back(std::move(s));
     }
 
@@ -166,8 +163,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 10;
         s.capabilities = DT_CAP_HDR | DT_CAP_ICC_PROFILE | DT_CAP_ANIMATION | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = true;
-        s.extensions = { L".avif" };
-        s.dependencies = { L"avif.dll", L"dav1d.dll" };
+        s.extensions = {L".avif"};
+        s.dependencies = {L"avif.dll", L"dav1d.dll"};
         specs.push_back(std::move(s));
     }
 
@@ -182,11 +179,9 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 5;
         s.capabilities = DT_CAP_ARCHIVE | DT_CAP_MULTI_PAGE | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = true;
-        s.extensions = {
-        L".zip", L".cbz", L".rar", L".cbr", L".7z", L".cb7",
-        L".tar", L".cbt", L".gz", L".bz2", L".xz", L".zst"
-        };
-        s.dependencies = { L"minizip.dll", L"zstd.dll", L"lz4.dll", L"lzma.dll" };
+        s.extensions = {L".zip", L".cbz", L".rar", L".cbr", L".7z", L".cb7",
+                        L".tar", L".cbt", L".gz",  L".bz2", L".xz", L".zst"};
+        s.dependencies = {L"minizip.dll", L"zstd.dll", L"lz4.dll", L"lzma.dll"};
         specs.push_back(std::move(s));
     }
 
@@ -201,7 +196,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 30;
         s.capabilities = DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".svg", L".svgz" };
+        s.extensions = {L".svg", L".svgz"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -213,11 +208,11 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.dllName = L"ExplorerLens_Codec_HDR.dll";
         s.displayName = L"Radiance HDR Codec";
         s.version = L"1.0.0 (custom RGBE + SSE)";
-        s.estimatedMemoryMB = 0; // < 0.5 MB
+        s.estimatedMemoryMB = 0;  // < 0.5 MB
         s.priority = 40;
         s.capabilities = DT_CAP_HDR | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".hdr" };
+        s.extensions = {L".hdr"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -233,7 +228,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 40;
         s.capabilities = DT_CAP_METADATA | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".psd", L".psb" };
+        s.extensions = {L".psd", L".psb"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -249,11 +244,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 50;
         s.capabilities = DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = {
-        L".mp4", L".mkv", L".avi", L".wmv", L".mov", L".flv",
-        L".webm", L".m4v", L".mpg", L".mpeg", L".3gp", L".ts",
-        L".m2ts", L".vob", L".ogv", L".rm", L".rmvb", L".asf"
-        };
+        s.extensions = {L".mp4",  L".mkv", L".avi", L".wmv",  L".mov", L".flv", L".webm", L".m4v",  L".mpg",
+                        L".mpeg", L".3gp", L".ts",  L".m2ts", L".vob", L".ogv", L".rm",   L".rmvb", L".asf"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -269,10 +261,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 60;
         s.capabilities = DT_CAP_METADATA | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = {
-        L".mp3", L".flac", L".wma", L".aac", L".m4a",
-        L".ogg", L".opus", L".ape", L".wv", L".mpc"
-        };
+        s.extensions = {L".mp3", L".flac", L".wma", L".aac", L".m4a", L".ogg", L".opus", L".ape", L".wv", L".mpc"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -288,10 +277,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 70;
         s.capabilities = DT_CAP_MULTI_PAGE | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = {
-        L".pdf", L".epub", L".mobi", L".azw", L".azw3",
-        L".docx", L".pptx", L".xlsx", L".odt", L".odp"
-        };
+        s.extensions = {L".pdf", L".epub", L".mobi", L".azw", L".azw3", L".docx", L".pptx", L".xlsx", L".odt", L".odp"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -307,7 +293,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 70;
         s.capabilities = DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".ttf", L".otf", L".woff", L".woff2", L".ttc" };
+        s.extensions = {L".ttf", L".otf", L".woff", L".woff2", L".ttc"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -323,7 +309,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 70;
         s.capabilities = DT_CAP_GPU_ACCEL | DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".obj", L".stl", L".gltf", L".glb", L".fbx", L".3ds" };
+        s.extensions = {L".obj", L".stl", L".gltf", L".glb", L".fbx", L".3ds"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -339,7 +325,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 30;
         s.capabilities = DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".qoi" };
+        s.extensions = {L".qoi"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -355,7 +341,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 30;
         s.capabilities = DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".tga", L".tpic" };
+        s.extensions = {L".tga", L".tpic"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -371,7 +357,7 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
         s.priority = 30;
         s.capabilities = DT_CAP_THREAD_SAFE;
         s.requiresExternalLib = false;
-        s.extensions = { L".ppm", L".pgm", L".pbm", L".pnm", L".pam", L".pfm" };
+        s.extensions = {L".ppm", L".pgm", L".pbm", L".pnm", L".pam", L".pfm"};
         s.dependencies = {};
         specs.push_back(std::move(s));
     }
@@ -382,7 +368,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs() {
 //==============================================================================
 // Codec Manifest Generator — creates the JSON sidecar for the CodecLoader
 //==============================================================================
-inline std::string GenerateCodecManifest() {
+inline std::string GenerateCodecManifest()
+{
     auto specs = GetAllCodecSpecs();
     std::string json = "{\n \"version\": 1,\n \"codecs\": [\n";
 
@@ -405,7 +392,8 @@ inline std::string GenerateCodecManifest() {
             for (wchar_t ch : s.extensions[j])
                 ext.push_back(static_cast<char>(ch & 0x7F));
             json += "\"" + ext + "\"";
-            if (j + 1 < s.extensions.size()) json += ", ";
+            if (j + 1 < s.extensions.size())
+                json += ", ";
         }
         json += "],\n";
 
@@ -420,12 +408,14 @@ inline std::string GenerateCodecManifest() {
             for (wchar_t ch : s.dependencies[j])
                 dep.push_back(static_cast<char>(ch & 0x7F));
             json += "\"" + dep + "\"";
-            if (j + 1 < s.dependencies.size()) json += ", ";
+            if (j + 1 < s.dependencies.size())
+                json += ", ";
         }
         json += "]\n";
 
         json += " }";
-        if (i + 1 < specs.size()) json += ",";
+        if (i + 1 < specs.size())
+            json += ",";
         json += "\n";
     }
 
@@ -438,18 +428,18 @@ inline std::string GenerateCodecManifest() {
 //==============================================================================
 struct MemoryImpactReport
 {
-    uint64_t monolithicMemoryMB; ///< All decoders statically linked
-    uint64_t modularMemoryMB; ///< Only needed codec DLLs loaded
-    uint64_t savingsMB; ///< Difference
-    double savingsPercent; ///< (savings / monolithic) * 100
-    uint32_t codecsLoaded; ///< Number of codec DLLs loaded
-    uint32_t codecsAvoided; ///< Number of codec DLLs NOT loaded
-    std::vector<std::string> loadedIds; ///< Codec IDs that would be loaded
-    std::vector<std::string> avoidedIds; ///< Codec IDs that stay unloaded
+    uint64_t monolithicMemoryMB;          ///< All decoders statically linked
+    uint64_t modularMemoryMB;             ///< Only needed codec DLLs loaded
+    uint64_t savingsMB;                   ///< Difference
+    double savingsPercent;                ///< (savings / monolithic) * 100
+    uint32_t codecsLoaded;                ///< Number of codec DLLs loaded
+    uint32_t codecsAvoided;               ///< Number of codec DLLs NOT loaded
+    std::vector<std::string> loadedIds;   ///< Codec IDs that would be loaded
+    std::vector<std::string> avoidedIds;  ///< Codec IDs that stay unloaded
 };
 
-inline MemoryImpactReport AnalyzeMemoryImpact(
-    const std::vector<std::wstring>& activeExtensions) {
+inline MemoryImpactReport AnalyzeMemoryImpact(const std::vector<std::wstring>& activeExtensions)
+{
     auto specs = GetAllCodecSpecs();
     MemoryImpactReport report{};
 
@@ -458,7 +448,7 @@ inline MemoryImpactReport AnalyzeMemoryImpact(
     for (auto& s : specs) {
         totalMemory += s.estimatedMemoryMB;
     }
-    report.monolithicMemoryMB = totalMemory + 12; // +12 MB for WIC base
+    report.monolithicMemoryMB = totalMemory + 12;  // +12 MB for WIC base
 
     // Modular: find which codecs are needed for the active extensions
     std::unordered_set<std::string> neededCodecs;
@@ -466,7 +456,8 @@ inline MemoryImpactReport AnalyzeMemoryImpact(
     for (auto& ext : activeExtensions) {
         std::wstring lower = ext;
         for (auto& c : lower) {
-            if (c >= L'A' && c <= L'Z') c += 32;
+            if (c >= L'A' && c <= L'Z')
+                c += 32;
         }
 
         for (auto& s : specs) {
@@ -479,13 +470,12 @@ inline MemoryImpactReport AnalyzeMemoryImpact(
         }
     }
 
-    uint64_t modularMemory = 12; // WIC base always loaded
+    uint64_t modularMemory = 12;  // WIC base always loaded
     for (auto& s : specs) {
         if (neededCodecs.count(s.codecId)) {
             modularMemory += s.estimatedMemoryMB;
             report.loadedIds.push_back(s.codecId);
-        }
-        else {
+        } else {
             report.avoidedIds.push_back(s.codecId);
         }
     }
@@ -493,14 +483,14 @@ inline MemoryImpactReport AnalyzeMemoryImpact(
     report.modularMemoryMB = modularMemory;
     report.savingsMB = report.monolithicMemoryMB - report.modularMemoryMB;
     report.savingsPercent = (report.monolithicMemoryMB > 0)
-        ? (static_cast<double>(report.savingsMB) / report.monolithicMemoryMB) * 100.0
-        : 0.0;
+                                ? (static_cast<double>(report.savingsMB) / report.monolithicMemoryMB) * 100.0
+                                : 0.0;
     report.codecsLoaded = static_cast<uint32_t>(report.loadedIds.size());
     report.codecsAvoided = static_cast<uint32_t>(report.avoidedIds.size());
 
     return report;
 }
 
-} // namespace Codec
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Codec
+}  // namespace Engine
+}  // namespace ExplorerLens

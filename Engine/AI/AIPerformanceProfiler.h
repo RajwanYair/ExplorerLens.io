@@ -8,32 +8,34 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // ---- Per-Module Profile -----------------------------------------------------
 
-struct AIModuleProfile {
-    std::string moduleName;       // e.g. "ContentCategoryClassifier"
-    uint64_t    sampleCount  = 0;
-    float       p50Ms        = 0.0f;
-    float       p95Ms        = 0.0f;
-    float       p99Ms        = 0.0f;
-    float       maxMs        = 0.0f;
-    uint64_t    vramDeltaKB  = 0;    // Peak VRAM increase during inference
-    float       energyUJPerInf = 0.0f; // Micro-joules per inference (GPU PM)
-    bool        withinBudget = true;  // p95Ms <= budgetMs
-    float       budgetMs     = 3.0f;  // Per-module SLO contribution
+struct AIModuleProfile
+{
+    std::string moduleName;  // e.g. "ContentCategoryClassifier"
+    uint64_t sampleCount = 0;
+    float p50Ms = 0.0f;
+    float p95Ms = 0.0f;
+    float p99Ms = 0.0f;
+    float maxMs = 0.0f;
+    uint64_t vramDeltaKB = 0;     // Peak VRAM increase during inference
+    float energyUJPerInf = 0.0f;  // Micro-joules per inference (GPU PM)
+    bool withinBudget = true;     // p95Ms <= budgetMs
+    float budgetMs = 3.0f;        // Per-module SLO contribution
 };
 
 // ---- Profiler ---------------------------------------------------------------
 
-class AIPerformanceProfiler {
-public:
+class AIPerformanceProfiler
+{
+  public:
     AIPerformanceProfiler();
     ~AIPerformanceProfiler();
 
@@ -60,10 +62,11 @@ public:
 
     static AIPerformanceProfiler& Instance();
 
-private:
-    struct Impl {};
+  private:
+    struct Impl
+    {};
     std::unique_ptr<Impl> m_impl;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,8 +6,8 @@
 
 #ifdef _WIN32
 
-#include <windows.h>
-#include <TraceLoggingProvider.h>
+    #include <windows.h>
+    #include <TraceLoggingProvider.h>
 
 // ============================================================================
 // Define the TraceLogging provider
@@ -23,10 +23,8 @@
 //   Use provider name "ExplorerLens-Engine-Provider"
 // ============================================================================
 
-TRACELOGGING_DEFINE_PROVIDER(
-    g_hExplorerLensProvider,
-    "ExplorerLens-Engine-Provider",
-    // {A1B2C3D4-E5F6-7890-ABCD-EF1234567890} — deterministic GUID from name
-    (0xa1b2c3d4, 0xe5f6, 0x7890, 0xab, 0xcd, 0xef, 0x12, 0x34, 0x56, 0x78, 0x90));
+TRACELOGGING_DEFINE_PROVIDER(g_hExplorerLensProvider, "ExplorerLens-Engine-Provider",
+                             // {A1B2C3D4-E5F6-7890-ABCD-EF1234567890} — deterministic GUID from name
+                             (0xa1b2c3d4, 0xe5f6, 0x7890, 0xab, 0xcd, 0xef, 0x12, 0x34, 0x56, 0x78, 0x90));
 
-#endif // _WIN32
+#endif  // _WIN32

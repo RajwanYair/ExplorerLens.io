@@ -9,8 +9,8 @@
 
 #include <cstdint>
 #include <functional>
-#include <string>
 #include <memory>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -18,27 +18,29 @@ namespace Engine {
 // ---- Event Types ------------------------------------------------------------
 
 enum class MonitorEvent : uint8_t {
-    DPIChanged         = 0,  // WM_DPICHANGED — DPI on a specific HMONITOR changed
-    DisplayChanged     = 1,  // WM_DISPLAYCHANGE — resolution/color depth changed
-    MonitorConnected   = 2,  // New monitor attached (WM_DISPLAYCHANGE superset)
-    MonitorDisconnected = 3, // Monitor removed
+    DPIChanged = 0,           // WM_DPICHANGED — DPI on a specific HMONITOR changed
+    DisplayChanged = 1,       // WM_DISPLAYCHANGE — resolution/color depth changed
+    MonitorConnected = 2,     // New monitor attached (WM_DISPLAYCHANGE superset)
+    MonitorDisconnected = 3,  // Monitor removed
 };
 
-struct MonitorEventData {
+struct MonitorEventData
+{
     MonitorEvent type;
-    void*        hmonitor    = nullptr;  // Relevant HMONITOR (null = all monitors)
-    uint32_t     newDPI      = 0;        // Only valid for DPIChanged
-    uint32_t     newWidth    = 0;        // Only valid for DisplayChanged
-    uint32_t     newHeight   = 0;
-    uint32_t     newBitDepth = 0;
+    void* hmonitor = nullptr;  // Relevant HMONITOR (null = all monitors)
+    uint32_t newDPI = 0;       // Only valid for DPIChanged
+    uint32_t newWidth = 0;     // Only valid for DisplayChanged
+    uint32_t newHeight = 0;
+    uint32_t newBitDepth = 0;
 };
 
 using MonitorEventCallback = std::function<void(const MonitorEventData&)>;
 
 // ---- MonitorConfigWatcher ---------------------------------------------------
 
-class MonitorConfigWatcher {
-public:
+class MonitorConfigWatcher
+{
+  public:
     MonitorConfigWatcher();
     ~MonitorConfigWatcher();
 
@@ -57,13 +59,14 @@ public:
     // Singleton — shared by MultiMonitorContext, HiDPIThumbnailCache, etc.
     static MonitorConfigWatcher& Instance();
 
-private:
-    struct Impl {};
+  private:
+    struct Impl
+    {};
     std::unique_ptr<Impl> m_impl;
 
     MonitorConfigWatcher(const MonitorConfigWatcher&) = delete;
     MonitorConfigWatcher& operator=(const MonitorConfigWatcher&) = delete;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

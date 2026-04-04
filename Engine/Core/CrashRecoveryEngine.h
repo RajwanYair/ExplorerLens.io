@@ -14,15 +14,28 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class CrashCause : uint8_t {
-    Unknown, GPUHang, DecoderFault, MemoryExhaustion,
-    StackOverflow, AccessViolation, HeapCorruption, COUNT
+    Unknown,
+    GPUHang,
+    DecoderFault,
+    MemoryExhaustion,
+    StackOverflow,
+    AccessViolation,
+    HeapCorruption,
+    COUNT
 };
 
 enum class CrashRecoveryAction : uint8_t {
-    FullRestart, WarmRestart, PartialRecovery, CacheRebuild, DisableGPU, SkipFormat, COUNT
+    FullRestart,
+    WarmRestart,
+    PartialRecovery,
+    CacheRebuild,
+    DisableGPU,
+    SkipFormat,
+    COUNT
 };
 
-struct CrashCheckpoint {
+struct CrashCheckpoint
+{
     std::wstring checkpointId;
     std::wstring operationName;
     uint64_t timestampUs = 0;
@@ -31,7 +44,8 @@ struct CrashCheckpoint {
     bool valid = false;
 };
 
-struct CrashDiagReport {
+struct CrashDiagReport
+{
     CrashCause cause = CrashCause::Unknown;
     std::wstring faultModule;
     uint64_t faultAddress = 0;
@@ -40,7 +54,8 @@ struct CrashDiagReport {
     CrashRecoveryAction recommended = CrashRecoveryAction::FullRestart;
 };
 
-struct RecoveryResult {
+struct RecoveryResult
+{
     CrashRecoveryAction action = CrashRecoveryAction::FullRestart;
     bool success = false;
     double recoveryMs = 0.0;
@@ -48,9 +63,11 @@ struct RecoveryResult {
     uint32_t stateLost = 0;
 };
 
-class CrashRecoveryEngine {
-public:
-    void SetCheckpoint(const std::wstring& opName) {
+class CrashRecoveryEngine
+{
+  public:
+    void SetCheckpoint(const std::wstring& opName)
+    {
         if (m_checkpointCount < MAX_CHECKPOINTS) {
             auto& cp = m_checkpoints[m_checkpointCount++];
             cp.operationName = opName;
@@ -58,22 +75,31 @@ public:
         }
     }
 
-    const CrashCheckpoint* GetLastCheckpoint() const {
-        if (m_checkpointCount == 0) return nullptr;
+    const CrashCheckpoint* GetLastCheckpoint() const
+    {
+        if (m_checkpointCount == 0)
+            return nullptr;
         return &m_checkpoints[m_checkpointCount - 1];
     }
 
-    CrashRecoveryAction Diagnose(CrashCause cause) const {
+    CrashRecoveryAction Diagnose(CrashCause cause) const
+    {
         switch (cause) {
-        case CrashCause::GPUHang: return CrashRecoveryAction::DisableGPU;
-        case CrashCause::DecoderFault: return CrashRecoveryAction::SkipFormat;
-        case CrashCause::MemoryExhaustion: return CrashRecoveryAction::WarmRestart;
-        case CrashCause::HeapCorruption: return CrashRecoveryAction::CacheRebuild;
-        default: return CrashRecoveryAction::FullRestart;
+            case CrashCause::GPUHang:
+                return CrashRecoveryAction::DisableGPU;
+            case CrashCause::DecoderFault:
+                return CrashRecoveryAction::SkipFormat;
+            case CrashCause::MemoryExhaustion:
+                return CrashRecoveryAction::WarmRestart;
+            case CrashCause::HeapCorruption:
+                return CrashRecoveryAction::CacheRebuild;
+            default:
+                return CrashRecoveryAction::FullRestart;
         }
     }
 
-    RecoveryResult Recover(CrashRecoveryAction action) {
+    RecoveryResult Recover(CrashRecoveryAction action)
+    {
         RecoveryResult result;
         result.action = action;
         // Simulated recovery time; replaced with real measurement in production
@@ -84,18 +110,31 @@ public:
         return result;
     }
 
-    uint32_t CheckpointCount() const { return m_checkpointCount; }
-    uint32_t RecoveryCount() const { return m_recoveryCount; }
+    uint32_t CheckpointCount() const
+    {
+        return m_checkpointCount;
+    }
+    uint32_t RecoveryCount() const
+    {
+        return m_recoveryCount;
+    }
 
-    void Reset() {
+    void Reset()
+    {
         m_checkpointCount = 0;
         m_recoveryCount = 0;
     }
 
-    static size_t CauseCount() { return static_cast<size_t>(CrashCause::COUNT); }
-    static size_t ActionCount() { return static_cast<size_t>(CrashRecoveryAction::COUNT); }
+    static size_t CauseCount()
+    {
+        return static_cast<size_t>(CrashCause::COUNT);
+    }
+    static size_t ActionCount()
+    {
+        return static_cast<size_t>(CrashRecoveryAction::COUNT);
+    }
 
-private:
+  private:
     static constexpr uint32_t MAX_CHECKPOINTS = 128;
     CrashCheckpoint m_checkpoints[MAX_CHECKPOINTS] = {};
     uint32_t m_checkpointCount = 0;
@@ -103,25 +142,34 @@ private:
 };
 
 enum class CrashDumpType : uint8_t {
-    MiniDump  = 0,
-    FullDump  = 1,
-    HeapDump  = 2,
+    MiniDump = 0,
+    FullDump = 1,
+    HeapDump = 2,
     CustomDump = 3
 };
 
-class CrashAnalyticsCollector {
-public:
-    static int CategoryCount() { return 8; }
-    static uint64_t EstimateDumpSize(CrashDumpType type) {
+class CrashAnalyticsCollector
+{
+  public:
+    static int CategoryCount()
+    {
+        return 8;
+    }
+    static uint64_t EstimateDumpSize(CrashDumpType type)
+    {
         switch (type) {
-        case CrashDumpType::MiniDump:  return 500ULL * 1024;
-        case CrashDumpType::FullDump:  return 256ULL * 1024 * 1024;
-        case CrashDumpType::HeapDump:  return 128ULL * 1024 * 1024;
-        default:                       return 1ULL * 1024 * 1024;
+            case CrashDumpType::MiniDump:
+                return 500ULL * 1024;
+            case CrashDumpType::FullDump:
+                return 256ULL * 1024 * 1024;
+            case CrashDumpType::HeapDump:
+                return 128ULL * 1024 * 1024;
+            default:
+                return 1ULL * 1024 * 1024;
         }
     }
     CrashAnalyticsCollector() = delete;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

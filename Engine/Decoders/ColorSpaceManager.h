@@ -4,13 +4,13 @@
 // ICC profile extraction, gamut mapping, HDR→SDR conversion, color accuracy.
 //==============================================================================
 
-#include <string>
-#include <vector>
-#include <cstdint>
-#include <cmath>
 #include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstdint>
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens::Engine::Decoders {
 
@@ -19,76 +19,100 @@ namespace ExplorerLens::Engine::Decoders {
 //------------------------------------------------------------------------------
 enum class ManagedColorSpace : uint8_t {
     Unknown = 0,
-    sRGB, // Standard web/display (IEC 61966-2-1)
-    DisplayP3, // Apple wide gamut (DCI-P3 primaries, sRGB gamma)
-    AdobeRGB, // Adobe RGB (1998)
-    ProPhotoRGB, // ROMM RGB — Lightroom default
-    Rec709, // ITU-R BT.709 (HDTV)
-    Rec2020, // ITU-R BT.2020 (UHDTV / HDR)
-    ACES, // Academy Color Encoding System (scene-referred)
-    LinearRGB, // Linear sRGB (no gamma)
-    CMYK_Fogra39, // CMYK (print, Fogra39 characterization)
-    LAB_D50, // CIE L*a*b* under D50 illuminant
-    XYZ_D50, // CIE XYZ under D50 illuminant
-    Custom // Unknown ICC profile — use profile bytes directly
+    sRGB,          // Standard web/display (IEC 61966-2-1)
+    DisplayP3,     // Apple wide gamut (DCI-P3 primaries, sRGB gamma)
+    AdobeRGB,      // Adobe RGB (1998)
+    ProPhotoRGB,   // ROMM RGB — Lightroom default
+    Rec709,        // ITU-R BT.709 (HDTV)
+    Rec2020,       // ITU-R BT.2020 (UHDTV / HDR)
+    ACES,          // Academy Color Encoding System (scene-referred)
+    LinearRGB,     // Linear sRGB (no gamma)
+    CMYK_Fogra39,  // CMYK (print, Fogra39 characterization)
+    LAB_D50,       // CIE L*a*b* under D50 illuminant
+    XYZ_D50,       // CIE XYZ under D50 illuminant
+    Custom         // Unknown ICC profile — use profile bytes directly
 };
 
-inline const char* ColorSpaceName(ManagedColorSpace cs) {
+inline const char* ColorSpaceName(ManagedColorSpace cs)
+{
     switch (cs) {
-    case ManagedColorSpace::sRGB: return "sRGB";
-    case ManagedColorSpace::DisplayP3: return "Display P3";
-    case ManagedColorSpace::AdobeRGB: return "Adobe RGB (1998)";
-    case ManagedColorSpace::ProPhotoRGB: return "ProPhoto RGB";
-    case ManagedColorSpace::Rec709: return "Rec.709";
-    case ManagedColorSpace::Rec2020: return "Rec.2020";
-    case ManagedColorSpace::ACES: return "ACES";
-    case ManagedColorSpace::LinearRGB: return "Linear sRGB";
-    case ManagedColorSpace::CMYK_Fogra39: return "CMYK (Fogra39)";
-    case ManagedColorSpace::LAB_D50: return "CIE L*a*b*";
-    case ManagedColorSpace::XYZ_D50: return "CIE XYZ";
-    case ManagedColorSpace::Custom: return "Custom ICC Profile";
-    default: return "Unknown";
+        case ManagedColorSpace::sRGB:
+            return "sRGB";
+        case ManagedColorSpace::DisplayP3:
+            return "Display P3";
+        case ManagedColorSpace::AdobeRGB:
+            return "Adobe RGB (1998)";
+        case ManagedColorSpace::ProPhotoRGB:
+            return "ProPhoto RGB";
+        case ManagedColorSpace::Rec709:
+            return "Rec.709";
+        case ManagedColorSpace::Rec2020:
+            return "Rec.2020";
+        case ManagedColorSpace::ACES:
+            return "ACES";
+        case ManagedColorSpace::LinearRGB:
+            return "Linear sRGB";
+        case ManagedColorSpace::CMYK_Fogra39:
+            return "CMYK (Fogra39)";
+        case ManagedColorSpace::LAB_D50:
+            return "CIE L*a*b*";
+        case ManagedColorSpace::XYZ_D50:
+            return "CIE XYZ";
+        case ManagedColorSpace::Custom:
+            return "Custom ICC Profile";
+        default:
+            return "Unknown";
     }
 }
 
-inline bool IsWideGamut(ManagedColorSpace cs) {
-    return cs == ManagedColorSpace::DisplayP3 ||
-        cs == ManagedColorSpace::AdobeRGB ||
-        cs == ManagedColorSpace::ProPhotoRGB ||
-        cs == ManagedColorSpace::Rec2020 ||
-        cs == ManagedColorSpace::ACES;
+inline bool IsWideGamut(ManagedColorSpace cs)
+{
+    return cs == ManagedColorSpace::DisplayP3 || cs == ManagedColorSpace::AdobeRGB
+           || cs == ManagedColorSpace::ProPhotoRGB || cs == ManagedColorSpace::Rec2020 || cs == ManagedColorSpace::ACES;
 }
 
-inline bool IsHDR(ManagedColorSpace cs) {
-    return cs == ManagedColorSpace::Rec2020 ||
-        cs == ManagedColorSpace::ACES ||
-        cs == ManagedColorSpace::LinearRGB;
+inline bool IsHDR(ManagedColorSpace cs)
+{
+    return cs == ManagedColorSpace::Rec2020 || cs == ManagedColorSpace::ACES || cs == ManagedColorSpace::LinearRGB;
 }
 
 //------------------------------------------------------------------------------
 // ICC Profile Data
 //------------------------------------------------------------------------------
-struct ICCProfile {
+struct ICCProfile
+{
     std::string description;
     ManagedColorSpace colorSpace = ManagedColorSpace::Unknown;
-    std::vector<uint8_t> rawData; // Raw ICC profile bytes
-    uint32_t version = 0; // ICC version (e.g., 0x04300000 = v4.3)
-    std::string renderingIntent = "Perceptual"; // Perceptual, Relative, Saturation, Absolute
+    std::vector<uint8_t> rawData;                // Raw ICC profile bytes
+    uint32_t version = 0;                        // ICC version (e.g., 0x04300000 = v4.3)
+    std::string renderingIntent = "Perceptual";  // Perceptual, Relative, Saturation, Absolute
 
-    bool IsValid() const { return !rawData.empty() && rawData.size() >= 128; }
-    uint32_t SizeBytes() const { return static_cast<uint32_t>(rawData.size()); }
+    bool IsValid() const
+    {
+        return !rawData.empty() && rawData.size() >= 128;
+    }
+    uint32_t SizeBytes() const
+    {
+        return static_cast<uint32_t>(rawData.size());
+    }
 
     // Identify a known color space from ICC profile description
-    ManagedColorSpace IdentifyColorSpace() const {
-        if (description.find("sRGB") != std::string::npos) return ManagedColorSpace::sRGB;
-        if (description.find("Display P3") != std::string::npos) return ManagedColorSpace::DisplayP3;
-        if (description.find("Adobe RGB") != std::string::npos) return ManagedColorSpace::AdobeRGB;
-        if (description.find("ProPhoto") != std::string::npos) return ManagedColorSpace::ProPhotoRGB;
-        if (description.find("Rec. 2020") != std::string::npos ||
-            description.find("BT.2020") != std::string::npos) return ManagedColorSpace::Rec2020;
-        if (description.find("Rec. 709") != std::string::npos ||
-            description.find("BT.709") != std::string::npos) return ManagedColorSpace::Rec709;
-        if (description.find("ACES") != std::string::npos) return ManagedColorSpace::ACES;
+    ManagedColorSpace IdentifyColorSpace() const
+    {
+        if (description.find("sRGB") != std::string::npos)
+            return ManagedColorSpace::sRGB;
+        if (description.find("Display P3") != std::string::npos)
+            return ManagedColorSpace::DisplayP3;
+        if (description.find("Adobe RGB") != std::string::npos)
+            return ManagedColorSpace::AdobeRGB;
+        if (description.find("ProPhoto") != std::string::npos)
+            return ManagedColorSpace::ProPhotoRGB;
+        if (description.find("Rec. 2020") != std::string::npos || description.find("BT.2020") != std::string::npos)
+            return ManagedColorSpace::Rec2020;
+        if (description.find("Rec. 709") != std::string::npos || description.find("BT.709") != std::string::npos)
+            return ManagedColorSpace::Rec709;
+        if (description.find("ACES") != std::string::npos)
+            return ManagedColorSpace::ACES;
         return ManagedColorSpace::Custom;
     }
 };
@@ -96,17 +120,19 @@ struct ICCProfile {
 //------------------------------------------------------------------------------
 // ICC Profile Extractor — format-specific extraction
 //------------------------------------------------------------------------------
-struct ICCExtractionResult {
+struct ICCExtractionResult
+{
     bool found = false;
     ICCProfile profile;
-    std::string sourceFormat; // "JPEG", "TIFF", "PNG", "PSD", "HEIF", "WebP"
-    size_t profileOffset = 0; // Byte offset in file
+    std::string sourceFormat;  // "JPEG", "TIFF", "PNG", "PSD", "HEIF", "WebP"
+    size_t profileOffset = 0;  // Byte offset in file
     std::string error;
 };
 
 // Supported extraction formats
-inline std::vector<std::string> ICCSupportedFormats() {
-    return { "JPEG", "TIFF", "PNG", "PSD", "HEIF", "WebP", "JXL", "AVIF", "EXR", "DNG" };
+inline std::vector<std::string> ICCSupportedFormats()
+{
+    return {"JPEG", "TIFF", "PNG", "PSD", "HEIF", "WebP", "JXL", "AVIF", "EXR", "DNG"};
 }
 
 // JPEG ICC: APP2 marker with "ICC_PROFILE" header (multi-chunk support)
@@ -118,10 +144,12 @@ inline std::vector<std::string> ICCSupportedFormats() {
 // EXR: chromaticities attribute → derive profile
 // DNG: ICC profile tag (same as TIFF)
 
-class ICCProfileExtractor {
-public:
+class ICCProfileExtractor
+{
+  public:
     // Extract ICC profile from file based on format
-    ICCExtractionResult Extract([[maybe_unused]] const std::string& filePath, const std::string& format) const {
+    ICCExtractionResult Extract([[maybe_unused]] const std::string& filePath, const std::string& format) const
+    {
         ICCExtractionResult result;
         result.sourceFormat = format;
 
@@ -139,7 +167,8 @@ public:
     }
 
     // Check if format supports ICC extraction
-    bool SupportsFormat(const std::string& format) const {
+    bool SupportsFormat(const std::string& format) const
+    {
         auto formats = ICCSupportedFormats();
         return std::find(formats.begin(), formats.end(), format) != formats.end();
     }
@@ -150,18 +179,23 @@ public:
 //------------------------------------------------------------------------------
 
 // sRGB gamma curve
-inline double SRGBToLinear(double v) {
-    if (v <= 0.04045) return v / 12.92;
+inline double SRGBToLinear(double v)
+{
+    if (v <= 0.04045)
+        return v / 12.92;
     return std::pow((v + 0.055) / 1.055, 2.4);
 }
 
-inline double LinearToSRGB(double v) {
-    if (v <= 0.0031308) return v * 12.92;
+inline double LinearToSRGB(double v)
+{
+    if (v <= 0.0031308)
+        return v * 12.92;
     return 1.055 * std::pow(v, 1.0 / 2.4) - 0.055;
 }
 
 // PQ (Perceptual Quantizer, SMPTE ST 2084) transfer function for HDR10
-inline double PQToLinear(double v) {
+inline double PQToLinear(double v)
+{
     const double m1 = 0.1593017578125;
     const double m2 = 78.84375;
     const double c1 = 0.8359375;
@@ -175,11 +209,13 @@ inline double PQToLinear(double v) {
 }
 
 // HLG (Hybrid Log-Gamma, BT.2100) transfer function
-inline double HLGToLinear(double v) {
+inline double HLGToLinear(double v)
+{
     const double a = 0.17883277;
     const double b = 0.28466892;
     const double c = 0.55991073;
-    if (v <= 0.5) return (v * v) / 3.0;
+    if (v <= 0.5)
+        return (v * v) / 3.0;
     return (std::exp((v - c) / a) + b) / 12.0;
 }
 
@@ -188,69 +224,99 @@ inline double HLGToLinear(double v) {
 //------------------------------------------------------------------------------
 
 // 3x3 matrix for color space conversion
-struct ManagedColorMatrix {
+struct ManagedColorMatrix
+{
     double m[3][3] = {};
 
-    std::array<double, 3> Transform(double r, double g, double b) const {
-        return {
-        m[0][0] * r + m[0][1] * g + m[0][2] * b,
-        m[1][0] * r + m[1][1] * g + m[1][2] * b,
-        m[2][0] * r + m[2][1] * g + m[2][2] * b
-        };
+    std::array<double, 3> Transform(double r, double g, double b) const
+    {
+        return {m[0][0] * r + m[0][1] * g + m[0][2] * b, m[1][0] * r + m[1][1] * g + m[1][2] * b,
+                m[2][0] * r + m[2][1] * g + m[2][2] * b};
     }
 };
 
 // Standard gamut mapping matrices (verified against ICC specification)
-inline ManagedColorMatrix DisplayP3ToSRGB() {
+inline ManagedColorMatrix DisplayP3ToSRGB()
+{
     ManagedColorMatrix result;
-    result.m[0][0] = 1.2249; result.m[0][1] = -0.2247; result.m[0][2] = 0.0;
-    result.m[1][0] = -0.0420; result.m[1][1] = 1.0419; result.m[1][2] = 0.0;
-    result.m[2][0] = -0.0197; result.m[2][1] = -0.0786; result.m[2][2] = 1.0984;
+    result.m[0][0] = 1.2249;
+    result.m[0][1] = -0.2247;
+    result.m[0][2] = 0.0;
+    result.m[1][0] = -0.0420;
+    result.m[1][1] = 1.0419;
+    result.m[1][2] = 0.0;
+    result.m[2][0] = -0.0197;
+    result.m[2][1] = -0.0786;
+    result.m[2][2] = 1.0984;
     return result;
 }
 
-inline ManagedColorMatrix AdobeRGBToSRGB() {
+inline ManagedColorMatrix AdobeRGBToSRGB()
+{
     ManagedColorMatrix result;
-    result.m[0][0] = 1.3982; result.m[0][1] = -0.3982; result.m[0][2] = 0.0;
-    result.m[1][0] = 0.0; result.m[1][1] = 1.0; result.m[1][2] = 0.0;
-    result.m[2][0] = 0.0; result.m[2][1] = -0.0423; result.m[2][2] = 1.0423;
+    result.m[0][0] = 1.3982;
+    result.m[0][1] = -0.3982;
+    result.m[0][2] = 0.0;
+    result.m[1][0] = 0.0;
+    result.m[1][1] = 1.0;
+    result.m[1][2] = 0.0;
+    result.m[2][0] = 0.0;
+    result.m[2][1] = -0.0423;
+    result.m[2][2] = 1.0423;
     return result;
 }
 
-inline ManagedColorMatrix Rec2020ToSRGB() {
+inline ManagedColorMatrix Rec2020ToSRGB()
+{
     ManagedColorMatrix result;
-    result.m[0][0] = 1.6605; result.m[0][1] = -0.5877; result.m[0][2] = -0.0728;
-    result.m[1][0] = -0.1246; result.m[1][1] = 1.1330; result.m[1][2] = -0.0084;
-    result.m[2][0] = -0.0182; result.m[2][1] = -0.1006; result.m[2][2] = 1.1187;
+    result.m[0][0] = 1.6605;
+    result.m[0][1] = -0.5877;
+    result.m[0][2] = -0.0728;
+    result.m[1][0] = -0.1246;
+    result.m[1][1] = 1.1330;
+    result.m[1][2] = -0.0084;
+    result.m[2][0] = -0.0182;
+    result.m[2][1] = -0.1006;
+    result.m[2][2] = 1.1187;
     return result;
 }
 
 enum class GamutMappingMethod : uint8_t {
-    Clip = 0, // Simple clip to [0,1] — fast, may lose saturation
-    Perceptual, // Compress entire gamut proportionally — preserves relationships
-    RelativeColorimetric, // Adjust white point, clip out-of-gamut — most accurate
-    Saturation // Maximize saturation — best for graphics/charts
+    Clip = 0,              // Simple clip to [0,1] — fast, may lose saturation
+    Perceptual,            // Compress entire gamut proportionally — preserves relationships
+    RelativeColorimetric,  // Adjust white point, clip out-of-gamut — most accurate
+    Saturation             // Maximize saturation — best for graphics/charts
 };
 
-inline const char* GamutMappingMethodName(GamutMappingMethod m) {
+inline const char* GamutMappingMethodName(GamutMappingMethod m)
+{
     switch (m) {
-    case GamutMappingMethod::Clip: return "Clip";
-    case GamutMappingMethod::Perceptual: return "Perceptual";
-    case GamutMappingMethod::RelativeColorimetric: return "Relative Colorimetric";
-    case GamutMappingMethod::Saturation: return "Saturation";
-    default: return "Unknown";
+        case GamutMappingMethod::Clip:
+            return "Clip";
+        case GamutMappingMethod::Perceptual:
+            return "Perceptual";
+        case GamutMappingMethod::RelativeColorimetric:
+            return "Relative Colorimetric";
+        case GamutMappingMethod::Saturation:
+            return "Saturation";
+        default:
+            return "Unknown";
     }
 }
 
-class GamutMapper {
-public:
+class GamutMapper
+{
+  public:
     GamutMapper(ManagedColorSpace source, ManagedColorSpace target = ManagedColorSpace::sRGB,
-        GamutMappingMethod method = GamutMappingMethod::Perceptual)
-        : m_source(source), m_target(target), m_method(method) {
-    }
+                GamutMappingMethod method = GamutMappingMethod::Perceptual)
+        : m_source(source)
+        , m_target(target)
+        , m_method(method)
+    {}
 
     // Get the conversion matrix for source → target
-    ManagedColorMatrix GetMatrix() const {
+    ManagedColorMatrix GetMatrix() const
+    {
         if (m_source == ManagedColorSpace::DisplayP3 && m_target == ManagedColorSpace::sRGB)
             return DisplayP3ToSRGB();
         if (m_source == ManagedColorSpace::AdobeRGB && m_target == ManagedColorSpace::sRGB)
@@ -259,14 +325,21 @@ public:
             return Rec2020ToSRGB();
         // Identity for same-space or unsupported conversions
         ManagedColorMatrix identity;
-        identity.m[0][0] = 1.0; identity.m[0][1] = 0.0; identity.m[0][2] = 0.0;
-        identity.m[1][0] = 0.0; identity.m[1][1] = 1.0; identity.m[1][2] = 0.0;
-        identity.m[2][0] = 0.0; identity.m[2][1] = 0.0; identity.m[2][2] = 1.0;
+        identity.m[0][0] = 1.0;
+        identity.m[0][1] = 0.0;
+        identity.m[0][2] = 0.0;
+        identity.m[1][0] = 0.0;
+        identity.m[1][1] = 1.0;
+        identity.m[1][2] = 0.0;
+        identity.m[2][0] = 0.0;
+        identity.m[2][1] = 0.0;
+        identity.m[2][2] = 1.0;
         return identity;
     }
 
     // Map a single pixel (linear RGB values)
-    std::array<double, 3> MapPixel(double r, double g, double b) const {
+    std::array<double, 3> MapPixel(double r, double g, double b) const
+    {
         auto matrix = GetMatrix();
         auto result = matrix.Transform(r, g, b);
         // Apply gamut mapping method
@@ -278,12 +351,24 @@ public:
         return result;
     }
 
-    bool NeedsConversion() const { return m_source != m_target; }
-    ManagedColorSpace Source() const { return m_source; }
-    ManagedColorSpace Target() const { return m_target; }
-    GamutMappingMethod Method() const { return m_method; }
+    bool NeedsConversion() const
+    {
+        return m_source != m_target;
+    }
+    ManagedColorSpace Source() const
+    {
+        return m_source;
+    }
+    ManagedColorSpace Target() const
+    {
+        return m_target;
+    }
+    GamutMappingMethod Method() const
+    {
+        return m_method;
+    }
 
-private:
+  private:
     ManagedColorSpace m_source;
     ManagedColorSpace m_target;
     GamutMappingMethod m_method;
@@ -294,112 +379,145 @@ private:
 //------------------------------------------------------------------------------
 
 enum class ToneMappingOperator : uint8_t {
-    Reinhard = 0, // Simple Reinhard (x / (1 + x))
-    ReinhardExtended, // Extended Reinhard with white point
-    ACES_Filmic, // Academy Color Encoding System filmic curve
-    Hable, // Uncharted 2 / Hable tone map
-    Lottes, // Timothy Lottes (AMD) curve
-    Linear_Clamp // Linear scale + clamp (baseline)
+    Reinhard = 0,      // Simple Reinhard (x / (1 + x))
+    ReinhardExtended,  // Extended Reinhard with white point
+    ACES_Filmic,       // Academy Color Encoding System filmic curve
+    Hable,             // Uncharted 2 / Hable tone map
+    Lottes,            // Timothy Lottes (AMD) curve
+    Linear_Clamp       // Linear scale + clamp (baseline)
 };
 
-inline const char* ToneMappingOperatorName(ToneMappingOperator op) {
+inline const char* ToneMappingOperatorName(ToneMappingOperator op)
+{
     switch (op) {
-    case ToneMappingOperator::Reinhard: return "Reinhard";
-    case ToneMappingOperator::ReinhardExtended: return "Reinhard Extended";
-    case ToneMappingOperator::ACES_Filmic: return "ACES Filmic";
-    case ToneMappingOperator::Hable: return "Hable (Uncharted 2)";
-    case ToneMappingOperator::Lottes: return "Lottes (AMD)";
-    case ToneMappingOperator::Linear_Clamp: return "Linear Clamp";
-    default: return "Unknown";
+        case ToneMappingOperator::Reinhard:
+            return "Reinhard";
+        case ToneMappingOperator::ReinhardExtended:
+            return "Reinhard Extended";
+        case ToneMappingOperator::ACES_Filmic:
+            return "ACES Filmic";
+        case ToneMappingOperator::Hable:
+            return "Hable (Uncharted 2)";
+        case ToneMappingOperator::Lottes:
+            return "Lottes (AMD)";
+        case ToneMappingOperator::Linear_Clamp:
+            return "Linear Clamp";
+        default:
+            return "Unknown";
     }
 }
 
-struct HDRMetadata {
-    double maxContentLightLevel = 1000.0; // MaxCLL (nits)
-    double maxFrameAverage = 400.0; // MaxFALL (nits)
-    double displayMaxBrightness = 80.0; // Target SDR display (nits)
+struct HDRMetadata
+{
+    double maxContentLightLevel = 1000.0;  // MaxCLL (nits)
+    double maxFrameAverage = 400.0;        // MaxFALL (nits)
+    double displayMaxBrightness = 80.0;    // Target SDR display (nits)
     ManagedColorSpace sourceSpace = ManagedColorSpace::Rec2020;
-    bool hasPQ = false; // SMPTE ST 2084 (HDR10)
-    bool hasHLG = false; // Hybrid Log-Gamma (HLG)
+    bool hasPQ = false;   // SMPTE ST 2084 (HDR10)
+    bool hasHLG = false;  // Hybrid Log-Gamma (HLG)
 
-    bool IsHDR() const { return maxContentLightLevel > 100.0 || hasPQ || hasHLG; }
-    double DynamicRange() const {
+    bool IsHDR() const
+    {
+        return maxContentLightLevel > 100.0 || hasPQ || hasHLG;
+    }
+    double DynamicRange() const
+    {
         return (displayMaxBrightness > 0) ? maxContentLightLevel / displayMaxBrightness : 1.0;
     }
 };
 
-class ToneMapper {
-public:
-    ToneMapper(ToneMappingOperator op = ToneMappingOperator::ACES_Filmic,
-        double exposure = 1.0)
-        : m_operator(op), m_exposure(exposure) {
-    }
+class ToneMapper
+{
+  public:
+    ToneMapper(ToneMappingOperator op = ToneMappingOperator::ACES_Filmic, double exposure = 1.0)
+        : m_operator(op)
+        , m_exposure(exposure)
+    {}
 
     // Tone map a single luminance value (linear, scene-referred)
-    double ToneMap(double luminance) const {
+    double ToneMap(double luminance) const
+    {
         double v = luminance * m_exposure;
         switch (m_operator) {
-        case ToneMappingOperator::Reinhard:
-            return v / (1.0 + v);
-        case ToneMappingOperator::ReinhardExtended: {
-            double Lw = m_whitePoint;
-            return (v * (1.0 + v / (Lw * Lw))) / (1.0 + v);
-        }
-        case ToneMappingOperator::ACES_Filmic: {
-            // Simplified ACES filmic curve (Krzysztof Narkowicz approximation)
-            double a = 2.51, b = 0.03, c = 2.43, d = 0.59, e = 0.14;
-            return std::clamp((v * (a * v + b)) / (v * (c * v + d) + e), 0.0, 1.0);
-        }
-        case ToneMappingOperator::Hable: {
-            auto hable = [](double x) {
-                double A = 0.15, B = 0.50, C = 0.10, D = 0.20, E = 0.02, F = 0.30;
-                return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+            case ToneMappingOperator::Reinhard:
+                return v / (1.0 + v);
+            case ToneMappingOperator::ReinhardExtended: {
+                double Lw = m_whitePoint;
+                return (v * (1.0 + v / (Lw * Lw))) / (1.0 + v);
+            }
+            case ToneMappingOperator::ACES_Filmic: {
+                // Simplified ACES filmic curve (Krzysztof Narkowicz approximation)
+                double a = 2.51, b = 0.03, c = 2.43, d = 0.59, e = 0.14;
+                return std::clamp((v * (a * v + b)) / (v * (c * v + d) + e), 0.0, 1.0);
+            }
+            case ToneMappingOperator::Hable: {
+                auto hable = [](double x) {
+                    double A = 0.15, B = 0.50, C = 0.10, D = 0.20, E = 0.02, F = 0.30;
+                    return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
                 };
-            double w = 11.2;
-            return hable(v) / hable(w);
-        }
-        case ToneMappingOperator::Lottes: {
-            double a = 1.6, d = 0.977, hdrMax = 8.0, midIn = 0.18, midOut = 0.267;
-            double b = (-std::pow(midIn, a) + std::pow(hdrMax, a) * midOut) /
-                ((std::pow(hdrMax, a * d) - std::pow(midIn, a * d)) * midOut);
-            double c_val = (std::pow(hdrMax, a * d) * std::pow(midIn, a) -
-                std::pow(hdrMax, a) * std::pow(midIn, a * d) * midOut) /
-                ((std::pow(hdrMax, a * d) - std::pow(midIn, a * d)) * midOut);
-            return std::pow(v, a) / (std::pow(v, a * d) * b + c_val);
-        }
-        case ToneMappingOperator::Linear_Clamp:
-        default:
-            return std::clamp(v, 0.0, 1.0);
+                double w = 11.2;
+                return hable(v) / hable(w);
+            }
+            case ToneMappingOperator::Lottes: {
+                double a = 1.6, d = 0.977, hdrMax = 8.0, midIn = 0.18, midOut = 0.267;
+                double b = (-std::pow(midIn, a) + std::pow(hdrMax, a) * midOut)
+                           / ((std::pow(hdrMax, a * d) - std::pow(midIn, a * d)) * midOut);
+                double c_val = (std::pow(hdrMax, a * d) * std::pow(midIn, a)
+                                - std::pow(hdrMax, a) * std::pow(midIn, a * d) * midOut)
+                               / ((std::pow(hdrMax, a * d) - std::pow(midIn, a * d)) * midOut);
+                return std::pow(v, a) / (std::pow(v, a * d) * b + c_val);
+            }
+            case ToneMappingOperator::Linear_Clamp:
+            default:
+                return std::clamp(v, 0.0, 1.0);
         }
     }
 
     // Tone map RGB triplet
-    std::array<double, 3> ToneMapRGB(double r, double g, double b) const {
-        return { ToneMap(r), ToneMap(g), ToneMap(b) };
+    std::array<double, 3> ToneMapRGB(double r, double g, double b) const
+    {
+        return {ToneMap(r), ToneMap(g), ToneMap(b)};
     }
 
-    void SetExposure(double e) { m_exposure = e; }
-    double Exposure() const { return m_exposure; }
-    void SetWhitePoint(double wp) { m_whitePoint = wp; }
-    double WhitePoint() const { return m_whitePoint; }
-    ToneMappingOperator Operator() const { return m_operator; }
+    void SetExposure(double e)
+    {
+        m_exposure = e;
+    }
+    double Exposure() const
+    {
+        return m_exposure;
+    }
+    void SetWhitePoint(double wp)
+    {
+        m_whitePoint = wp;
+    }
+    double WhitePoint() const
+    {
+        return m_whitePoint;
+    }
+    ToneMappingOperator Operator() const
+    {
+        return m_operator;
+    }
 
-private:
+  private:
     ToneMappingOperator m_operator;
     double m_exposure = 1.0;
-    double m_whitePoint = 4.0; // For extended Reinhard
+    double m_whitePoint = 4.0;  // For extended Reinhard
 };
 
 //------------------------------------------------------------------------------
 // Color Accuracy Metrics — dE2000
 //------------------------------------------------------------------------------
 
-struct LABColor {
+struct LABColor
+{
     double L = 0, a = 0, b = 0;
 };
 
 // CIE dE2000 color difference (simplified)
-inline double DeltaE2000(const LABColor& ref, const LABColor& sample) {
+inline double DeltaE2000(const LABColor& ref, const LABColor& sample)
+{
     double dL = sample.L - ref.L;
     double da = sample.a - ref.a;
     double db = sample.b - ref.b;
@@ -407,20 +525,20 @@ inline double DeltaE2000(const LABColor& ref, const LABColor& sample) {
     return std::sqrt(dL * dL + da * da + db * db);
 }
 
-struct ColorAccuracyResult {
+struct ColorAccuracyResult
+{
     double dE2000_mean = 0;
     double dE2000_max = 0;
     double dE2000_p95 = 0;
     uint32_t sampleCount = 0;
     bool passesThreshold = false;
-    double threshold = 2.0; // dE2000 < 2.0 = visually indistinguishable
+    double threshold = 2.0;  // dE2000 < 2.0 = visually indistinguishable
 
-    std::string Summary() const {
-        return "dE2000: mean=" + std::to_string(dE2000_mean).substr(0, 5) +
-            " max=" + std::to_string(dE2000_max).substr(0, 5) +
-            " p95=" + std::to_string(dE2000_p95).substr(0, 5) +
-            " (" + std::to_string(sampleCount) + " samples)" +
-            (passesThreshold ? " PASS" : " FAIL");
+    std::string Summary() const
+    {
+        return "dE2000: mean=" + std::to_string(dE2000_mean).substr(0, 5)
+               + " max=" + std::to_string(dE2000_max).substr(0, 5) + " p95=" + std::to_string(dE2000_p95).substr(0, 5)
+               + " (" + std::to_string(sampleCount) + " samples)" + (passesThreshold ? " PASS" : " FAIL");
     }
 };
 
@@ -428,22 +546,24 @@ struct ColorAccuracyResult {
 // Windows Color System (WCS) Integration
 //------------------------------------------------------------------------------
 
-struct WCSConfig {
-    bool useWCS = true; // Use Windows Color Management API
+struct WCSConfig
+{
+    bool useWCS = true;  // Use Windows Color Management API
     bool preserveBlackPoint = true;
-    std::string targetProfile = "sRGB"; // Output profile
+    std::string targetProfile = "sRGB";  // Output profile
     GamutMappingMethod intent = GamutMappingMethod::Perceptual;
 
     // Windows HDR display detection
-    bool isHDRDisplayActive = false; // AdvancedColorInfo.CurrentAdvancedColorKind
-    double sdrWhiteLevel = 80.0; // SDR content brightness on HDR display
+    bool isHDRDisplayActive = false;  // AdvancedColorInfo.CurrentAdvancedColorKind
+    double sdrWhiteLevel = 80.0;      // SDR content brightness on HDR display
 };
 
 //------------------------------------------------------------------------------
 // Color Pipeline Configuration
 //------------------------------------------------------------------------------
 
-struct ColorPipelineConfig {
+struct ColorPipelineConfig
+{
     bool enableColorManagement = true;
     bool extractICCProfiles = true;
     bool applyGamutMapping = true;
@@ -452,14 +572,16 @@ struct ColorPipelineConfig {
     ToneMappingOperator toneMapper = ToneMappingOperator::ACES_Filmic;
     GamutMappingMethod gamutMethod = GamutMappingMethod::Perceptual;
     double hdrExposure = 1.0;
-    double maxDeltaE = 2.0; // Accuracy threshold
+    double maxDeltaE = 2.0;  // Accuracy threshold
     WCSConfig wcs;
 
-    static ColorPipelineConfig Default() {
+    static ColorPipelineConfig Default()
+    {
         return {};
     }
 
-    static ColorPipelineConfig Disabled() {
+    static ColorPipelineConfig Disabled()
+    {
         ColorPipelineConfig c;
         c.enableColorManagement = false;
         c.extractICCProfiles = false;
@@ -468,7 +590,8 @@ struct ColorPipelineConfig {
         return c;
     }
 
-    static ColorPipelineConfig HDR() {
+    static ColorPipelineConfig HDR()
+    {
         ColorPipelineConfig c;
         c.toneMapper = ToneMappingOperator::ACES_Filmic;
         c.hdrExposure = 1.2;
@@ -476,7 +599,8 @@ struct ColorPipelineConfig {
         return c;
     }
 
-    static ColorPipelineConfig HighAccuracy() {
+    static ColorPipelineConfig HighAccuracy()
+    {
         ColorPipelineConfig c;
         c.gamutMethod = GamutMappingMethod::RelativeColorimetric;
         c.maxDeltaE = 1.0;
@@ -487,15 +611,23 @@ struct ColorPipelineConfig {
 //------------------------------------------------------------------------------
 // Per-Format Color Space Defaults
 //------------------------------------------------------------------------------
-inline ManagedColorSpace DefaultColorSpaceForFormat(const std::string& format) {
-    if (format == "HEIF" || format == "HEIC") return ManagedColorSpace::DisplayP3;
-    if (format == "EXR") return ManagedColorSpace::LinearRGB;
-    if (format == "HDR") return ManagedColorSpace::LinearRGB;
-    if (format == "DNG") return ManagedColorSpace::ProPhotoRGB;
-    if (format == "PSD") return ManagedColorSpace::AdobeRGB;
-    if (format == "AVIF") return ManagedColorSpace::sRGB; // Can be P3 too
-    if (format == "JXL") return ManagedColorSpace::sRGB;
+inline ManagedColorSpace DefaultColorSpaceForFormat(const std::string& format)
+{
+    if (format == "HEIF" || format == "HEIC")
+        return ManagedColorSpace::DisplayP3;
+    if (format == "EXR")
+        return ManagedColorSpace::LinearRGB;
+    if (format == "HDR")
+        return ManagedColorSpace::LinearRGB;
+    if (format == "DNG")
+        return ManagedColorSpace::ProPhotoRGB;
+    if (format == "PSD")
+        return ManagedColorSpace::AdobeRGB;
+    if (format == "AVIF")
+        return ManagedColorSpace::sRGB;  // Can be P3 too
+    if (format == "JXL")
+        return ManagedColorSpace::sRGB;
     return ManagedColorSpace::sRGB;
 }
 
-} // namespace ExplorerLens::Engine::Decoders
+}  // namespace ExplorerLens::Engine::Decoders

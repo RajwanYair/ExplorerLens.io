@@ -5,9 +5,15 @@
 
 namespace ExplorerLens::Engine {
 
-bool ThumbnailPersonalisationEngine::ApplyPersonalisation(const UserPersonalisationProfile&, void*, uint32_t, uint32_t) { return false; }
+bool ThumbnailPersonalisationEngine::ApplyPersonalisation(const UserPersonalisationProfile&, void*, uint32_t, uint32_t)
+{
+    return false;
+}
 void ThumbnailPersonalisationEngine::UpdateSignal(const std::string&, PersonalisationSignal, float) {}
 void ThumbnailPersonalisationEngine::ResetProfile(const std::string&) {}
-std::optional<UserPersonalisationProfile> ThumbnailPersonalisationEngine::GetProfile(const std::string&) const { return {}; }
+std::optional<UserPersonalisationProfile> ThumbnailPersonalisationEngine::GetProfile(const std::string&) const
+{
+    return {};
+}
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

@@ -6,46 +6,61 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct FolderAccessPattern {
-    std::wstring   folderPath;
-    uint64_t       lastAccessMs = 0;
-    uint32_t       accessCount = 0;
-    uint32_t       fileCount = 0;
-    float          avgDwellTimeMs = 0.0f;
+struct FolderAccessPattern
+{
+    std::wstring folderPath;
+    uint64_t lastAccessMs = 0;
+    uint32_t accessCount = 0;
+    uint32_t fileCount = 0;
+    float avgDwellTimeMs = 0.0f;
 };
 
-struct PredictedPath {
-    std::wstring   path;
-    float          confidence = 0.0f;   // 0.0 to 1.0
-    uint32_t       expectedFiles = 0;
+struct PredictedPath
+{
+    std::wstring path;
+    float confidence = 0.0f;  // 0.0 to 1.0
+    uint32_t expectedFiles = 0;
 };
 
-struct FolderPredictorConfig {
+struct FolderPredictorConfig
+{
     uint32_t maxHistoryEntries = 1000;
     uint32_t maxPredictions = 5;
-    float    decayFactor = 0.95f;   // score decay per access cycle
-    uint64_t hotThresholdMs = 60000;   // 1 minute recency threshold
-    uint32_t minAccessCount = 2;       // minimum accesses to predict
+    float decayFactor = 0.95f;        // score decay per access cycle
+    uint64_t hotThresholdMs = 60000;  // 1 minute recency threshold
+    uint32_t minAccessCount = 2;      // minimum accesses to predict
 };
 
-class FolderWatchPredictor {
-public:
-    static FolderWatchPredictor& Instance() { static FolderWatchPredictor s; return s; }
+class FolderWatchPredictor
+{
+  public:
+    static FolderWatchPredictor& Instance()
+    {
+        static FolderWatchPredictor s;
+        return s;
+    }
 
-    void SetConfig(const FolderPredictorConfig& config) { m_config = config; }
-    const FolderPredictorConfig& GetConfig() const { return m_config; }
+    void SetConfig(const FolderPredictorConfig& config)
+    {
+        m_config = config;
+    }
+    const FolderPredictorConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-    void RecordAccess(const std::wstring& folderPath, uint32_t fileCount = 0) {
+    void RecordAccess(const std::wstring& folderPath, uint32_t fileCount = 0)
+    {
         uint64_t now = GetCurrentTimeMs();
         auto it = m_patterns.find(folderPath);
         if (it != m_patterns.end()) {
@@ -56,9 +71,9 @@ public:
             }
             p.accessCount++;
             p.lastAccessMs = now;
-            if (fileCount > 0) p.fileCount = fileCount;
-        }
-        else {
+            if (fileCount > 0)
+                p.fileCount = fileCount;
+        } else {
             if (m_patterns.size() >= m_config.maxHistoryEntries) {
                 EvictOldest();
             }
@@ -77,7 +92,8 @@ public:
         m_lastFolder = folderPath;
     }
 
-    std::vector<PredictedPath> PredictNext(const std::wstring& currentFolder) const {
+    std::vector<PredictedPath> PredictNext(const std::wstring& currentFolder) const
+    {
         std::vector<PredictedPath> predictions;
 
         // Strategy 1: Markov transition probability
@@ -101,13 +117,18 @@ public:
         // Strategy 2: Hot folders by recency + frequency
         uint64_t now = GetCurrentTimeMs();
         for (const auto& [path, pattern] : m_patterns) {
-            if (path == currentFolder) continue;
-            if (pattern.accessCount < m_config.minAccessCount) continue;
+            if (path == currentFolder)
+                continue;
+            if (pattern.accessCount < m_config.minAccessCount)
+                continue;
             uint64_t age = now - pattern.lastAccessMs;
             if (age < m_config.hotThresholdMs) {
                 bool alreadyPredicted = false;
                 for (const auto& p : predictions) {
-                    if (p.path == path) { alreadyPredicted = true; break; }
+                    if (p.path == path) {
+                        alreadyPredicted = true;
+                        break;
+                    }
                 }
                 if (!alreadyPredicted) {
                     float recencyScore = 1.0f - static_cast<float>(age) / static_cast<float>(m_config.hotThresholdMs);
@@ -124,24 +145,24 @@ public:
 
         // Sort by confidence and limit
         std::sort(predictions.begin(), predictions.end(),
-            [](const PredictedPath& a, const PredictedPath& b) { return a.confidence > b.confidence; });
+                  [](const PredictedPath& a, const PredictedPath& b) { return a.confidence > b.confidence; });
         if (predictions.size() > m_config.maxPredictions)
             predictions.resize(m_config.maxPredictions);
 
         return predictions;
     }
 
-    std::vector<std::wstring> GetHotFolders(uint32_t maxCount = 10) const {
+    std::vector<std::wstring> GetHotFolders(uint32_t maxCount = 10) const
+    {
         uint64_t now = GetCurrentTimeMs();
         std::vector<std::pair<float, std::wstring>> scored;
         for (const auto& [path, pattern] : m_patterns) {
             uint64_t age = now - pattern.lastAccessMs;
-            float score = static_cast<float>(pattern.accessCount) *
-                std::pow(m_config.decayFactor, static_cast<float>(age) / 60000.0f);
-            scored.push_back({ score, path });
+            float score = static_cast<float>(pattern.accessCount)
+                          * std::pow(m_config.decayFactor, static_cast<float>(age) / 60000.0f);
+            scored.push_back({score, path});
         }
-        std::sort(scored.begin(), scored.end(),
-            [](const auto& a, const auto& b) { return a.first > b.first; });
+        std::sort(scored.begin(), scored.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
 
         std::vector<std::wstring> result;
         for (uint32_t i = 0; i < maxCount && i < scored.size(); ++i)
@@ -149,36 +170,48 @@ public:
         return result;
     }
 
-    size_t PatternCount() const { return m_patterns.size(); }
+    size_t PatternCount() const
+    {
+        return m_patterns.size();
+    }
 
-    void Clear() {
+    void Clear()
+    {
         m_patterns.clear();
         m_transitions.clear();
         m_lastFolder.clear();
     }
 
-    bool Validate() const {
-        if (m_config.maxHistoryEntries == 0) return false;
-        if (m_config.maxPredictions == 0) return false;
-        if (m_config.decayFactor <= 0.0f || m_config.decayFactor > 1.0f) return false;
-        if (m_patterns.size() > m_config.maxHistoryEntries + 1) return false;
+    bool Validate() const
+    {
+        if (m_config.maxHistoryEntries == 0)
+            return false;
+        if (m_config.maxPredictions == 0)
+            return false;
+        if (m_config.decayFactor <= 0.0f || m_config.decayFactor > 1.0f)
+            return false;
+        if (m_patterns.size() > m_config.maxHistoryEntries + 1)
+            return false;
         return true;
     }
 
-private:
+  private:
     FolderWatchPredictor() = default;
     ~FolderWatchPredictor() = default;
     FolderWatchPredictor(const FolderWatchPredictor&) = delete;
     FolderWatchPredictor& operator=(const FolderWatchPredictor&) = delete;
 
-    static uint64_t GetCurrentTimeMs() {
+    static uint64_t GetCurrentTimeMs()
+    {
         return static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count());
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+                .count());
     }
 
-    void EvictOldest() {
-        if (m_patterns.empty()) return;
+    void EvictOldest()
+    {
+        if (m_patterns.empty())
+            return;
         auto oldest = m_patterns.begin();
         for (auto it = m_patterns.begin(); it != m_patterns.end(); ++it) {
             if (it->second.lastAccessMs < oldest->second.lastAccessMs)
@@ -193,5 +226,5 @@ private:
     std::wstring m_lastFolder;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

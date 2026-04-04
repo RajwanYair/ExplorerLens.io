@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <chrono>
-#include <functional>
 #include <algorithm>
-#include <unordered_map>
+#include <chrono>
+#include <cstdint>
+#include <functional>
 #include <numeric>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -44,10 +44,10 @@ enum class StepResult : uint8_t {
 
 /// Orchestrator run mode
 enum class OrchestratorMode : uint8_t {
-    Full = 0,       ///< Run all scenarios
-    Smoke,          ///< Quick subset for pre-commit
-    Nightly,        ///< Extended scenarios for nightly CI
-    Stress,         ///< Repeated runs for stability
+    Full = 0,  ///< Run all scenarios
+    Smoke,     ///< Quick subset for pre-commit
+    Nightly,   ///< Extended scenarios for nightly CI
+    Stress,    ///< Repeated runs for stability
     COUNT
 };
 
@@ -55,24 +55,23 @@ enum class OrchestratorMode : uint8_t {
 // String conversions
 // ============================================================================
 
-inline const char* ScenarioTypeToString(ScenarioType t) {
-    static const char* names[] = {
-        "Sequential", "Parallel", "ConditionalFanOut", "RetryLoop"
-    };
+inline const char* ScenarioTypeToString(ScenarioType t)
+{
+    static const char* names[] = {"Sequential", "Parallel", "ConditionalFanOut", "RetryLoop"};
     auto idx = static_cast<uint8_t>(t);
     return (idx < static_cast<uint8_t>(ScenarioType::COUNT)) ? names[idx] : "Unknown";
 }
 
-inline const char* StepResultToString(StepResult r) {
-    static const char* names[] = {
-        "NotStarted", "Success", "Failure", "Skipped", "DependencyFailed"
-    };
+inline const char* StepResultToString(StepResult r)
+{
+    static const char* names[] = {"NotStarted", "Success", "Failure", "Skipped", "DependencyFailed"};
     auto idx = static_cast<uint8_t>(r);
     return (idx < static_cast<uint8_t>(StepResult::COUNT)) ? names[idx] : "Unknown";
 }
 
-inline const char* OrchestratorModeToString(OrchestratorMode m) {
-    static const char* names[] = { "Full", "Smoke", "Nightly", "Stress" };
+inline const char* OrchestratorModeToString(OrchestratorMode m)
+{
+    static const char* names[] = {"Full", "Smoke", "Nightly", "Stress"};
     auto idx = static_cast<uint8_t>(m);
     return (idx < static_cast<uint8_t>(OrchestratorMode::COUNT)) ? names[idx] : "Unknown";
 }
@@ -82,55 +81,65 @@ inline const char* OrchestratorModeToString(OrchestratorMode m) {
 // ============================================================================
 
 /// A single step in a test scenario
-struct TestStep {
-    std::string   name;
-    uint32_t      stepId = 0;
-    StepResult    result = StepResult::NotStarted;
-    double        durationMs = 0.0;
-    std::string   errorDetail;
+struct TestStep
+{
+    std::string name;
+    uint32_t stepId = 0;
+    StepResult result = StepResult::NotStarted;
+    double durationMs = 0.0;
+    std::string errorDetail;
     std::vector<uint32_t> dependsOn;  ///< Step IDs this step depends on
 };
 
 /// A complete test scenario (composed of steps)
-struct TestScenario {
-    std::string     name;
-    ScenarioType    type = ScenarioType::Sequential;
+struct TestScenario
+{
+    std::string name;
+    ScenarioType type = ScenarioType::Sequential;
     OrchestratorMode mode = OrchestratorMode::Full;
     std::vector<TestStep> steps;
-    bool            completed = false;
-    double          totalDurationMs = 0.0;
+    bool completed = false;
+    double totalDurationMs = 0.0;
 
-    uint32_t PassedSteps() const {
+    uint32_t PassedSteps() const
+    {
         uint32_t count = 0;
         for (const auto& s : steps)
-            if (s.result == StepResult::Success) count++;
+            if (s.result == StepResult::Success)
+                count++;
         return count;
     }
 
-    uint32_t FailedSteps() const {
+    uint32_t FailedSteps() const
+    {
         uint32_t count = 0;
         for (const auto& s : steps)
-            if (s.result == StepResult::Failure || s.result == StepResult::DependencyFailed) count++;
+            if (s.result == StepResult::Failure || s.result == StepResult::DependencyFailed)
+                count++;
         return count;
     }
 };
 
 /// Orchestrator statistics
-struct OrchestratorStats {
+struct OrchestratorStats
+{
     uint32_t totalScenarios = 0;
     uint32_t completedScenarios = 0;
     uint32_t failedScenarios = 0;
     uint32_t totalSteps = 0;
     uint32_t passedSteps = 0;
     uint32_t failedSteps = 0;
-    double   totalDurationMs = 0.0;
+    double totalDurationMs = 0.0;
 
-    double ScenarioPassRate() const {
-        return (totalScenarios > 0) ?
-            (static_cast<double>(completedScenarios - failedScenarios) / totalScenarios * 100.0) : 0.0;
+    double ScenarioPassRate() const
+    {
+        return (totalScenarios > 0)
+                   ? (static_cast<double>(completedScenarios - failedScenarios) / totalScenarios * 100.0)
+                   : 0.0;
     }
 
-    double StepPassRate() const {
+    double StepPassRate() const
+    {
         uint32_t executed = passedSteps + failedSteps;
         return (executed > 0) ? (static_cast<double>(passedSteps) / executed * 100.0) : 0.0;
     }
@@ -140,13 +149,14 @@ struct OrchestratorStats {
 // IntegrationTestOrchestrator class
 // ============================================================================
 
-class IntegrationTestOrchestrator {
-public:
+class IntegrationTestOrchestrator
+{
+  public:
     using StepFunc = std::function<bool()>;
 
     /// Add a scenario
-    void AddScenario(const std::string& name, ScenarioType type,
-        OrchestratorMode mode = OrchestratorMode::Full) {
+    void AddScenario(const std::string& name, ScenarioType type, OrchestratorMode mode = OrchestratorMode::Full)
+    {
         TestScenario scenario;
         scenario.name = name;
         scenario.type = type;
@@ -155,9 +165,10 @@ public:
     }
 
     /// Add a step to the last added scenario
-    void AddStep(const std::string& stepName, StepFunc func,
-        const std::vector<uint32_t>& deps = {}) {
-        if (m_scenarios.empty()) return;
+    void AddStep(const std::string& stepName, StepFunc func, const std::vector<uint32_t>& deps = {})
+    {
+        if (m_scenarios.empty())
+            return;
         auto& scenario = m_scenarios.back();
         TestStep step;
         step.name = stepName;
@@ -168,12 +179,14 @@ public:
     }
 
     /// Run all scenarios matching the given mode
-    OrchestratorStats Run(OrchestratorMode mode = OrchestratorMode::Full) {
+    OrchestratorStats Run(OrchestratorMode mode = OrchestratorMode::Full)
+    {
         OrchestratorStats stats;
 
         for (size_t si = 0; si < m_scenarios.size(); ++si) {
             auto& scenario = m_scenarios[si];
-            if (mode != OrchestratorMode::Full && scenario.mode != mode) continue;
+            if (mode != OrchestratorMode::Full && scenario.mode != mode)
+                continue;
             stats.totalScenarios++;
 
             auto scenarioStart = std::chrono::steady_clock::now();
@@ -186,8 +199,7 @@ public:
                 // Check dependencies
                 bool depsFailed = false;
                 for (uint32_t dep : step.dependsOn) {
-                    if (dep < scenario.steps.size() &&
-                        scenario.steps[dep].result != StepResult::Success) {
+                    if (dep < scenario.steps.size() && scenario.steps[dep].result != StepResult::Success) {
                         depsFailed = true;
                         break;
                     }
@@ -201,7 +213,7 @@ public:
                 }
 
                 // Execute step
-                auto it = m_stepFuncs.find({ si, stIdx });
+                auto it = m_stepFuncs.find({si, stIdx});
                 if (it == m_stepFuncs.end()) {
                     step.result = StepResult::Skipped;
                     continue;
@@ -209,16 +221,18 @@ public:
 
                 auto start = std::chrono::steady_clock::now();
                 bool ok = false;
-                try { ok = it->second(); }
-                catch (...) { ok = false; }
+                try {
+                    ok = it->second();
+                } catch (...) {
+                    ok = false;
+                }
                 auto end = std::chrono::steady_clock::now();
                 step.durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
                 if (ok) {
                     step.result = StepResult::Success;
                     stats.passedSteps++;
-                }
-                else {
+                } else {
                     step.result = StepResult::Failure;
                     stats.failedSteps++;
                     scenarioFailed = true;
@@ -226,27 +240,39 @@ public:
             }
 
             auto scenarioEnd = std::chrono::steady_clock::now();
-            scenario.totalDurationMs = std::chrono::duration<double, std::milli>(
-                scenarioEnd - scenarioStart).count();
+            scenario.totalDurationMs = std::chrono::duration<double, std::milli>(scenarioEnd - scenarioStart).count();
             scenario.completed = true;
             stats.completedScenarios++;
             stats.totalDurationMs += scenario.totalDurationMs;
-            if (scenarioFailed) stats.failedScenarios++;
+            if (scenarioFailed)
+                stats.failedScenarios++;
         }
 
         return stats;
     }
 
     /// Get all scenarios
-    const std::vector<TestScenario>& GetScenarios() const { return m_scenarios; }
-    uint32_t GetScenarioCount() const { return static_cast<uint32_t>(m_scenarios.size()); }
+    const std::vector<TestScenario>& GetScenarios() const
+    {
+        return m_scenarios;
+    }
+    uint32_t GetScenarioCount() const
+    {
+        return static_cast<uint32_t>(m_scenarios.size());
+    }
 
     /// Clear all scenarios
-    void Clear() { m_scenarios.clear(); m_stepFuncs.clear(); }
+    void Clear()
+    {
+        m_scenarios.clear();
+        m_stepFuncs.clear();
+    }
 
-private:
-    struct PairHash {
-        size_t operator()(const std::pair<size_t, size_t>& p) const {
+  private:
+    struct PairHash
+    {
+        size_t operator()(const std::pair<size_t, size_t>& p) const
+        {
             return std::hash<size_t>()(p.first) ^ (std::hash<size_t>()(p.second) << 32);
         }
     };
@@ -255,5 +281,5 @@ private:
     std::unordered_map<std::pair<size_t, size_t>, StepFunc, PairHash> m_stepFuncs;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

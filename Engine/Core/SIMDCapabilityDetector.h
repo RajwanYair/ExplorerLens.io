@@ -16,16 +16,16 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
 #include <array>
 #include <atomic>
+#include <cstdint>
+#include <string>
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
 #include <intrin.h>
+#include <windows.h>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -48,43 +48,45 @@ enum class SIMDCap : uint8_t {
     COUNT
 };
 
-inline const char* SIMDCapName(SIMDCap f) {
-    static const char* names[] = {
-        "SSE2", "SSE3", "SSSE3", "SSE4.1", "SSE4.2",
-        "AVX", "AVX2", "FMA", "AVX-512F", "AVX-512BW",
-        "POPCNT", "BMI1", "BMI2"
-    };
+inline const char* SIMDCapName(SIMDCap f)
+{
+    static const char* names[] = {"SSE2", "SSE3",     "SSSE3",     "SSE4.1", "SSE4.2", "AVX", "AVX2",
+                                  "FMA",  "AVX-512F", "AVX-512BW", "POPCNT", "BMI1",   "BMI2"};
     auto idx = static_cast<uint8_t>(f);
     return (idx < static_cast<uint8_t>(SIMDCap::COUNT)) ? names[idx] : "Unknown";
 }
 
 /// Aggregated detection result
-struct SIMDDetectionResult {
+struct SIMDDetectionResult
+{
     std::array<bool, static_cast<size_t>(SIMDCap::COUNT)> supported{};
     std::array<bool, static_cast<size_t>(SIMDCap::COUNT)> verified{};
     std::string cpuBrand;
-    uint32_t    cpuFamily = 0;
-    uint32_t    cpuModel = 0;
-    uint32_t    cpuStepping = 0;
-    bool        osSupportsAVX = false;
-    bool        osSupportsAVX512 = false;
+    uint32_t cpuFamily = 0;
+    uint32_t cpuModel = 0;
+    uint32_t cpuStepping = 0;
+    bool osSupportsAVX = false;
+    bool osSupportsAVX512 = false;
 
     /// Get the highest verified SIMD level
-    SIMDCap GetMaxVerified() const {
+    SIMDCap GetMaxVerified() const
+    {
         for (int i = static_cast<int>(SIMDCap::COUNT) - 1; i >= 0; --i) {
-            if (verified[i]) return static_cast<SIMDCap>(i);
+            if (verified[i])
+                return static_cast<SIMDCap>(i);
         }
-        return SIMDCap::SSE2; // x64 baseline
+        return SIMDCap::SSE2;  // x64 baseline
     }
 
     /// Human-readable summary
-    std::string Summary() const {
-        std::string s = "CPU: " + cpuBrand + " | Max SIMD: " +
-            SIMDCapName(GetMaxVerified()) + " | Features: ";
+    std::string Summary() const
+    {
+        std::string s = "CPU: " + cpuBrand + " | Max SIMD: " + SIMDCapName(GetMaxVerified()) + " | Features: ";
         bool first = true;
         for (size_t i = 0; i < static_cast<size_t>(SIMDCap::COUNT); ++i) {
             if (verified[i]) {
-                if (!first) s += ", ";
+                if (!first)
+                    s += ", ";
                 s += SIMDCapName(static_cast<SIMDCap>(i));
                 first = false;
             }
@@ -94,35 +96,49 @@ struct SIMDDetectionResult {
 };
 
 /// One-shot CPUID-based SIMD detection with OS support verification.
-class SIMDCapabilityDetector {
-public:
-    static SIMDCapabilityDetector& Instance() {
+class SIMDCapabilityDetector
+{
+  public:
+    static SIMDCapabilityDetector& Instance()
+    {
         static SIMDCapabilityDetector inst;
         return inst;
     }
 
     /// Check if a feature is supported by CPU.
-    bool IsSupported(SIMDCap f) const {
+    bool IsSupported(SIMDCap f) const
+    {
         return m_result.supported[static_cast<size_t>(f)];
     }
 
     /// Check if a feature is verified (supported by CPU + enabled by OS).
-    bool IsVerified(SIMDCap f) const {
+    bool IsVerified(SIMDCap f) const
+    {
         return m_result.verified[static_cast<size_t>(f)];
     }
 
     /// Get full detection result.
-    const SIMDDetectionResult& GetResult() const { return m_result; }
+    const SIMDDetectionResult& GetResult() const
+    {
+        return m_result;
+    }
 
     /// Re-run detection (normally not needed — runs once on construction).
-    void Detect() { RunDetection(); }
+    void Detect()
+    {
+        RunDetection();
+    }
 
-private:
-    SIMDCapabilityDetector() { RunDetection(); }
+  private:
+    SIMDCapabilityDetector()
+    {
+        RunDetection();
+    }
     SIMDCapabilityDetector(const SIMDCapabilityDetector&) = delete;
     SIMDCapabilityDetector& operator=(const SIMDCapabilityDetector&) = delete;
 
-    void RunDetection() {
+    void RunDetection()
+    {
         // Zero out
         m_result = {};
 
@@ -160,8 +176,8 @@ private:
         if (osxsave) {
             // Check XCR0 register for AVX state save support
             uint64_t xcr0 = _xgetbv(0);
-            m_result.osSupportsAVX = (xcr0 & 0x6) == 0x6;           // SSE + AVX
-            m_result.osSupportsAVX512 = (xcr0 & 0xE6) == 0xE6;        // SSE + AVX + opmask + ZMM
+            m_result.osSupportsAVX = (xcr0 & 0x6) == 0x6;       // SSE + AVX
+            m_result.osSupportsAVX512 = (xcr0 & 0xE6) == 0xE6;  // SSE + AVX + opmask + ZMM
         }
 
         // CPUID leaf 7: extended features
@@ -182,8 +198,7 @@ private:
             }
 
             // SSE2-SSE4.2 + POPCNT don't need XSAVE — always available on x64
-            if (f <= SIMDCap::SSE42 || f == SIMDCap::POPCNT ||
-                f == SIMDCap::BMI1 || f == SIMDCap::BMI2) {
+            if (f <= SIMDCap::SSE42 || f == SIMDCap::POPCNT || f == SIMDCap::BMI1 || f == SIMDCap::BMI2) {
                 m_result.verified[i] = true;
                 continue;
             }
@@ -202,10 +217,13 @@ private:
         }
     }
 
-    static constexpr size_t idx(SIMDCap f) { return static_cast<size_t>(f); }
+    static constexpr size_t idx(SIMDCap f)
+    {
+        return static_cast<size_t>(f);
+    }
 
     SIMDDetectionResult m_result;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -37,44 +37,67 @@ enum class DocDriftLevel : uint8_t {
     COUNT = 5
 };
 
-class DocumentationExcellenceV2 {
-public:
-    static const wchar_t *DocFormatName(DocOutputFormat f) noexcept {
+class DocumentationExcellenceV2
+{
+  public:
+    static const wchar_t* DocFormatName(DocOutputFormat f) noexcept
+    {
         switch (f) {
-        case DocOutputFormat::Doxygen:  return L"Doxygen";
-        case DocOutputFormat::Sphinx:   return L"Sphinx";
-        case DocOutputFormat::Markdown: return L"Markdown";
-        case DocOutputFormat::HTML:     return L"HTML";
-        case DocOutputFormat::PDF:      return L"PDF";
-        default: return L"Unknown";
+            case DocOutputFormat::Doxygen:
+                return L"Doxygen";
+            case DocOutputFormat::Sphinx:
+                return L"Sphinx";
+            case DocOutputFormat::Markdown:
+                return L"Markdown";
+            case DocOutputFormat::HTML:
+                return L"HTML";
+            case DocOutputFormat::PDF:
+                return L"PDF";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t *DocScopeName(DocScope s) noexcept {
+    static const wchar_t* DocScopeName(DocScope s) noexcept
+    {
         switch (s) {
-        case DocScope::Public:    return L"Public";
-        case DocScope::Protected: return L"Protected";
-        case DocScope::Private:   return L"Private";
-        case DocScope::Internal:  return L"Internal";
-        default: return L"Unknown";
+            case DocScope::Public:
+                return L"Public";
+            case DocScope::Protected:
+                return L"Protected";
+            case DocScope::Private:
+                return L"Private";
+            case DocScope::Internal:
+                return L"Internal";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t *DriftLevelName(DocDriftLevel d) noexcept {
+    static const wchar_t* DriftLevelName(DocDriftLevel d) noexcept
+    {
         switch (d) {
-        case DocDriftLevel::Clean:    return L"Clean";
-        case DocDriftLevel::Minor:    return L"Minor";
-        case DocDriftLevel::Moderate: return L"Moderate";
-        case DocDriftLevel::Severe:   return L"Severe";
-        case DocDriftLevel::Critical: return L"Critical";
-        default: return L"Unknown";
+            case DocDriftLevel::Clean:
+                return L"Clean";
+            case DocDriftLevel::Minor:
+                return L"Minor";
+            case DocDriftLevel::Moderate:
+                return L"Moderate";
+            case DocDriftLevel::Severe:
+                return L"Severe";
+            case DocDriftLevel::Critical:
+                return L"Critical";
+            default:
+                return L"Unknown";
         }
     }
-    static size_t DocFormatCount() noexcept {
+    static size_t DocFormatCount() noexcept
+    {
         return static_cast<size_t>(DocOutputFormat::COUNT);
     }
-    static size_t DocScopeCount() noexcept {
+    static size_t DocScopeCount() noexcept
+    {
         return static_cast<size_t>(DocScope::COUNT);
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

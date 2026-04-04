@@ -7,10 +7,10 @@
 //
 #pragma once
 
-#include <cstdint>
 #include <atomic>
-#include <string>
+#include <cstdint>
 #include <mutex>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,54 +22,72 @@ enum class WarmActivationMode : uint8_t {
     Predictive = 3
 };
 
-struct WarmActivationConfig {
+struct WarmActivationConfig
+{
     WarmActivationMode strategy = WarmActivationMode::Adaptive;
     uint32_t maxConcurrentWarms = 4;
     uint32_t maxDirectoryDepth = 2;
     uint64_t maxWarmBudgetBytes = 256 * 1024 * 1024;
 };
 
-struct WarmActivationStats {
+struct WarmActivationStats
+{
     uint64_t directoriesWarmed = 0;
     uint64_t thumbnailsPregenerated = 0;
     uint64_t cacheHitsFromWarming = 0;
     uint64_t warmingTimeMs = 0;
 };
 
-class CacheWarmingActivation {
-public:
-    static CacheWarmingActivation& Instance() {
+class CacheWarmingActivation
+{
+  public:
+    static CacheWarmingActivation& Instance()
+    {
         static CacheWarmingActivation s_instance;
         return s_instance;
     }
 
-    bool Activate(const WarmActivationConfig& config) {
+    bool Activate(const WarmActivationConfig& config)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_active.load()) return true;
+        if (m_active.load())
+            return true;
         m_config = config;
         m_active.store(true);
         return true;
     }
 
-    void Deactivate() {
+    void Deactivate()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_active.store(false);
         m_stats = {};
     }
 
-    bool IsActive() const { return m_active.load(); }
+    bool IsActive() const
+    {
+        return m_active.load();
+    }
 
-    void AddWatchDirectory(const std::wstring& directoryPath) {
-        if (!m_active.load()) return;
+    void AddWatchDirectory(const std::wstring& directoryPath)
+    {
+        if (!m_active.load())
+            return;
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.directoriesWarmed++;
         (void)directoryPath;
     }
 
-    const WarmActivationStats& GetStats() const { return m_stats; }
-    const WarmActivationConfig& GetConfig() const { return m_config; }
+    const WarmActivationStats& GetStats() const
+    {
+        return m_stats;
+    }
+    const WarmActivationConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-private:
+  private:
     CacheWarmingActivation() = default;
     ~CacheWarmingActivation() = default;
     CacheWarmingActivation(const CacheWarmingActivation&) = delete;
@@ -81,5 +99,5 @@ private:
     WarmActivationStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

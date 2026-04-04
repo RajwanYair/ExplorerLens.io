@@ -8,44 +8,48 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct AVIFSequenceInfo {
+struct AVIFSequenceInfo
+{
     uint32_t frameCount{0};
     uint32_t width{0};
     uint32_t height{0};
-    double   durationMs{0.0};
-    double   frameRateFps{0.0};
-    bool     hasAlpha{false};
-    bool     isHDR{false};
-    uint8_t  bitDepth{8};
+    double durationMs{0.0};
+    double frameRateFps{0.0};
+    bool hasAlpha{false};
+    bool isHDR{false};
+    uint8_t bitDepth{8};
 };
 
-struct AVIFDecodeOptions {
-    uint32_t frameIndex{0};         // 0 = first frame, UINT32_MAX = cover frame
+struct AVIFDecodeOptions
+{
+    uint32_t frameIndex{0};  // 0 = first frame, UINT32_MAX = cover frame
     uint32_t maxWidth{256};
     uint32_t maxHeight{256};
-    bool     useHardwareDecode{true};
-    bool     tonemapHDR{true};       // map HDR10 → sRGB for display
-    float    tonemapNits{203.0f};    // SDR white level for tonemapping
+    bool useHardwareDecode{true};
+    bool tonemapHDR{true};      // map HDR10 → sRGB for display
+    float tonemapNits{203.0f};  // SDR white level for tonemapping
 };
 
-struct AVIFDecodeResult {
+struct AVIFDecodeResult
+{
     std::vector<uint8_t> bgra;
-    uint32_t             width{0};
-    uint32_t             height{0};
-    uint32_t             stride{0};
-    uint32_t             frameIndex{0};
-    bool                 isHDR{false};
+    uint32_t width{0};
+    uint32_t height{0};
+    uint32_t stride{0};
+    uint32_t frameIndex{0};
+    bool isHDR{false};
 };
 
-class AVIFSequenceDecoder {
-public:
+class AVIFSequenceDecoder
+{
+  public:
     AVIFSequenceDecoder() {}
     ~AVIFSequenceDecoder() {}
 
@@ -53,24 +57,26 @@ public:
     AVIFSequenceDecoder& operator=(const AVIFSequenceDecoder&) = delete;
 
     // Parse sequence metadata without decoding pixels.
-    [[nodiscard]] std::optional<AVIFSequenceInfo> ParseInfo(
-        const void* data, size_t size) const noexcept;
+    [[nodiscard]] std::optional<AVIFSequenceInfo> ParseInfo(const void* data, size_t size) const noexcept;
 
     // Decode a single frame.
-    [[nodiscard]] std::optional<AVIFDecodeResult> DecodeFrame(
-        const void* data, size_t size,
-        const AVIFDecodeOptions& opts = {}) const;
+    [[nodiscard]] std::optional<AVIFDecodeResult> DecodeFrame(const void* data, size_t size,
+                                                              const AVIFDecodeOptions& opts = {}) const;
 
     // Convenience: decode the best representative frame for preview.
-    [[nodiscard]] std::optional<AVIFDecodeResult> DecodeCoverFrame(
-        const void* data, size_t size, uint32_t maxDim = 256) const;
+    [[nodiscard]] std::optional<AVIFDecodeResult> DecodeCoverFrame(const void* data, size_t size,
+                                                                   uint32_t maxDim = 256) const;
 
-    static bool SupportsHardwareDecode() noexcept { return false; }
+    static bool SupportsHardwareDecode() noexcept
+    {
+        return false;
+    }
 
-private:
-    struct Impl {};
+  private:
+    struct Impl
+    {};
     Impl* m_impl{nullptr};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

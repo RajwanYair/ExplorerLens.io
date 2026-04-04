@@ -8,12 +8,12 @@
 // thumbnail.
 //==============================================================================
 
-#include "../Core/IThumbnailDecoder.h"
 #include <windows.h>
 #include <objidl.h>
 #include <gdiplus.h>
 #include <string>
 #include <vector>
+#include "../Core/IThumbnailDecoder.h"
 
 namespace ExplorerLens {
 namespace Engine {
@@ -29,37 +29,47 @@ namespace Engine {
 /// 2. Create target bitmap at requested thumbnail size
 /// 3. Render metafile into bitmap using DrawImage (preserving aspect ratio)
 /// 4. Convert to HBITMAP for shell integration
-class WMFDecoder {
-public:
- WMFDecoder() = default;
- ~WMFDecoder() = default;
+class WMFDecoder
+{
+  public:
+    WMFDecoder() = default;
+    ~WMFDecoder() = default;
 
- // IThumbnailDecoder interface
- bool CanDecode(const wchar_t *filePath) const;
- HRESULT Decode(const wchar_t *filePath, uint32_t requestedSize,
- HBITMAP &hBitmap);
- const wchar_t *GetName() const { return L"WMFDecoder"; }
- bool SupportsGPU() const { return false; }
- bool IsArchiveDecoder() const { return false; }
+    // IThumbnailDecoder interface
+    bool CanDecode(const wchar_t* filePath) const;
+    HRESULT Decode(const wchar_t* filePath, uint32_t requestedSize, HBITMAP& hBitmap);
+    const wchar_t* GetName() const
+    {
+        return L"WMFDecoder";
+    }
+    bool SupportsGPU() const
+    {
+        return false;
+    }
+    bool IsArchiveDecoder() const
+    {
+        return false;
+    }
 
- static constexpr const wchar_t *s_extensions[] = {L".wmf", L".emf"};
- static constexpr uint32_t s_extensionCount = 2;
+    static constexpr const wchar_t* s_extensions[] = {L".wmf", L".emf"};
+    static constexpr uint32_t s_extensionCount = 2;
 
- const wchar_t **GetSupportedExtensions() const {
- return const_cast<const wchar_t **>(s_extensions);
- }
- uint32_t GetExtensionCount() const { return s_extensionCount; }
+    const wchar_t** GetSupportedExtensions() const
+    {
+        return const_cast<const wchar_t**>(s_extensions);
+    }
+    uint32_t GetExtensionCount() const
+    {
+        return s_extensionCount;
+    }
 
-private:
- /// Render metafile to HBITMAP using GDI+
- HRESULT RenderMetafile(const wchar_t *filePath, uint32_t size,
- HBITMAP &hBitmap);
+  private:
+    /// Render metafile to HBITMAP using GDI+
+    HRESULT RenderMetafile(const wchar_t* filePath, uint32_t size, HBITMAP& hBitmap);
 
- /// Calculate aspect-ratio-preserving render rect
- static Gdiplus::RectF CalculateRenderRect(uint32_t targetSize,
- float sourceWidth,
- float sourceHeight);
+    /// Calculate aspect-ratio-preserving render rect
+    static Gdiplus::RectF CalculateRenderRect(uint32_t targetSize, float sourceWidth, float sourceHeight);
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

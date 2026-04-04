@@ -8,8 +8,8 @@
 //
 #pragma once
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,50 +22,62 @@ enum class PredictedQuality : uint8_t {
     Unusable
 };
 
-inline const wchar_t* ToString(PredictedQuality q) {
+inline const wchar_t* ToString(PredictedQuality q)
+{
     switch (q) {
-    case PredictedQuality::Excellent:  return L"Excellent";
-    case PredictedQuality::Good:       return L"Good";
-    case PredictedQuality::Acceptable: return L"Acceptable";
-    case PredictedQuality::Poor:       return L"Poor";
-    case PredictedQuality::Unusable:   return L"Unusable";
-    default:                           return L"Unknown";
+        case PredictedQuality::Excellent:
+            return L"Excellent";
+        case PredictedQuality::Good:
+            return L"Good";
+        case PredictedQuality::Acceptable:
+            return L"Acceptable";
+        case PredictedQuality::Poor:
+            return L"Poor";
+        case PredictedQuality::Unusable:
+            return L"Unusable";
+        default:
+            return L"Unknown";
     }
 }
 
-struct ThumbnailQualityPrediction {
+struct ThumbnailQualityPrediction
+{
     PredictedQuality quality = PredictedQuality::Good;
     double confidenceScore = 0.0;
     bool shouldSkipDecode = false;
     double estimatedDecodeTimeMs = 0.0;
 };
 
-struct QualityPredictorStats {
+struct QualityPredictorStats
+{
     uint64_t totalPredictions = 0;
     uint64_t skippedDecodes = 0;
     double accuracyPercent = 0.0;
     double totalTimeSavedMs = 0.0;
 };
 
-class ThumbnailQualityPredictor {
-public:
-    static ThumbnailQualityPredictor& Instance() {
+class ThumbnailQualityPredictor
+{
+  public:
+    static ThumbnailQualityPredictor& Instance()
+    {
         static ThumbnailQualityPredictor instance;
         return instance;
     }
 
-    bool Initialize(double skipThreshold = 0.3) {
+    bool Initialize(double skipThreshold = 0.3)
+    {
         m_skipThreshold = skipThreshold;
         m_initialized = true;
         return true;
     }
 
-    ThumbnailQualityPrediction Predict(const std::wstring& /*filePath*/, uint64_t fileSize = 0) {
-        if (!m_initialized) return {};
+    ThumbnailQualityPrediction Predict(const std::wstring& /*filePath*/, uint64_t fileSize = 0)
+    {
+        if (!m_initialized)
+            return {};
         ThumbnailQualityPrediction pred;
-        pred.quality = (fileSize > 0 && fileSize < 100)
-            ? PredictedQuality::Unusable
-            : PredictedQuality::Good;
+        pred.quality = (fileSize > 0 && fileSize < 100) ? PredictedQuality::Unusable : PredictedQuality::Good;
         pred.confidenceScore = 0.88;
         pred.shouldSkipDecode = (pred.quality == PredictedQuality::Unusable);
         pred.estimatedDecodeTimeMs = 15.0;
@@ -77,18 +89,30 @@ public:
         return pred;
     }
 
-    QualityPredictorStats GetStats() const { return m_stats; }
-    bool IsInitialized() const { return m_initialized; }
-    double GetSkipThreshold() const { return m_skipThreshold; }
+    QualityPredictorStats GetStats() const
+    {
+        return m_stats;
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    double GetSkipThreshold() const
+    {
+        return m_skipThreshold;
+    }
 
-    void Shutdown() { m_initialized = false; }
+    void Shutdown()
+    {
+        m_initialized = false;
+    }
 
-private:
+  private:
     ThumbnailQualityPredictor() = default;
     bool m_initialized = false;
     double m_skipThreshold = 0.3;
     QualityPredictorStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

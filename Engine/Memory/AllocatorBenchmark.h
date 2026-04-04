@@ -6,10 +6,10 @@
 //
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <chrono>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -31,7 +31,8 @@ enum class BenchmarkPattern : uint8_t {
     RandomPattern
 };
 
-struct AllocBenchmarkResult {
+struct AllocBenchmarkResult
+{
     AllocatorType allocator = AllocatorType::SystemDefault;
     BenchmarkPattern pattern = BenchmarkPattern::SingleSize;
     uint64_t operationsCompleted = 0;
@@ -42,7 +43,8 @@ struct AllocBenchmarkResult {
     uint64_t peakMemoryBytes = 0;
 };
 
-struct BenchmarkConfig {
+struct BenchmarkConfig
+{
     uint32_t iterations = 10000;
     uint32_t warmupIterations = 1000;
     uint32_t allocationSize = 256;
@@ -50,11 +52,13 @@ struct BenchmarkConfig {
     BenchmarkPattern pattern = BenchmarkPattern::SingleSize;
 };
 
-class AllocatorBenchmark {
-public:
+class AllocatorBenchmark
+{
+  public:
     AllocatorBenchmark() = default;
 
-    AllocBenchmarkResult RunBenchmark(AllocatorType allocator, const BenchmarkConfig& config) {
+    AllocBenchmarkResult RunBenchmark(AllocatorType allocator, const BenchmarkConfig& config)
+    {
         AllocBenchmarkResult result;
         result.allocator = allocator;
         result.pattern = config.pattern;
@@ -81,21 +85,29 @@ public:
         return result;
     }
 
-    std::vector<AllocBenchmarkResult> GetAllResults() const { return m_results; }
+    std::vector<AllocBenchmarkResult> GetAllResults() const
+    {
+        return m_results;
+    }
 
-    const AllocBenchmarkResult* GetBestResult() const {
+    const AllocBenchmarkResult* GetBestResult() const
+    {
         const AllocBenchmarkResult* best = nullptr;
         for (const auto& r : m_results) {
-            if (!best || r.opsPerSecond > best->opsPerSecond) best = &r;
+            if (!best || r.opsPerSecond > best->opsPerSecond)
+                best = &r;
         }
         return best;
     }
 
-    void ClearResults() { m_results.clear(); }
+    void ClearResults()
+    {
+        m_results.clear();
+    }
 
-private:
+  private:
     std::vector<AllocBenchmarkResult> m_results;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -37,46 +37,69 @@ enum class HotReloadPolicy : uint8_t {
     COUNT = 4
 };
 
-class PluginHotReload {
-public:
-    static const wchar_t *TriggerName(HotReloadTrigger t) noexcept {
+class PluginHotReload
+{
+  public:
+    static const wchar_t* TriggerName(HotReloadTrigger t) noexcept
+    {
         switch (t) {
-        case HotReloadTrigger::FileChanged:  return L"File Changed";
-        case HotReloadTrigger::Manual:       return L"Manual";
-        case HotReloadTrigger::Scheduled:    return L"Scheduled";
-        case HotReloadTrigger::EventBased:   return L"Event-Based";
-        default: return L"Unknown";
+            case HotReloadTrigger::FileChanged:
+                return L"File Changed";
+            case HotReloadTrigger::Manual:
+                return L"Manual";
+            case HotReloadTrigger::Scheduled:
+                return L"Scheduled";
+            case HotReloadTrigger::EventBased:
+                return L"Event-Based";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t *StateName(HotReloadState s) noexcept {
+    static const wchar_t* StateName(HotReloadState s) noexcept
+    {
         switch (s) {
-        case HotReloadState::Idle:     return L"Idle";
-        case HotReloadState::Watching: return L"Watching";
-        case HotReloadState::Loading:  return L"Loading";
-        case HotReloadState::Ready:    return L"Ready";
-        case HotReloadState::Failed:   return L"Failed";
-        default: return L"Unknown";
+            case HotReloadState::Idle:
+                return L"Idle";
+            case HotReloadState::Watching:
+                return L"Watching";
+            case HotReloadState::Loading:
+                return L"Loading";
+            case HotReloadState::Ready:
+                return L"Ready";
+            case HotReloadState::Failed:
+                return L"Failed";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t *PolicyName(HotReloadPolicy p) noexcept {
+    static const wchar_t* PolicyName(HotReloadPolicy p) noexcept
+    {
         switch (p) {
-        case HotReloadPolicy::Automatic:  return L"Automatic";
-        case HotReloadPolicy::Manual:     return L"Manual";
-        case HotReloadPolicy::Supervised: return L"Supervised";
-        case HotReloadPolicy::Disabled:   return L"Disabled";
-        default: return L"Unknown";
+            case HotReloadPolicy::Automatic:
+                return L"Automatic";
+            case HotReloadPolicy::Manual:
+                return L"Manual";
+            case HotReloadPolicy::Supervised:
+                return L"Supervised";
+            case HotReloadPolicy::Disabled:
+                return L"Disabled";
+            default:
+                return L"Unknown";
         }
     }
-    static size_t TriggerCount() noexcept {
+    static size_t TriggerCount() noexcept
+    {
         return static_cast<size_t>(HotReloadTrigger::COUNT);
     }
-    static size_t StateCount() noexcept {
+    static size_t StateCount() noexcept
+    {
         return static_cast<size_t>(HotReloadState::COUNT);
     }
-    static size_t PolicyCount() noexcept {
+    static size_t PolicyCount() noexcept
+    {
         return static_cast<size_t>(HotReloadPolicy::COUNT);
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,26 +6,26 @@
 //==============================================================================
 
 #include <cstdint>
-#include <string>
-#include <vector>
 #include <functional>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 /// Test category for organizing test suites (expansion-local — see TestFramework.h for canonical TestCategory)
 enum class TestSuiteCategory : uint8_t {
-    UnitTest, ///< Single function/class test
-    IntegrationTest, ///< Multi-component test
-    DecoderTest, ///< Format-specific decoder test
-    PerformanceTest, ///< Benchmark/timing test
-    FuzzTest, ///< Fuzz/randomized test
-    RegressionTest, ///< Bug regression test
-    StressTest, ///< High-load/concurrency test
-    EndToEndTest, ///< Full pipeline test
-    COMTest, ///< COM interface test
-    PlatformTest ///< Platform-specific test
+    UnitTest,         ///< Single function/class test
+    IntegrationTest,  ///< Multi-component test
+    DecoderTest,      ///< Format-specific decoder test
+    PerformanceTest,  ///< Benchmark/timing test
+    FuzzTest,         ///< Fuzz/randomized test
+    RegressionTest,   ///< Bug regression test
+    StressTest,       ///< High-load/concurrency test
+    EndToEndTest,     ///< Full pipeline test
+    COMTest,          ///< COM interface test
+    PlatformTest      ///< Platform-specific test
 };
 
 /// Test result verdict
@@ -35,39 +35,42 @@ enum class TestVerdict : uint8_t {
     Skip,
     Error,
     Timeout,
-    Flaky ///< Intermittent pass/fail
+    Flaky  ///< Intermittent pass/fail
 };
 
 /// Decoder test specification
-struct DecoderTestSpec {
-    std::wstring formatName; ///< e.g., "PNG", "JPEG", "RAW"
-    std::wstring decoderClass; ///< e.g., "ImageDecoder", "RAWDecoder"
-    uint32_t minTestCount = 10; ///< Target tests per decoder
+struct DecoderTestSpec
+{
+    std::wstring formatName;     ///< e.g., "PNG", "JPEG", "RAW"
+    std::wstring decoderClass;   ///< e.g., "ImageDecoder", "RAWDecoder"
+    uint32_t minTestCount = 10;  ///< Target tests per decoder
     uint32_t currentTestCount = 0;
-    bool hasValidFile = false; ///< Has valid test file
-    bool hasTruncatedFile = false; ///< Has truncated input test
-    bool hasCorruptFile = false; ///< Has corrupt header test
-    bool hasZeroByteFile = false; ///< Has zero-byte test
-    bool hasLargeFile = false; ///< Has oversized file test
-    bool hasAnimated = false; ///< Has animated/multi-frame test
-    bool hasExifTest = false; ///< Has EXIF orientation test
-    bool hasPerformance = false; ///< Has decode timing test
+    bool hasValidFile = false;      ///< Has valid test file
+    bool hasTruncatedFile = false;  ///< Has truncated input test
+    bool hasCorruptFile = false;    ///< Has corrupt header test
+    bool hasZeroByteFile = false;   ///< Has zero-byte test
+    bool hasLargeFile = false;      ///< Has oversized file test
+    bool hasAnimated = false;       ///< Has animated/multi-frame test
+    bool hasExifTest = false;       ///< Has EXIF orientation test
+    bool hasPerformance = false;    ///< Has decode timing test
     double coveragePercent = 0.0;
 };
 
 /// Test execution result
-struct TestResult {
+struct TestResult
+{
     std::wstring testName;
     TestSuiteCategory category = TestSuiteCategory::UnitTest;
     TestVerdict verdict = TestVerdict::Pass;
     double durationMs = 0.0;
     std::wstring message;
-    std::wstring filePath; ///< Source file
+    std::wstring filePath;  ///< Source file
     uint32_t lineNumber = 0;
 };
 
 /// Test suite summary
-struct TestSuiteSummary {
+struct TestSuiteSummary
+{
     uint32_t totalTests = 0;
     uint32_t passed = 0;
     uint32_t failed = 0;
@@ -82,7 +85,8 @@ struct TestSuiteSummary {
 };
 
 /// Target coverage per component
-struct CoverageTarget {
+struct CoverageTarget
+{
     std::wstring component;
     uint32_t currentTests = 0;
     uint32_t targetTests = 0;
@@ -91,7 +95,8 @@ struct CoverageTarget {
 };
 
 /// Test suite expansion configuration
-struct TestExpansionConfig {
+struct TestExpansionConfig
+{
     uint32_t targetTestsPerDecoder = 10;
     uint32_t targetTotalTests = 600;
     bool generatePropertyTests = true;
@@ -103,8 +108,9 @@ struct TestExpansionConfig {
 //==============================================================================
 // TestSuiteExpansion
 //==============================================================================
-class TestSuiteExpansion {
-public:
+class TestSuiteExpansion
+{
+  public:
     TestSuiteExpansion();
     explicit TestSuiteExpansion(const TestExpansionConfig& config);
 
@@ -127,15 +133,18 @@ public:
     std::vector<std::wstring> GetTestFilesForDecoder(const std::wstring& decoderName) const;
 
     /// Get config
-    const TestExpansionConfig& GetConfig() const { return m_config; }
+    const TestExpansionConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
     /// Static name helpers
     static const wchar_t* GetCategoryName(TestSuiteCategory category);
     static const wchar_t* GetVerdictName(TestVerdict verdict);
 
-private:
+  private:
     TestExpansionConfig m_config;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

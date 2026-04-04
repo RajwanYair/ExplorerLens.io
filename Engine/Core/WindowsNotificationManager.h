@@ -7,8 +7,8 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <functional>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -20,7 +20,8 @@ enum class NotificationPriority : uint8_t {
     Urgent
 };
 
-struct NotificationPayload {
+struct NotificationPayload
+{
     std::wstring title;
     std::wstring body;
     std::wstring iconPath;
@@ -29,39 +30,55 @@ struct NotificationPayload {
     bool persistent = false;
 };
 
-struct WinNotificationStats {
+struct WinNotificationStats
+{
     uint64_t totalSent = 0;
     uint64_t totalDismissed = 0;
     uint64_t totalClicked = 0;
     uint64_t suppressed = 0;
 };
 
-class WindowsNotificationManager {
-public:
+class WindowsNotificationManager
+{
+  public:
     WindowsNotificationManager() = default;
 
-    bool Initialize(const std::wstring& appId) {
-        if (appId.empty()) return false;
+    bool Initialize(const std::wstring& appId)
+    {
+        if (appId.empty())
+            return false;
         m_appId = appId;
         m_initialized = true;
         return true;
     }
 
-    bool SendNotification(const NotificationPayload& payload) {
-        if (!m_initialized || payload.title.empty()) return false;
+    bool SendNotification(const NotificationPayload& payload)
+    {
+        if (!m_initialized || payload.title.empty())
+            return false;
         m_stats.totalSent++;
         return true;
     }
 
-    void SetCallback(std::function<void(uint32_t)> onClick) {
+    void SetCallback(std::function<void(uint32_t)> onClick)
+    {
         m_onClick = std::move(onClick);
     }
 
-    WinNotificationStats GetStats() const { return m_stats; }
-    bool IsInitialized() const { return m_initialized; }
-    void SetQuietMode(bool quiet) { m_quiet = quiet; }
+    WinNotificationStats GetStats() const
+    {
+        return m_stats;
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    void SetQuietMode(bool quiet)
+    {
+        m_quiet = quiet;
+    }
 
-private:
+  private:
     std::wstring m_appId;
     std::function<void(uint32_t)> m_onClick;
     WinNotificationStats m_stats;
@@ -69,5 +86,5 @@ private:
     bool m_quiet = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

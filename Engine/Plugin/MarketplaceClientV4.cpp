@@ -8,4 +8,4 @@ namespace ExplorerLens::Engine {
 MarketplaceClientV4::MarketplaceClientV4(MarketplaceProtocol) {}
 MarketplaceClientV4::~MarketplaceClientV4() noexcept = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

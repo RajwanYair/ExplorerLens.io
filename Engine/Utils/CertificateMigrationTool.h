@@ -11,39 +11,59 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class CertificateAlgoType { RSA2048, RSA4096, ECDSA_P256, ECDSA_P384, SLHDSA, Hybrid };
-enum class CertMigPhase         { Assess, DualSign, Cutover, Complete };
+enum class CertificateAlgoType {
+    RSA2048,
+    RSA4096,
+    ECDSA_P256,
+    ECDSA_P384,
+    SLHDSA,
+    Hybrid
+};
+enum class CertMigPhase {
+    Assess,
+    DualSign,
+    Cutover,
+    Complete
+};
 
-struct MigCertInfo {
-    std::string       subjectCN;
+struct MigCertInfo
+{
+    std::string subjectCN;
     CertificateAlgoType algoType = CertificateAlgoType::ECDSA_P384;
-    int               keyBits   = 0;
-    std::string       isoExpiry;
-    bool              isCA      = false;
-    bool              selfSigned = false;
+    int keyBits = 0;
+    std::string isoExpiry;
+    bool isCA = false;
+    bool selfSigned = false;
 };
 
-struct CertMigrationPlan {
-    MigCertInfo    source;
+struct CertMigrationPlan
+{
+    MigCertInfo source;
     CertificateAlgoType targetAlgo = CertificateAlgoType::Hybrid;
-    CertMigPhase       phase       = CertMigPhase::Assess;
+    CertMigPhase phase = CertMigPhase::Assess;
     std::vector<std::string> steps;
-    bool               dualSignRequired = true;
+    bool dualSignRequired = true;
 };
 
-struct CertMigrationResult {
-    bool         success    = false;
-    CertMigPhase phase      = CertMigPhase::Assess;
-    std::string  newCertId;
-    std::string  errorMsg;
-    bool Ok() const noexcept { return success; }
+struct CertMigrationResult
+{
+    bool success = false;
+    CertMigPhase phase = CertMigPhase::Assess;
+    std::string newCertId;
+    std::string errorMsg;
+    bool Ok() const noexcept
+    {
+        return success;
+    }
 };
 
-class CertificateMigrationTool {
-public:
+class CertificateMigrationTool
+{
+  public:
     explicit CertificateMigrationTool() = default;
 
-    CertMigrationPlan BuildPlan(const MigCertInfo& source) const {
+    CertMigrationPlan BuildPlan(const MigCertInfo& source) const
+    {
         CertMigrationPlan plan;
         plan.source = source;
         plan.targetAlgo = CertificateAlgoType::Hybrid;
@@ -57,36 +77,49 @@ public:
         return plan;
     }
 
-    CertMigrationResult Execute(const CertMigrationPlan& plan) {
+    CertMigrationResult Execute(const CertMigrationPlan& plan)
+    {
         CertMigrationResult result;
-        result.success   = true;
-        result.phase     = CertMigPhase::DualSign;
+        result.success = true;
+        result.phase = CertMigPhase::DualSign;
         result.newCertId = "hybrid-cert-" + plan.source.subjectCN;
         return result;
     }
 
-    static std::string PhaseName(CertMigPhase phase) noexcept {
+    static std::string PhaseName(CertMigPhase phase) noexcept
+    {
         switch (phase) {
-        case CertMigPhase::Assess:    return "Assess";
-        case CertMigPhase::DualSign:  return "DualSign";
-        case CertMigPhase::Cutover:   return "Cutover";
-        case CertMigPhase::Complete:  return "Complete";
+            case CertMigPhase::Assess:
+                return "Assess";
+            case CertMigPhase::DualSign:
+                return "DualSign";
+            case CertMigPhase::Cutover:
+                return "Cutover";
+            case CertMigPhase::Complete:
+                return "Complete";
         }
         return "Unknown";
     }
 
-    static std::string AlgoName(CertificateAlgoType t) noexcept {
+    static std::string AlgoName(CertificateAlgoType t) noexcept
+    {
         switch (t) {
-        case CertificateAlgoType::RSA2048:    return "RSA-2048";
-        case CertificateAlgoType::RSA4096:    return "RSA-4096";
-        case CertificateAlgoType::ECDSA_P256: return "ECDSA-P256";
-        case CertificateAlgoType::ECDSA_P384: return "ECDSA-P384";
-        case CertificateAlgoType::SLHDSA:     return "SLH-DSA";
-        case CertificateAlgoType::Hybrid:     return "Hybrid";
+            case CertificateAlgoType::RSA2048:
+                return "RSA-2048";
+            case CertificateAlgoType::RSA4096:
+                return "RSA-4096";
+            case CertificateAlgoType::ECDSA_P256:
+                return "ECDSA-P256";
+            case CertificateAlgoType::ECDSA_P384:
+                return "ECDSA-P384";
+            case CertificateAlgoType::SLHDSA:
+                return "SLH-DSA";
+            case CertificateAlgoType::Hybrid:
+                return "Hybrid";
         }
         return "Unknown";
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

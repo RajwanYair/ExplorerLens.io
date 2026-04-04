@@ -9,9 +9,9 @@
 // Used by:   Shell extension DLL
 // ============================================================================
 
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -26,14 +26,21 @@ enum class ExtMenuAction : uint8_t {
     ExportFullSize = 4
 };
 
-inline const char* ExtMenuActionName(ExtMenuAction a) {
+inline const char* ExtMenuActionName(ExtMenuAction a)
+{
     switch (a) {
-    case ExtMenuAction::RegenerateThumbnail: return "RegenerateThumbnail";
-    case ExtMenuAction::ClearCacheForFile:   return "ClearCacheForFile";
-    case ExtMenuAction::ShowProperties:      return "ShowProperties";
-    case ExtMenuAction::CopyThumbnail:       return "CopyThumbnail";
-    case ExtMenuAction::ExportFullSize:      return "ExportFullSize";
-    default:                                 return "Unknown";
+        case ExtMenuAction::RegenerateThumbnail:
+            return "RegenerateThumbnail";
+        case ExtMenuAction::ClearCacheForFile:
+            return "ClearCacheForFile";
+        case ExtMenuAction::ShowProperties:
+            return "ShowProperties";
+        case ExtMenuAction::CopyThumbnail:
+            return "CopyThumbnail";
+        case ExtMenuAction::ExportFullSize:
+            return "ExportFullSize";
+        default:
+            return "Unknown";
     }
 }
 
@@ -45,36 +52,46 @@ enum class ExtMenuItemState : uint8_t {
     Submenu = 4
 };
 
-inline const char* ExtMenuItemStateName(ExtMenuItemState s) {
+inline const char* ExtMenuItemStateName(ExtMenuItemState s)
+{
     switch (s) {
-    case ExtMenuItemState::Enabled:   return "Enabled";
-    case ExtMenuItemState::Disabled:  return "Disabled";
-    case ExtMenuItemState::Hidden:    return "Hidden";
-    case ExtMenuItemState::Separator: return "Separator";
-    case ExtMenuItemState::Submenu:   return "Submenu";
-    default:                          return "Unknown";
+        case ExtMenuItemState::Enabled:
+            return "Enabled";
+        case ExtMenuItemState::Disabled:
+            return "Disabled";
+        case ExtMenuItemState::Hidden:
+            return "Hidden";
+        case ExtMenuItemState::Separator:
+            return "Separator";
+        case ExtMenuItemState::Submenu:
+            return "Submenu";
+        default:
+            return "Unknown";
     }
 }
 
 // ── Structs ──────────────────────────────────────────────────────────────────
 
-struct ExtContextMenuItem {
-    ExtMenuAction    action = ExtMenuAction::ShowProperties;
-    std::string      label;
-    std::string      icon;
+struct ExtContextMenuItem
+{
+    ExtMenuAction action = ExtMenuAction::ShowProperties;
+    std::string label;
+    std::string icon;
     ExtMenuItemState state = ExtMenuItemState::Enabled;
-    std::string      shortcutKey;
+    std::string shortcutKey;
 };
 
 // ── Class ────────────────────────────────────────────────────────────────────
 
-class ExplorerContextMenuExtension {
-public:
+class ExplorerContextMenuExtension
+{
+  public:
     ExplorerContextMenuExtension() = default;
     ~ExplorerContextMenuExtension() = default;
 
     // Build the context menu for a given file path
-    bool BuildMenu(const std::string& filePath) {
+    bool BuildMenu(const std::string& filePath)
+    {
         if (filePath.empty())
             return false;
 
@@ -122,7 +139,8 @@ public:
     }
 
     // Execute a menu action; returns true on success
-    bool ExecuteAction(ExtMenuAction action) {
+    bool ExecuteAction(ExtMenuAction action)
+    {
         if (m_targetPath.empty())
             return false;
         m_lastAction = action;
@@ -130,23 +148,39 @@ public:
         return true;
     }
 
-    const std::vector<ExtContextMenuItem>& GetMenuItems() const { return m_items; }
-    size_t GetMenuItemCount() const { return m_items.size(); }
-    const std::string& GetTargetPath() const { return m_targetPath; }
-    ExtMenuAction GetLastAction() const { return m_lastAction; }
-    uint32_t GetExecutionCount() const { return m_executionCount; }
+    const std::vector<ExtContextMenuItem>& GetMenuItems() const
+    {
+        return m_items;
+    }
+    size_t GetMenuItemCount() const
+    {
+        return m_items.size();
+    }
+    const std::string& GetTargetPath() const
+    {
+        return m_targetPath;
+    }
+    ExtMenuAction GetLastAction() const
+    {
+        return m_lastAction;
+    }
+    uint32_t GetExecutionCount() const
+    {
+        return m_executionCount;
+    }
 
-    void ClearMenu() {
+    void ClearMenu()
+    {
         m_items.clear();
         m_targetPath.clear();
     }
 
-private:
+  private:
     std::vector<ExtContextMenuItem> m_items;
-    std::string                     m_targetPath;
-    ExtMenuAction                   m_lastAction = ExtMenuAction::ShowProperties;
-    uint32_t                        m_executionCount = 0;
+    std::string m_targetPath;
+    ExtMenuAction m_lastAction = ExtMenuAction::ShowProperties;
+    uint32_t m_executionCount = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

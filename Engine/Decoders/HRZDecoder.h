@@ -13,37 +13,53 @@
 namespace ExplorerLens::Decoders {
 
 /// HRZ canonical dimensions — defined by the original SSTV standard.
-inline constexpr uint32_t HRZ_WIDTH  = 256;
+inline constexpr uint32_t HRZ_WIDTH = 256;
 inline constexpr uint32_t HRZ_HEIGHT = 240;
-inline constexpr uint32_t HRZ_BYTES  = HRZ_WIDTH * HRZ_HEIGHT * 3;  // RGB24
+inline constexpr uint32_t HRZ_BYTES = HRZ_WIDTH * HRZ_HEIGHT * 3;  // RGB24
 
-class HRZDecoder {
-public:
+class HRZDecoder
+{
+  public:
     HRZDecoder() = default;
 
-    struct DecodeResult {
-        bool     success = false;
-        uint32_t width   = HRZ_WIDTH;
-        uint32_t height  = HRZ_HEIGHT;
+    struct DecodeResult
+    {
+        bool success = false;
+        uint32_t width = HRZ_WIDTH;
+        uint32_t height = HRZ_HEIGHT;
         std::vector<uint8_t> pixelData;  // BGRA32
         std::string error;
     };
 
-    struct HRZInfo {
-        uint32_t width  = HRZ_WIDTH;
+    struct HRZInfo
+    {
+        uint32_t width = HRZ_WIDTH;
         uint32_t height = HRZ_HEIGHT;
         uint32_t fileSize = 0;
 
-        bool IsValid() const { return fileSize == HRZ_BYTES; }
+        bool IsValid() const
+        {
+            return fileSize == HRZ_BYTES;
+        }
     };
 
-    HRZInfo  ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
+    HRZInfo ReadInfo(const std::string& filePath) const
+    {
+        (void)filePath;
+        return {};
+    }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const
+    {
+        (void)filePath;
+        (void)targetWidth;
+        return {};
+    }
 
-    static bool IsHRZExtension(const std::string& ext) {
+    static bool IsHRZExtension(const std::string& ext)
+    {
         return ext == ".hrz" || ext == ".HRZ";
     }
-    static constexpr const char* EXTENSIONS[] = { ".hrz", nullptr };
+    static constexpr const char* EXTENSIONS[] = {".hrz", nullptr};
 };
 
 }  // namespace ExplorerLens::Decoders

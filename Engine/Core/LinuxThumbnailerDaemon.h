@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class ThumbSize : uint8_t {
     Normal,
@@ -27,7 +28,8 @@ enum class DaemonState : uint8_t {
     ShuttingDown
 };
 
-struct ThumbnailerDaemonConfig {
+struct ThumbnailerDaemonConfig
+{
     std::string cachePath;
     uint64_t maxCacheSize = 512 * 1024 * 1024;
     uint32_t maxConcurrent = 4;
@@ -35,8 +37,9 @@ struct ThumbnailerDaemonConfig {
     bool autoStart = true;
 };
 
-class LinuxThumbnailerDaemon {
-public:
+class LinuxThumbnailerDaemon
+{
+  public:
     LinuxThumbnailerDaemon() = default;
     ~LinuxThumbnailerDaemon() = default;
 
@@ -45,7 +48,8 @@ public:
     LinuxThumbnailerDaemon(LinuxThumbnailerDaemon&&) noexcept = default;
     LinuxThumbnailerDaemon& operator=(LinuxThumbnailerDaemon&&) noexcept = default;
 
-    bool Start(ThumbnailerDaemonConfig const& config) {
+    bool Start(ThumbnailerDaemonConfig const& config)
+    {
         if (m_state != DaemonState::Stopped)
             return false;
         m_config = config;
@@ -53,17 +57,20 @@ public:
         return true;
     }
 
-    bool Stop() {
+    bool Stop()
+    {
         m_state = DaemonState::ShuttingDown;
         m_state = DaemonState::Stopped;
         return true;
     }
 
-    [[nodiscard]] DaemonState GetState() const {
+    [[nodiscard]] DaemonState GetState() const
+    {
         return m_state;
     }
 
-    bool GenerateThumbnail(std::string const& filePath, ThumbSize size) {
+    bool GenerateThumbnail(std::string const& filePath, ThumbSize size)
+    {
         if (m_state != DaemonState::Running)
             return false;
         (void)filePath;
@@ -71,18 +78,21 @@ public:
         return true;
     }
 
-    uint64_t PurgeCache() {
+    uint64_t PurgeCache()
+    {
         uint64_t purgedBytes = 0;
         return purgedBytes;
     }
 
-    [[nodiscard]] ThumbnailerDaemonConfig const& GetConfig() const {
+    [[nodiscard]] ThumbnailerDaemonConfig const& GetConfig() const
+    {
         return m_config;
     }
 
-private:
+  private:
     ThumbnailerDaemonConfig m_config;
     DaemonState m_state = DaemonState::Stopped;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

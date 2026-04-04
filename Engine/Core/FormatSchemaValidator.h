@@ -12,23 +12,26 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct SchemaSpec {
+struct SchemaSpec
+{
     std::string formatName;
-    uint32_t    ruleCount   = 0;
+    uint32_t ruleCount = 0;
     std::string specVersion;
 };
 
-struct ValidationResult {
-    bool               isValid    = false;
-    ValidationSeverity severity   = ValidationSeverity::Info;
-    uint64_t           byteOffset = 0;
-    std::string        ruleName;
+struct ValidationResult
+{
+    bool isValid = false;
+    ValidationSeverity severity = ValidationSeverity::Info;
+    uint64_t byteOffset = 0;
+    std::string ruleName;
 };
 
-class FormatSchemaValidator {
-public:
+class FormatSchemaValidator
+{
+  public:
     FormatSchemaValidator() = default;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -7,12 +7,12 @@
 //
 #pragma once
 
+#include <chrono>
+#include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
-#include <chrono>
-#include <cstdint>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -24,19 +24,19 @@ namespace Tests {
 
 class CorpusTestRunner
 {
-public:
+  public:
     //--------------------------------------------------------------------------
     // Per-file test outcome
     //--------------------------------------------------------------------------
     struct TestResult
     {
-        std::wstring filePath;       // Absolute path to the test file
-        std::wstring format;         // Detected format name (e.g. "JPEG", "ZIP")
-        std::string  extension;      // File extension (lowercase, no dot, narrow UTF-8)
-        bool         passed{false};  // True if decode returned non-null / non-error
-        std::wstring errorMessage;   // Empty on success; populated on failure
-        double       durationMs{0.0};
-        uint64_t     fileSizeBytes{0};
+        std::wstring filePath;      // Absolute path to the test file
+        std::wstring format;        // Detected format name (e.g. "JPEG", "ZIP")
+        std::string extension;      // File extension (lowercase, no dot, narrow UTF-8)
+        bool passed{false};         // True if decode returned non-null / non-error
+        std::wstring errorMessage;  // Empty on success; populated on failure
+        double durationMs{0.0};
+        uint64_t fileSizeBytes{0};
     };
 
     //--------------------------------------------------------------------------
@@ -45,14 +45,14 @@ public:
     struct RunReport
     {
         std::vector<TestResult> results;
-        int    totalFiles{0};
-        int    passed{0};
-        int    failed{0};
-        int    skipped{0};         // Files skipped (unsupported extension, too large, etc.)
+        int totalFiles{0};
+        int passed{0};
+        int failed{0};
+        int skipped{0};  // Files skipped (unsupported extension, too large, etc.)
         double totalDurationMs{0.0};
         double averageDurationMs{0.0};
-        std::string generatedAt;   // ISO-8601 timestamp
-        std::string engineVersion; // From BuildValidation::VersionString
+        std::string generatedAt;    // ISO-8601 timestamp
+        std::string engineVersion;  // From BuildValidation::VersionString
     };
 
     //--------------------------------------------------------------------------
@@ -82,32 +82,28 @@ public:
     // Attempt to decode a single file via the engine's format detector.
     // Returns true if the operation succeeded (non-null thumbnail produced).
     // Sets formatOut to the detected format string.
-    static bool TryDecodeFile(const std::filesystem::path& path,
-                              std::wstring& formatOut,
-                              std::wstring& errorOut);
+    static bool TryDecodeFile(const std::filesystem::path& path, std::wstring& formatOut, std::wstring& errorOut);
 
     //--------------------------------------------------------------------------
     // Report writers
     //--------------------------------------------------------------------------
 
     // Write results to an HTML file with per-format summary tables.
-    static bool WriteHtmlReport(const std::filesystem::path& outputPath,
-                                const RunReport& report);
+    static bool WriteHtmlReport(const std::filesystem::path& outputPath, const RunReport& report);
 
     // Write results to a CSV file (one row per file).
-    static bool WriteCsvReport(const std::filesystem::path& outputPath,
-                               const RunReport& report);
+    static bool WriteCsvReport(const std::filesystem::path& outputPath, const RunReport& report);
 
     // Print a short summary table to std::wcout.
     static void PrintSummary(const RunReport& report);
 
-private:
-    std::vector<std::filesystem::path>                   m_corpusDirs;
-    uint32_t                                             m_maxFiles{0};
-    uint64_t                                             m_maxFileSizeBytes{0};
-    std::function<bool(const std::filesystem::path&)>    m_filter;
+  private:
+    std::vector<std::filesystem::path> m_corpusDirs;
+    uint32_t m_maxFiles{0};
+    uint64_t m_maxFileSizeBytes{0};
+    std::function<bool(const std::filesystem::path&)> m_filter;
 };
 
-} // namespace Tests
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Tests
+}  // namespace Engine
+}  // namespace ExplorerLens

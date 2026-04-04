@@ -8,42 +8,49 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Core {
 
 enum class CircuitState : uint8_t {
-    Closed   = 0,
-    Open     = 1,
+    Closed = 0,
+    Open = 1,
     HalfOpen = 2
 };
 
 enum class HealthStatus : uint8_t {
-    Healthy   = 0,
-    Degraded  = 1,
+    Healthy = 0,
+    Degraded = 1,
     Unhealthy = 2,
-    Disabled  = 3
+    Disabled = 3
 };
 
-inline const char* HealthStatusName(HealthStatus s) noexcept {
+inline const char* HealthStatusName(HealthStatus s) noexcept
+{
     switch (s) {
-        case HealthStatus::Healthy:   return "Healthy";
-        case HealthStatus::Degraded:  return "Degraded";
-        case HealthStatus::Unhealthy: return "Unhealthy";
-        case HealthStatus::Disabled:  return "Disabled";
+        case HealthStatus::Healthy:
+            return "Healthy";
+        case HealthStatus::Degraded:
+            return "Degraded";
+        case HealthStatus::Unhealthy:
+            return "Unhealthy";
+        case HealthStatus::Disabled:
+            return "Disabled";
     }
     return "Unknown";
 }
 
-struct DecoderDashboardConfig {
+struct DecoderDashboardConfig
+{
     uint32_t maxDecoders = 64;
     uint32_t failureThreshold = 5;
     uint32_t halfOpenProbeIntervalMs = 10000;
 };
 
-struct DecoderStats {
+struct DecoderStats
+{
     uint64_t totalDecodes = 0;
     uint64_t successCount = 0;
     uint64_t failureCount = 0;
@@ -52,28 +59,36 @@ struct DecoderStats {
     CircuitState circuit = CircuitState::Closed;
 };
 
-class DecoderHealthDashboard {
-public:
-    static DecoderHealthDashboard Create(const DecoderDashboardConfig& config) {
+class DecoderHealthDashboard
+{
+  public:
+    static DecoderHealthDashboard Create(const DecoderDashboardConfig& config)
+    {
         DecoderHealthDashboard d;
         d.m_config = config;
         return d;
     }
 
-    void RegisterDecoder(const std::string& name, const std::vector<std::string>& extensions) {
+    void RegisterDecoder(const std::string& name, const std::vector<std::string>& extensions)
+    {
         m_decoders[name] = DecoderStats{};
         (void)extensions;
     }
 
-    void RecordDecode(const std::string& name, bool success, int durationMs, int sizeBytes) {
+    void RecordDecode(const std::string& name, bool success, int durationMs, int sizeBytes)
+    {
         auto& s = m_decoders[name];
         s.totalDecodes++;
-        if (success) s.successCount++; else s.failureCount++;
+        if (success)
+            s.successCount++;
+        else
+            s.failureCount++;
         s.avgLatencyMs = (s.avgLatencyMs * (s.totalDecodes - 1) + durationMs) / s.totalDecodes;
         (void)sizeBytes;
     }
 
-    DecoderStats GetStats() const {
+    DecoderStats GetStats() const
+    {
         DecoderStats agg;
         for (auto& [k, v] : m_decoders) {
             agg.totalDecodes += v.totalDecodes;
@@ -83,11 +98,11 @@ public:
         return agg;
     }
 
-private:
+  private:
     DecoderHealthDashboard() = default;
     DecoderDashboardConfig m_config{};
     std::unordered_map<std::string, DecoderStats> m_decoders;
 };
 
-} // namespace Core
-} // namespace ExplorerLens
+}  // namespace Core
+}  // namespace ExplorerLens

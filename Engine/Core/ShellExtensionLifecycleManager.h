@@ -9,46 +9,65 @@
 #include <cstdint>
 #include <string>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class ExtensionState : uint8_t {
-    Unregistered = 0, Registering, Active, Suspended, Crashed, Unregistering
+    Unregistered = 0,
+    Registering,
+    Active,
+    Suspended,
+    Crashed,
+    Unregistering
 };
 
-struct LifecycleStats {
-    uint32_t registrations  = 0;
-    uint32_t crashes        = 0;
-    uint32_t recoveries     = 0;
-    uint32_t gracefulStops  = 0;
-    float    uptimeSeconds  = 0.0f;
+struct LifecycleStats
+{
+    uint32_t registrations = 0;
+    uint32_t crashes = 0;
+    uint32_t recoveries = 0;
+    uint32_t gracefulStops = 0;
+    float uptimeSeconds = 0.0f;
 };
 
-class ShellExtensionLifecycleManager {
-public:
-    static ShellExtensionLifecycleManager& Instance() {
+class ShellExtensionLifecycleManager
+{
+  public:
+    static ShellExtensionLifecycleManager& Instance()
+    {
         static ShellExtensionLifecycleManager inst;
         return inst;
     }
 
-    bool Register(const std::string& /*extensionId*/) {
+    bool Register(const std::string& /*extensionId*/)
+    {
         ++m_stats.registrations;
         return true;
     }
-    bool Unregister(const std::string& /*extensionId*/) { return true; }
-    void Suspend(const std::string& /*extensionId*/)    {}
-    bool Recover(const std::string& /*extensionId*/) {
+    bool Unregister(const std::string& /*extensionId*/)
+    {
+        return true;
+    }
+    void Suspend(const std::string& /*extensionId*/) {}
+    bool Recover(const std::string& /*extensionId*/)
+    {
         ++m_stats.recoveries;
         return true;
     }
-    ExtensionState GetState(const std::string& /*extensionId*/) const {
+    ExtensionState GetState(const std::string& /*extensionId*/) const
+    {
         return ExtensionState::Active;
     }
     void Heartbeat(const std::string& /*extensionId*/) {}
-    LifecycleStats GetStats() const { return m_stats; }
+    LifecycleStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     ShellExtensionLifecycleManager() = default;
     LifecycleStats m_stats;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

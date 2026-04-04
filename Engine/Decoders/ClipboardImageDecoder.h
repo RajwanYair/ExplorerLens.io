@@ -23,7 +23,8 @@ enum class ClipboardImageFormat : uint8_t {
     Html
 };
 
-struct ClipboardImageInfo {
+struct ClipboardImageInfo
+{
     ClipboardImageFormat format = ClipboardImageFormat::Unknown;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -32,7 +33,8 @@ struct ClipboardImageInfo {
     bool hasAlpha = false;
 };
 
-struct ClipboardDecodeResult {
+struct ClipboardDecodeResult
+{
     bool success = false;
     uint32_t thumbnailWidth = 0;
     uint32_t thumbnailHeight = 0;
@@ -41,13 +43,16 @@ struct ClipboardDecodeResult {
     double decodeTimeMs = 0.0;
 };
 
-class ClipboardImageDecoder {
-public:
+class ClipboardImageDecoder
+{
+  public:
     ClipboardImageDecoder() = default;
 
-    ClipboardImageInfo Probe(const uint8_t* data, size_t size) const {
+    ClipboardImageInfo Probe(const uint8_t* data, size_t size) const
+    {
         ClipboardImageInfo info;
-        if (!data || size < 14) return info;
+        if (!data || size < 14)
+            return info;
 
         // Check for BMP header
         if (data[0] == 'B' && data[1] == 'M') {
@@ -58,8 +63,7 @@ public:
             }
         }
         // Check for PNG header
-        else if (size >= 8 && data[0] == 0x89 && data[1] == 'P' &&
-            data[2] == 'N' && data[3] == 'G') {
+        else if (size >= 8 && data[0] == 0x89 && data[1] == 'P' && data[2] == 'N' && data[3] == 'G') {
             info.format = ClipboardImageFormat::Png;
             if (size >= 24) {
                 info.width = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
@@ -71,11 +75,12 @@ public:
         return info;
     }
 
-    ClipboardDecodeResult Decode(const uint8_t* data, size_t size,
-        uint32_t targetSize = 256) const {
+    ClipboardDecodeResult Decode(const uint8_t* data, size_t size, uint32_t targetSize = 256) const
+    {
         ClipboardDecodeResult result;
         auto info = Probe(data, size);
-        if (info.format == ClipboardImageFormat::Unknown) return result;
+        if (info.format == ClipboardImageFormat::Unknown)
+            return result;
 
         result.sourceFormat = info.format;
         result.thumbnailWidth = targetSize;
@@ -84,17 +89,20 @@ public:
         return result;
     }
 
-    bool SupportsFormat(ClipboardImageFormat format) const {
-        return format == ClipboardImageFormat::Dib ||
-            format == ClipboardImageFormat::DibV5 ||
-            format == ClipboardImageFormat::Png;
+    bool SupportsFormat(ClipboardImageFormat format) const
+    {
+        return format == ClipboardImageFormat::Dib || format == ClipboardImageFormat::DibV5
+               || format == ClipboardImageFormat::Png;
     }
 
-    uint64_t GetTotalDecoded() const { return m_totalDecoded; }
+    uint64_t GetTotalDecoded() const
+    {
+        return m_totalDecoded;
+    }
 
-private:
+  private:
     uint64_t m_totalDecoded = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

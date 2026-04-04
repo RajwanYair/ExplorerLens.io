@@ -18,14 +18,14 @@ namespace Utils {
 /// EXIF Orientation Tag Values
 /// Based on EXIF 2.3 specification
 enum class EXIFOrientation : int {
- Normal = 1, // No transformation
- FlipHorizontal = 2, // Flip horizontally (mirror)
- Rotate180 = 3, // Rotate 180 degrees
- FlipVertical = 4, // Flip vertically
- Transpose = 5, // Flip horizontal + rotate 90 CW
- Rotate90CW = 6, // Rotate 90 degrees clockwise
- Transverse = 7, // Flip horizontal + rotate 270 CW
- Rotate270CW = 8 // Rotate 270 degrees clockwise (90 CCW)
+    Normal = 1,          // No transformation
+    FlipHorizontal = 2,  // Flip horizontally (mirror)
+    Rotate180 = 3,       // Rotate 180 degrees
+    FlipVertical = 4,    // Flip vertically
+    Transpose = 5,       // Flip horizontal + rotate 90 CW
+    Rotate90CW = 6,      // Rotate 90 degrees clockwise
+    Transverse = 7,      // Flip horizontal + rotate 270 CW
+    Rotate270CW = 8      // Rotate 270 degrees clockwise (90 CCW)
 };
 
 /// Apply EXIF orientation transformation to an HBITMAP
@@ -49,6 +49,6 @@ enum class EXIFOrientation : int {
 /// }
 HBITMAP ApplyEXIFOrientation(HBITMAP hBitmap, int orientation);
 
-} // namespace Utils
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Utils
+}  // namespace Engine
+}  // namespace ExplorerLens

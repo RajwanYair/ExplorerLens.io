@@ -15,16 +15,18 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct MSIPropertyInfo {
+struct MSIPropertyInfo
+{
     std::wstring productName;
     std::wstring manufacturer;
     std::wstring productVersion;
     std::wstring productCode;
-    uint32_t     estimatedSizeKB = 0;
+    uint32_t estimatedSizeKB = 0;
 };
 
-struct CFBFHeader {
-    bool     isValid = false;
+struct CFBFHeader
+{
+    bool isValid = false;
     uint16_t minorVersion = 0;
     uint16_t majorVersion = 0;
     uint16_t sectorSize = 0;
@@ -35,36 +37,48 @@ struct CFBFHeader {
     uint32_t totalStreamEntries = 0;
 };
 
-struct MSIStats {
+struct MSIStats
+{
     uint32_t filesProcessed = 0;
     uint64_t totalSizeKB = 0;
 };
 
-class MSIPackageInspector {
-public:
+class MSIPackageInspector
+{
+  public:
     MSIPackageInspector() = default;
     ~MSIPackageInspector() = default;
 
-    static const wchar_t* GetName() { return L"MSIPackageInspector"; }
+    static const wchar_t* GetName()
+    {
+        return L"MSIPackageInspector";
+    }
 
-    bool CanDecode(const wchar_t* ext) const {
-        if (!ext) return false;
+    bool CanDecode(const wchar_t* ext) const
+    {
+        if (!ext)
+            return false;
         std::wstring e(ext);
-        for (auto& c : e) c = towlower(c);
+        for (auto& c : e)
+            c = towlower(c);
         return e == L".msi" || e == L".msp" || e == L".mst" || e == L".msm";
     }
 
     /// Detect OLE Compound File magic: D0 CF 11 E0 A1 B1 1A E1
-    bool DetectCFBF(const uint8_t* data, size_t size) const {
-        if (!data || size < 512) return false;
-        static const uint8_t cfbfMagic[] = { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
+    bool DetectCFBF(const uint8_t* data, size_t size) const
+    {
+        if (!data || size < 512)
+            return false;
+        static const uint8_t cfbfMagic[] = {0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1};
         return memcmp(data, cfbfMagic, 8) == 0;
     }
 
     /// Parse CFBF file header (first 512 bytes).
-    CFBFHeader ParseCFBFHeader(const uint8_t* data, size_t size) const {
+    CFBFHeader ParseCFBFHeader(const uint8_t* data, size_t size) const
+    {
         CFBFHeader hdr;
-        if (!DetectCFBF(data, size)) return hdr;
+        if (!DetectCFBF(data, size))
+            return hdr;
         hdr.isValid = true;
 
         memcpy(&hdr.minorVersion, data + 24, 2);
@@ -83,11 +97,11 @@ public:
         uint32_t dirOffset = 512 + hdr.firstDirectorySector * hdr.sectorSize;
         if (dirOffset < size) {
             uint32_t entries = 0;
-            for (uint32_t off = dirOffset; off + 128 <= size && off < dirOffset + hdr.sectorSize;
-                off += 128) {
+            for (uint32_t off = dirOffset; off + 128 <= size && off < dirOffset + hdr.sectorSize; off += 128) {
                 uint16_t nameLen = 0;
                 memcpy(&nameLen, data + off + 64, 2);
-                if (nameLen > 0 && nameLen <= 64) entries++;
+                if (nameLen > 0 && nameLen <= 64)
+                    entries++;
             }
             hdr.totalStreamEntries = entries;
         }
@@ -95,7 +109,8 @@ public:
     }
 
     /// Estimate product info from CFBF stream content.
-    MSIPropertyInfo EstimateProperties(const CFBFHeader& hdr, uint64_t fileSize) const {
+    MSIPropertyInfo EstimateProperties(const CFBFHeader& hdr, uint64_t fileSize) const
+    {
         MSIPropertyInfo props;
         props.estimatedSizeKB = static_cast<uint32_t>(fileSize / 1024);
         // MSI version heuristic from CFBF version
@@ -106,11 +121,14 @@ public:
         return props;
     }
 
-    MSIStats GetStats() const { return m_stats; }
+    MSIStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     mutable MSIStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

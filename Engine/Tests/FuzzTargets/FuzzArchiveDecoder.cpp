@@ -11,10 +11,14 @@
 #ifdef __clang__
 extern "C" int LLVMFuzzerTestOneInput(const unsigned char* data, size_t size)
 {
-    if (size < 4) return 0;
+    if (size < 4)
+        return 0;
     (void)data;
     return 0;
 }
 #else
-int FuzzArchiveDecoder_Stub() { return 0; }
+int FuzzArchiveDecoder_Stub()
+{
+    return 0;
+}
 #endif

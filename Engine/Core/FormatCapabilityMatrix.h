@@ -13,30 +13,35 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class CapabilityLevel : uint8_t {
-    None            = 0,
-    Basic           = 1,
-    Full            = 2,
-    GPUAccelerated  = 3
+    None = 0,
+    Basic = 1,
+    Full = 2,
+    GPUAccelerated = 3
 };
 
 enum class PlatformType : uint8_t {
     Windows = 0,
-    Linux   = 1,
-    macOS   = 2,
-    WASM    = 3
+    Linux = 1,
+    macOS = 2,
+    WASM = 3
 };
 
-struct FormatCapability {
-    std::string    format;
-    CapabilityLevel level      = CapabilityLevel::None;
-    std::string    minVersion;
-    PlatformType   platform    = PlatformType::Windows;
+struct FormatCapability
+{
+    std::string format;
+    CapabilityLevel level = CapabilityLevel::None;
+    std::string minVersion;
+    PlatformType platform = PlatformType::Windows;
 };
 
-class FormatCapabilityMatrix {
-public:
-    int GetTotalFormatCount() const noexcept { return 0; }
+class FormatCapabilityMatrix
+{
+  public:
+    int GetTotalFormatCount() const noexcept
+    {
+        return 0;
+    }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

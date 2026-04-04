@@ -4,14 +4,16 @@
 
 using namespace ExplorerLens::Engine;
 
-TEST(ArchiveMemoryCompactor, DefaultConstruction) {
+TEST(ArchiveMemoryCompactor, DefaultConstruction)
+{
     ArchiveMemoryCompactor c;
     auto stats = c.GetStats();
     EXPECT_EQ(stats.bufferCount, 0u);
     EXPECT_EQ(stats.usedBytes, 0u);
 }
 
-TEST(ArchiveMemoryCompactor, AllocateBuffer) {
+TEST(ArchiveMemoryCompactor, AllocateBuffer)
+{
     ArchiveMemoryCompactor c;
     auto* buf = c.AllocateBuffer(1, 0, 1024);
     EXPECT_TRUE(buf != nullptr);
@@ -22,7 +24,8 @@ TEST(ArchiveMemoryCompactor, AllocateBuffer) {
     EXPECT_EQ(stats.bufferCount, 1u);
 }
 
-TEST(ArchiveMemoryCompactor, FreeBuffer) {
+TEST(ArchiveMemoryCompactor, FreeBuffer)
+{
     ArchiveMemoryCompactor c;
     auto* buf = c.AllocateBuffer(1, 0, 2048);
     EXPECT_TRUE(buf != nullptr);
@@ -30,7 +33,8 @@ TEST(ArchiveMemoryCompactor, FreeBuffer) {
     EXPECT_FALSE(buf->alive);
 }
 
-TEST(ArchiveMemoryCompactor, PinUnpinBuffer) {
+TEST(ArchiveMemoryCompactor, PinUnpinBuffer)
+{
     ArchiveMemoryCompactor c;
     auto* buf = c.AllocateBuffer(1, 0, 4096);
     EXPECT_TRUE(buf != nullptr);
@@ -41,7 +45,8 @@ TEST(ArchiveMemoryCompactor, PinUnpinBuffer) {
     EXPECT_FALSE(buf->pinned);
 }
 
-TEST(ArchiveMemoryCompactor, CompactResult) {
+TEST(ArchiveMemoryCompactor, CompactResult)
+{
     ArchiveMemoryCompactor c;
     auto* b1 = c.AllocateBuffer(1, 0, 1024);
     auto* b2 = c.AllocateBuffer(1, 1, 2048);
@@ -51,7 +56,8 @@ TEST(ArchiveMemoryCompactor, CompactResult) {
     EXPECT_GE(result.buffersMoved, 0u);
 }
 
-TEST(ArchiveMemoryCompactor, GetStats) {
+TEST(ArchiveMemoryCompactor, GetStats)
+{
     ArchiveMemoryCompactor c;
     c.AllocateBuffer(1, 0, 512);
     c.AllocateBuffer(1, 1, 1024);
@@ -60,7 +66,8 @@ TEST(ArchiveMemoryCompactor, GetStats) {
     EXPECT_GE(stats.arenaReserved, 0u);
 }
 
-TEST(ArchiveMemoryCompactor, MultipleAllocations) {
+TEST(ArchiveMemoryCompactor, MultipleAllocations)
+{
     ArchiveMemoryCompactor c;
     for (uint32_t i = 0; i < 10; ++i) {
         auto* buf = c.AllocateBuffer(1, i, 256);
@@ -70,7 +77,8 @@ TEST(ArchiveMemoryCompactor, MultipleAllocations) {
     EXPECT_EQ(stats.bufferCount, 10u);
 }
 
-TEST(ArchiveMemoryCompactor, ExtractedBufferDefaults) {
+TEST(ArchiveMemoryCompactor, ExtractedBufferDefaults)
+{
     ExtractedBuffer buf;
     EXPECT_EQ(buf.archiveId, 0u);
     EXPECT_EQ(buf.data, nullptr);
@@ -78,13 +86,15 @@ TEST(ArchiveMemoryCompactor, ExtractedBufferDefaults) {
     EXPECT_FALSE(buf.pinned);
 }
 
-TEST(ArchiveMemoryCompactor, CompactResultDefaults) {
+TEST(ArchiveMemoryCompactor, CompactResultDefaults)
+{
     CompactResult result;
     EXPECT_EQ(result.buffersMoved, 0u);
     EXPECT_EQ(result.bytesMoved, 0u);
 }
 
-TEST(ArchiveMemoryCompactor, CompactorStatsDefaults) {
+TEST(ArchiveMemoryCompactor, CompactorStatsDefaults)
+{
     CompactorStats stats;
     EXPECT_EQ(stats.bufferCount, 0u);
     EXPECT_EQ(stats.fragmentationRatio, 0.0);

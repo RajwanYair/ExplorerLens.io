@@ -14,47 +14,52 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <windows.h>
 #include <bcrypt.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <thread>
-#include <mutex>
+#include <windows.h>
 #include <atomic>
-#include <functional>
 #include <chrono>
 #include <cstdint>
+#include <functional>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
 
 #pragma comment(lib, "bcrypt.lib")
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct HotReloadStats {
+struct HotReloadStats
+{
     uint64_t filesWatched = 0;
     uint64_t reloadsTriggered = 0;
     uint64_t hashMismatches = 0;
     uint64_t falsePositivesFiltered = 0;
 };
 
-class PluginHotReloadManager {
-public:
-    PluginHotReloadManager() {
+class PluginHotReloadManager
+{
+  public:
+    PluginHotReloadManager()
+    {
         InitializeSRWLock(&m_lock);
     }
 
-    ~PluginHotReloadManager() {
+    ~PluginHotReloadManager()
+    {
         StopWatching();
     }
 
     PluginHotReloadManager(const PluginHotReloadManager&) = delete;
     PluginHotReloadManager& operator=(const PluginHotReloadManager&) = delete;
 
-    inline void SetPluginDirectory(const std::wstring& dir) {
+    inline void SetPluginDirectory(const std::wstring& dir)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_pluginDirectory = dir;
         if (!m_pluginDirectory.empty() && m_pluginDirectory.back() != L'\\') {
@@ -63,15 +68,17 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    inline void SetReloadCallback(std::function<void(const std::wstring&)> fn) {
+    inline void SetReloadCallback(std::function<void(const std::wstring&)> fn)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_reloadCallback = std::move(fn);
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    inline void StartWatching() {
+    inline void StartWatching()
+    {
         if (m_watching.exchange(true, std::memory_order_acq_rel)) {
-            return; // Already watching
+            return;  // Already watching
         }
 
         m_stopEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
@@ -83,9 +90,10 @@ public:
         m_watchThread = std::thread([this]() { WatchThreadProc(); });
     }
 
-    inline void StopWatching() {
+    inline void StopWatching()
+    {
         if (!m_watching.exchange(false, std::memory_order_acq_rel)) {
-            return; // Not watching
+            return;  // Not watching
         }
 
         if (m_stopEvent) {
@@ -102,7 +110,8 @@ public:
         }
     }
 
-    inline void RegisterPluginHash(const std::wstring& dllPath) {
+    inline void RegisterPluginHash(const std::wstring& dllPath)
+    {
         std::vector<uint8_t> hash = ComputeSHA256(dllPath);
         if (!hash.empty()) {
             AcquireSRWLockExclusive(&m_lock);
@@ -112,22 +121,25 @@ public:
         }
     }
 
-    inline bool HasChanged(const std::wstring& dllPath) {
+    inline bool HasChanged(const std::wstring& dllPath)
+    {
         std::vector<uint8_t> currentHash = ComputeSHA256(dllPath);
-        if (currentHash.empty()) return false;
+        if (currentHash.empty())
+            return false;
 
         AcquireSRWLockShared(&m_lock);
         auto it = m_knownHashes.find(dllPath);
         if (it == m_knownHashes.end()) {
             ReleaseSRWLockShared(&m_lock);
-            return true; // Unknown plugin, treat as changed
+            return true;  // Unknown plugin, treat as changed
         }
         bool changed = (it->second != currentHash);
         ReleaseSRWLockShared(&m_lock);
         return changed;
     }
 
-    inline HotReloadStats GetStats() const {
+    inline HotReloadStats GetStats() const
+    {
         HotReloadStats s;
         AcquireSRWLockShared(&m_lock);
         s = m_stats;
@@ -135,8 +147,9 @@ public:
         return s;
     }
 
-private:
-    inline void WatchThreadProc() {
+  private:
+    inline void WatchThreadProc()
+    {
         std::wstring dirCopy;
         AcquireSRWLockShared(&m_lock);
         dirCopy = m_pluginDirectory;
@@ -147,14 +160,9 @@ private:
             return;
         }
 
-        HANDLE hDir = CreateFileW(
-            dirCopy.c_str(),
-            FILE_LIST_DIRECTORY,
-            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            nullptr,
-            OPEN_EXISTING,
-            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
-            nullptr);
+        HANDLE hDir =
+            CreateFileW(dirCopy.c_str(), FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                        nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, nullptr);
 
         if (hDir == INVALID_HANDLE_VALUE) {
             m_watching.store(false, std::memory_order_release);
@@ -172,17 +180,17 @@ private:
             return;
         }
 
-        HANDLE waitHandles[2] = { m_stopEvent, overlapped.hEvent };
+        HANDLE waitHandles[2] = {m_stopEvent, overlapped.hEvent};
 
         while (m_watching.load(std::memory_order_acquire)) {
             ResetEvent(overlapped.hEvent);
 
-            BOOL ok = ReadDirectoryChangesW(
-                hDir, buffer, kBufSize, FALSE,
-                FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_SIZE,
-                nullptr, &overlapped, nullptr);
+            BOOL ok = ReadDirectoryChangesW(hDir, buffer, kBufSize, FALSE,
+                                            FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_SIZE, nullptr,
+                                            &overlapped, nullptr);
 
-            if (!ok) break;
+            if (!ok)
+                break;
 
             DWORD waitResult = WaitForMultipleObjects(2, waitHandles, FALSE, INFINITE);
             if (waitResult == WAIT_OBJECT_0) {
@@ -191,7 +199,8 @@ private:
                 break;
             }
 
-            if (waitResult != WAIT_OBJECT_0 + 1) break;
+            if (waitResult != WAIT_OBJECT_0 + 1)
+                break;
 
             DWORD bytesReturned = 0;
             if (!GetOverlappedResult(hDir, &overlapped, &bytesReturned, FALSE) || bytesReturned == 0) {
@@ -203,13 +212,13 @@ private:
             do {
                 auto* fni = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer + offset);
                 if (fni->Action == FILE_ACTION_MODIFIED) {
-                    std::wstring fileName(fni->FileName,
-                        fni->FileNameLength / sizeof(wchar_t));
+                    std::wstring fileName(fni->FileName, fni->FileNameLength / sizeof(wchar_t));
 
                     // Only process .dll files
                     if (fileName.size() >= 4) {
                         std::wstring ext = fileName.substr(fileName.size() - 4);
-                        for (auto& c : ext) c = static_cast<wchar_t>(towlower(c));
+                        for (auto& c : ext)
+                            c = static_cast<wchar_t>(towlower(c));
                         if (ext == L".dll") {
                             std::wstring fullPath = dirCopy + fileName;
                             HandleDllChanged(fullPath);
@@ -217,7 +226,8 @@ private:
                     }
                 }
 
-                if (fni->NextEntryOffset == 0) break;
+                if (fni->NextEntryOffset == 0)
+                    break;
                 offset += fni->NextEntryOffset;
             } while (offset < bytesReturned);
         }
@@ -226,22 +236,23 @@ private:
         CloseHandle(hDir);
     }
 
-    inline void HandleDllChanged(const std::wstring& fullPath) {
+    inline void HandleDllChanged(const std::wstring& fullPath)
+    {
         // Debounce: wait 500ms for writes to settle
         Sleep(500);
 
         // Verify file is accessible (not locked by another process)
-        HANDLE hTest = CreateFileW(fullPath.c_str(), GENERIC_READ,
-            FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL, nullptr);
+        HANDLE hTest = CreateFileW(fullPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                                   FILE_ATTRIBUTE_NORMAL, nullptr);
         if (hTest == INVALID_HANDLE_VALUE) {
-            return; // File still locked
+            return;  // File still locked
         }
         CloseHandle(hTest);
 
         // Compute new hash
         std::vector<uint8_t> newHash = ComputeSHA256(fullPath);
-        if (newHash.empty()) return;
+        if (newHash.empty())
+            return;
 
         // Compare with stored hash
         AcquireSRWLockExclusive(&m_lock);
@@ -267,19 +278,19 @@ private:
         }
     }
 
-    inline std::vector<uint8_t> ComputeSHA256(const std::wstring& filePath) {
+    inline std::vector<uint8_t> ComputeSHA256(const std::wstring& filePath)
+    {
         std::vector<uint8_t> hashResult;
 
-        HANDLE hFile = CreateFileW(filePath.c_str(), GENERIC_READ,
-            FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL, nullptr);
-        if (hFile == INVALID_HANDLE_VALUE) return hashResult;
+        HANDLE hFile = CreateFileW(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                                   FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile == INVALID_HANDLE_VALUE)
+            return hashResult;
 
         BCRYPT_ALG_HANDLE hAlg = nullptr;
         BCRYPT_HASH_HANDLE hHash = nullptr;
 
-        NTSTATUS status = BCryptOpenAlgorithmProvider(&hAlg,
-            BCRYPT_SHA256_ALGORITHM, nullptr, 0);
+        NTSTATUS status = BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA256_ALGORITHM, nullptr, 0);
         if (status < 0) {
             CloseHandle(hFile);
             return hashResult;
@@ -287,8 +298,8 @@ private:
 
         DWORD hashLength = 0;
         DWORD cbData = 0;
-        status = BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
-            reinterpret_cast<PUCHAR>(&hashLength), sizeof(hashLength), &cbData, 0);
+        status = BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH, reinterpret_cast<PUCHAR>(&hashLength), sizeof(hashLength),
+                                   &cbData, 0);
         if (status < 0 || hashLength == 0) {
             BCryptCloseAlgorithmProvider(hAlg, 0);
             CloseHandle(hFile);
@@ -296,8 +307,8 @@ private:
         }
 
         DWORD hashObjectSize = 0;
-        status = BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
-            reinterpret_cast<PUCHAR>(&hashObjectSize), sizeof(hashObjectSize), &cbData, 0);
+        status = BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH, reinterpret_cast<PUCHAR>(&hashObjectSize),
+                                   sizeof(hashObjectSize), &cbData, 0);
         if (status < 0 || hashObjectSize == 0) {
             BCryptCloseAlgorithmProvider(hAlg, 0);
             CloseHandle(hFile);
@@ -305,8 +316,7 @@ private:
         }
 
         std::vector<uint8_t> hashObject(hashObjectSize);
-        status = BCryptCreateHash(hAlg, &hHash, hashObject.data(),
-            hashObjectSize, nullptr, 0, 0);
+        status = BCryptCreateHash(hAlg, &hHash, hashObject.data(), hashObjectSize, nullptr, 0, 0);
         if (status < 0) {
             BCryptCloseAlgorithmProvider(hAlg, 0);
             CloseHandle(hFile);
@@ -336,14 +346,14 @@ private:
 
     // Members
     mutable SRWLOCK m_lock{};
-    std::wstring    m_pluginDirectory;
+    std::wstring m_pluginDirectory;
     std::function<void(const std::wstring&)> m_reloadCallback;
     std::unordered_map<std::wstring, std::vector<uint8_t>> m_knownHashes;
-    std::thread     m_watchThread;
-    HANDLE          m_stopEvent = nullptr;
-    std::atomic<bool> m_watching{ false };
-    HotReloadStats  m_stats{};
+    std::thread m_watchThread;
+    HANDLE m_stopEvent = nullptr;
+    std::atomic<bool> m_watching{false};
+    HotReloadStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

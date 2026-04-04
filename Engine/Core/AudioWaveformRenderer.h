@@ -6,13 +6,13 @@
 //
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
-#include <cmath>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -24,14 +24,16 @@ enum class WaveformStyle : uint8_t {
     Circular
 };
 
-struct WaveformColor {
+struct WaveformColor
+{
     uint8_t r = 66;
     uint8_t g = 133;
     uint8_t b = 244;
     uint8_t a = 255;
 };
 
-struct WaveformConfig {
+struct WaveformConfig
+{
     uint32_t width = 512;
     uint32_t height = 128;
     WaveformColor foregroundColor;
@@ -44,7 +46,8 @@ struct WaveformConfig {
     float peakNormalization = 1.0f;
 };
 
-struct AudioMetadata {
+struct AudioMetadata
+{
     uint32_t sampleRate = 0;
     uint16_t channels = 0;
     uint64_t durationMs = 0;
@@ -54,7 +57,8 @@ struct AudioMetadata {
     uint64_t fileSizeBytes = 0;
 };
 
-struct PeakData {
+struct PeakData
+{
     float minPeak = 0.0f;
     float maxPeak = 0.0f;
     float rms = 0.0f;
@@ -62,56 +66,89 @@ struct PeakData {
 
 using WaveformRenderedCallback = std::function<void(const uint8_t* rgba, uint32_t width, uint32_t height)>;
 
-class AudioWaveformRenderer {
-public:
-    explicit AudioWaveformRenderer(WaveformConfig config = {})
-        : m_config(config) {}
+class AudioWaveformRenderer
+{
+  public:
+    explicit AudioWaveformRenderer(WaveformConfig config = {}) : m_config(config) {}
 
     ~AudioWaveformRenderer() = default;
 
-    bool AnalyzeAudio(const std::wstring& filePath) {
+    bool AnalyzeAudio(const std::wstring& filePath)
+    {
         m_filePath = filePath;
         m_peaks.clear();
         m_isAnalyzed = true;
         return true;
     }
 
-    bool RenderWaveform(std::vector<uint8_t>& outputRGBA) const {
-        if (!m_isAnalyzed || m_peaks.empty()) return false;
+    bool RenderWaveform(std::vector<uint8_t>& outputRGBA) const
+    {
+        if (!m_isAnalyzed || m_peaks.empty())
+            return false;
         outputRGBA.resize(static_cast<size_t>(m_config.width) * m_config.height * 4);
         FillBackground(outputRGBA);
         DrawPeaks(outputRGBA);
-        if (m_config.rmsOverlay) DrawRMS(outputRGBA);
-        if (m_renderedCallback) m_renderedCallback(outputRGBA.data(), m_config.width, m_config.height);
+        if (m_config.rmsOverlay)
+            DrawRMS(outputRGBA);
+        if (m_renderedCallback)
+            m_renderedCallback(outputRGBA.data(), m_config.width, m_config.height);
         return true;
     }
 
-    const std::vector<PeakData>& GetPeakData() const { return m_peaks; }
+    const std::vector<PeakData>& GetPeakData() const
+    {
+        return m_peaks;
+    }
 
-    void SetColorScheme(WaveformColor fg, WaveformColor bg) {
+    void SetColorScheme(WaveformColor fg, WaveformColor bg)
+    {
         m_config.foregroundColor = fg;
         m_config.backgroundColor = bg;
     }
 
-    bool RenderSpectrum(std::vector<uint8_t>& outputRGBA, uint32_t fftSize = 1024) const {
-        if (!m_isAnalyzed) return false;
+    bool RenderSpectrum(std::vector<uint8_t>& outputRGBA, uint32_t fftSize = 1024) const
+    {
+        if (!m_isAnalyzed)
+            return false;
         outputRGBA.resize(static_cast<size_t>(m_config.width) * m_config.height * 4);
         m_lastFFTSize = fftSize;
         return true;
     }
 
-    void SetStyle(WaveformStyle style) { m_config.style = style; }
-    const AudioMetadata& GetMetadata() const { return m_metadata; }
-    void SetMetadata(const AudioMetadata& meta) { m_metadata = meta; }
-    void AddPeaks(const std::vector<PeakData>& peaks) { m_peaks = peaks; }
-    void SetRenderedCallback(WaveformRenderedCallback cb) { m_renderedCallback = std::move(cb); }
-    const WaveformConfig& GetConfig() const { return m_config; }
+    void SetStyle(WaveformStyle style)
+    {
+        m_config.style = style;
+    }
+    const AudioMetadata& GetMetadata() const
+    {
+        return m_metadata;
+    }
+    void SetMetadata(const AudioMetadata& meta)
+    {
+        m_metadata = meta;
+    }
+    void AddPeaks(const std::vector<PeakData>& peaks)
+    {
+        m_peaks = peaks;
+    }
+    void SetRenderedCallback(WaveformRenderedCallback cb)
+    {
+        m_renderedCallback = std::move(cb);
+    }
+    const WaveformConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-private:
-    void FillBackground(std::vector<uint8_t>& buf) const {
+  private:
+    void FillBackground(std::vector<uint8_t>& buf) const
+    {
         auto& bg = m_config.backgroundColor;
         for (size_t i = 0; i < buf.size(); i += 4) {
-            buf[i] = bg.r; buf[i+1] = bg.g; buf[i+2] = bg.b; buf[i+3] = bg.a;
+            buf[i] = bg.r;
+            buf[i + 1] = bg.g;
+            buf[i + 2] = bg.b;
+            buf[i + 3] = bg.a;
         }
     }
 
@@ -127,5 +164,5 @@ private:
     bool m_isAnalyzed = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

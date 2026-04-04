@@ -2,16 +2,16 @@
 // Copyright (c) 2026 ExplorerLens Project
 
 #include "PDFDecoder.h"
-#include "../Utils/PerformanceProfiler.h"
-#include <algorithm>
-#include <cwchar>
-#include <memory>
 #include <windows.h>
 #include <objidl.h>
 #include <gdiplus.h>
 #include <shlwapi.h>
 #include <shobjidl.h>
 #include <thumbcache.h>
+#include <algorithm>
+#include <cwchar>
+#include <memory>
+#include "../Utils/PerformanceProfiler.h"
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
@@ -19,19 +19,21 @@
 namespace ExplorerLens {
 namespace Engine {
 
-const wchar_t* PDFDecoder::m_extensions[] = { L".pdf", nullptr };
+const wchar_t* PDFDecoder::m_extensions[] = {L".pdf", nullptr};
 const uint32_t PDFDecoder::m_extensionCount = 1;
 
 PDFDecoder::PDFDecoder() = default;
 PDFDecoder::~PDFDecoder() = default;
 
-bool PDFDecoder::CanDecode(const wchar_t* filePath) {
+bool PDFDecoder::CanDecode(const wchar_t* filePath)
+{
     if (!filePath)
         return false;
     return IsPDFFormat(filePath);
 }
 
-bool PDFDecoder::HasNativeRenderer() {
+bool PDFDecoder::HasNativeRenderer()
+{
 #ifdef HAS_MUPDF
     return true;
 #else
@@ -39,8 +41,8 @@ bool PDFDecoder::HasNativeRenderer() {
 #endif
 }
 
-HRESULT PDFDecoder::Decode(const ThumbnailRequest& request,
-    ThumbnailResult& result) {
+HRESULT PDFDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result)
+{
     PROFILE_SCOPE(ProfileComponent::DECODE_PDF);
 
     result.hBitmap = nullptr;
@@ -54,20 +56,17 @@ HRESULT PDFDecoder::Decode(const ThumbnailRequest& request,
 #ifdef HAS_MUPDF
     // Preferred path: native MuPDF rendering — no dependency on installed PDF
     // viewers
-    hr = RenderWithMuPDF(request.filePath, request.width, request.height,
-        &result.hBitmap);
+    hr = RenderWithMuPDF(request.filePath, request.width, request.height, &result.hBitmap);
 #endif
 
     // Fallback: Shell thumbnail provider (works if Edge/Acrobat/Foxit installed)
     if (FAILED(hr) || !result.hBitmap) {
-        hr = ExtractThumbnailShell(request.filePath, request.width, request.height,
-            &result.hBitmap);
+        hr = ExtractThumbnailShell(request.filePath, request.width, request.height, &result.hBitmap);
     }
 
     // Last resort: placeholder
     if (FAILED(hr) || !result.hBitmap) {
-        result.hBitmap =
-            CreatePDFPlaceholder(request.width, request.height, request.filePath);
+        result.hBitmap = CreatePDFPlaceholder(request.width, request.height, request.filePath);
         hr = result.hBitmap ? S_OK : E_FAIL;
     }
 
@@ -81,7 +80,8 @@ HRESULT PDFDecoder::Decode(const ThumbnailRequest& request,
     return hr;
 }
 
-DecoderInfo PDFDecoder::GetInfo() const {
+DecoderInfo PDFDecoder::GetInfo() const
+{
     DecoderInfo info;
     info.name = L"PDF Decoder";
 #ifdef HAS_MUPDF
@@ -96,7 +96,8 @@ DecoderInfo PDFDecoder::GetInfo() const {
     return info;
 }
 
-const wchar_t** PDFDecoder::GetSupportedExtensions() const {
+const wchar_t** PDFDecoder::GetSupportedExtensions() const
+{
     return const_cast<const wchar_t**>(m_extensions);
 }
 
@@ -105,20 +106,18 @@ const wchar_t** PDFDecoder::GetSupportedExtensions() const {
 // ============================================================================
 
 #ifdef HAS_MUPDF
-HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
-    uint32_t height, HBITMAP* phBitmap) {
+HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP* phBitmap)
+{
     if (!phBitmap)
         return E_INVALIDARG;
     *phBitmap = nullptr;
 
     // Convert wide path to UTF-8 for MuPDF
-    int utf8Len = WideCharToMultiByte(CP_UTF8, 0, filePath, -1, nullptr, 0,
-        nullptr, nullptr);
+    int utf8Len = WideCharToMultiByte(CP_UTF8, 0, filePath, -1, nullptr, 0, nullptr, nullptr);
     if (utf8Len <= 0)
         return E_INVALIDARG;
     auto utf8Path = std::make_unique<char[]>(utf8Len);
-    WideCharToMultiByte(CP_UTF8, 0, filePath, -1, utf8Path.get(), utf8Len,
-        nullptr, nullptr);
+    WideCharToMultiByte(CP_UTF8, 0, filePath, -1, utf8Path.get(), utf8Len, nullptr, nullptr);
 
     fz_context* ctx = fz_new_context(nullptr, nullptr, FZ_STORE_DEFAULT);
     if (!ctx)
@@ -129,9 +128,10 @@ HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
     fz_pixmap* pix = nullptr;
     HRESULT hr = E_FAIL;
 
-#pragma warning(push)
-#pragma warning(disable: 4611)  // setjmp + C++ destructors
-    fz_try(ctx) {
+    #pragma warning(push)
+    #pragma warning(disable : 4611)  // setjmp + C++ destructors
+    fz_try(ctx)
+    {
         fz_register_document_handlers(ctx);
         doc = fz_open_document(ctx, utf8Path.get());
 
@@ -161,7 +161,7 @@ HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
 
         // Render to BGRA pixmap (matches Windows HBITMAP format)
         pix = fz_new_pixmap_with_bbox(ctx, fz_device_bgr(ctx), bbox, nullptr, 1);
-        fz_clear_pixmap_with_value(ctx, pix, 0xFF); // White background
+        fz_clear_pixmap_with_value(ctx, pix, 0xFF);  // White background
 
         fz_device* dev = fz_new_draw_device(ctx, ctm, pix);
         fz_run_page(ctx, page, dev, fz_identity, nullptr);
@@ -172,14 +172,13 @@ HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
         BITMAPINFO bmi = {};
         bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmi.bmiHeader.biWidth = pixW;
-        bmi.bmiHeader.biHeight = -pixH; // Top-down
+        bmi.bmiHeader.biHeight = -pixH;  // Top-down
         bmi.bmiHeader.biPlanes = 1;
         bmi.bmiHeader.biBitCount = 32;
         bmi.bmiHeader.biCompression = BI_RGB;
 
         void* bits = nullptr;
-        *phBitmap =
-            CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
+        *phBitmap = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
         if (*phBitmap && bits) {
             unsigned char* src = fz_pixmap_samples(ctx, pix);
             int stride = fz_pixmap_stride(ctx, pix);
@@ -190,7 +189,8 @@ HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
             hr = S_OK;
         }
     }
-    fz_always(ctx) {
+    fz_always(ctx)
+    {
         if (pix)
             fz_drop_pixmap(ctx, pix);
         if (page)
@@ -198,10 +198,13 @@ HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
         if (doc)
             fz_drop_document(ctx, doc);
     }
-    fz_catch(ctx) { hr = E_FAIL; }
+    fz_catch(ctx)
+    {
+        hr = E_FAIL;
+    }
 
     fz_drop_context(ctx);
-#pragma warning(pop)
+    #pragma warning(pop)
     return hr;
 }
 #endif
@@ -210,9 +213,8 @@ HRESULT PDFDecoder::RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
 // Shell Thumbnail Extraction
 // ============================================================================
 
-HRESULT PDFDecoder::ExtractThumbnailShell(const wchar_t* filePath,
-    uint32_t width, uint32_t height,
-    HBITMAP* phBitmap) {
+HRESULT PDFDecoder::ExtractThumbnailShell(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP* phBitmap)
+{
     if (!phBitmap)
         return E_INVALIDARG;
     *phBitmap = nullptr;
@@ -233,9 +235,8 @@ HRESULT PDFDecoder::ExtractThumbnailShell(const wchar_t* filePath,
     IShellItemImageFactory* pFactory = nullptr;
     hr = pItem->QueryInterface(IID_PPV_ARGS(&pFactory));
     if (SUCCEEDED(hr) && pFactory) {
-        SIZE sz = { static_cast<LONG>(width), static_cast<LONG>(height) };
-        hr = pFactory->GetImage(sz, SIIGBF_THUMBNAILONLY | SIIGBF_BIGGERSIZEOK,
-            phBitmap);
+        SIZE sz = {static_cast<LONG>(width), static_cast<LONG>(height)};
+        hr = pFactory->GetImage(sz, SIIGBF_THUMBNAILONLY | SIIGBF_BIGGERSIZEOK, phBitmap);
 
         // If thumbnail-only fails, try with icon fallback
         if (FAILED(hr)) {
@@ -253,16 +254,15 @@ HRESULT PDFDecoder::ExtractThumbnailShell(const wchar_t* filePath,
 // PDF Placeholder
 // ============================================================================
 
-HBITMAP PDFDecoder::CreatePDFPlaceholder(uint32_t width, uint32_t height,
-    const wchar_t* filePath) {
-    (void)filePath; // Reserved for future filename display on placeholder
+HBITMAP PDFDecoder::CreatePDFPlaceholder(uint32_t width, uint32_t height, const wchar_t* filePath)
+{
+    (void)filePath;  // Reserved for future filename display on placeholder
     Gdiplus::GdiplusStartupInput gdipInput;
     ULONG_PTR gdipToken = 0;
     if (Gdiplus::GdiplusStartup(&gdipToken, &gdipInput, nullptr) != Gdiplus::Ok)
         return nullptr;
 
-    auto bmp =
-        std::make_unique<Gdiplus::Bitmap>(width, height, PixelFormat32bppARGB);
+    auto bmp = std::make_unique<Gdiplus::Bitmap>(width, height, PixelFormat32bppARGB);
     Gdiplus::Graphics g(bmp.get());
     g.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
     g.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
@@ -299,8 +299,7 @@ HBITMAP PDFDecoder::CreatePDFPlaceholder(uint32_t width, uint32_t height,
     float fontSize = badgeH * 0.65f;
     if (fontSize < 8)
         fontSize = 8;
-    Gdiplus::Font pdfFont(&fontFamily, fontSize, Gdiplus::FontStyleBold,
-        Gdiplus::UnitPixel);
+    Gdiplus::Font pdfFont(&fontFamily, fontSize, Gdiplus::FontStyleBold, Gdiplus::UnitPixel);
     Gdiplus::SolidBrush whiteBrush(Gdiplus::Color(255, 255, 255, 255));
     Gdiplus::StringFormat centerFmt;
     centerFmt.SetAlignment(Gdiplus::StringAlignmentCenter);
@@ -328,7 +327,8 @@ HBITMAP PDFDecoder::CreatePDFPlaceholder(uint32_t width, uint32_t height,
 // Format Detection
 // ============================================================================
 
-bool PDFDecoder::IsPDFFormat(const wchar_t* path) {
+bool PDFDecoder::IsPDFFormat(const wchar_t* path)
+{
     if (!path)
         return false;
     const wchar_t* ext = PathFindExtensionW(path);
@@ -336,8 +336,8 @@ bool PDFDecoder::IsPDFFormat(const wchar_t* path) {
         return true;
 
     // Also check signature
-    HANDLE hFile = CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE hFile =
+        CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE)
         return false;
 
@@ -346,9 +346,8 @@ bool PDFDecoder::IsPDFFormat(const wchar_t* path) {
     ReadFile(hFile, sig, 5, &bytesRead, nullptr);
     CloseHandle(hFile);
     // %PDF-
-    return bytesRead >= 5 && sig[0] == 0x25 && sig[1] == 0x50 && sig[2] == 0x44 &&
-        sig[3] == 0x46 && sig[4] == 0x2D;
+    return bytesRead >= 5 && sig[0] == 0x25 && sig[1] == 0x50 && sig[2] == 0x44 && sig[3] == 0x46 && sig[4] == 0x2D;
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

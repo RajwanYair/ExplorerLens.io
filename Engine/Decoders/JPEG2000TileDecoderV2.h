@@ -15,61 +15,77 @@ namespace ExplorerLens::Decoders {
 
 /// Sub-resolution factor used when decoding a JPEG 2000 tile.
 enum class J2KResductionFactor : uint8_t {
-    Full      = 0,   // 1:1 — full resolution
-    Half      = 1,   // 1:2
-    Quarter   = 2,   // 1:4
-    Eighth    = 3,   // 1:8
-    Sixteenth = 4,   // 1:16
+    Full = 0,       // 1:1 — full resolution
+    Half = 1,       // 1:2
+    Quarter = 2,    // 1:4
+    Eighth = 3,     // 1:8
+    Sixteenth = 4,  // 1:16
 };
 
-class JPEG2000TileDecoderV2 {
-public:
+class JPEG2000TileDecoderV2
+{
+  public:
     JPEG2000TileDecoderV2() = default;
 
-    struct DecodeResult {
-        bool     success       = false;
-        uint32_t width         = 0;
-        uint32_t height        = 0;
-        uint32_t tileWidth     = 0;
-        uint32_t tileHeight    = 0;
-        uint32_t components    = 0;
+    struct DecodeResult
+    {
+        bool success = false;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t tileWidth = 0;
+        uint32_t tileHeight = 0;
+        uint32_t components = 0;
         std::vector<uint8_t> pixelData;  // BGRA32
         std::string error;
     };
 
-    struct TileInfo {
-        uint32_t imageWidth    = 0;
-        uint32_t imageHeight   = 0;
-        uint32_t tileWidth     = 0;
-        uint32_t tileHeight    = 0;
-        uint32_t tilesX        = 0;
-        uint32_t tilesY        = 0;
+    struct TileInfo
+    {
+        uint32_t imageWidth = 0;
+        uint32_t imageHeight = 0;
+        uint32_t tileWidth = 0;
+        uint32_t tileHeight = 0;
+        uint32_t tilesX = 0;
+        uint32_t tilesY = 0;
         uint32_t resolutionLevels = 0;
-        uint32_t components    = 0;
+        uint32_t components = 0;
 
-        bool IsValid() const { return imageWidth > 0 && imageHeight > 0 && tileWidth > 0; }
-        uint32_t TotalTiles() const { return tilesX * tilesY; }
+        bool IsValid() const
+        {
+            return imageWidth > 0 && imageHeight > 0 && tileWidth > 0;
+        }
+        uint32_t TotalTiles() const
+        {
+            return tilesX * tilesY;
+        }
     };
 
-    TileInfo  ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    TileInfo ReadInfo(const std::string& filePath) const
+    {
+        (void)filePath;
+        return {};
+    }
 
     /// Decode at the smallest sub-resolution sufficient for targetWidth×targetHeight.
-    DecodeResult DecodeThumbnail(const std::string& filePath,
-                                  uint32_t targetWidth  = 256,
-                                  uint32_t targetHeight = 256) const {
-        (void)filePath; (void)targetWidth; (void)targetHeight; return {};
+    DecodeResult DecodeThumbnail(const std::string& filePath, uint32_t targetWidth = 256,
+                                 uint32_t targetHeight = 256) const
+    {
+        (void)filePath;
+        (void)targetWidth;
+        (void)targetHeight;
+        return {};
     }
 
-    static bool IsJ2KExtension(const std::string& ext) {
-        return ext == ".jp2" || ext == ".JP2" || ext == ".j2k" || ext == ".J2K"
-            || ext == ".jpx" || ext == ".JPX" || ext == ".jpc" || ext == ".JPC";
+    static bool IsJ2KExtension(const std::string& ext)
+    {
+        return ext == ".jp2" || ext == ".JP2" || ext == ".j2k" || ext == ".J2K" || ext == ".jpx" || ext == ".JPX"
+               || ext == ".jpc" || ext == ".JPC";
     }
-    static constexpr const char* EXTENSIONS[] = { ".jp2", ".j2k", ".jpx", ".jpc", nullptr };
+    static constexpr const char* EXTENSIONS[] = {".jp2", ".j2k", ".jpx", ".jpc", nullptr};
 
-private:
-    static J2KResductionFactor ChooseReductionFactor(uint32_t srcW, uint32_t srcH,
-                                                      uint32_t dstW, uint32_t dstH,
-                                                      uint32_t maxLevels);
+  private:
+    static J2KResductionFactor ChooseReductionFactor(uint32_t srcW, uint32_t srcH, uint32_t dstW, uint32_t dstH,
+                                                     uint32_t maxLevels);
 };
 
 }  // namespace ExplorerLens::Decoders

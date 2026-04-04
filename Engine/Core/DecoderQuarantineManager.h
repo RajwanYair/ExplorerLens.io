@@ -9,42 +9,53 @@
 #include <string>
 #include <unordered_map>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class QuarantineStage : uint8_t {
-    Active      = 0, // Normal operation
-    RetryOnly   = 1, // Second-chance retries only
-    SoftRestart = 2, // Restart decoder between requests
-    Bypassed    = 3, // Completely bypassed
+    Active = 0,       // Normal operation
+    RetryOnly = 1,    // Second-chance retries only
+    SoftRestart = 2,  // Restart decoder between requests
+    Bypassed = 3,     // Completely bypassed
 };
 
-struct QuarantineRecord {
-    QuarantineStage stage       = QuarantineStage::Active;
-    int             crashCount  = 0;
-    int             successRun  = 0;
+struct QuarantineRecord
+{
+    QuarantineStage stage = QuarantineStage::Active;
+    int crashCount = 0;
+    int successRun = 0;
 
-    std::string StageName() const noexcept {
+    std::string StageName() const noexcept
+    {
         switch (stage) {
-            case QuarantineStage::Active:      return "Active";
-            case QuarantineStage::RetryOnly:   return "RetryOnly";
-            case QuarantineStage::SoftRestart: return "SoftRestart";
-            case QuarantineStage::Bypassed:    return "Bypassed";
+            case QuarantineStage::Active:
+                return "Active";
+            case QuarantineStage::RetryOnly:
+                return "RetryOnly";
+            case QuarantineStage::SoftRestart:
+                return "SoftRestart";
+            case QuarantineStage::Bypassed:
+                return "Bypassed";
         }
         return "Unknown";
     }
 };
 
-class DecoderQuarantineManager {
-public:
+class DecoderQuarantineManager
+{
+  public:
     static constexpr int RECOVERY_RELEASE_COUNT = 5;
 
-    bool IsQuarantined(const std::string& decoder) const {
+    bool IsQuarantined(const std::string& decoder) const
+    {
         auto it = m_records.find(decoder);
-        if (it == m_records.end()) return false;
+        if (it == m_records.end())
+            return false;
         return it->second.stage != QuarantineStage::Active;
     }
 
-    void RecordCrash(const std::string& decoder) {
+    void RecordCrash(const std::string& decoder)
+    {
         auto& r = m_records[decoder];
         r.crashCount++;
         r.successRun = 0;
@@ -58,26 +69,32 @@ public:
         }
     }
 
-    void RecordSuccess(const std::string& decoder) {
+    void RecordSuccess(const std::string& decoder)
+    {
         auto it = m_records.find(decoder);
-        if (it == m_records.end()) return;
+        if (it == m_records.end())
+            return;
         auto& r = it->second;
-        if (r.stage == QuarantineStage::Active) return;
+        if (r.stage == QuarantineStage::Active)
+            return;
         r.successRun++;
         if (r.successRun >= RECOVERY_RELEASE_COUNT) {
-            r.stage      = QuarantineStage::Active;
+            r.stage = QuarantineStage::Active;
             r.successRun = 0;
         }
     }
 
-    const QuarantineRecord* GetRecord(const std::string& decoder) const {
+    const QuarantineRecord* GetRecord(const std::string& decoder) const
+    {
         auto it = m_records.find(decoder);
-        if (it == m_records.end()) return nullptr;
+        if (it == m_records.end())
+            return nullptr;
         return &it->second;
     }
 
-private:
+  private:
     std::unordered_map<std::string, QuarantineRecord> m_records;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

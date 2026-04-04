@@ -6,40 +6,44 @@
 //
 #pragma once
 
-#include <string>
-#include <vector>
 #include <algorithm>
-#include <utility>
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // Represents a single metadata field for tooltip display
-struct TooltipField {
+struct TooltipField
+{
     std::wstring key;
     std::wstring value;
 };
 
 // Generates formatted multi-line tooltip text from metadata key-value pairs.
 // Supports field truncation, max-width formatting, and duplicate detection.
-class MetadataTooltipRenderer {
-public:
-    MetadataTooltipRenderer()
-        : m_maxWidth(80) {
-    }
+class MetadataTooltipRenderer
+{
+  public:
+    MetadataTooltipRenderer() : m_maxWidth(80) {}
 
     // Add a metadata field (key-value pair) to the tooltip
-    void AddField(const std::wstring& key, const std::wstring& value) {
-        if (key.empty()) return;
-        m_fields.push_back({ key, value });
+    void AddField(const std::wstring& key, const std::wstring& value)
+    {
+        if (key.empty())
+            return;
+        m_fields.push_back({key, value});
     }
 
     // Format all fields into a multi-line tooltip string
     // Format: "Key: Value\n" per field, with value truncation at max width
-    std::wstring FormatTooltipText() const {
-        if (m_fields.empty()) return std::wstring();
+    std::wstring FormatTooltipText() const
+    {
+        if (m_fields.empty())
+            return std::wstring();
 
         std::wstring result;
         // Pre-calculate approximate size
@@ -61,10 +65,9 @@ public:
             }
 
             // Calculate available width for value
-            const size_t separatorLen = 2; // ": "
-            const size_t availableWidth = (m_maxWidth > paddedKey.size() + separatorLen)
-                ? m_maxWidth - paddedKey.size() - separatorLen
-                : 20;
+            const size_t separatorLen = 2;  // ": "
+            const size_t availableWidth =
+                (m_maxWidth > paddedKey.size() + separatorLen) ? m_maxWidth - paddedKey.size() - separatorLen : 20;
 
             std::wstring truncatedValue = TruncateValue(field.value, availableWidth);
 
@@ -80,42 +83,53 @@ public:
     }
 
     // Return number of fields currently stored
-    size_t GetFieldCount() const {
+    size_t GetFieldCount() const
+    {
         return m_fields.size();
     }
 
     // Set the maximum character width for formatted lines
-    void SetMaxWidth(uint32_t chars) {
+    void SetMaxWidth(uint32_t chars)
+    {
         m_maxWidth = (std::max)(chars, static_cast<uint32_t>(20));
     }
 
     // Truncate a value string to maxLen, appending ellipsis if needed
-    static std::wstring TruncateValue(const std::wstring& value, size_t maxLen) {
-        if (maxLen < 4) maxLen = 4;
-        if (value.size() <= maxLen) return value;
+    static std::wstring TruncateValue(const std::wstring& value, size_t maxLen)
+    {
+        if (maxLen < 4)
+            maxLen = 4;
+        if (value.size() <= maxLen)
+            return value;
         return value.substr(0, maxLen - 3) + L"...";
     }
 
     // Check if a field with the given key already exists
-    bool HasField(const std::wstring& key) const {
+    bool HasField(const std::wstring& key) const
+    {
         for (const auto& f : m_fields) {
-            if (f.key == key) return true;
+            if (f.key == key)
+                return true;
         }
         return false;
     }
 
     // Clear all fields
-    void Clear() {
+    void Clear()
+    {
         m_fields.clear();
     }
 
     // Get the current max width setting
-    uint32_t GetMaxWidth() const { return m_maxWidth; }
+    uint32_t GetMaxWidth() const
+    {
+        return m_maxWidth;
+    }
 
-private:
+  private:
     std::vector<TooltipField> m_fields;
     uint32_t m_maxWidth;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

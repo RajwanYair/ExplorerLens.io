@@ -12,33 +12,31 @@ namespace Engine {
 
 TestSuiteExpansion::TestSuiteExpansion() = default;
 
-TestSuiteExpansion::TestSuiteExpansion(const TestExpansionConfig& config)
-    : m_config(config) {
-}
+TestSuiteExpansion::TestSuiteExpansion(const TestExpansionConfig& config) : m_config(config) {}
 
 //==============================================================================
 // Decoder Test Specifications
 //==============================================================================
-std::vector<DecoderTestSpec> TestSuiteExpansion::GetDecoderTestSpecs() const {
+std::vector<DecoderTestSpec> TestSuiteExpansion::GetDecoderTestSpecs() const
+{
     std::vector<DecoderTestSpec> specs;
 
-    auto addSpec = [&](const wchar_t* name, const wchar_t* cls, uint32_t current,
-        bool valid, bool trunc, bool corrupt, bool zero, bool perf) {
-            DecoderTestSpec s;
-            s.formatName = name;
-            s.decoderClass = cls;
-            s.minTestCount = m_config.targetTestsPerDecoder;
-            s.currentTestCount = current;
-            s.hasValidFile = valid;
-            s.hasTruncatedFile = trunc;
-            s.hasCorruptFile = corrupt;
-            s.hasZeroByteFile = zero;
-            s.hasPerformance = perf;
-            s.coveragePercent = (s.minTestCount > 0)
-                ? (static_cast<double>(s.currentTestCount) / s.minTestCount * 100.0)
-                : 0.0;
-            specs.push_back(s);
-        };
+    auto addSpec = [&](const wchar_t* name, const wchar_t* cls, uint32_t current, bool valid, bool trunc, bool corrupt,
+                       bool zero, bool perf) {
+        DecoderTestSpec s;
+        s.formatName = name;
+        s.decoderClass = cls;
+        s.minTestCount = m_config.targetTestsPerDecoder;
+        s.currentTestCount = current;
+        s.hasValidFile = valid;
+        s.hasTruncatedFile = trunc;
+        s.hasCorruptFile = corrupt;
+        s.hasZeroByteFile = zero;
+        s.hasPerformance = perf;
+        s.coveragePercent =
+            (s.minTestCount > 0) ? (static_cast<double>(s.currentTestCount) / s.minTestCount * 100.0) : 0.0;
+        specs.push_back(s);
+    };
 
     // Core decoders (25+)
     addSpec(L"PNG", L"ImageDecoder", 8, true, true, true, true, true);
@@ -84,7 +82,8 @@ std::vector<DecoderTestSpec> TestSuiteExpansion::GetDecoderTestSpecs() const {
 //==============================================================================
 // Coverage Analysis
 //==============================================================================
-std::vector<CoverageTarget> TestSuiteExpansion::CalculateCoverageGaps() const {
+std::vector<CoverageTarget> TestSuiteExpansion::CalculateCoverageGaps() const
+{
     std::vector<CoverageTarget> targets;
 
     auto addTarget = [&](const wchar_t* component, uint32_t current, uint32_t target) {
@@ -95,7 +94,7 @@ std::vector<CoverageTarget> TestSuiteExpansion::CalculateCoverageGaps() const {
         t.gap = (target > current) ? (target - current) : 0;
         t.coveragePercent = (target > 0) ? (static_cast<double>(current) / target * 100.0) : 100.0;
         targets.push_back(t);
-        };
+    };
 
     addTarget(L"Core Decoders", 110, 360);
     addTarget(L"Plugin System", 50, 100);
@@ -111,50 +110,64 @@ std::vector<CoverageTarget> TestSuiteExpansion::CalculateCoverageGaps() const {
     return targets;
 }
 
-uint32_t TestSuiteExpansion::GetTotalTestCount() const {
+uint32_t TestSuiteExpansion::GetTotalTestCount() const
+{
     auto specs = GetDecoderTestSpecs();
     uint32_t total = 0;
     for (const auto& s : specs) {
         total += s.currentTestCount;
     }
     // Add infrastructure tests (cache, memory, pipeline, GPU, etc.)
-    total += 200; // Approximate infrastructure test count
+    total += 200;  // Approximate infrastructure test count
     return total;
 }
 
-TestSuiteSummary TestSuiteExpansion::ComputeSummary(
-    const std::vector<TestResult>& results) const {
-
+TestSuiteSummary TestSuiteExpansion::ComputeSummary(const std::vector<TestResult>& results) const
+{
     TestSuiteSummary summary;
     summary.totalTests = static_cast<uint32_t>(results.size());
 
     for (const auto& r : results) {
         summary.totalDurationMs += r.durationMs;
         switch (r.verdict) {
-        case TestVerdict::Pass: summary.passed++; break;
-        case TestVerdict::Fail: summary.failed++; summary.failures.push_back(r); break;
-        case TestVerdict::Skip: summary.skipped++; break;
-        case TestVerdict::Error: summary.errors++; summary.failures.push_back(r); break;
-        case TestVerdict::Timeout: summary.timeouts++; summary.failures.push_back(r); break;
-        case TestVerdict::Flaky: summary.flaky++; break;
+            case TestVerdict::Pass:
+                summary.passed++;
+                break;
+            case TestVerdict::Fail:
+                summary.failed++;
+                summary.failures.push_back(r);
+                break;
+            case TestVerdict::Skip:
+                summary.skipped++;
+                break;
+            case TestVerdict::Error:
+                summary.errors++;
+                summary.failures.push_back(r);
+                break;
+            case TestVerdict::Timeout:
+                summary.timeouts++;
+                summary.failures.push_back(r);
+                break;
+            case TestVerdict::Flaky:
+                summary.flaky++;
+                break;
         }
     }
 
-    summary.passRate = (summary.totalTests > 0)
-        ? (static_cast<double>(summary.passed) / summary.totalTests * 100.0)
-        : 0.0;
+    summary.passRate =
+        (summary.totalTests > 0) ? (static_cast<double>(summary.passed) / summary.totalTests * 100.0) : 0.0;
 
     return summary;
 }
 
-bool TestSuiteExpansion::MeetsTargets() const {
+bool TestSuiteExpansion::MeetsTargets() const
+{
     uint32_t total = GetTotalTestCount();
     return total >= m_config.targetTotalTests;
 }
 
-std::vector<std::wstring> TestSuiteExpansion::GetTestFilesForDecoder(
-    const std::wstring& decoderName) const {
-
+std::vector<std::wstring> TestSuiteExpansion::GetTestFilesForDecoder(const std::wstring& decoderName) const
+{
     std::vector<std::wstring> files;
     std::wstring base = m_config.testArchiveDir + L"\\" + decoderName + L"\\";
     files.push_back(base + L"valid_sample");
@@ -168,33 +181,53 @@ std::vector<std::wstring> TestSuiteExpansion::GetTestFilesForDecoder(
 //==============================================================================
 // Static Name Helpers
 //==============================================================================
-const wchar_t* TestSuiteExpansion::GetCategoryName(TestSuiteCategory category) {
+const wchar_t* TestSuiteExpansion::GetCategoryName(TestSuiteCategory category)
+{
     switch (category) {
-    case TestSuiteCategory::UnitTest: return L"UnitTest";
-    case TestSuiteCategory::IntegrationTest: return L"IntegrationTest";
-    case TestSuiteCategory::DecoderTest: return L"DecoderTest";
-    case TestSuiteCategory::PerformanceTest: return L"PerformanceTest";
-    case TestSuiteCategory::FuzzTest: return L"FuzzTest";
-    case TestSuiteCategory::RegressionTest: return L"RegressionTest";
-    case TestSuiteCategory::StressTest: return L"StressTest";
-    case TestSuiteCategory::EndToEndTest: return L"EndToEndTest";
-    case TestSuiteCategory::COMTest: return L"COMTest";
-    case TestSuiteCategory::PlatformTest: return L"PlatformTest";
-    default: return L"Unknown";
+        case TestSuiteCategory::UnitTest:
+            return L"UnitTest";
+        case TestSuiteCategory::IntegrationTest:
+            return L"IntegrationTest";
+        case TestSuiteCategory::DecoderTest:
+            return L"DecoderTest";
+        case TestSuiteCategory::PerformanceTest:
+            return L"PerformanceTest";
+        case TestSuiteCategory::FuzzTest:
+            return L"FuzzTest";
+        case TestSuiteCategory::RegressionTest:
+            return L"RegressionTest";
+        case TestSuiteCategory::StressTest:
+            return L"StressTest";
+        case TestSuiteCategory::EndToEndTest:
+            return L"EndToEndTest";
+        case TestSuiteCategory::COMTest:
+            return L"COMTest";
+        case TestSuiteCategory::PlatformTest:
+            return L"PlatformTest";
+        default:
+            return L"Unknown";
     }
 }
 
-const wchar_t* TestSuiteExpansion::GetVerdictName(TestVerdict verdict) {
+const wchar_t* TestSuiteExpansion::GetVerdictName(TestVerdict verdict)
+{
     switch (verdict) {
-    case TestVerdict::Pass: return L"Pass";
-    case TestVerdict::Fail: return L"Fail";
-    case TestVerdict::Skip: return L"Skip";
-    case TestVerdict::Error: return L"Error";
-    case TestVerdict::Timeout: return L"Timeout";
-    case TestVerdict::Flaky: return L"Flaky";
-    default: return L"Unknown";
+        case TestVerdict::Pass:
+            return L"Pass";
+        case TestVerdict::Fail:
+            return L"Fail";
+        case TestVerdict::Skip:
+            return L"Skip";
+        case TestVerdict::Error:
+            return L"Error";
+        case TestVerdict::Timeout:
+            return L"Timeout";
+        case TestVerdict::Flaky:
+            return L"Flaky";
+        default:
+            return L"Unknown";
     }
 }
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

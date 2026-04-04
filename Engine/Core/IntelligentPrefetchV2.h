@@ -8,12 +8,12 @@
 // Used by:   Pipeline I/O layer
 // ============================================================================
 
-#include <string>
-#include <vector>
-#include <cstdint>
-#include <unordered_map>
-#include <mutex>
 #include <chrono>
+#include <cstdint>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -30,14 +30,21 @@ enum class PrefetchStrategyV2 {
     Aggressive
 };
 
-inline const char* PrefetchStrategyV2Name(PrefetchStrategyV2 value) {
+inline const char* PrefetchStrategyV2Name(PrefetchStrategyV2 value)
+{
     switch (value) {
-    case PrefetchStrategyV2::None:        return "None";
-    case PrefetchStrategyV2::Sequential:  return "Sequential";
-    case PrefetchStrategyV2::Predictive:  return "Predictive";
-    case PrefetchStrategyV2::Adaptive:    return "Adaptive";
-    case PrefetchStrategyV2::Aggressive:  return "Aggressive";
-    default:                              return "Unknown";
+        case PrefetchStrategyV2::None:
+            return "None";
+        case PrefetchStrategyV2::Sequential:
+            return "Sequential";
+        case PrefetchStrategyV2::Predictive:
+            return "Predictive";
+        case PrefetchStrategyV2::Adaptive:
+            return "Adaptive";
+        case PrefetchStrategyV2::Aggressive:
+            return "Aggressive";
+        default:
+            return "Unknown";
     }
 }
 
@@ -49,40 +56,51 @@ enum class AccessPatternV2 {
     Hybrid
 };
 
-inline const char* AccessPatternV2Name(AccessPatternV2 value) {
+inline const char* AccessPatternV2Name(AccessPatternV2 value)
+{
     switch (value) {
-    case AccessPatternV2::Random:     return "Random";
-    case AccessPatternV2::Sequential: return "Sequential";
-    case AccessPatternV2::Temporal:   return "Temporal";
-    case AccessPatternV2::Spatial:    return "Spatial";
-    case AccessPatternV2::Hybrid:     return "Hybrid";
-    default:                          return "Unknown";
+        case AccessPatternV2::Random:
+            return "Random";
+        case AccessPatternV2::Sequential:
+            return "Sequential";
+        case AccessPatternV2::Temporal:
+            return "Temporal";
+        case AccessPatternV2::Spatial:
+            return "Spatial";
+        case AccessPatternV2::Hybrid:
+            return "Hybrid";
+        default:
+            return "Unknown";
     }
 }
 
-struct PrefetchPrediction {
-    std::wstring    folderPath;
-    float           confidence = 0.0f;
-    uint32_t        suggestedCount = 0;
-    AccessPatternV2   pattern = AccessPatternV2::Random;
+struct PrefetchPrediction
+{
+    std::wstring folderPath;
+    float confidence = 0.0f;
+    uint32_t suggestedCount = 0;
+    AccessPatternV2 pattern = AccessPatternV2::Random;
     PrefetchStrategyV2 strategy = PrefetchStrategyV2::None;
 
-    bool IsViable(float threshold) const {
+    bool IsViable(float threshold) const
+    {
         return confidence >= threshold && suggestedCount > 0;
     }
 };
 
-struct FolderAccessEntry {
-    std::wstring    folderPath;
-    uint32_t        accessCount = 0;
-    uint64_t        lastAccessMs = 0;
-    uint64_t        firstAccessMs = 0;
-    AccessPatternV2   detectedPattern = AccessPatternV2::Random;
+struct FolderAccessEntry
+{
+    std::wstring folderPath;
+    uint32_t accessCount = 0;
+    uint64_t lastAccessMs = 0;
+    uint64_t firstAccessMs = 0;
+    AccessPatternV2 detectedPattern = AccessPatternV2::Random;
 };
 
-class IntelligentPrefetchV2 {
-public:
-    static constexpr float    CONFIDENCE_THRESHOLD = 0.7f;
+class IntelligentPrefetchV2
+{
+  public:
+    static constexpr float CONFIDENCE_THRESHOLD = 0.7f;
     static constexpr uint32_t MAX_HISTORY_ENTRIES = 10000;
     static constexpr uint32_t MAX_PREDICTIONS = 32;
     static constexpr uint32_t MIN_ACCESS_FOR_PREDICT = 3;
@@ -93,7 +111,8 @@ public:
     IntelligentPrefetchV2(const IntelligentPrefetchV2&) = delete;
     IntelligentPrefetchV2& operator=(const IntelligentPrefetchV2&) = delete;
 
-    PrefetchPrediction Predict(const std::wstring& currentFolder) {
+    PrefetchPrediction Predict(const std::wstring& currentFolder)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         PrefetchPrediction prediction;
@@ -123,10 +142,9 @@ public:
 
         if (prediction.confidence >= CONFIDENCE_THRESHOLD) {
             prediction.strategy = (entry.detectedPattern == AccessPatternV2::Sequential)
-                ? PrefetchStrategyV2::Sequential
-                : PrefetchStrategyV2::Adaptive;
-        }
-        else {
+                                      ? PrefetchStrategyV2::Sequential
+                                      : PrefetchStrategyV2::Adaptive;
+        } else {
             prediction.strategy = PrefetchStrategyV2::None;
         }
 
@@ -138,7 +156,8 @@ public:
         return prediction;
     }
 
-    void RecordAccess(const std::wstring& folderPath) {
+    void RecordAccess(const std::wstring& folderPath)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint64_t now = GetCurrentTimeMs();
 
@@ -155,11 +174,9 @@ public:
             uint64_t avgInterval = (now - entry.firstAccessMs) / entry.accessCount;
             if (avgInterval < 2000) {
                 entry.detectedPattern = AccessPatternV2::Sequential;
-            }
-            else if (avgInterval < 30000) {
+            } else if (avgInterval < 30000) {
                 entry.detectedPattern = AccessPatternV2::Temporal;
-            }
-            else {
+            } else {
                 entry.detectedPattern = AccessPatternV2::Random;
             }
         }
@@ -167,21 +184,31 @@ public:
         m_totalAccesses++;
     }
 
-    float GetAccuracyPercent() const {
+    float GetAccuracyPercent() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_totalPredictions == 0) return 0.0f;
+        if (m_totalPredictions == 0)
+            return 0.0f;
         return (static_cast<float>(m_successfulPredictions) / static_cast<float>(m_totalPredictions)) * 100.0f;
     }
 
-    size_t GetHistorySize() const {
+    size_t GetHistorySize() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_accessHistory.size();
     }
 
-    uint64_t GetTotalAccesses() const { return m_totalAccesses; }
-    uint64_t GetTotalPredictions() const { return m_totalPredictions; }
+    uint64_t GetTotalAccesses() const
+    {
+        return m_totalAccesses;
+    }
+    uint64_t GetTotalPredictions() const
+    {
+        return m_totalPredictions;
+    }
 
-    void ClearHistory() {
+    void ClearHistory()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_accessHistory.clear();
         m_totalAccesses = 0;
@@ -189,19 +216,20 @@ public:
         m_successfulPredictions = 0;
     }
 
-private:
-    uint64_t GetCurrentTimeMs() const {
+  private:
+    uint64_t GetCurrentTimeMs() const
+    {
         auto now = std::chrono::steady_clock::now();
         return static_cast<uint64_t>(
             std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
     }
 
-    mutable std::mutex                                     m_mutex;
-    std::unordered_map<std::wstring, FolderAccessEntry>    m_accessHistory;
-    uint64_t                                               m_totalAccesses = 0;
-    uint64_t                                               m_totalPredictions = 0;
-    uint64_t                                               m_successfulPredictions = 0;
+    mutable std::mutex m_mutex;
+    std::unordered_map<std::wstring, FolderAccessEntry> m_accessHistory;
+    uint64_t m_totalAccesses = 0;
+    uint64_t m_totalPredictions = 0;
+    uint64_t m_successfulPredictions = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

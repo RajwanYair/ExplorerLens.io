@@ -6,13 +6,13 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
 #include <algorithm>
 #include <chrono>
-#include <mutex>
+#include <cstdint>
 #include <cstring>
+#include <mutex>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -31,7 +31,8 @@ enum class DecompressTarget : uint8_t {
     StagingBuffer
 };
 
-struct GPUDecompRequest {
+struct GPUDecompRequest
+{
     const uint8_t* compressedData = nullptr;
     size_t compressedSize = 0;
     size_t uncompressedSize = 0;
@@ -40,7 +41,8 @@ struct GPUDecompRequest {
     uint32_t blockSize = 65536;
 };
 
-struct GPUDecompResult {
+struct GPUDecompResult
+{
     std::vector<uint8_t> data;
     size_t originalSize = 0;
     size_t decompressedSize = 0;
@@ -50,7 +52,8 @@ struct GPUDecompResult {
     std::string errorMessage;
 };
 
-struct DecompressStats {
+struct DecompressStats
+{
     uint64_t totalBytesProcessed = 0;
     uint64_t totalBlocksProcessed = 0;
     double avgThroughputMBps = 0.0;
@@ -59,14 +62,17 @@ struct DecompressStats {
     uint64_t cpuFallbacks = 0;
 };
 
-class GPUDecompressionEngine {
-public:
-    static GPUDecompressionEngine& Instance() {
+class GPUDecompressionEngine
+{
+  public:
+    static GPUDecompressionEngine& Instance()
+    {
         static GPUDecompressionEngine instance;
         return instance;
     }
 
-    inline GPUDecompResult Decompress(const GPUDecompRequest& request) const {
+    inline GPUDecompResult Decompress(const GPUDecompRequest& request) const
+    {
         GPUDecompResult result;
         if (!request.compressedData || request.compressedSize == 0) {
             result.errorMessage = "Invalid input";
@@ -78,20 +84,18 @@ public:
         result.data.resize(request.uncompressedSize > 0 ? request.uncompressedSize : request.compressedSize * 4);
         result.originalSize = request.compressedSize;
 
-        uint32_t blockCount = static_cast<uint32_t>(
-            (request.compressedSize + request.blockSize - 1) / request.blockSize);
+        uint32_t blockCount =
+            static_cast<uint32_t>((request.compressedSize + request.blockSize - 1) / request.blockSize);
 
         size_t decompressedTotal = 0;
         for (uint32_t b = 0; b < blockCount; ++b) {
             size_t blockOffset = static_cast<size_t>(b) * request.blockSize;
-            size_t blockLen = (std::min)(static_cast<size_t>(request.blockSize),
-                request.compressedSize - blockOffset);
+            size_t blockLen = (std::min)(static_cast<size_t>(request.blockSize), request.compressedSize - blockOffset);
 
             size_t outOffset = decompressedTotal;
-            size_t decompBlockSize = DecompressBlock(
-                request.compressedData + blockOffset, blockLen,
-                result.data.data() + outOffset, result.data.size() - outOffset,
-                request.codec);
+            size_t decompBlockSize =
+                DecompressBlock(request.compressedData + blockOffset, blockLen, result.data.data() + outOffset,
+                                result.data.size() - outOffset, request.codec);
 
             decompressedTotal += decompBlockSize;
         }
@@ -108,43 +112,56 @@ public:
         return result;
     }
 
-    inline bool IsCodecSupported(CompressionCodec codec) const {
+    inline bool IsCodecSupported(CompressionCodec codec) const
+    {
         switch (codec) {
-        case CompressionCodec::GDeflate:
-        case CompressionCodec::Zstd:
-        case CompressionCodec::LZ4:
-            return true;
-        default:
-            return false;
+            case CompressionCodec::GDeflate:
+            case CompressionCodec::Zstd:
+            case CompressionCodec::LZ4:
+                return true;
+            default:
+                return false;
         }
     }
 
-    inline uint32_t GetOptimalBlockSize(CompressionCodec codec) const {
+    inline uint32_t GetOptimalBlockSize(CompressionCodec codec) const
+    {
         switch (codec) {
-        case CompressionCodec::GDeflate: return 65536;
-        case CompressionCodec::Zstd:     return 131072;
-        case CompressionCodec::LZ4:      return 65536;
-        default:                         return 65536;
+            case CompressionCodec::GDeflate:
+                return 65536;
+            case CompressionCodec::Zstd:
+                return 131072;
+            case CompressionCodec::LZ4:
+                return 65536;
+            default:
+                return 65536;
         }
     }
 
-    inline std::string CodecToString(CompressionCodec codec) const {
+    inline std::string CodecToString(CompressionCodec codec) const
+    {
         switch (codec) {
-        case CompressionCodec::GDeflate: return "GDeflate";
-        case CompressionCodec::Zstd:     return "Zstandard";
-        case CompressionCodec::LZ4:      return "LZ4";
-        case CompressionCodec::Snappy:   return "Snappy";
-        case CompressionCodec::None:     return "None";
-        default:                         return "Unknown";
+            case CompressionCodec::GDeflate:
+                return "GDeflate";
+            case CompressionCodec::Zstd:
+                return "Zstandard";
+            case CompressionCodec::LZ4:
+                return "LZ4";
+            case CompressionCodec::Snappy:
+                return "Snappy";
+            case CompressionCodec::None:
+                return "None";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     GPUDecompressionEngine() = default;
 
-    inline size_t DecompressBlock(const uint8_t* input, size_t inputLen,
-        uint8_t* output, size_t outputCapacity,
-        CompressionCodec codec) const {
+    inline size_t DecompressBlock(const uint8_t* input, size_t inputLen, uint8_t* output, size_t outputCapacity,
+                                  CompressionCodec codec) const
+    {
         (void)codec;
         size_t outLen = (std::min)(inputLen, outputCapacity);
         if (input && output && outLen > 0) {
@@ -154,5 +171,5 @@ private:
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

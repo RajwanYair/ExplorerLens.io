@@ -36,7 +36,7 @@ namespace Engine {
 //==============================================================================
 class IThumbnailDecoder
 {
-public:
+  public:
     virtual ~IThumbnailDecoder() = default;
 
     //==========================================================================
@@ -63,9 +63,7 @@ public:
     /// @note If the file is an archive (ZIP, RAR), extract the first image
     /// and decode that.
     //==========================================================================
-    virtual HRESULT Decode(
-        const ThumbnailRequest& request,
-        ThumbnailResult& result) = 0;
+    virtual HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) = 0;
 
     //==========================================================================
     /// Get decoder information
@@ -113,5 +111,5 @@ public:
     virtual bool IsArchiveDecoder() const = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

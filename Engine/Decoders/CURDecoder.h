@@ -12,44 +12,60 @@
 namespace ExplorerLens::Decoders {
 
 enum class CursorFileType : uint8_t {
-    Static    = 1,  // .cur  — ICONDIR with type=2
-    Animated  = 2,  // .ani  — RIFF container
-    Unknown   = 0,
+    Static = 1,    // .cur  — ICONDIR with type=2
+    Animated = 2,  // .ani  — RIFF container
+    Unknown = 0,
 };
 
-class CURDecoder {
-public:
+class CURDecoder
+{
+  public:
     CURDecoder() = default;
 
-    struct DecodeResult {
-        bool     success   = false;
-        uint32_t width     = 0;
-        uint32_t height    = 0;
+    struct DecodeResult
+    {
+        bool success = false;
+        uint32_t width = 0;
+        uint32_t height = 0;
         uint32_t frameCount = 1;
         std::vector<uint8_t> pixelData;  // BGRA32 of best frame
         std::string error;
     };
 
-    struct CursorInfo {
-        CursorFileType type   = CursorFileType::Unknown;
-        uint32_t       frames = 0;
-        uint32_t       width  = 0;
-        uint32_t       height = 0;
-        uint32_t       hotspotX = 0;
-        uint32_t       hotspotY = 0;
+    struct CursorInfo
+    {
+        CursorFileType type = CursorFileType::Unknown;
+        uint32_t frames = 0;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t hotspotX = 0;
+        uint32_t hotspotY = 0;
 
-        bool IsValid() const { return type != CursorFileType::Unknown && width > 0; }
+        bool IsValid() const
+        {
+            return type != CursorFileType::Unknown && width > 0;
+        }
     };
 
-    CursorInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 64) const { (void)filePath; (void)targetWidth; return {}; }
+    CursorInfo ReadInfo(const std::string& filePath) const
+    {
+        (void)filePath;
+        return {};
+    }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 64) const
+    {
+        (void)filePath;
+        (void)targetWidth;
+        return {};
+    }
 
-    static bool IsCursorExtension(const std::string& ext) {
+    static bool IsCursorExtension(const std::string& ext)
+    {
         return ext == ".cur" || ext == ".CUR" || ext == ".ani" || ext == ".ANI";
     }
-    static constexpr const char* EXTENSIONS[] = { ".cur", ".ani", nullptr };
+    static constexpr const char* EXTENSIONS[] = {".cur", ".ani", nullptr};
 
-private:
+  private:
     DecodeResult DecodeStatic(const std::string& filePath, uint32_t targetWidth) const;
     DecodeResult DecodeAnimated(const std::string& filePath, uint32_t targetWidth) const;
 };

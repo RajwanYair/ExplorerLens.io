@@ -6,14 +6,14 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <mutex>
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <cstring>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -34,7 +34,8 @@ enum class AccessTemperature : uint8_t {
     Frozen
 };
 
-struct CompressedEntry {
+struct CompressedEntry
+{
     std::vector<uint8_t> data;
     size_t originalSize = 0;
     size_t compressedSize = 0;
@@ -45,7 +46,8 @@ struct CompressedEntry {
     double compressionRatio = 1.0;
 };
 
-struct CompressionEngineStats {
+struct CompressionEngineStats
+{
     uint64_t totalEntries = 0;
     uint64_t compressedEntries = 0;
     size_t totalOriginalBytes = 0;
@@ -57,15 +59,17 @@ struct CompressionEngineStats {
     double avgCompressionTimeUs = 0.0;
 };
 
-class MemoryCompressionEngine {
-public:
-    static MemoryCompressionEngine& Instance() {
+class MemoryCompressionEngine
+{
+  public:
+    static MemoryCompressionEngine& Instance()
+    {
         static MemoryCompressionEngine instance;
         return instance;
     }
 
-    inline std::string Store(const std::string& key, const uint8_t* data, size_t size,
-        bool compressImmediately = false) {
+    inline std::string Store(const std::string& key, const uint8_t* data, size_t size, bool compressImmediately = false)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         CompressedEntry entry;
         entry.originalSize = size;
@@ -81,8 +85,7 @@ public:
             entry.state = CompressionState::Compressed;
             m_stats.compressionOps++;
             m_stats.compressedEntries++;
-        }
-        else {
+        } else {
             entry.data.assign(data, data + size);
             entry.compressedSize = size;
             entry.compressionRatio = 1.0;
@@ -93,10 +96,12 @@ public:
         return key;
     }
 
-    inline std::vector<uint8_t> Retrieve(const std::string& key) {
+    inline std::vector<uint8_t> Retrieve(const std::string& key)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_entries.find(key);
-        if (it == m_entries.end()) return {};
+        if (it == m_entries.end())
+            return {};
 
         auto& entry = it->second;
         entry.lastAccessTime = CurrentTimestamp();
@@ -110,16 +115,15 @@ public:
         return entry.data;
     }
 
-    inline uint64_t CompressColdEntries(uint64_t ageThresholdMs = 30000) {
+    inline uint64_t CompressColdEntries(uint64_t ageThresholdMs = 30000)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint64_t now = CurrentTimestamp();
         uint64_t compressed = 0;
 
         for (auto& [key, entry] : m_entries) {
-            if (entry.state == CompressionState::Uncompressed &&
-                (now - entry.lastAccessTime) > ageThresholdMs &&
-                entry.originalSize > 256) {
-
+            if (entry.state == CompressionState::Uncompressed && (now - entry.lastAccessTime) > ageThresholdMs
+                && entry.originalSize > 256) {
                 std::vector<uint8_t> compData = CompressData(entry.data.data(), entry.data.size());
                 if (compData.size() < entry.data.size() * 0.9) {
                     entry.data = std::move(compData);
@@ -137,61 +141,75 @@ public:
         return compressed;
     }
 
-    inline AccessTemperature ClassifyTemperature(uint32_t accessCount) const {
-        if (accessCount > 50) return AccessTemperature::Hot;
-        if (accessCount > 20) return AccessTemperature::Warm;
-        if (accessCount > 5)  return AccessTemperature::Cool;
-        if (accessCount > 1)  return AccessTemperature::Cold;
+    inline AccessTemperature ClassifyTemperature(uint32_t accessCount) const
+    {
+        if (accessCount > 50)
+            return AccessTemperature::Hot;
+        if (accessCount > 20)
+            return AccessTemperature::Warm;
+        if (accessCount > 5)
+            return AccessTemperature::Cool;
+        if (accessCount > 1)
+            return AccessTemperature::Cold;
         return AccessTemperature::Frozen;
     }
 
-    inline CompressionEngineStats GetStats() const {
+    inline CompressionEngineStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    inline std::string TemperatureToString(AccessTemperature temp) const {
+    inline std::string TemperatureToString(AccessTemperature temp) const
+    {
         switch (temp) {
-        case AccessTemperature::Hot:    return "Hot";
-        case AccessTemperature::Warm:   return "Warm";
-        case AccessTemperature::Cool:   return "Cool";
-        case AccessTemperature::Cold:   return "Cold";
-        case AccessTemperature::Frozen: return "Frozen";
-        default:                        return "Unknown";
+            case AccessTemperature::Hot:
+                return "Hot";
+            case AccessTemperature::Warm:
+                return "Warm";
+            case AccessTemperature::Cool:
+                return "Cool";
+            case AccessTemperature::Cold:
+                return "Cold";
+            case AccessTemperature::Frozen:
+                return "Frozen";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     MemoryCompressionEngine() = default;
 
-    inline uint64_t CurrentTimestamp() const {
+    inline uint64_t CurrentTimestamp() const
+    {
         return static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count());
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+                .count());
     }
 
-    inline std::vector<uint8_t> CompressData(const uint8_t* data, size_t size) const {
+    inline std::vector<uint8_t> CompressData(const uint8_t* data, size_t size) const
+    {
         std::vector<uint8_t> result;
         result.reserve(size);
         size_t i = 0;
         while (i < size) {
             size_t runStart = i;
             uint8_t val = data[i];
-            while (i < size && data[i] == val && (i - runStart) < 255) ++i;
+            while (i < size && data[i] == val && (i - runStart) < 255)
+                ++i;
             uint8_t runLen = static_cast<uint8_t>(i - runStart);
             if (runLen >= 3) {
                 result.push_back(0xFF);
                 result.push_back(runLen);
                 result.push_back(val);
-            }
-            else {
+            } else {
                 for (size_t j = runStart; j < i; ++j) {
                     if (data[j] == 0xFF) {
                         result.push_back(0xFF);
                         result.push_back(1);
                         result.push_back(0xFF);
-                    }
-                    else {
+                    } else {
                         result.push_back(data[j]);
                     }
                 }
@@ -200,7 +218,8 @@ private:
         return result;
     }
 
-    inline std::vector<uint8_t> DecompressData(const std::vector<uint8_t>& compressed, size_t originalSize) const {
+    inline std::vector<uint8_t> DecompressData(const std::vector<uint8_t>& compressed, size_t originalSize) const
+    {
         std::vector<uint8_t> result;
         result.reserve(originalSize);
         size_t i = 0;
@@ -212,8 +231,7 @@ private:
                     result.push_back(val);
                 }
                 i += 3;
-            }
-            else {
+            } else {
                 result.push_back(compressed[i]);
                 ++i;
             }
@@ -221,7 +239,8 @@ private:
         return result;
     }
 
-    inline void UpdateStats() {
+    inline void UpdateStats()
+    {
         m_stats.totalEntries = m_entries.size();
         size_t origTotal = 0, compTotal = 0;
         for (const auto& [key, entry] : m_entries) {
@@ -239,5 +258,5 @@ private:
     CompressionEngineStats m_stats;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

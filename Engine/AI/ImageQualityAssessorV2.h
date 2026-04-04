@@ -6,14 +6,14 @@
 #pragma once
 
 #include <windows.h>
-#include <vector>
-#include <cstdint>
-#include <cmath>
 #include <algorithm>
-#include <string>
-#include <chrono>
 #include <array>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
 #include <numeric>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -25,7 +25,7 @@ enum class IQAMetric : uint8_t {
     NIQE,
     CLIP_IQA,
     SSIM_Reference,
-    PSNR = SSIM_Reference, // compat alias
+    PSNR = SSIM_Reference,  // compat alias
     COUNT = SSIM_Reference + 1
 };
 enum class IQADefect : uint8_t {
@@ -46,14 +46,16 @@ enum class IQAGrade : uint8_t {
     COUNT
 };
 
-struct IQAScore {
+struct IQAScore
+{
     IQAMetric metric = IQAMetric::BRISQUE;
     float value = 0.0f;
     IQAGrade grade = IQAGrade::Fair;
     IQADefect primaryDefect = IQADefect::None;
 };
 
-struct ImageQualityReport {
+struct ImageQualityReport
+{
     IQAScore overallScore;
     float blurScore = 0.0f;
     float noiseScore = 0.0f;
@@ -61,91 +63,98 @@ struct ImageQualityReport {
     bool worthEnhancing = false;
 };
 
-class ImageQualityAssessor {
-public:
-    static const wchar_t* MetricName(IQAMetric m) {
+class ImageQualityAssessor
+{
+  public:
+    static const wchar_t* MetricName(IQAMetric m)
+    {
         switch (m) {
-        case IQAMetric::BRISQUE:
-            return L"BRISQUE";
-        case IQAMetric::NIQE:
-            return L"NIQE";
-        case IQAMetric::CLIP_IQA:
-            return L"CLIP-IQA";
-        case IQAMetric::SSIM_Reference:
-            return L"SSIM (Reference)";
-        default:
-            return L"Unknown";
+            case IQAMetric::BRISQUE:
+                return L"BRISQUE";
+            case IQAMetric::NIQE:
+                return L"NIQE";
+            case IQAMetric::CLIP_IQA:
+                return L"CLIP-IQA";
+            case IQAMetric::SSIM_Reference:
+                return L"SSIM (Reference)";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* DefectName(IQADefect d) {
+    static const wchar_t* DefectName(IQADefect d)
+    {
         switch (d) {
-        case IQADefect::None:
-            return L"None";
-        case IQADefect::Blur:
-            return L"Blur";
-        case IQADefect::Noise:
-            return L"Noise";
-        case IQADefect::Overexposed:
-            return L"Overexposed";
-        case IQADefect::Underexposed:
-            return L"Underexposed";
-        case IQADefect::Compression:
-            return L"Compression";
-        default:
-            return L"Unknown";
+            case IQADefect::None:
+                return L"None";
+            case IQADefect::Blur:
+                return L"Blur";
+            case IQADefect::Noise:
+                return L"Noise";
+            case IQADefect::Overexposed:
+                return L"Overexposed";
+            case IQADefect::Underexposed:
+                return L"Underexposed";
+            case IQADefect::Compression:
+                return L"Compression";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* GradeName(IQAGrade g) {
+    static const wchar_t* GradeName(IQAGrade g)
+    {
         switch (g) {
-        case IQAGrade::Excellent:
-            return L"Excellent";
-        case IQAGrade::Good:
-            return L"Good";
-        case IQAGrade::Fair:
-            return L"Fair";
-        case IQAGrade::Poor:
-            return L"Poor";
-        case IQAGrade::Unacceptable:
-            return L"Unacceptable";
-        default:
-            return L"Unknown";
+            case IQAGrade::Excellent:
+                return L"Excellent";
+            case IQAGrade::Good:
+                return L"Good";
+            case IQAGrade::Fair:
+                return L"Fair";
+            case IQAGrade::Poor:
+                return L"Poor";
+            case IQAGrade::Unacceptable:
+                return L"Unacceptable";
+            default:
+                return L"Unknown";
         }
     }
-    static constexpr size_t MetricCount() {
+    static constexpr size_t MetricCount()
+    {
         return static_cast<size_t>(IQAMetric::COUNT);
     }
-    static constexpr size_t DefectCount() {
+    static constexpr size_t DefectCount()
+    {
         return static_cast<size_t>(IQADefect::COUNT);
     }
-    static constexpr size_t GradeCount() {
+    static constexpr size_t GradeCount()
+    {
         return static_cast<size_t>(IQAGrade::COUNT);
     }
 
-    static double ComputeLaplacianVariance(const uint8_t* gray, uint32_t width,
-        uint32_t height, uint32_t stride) {
-        if (!gray || width < 3 || height < 3) return 0.0;
+    static double ComputeLaplacianVariance(const uint8_t* gray, uint32_t width, uint32_t height, uint32_t stride)
+    {
+        if (!gray || width < 3 || height < 3)
+            return 0.0;
         double sum = 0.0, sumSq = 0.0;
         uint32_t count = 0;
         for (uint32_t y = 1; y < height - 1; ++y) {
             for (uint32_t x = 1; x < width - 1; ++x) {
-                int lap = 4 * gray[y * stride + x]
-                    - gray[(y - 1) * stride + x]
-                    - gray[(y + 1) * stride + x]
-                    - gray[y * stride + (x - 1)]
-                    - gray[y * stride + (x + 1)];
+                int lap = 4 * gray[y * stride + x] - gray[(y - 1) * stride + x] - gray[(y + 1) * stride + x]
+                          - gray[y * stride + (x - 1)] - gray[y * stride + (x + 1)];
                 sum += lap;
                 sumSq += static_cast<double>(lap) * lap;
                 ++count;
             }
         }
-        if (count == 0) return 0.0;
+        if (count == 0)
+            return 0.0;
         double mean = sum / count;
         return (sumSq / count) - (mean * mean);
     }
 
-    static double ComputeMeanBrightness(const uint8_t* gray, uint32_t width,
-        uint32_t height, uint32_t stride) {
-        if (!gray || width == 0 || height == 0) return 0.0;
+    static double ComputeMeanBrightness(const uint8_t* gray, uint32_t width, uint32_t height, uint32_t stride)
+    {
+        if (!gray || width == 0 || height == 0)
+            return 0.0;
         uint64_t sum = 0;
         for (uint32_t y = 0; y < height; ++y)
             for (uint32_t x = 0; x < width; ++x)
@@ -153,46 +162,59 @@ public:
         return static_cast<double>(sum) / (width * height);
     }
 
-    static std::vector<IQADefect> DetectExposureDefects(const uint8_t* gray,
-        uint32_t width, uint32_t height, uint32_t stride) {
+    static std::vector<IQADefect> DetectExposureDefects(const uint8_t* gray, uint32_t width, uint32_t height,
+                                                        uint32_t stride)
+    {
         std::vector<IQADefect> defects;
-        if (!gray || width == 0 || height == 0) return defects;
+        if (!gray || width == 0 || height == 0)
+            return defects;
         uint32_t bright = 0, dark = 0;
         uint32_t total = width * height;
         for (uint32_t y = 0; y < height; ++y) {
             for (uint32_t x = 0; x < width; ++x) {
                 uint8_t v = gray[y * stride + x];
-                if (v > 240) ++bright;
-                if (v < 15) ++dark;
+                if (v > 240)
+                    ++bright;
+                if (v < 15)
+                    ++dark;
             }
         }
-        if (bright > total * 3 / 10) defects.push_back(IQADefect::Overexposed);
-        if (dark > total * 3 / 10) defects.push_back(IQADefect::Underexposed);
+        if (bright > total * 3 / 10)
+            defects.push_back(IQADefect::Overexposed);
+        if (dark > total * 3 / 10)
+            defects.push_back(IQADefect::Underexposed);
         return defects;
     }
 
-    static IQAGrade GradeBySharpness(double laplacianVariance) {
-        if (laplacianVariance > 500.0) return IQAGrade::Excellent;
-        if (laplacianVariance > 200.0) return IQAGrade::Good;
-        if (laplacianVariance > 100.0) return IQAGrade::Fair;
-        if (laplacianVariance > 30.0) return IQAGrade::Poor;
+    static IQAGrade GradeBySharpness(double laplacianVariance)
+    {
+        if (laplacianVariance > 500.0)
+            return IQAGrade::Excellent;
+        if (laplacianVariance > 200.0)
+            return IQAGrade::Good;
+        if (laplacianVariance > 100.0)
+            return IQAGrade::Fair;
+        if (laplacianVariance > 30.0)
+            return IQAGrade::Poor;
         return IQAGrade::Unacceptable;
     }
 
-    static ImageQualityReport Assess(const uint8_t* gray, uint32_t width,
-        uint32_t height, uint32_t stride) {
+    static ImageQualityReport Assess(const uint8_t* gray, uint32_t width, uint32_t height, uint32_t stride)
+    {
         ImageQualityReport report;
         double lapVar = ComputeLaplacianVariance(gray, width, height, stride);
         report.overallScore.metric = IQAMetric::BRISQUE;
         report.overallScore.value = static_cast<float>(lapVar);
         report.overallScore.grade = GradeBySharpness(lapVar);
-        report.blurScore = (lapVar > 500.0f) ? 0.0f :
-            (lapVar < 10.0f) ? 1.0f :
-            1.0f - static_cast<float>(lapVar / 500.0);
+        report.blurScore = (lapVar > 500.0f)  ? 0.0f
+                           : (lapVar < 10.0f) ? 1.0f
+                                              : 1.0f - static_cast<float>(lapVar / 500.0);
         auto defects = DetectExposureDefects(gray, width, height, stride);
         report.exposureOk = defects.empty() ? 1.0f : 0.0f;
-        if (lapVar < 100.0) report.overallScore.primaryDefect = IQADefect::Blur;
-        else if (!defects.empty()) report.overallScore.primaryDefect = defects[0];
+        if (lapVar < 100.0)
+            report.overallScore.primaryDefect = IQADefect::Blur;
+        else if (!defects.empty())
+            report.overallScore.primaryDefect = defects[0];
         report.worthEnhancing = (report.blurScore > 0.5f || report.exposureOk < 0.5f);
         return report;
     }
@@ -202,49 +224,59 @@ public:
 
 /// Quality tier derived from the overall quality score.
 enum class QualityTierV2 : uint8_t {
-    Excellent = 0,   // > 0.8
-    Good,            // > 0.6
-    Fair,            // > 0.4
-    Poor,            // > 0.2
-    Bad              // <= 0.2
+    Excellent = 0,  // > 0.8
+    Good,           // > 0.6
+    Fair,           // > 0.4
+    Poor,           // > 0.2
+    Bad             // <= 0.2
 };
 
 /// Per-axis quality sub-scores; all values in [0, 1].
-struct QualityScoreV2 {
+struct QualityScoreV2
+{
     float overall = 0.0f;
     float sharpness = 0.0f;
-    float noise = 0.0f;   // 1.0 = low noise (good), 0.0 = very noisy
+    float noise = 0.0f;  // 1.0 = low noise (good), 0.0 = very noisy
     float contrast = 0.0f;
     float colorfulness = 0.0f;
     float exposure = 0.0f;
 };
 
 /// Cumulative assessment statistics.
-struct AssessmentStatsV2 {
+struct AssessmentStatsV2
+{
     uint64_t imagesAssessed = 0;
-    double   totalScore = 0.0;
-    double   totalAssessTimeMs = 0.0;
-    std::array<uint64_t, 5> tierDistribution{}; // [Excellent..Bad]
-    double AvgScore()  const { return imagesAssessed ? totalScore / static_cast<double>(imagesAssessed) : 0.0; }
-    double AvgTimeMs() const { return imagesAssessed ? totalAssessTimeMs / static_cast<double>(imagesAssessed) : 0.0; }
+    double totalScore = 0.0;
+    double totalAssessTimeMs = 0.0;
+    std::array<uint64_t, 5> tierDistribution{};  // [Excellent..Bad]
+    double AvgScore() const
+    {
+        return imagesAssessed ? totalScore / static_cast<double>(imagesAssessed) : 0.0;
+    }
+    double AvgTimeMs() const
+    {
+        return imagesAssessed ? totalAssessTimeMs / static_cast<double>(imagesAssessed) : 0.0;
+    }
 };
 
 /// No-reference image quality assessor (BRISQUE-inspired).
-class ImageQualityAssessorV2 {
-public:
-    ImageQualityAssessorV2() {
+class ImageQualityAssessorV2
+{
+  public:
+    ImageQualityAssessorV2()
+    {
         InitializeSRWLock(&m_statsLock);
     }
 
     /// Full assessment returning all sub-metrics.
-    inline QualityScoreV2 Assess(const uint8_t* rgbaData,
-        uint32_t width,
-        uint32_t height) {
+    inline QualityScoreV2 Assess(const uint8_t* rgbaData, uint32_t width, uint32_t height)
+    {
         using Clock = std::chrono::high_resolution_clock;
         auto t0 = Clock::now();
 
         QualityScoreV2 qs{};
-        if (!rgbaData || width < 3 || height < 3) return qs;
+        if (!rgbaData || width < 3 || height < 3)
+            return qs;
 
         const uint32_t pixelCount = width * height;
 
@@ -271,11 +303,8 @@ public:
         qs.exposure = ComputeExposure(lum, pixelCount);
 
         // Weighted overall
-        qs.overall = 0.35f * qs.sharpness
-            + 0.20f * qs.noise
-            + 0.20f * qs.contrast
-            + 0.15f * qs.colorfulness
-            + 0.10f * qs.exposure;
+        qs.overall = 0.35f * qs.sharpness + 0.20f * qs.noise + 0.20f * qs.contrast + 0.15f * qs.colorfulness
+                     + 0.10f * qs.exposure;
         qs.overall = (std::max)(0.0f, (std::min)(qs.overall, 1.0f));
 
         auto t1 = Clock::now();
@@ -294,56 +323,67 @@ public:
     }
 
     /// Map a score to a quality tier.
-    static inline QualityTierV2 GetTier(float score) {
-        if (score > 0.8f) return QualityTierV2::Excellent;
-        if (score > 0.6f) return QualityTierV2::Good;
-        if (score > 0.4f) return QualityTierV2::Fair;
-        if (score > 0.2f) return QualityTierV2::Poor;
+    static inline QualityTierV2 GetTier(float score)
+    {
+        if (score > 0.8f)
+            return QualityTierV2::Excellent;
+        if (score > 0.6f)
+            return QualityTierV2::Good;
+        if (score > 0.4f)
+            return QualityTierV2::Fair;
+        if (score > 0.2f)
+            return QualityTierV2::Poor;
         return QualityTierV2::Bad;
     }
 
     /// Human-readable tier name.
-    static inline const wchar_t* TierName(QualityTierV2 tier) {
+    static inline const wchar_t* TierName(QualityTierV2 tier)
+    {
         switch (tier) {
-        case QualityTierV2::Excellent: return L"Excellent";
-        case QualityTierV2::Good:      return L"Good";
-        case QualityTierV2::Fair:      return L"Fair";
-        case QualityTierV2::Poor:      return L"Poor";
-        case QualityTierV2::Bad:       return L"Bad";
-        default:                       return L"Unknown";
+            case QualityTierV2::Excellent:
+                return L"Excellent";
+            case QualityTierV2::Good:
+                return L"Good";
+            case QualityTierV2::Fair:
+                return L"Fair";
+            case QualityTierV2::Poor:
+                return L"Poor";
+            case QualityTierV2::Bad:
+                return L"Bad";
+            default:
+                return L"Unknown";
         }
     }
 
     /// Retrieve cumulative statistics (thread-safe).
-    inline AssessmentStatsV2 GetStats() const {
+    inline AssessmentStatsV2 GetStats() const
+    {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_statsLock));
         AssessmentStatsV2 copy = m_stats;
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_statsLock));
         return copy;
     }
 
-private:
+  private:
     // ---- Sub-metric implementations ----------------------------------------
 
     /// Sharpness via Laplacian variance. Returns [0, 1].
-    static inline float ComputeSharpness(const std::vector<float>& lum,
-        uint32_t w, uint32_t h) {
+    static inline float ComputeSharpness(const std::vector<float>& lum, uint32_t w, uint32_t h)
+    {
         // Laplacian kernel: [0,-1,0; -1,4,-1; 0,-1,0]
         double sum = 0.0, sumSq = 0.0;
         uint32_t count = 0;
         for (uint32_t y = 1; y + 1 < h; ++y) {
             for (uint32_t x = 1; x + 1 < w; ++x) {
-                float lap = 4.0f * lum[y * w + x]
-                    - lum[(y - 1) * w + x]
-                    - lum[(y + 1) * w + x]
-                    - lum[y * w + (x - 1)]
-                    - lum[y * w + (x + 1)];
+                float lap = 4.0f * lum[y * w + x] - lum[(y - 1) * w + x] - lum[(y + 1) * w + x] - lum[y * w + (x - 1)]
+                            - lum[y * w + (x + 1)];
                 sum += lap;
                 sumSq += static_cast<double>(lap) * lap;
                 ++count;
             }
         }
-        if (count == 0) return 0.0f;
+        if (count == 0)
+            return 0.0f;
         double mean = sum / count;
         double variance = sumSq / count - mean * mean;
         // Normalize: variance of ~0.02 on [0,1] luminance is sharp
@@ -353,8 +393,8 @@ private:
 
     /// Noise estimation via median absolute deviation in 3x3 blocks.
     /// Returns [0, 1] where 1.0 = minimal noise (good).
-    static inline float ComputeNoiseScore(const std::vector<float>& lum,
-        uint32_t w, uint32_t h) {
+    static inline float ComputeNoiseScore(const std::vector<float>& lum, uint32_t w, uint32_t h)
+    {
         double madSum = 0.0;
         uint32_t blockCount = 0;
         std::array<float, 9> neighborhood{};
@@ -380,7 +420,8 @@ private:
                 ++blockCount;
             }
         }
-        if (blockCount == 0) return 1.0f;
+        if (blockCount == 0)
+            return 1.0f;
         float avgMAD = static_cast<float>(madSum / blockCount);
         // Normalize: low MAD = low noise = score near 1.0
         // MAD > 0.05 is quite noisy on [0,1] luminance
@@ -389,8 +430,8 @@ private:
     }
 
     /// Michelson contrast in 16x16 blocks, averaged. Returns [0, 1].
-    static inline float ComputeContrast(const std::vector<float>& lum,
-        uint32_t w, uint32_t h) {
+    static inline float ComputeContrast(const std::vector<float>& lum, uint32_t w, uint32_t h)
+    {
         const uint32_t blockSize = 16;
         double contrastSum = 0.0;
         uint32_t blockCount = 0;
@@ -411,14 +452,16 @@ private:
                 ++blockCount;
             }
         }
-        if (blockCount == 0) return 0.0f;
+        if (blockCount == 0)
+            return 0.0f;
         return static_cast<float>(contrastSum / blockCount);
     }
 
     /// Hasler & Süsstrunk 2003 colorfulness metric. Returns [0, 1].
-    static inline float ComputeColorfulness(const uint8_t* rgba,
-        uint32_t pixelCount) {
-        if (pixelCount == 0) return 0.0f;
+    static inline float ComputeColorfulness(const uint8_t* rgba, uint32_t pixelCount)
+    {
+        if (pixelCount == 0)
+            return 0.0f;
 
         double sumRG = 0.0, sumYB = 0.0;
         double sumRG2 = 0.0, sumYB2 = 0.0;
@@ -444,8 +487,8 @@ private:
         double sigmaRG = std::sqrt((std::max)(varRG, 0.0));
         double sigmaYB = std::sqrt((std::max)(varYB, 0.0));
 
-        double colorfulness = std::sqrt(sigmaRG * sigmaRG + sigmaYB * sigmaYB)
-            + 0.3 * std::sqrt(meanRG * meanRG + meanYB * meanYB);
+        double colorfulness =
+            std::sqrt(sigmaRG * sigmaRG + sigmaYB * sigmaYB) + 0.3 * std::sqrt(meanRG * meanRG + meanYB * meanYB);
 
         // Typical colorfulness range: 0–0.8 for natural images
         float normalized = static_cast<float>(colorfulness / 0.75);
@@ -454,15 +497,17 @@ private:
 
     /// Exposure quality: penalize deviation from target 0.5 midpoint.
     /// Also penalize very dark (<0.1) or very bright (>0.9) areas.
-    static inline float ComputeExposure(const std::vector<float>& lum,
-        uint32_t pixelCount) {
-        if (pixelCount == 0) return 0.0f;
+    static inline float ComputeExposure(const std::vector<float>& lum, uint32_t pixelCount)
+    {
+        if (pixelCount == 0)
+            return 0.0f;
 
         float sum = 0.0f;
         uint32_t extremeCount = 0;
         for (uint32_t i = 0; i < pixelCount; ++i) {
             sum += lum[i];
-            if (lum[i] < 0.1f || lum[i] > 0.9f) ++extremeCount;
+            if (lum[i] < 0.1f || lum[i] > 0.9f)
+                ++extremeCount;
         }
         float meanLum = sum / static_cast<float>(pixelCount);
 
@@ -477,9 +522,9 @@ private:
         return (std::max)(0.0f, (std::min)(exposureScore, 1.0f));
     }
 
-    mutable SRWLOCK       m_statsLock{};
-    AssessmentStatsV2     m_stats{};
+    mutable SRWLOCK m_statsLock{};
+    AssessmentStatsV2 m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

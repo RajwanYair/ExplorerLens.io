@@ -6,13 +6,13 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
 #include <array>
-#include <memory>
+#include <cstdint>
 #include <functional>
+#include <memory>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -29,17 +29,18 @@ enum class FontScript : uint8_t {
 };
 
 enum class FontWeight : uint16_t {
-    Thin       = 100,
-    Light      = 300,
-    Regular    = 400,
-    Medium     = 500,
-    SemiBold   = 600,
-    Bold       = 700,
-    ExtraBold  = 800,
-    Black      = 900
+    Thin = 100,
+    Light = 300,
+    Regular = 400,
+    Medium = 500,
+    SemiBold = 600,
+    Bold = 700,
+    ExtraBold = 800,
+    Black = 900
 };
 
-struct SamplerConfig {
+struct SamplerConfig
+{
     std::wstring pangramText = L"The quick brown fox jumps over the lazy dog";
     float fontSize = 24.0f;
     FontWeight weight = FontWeight::Regular;
@@ -52,7 +53,8 @@ struct SamplerConfig {
     bool showFontName = true;
 };
 
-struct GlyphMetrics {
+struct GlyphMetrics
+{
     float advance = 0.0f;
     float bearingX = 0.0f;
     float bearingY = 0.0f;
@@ -62,63 +64,89 @@ struct GlyphMetrics {
     bool isPresent = false;
 };
 
-class FontGlyphSampler {
-public:
-    explicit FontGlyphSampler(SamplerConfig config = {})
-        : m_config(config) {}
+class FontGlyphSampler
+{
+  public:
+    explicit FontGlyphSampler(SamplerConfig config = {}) : m_config(config) {}
 
     ~FontGlyphSampler() = default;
 
-    bool LoadFont(const std::wstring& filePath) {
+    bool LoadFont(const std::wstring& filePath)
+    {
         m_filePath = filePath;
         m_isLoaded = true;
         m_supportedScripts.clear();
         return true;
     }
 
-    bool RenderPangram(std::vector<uint8_t>& outputRGBA) const {
-        if (!m_isLoaded) return false;
+    bool RenderPangram(std::vector<uint8_t>& outputRGBA) const
+    {
+        if (!m_isLoaded)
+            return false;
         outputRGBA.resize(static_cast<size_t>(m_config.thumbnailWidth) * m_config.thumbnailHeight * 4, 0);
         return true;
     }
 
-    GlyphMetrics GetGlyphMetrics(uint32_t codepoint) const {
+    GlyphMetrics GetGlyphMetrics(uint32_t codepoint) const
+    {
         GlyphMetrics gm;
         gm.codepoint = codepoint;
         gm.isPresent = m_coveredCodepoints.count(codepoint) > 0;
         return gm;
     }
 
-    void SetScript(FontScript script) {
+    void SetScript(FontScript script)
+    {
         m_activeScript = script;
         UpdatePangramForScript(script);
     }
 
-    std::vector<FontScript> GetSupportedScripts() const {
+    std::vector<FontScript> GetSupportedScripts() const
+    {
         return std::vector<FontScript>(m_supportedScripts.begin(), m_supportedScripts.end());
     }
 
-    bool HasGlyphCoverage(uint32_t rangeStart, uint32_t rangeEnd) const {
+    bool HasGlyphCoverage(uint32_t rangeStart, uint32_t rangeEnd) const
+    {
         for (uint32_t cp = rangeStart; cp <= rangeEnd; ++cp)
-            if (m_coveredCodepoints.count(cp) == 0) return false;
+            if (m_coveredCodepoints.count(cp) == 0)
+                return false;
         return true;
     }
 
-    const FontInfo& GetFontInfo() const { return m_fontInfo; }
-    void SetFontInfo(const FontInfo& info) { m_fontInfo = info; }
-    void AddCoveredCodepoint(uint32_t cp) { m_coveredCodepoints.insert(cp); }
-    void AddSupportedScript(FontScript s) { m_supportedScripts.push_back(s); }
-    bool IsLoaded() const { return m_isLoaded; }
-    const SamplerConfig& GetConfig() const { return m_config; }
+    const FontInfo& GetFontInfo() const
+    {
+        return m_fontInfo;
+    }
+    void SetFontInfo(const FontInfo& info)
+    {
+        m_fontInfo = info;
+    }
+    void AddCoveredCodepoint(uint32_t cp)
+    {
+        m_coveredCodepoints.insert(cp);
+    }
+    void AddSupportedScript(FontScript s)
+    {
+        m_supportedScripts.push_back(s);
+    }
+    bool IsLoaded() const
+    {
+        return m_isLoaded;
+    }
+    const SamplerConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-private:
-    void UpdatePangramForScript(FontScript script) {
-        static const std::array<const wchar_t*, 8> pangrams = {{
-            L"The quick brown fox jumps over the lazy dog", L"\u0627\u0644\u062B\u0639\u0644\u0628",
-            L"\u6211\u80FD\u541E\u4E0B\u73BB\u7483", L"\u0928\u092E\u0938\u094D\u0924\u0947",
-            L"\u0421\u044A\u0435\u0448\u044C", L"\u03A4\u03AC\u03C7\u03B9\u03C3\u03C4\u03B7",
-            L"\u05D3\u05D2 \u05E1\u05E7\u05E8\u05DF", L"\u0E01\u0E34\u0E19\u0E41\u0E01\u0E49\u0E27"
-        }};
+  private:
+    void UpdatePangramForScript(FontScript script)
+    {
+        static const std::array<const wchar_t*, 8> pangrams = {
+            {L"The quick brown fox jumps over the lazy dog", L"\u0627\u0644\u062B\u0639\u0644\u0628",
+             L"\u6211\u80FD\u541E\u4E0B\u73BB\u7483", L"\u0928\u092E\u0938\u094D\u0924\u0947",
+             L"\u0421\u044A\u0435\u0448\u044C", L"\u03A4\u03AC\u03C7\u03B9\u03C3\u03C4\u03B7",
+             L"\u05D3\u05D2 \u05E1\u05E7\u05E8\u05DF", L"\u0E01\u0E34\u0E19\u0E41\u0E01\u0E49\u0E27"}};
         m_config.pangramText = pangrams[static_cast<size_t>(script)];
     }
 
@@ -131,5 +159,5 @@ private:
     bool m_isLoaded = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -7,14 +7,14 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
 #include <cstdint>
-#include <vector>
-#include <string>
 #include <mutex>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -27,36 +27,39 @@ enum class ONNXProvider : uint32_t {
     OpenVINO = 4
 };
 
-struct ONNXModelInfo {
-    uint64_t            modelId = 0;
-    std::string         modelPath;
-    std::string         modelName;
-    ONNXProvider        provider = ONNXProvider::CPU;
-    bool                loaded = false;
-    uint64_t            modelSizeBytes = 0;
-    uint64_t            loadTimeMs = 0;
+struct ONNXModelInfo
+{
+    uint64_t modelId = 0;
+    std::string modelPath;
+    std::string modelName;
+    ONNXProvider provider = ONNXProvider::CPU;
+    bool loaded = false;
+    uint64_t modelSizeBytes = 0;
+    uint64_t loadTimeMs = 0;
     std::vector<int64_t> inputShape;
     std::vector<int64_t> outputShape;
-    std::string         inputName;
-    std::string         outputName;
-    uint32_t            opsetVersion = 0;
+    std::string inputName;
+    std::string outputName;
+    uint32_t opsetVersion = 0;
 
-    bool IsGPUProvider() const {
-        return provider == ONNXProvider::DirectML ||
-            provider == ONNXProvider::CUDA ||
-            provider == ONNXProvider::TensorRT;
+    bool IsGPUProvider() const
+    {
+        return provider == ONNXProvider::DirectML || provider == ONNXProvider::CUDA
+               || provider == ONNXProvider::TensorRT;
     }
 };
 
-class ONNXModelLoader {
-public:
-    static ONNXModelLoader& Instance() {
+class ONNXModelLoader
+{
+  public:
+    static ONNXModelLoader& Instance()
+    {
         static ONNXModelLoader s;
         return s;
     }
 
-    uint64_t LoadModel(const std::string& path, const std::string& name,
-        ONNXProvider provider) {
+    uint64_t LoadModel(const std::string& path, const std::string& name, ONNXProvider provider)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         DWORD startTick = GetTickCount();
 
@@ -74,8 +77,7 @@ public:
 
         // Query file size
         std::wstring widePath(path.begin(), path.end());
-        HANDLE hFile = CreateFileW(widePath.c_str(), GENERIC_READ,
-            FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+        HANDLE hFile = CreateFileW(widePath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
         if (hFile != INVALID_HANDLE_VALUE) {
             LARGE_INTEGER fileSize;
             if (GetFileSizeEx(hFile, &fileSize)) {
@@ -85,8 +87,8 @@ public:
         }
 
         // Default shapes for placeholder
-        info.inputShape = { 1, 3, 224, 224 };
-        info.outputShape = { 1, 1000 };
+        info.inputShape = {1, 3, 224, 224};
+        info.outputShape = {1, 1000};
         info.inputName = "input";
         info.outputName = "output";
         info.opsetVersion = 17;
@@ -97,33 +99,39 @@ public:
         return info.modelId;
     }
 
-    std::vector<int64_t> GetInputShape(uint64_t modelId) const {
+    std::vector<int64_t> GetInputShape(uint64_t modelId) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_models.find(modelId);
         return it != m_models.end() ? it->second.inputShape : std::vector<int64_t>{};
     }
 
-    std::vector<int64_t> GetOutputShape(uint64_t modelId) const {
+    std::vector<int64_t> GetOutputShape(uint64_t modelId) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_models.find(modelId);
         return it != m_models.end() ? it->second.outputShape : std::vector<int64_t>{};
     }
 
-    ONNXModelInfo GetModelInfo(uint64_t modelId) const {
+    ONNXModelInfo GetModelInfo(uint64_t modelId) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_models.find(modelId);
         return it != m_models.end() ? it->second : ONNXModelInfo{};
     }
 
-    bool UnloadModel(uint64_t modelId) {
+    bool UnloadModel(uint64_t modelId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_models.find(modelId);
-        if (it == m_models.end()) return false;
+        if (it == m_models.end())
+            return false;
         m_models.erase(it);
         return true;
     }
 
-    std::vector<ONNXProvider> GetAvailableProviders() const {
+    std::vector<ONNXProvider> GetAvailableProviders() const
+    {
         std::vector<ONNXProvider> providers;
         providers.push_back(ONNXProvider::CPU);
 #ifdef HAS_ONNXRUNTIME
@@ -132,29 +140,36 @@ public:
         return providers;
     }
 
-    size_t GetLoadedModelCount() const {
+    size_t GetLoadedModelCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_models.size();
     }
 
-    void Reset() {
+    void Reset()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_models.clear();
         m_nextModelId = 1;
     }
 
-    bool Validate() const {
+    bool Validate() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (const auto& [id, info] : m_models) {
-            if (id == 0) return false;
-            if (info.modelName.empty()) return false;
-            if (info.loaded && info.inputShape.empty()) return false;
-            if (info.loaded && info.outputShape.empty()) return false;
+            if (id == 0)
+                return false;
+            if (info.modelName.empty())
+                return false;
+            if (info.loaded && info.inputShape.empty())
+                return false;
+            if (info.loaded && info.outputShape.empty())
+                return false;
         }
         return true;
     }
 
-private:
+  private:
     ONNXModelLoader() = default;
     ~ONNXModelLoader() = default;
     ONNXModelLoader(const ONNXModelLoader&) = delete;
@@ -165,5 +180,5 @@ private:
     uint64_t m_nextModelId = 1;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

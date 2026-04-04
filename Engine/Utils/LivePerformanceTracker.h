@@ -7,36 +7,39 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <mutex>
 #include <algorithm>
-#include <numeric>
+#include <cstdint>
 #include <deque>
+#include <mutex>
+#include <numeric>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct LivePerfSample {
+struct LivePerfSample
+{
     uint64_t timestampMs = 0;
-    double   frameTimeMs = 0.0;
-    double   decodeTimeMs = 0.0;
-    double   renderTimeMs = 0.0;
+    double frameTimeMs = 0.0;
+    double decodeTimeMs = 0.0;
+    double renderTimeMs = 0.0;
     uint64_t memoryUsedBytes = 0;
     uint32_t activeThreads = 0;
 };
 
-struct PerfTimeSeries {
+struct PerfTimeSeries
+{
     std::string metricName;
     std::deque<double> values;
     std::deque<uint64_t> timestamps;
-    size_t maxSamples = 600; // 10 minutes at 1 sample/sec
+    size_t maxSamples = 600;  // 10 minutes at 1 sample/sec
 
-    void Add(double value, uint64_t timestampMs) {
+    void Add(double value, uint64_t timestampMs)
+    {
         values.push_back(value);
         timestamps.push_back(timestampMs);
         while (values.size() > maxSamples) {
@@ -45,31 +48,40 @@ struct PerfTimeSeries {
         }
     }
 
-    double Average() const {
-        if (values.empty()) return 0.0;
+    double Average() const
+    {
+        if (values.empty())
+            return 0.0;
         double sum = 0.0;
-        for (double v : values) sum += v;
+        for (double v : values)
+            sum += v;
         return sum / values.size();
     }
 
-    double Peak() const {
-        if (values.empty()) return 0.0;
+    double Peak() const
+    {
+        if (values.empty())
+            return 0.0;
         return *std::max_element(values.begin(), values.end());
     }
 
-    double Latest() const {
+    double Latest() const
+    {
         return values.empty() ? 0.0 : values.back();
     }
 };
 
-class LivePerformanceTracker {
-public:
-    static LivePerformanceTracker& Instance() {
+class LivePerformanceTracker
+{
+  public:
+    static LivePerformanceTracker& Instance()
+    {
         static LivePerformanceTracker s;
         return s;
     }
 
-    void RecordSample(const LivePerfSample& sample) {
+    void RecordSample(const LivePerfSample& sample)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         LivePerfSample s = sample;
         s.timestampMs = GetTickCount64();
@@ -87,19 +99,26 @@ public:
         m_totalSamplesRecorded++;
     }
 
-    PerfTimeSeries GetTimeSeries(const std::string& metric) const {
+    PerfTimeSeries GetTimeSeries(const std::string& metric) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (metric == "fps") return m_fpsSeries;
-        if (metric == "decode") return m_decodeSeries;
-        if (metric == "render") return m_renderSeries;
-        if (metric == "memory") return m_memorySeries;
+        if (metric == "fps")
+            return m_fpsSeries;
+        if (metric == "decode")
+            return m_decodeSeries;
+        if (metric == "render")
+            return m_renderSeries;
+        if (metric == "memory")
+            return m_memorySeries;
         return PerfTimeSeries{};
     }
 
-    double GetCurrentFPS() const {
+    double GetCurrentFPS() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         // Average FPS over last 10 samples
-        if (m_fpsSeries.values.empty()) return 0.0;
+        if (m_fpsSeries.values.empty())
+            return 0.0;
         size_t count = (std::min)(m_fpsSeries.values.size(), static_cast<size_t>(10));
         double sum = 0.0;
         auto it = m_fpsSeries.values.end();
@@ -110,32 +129,38 @@ public:
         return sum / count;
     }
 
-    double GetAvgDecodeTime() const {
+    double GetAvgDecodeTime() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_decodeSeries.Average();
     }
 
-    double GetPeakDecodeTime() const {
+    double GetPeakDecodeTime() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_decodeSeries.Peak();
     }
 
-    double GetCurrentMemoryMB() const {
+    double GetCurrentMemoryMB() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_memorySeries.Latest();
     }
 
-    LivePerfSample GetLatestSample() const {
+    LivePerfSample GetLatestSample() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_samples.empty() ? LivePerfSample{} : m_samples.back();
     }
 
-    uint64_t GetTotalSamples() const {
+    uint64_t GetTotalSamples() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_totalSamplesRecorded;
     }
 
-    void SetMaxSamples(size_t max) {
+    void SetMaxSamples(size_t max)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_maxSamples = max;
         m_fpsSeries.maxSamples = max;
@@ -144,7 +169,8 @@ public:
         m_memorySeries.maxSamples = max;
     }
 
-    void Reset() {
+    void Reset()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_samples.clear();
         m_fpsSeries = PerfTimeSeries{};
@@ -158,18 +184,23 @@ public:
         m_totalSamplesRecorded = 0;
     }
 
-    bool Validate() const {
+    bool Validate() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (m_samples.size() > m_maxSamples) return false;
+        if (m_samples.size() > m_maxSamples)
+            return false;
         for (const auto& s : m_samples) {
-            if (s.frameTimeMs < 0.0) return false;
-            if (s.decodeTimeMs < 0.0) return false;
+            if (s.frameTimeMs < 0.0)
+                return false;
+            if (s.decodeTimeMs < 0.0)
+                return false;
         }
         return true;
     }
 
-private:
-    LivePerformanceTracker() {
+  private:
+    LivePerformanceTracker()
+    {
         m_fpsSeries.metricName = "fps";
         m_decodeSeries.metricName = "decode";
         m_renderSeries.metricName = "render";
@@ -189,5 +220,5 @@ private:
     uint64_t m_totalSamplesRecorded = 0;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

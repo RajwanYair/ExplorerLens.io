@@ -5,10 +5,19 @@
 
 namespace ExplorerLens::Engine {
 
-ModerationResult ContentModerationFilter::Evaluate(const void*, uint32_t, uint32_t) { return {}; }
+ModerationResult ContentModerationFilter::Evaluate(const void*, uint32_t, uint32_t)
+{
+    return {};
+}
 void ContentModerationFilter::SetTier(ModerationTier) {}
 void ContentModerationFilter::AddCustomBlocklist(const std::string&, float) {}
-ModerationTier ContentModerationFilter::GetTier() const { return {}; }
-std::vector<std::string> ContentModerationFilter::GetBlocklistCategories() const { return {}; }
+ModerationTier ContentModerationFilter::GetTier() const
+{
+    return {};
+}
+std::vector<std::string> ContentModerationFilter::GetBlocklistCategories() const
+{
+    return {};
+}
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

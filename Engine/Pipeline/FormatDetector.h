@@ -17,26 +17,27 @@ namespace Engine {
 /// 1. Extension-based detection (fast)
 /// 2. File signature detection (reliable but slower)
 //==============================================================================
-class FormatDetector : public IFormatDetector {
-public:
- FormatDetector();
- virtual ~FormatDetector();
+class FormatDetector : public IFormatDetector
+{
+  public:
+    FormatDetector();
+    virtual ~FormatDetector();
 
- // IFormatDetector implementation
- DetectedFormat DetectFormat(const wchar_t *filePath) override;
- DetectedFormat DetectFromExtension(const wchar_t *extension) override;
- DetectedFormat DetectFromSignature(const wchar_t *filePath) override;
- bool IsImageFormat(const wchar_t *extension) const override;
- bool IsArchiveFormat(const wchar_t *extension) const override;
- bool IsDocumentFormat(const wchar_t *extension) const override;
- bool IsVideoFormat(const wchar_t *extension) const override;
- const wchar_t *GetExtension(const wchar_t *filePath) const override;
+    // IFormatDetector implementation
+    DetectedFormat DetectFormat(const wchar_t* filePath) override;
+    DetectedFormat DetectFromExtension(const wchar_t* extension) override;
+    DetectedFormat DetectFromSignature(const wchar_t* filePath) override;
+    bool IsImageFormat(const wchar_t* extension) const override;
+    bool IsArchiveFormat(const wchar_t* extension) const override;
+    bool IsDocumentFormat(const wchar_t* extension) const override;
+    bool IsVideoFormat(const wchar_t* extension) const override;
+    const wchar_t* GetExtension(const wchar_t* filePath) const override;
 
-private:
- // Non-copyable
- FormatDetector(const FormatDetector &) = delete;
- FormatDetector &operator=(const FormatDetector &) = delete;
+  private:
+    // Non-copyable
+    FormatDetector(const FormatDetector&) = delete;
+    FormatDetector& operator=(const FormatDetector&) = delete;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

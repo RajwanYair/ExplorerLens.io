@@ -30,7 +30,7 @@
  */
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 
@@ -46,15 +46,17 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Represents a single decoder that can handle a file format.
-struct DecoderEntry {
+struct DecoderEntry
+{
     uint32_t decoderId = 0;
     std::string name;
-    int32_t priority = 0;   ///< Lower value = higher priority.
+    int32_t priority = 0;  ///< Lower value = higher priority.
     bool enabled = true;
 };
 
 /// Per-extension aggregate statistics.
-struct FallbackStats {
+struct FallbackStats
+{
     uint64_t totalAttempts = 0;
     uint64_t firstTrySuccesses = 0;
     uint64_t fallbackSuccesses = 0;
@@ -65,14 +67,17 @@ struct FallbackStats {
 };
 
 /// Internal: a magic-byte signature used for header verification.
-struct MagicSignature {
+struct MagicSignature
+{
     std::vector<uint8_t> bytes;
-    size_t offset = 0;           ///< Byte offset within header to start comparing.
+    size_t offset = 0;  ///< Byte offset within header to start comparing.
 };
 
-class FormatFallbackEngine {
-public:
-    inline FormatFallbackEngine() noexcept {
+class FormatFallbackEngine
+{
+  public:
+    inline FormatFallbackEngine() noexcept
+    {
         InitializeSRWLock(&m_lock);
         m_failureThreshold = 5;
         InitBuiltinMagicDatabase();
@@ -85,22 +90,23 @@ public:
     FormatFallbackEngine& operator=(const FormatFallbackEngine&) = delete;
 
     /// Register a decoder for the given file extension (e.g., L".jpg").
-    inline void RegisterDecoder(const std::wstring& extension, DecoderEntry entry) {
+    inline void RegisterDecoder(const std::wstring& extension, DecoderEntry entry)
+    {
         AcquireSRWLockExclusive(&m_lock);
         auto extLower = ToLower(extension);
         auto& chain = m_chains[extLower];
         // Remove existing decoder with same ID.
-        chain.erase(
-            std::remove_if(chain.begin(), chain.end(),
-                [&](const DecoderEntry& e) { return e.decoderId == entry.decoderId; }),
-            chain.end());
+        chain.erase(std::remove_if(chain.begin(), chain.end(),
+                                   [&](const DecoderEntry& e) { return e.decoderId == entry.decoderId; }),
+                    chain.end());
         chain.push_back(std::move(entry));
         SortChain(chain);
         ReleaseSRWLockExclusive(&m_lock);
     }
 
     /// Set an explicit fallback order for an extension by decoder IDs.
-    inline void SetFallbackChain(const std::wstring& extension, std::vector<uint32_t> decoderIds) {
+    inline void SetFallbackChain(const std::wstring& extension, std::vector<uint32_t> decoderIds)
+    {
         AcquireSRWLockExclusive(&m_lock);
         auto extLower = ToLower(extension);
         auto& chain = m_chains[extLower];
@@ -122,7 +128,10 @@ public:
         for (auto& e : chain) {
             bool found = false;
             for (auto& r : reordered) {
-                if (r.decoderId == e.decoderId) { found = true; break; }
+                if (r.decoderId == e.decoderId) {
+                    found = true;
+                    break;
+                }
             }
             if (!found) {
                 DecoderEntry copy = e;
@@ -136,8 +145,8 @@ public:
 
     /// Select the best decoder for an extension, optionally verifying magic bytes.
     /// Returns 0 if no suitable decoder found.
-    inline uint32_t SelectDecoder(const std::wstring& extension,
-        const uint8_t* headerBytes, size_t headerSize) {
+    inline uint32_t SelectDecoder(const std::wstring& extension, const uint8_t* headerBytes, size_t headerSize)
+    {
         AcquireSRWLockShared(&m_lock);
         auto extLower = ToLower(extension);
         auto chainIt = m_chains.find(extLower);
@@ -155,7 +164,8 @@ public:
         uint32_t magicDecoder = 0;
 
         for (auto& entry : chain) {
-            if (!entry.enabled) continue;
+            if (!entry.enabled)
+                continue;
             // Check if magic bytes match any signature for this extension.
             if (headerBytes != nullptr && headerSize > 0) {
                 if (MatchesMagic(extLower, headerBytes, headerSize)) {
@@ -172,18 +182,20 @@ public:
             }
         }
 
-        if (hasMagicMatch) return magicDecoder;
+        if (hasMagicMatch)
+            return magicDecoder;
 
         // No magic match or no header — just return the first enabled decoder.
         for (auto& entry : chain) {
-            if (entry.enabled) return entry.decoderId;
+            if (entry.enabled)
+                return entry.decoderId;
         }
         return 0;
     }
 
     /// Record the result of a decode attempt (for auto-reordering).
-    inline void RecordDecoderResult(const std::wstring& ext, uint32_t decoderId,
-        bool success, uint32_t timeMs) {
+    inline void RecordDecoderResult(const std::wstring& ext, uint32_t decoderId, bool success, uint32_t timeMs)
+    {
         AcquireSRWLockExclusive(&m_lock);
         auto extLower = ToLower(ext);
         auto& stats = m_decoderStats[extLower][decoderId];
@@ -192,8 +204,7 @@ public:
         if (success) {
             stats.successes++;
             stats.consecutiveFailures = 0;
-        }
-        else {
+        } else {
             stats.failures++;
             stats.consecutiveFailures++;
             // Auto-demote if threshold exceeded.
@@ -210,12 +221,10 @@ public:
             bool isFirstInChain = (!chain.empty() && chain.front().decoderId == decoderId);
             if (isFirstInChain) {
                 extStats.firstTrySuccesses++;
-            }
-            else {
+            } else {
                 extStats.fallbackSuccesses++;
             }
-        }
-        else {
+        } else {
             extStats.totalFailures++;
         }
         extStats.totalDecodeTimeMs += timeMs;
@@ -223,7 +232,8 @@ public:
     }
 
     /// Get aggregate statistics for all extensions.
-    inline FallbackStats GetStats() const {
+    inline FallbackStats GetStats() const
+    {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
         FallbackStats result{};
         for (auto& [ext, es] : m_extensionStats) {
@@ -245,25 +255,29 @@ public:
     }
 
     /// Get the current decoder chain for an extension.
-    inline std::vector<DecoderEntry> GetChain(const std::wstring& extension) const {
+    inline std::vector<DecoderEntry> GetChain(const std::wstring& extension) const
+    {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
         auto extLower = ToLower(extension);
         auto it = m_chains.find(extLower);
         std::vector<DecoderEntry> result;
-        if (it != m_chains.end()) result = it->second;
+        if (it != m_chains.end())
+            result = it->second;
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
         return result;
     }
 
     /// Set the failure threshold before auto-demotion.
-    inline void SetFailureThreshold(uint32_t threshold) {
+    inline void SetFailureThreshold(uint32_t threshold)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_failureThreshold = (std::max)(threshold, 1u);
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-private:
-    struct PerDecoderStats {
+  private:
+    struct PerDecoderStats
+    {
         uint64_t attempts = 0;
         uint64_t successes = 0;
         uint64_t failures = 0;
@@ -271,7 +285,8 @@ private:
         uint64_t totalTimeMs = 0;
     };
 
-    struct ExtensionStats {
+    struct ExtensionStats
+    {
         uint64_t totalAttempts = 0;
         uint64_t firstTrySuccesses = 0;
         uint64_t fallbackSuccesses = 0;
@@ -289,32 +304,37 @@ private:
     std::unordered_map<std::wstring, std::vector<MagicSignature>> m_magicDb;
     std::unordered_map<std::string, std::vector<MagicSignature>> m_magicByName;
 
-    inline static std::wstring ToLower(const std::wstring& s) {
+    inline static std::wstring ToLower(const std::wstring& s)
+    {
         std::wstring out = s;
         for (auto& c : out) {
-            if (c >= L'A' && c <= L'Z') c += 32;
+            if (c >= L'A' && c <= L'Z')
+                c += 32;
         }
         return out;
     }
 
-    inline static std::string ToLowerA(const std::string& s) {
+    inline static std::string ToLowerA(const std::string& s)
+    {
         std::string out = s;
         for (auto& c : out) {
-            if (c >= 'A' && c <= 'Z') c += 32;
+            if (c >= 'A' && c <= 'Z')
+                c += 32;
         }
         return out;
     }
 
-    inline void SortChain(std::vector<DecoderEntry>& chain) {
+    inline void SortChain(std::vector<DecoderEntry>& chain)
+    {
         std::sort(chain.begin(), chain.end(),
-            [](const DecoderEntry& a, const DecoderEntry& b) {
-                return a.priority < b.priority;
-            });
+                  [](const DecoderEntry& a, const DecoderEntry& b) { return a.priority < b.priority; });
     }
 
-    inline void DemoteDecoder(const std::wstring& extLower, uint32_t decoderId) {
+    inline void DemoteDecoder(const std::wstring& extLower, uint32_t decoderId)
+    {
         auto it = m_chains.find(extLower);
-        if (it == m_chains.end()) return;
+        if (it == m_chains.end())
+            return;
         auto& chain = it->second;
         for (size_t i = 0; i < chain.size(); ++i) {
             if (chain[i].decoderId == decoderId && i + 1 < chain.size()) {
@@ -328,10 +348,11 @@ private:
         }
     }
 
-    inline bool MatchesMagic(const std::wstring& extLower,
-        const uint8_t* data, size_t size) const {
+    inline bool MatchesMagic(const std::wstring& extLower, const uint8_t* data, size_t size) const
+    {
         auto it = m_magicDb.find(extLower);
-        if (it == m_magicDb.end()) return false;
+        if (it == m_magicDb.end())
+            return false;
         for (auto& sig : it->second) {
             if (sig.offset + sig.bytes.size() <= size) {
                 if (std::memcmp(data + sig.offset, sig.bytes.data(), sig.bytes.size()) == 0) {
@@ -342,11 +363,12 @@ private:
         return false;
     }
 
-    inline bool MatchesMagicByName(const std::string& decoderName,
-        const uint8_t* data, size_t size) const {
+    inline bool MatchesMagicByName(const std::string& decoderName, const uint8_t* data, size_t size) const
+    {
         auto nameL = ToLowerA(decoderName);
         auto it = m_magicByName.find(nameL);
-        if (it == m_magicByName.end()) return false;
+        if (it == m_magicByName.end())
+            return false;
         for (auto& sig : it->second) {
             if (sig.offset + sig.bytes.size() <= size) {
                 if (std::memcmp(data + sig.offset, sig.bytes.data(), sig.bytes.size()) == 0) {
@@ -357,84 +379,85 @@ private:
         return false;
     }
 
-    inline void AddMagic(const std::wstring& ext, std::vector<uint8_t> bytes,
-        size_t offset = 0) {
-        m_magicDb[ext].push_back(MagicSignature{ std::move(bytes), offset });
+    inline void AddMagic(const std::wstring& ext, std::vector<uint8_t> bytes, size_t offset = 0)
+    {
+        m_magicDb[ext].push_back(MagicSignature{std::move(bytes), offset});
     }
 
-    inline void AddMagicByName(const std::string& name, std::vector<uint8_t> bytes,
-        size_t offset = 0) {
-        m_magicByName[ToLowerA(name)].push_back(MagicSignature{ std::move(bytes), offset });
+    inline void AddMagicByName(const std::string& name, std::vector<uint8_t> bytes, size_t offset = 0)
+    {
+        m_magicByName[ToLowerA(name)].push_back(MagicSignature{std::move(bytes), offset});
     }
 
-    inline void InitBuiltinMagicDatabase() {
+    inline void InitBuiltinMagicDatabase()
+    {
         // JPEG: FF D8 FF
-        AddMagic(L".jpg", { 0xFF, 0xD8, 0xFF });
-        AddMagic(L".jpeg", { 0xFF, 0xD8, 0xFF });
-        AddMagicByName("jpeg", { 0xFF, 0xD8, 0xFF });
+        AddMagic(L".jpg", {0xFF, 0xD8, 0xFF});
+        AddMagic(L".jpeg", {0xFF, 0xD8, 0xFF});
+        AddMagicByName("jpeg", {0xFF, 0xD8, 0xFF});
 
         // PNG: 89 50 4E 47
-        AddMagic(L".png", { 0x89, 0x50, 0x4E, 0x47 });
-        AddMagicByName("png", { 0x89, 0x50, 0x4E, 0x47 });
+        AddMagic(L".png", {0x89, 0x50, 0x4E, 0x47});
+        AddMagicByName("png", {0x89, 0x50, 0x4E, 0x47});
 
         // GIF: 47 49 46 38
-        AddMagic(L".gif", { 0x47, 0x49, 0x46, 0x38 });
-        AddMagicByName("gif", { 0x47, 0x49, 0x46, 0x38 });
+        AddMagic(L".gif", {0x47, 0x49, 0x46, 0x38});
+        AddMagicByName("gif", {0x47, 0x49, 0x46, 0x38});
 
         // BMP: 42 4D
-        AddMagic(L".bmp", { 0x42, 0x4D });
-        AddMagicByName("bmp", { 0x42, 0x4D });
+        AddMagic(L".bmp", {0x42, 0x4D});
+        AddMagicByName("bmp", {0x42, 0x4D});
 
         // WebP: RIFF....WEBP  (RIFF at 0, WEBP at 8)
-        AddMagic(L".webp", { 0x52, 0x49, 0x46, 0x46 });
-        AddMagicByName("webp", { 0x57, 0x45, 0x42, 0x50 }, 8);
+        AddMagic(L".webp", {0x52, 0x49, 0x46, 0x46});
+        AddMagicByName("webp", {0x57, 0x45, 0x42, 0x50}, 8);
 
         // TIFF LE: 49 49 2A 00
-        AddMagic(L".tiff", { 0x49, 0x49, 0x2A, 0x00 });
-        AddMagic(L".tif", { 0x49, 0x49, 0x2A, 0x00 });
+        AddMagic(L".tiff", {0x49, 0x49, 0x2A, 0x00});
+        AddMagic(L".tif", {0x49, 0x49, 0x2A, 0x00});
         // TIFF BE: 4D 4D 00 2A
-        AddMagic(L".tiff", { 0x4D, 0x4D, 0x00, 0x2A });
-        AddMagic(L".tif", { 0x4D, 0x4D, 0x00, 0x2A });
-        AddMagicByName("tiff", { 0x49, 0x49, 0x2A, 0x00 });
-        AddMagicByName("tiff", { 0x4D, 0x4D, 0x00, 0x2A });
+        AddMagic(L".tiff", {0x4D, 0x4D, 0x00, 0x2A});
+        AddMagic(L".tif", {0x4D, 0x4D, 0x00, 0x2A});
+        AddMagicByName("tiff", {0x49, 0x49, 0x2A, 0x00});
+        AddMagicByName("tiff", {0x4D, 0x4D, 0x00, 0x2A});
 
         // PSD: 38 42 50 53
-        AddMagic(L".psd", { 0x38, 0x42, 0x50, 0x53 });
-        AddMagicByName("psd", { 0x38, 0x42, 0x50, 0x53 });
+        AddMagic(L".psd", {0x38, 0x42, 0x50, 0x53});
+        AddMagicByName("psd", {0x38, 0x42, 0x50, 0x53});
 
         // PDF: %PDF (25 50 44 46)
-        AddMagic(L".pdf", { 0x25, 0x50, 0x44, 0x46 });
-        AddMagicByName("pdf", { 0x25, 0x50, 0x44, 0x46 });
+        AddMagic(L".pdf", {0x25, 0x50, 0x44, 0x46});
+        AddMagicByName("pdf", {0x25, 0x50, 0x44, 0x46});
 
         // ZIP: 50 4B 03 04
-        AddMagic(L".zip", { 0x50, 0x4B, 0x03, 0x04 });
-        AddMagicByName("zip", { 0x50, 0x4B, 0x03, 0x04 });
+        AddMagic(L".zip", {0x50, 0x4B, 0x03, 0x04});
+        AddMagicByName("zip", {0x50, 0x4B, 0x03, 0x04});
 
         // RAR: 52 61 72 21 1A 07
-        AddMagic(L".rar", { 0x52, 0x61, 0x72, 0x21, 0x1A, 0x07 });
-        AddMagicByName("rar", { 0x52, 0x61, 0x72, 0x21, 0x1A, 0x07 });
+        AddMagic(L".rar", {0x52, 0x61, 0x72, 0x21, 0x1A, 0x07});
+        AddMagicByName("rar", {0x52, 0x61, 0x72, 0x21, 0x1A, 0x07});
 
         // 7z: 37 7A BC AF 27 1C
-        AddMagic(L".7z", { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C });
-        AddMagicByName("7z", { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C });
+        AddMagic(L".7z", {0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C});
+        AddMagicByName("7z", {0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C});
 
         // AVIF: ftyp box at offset 4 with brand "avif" or "mif1"
-        AddMagic(L".avif", { 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66 }, 4); // ftypavif
-        AddMagic(L".avif", { 0x66, 0x74, 0x79, 0x70, 0x6D, 0x69, 0x66, 0x31 }, 4); // ftypmif1
-        AddMagicByName("avif", { 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66 }, 4);
+        AddMagic(L".avif", {0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66}, 4);  // ftypavif
+        AddMagic(L".avif", {0x66, 0x74, 0x79, 0x70, 0x6D, 0x69, 0x66, 0x31}, 4);  // ftypmif1
+        AddMagicByName("avif", {0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66}, 4);
 
         // HEIC: ftyp box at offset 4 with brand "heic" or "heix"
-        AddMagic(L".heic", { 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63 }, 4); // ftypheic
-        AddMagic(L".heic", { 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x78 }, 4); // ftypheix
-        AddMagicByName("heic", { 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63 }, 4);
+        AddMagic(L".heic", {0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63}, 4);  // ftypheic
+        AddMagic(L".heic", {0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x78}, 4);  // ftypheix
+        AddMagicByName("heic", {0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63}, 4);
 
         // JPEG XL: FF 0A (codestream) or container 00 00 00 0C 4A 58 4C 20
-        AddMagic(L".jxl", { 0xFF, 0x0A });
-        AddMagic(L".jxl", { 0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20 });
-        AddMagicByName("jxl", { 0xFF, 0x0A });
-        AddMagicByName("jxl", { 0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20 });
+        AddMagic(L".jxl", {0xFF, 0x0A});
+        AddMagic(L".jxl", {0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20});
+        AddMagicByName("jxl", {0xFF, 0x0A});
+        AddMagicByName("jxl", {0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20});
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

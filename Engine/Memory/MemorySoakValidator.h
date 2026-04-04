@@ -39,68 +39,73 @@
 // ============================================================================
 
 #include <windows.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <mutex>
 #include <atomic>
-#include <cstdint>
 #include <chrono>
+#include <cstdint>
 #include <fstream>
 #include <iomanip>
+#include <mutex>
 #include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-static constexpr uint8_t  kCanaryByte = 0xFD;
-static constexpr uint8_t  kFreedPoisonByte = 0xDD;
-static constexpr uint8_t  kFreshAllocByte = 0xCD;
-static constexpr size_t   kCanarySize = 16;  // bytes before + after payload
-static constexpr size_t   kMaxSoakAllocSize = 16ULL * 1024 * 1024; // 16 MB
+static constexpr uint8_t kCanaryByte = 0xFD;
+static constexpr uint8_t kFreedPoisonByte = 0xDD;
+static constexpr uint8_t kFreshAllocByte = 0xCD;
+static constexpr size_t kCanarySize = 16;                         // bytes before + after payload
+static constexpr size_t kMaxSoakAllocSize = 16ULL * 1024 * 1024;  // 16 MB
 
 // ── Allocation record ────────────────────────────────────────────────────────
 
-struct AllocationRecord {
+struct AllocationRecord
+{
     void* rawPtr = nullptr;   // actual heap ptr (includes leading canary)
-    void* userPtr = nullptr;   // ptr returned to caller
-    size_t      size = 0;
+    void* userPtr = nullptr;  // ptr returned to caller
+    size_t size = 0;
     const char* tag = nullptr;
-    uint64_t    timestamp = 0;         // ms since epoch
-    bool        freed = false;
+    uint64_t timestamp = 0;  // ms since epoch
+    bool freed = false;
 };
 
 // ── Leak descriptor ──────────────────────────────────────────────────────────
 
-struct LeakRecord {
+struct LeakRecord
+{
     void* address = nullptr;
-    size_t      size = 0;
+    size_t size = 0;
     const char* tag = nullptr;
-    uint64_t    timestamp = 0;
+    uint64_t timestamp = 0;
 };
 
 // ── Soak result ──────────────────────────────────────────────────────────────
 
-struct SoakResult {
-    size_t   peakAllocation = 0;
-    size_t   currentAllocation = 0;
+struct SoakResult
+{
+    size_t peakAllocation = 0;
+    size_t currentAllocation = 0;
     uint32_t leakCount = 0;
     uint32_t doubleFreeAttempts = 0;
     uint32_t canaryViolations = 0;
-    double   allocationRate = 0.0;   // allocs/sec
-    double   deallocationRate = 0.0;   // frees/sec
+    double allocationRate = 0.0;    // allocs/sec
+    double deallocationRate = 0.0;  // frees/sec
     uint64_t totalAllocations = 0;
     uint64_t totalFrees = 0;
-    double   durationSeconds = 0.0;
+    double durationSeconds = 0.0;
 };
 
 // ── Main class ───────────────────────────────────────────────────────────────
 
-class MemorySoakValidator {
-public:
-    MemorySoakValidator() noexcept {
+class MemorySoakValidator
+{
+  public:
+    MemorySoakValidator() noexcept
+    {
         InitializeSRWLock(&m_lock);
 
         // Create a private heap for isolation
@@ -108,7 +113,8 @@ public:
         m_startTime = std::chrono::steady_clock::now();
     }
 
-    ~MemorySoakValidator() {
+    ~MemorySoakValidator()
+    {
         AcquireSRWLockExclusive(&m_lock);
         // Free all tracked allocations
         for (auto& [ptr, rec] : m_allocations) {
@@ -131,9 +137,12 @@ public:
 
     // ── Tracked allocation ───────────────────────────────────────
 
-    void* TrackedAlloc(size_t size, const char* tag = nullptr) {
-        if (size == 0) return nullptr;
-        if (!m_heap) return nullptr;
+    void* TrackedAlloc(size_t size, const char* tag = nullptr)
+    {
+        if (size == 0)
+            return nullptr;
+        if (!m_heap)
+            return nullptr;
 
         // Total = leading canary + payload + trailing canary
         size_t totalSize = kCanarySize + size + kCanarySize;
@@ -179,8 +188,10 @@ public:
 
     // ── Tracked free ─────────────────────────────────────────────
 
-    bool TrackedFree(void* ptr) {
-        if (!ptr) return false;
+    bool TrackedFree(void* ptr)
+    {
+        if (!ptr)
+            return false;
 
         AcquireSRWLockExclusive(&m_lock);
 
@@ -254,7 +265,8 @@ public:
 
     // ── Soak test ────────────────────────────────────────────────
 
-    bool StartSoakTest(uint32_t durationSeconds, uint32_t allocationPattern) {
+    bool StartSoakTest(uint32_t durationSeconds, uint32_t allocationPattern)
+    {
         auto soakStart = std::chrono::steady_clock::now();
         auto deadline = soakStart + std::chrono::seconds(durationSeconds);
 
@@ -264,71 +276,73 @@ public:
         auto nextRng = [&rngState]() -> uint32_t {
             rngState = rngState * 1664525u + 1013904223u;
             return rngState;
-            };
+        };
 
         std::vector<void*> soakPtrs;
         soakPtrs.reserve(4096);
 
         switch (allocationPattern) {
-        case 0: {
-            // Pattern 0: Random alloc/free 50/50 mix, sizes 1B – 16MB
-            while (std::chrono::steady_clock::now() < deadline) {
-                bool doAlloc = soakPtrs.empty() || (nextRng() & 1);
-                if (doAlloc) {
+            case 0: {
+                // Pattern 0: Random alloc/free 50/50 mix, sizes 1B – 16MB
+                while (std::chrono::steady_clock::now() < deadline) {
+                    bool doAlloc = soakPtrs.empty() || (nextRng() & 1);
+                    if (doAlloc) {
+                        uint32_t r = nextRng();
+                        size_t size = 1 + (r % kMaxSoakAllocSize);
+                        // Keep sizes reasonable for a soak test
+                        size = (std::min)(size, static_cast<size_t>(64 * 1024));
+                        void* p = TrackedAlloc(size, "soak_random");
+                        if (p)
+                            soakPtrs.push_back(p);
+                    } else if (!soakPtrs.empty()) {
+                        size_t idx = nextRng() % soakPtrs.size();
+                        TrackedFree(soakPtrs[idx]);
+                        soakPtrs[idx] = soakPtrs.back();
+                        soakPtrs.pop_back();
+                    }
+                }
+                break;
+            }
+            case 1: {
+                // Pattern 1: Monotonic growth (alloc-heavy)
+                while (std::chrono::steady_clock::now() < deadline) {
                     uint32_t r = nextRng();
-                    size_t size = 1 + (r % kMaxSoakAllocSize);
-                    // Keep sizes reasonable for a soak test
-                    size = (std::min)(size, static_cast<size_t>(64 * 1024));
-                    void* p = TrackedAlloc(size, "soak_random");
-                    if (p) soakPtrs.push_back(p);
-                }
-                else if (!soakPtrs.empty()) {
-                    size_t idx = nextRng() % soakPtrs.size();
-                    TrackedFree(soakPtrs[idx]);
-                    soakPtrs[idx] = soakPtrs.back();
-                    soakPtrs.pop_back();
-                }
-            }
-            break;
-        }
-        case 1: {
-            // Pattern 1: Monotonic growth (alloc-heavy)
-            while (std::chrono::steady_clock::now() < deadline) {
-                uint32_t r = nextRng();
-                size_t size = 256 + (r % (4 * 1024));
-                void* p = TrackedAlloc(size, "soak_growth");
-                if (p) soakPtrs.push_back(p);
+                    size_t size = 256 + (r % (4 * 1024));
+                    void* p = TrackedAlloc(size, "soak_growth");
+                    if (p)
+                        soakPtrs.push_back(p);
 
-                // Occasionally free ~10% to avoid instant OOM
-                if ((nextRng() % 10) == 0 && !soakPtrs.empty()) {
-                    size_t idx = nextRng() % soakPtrs.size();
-                    TrackedFree(soakPtrs[idx]);
-                    soakPtrs[idx] = soakPtrs.back();
-                    soakPtrs.pop_back();
+                    // Occasionally free ~10% to avoid instant OOM
+                    if ((nextRng() % 10) == 0 && !soakPtrs.empty()) {
+                        size_t idx = nextRng() % soakPtrs.size();
+                        TrackedFree(soakPtrs[idx]);
+                        soakPtrs[idx] = soakPtrs.back();
+                        soakPtrs.pop_back();
+                    }
                 }
+                break;
             }
-            break;
-        }
-        case 2: {
-            // Pattern 2: Sawtooth (burst alloc → bulk free → repeat)
-            while (std::chrono::steady_clock::now() < deadline) {
-                // Burst alloc: 100 allocations
-                for (uint32_t i = 0; i < 100; ++i) {
-                    size_t size = 128 + (nextRng() % (16 * 1024));
-                    void* p = TrackedAlloc(size, "soak_sawtooth");
-                    if (p) soakPtrs.push_back(p);
+            case 2: {
+                // Pattern 2: Sawtooth (burst alloc → bulk free → repeat)
+                while (std::chrono::steady_clock::now() < deadline) {
+                    // Burst alloc: 100 allocations
+                    for (uint32_t i = 0; i < 100; ++i) {
+                        size_t size = 128 + (nextRng() % (16 * 1024));
+                        void* p = TrackedAlloc(size, "soak_sawtooth");
+                        if (p)
+                            soakPtrs.push_back(p);
+                    }
+                    // Bulk free: free ~80% of current allocations
+                    size_t freeCount = soakPtrs.size() * 4 / 5;
+                    for (size_t i = 0; i < freeCount && !soakPtrs.empty(); ++i) {
+                        TrackedFree(soakPtrs.back());
+                        soakPtrs.pop_back();
+                    }
                 }
-                // Bulk free: free ~80% of current allocations
-                size_t freeCount = soakPtrs.size() * 4 / 5;
-                for (size_t i = 0; i < freeCount && !soakPtrs.empty(); ++i) {
-                    TrackedFree(soakPtrs.back());
-                    soakPtrs.pop_back();
-                }
+                break;
             }
-            break;
-        }
-        default:
-            return false;
+            default:
+                return false;
         }
 
         // Free remaining soak allocations
@@ -338,15 +352,15 @@ public:
         soakPtrs.clear();
 
         auto soakEnd = std::chrono::steady_clock::now();
-        m_lastSoakDuration = std::chrono::duration<double>(
-            soakEnd - soakStart).count();
+        m_lastSoakDuration = std::chrono::duration<double>(soakEnd - soakStart).count();
 
         return true;
     }
 
     // ── Results ──────────────────────────────────────────────────
 
-    SoakResult GetSoakResult() {
+    SoakResult GetSoakResult()
+    {
         AcquireSRWLockExclusive(&m_lock);
         SoakResult result{};
         result.peakAllocation = m_peakAllocation;
@@ -360,7 +374,8 @@ public:
         // Count leaks
         result.leakCount = 0;
         for (const auto& [key, rec] : m_allocations) {
-            if (!rec.freed) result.leakCount++;
+            if (!rec.freed)
+                result.leakCount++;
         }
 
         if (m_lastSoakDuration > 0.0) {
@@ -372,7 +387,8 @@ public:
         return result;
     }
 
-    std::vector<LeakRecord> GetLeaks() {
+    std::vector<LeakRecord> GetLeaks()
+    {
         AcquireSRWLockExclusive(&m_lock);
         std::vector<LeakRecord> leaks;
         for (const auto& [key, rec] : m_allocations) {
@@ -391,12 +407,14 @@ public:
 
     // ── Leak report ──────────────────────────────────────────────
 
-    void DumpLeakReport(const std::wstring& outputPath) {
+    void DumpLeakReport(const std::wstring& outputPath)
+    {
         auto leaks = GetLeaks();
         auto result = GetSoakResult();
 
         std::ofstream ofs(outputPath);
-        if (!ofs.is_open()) return;
+        if (!ofs.is_open())
+            return;
 
         ofs << "===============================================\n";
         ofs << "  ExplorerLens Memory Soak Leak Report\n";
@@ -410,35 +428,26 @@ public:
         ofs << "  Leak count:           " << result.leakCount << "\n";
         ofs << "  Double-free attempts: " << result.doubleFreeAttempts << "\n";
         ofs << "  Canary violations:    " << result.canaryViolations << "\n";
-        ofs << "  Duration:             " << std::fixed << std::setprecision(3)
-            << result.durationSeconds << " s\n";
-        ofs << "  Alloc rate:           " << std::fixed << std::setprecision(1)
-            << result.allocationRate << " /s\n";
-        ofs << "  Free rate:            " << std::fixed << std::setprecision(1)
-            << result.deallocationRate << " /s\n\n";
+        ofs << "  Duration:             " << std::fixed << std::setprecision(3) << result.durationSeconds << " s\n";
+        ofs << "  Alloc rate:           " << std::fixed << std::setprecision(1) << result.allocationRate << " /s\n";
+        ofs << "  Free rate:            " << std::fixed << std::setprecision(1) << result.deallocationRate << " /s\n\n";
 
         if (leaks.empty()) {
             ofs << "No leaks detected.\n";
-        }
-        else {
+        } else {
             ofs << "Leaked Allocations (" << leaks.size() << " total):\n";
             ofs << std::string(60, '-') << "\n";
-            ofs << std::left << std::setw(18) << "Address"
-                << std::setw(12) << "Size"
-                << std::setw(16) << "Tag"
+            ofs << std::left << std::setw(18) << "Address" << std::setw(12) << "Size" << std::setw(16) << "Tag"
                 << std::setw(14) << "Timestamp(ms)" << "\n";
             ofs << std::string(60, '-') << "\n";
 
             for (const auto& lr : leaks) {
                 std::ostringstream addrStr;
-                addrStr << "0x" << std::hex << std::setfill('0')
-                    << std::setw(12)
-                    << reinterpret_cast<uintptr_t>(lr.address);
+                addrStr << "0x" << std::hex << std::setfill('0') << std::setw(12)
+                        << reinterpret_cast<uintptr_t>(lr.address);
 
-                ofs << std::left << std::setw(18) << addrStr.str()
-                    << std::dec << std::setw(12) << lr.size
-                    << std::setw(16) << (lr.tag ? lr.tag : "<none>")
-                    << std::setw(14) << lr.timestamp << "\n";
+                ofs << std::left << std::setw(18) << addrStr.str() << std::dec << std::setw(12) << lr.size
+                    << std::setw(16) << (lr.tag ? lr.tag : "<none>") << std::setw(14) << lr.timestamp << "\n";
             }
         }
 
@@ -448,45 +457,46 @@ public:
 
     // ── Accessors ────────────────────────────────────────────────
 
-    size_t GetCurrentAllocation() {
+    size_t GetCurrentAllocation()
+    {
         AcquireSRWLockExclusive(&m_lock);
         size_t val = m_currentAllocation;
         ReleaseSRWLockExclusive(&m_lock);
         return val;
     }
 
-    size_t GetPeakAllocation() {
+    size_t GetPeakAllocation()
+    {
         AcquireSRWLockExclusive(&m_lock);
         size_t val = m_peakAllocation;
         ReleaseSRWLockExclusive(&m_lock);
         return val;
     }
 
-private:
-    uint64_t NowMs() const {
+  private:
+    uint64_t NowMs() const
+    {
         auto now = std::chrono::steady_clock::now();
-        return static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                now - m_startTime).count());
+        return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(now - m_startTime).count());
     }
 
     // ── Data members ─────────────────────────────────────────────
 
     SRWLOCK m_lock{};
-    HANDLE  m_heap = nullptr;
+    HANDLE m_heap = nullptr;
 
     std::unordered_map<uintptr_t, AllocationRecord> m_allocations;
 
-    size_t   m_currentAllocation = 0;
-    size_t   m_peakAllocation = 0;
+    size_t m_currentAllocation = 0;
+    size_t m_peakAllocation = 0;
     uint32_t m_doubleFreeAttempts = 0;
     uint32_t m_canaryViolations = 0;
     uint64_t m_totalAllocations = 0;
     uint64_t m_totalFrees = 0;
-    double   m_lastSoakDuration = 0.0;
+    double m_lastSoakDuration = 0.0;
 
     std::chrono::steady_clock::time_point m_startTime;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

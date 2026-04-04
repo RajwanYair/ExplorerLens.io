@@ -7,9 +7,9 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -22,48 +22,55 @@ enum class TimeoutStrategy : uint8_t {
     COUNT
 };
 
-struct TimeoutConfig {
+struct TimeoutConfig
+{
     uint32_t baseTimeoutMs = 5000;
     uint32_t maxTimeoutMs = 30000;
     uint32_t minTimeoutMs = 500;
-    float fileSizeMultiplier = 1.0f; // ms per MB
-    float loadMultiplier = 1.5f; // increase under load
+    float fileSizeMultiplier = 1.0f;  // ms per MB
+    float loadMultiplier = 1.5f;      // increase under load
 };
 
-struct TimeoutDecision {
+struct TimeoutDecision
+{
     uint32_t timeoutMs = 5000;
     TimeoutStrategy strategy = TimeoutStrategy::Fixed;
     bool wasExtended = false;
     float confidence = 1.0f;
 };
 
-class AdaptiveTimeoutController {
-public:
-    void SetConfig(const TimeoutConfig& cfg) { m_config = cfg; }
-    const TimeoutConfig& GetConfig() const { return m_config; }
+class AdaptiveTimeoutController
+{
+  public:
+    void SetConfig(const TimeoutConfig& cfg)
+    {
+        m_config = cfg;
+    }
+    const TimeoutConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-    TimeoutDecision Calculate(uint64_t fileSize, const std::wstring& format,
-        float systemLoad = 0.5f) const {
+    TimeoutDecision Calculate(uint64_t fileSize, const std::wstring& format, float systemLoad = 0.5f) const
+    {
         (void)format;
         TimeoutDecision d;
         switch (m_strategy) {
-        case TimeoutStrategy::Fixed:
-            d.timeoutMs = m_config.baseTimeoutMs;
-            break;
-        case TimeoutStrategy::FileSizeBased: {
-            float sizeMB = static_cast<float>(fileSize) / (1024.0f * 1024.0f);
-            d.timeoutMs = m_config.baseTimeoutMs +
-                static_cast<uint32_t>(sizeMB * m_config.fileSizeMultiplier);
-            break;
-        }
-        case TimeoutStrategy::Adaptive:
-        default: {
-            float sizeMB = static_cast<float>(fileSize) / (1024.0f * 1024.0f);
-            uint32_t base = m_config.baseTimeoutMs +
-                static_cast<uint32_t>(sizeMB * m_config.fileSizeMultiplier);
-            d.timeoutMs = static_cast<uint32_t>(base * (1.0f + systemLoad * 0.5f));
-            break;
-        }
+            case TimeoutStrategy::Fixed:
+                d.timeoutMs = m_config.baseTimeoutMs;
+                break;
+            case TimeoutStrategy::FileSizeBased: {
+                float sizeMB = static_cast<float>(fileSize) / (1024.0f * 1024.0f);
+                d.timeoutMs = m_config.baseTimeoutMs + static_cast<uint32_t>(sizeMB * m_config.fileSizeMultiplier);
+                break;
+            }
+            case TimeoutStrategy::Adaptive:
+            default: {
+                float sizeMB = static_cast<float>(fileSize) / (1024.0f * 1024.0f);
+                uint32_t base = m_config.baseTimeoutMs + static_cast<uint32_t>(sizeMB * m_config.fileSizeMultiplier);
+                d.timeoutMs = static_cast<uint32_t>(base * (1.0f + systemLoad * 0.5f));
+                break;
+            }
         }
         d.timeoutMs = std::clamp(d.timeoutMs, m_config.minTimeoutMs, m_config.maxTimeoutMs);
         d.strategy = m_strategy;
@@ -71,37 +78,52 @@ public:
         return d;
     }
 
-    void SetStrategy(TimeoutStrategy s) { m_strategy = s; }
-    TimeoutStrategy GetStrategy() const { return m_strategy; }
+    void SetStrategy(TimeoutStrategy s)
+    {
+        m_strategy = s;
+    }
+    TimeoutStrategy GetStrategy() const
+    {
+        return m_strategy;
+    }
 
-    void RecordActualTime(uint32_t decodeMs) {
+    void RecordActualTime(uint32_t decodeMs)
+    {
         m_historySum += decodeMs;
         m_historyCount++;
     }
 
-    float AverageDecodeMs() const {
-        return m_historyCount > 0
-            ? static_cast<float>(m_historySum) / static_cast<float>(m_historyCount)
-            : 0.0f;
+    float AverageDecodeMs() const
+    {
+        return m_historyCount > 0 ? static_cast<float>(m_historySum) / static_cast<float>(m_historyCount) : 0.0f;
     }
 
-    static const wchar_t* StrategyName(TimeoutStrategy s) {
+    static const wchar_t* StrategyName(TimeoutStrategy s)
+    {
         switch (s) {
-        case TimeoutStrategy::Fixed:         return L"Fixed";
-        case TimeoutStrategy::FileSizeBased: return L"FileSizeBased";
-        case TimeoutStrategy::HistoryBased:  return L"HistoryBased";
-        case TimeoutStrategy::Adaptive:      return L"Adaptive";
-        default: return L"Unknown";
+            case TimeoutStrategy::Fixed:
+                return L"Fixed";
+            case TimeoutStrategy::FileSizeBased:
+                return L"FileSizeBased";
+            case TimeoutStrategy::HistoryBased:
+                return L"HistoryBased";
+            case TimeoutStrategy::Adaptive:
+                return L"Adaptive";
+            default:
+                return L"Unknown";
         }
     }
-    static size_t StrategyCount() { return static_cast<size_t>(TimeoutStrategy::COUNT); }
+    static size_t StrategyCount()
+    {
+        return static_cast<size_t>(TimeoutStrategy::COUNT);
+    }
 
-private:
+  private:
     TimeoutStrategy m_strategy = TimeoutStrategy::Adaptive;
     TimeoutConfig m_config;
     uint64_t m_historySum = 0;
     uint32_t m_historyCount = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

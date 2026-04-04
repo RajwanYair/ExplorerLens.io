@@ -5,13 +5,14 @@
 // cache stats, error logs) into a shareable diagnostic bundle for support.
 //
 #pragma once
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct DiagnosticBundleCollectorConfig {
+struct DiagnosticBundleCollectorConfig
+{
     bool enabled = true;
     bool includeSystemInfo = true;
     bool includeCacheStats = true;
@@ -19,18 +20,31 @@ struct DiagnosticBundleCollectorConfig {
     std::string label = "DiagnosticBundleCollector";
 };
 
-class DiagnosticBundleCollector {
-public:
-    bool Initialize() {
-        if (m_initialized) return true;
+class DiagnosticBundleCollector
+{
+  public:
+    bool Initialize()
+    {
+        if (m_initialized)
+            return true;
         m_initialized = true;
         return true;
     }
-    bool IsInitialized() const { return m_initialized; }
-    DiagnosticBundleCollectorConfig GetConfig() const { return m_config; }
-    std::string GetName() const { return m_config.label; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    DiagnosticBundleCollectorConfig GetConfig() const
+    {
+        return m_config;
+    }
+    std::string GetName() const
+    {
+        return m_config.label;
+    }
 
-    struct Bundle {
+    struct Bundle
+    {
         std::string osVersion;
         std::string gpuName;
         uint64_t systemMemoryMB = 0;
@@ -39,7 +53,8 @@ public:
         std::string engineVersion;
     };
 
-    Bundle Collect() const {
+    Bundle Collect() const
+    {
         Bundle b;
         b.engineVersion = "15.0.0";
         b.systemMemoryMB = 16384;
@@ -48,14 +63,15 @@ public:
         return b;
     }
 
-    bool IsComplete(const Bundle& b) const {
+    bool IsComplete(const Bundle& b) const
+    {
         return !b.engineVersion.empty() && b.systemMemoryMB > 0;
     }
 
-private:
+  private:
     bool m_initialized = false;
     DiagnosticBundleCollectorConfig m_config;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -7,10 +7,10 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <mutex>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -26,7 +26,8 @@ enum class LeakDetectorResourceType : uint8_t {
     PipelineState
 };
 
-struct TrackedGPUResource {
+struct TrackedGPUResource
+{
     uint64_t resourceId = 0;
     LeakDetectorResourceType type = LeakDetectorResourceType::Texture2D;
     uint64_t sizeBytes = 0;
@@ -35,7 +36,8 @@ struct TrackedGPUResource {
     bool released = false;
 };
 
-struct GPULeakReport {
+struct GPULeakReport
+{
     uint64_t totalAllocations = 0;
     uint64_t totalReleases = 0;
     uint64_t leakedResources = 0;
@@ -43,12 +45,13 @@ struct GPULeakReport {
     std::vector<TrackedGPUResource> leakedItems;
 };
 
-class GPUResourceLeakDetector {
-public:
+class GPUResourceLeakDetector
+{
+  public:
     GPUResourceLeakDetector() = default;
 
-    uint64_t TrackAllocation(LeakDetectorResourceType type, uint64_t sizeBytes,
-        const std::string& site = "") {
+    uint64_t TrackAllocation(LeakDetectorResourceType type, uint64_t sizeBytes, const std::string& site = "")
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint64_t id = ++m_nextId;
         TrackedGPUResource res;
@@ -62,17 +65,20 @@ public:
         return id;
     }
 
-    bool TrackRelease(uint64_t resourceId) {
+    bool TrackRelease(uint64_t resourceId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_resources.find(resourceId);
-        if (it == m_resources.end()) return false;
+        if (it == m_resources.end())
+            return false;
         it->second.released = true;
         m_totalReleases++;
         m_totalBytesReleased += it->second.sizeBytes;
         return true;
     }
 
-    GPULeakReport GenerateReport() const {
+    GPULeakReport GenerateReport() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         GPULeakReport report;
         report.totalAllocations = m_totalAllocations;
@@ -87,28 +93,33 @@ public:
         return report;
     }
 
-    bool HasLeaks() const {
+    bool HasLeaks() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (const auto& [id, res] : m_resources) {
-            if (!res.released) return true;
+            if (!res.released)
+                return true;
         }
         return false;
     }
 
-    uint64_t GetActiveResourceCount() const {
+    uint64_t GetActiveResourceCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint64_t count = 0;
         for (const auto& [id, res] : m_resources) {
-            if (!res.released) count++;
+            if (!res.released)
+                count++;
         }
         return count;
     }
 
-    uint64_t GetTotalBytesInUse() const {
+    uint64_t GetTotalBytesInUse() const
+    {
         return m_totalBytesAllocated - m_totalBytesReleased;
     }
 
-private:
+  private:
     mutable std::mutex m_mutex;
     std::unordered_map<uint64_t, TrackedGPUResource> m_resources;
     uint64_t m_nextId = 0;
@@ -118,5 +129,5 @@ private:
     uint64_t m_totalBytesReleased = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

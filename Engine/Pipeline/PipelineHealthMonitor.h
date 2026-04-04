@@ -34,7 +34,8 @@ enum class PipelineHealthMetric : uint8_t {
     MemoryPressure
 };
 
-struct PipelineHealthThresholds {
+struct PipelineHealthThresholds
+{
     float maxErrorRate = 0.05f;
     float maxP95LatencyMs = 100.0f;
     float maxP99LatencyMs = 500.0f;
@@ -42,7 +43,8 @@ struct PipelineHealthThresholds {
     float minThroughputPerSec = 10.0f;
 };
 
-struct PipelineAlert {
+struct PipelineAlert
+{
     PipelineAlertLevel level = PipelineAlertLevel::Normal;
     PipelineHealthMetric metric = PipelineHealthMetric::Throughput;
     float currentValue = 0.0f;
@@ -50,7 +52,8 @@ struct PipelineAlert {
     std::wstring description;
 };
 
-struct PipelineHealthSnapshot {
+struct PipelineHealthSnapshot
+{
     PipelineAlertLevel overallHealth = PipelineAlertLevel::Normal;
     float currentThroughput = 0.0f;
     float currentErrorRate = 0.0f;
@@ -61,7 +64,8 @@ struct PipelineHealthSnapshot {
     uint32_t activeAlertCount = 0;
 };
 
-struct PipelineHealthMonitorStats {
+struct PipelineHealthMonitorStats
+{
     uint64_t totalSamples = 0;
     uint64_t alertsGenerated = 0;
     uint64_t criticalAlerts = 0;
@@ -69,14 +73,17 @@ struct PipelineHealthMonitorStats {
     bool initialized = false;
 };
 
-class PipelineHealthMonitor {
-public:
-    static PipelineHealthMonitor& Instance() {
+class PipelineHealthMonitor
+{
+  public:
+    static PipelineHealthMonitor& Instance()
+    {
         static PipelineHealthMonitor instance;
         return instance;
     }
 
-    void Initialize(const PipelineHealthThresholds& thresholds = {}) {
+    void Initialize(const PipelineHealthThresholds& thresholds = {})
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_thresholds = thresholds;
         m_latencies.clear();
@@ -86,12 +93,14 @@ public:
         m_stats.initialized = true;
     }
 
-    void RecordSample(float latencyMs, bool success) {
+    void RecordSample(float latencyMs, bool success)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalSamples++;
         m_latencies.push_back(latencyMs);
         m_totalCount++;
-        if (!success) m_errorCount++;
+        if (!success)
+            m_errorCount++;
 
         if (m_latencies.size() > MAX_LATENCY_WINDOW) {
             m_latencies.erase(m_latencies.begin());
@@ -100,34 +109,39 @@ public:
         UpdateSnapshot();
     }
 
-    PipelineHealthSnapshot GetSnapshot() const {
+    PipelineHealthSnapshot GetSnapshot() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_snapshot;
     }
 
-    std::vector<PipelineAlert> GetActiveAlerts() const {
+    std::vector<PipelineAlert> GetActiveAlerts() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_alerts;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    PipelineHealthMonitorStats GetStats() const {
+    PipelineHealthMonitorStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_latencies.clear();
         m_alerts.clear();
     }
 
-private:
+  private:
     PipelineHealthMonitor() = default;
     ~PipelineHealthMonitor() = default;
     PipelineHealthMonitor(const PipelineHealthMonitor&) = delete;
@@ -135,11 +149,13 @@ private:
 
     static constexpr size_t MAX_LATENCY_WINDOW = 1000;
 
-    void UpdateSnapshot() {
+    void UpdateSnapshot()
+    {
         m_alerts.clear();
         m_snapshot = {};
 
-        if (m_latencies.empty()) return;
+        if (m_latencies.empty())
+            return;
 
         std::vector<float> sorted = m_latencies;
         std::sort(sorted.begin(), sorted.end());
@@ -150,8 +166,7 @@ private:
         m_snapshot.p99LatencyMs = sorted[(std::min)(n * 99 / 100, n - 1)];
 
         if (m_totalCount > 0) {
-            m_snapshot.currentErrorRate =
-                static_cast<float>(m_errorCount) / static_cast<float>(m_totalCount);
+            m_snapshot.currentErrorRate = static_cast<float>(m_errorCount) / static_cast<float>(m_totalCount);
         }
 
         m_snapshot.overallHealth = PipelineAlertLevel::Normal;
@@ -208,5 +223,5 @@ private:
     uint64_t m_errorCount = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

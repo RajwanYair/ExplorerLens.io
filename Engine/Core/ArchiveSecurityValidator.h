@@ -8,25 +8,24 @@
 //
 #pragma once
 
-#include "DecodeErrorCategory.h"
 #include <cstdint>
 #include <string_view>
+#include "DecodeErrorCategory.h"
 
 namespace ExplorerLens {
 namespace Engine {
 
 class ArchiveSecurityValidator
 {
-public:
+  public:
     static constexpr uint64_t MAX_UNCOMPRESSED_RATIO = 100u;
     static constexpr uint64_t MAX_UNCOMPRESSED_BYTES = 2ull * 1024 * 1024 * 1024;
-    static constexpr uint64_t MAX_ENTRY_COUNT        = 65536u;
+    static constexpr uint64_t MAX_ENTRY_COUNT = 65536u;
 
-    static DecodeErrorCategory CheckCompressionRatio(
-        uint64_t compressedBytes,
-        uint64_t uncompressedBytes) noexcept
+    static DecodeErrorCategory CheckCompressionRatio(uint64_t compressedBytes, uint64_t uncompressedBytes) noexcept
     {
-        if (compressedBytes == 0) return DecodeErrorCategory::CorruptedData;
+        if (compressedBytes == 0)
+            return DecodeErrorCategory::CorruptedData;
         if (uncompressedBytes > MAX_UNCOMPRESSED_BYTES)
             return DecodeErrorCategory::ZipBombDetected;
         if (uncompressedBytes / compressedBytes > MAX_UNCOMPRESSED_RATIO)
@@ -36,7 +35,8 @@ public:
 
     static DecodeErrorCategory CheckEntryPath(std::string_view entryPath) noexcept
     {
-        if (entryPath.empty()) return DecodeErrorCategory::CorruptedData;
+        if (entryPath.empty())
+            return DecodeErrorCategory::CorruptedData;
 
         if (entryPath.find("..") != std::string_view::npos)
             return DecodeErrorCategory::PathTraversalDetected;
@@ -52,16 +52,18 @@ public:
 
     static DecodeErrorCategory CheckEntryCount(uint64_t entryCount) noexcept
     {
-        if (entryCount > MAX_ENTRY_COUNT) return DecodeErrorCategory::ZipBombDetected;
+        if (entryCount > MAX_ENTRY_COUNT)
+            return DecodeErrorCategory::ZipBombDetected;
         return DecodeErrorCategory::None;
     }
 
     static DecodeErrorCategory CheckSymlink(bool isSymlink) noexcept
     {
-        if (isSymlink) return DecodeErrorCategory::SymlinkAttackDetected;
+        if (isSymlink)
+            return DecodeErrorCategory::SymlinkAttackDetected;
         return DecodeErrorCategory::None;
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -35,7 +35,8 @@ enum class FallbackStrategy : uint8_t {
     SkipFile
 };
 
-struct DecodeAttemptRecord {
+struct DecodeAttemptRecord
+{
     std::wstring decoderName;
     DecodeOutcome outcome = DecodeOutcome::Success;
     float durationMs = 0.0f;
@@ -43,7 +44,8 @@ struct DecodeAttemptRecord {
     FallbackStrategy fallbackUsed = FallbackStrategy::None;
 };
 
-struct DecoderReliability {
+struct DecoderReliability
+{
     std::wstring decoderName;
     uint64_t totalAttempts = 0;
     uint64_t successCount = 0;
@@ -52,7 +54,8 @@ struct DecoderReliability {
     float reliabilityScore = 1.0f;
 };
 
-struct FaultToleranceStats {
+struct FaultToleranceStats
+{
     uint64_t totalDecodes = 0;
     uint64_t successfulDecodes = 0;
     uint64_t fallbackRecoveries = 0;
@@ -61,14 +64,17 @@ struct FaultToleranceStats {
     bool initialized = false;
 };
 
-class FaultTolerantDecodeOrchestrator {
-public:
-    static FaultTolerantDecodeOrchestrator& Instance() {
+class FaultTolerantDecodeOrchestrator
+{
+  public:
+    static FaultTolerantDecodeOrchestrator& Instance()
+    {
         static FaultTolerantDecodeOrchestrator instance;
         return instance;
     }
 
-    void Initialize(uint32_t maxRetries = 3) {
+    void Initialize(uint32_t maxRetries = 3)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_maxRetries = maxRetries;
         m_decoderReliability.clear();
@@ -76,9 +82,8 @@ public:
         m_stats.initialized = true;
     }
 
-    DecodeAttemptRecord RecordAttempt(const std::wstring& decoderName,
-                                      DecodeOutcome outcome,
-                                      float durationMs) {
+    DecodeAttemptRecord RecordAttempt(const std::wstring& decoderName, DecodeOutcome outcome, float durationMs)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalDecodes++;
 
@@ -104,55 +109,64 @@ public:
         }
 
         if (rel.totalAttempts > 0) {
-            rel.reliabilityScore = static_cast<float>(rel.successCount) /
-                                   static_cast<float>(rel.totalAttempts);
+            rel.reliabilityScore = static_cast<float>(rel.successCount) / static_cast<float>(rel.totalAttempts);
         }
 
         if (m_stats.totalDecodes > 0) {
-            m_stats.overallReliability =
-                static_cast<float>(m_stats.successfulDecodes + m_stats.fallbackRecoveries) /
-                static_cast<float>(m_stats.totalDecodes);
+            m_stats.overallReliability = static_cast<float>(m_stats.successfulDecodes + m_stats.fallbackRecoveries)
+                                         / static_cast<float>(m_stats.totalDecodes);
         }
 
         return record;
     }
 
-    FallbackStrategy GetRecommendedFallback(const std::wstring& decoderName) const {
+    FallbackStrategy GetRecommendedFallback(const std::wstring& decoderName) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_decoderReliability.find(decoderName);
-        if (it == m_decoderReliability.end()) return FallbackStrategy::None;
+        if (it == m_decoderReliability.end())
+            return FallbackStrategy::None;
 
-        if (it->second.reliabilityScore < 0.3f) return FallbackStrategy::SkipFile;
-        if (it->second.reliabilityScore < 0.5f) return FallbackStrategy::GenericDecoder;
-        if (it->second.reliabilityScore < 0.7f) return FallbackStrategy::CPUOnly;
-        if (it->second.reliabilityScore < 0.9f) return FallbackStrategy::NextDecoder;
+        if (it->second.reliabilityScore < 0.3f)
+            return FallbackStrategy::SkipFile;
+        if (it->second.reliabilityScore < 0.5f)
+            return FallbackStrategy::GenericDecoder;
+        if (it->second.reliabilityScore < 0.7f)
+            return FallbackStrategy::CPUOnly;
+        if (it->second.reliabilityScore < 0.9f)
+            return FallbackStrategy::NextDecoder;
         return FallbackStrategy::None;
     }
 
-    DecoderReliability GetDecoderReliability(const std::wstring& decoderName) const {
+    DecoderReliability GetDecoderReliability(const std::wstring& decoderName) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_decoderReliability.find(decoderName);
-        if (it != m_decoderReliability.end()) return it->second;
+        if (it != m_decoderReliability.end())
+            return it->second;
         return {};
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    FaultToleranceStats GetStats() const {
+    FaultToleranceStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
         m_decoderReliability.clear();
     }
 
-private:
+  private:
     FaultTolerantDecodeOrchestrator() = default;
     ~FaultTolerantDecodeOrchestrator() = default;
     FaultTolerantDecodeOrchestrator(const FaultTolerantDecodeOrchestrator&) = delete;
@@ -164,5 +178,5 @@ private:
     FaultToleranceStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

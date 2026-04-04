@@ -22,27 +22,30 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Result of a deduplicated decode operation
-struct DeduplicatedResult {
-    bool        success = false;
-    uint32_t    width = 0;
-    uint32_t    height = 0;
+struct DeduplicatedResult
+{
+    bool success = false;
+    uint32_t width = 0;
+    uint32_t height = 0;
     std::vector<uint8_t> pixels;
     std::string error;
-    bool        wasCoalesced = false;  // True if this was a joined request
+    bool wasCoalesced = false;  // True if this was a joined request
 };
 
 /// Deduplication statistics
-struct DeduplicationStats {
+struct DeduplicationStats
+{
     uint64_t totalRequests = 0;
     uint64_t uniqueDecodes = 0;
     uint64_t coalescedRequests = 0;
     uint64_t activeInflight = 0;
-    double   avgWaitersPerKey = 0.0;
-    double   deduplicationRate = 0.0;  // coalescedRequests / totalRequests
+    double avgWaitersPerKey = 0.0;
+    double deduplicationRate = 0.0;  // coalescedRequests / totalRequests
 };
 
 /// Internal: represents one in-flight decode with its waiters
-struct InflightEntry {
+struct InflightEntry
+{
     std::shared_ptr<DeduplicatedResult> result;
     std::shared_ptr<std::condition_variable> cv;
     std::shared_ptr<std::mutex> mtx;
@@ -51,9 +54,11 @@ struct InflightEntry {
 };
 
 /// Thread-safe request deduplicator for thumbnail generation
-class RequestDeduplicator {
-public:
-    static RequestDeduplicator& Instance() {
+class RequestDeduplicator
+{
+  public:
+    static RequestDeduplicator& Instance()
+    {
         static RequestDeduplicator inst;
         return inst;
     }
@@ -62,8 +67,8 @@ public:
     /// @param filePath  The file to decode
     /// @param decoder   Callback invoked only for the first request
     /// @return Shared result (blocking for coalesced requests)
-    DeduplicatedResult Submit(const std::wstring& filePath,
-        std::function<DeduplicatedResult()> decoder) {
+    DeduplicatedResult Submit(const std::wstring& filePath, std::function<DeduplicatedResult()> decoder)
+    {
         std::unique_lock<std::mutex> globalLock(m_mutex);
         m_stats.totalRequests++;
 
@@ -111,7 +116,8 @@ public:
         {
             std::lock_guard<std::mutex> cleanLock(m_mutex);
             m_inflight.erase(filePath);
-            if (m_stats.activeInflight > 0) m_stats.activeInflight--;
+            if (m_stats.activeInflight > 0)
+                m_stats.activeInflight--;
         }
 
         decoded.wasCoalesced = false;
@@ -119,27 +125,29 @@ public:
     }
 
     /// Get deduplication statistics
-    DeduplicationStats GetStats() const {
+    DeduplicationStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto stats = m_stats;
         if (stats.totalRequests > 0) {
-            stats.deduplicationRate = static_cast<double>(stats.coalescedRequests) /
-                static_cast<double>(stats.totalRequests);
+            stats.deduplicationRate =
+                static_cast<double>(stats.coalescedRequests) / static_cast<double>(stats.totalRequests);
         }
         if (stats.uniqueDecodes > 0) {
-            stats.avgWaitersPerKey = static_cast<double>(stats.totalRequests) /
-                static_cast<double>(stats.uniqueDecodes);
+            stats.avgWaitersPerKey =
+                static_cast<double>(stats.totalRequests) / static_cast<double>(stats.uniqueDecodes);
         }
         return stats;
     }
 
     /// Get number of currently in-flight decodes
-    size_t InflightCount() const {
+    size_t InflightCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_inflight.size();
     }
 
-private:
+  private:
     RequestDeduplicator() = default;
 
     mutable std::mutex m_mutex;
@@ -147,5 +155,5 @@ private:
     mutable DeduplicationStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

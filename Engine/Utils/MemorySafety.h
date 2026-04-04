@@ -34,7 +34,7 @@ enum class MemSafetyTool : uint8_t {
     PageHeap,
     DrMemory,
     WinHeap,
-    AddressSanitizer = ASAN, // compat alias
+    AddressSanitizer = ASAN,  // compat alias
     COUNT = WinHeap + 1
 };
 enum class MemSafetyScope : uint8_t {
@@ -45,7 +45,8 @@ enum class MemSafetyScope : uint8_t {
     COUNT
 };
 
-struct MemSafetyFinding {
+struct MemSafetyFinding
+{
     MemSafetyViolation violation = MemSafetyViolation::BufferOverflow;
     MemSafetyTool tool = MemSafetyTool::ASAN;
     std::wstring component;
@@ -53,7 +54,8 @@ struct MemSafetyFinding {
     bool fixed = false;
 };
 
-struct MemSafetyAuditReport {
+struct MemSafetyAuditReport
+{
     MemSafetyScope scope = MemSafetyScope::FullEngine;
     uint32_t findingsCount = 0;
     uint32_t fixedCount = 0;
@@ -61,86 +63,95 @@ struct MemSafetyAuditReport {
     bool clean = false;
 };
 
-class MemorySafetyAuditV2 {
-public:
-    static const wchar_t* ViolationName(MemSafetyViolation v) {
+class MemorySafetyAuditV2
+{
+  public:
+    static const wchar_t* ViolationName(MemSafetyViolation v)
+    {
         switch (v) {
-        case MemSafetyViolation::UseAfterFree:
-            return L"Use-After-Free";
-        case MemSafetyViolation::BufferOverflow:
-            return L"Buffer Overflow";
-        case MemSafetyViolation::HeapCorruption:
-            return L"Heap Corruption";
-        case MemSafetyViolation::UninitialisedRead:
-            return L"Uninitialised Read";
-        case MemSafetyViolation::DoubleFree:
-            return L"Double Free";
-        case MemSafetyViolation::StackOverflow:
-            return L"Stack Overflow";
-        case MemSafetyViolation::NullDeref:
-            return L"Null Dereference";
-        default:
-            return L"Unknown";
+            case MemSafetyViolation::UseAfterFree:
+                return L"Use-After-Free";
+            case MemSafetyViolation::BufferOverflow:
+                return L"Buffer Overflow";
+            case MemSafetyViolation::HeapCorruption:
+                return L"Heap Corruption";
+            case MemSafetyViolation::UninitialisedRead:
+                return L"Uninitialised Read";
+            case MemSafetyViolation::DoubleFree:
+                return L"Double Free";
+            case MemSafetyViolation::StackOverflow:
+                return L"Stack Overflow";
+            case MemSafetyViolation::NullDeref:
+                return L"Null Dereference";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* ToolName(MemSafetyTool t) {
+    static const wchar_t* ToolName(MemSafetyTool t)
+    {
         switch (t) {
-        case MemSafetyTool::ASAN:
-            return L"AddressSanitizer";
-        case MemSafetyTool::HeapGuard:
-            return L"HeapGuard";
-        case MemSafetyTool::PageHeap:
-            return L"PageHeap";
-        case MemSafetyTool::DrMemory:
-            return L"Dr. Memory";
-        case MemSafetyTool::WinHeap:
-            return L"Windows Heap";
-        default:
-            return L"Unknown";
+            case MemSafetyTool::ASAN:
+                return L"AddressSanitizer";
+            case MemSafetyTool::HeapGuard:
+                return L"HeapGuard";
+            case MemSafetyTool::PageHeap:
+                return L"PageHeap";
+            case MemSafetyTool::DrMemory:
+                return L"Dr. Memory";
+            case MemSafetyTool::WinHeap:
+                return L"Windows Heap";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* ScopeName(MemSafetyScope s) {
+    static const wchar_t* ScopeName(MemSafetyScope s)
+    {
         switch (s) {
-        case MemSafetyScope::AllDecoders:
-            return L"All Decoders";
-        case MemSafetyScope::PluginsOnly:
-            return L"Plugins Only";
-        case MemSafetyScope::CoreOnly:
-            return L"Core Only";
-        case MemSafetyScope::FullEngine:
-            return L"Full Engine";
-        default:
-            return L"Unknown";
+            case MemSafetyScope::AllDecoders:
+                return L"All Decoders";
+            case MemSafetyScope::PluginsOnly:
+                return L"Plugins Only";
+            case MemSafetyScope::CoreOnly:
+                return L"Core Only";
+            case MemSafetyScope::FullEngine:
+                return L"Full Engine";
+            default:
+                return L"Unknown";
         }
     }
-    static constexpr size_t ViolationCount() {
+    static constexpr size_t ViolationCount()
+    {
         return static_cast<size_t>(MemSafetyViolation::COUNT);
     }
-    static constexpr size_t ToolCount() {
+    static constexpr size_t ToolCount()
+    {
         return static_cast<size_t>(MemSafetyTool::COUNT);
     }
-    static constexpr size_t ScopeCount() {
+    static constexpr size_t ScopeCount()
+    {
         return static_cast<size_t>(MemSafetyScope::COUNT);
     }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 // ─── MemoryLeakDetection ───────────────────────────────────────────────────────
 
 #ifdef _DEBUG
-#ifndef _CRTDBG_MAP_ALLOC
-#define _CRTDBG_MAP_ALLOC
-#endif
+    #ifndef _CRTDBG_MAP_ALLOC
+        #define _CRTDBG_MAP_ALLOC
+    #endif
 
-#include <atomic>
-#include <crtdbg.h>
-#include <cstdlib>
+    #include <crtdbg.h>
+    #include <atomic>
+    #include <cstdlib>
 
-class MemoryLeakDetector {
-public:
-    MemoryLeakDetector() {
+class MemoryLeakDetector
+{
+  public:
+    MemoryLeakDetector()
+    {
         // Enable leak checking on program exit
         _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
@@ -152,115 +163,124 @@ public:
         OutputDebugStringA("[ExplorerLens] Memory leak detection ENABLED\n");
     }
 
-    ~MemoryLeakDetector() {
+    ~MemoryLeakDetector()
+    {
         // Report any leaks found
         if (_CrtDumpMemoryLeaks()) {
             OutputDebugStringA("[ExplorerLens] WARNING: Memory leaks detected!\n");
-        }
-        else {
+        } else {
             OutputDebugStringA("[ExplorerLens] No memory leaks detected\n");
         }
     }
 
     // Take a memory snapshot (CRT + atomic counter)
-    void Snapshot() {
+    void Snapshot()
+    {
         _CrtMemCheckpoint(&m_memState);
         m_snapshotCount = s_allocationCounter.load(std::memory_order_acquire);
     }
 
     // Check for leaks since last snapshot (uses atomic counters for unit-test compatibility)
-    bool CheckLeaksSinceSnapshot() {
+    bool CheckLeaksSinceSnapshot()
+    {
         return s_allocationCounter.load(std::memory_order_acquire) > m_snapshotCount;
     }
 
     // Atomic counter interface — mirrors Release-build API for unit-test compatibility.
-    static void TrackAllocation() {
+    static void TrackAllocation()
+    {
         s_allocationCounter.fetch_add(1, std::memory_order_relaxed);
     }
 
-    static void TrackDeallocation() {
+    static void TrackDeallocation()
+    {
         uint64_t prev = s_allocationCounter.load(std::memory_order_relaxed);
-        while (prev > 0 &&
-            !s_allocationCounter.compare_exchange_weak(
-                prev, prev - 1, std::memory_order_relaxed)) {
-        }
+        while (prev > 0 && !s_allocationCounter.compare_exchange_weak(prev, prev - 1, std::memory_order_relaxed)) {}
     }
 
-    static uint64_t GetAllocationCount() {
+    static uint64_t GetAllocationCount()
+    {
         return s_allocationCounter.load(std::memory_order_relaxed);
     }
 
-    static void ResetCounter() {
+    static void ResetCounter()
+    {
         s_allocationCounter.store(0, std::memory_order_relaxed);
     }
 
-private:
+  private:
     _CrtMemState m_memState;
     uint64_t m_snapshotCount = 0;
-    static inline std::atomic<uint64_t> s_allocationCounter{ 0 };
+    static inline std::atomic<uint64_t> s_allocationCounter{0};
 };
 
 // Global instance - automatically enabled in Debug builds
 static MemoryLeakDetector g_memoryLeakDetector;
 
 #else
-// Release build — lightweight leak detection using atomic counters
-#include <atomic>
+    // Release build — lightweight leak detection using atomic counters
+    #include <atomic>
 
-class MemoryLeakDetector {
-public:
+class MemoryLeakDetector
+{
+  public:
     /// Capture current allocation count as a snapshot
-    void Snapshot() {
+    void Snapshot()
+    {
         m_snapshotCount = s_allocationCounter.load(std::memory_order_acquire);
     }
 
     /// Compare current allocation count vs snapshot; return true if leaked
-    bool CheckLeaksSinceSnapshot() {
+    bool CheckLeaksSinceSnapshot()
+    {
         uint64_t current = s_allocationCounter.load(std::memory_order_acquire);
         return current > m_snapshotCount;
     }
 
     /// Increment the global allocation counter (call from allocators/new)
-    static void TrackAllocation() {
+    static void TrackAllocation()
+    {
         s_allocationCounter.fetch_add(1, std::memory_order_relaxed);
     }
 
     /// Decrement the global allocation counter (call from deallocators/delete)
-    static void TrackDeallocation() {
+    static void TrackDeallocation()
+    {
         // Saturating decrement — avoid underflow
         uint64_t prev = s_allocationCounter.load(std::memory_order_relaxed);
-        while (prev > 0 &&
-            !s_allocationCounter.compare_exchange_weak(
-                prev, prev - 1, std::memory_order_relaxed)) {
-        }
+        while (prev > 0 && !s_allocationCounter.compare_exchange_weak(prev, prev - 1, std::memory_order_relaxed)) {}
     }
 
     /// Current live allocation count
-    static uint64_t GetAllocationCount() {
+    static uint64_t GetAllocationCount()
+    {
         return s_allocationCounter.load(std::memory_order_relaxed);
     }
 
     /// Reset counter (for testing)
-    static void ResetCounter() {
+    static void ResetCounter()
+    {
         s_allocationCounter.store(0, std::memory_order_relaxed);
     }
 
-private:
+  private:
     uint64_t m_snapshotCount = 0;
-    static inline std::atomic<uint64_t> s_allocationCounter{ 0 };
+    static inline std::atomic<uint64_t> s_allocationCounter{0};
 };
 
-#endif // _DEBUG
+#endif  // _DEBUG
 
 // ─── Handle wrappers (available in all build configurations) ───────────────────
 
 // HBITMAP wrapper
-class BitmapHandle {
-public:
+class BitmapHandle
+{
+  public:
     BitmapHandle() : m_hBitmap(nullptr) {}
     explicit BitmapHandle(HBITMAP hBitmap) : m_hBitmap(hBitmap) {}
 
-    ~BitmapHandle() {
+    ~BitmapHandle()
+    {
         if (m_hBitmap) {
             DeleteObject(m_hBitmap);
         }
@@ -270,11 +290,13 @@ public:
     BitmapHandle(const BitmapHandle&) = delete;
     BitmapHandle& operator=(const BitmapHandle&) = delete;
 
-    BitmapHandle(BitmapHandle&& other) noexcept : m_hBitmap(other.m_hBitmap) {
+    BitmapHandle(BitmapHandle&& other) noexcept : m_hBitmap(other.m_hBitmap)
+    {
         other.m_hBitmap = nullptr;
     }
 
-    BitmapHandle& operator=(BitmapHandle&& other) noexcept {
+    BitmapHandle& operator=(BitmapHandle&& other) noexcept
+    {
         if (this != &other) {
             if (m_hBitmap) {
                 DeleteObject(m_hBitmap);
@@ -285,35 +307,48 @@ public:
         return *this;
     }
 
-    HBITMAP Get() const { return m_hBitmap; }
-    HBITMAP* GetAddressOf() { return &m_hBitmap; }
+    HBITMAP Get() const
+    {
+        return m_hBitmap;
+    }
+    HBITMAP* GetAddressOf()
+    {
+        return &m_hBitmap;
+    }
 
-    HBITMAP Release() {
+    HBITMAP Release()
+    {
         HBITMAP temp = m_hBitmap;
         m_hBitmap = nullptr;
         return temp;
     }
 
-    void Reset(HBITMAP hBitmap = nullptr) {
+    void Reset(HBITMAP hBitmap = nullptr)
+    {
         if (m_hBitmap) {
             DeleteObject(m_hBitmap);
         }
         m_hBitmap = hBitmap;
     }
 
-    explicit operator bool() const { return m_hBitmap != nullptr; }
+    explicit operator bool() const
+    {
+        return m_hBitmap != nullptr;
+    }
 
-private:
+  private:
     HBITMAP m_hBitmap;
 };
 
 // HICON wrapper
-class IconHandle {
-public:
+class IconHandle
+{
+  public:
     IconHandle() : m_hIcon(nullptr) {}
     explicit IconHandle(HICON hIcon) : m_hIcon(hIcon) {}
 
-    ~IconHandle() {
+    ~IconHandle()
+    {
         if (m_hIcon) {
             DestroyIcon(m_hIcon);
         }
@@ -323,11 +358,13 @@ public:
     IconHandle(const IconHandle&) = delete;
     IconHandle& operator=(const IconHandle&) = delete;
 
-    IconHandle(IconHandle&& other) noexcept : m_hIcon(other.m_hIcon) {
+    IconHandle(IconHandle&& other) noexcept : m_hIcon(other.m_hIcon)
+    {
         other.m_hIcon = nullptr;
     }
 
-    IconHandle& operator=(IconHandle&& other) noexcept {
+    IconHandle& operator=(IconHandle&& other) noexcept
+    {
         if (this != &other) {
             if (m_hIcon) {
                 DestroyIcon(m_hIcon);
@@ -338,35 +375,48 @@ public:
         return *this;
     }
 
-    HICON Get() const { return m_hIcon; }
-    HICON* GetAddressOf() { return &m_hIcon; }
+    HICON Get() const
+    {
+        return m_hIcon;
+    }
+    HICON* GetAddressOf()
+    {
+        return &m_hIcon;
+    }
 
-    HICON Release() {
+    HICON Release()
+    {
         HICON temp = m_hIcon;
         m_hIcon = nullptr;
         return temp;
     }
 
-    void Reset(HICON hIcon = nullptr) {
+    void Reset(HICON hIcon = nullptr)
+    {
         if (m_hIcon) {
             DestroyIcon(m_hIcon);
         }
         m_hIcon = hIcon;
     }
 
-    explicit operator bool() const { return m_hIcon != nullptr; }
+    explicit operator bool() const
+    {
+        return m_hIcon != nullptr;
+    }
 
-private:
+  private:
     HICON m_hIcon;
 };
 
 // HANDLE wrapper
-class HandleWrapper {
-public:
+class HandleWrapper
+{
+  public:
     HandleWrapper() : m_hHandle(nullptr) {}
     explicit HandleWrapper(HANDLE hHandle) : m_hHandle(hHandle) {}
 
-    ~HandleWrapper() {
+    ~HandleWrapper()
+    {
         if (m_hHandle && m_hHandle != INVALID_HANDLE_VALUE) {
             CloseHandle(m_hHandle);
         }
@@ -376,11 +426,13 @@ public:
     HandleWrapper(const HandleWrapper&) = delete;
     HandleWrapper& operator=(const HandleWrapper&) = delete;
 
-    HandleWrapper(HandleWrapper&& other) noexcept : m_hHandle(other.m_hHandle) {
+    HandleWrapper(HandleWrapper&& other) noexcept : m_hHandle(other.m_hHandle)
+    {
         other.m_hHandle = nullptr;
     }
 
-    HandleWrapper& operator=(HandleWrapper&& other) noexcept {
+    HandleWrapper& operator=(HandleWrapper&& other) noexcept
+    {
         if (this != &other) {
             if (m_hHandle && m_hHandle != INVALID_HANDLE_VALUE) {
                 CloseHandle(m_hHandle);
@@ -391,27 +443,36 @@ public:
         return *this;
     }
 
-    HANDLE Get() const { return m_hHandle; }
-    HANDLE* GetAddressOf() { return &m_hHandle; }
+    HANDLE Get() const
+    {
+        return m_hHandle;
+    }
+    HANDLE* GetAddressOf()
+    {
+        return &m_hHandle;
+    }
 
-    HANDLE Release() {
+    HANDLE Release()
+    {
         HANDLE temp = m_hHandle;
         m_hHandle = nullptr;
         return temp;
     }
 
-    void Reset(HANDLE hHandle = nullptr) {
+    void Reset(HANDLE hHandle = nullptr)
+    {
         if (m_hHandle && m_hHandle != INVALID_HANDLE_VALUE) {
             CloseHandle(m_hHandle);
         }
         m_hHandle = hHandle;
     }
 
-    explicit operator bool() const {
+    explicit operator bool() const
+    {
         return m_hHandle != nullptr && m_hHandle != INVALID_HANDLE_VALUE;
     }
 
-private:
+  private:
     HANDLE m_hHandle;
 };
 

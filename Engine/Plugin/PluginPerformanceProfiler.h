@@ -16,29 +16,30 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 
 #include <windows.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <mutex>
-#include <cstdint>
-#include <chrono>
 #include <algorithm>
+#include <chrono>
+#include <cstdint>
 #include <fstream>
-#include <sstream>
 #include <iomanip>
+#include <mutex>
 #include <numeric>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // PROCESS_MEMORY_COUNTERS structure (avoids including <psapi.h>)
-struct ProcessMemCounters {
-    DWORD  cb;
-    DWORD  PageFaultCount;
+struct ProcessMemCounters
+{
+    DWORD cb;
+    DWORD PageFaultCount;
     SIZE_T PeakWorkingSetSize;
     SIZE_T WorkingSetSize;
     SIZE_T QuotaPeakPagedPoolUsage;
@@ -49,33 +50,37 @@ struct ProcessMemCounters {
     SIZE_T PeakPagefileUsage;
 };
 
-struct ProfileRecord {
+struct ProfileRecord
+{
     std::wstring pluginId;
-    std::string  operation;
-    uint64_t     startUs = 0;
-    uint64_t     endUs = 0;
-    uint64_t     durationUs = 0;
-    int64_t      memoryDeltaBytes = 0;
-    int32_t      gdiObjectDelta = 0;
+    std::string operation;
+    uint64_t startUs = 0;
+    uint64_t endUs = 0;
+    uint64_t durationUs = 0;
+    int64_t memoryDeltaBytes = 0;
+    int32_t gdiObjectDelta = 0;
 };
 
-struct ProfileSummary {
+struct ProfileSummary
+{
     std::wstring pluginId;
-    uint64_t     totalRecords = 0;
-    uint64_t     avgDurationUs = 0;
-    uint64_t     minDurationUs = 0;
-    uint64_t     maxDurationUs = 0;
-    uint64_t     p95DurationUs = 0;
-    int64_t      memoryTrendBytes = 0; // positive = growing
-    bool         gdiLeakDetected = false;
+    uint64_t totalRecords = 0;
+    uint64_t avgDurationUs = 0;
+    uint64_t minDurationUs = 0;
+    uint64_t maxDurationUs = 0;
+    uint64_t p95DurationUs = 0;
+    int64_t memoryTrendBytes = 0;  // positive = growing
+    bool gdiLeakDetected = false;
     std::unordered_map<std::string, uint64_t> avgPerOperation;
 };
 
-class PluginPerformanceProfiler {
-public:
+class PluginPerformanceProfiler
+{
+  public:
     static constexpr size_t MAX_RECORDS_PER_PLUGIN = 1000;
 
-    PluginPerformanceProfiler() {
+    PluginPerformanceProfiler()
+    {
         InitializeSRWLock(&m_lock);
 
         // Initialize QPC frequency
@@ -87,8 +92,8 @@ public:
         // (On Win7+ it's in kernel32 via K32GetProcessMemoryInfo)
         HMODULE hKernel = GetModuleHandleW(L"kernel32.dll");
         if (hKernel) {
-            m_fnGetProcessMemoryInfo = reinterpret_cast<GetProcessMemoryInfoFn>(
-                GetProcAddress(hKernel, "K32GetProcessMemoryInfo"));
+            m_fnGetProcessMemoryInfo =
+                reinterpret_cast<GetProcessMemoryInfoFn>(GetProcAddress(hKernel, "K32GetProcessMemoryInfo"));
         }
     }
 
@@ -97,7 +102,8 @@ public:
     PluginPerformanceProfiler(const PluginPerformanceProfiler&) = delete;
     PluginPerformanceProfiler& operator=(const PluginPerformanceProfiler&) = delete;
 
-    inline uint64_t BeginProfile(const std::wstring& pluginId, const std::string& operation) {
+    inline uint64_t BeginProfile(const std::wstring& pluginId, const std::string& operation)
+    {
         ActiveSession session;
         session.pluginId = pluginId;
         session.operation = operation;
@@ -112,8 +118,7 @@ public:
         session.startMemoryBytes = GetCurrentWorkingSetBytes();
 
         // Capture start GDI objects
-        session.startGdiObjects = static_cast<int32_t>(
-            GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS));
+        session.startGdiObjects = static_cast<int32_t>(GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS));
 
         uint64_t sessionId = m_nextSessionId.fetch_add(1, std::memory_order_relaxed);
 
@@ -124,7 +129,8 @@ public:
         return sessionId;
     }
 
-    inline void EndProfile(uint64_t sessionId) {
+    inline void EndProfile(uint64_t sessionId)
+    {
         // Capture end QPC tick immediately
         LARGE_INTEGER tick{};
         QueryPerformanceCounter(&tick);
@@ -134,8 +140,7 @@ public:
         int64_t endMemory = GetCurrentWorkingSetBytes();
 
         // Capture end GDI objects
-        int32_t endGdi = static_cast<int32_t>(
-            GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS));
+        int32_t endGdi = static_cast<int32_t>(GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS));
 
         AcquireSRWLockExclusive(&m_lock);
         auto it = m_activeSessions.find(sessionId);
@@ -158,7 +163,7 @@ public:
         // Store in per-plugin rolling window
         auto& records = m_records[record.pluginId];
         if (records.size() >= MAX_RECORDS_PER_PLUGIN) {
-            records.erase(records.begin()); // Evict oldest
+            records.erase(records.begin());  // Evict oldest
         }
         records.push_back(record);
 
@@ -166,7 +171,8 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    inline std::vector<ProfileRecord> GetRecords(const std::wstring& pluginId) const {
+    inline std::vector<ProfileRecord> GetRecords(const std::wstring& pluginId) const
+    {
         AcquireSRWLockShared(&m_lock);
         auto it = m_records.find(pluginId);
         std::vector<ProfileRecord> result;
@@ -177,7 +183,8 @@ public:
         return result;
     }
 
-    inline ProfileSummary GetSummary(const std::wstring& pluginId) const {
+    inline ProfileSummary GetSummary(const std::wstring& pluginId) const
+    {
         ProfileSummary summary;
         summary.pluginId = pluginId;
 
@@ -196,7 +203,7 @@ public:
         durations.reserve(records.size());
 
         // Per-operation duration accumulators
-        std::unordered_map<std::string, std::pair<uint64_t, uint64_t>> opAccum; // sum, count
+        std::unordered_map<std::string, std::pair<uint64_t, uint64_t>> opAccum;  // sum, count
 
         int64_t totalMemoryDelta = 0;
         int32_t totalGdiDelta = 0;
@@ -217,15 +224,15 @@ public:
 
         // Compute statistics
         uint64_t totalDuration = 0;
-        for (auto d : durations) totalDuration += d;
+        for (auto d : durations)
+            totalDuration += d;
         summary.avgDurationUs = totalDuration / durations.size();
         summary.minDurationUs = minDur;
         summary.maxDurationUs = maxDur;
 
         // P95 calculation
         std::sort(durations.begin(), durations.end());
-        size_t p95Index = static_cast<size_t>(
-            static_cast<double>(durations.size()) * 0.95);
+        size_t p95Index = static_cast<size_t>(static_cast<double>(durations.size()) * 0.95);
         p95Index = (std::min)(p95Index, durations.size() - 1);
         summary.p95DurationUs = durations[p95Index];
 
@@ -243,13 +250,15 @@ public:
         return summary;
     }
 
-    inline void SetSlowThreshold(uint64_t microseconds) {
+    inline void SetSlowThreshold(uint64_t microseconds)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_slowThresholdUs = microseconds;
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    inline std::vector<ProfileRecord> GetSlowOperations() const {
+    inline std::vector<ProfileRecord> GetSlowOperations() const
+    {
         std::vector<ProfileRecord> slow;
         AcquireSRWLockShared(&m_lock);
         uint64_t threshold = m_slowThresholdUs;
@@ -264,7 +273,8 @@ public:
         return slow;
     }
 
-    inline bool ExportReport(const std::wstring& outputPath) const {
+    inline bool ExportReport(const std::wstring& outputPath) const
+    {
         AcquireSRWLockShared(&m_lock);
 
         // Collect all records
@@ -274,12 +284,14 @@ public:
         }
         ReleaseSRWLockShared(&m_lock);
 
-        if (allRecords.empty()) return false;
+        if (allRecords.empty())
+            return false;
 
         // Open output file
-        HANDLE hFile = CreateFileW(outputPath.c_str(), GENERIC_WRITE, 0,
-            nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-        if (hFile == INVALID_HANDLE_VALUE) return false;
+        HANDLE hFile =
+            CreateFileW(outputPath.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile == INVALID_HANDLE_VALUE)
+            return false;
 
         // Write CSV header
         std::ostringstream csv;
@@ -287,51 +299,48 @@ public:
 
         for (const auto& r : allRecords) {
             // Convert pluginId to narrow for CSV
-            int len = WideCharToMultiByte(CP_UTF8, 0, r.pluginId.c_str(),
-                static_cast<int>(r.pluginId.size()), nullptr, 0, nullptr, nullptr);
+            int len = WideCharToMultiByte(CP_UTF8, 0, r.pluginId.c_str(), static_cast<int>(r.pluginId.size()), nullptr,
+                                          0, nullptr, nullptr);
             std::string narrow(static_cast<size_t>(len), '\0');
-            WideCharToMultiByte(CP_UTF8, 0, r.pluginId.c_str(),
-                static_cast<int>(r.pluginId.size()), narrow.data(), len, nullptr, nullptr);
+            WideCharToMultiByte(CP_UTF8, 0, r.pluginId.c_str(), static_cast<int>(r.pluginId.size()), narrow.data(), len,
+                                nullptr, nullptr);
 
-            csv << narrow << ","
-                << r.operation << ","
-                << r.startUs << ","
-                << r.endUs << ","
-                << r.durationUs << ","
-                << r.memoryDeltaBytes << ","
-                << r.gdiObjectDelta << "\r\n";
+            csv << narrow << "," << r.operation << "," << r.startUs << "," << r.endUs << "," << r.durationUs << ","
+                << r.memoryDeltaBytes << "," << r.gdiObjectDelta << "\r\n";
         }
 
         std::string csvStr = csv.str();
         DWORD written = 0;
-        WriteFile(hFile, csvStr.c_str(), static_cast<DWORD>(csvStr.size()),
-            &written, nullptr);
+        WriteFile(hFile, csvStr.c_str(), static_cast<DWORD>(csvStr.size()), &written, nullptr);
         CloseHandle(hFile);
 
         return written == static_cast<DWORD>(csvStr.size());
     }
 
-private:
-    struct ActiveSession {
+  private:
+    struct ActiveSession
+    {
         std::wstring pluginId;
-        std::string  operation;
-        LONGLONG     startTick = 0;
-        uint64_t     startUs = 0;
-        int64_t      startMemoryBytes = 0;
-        int32_t      startGdiObjects = 0;
+        std::string operation;
+        LONGLONG startTick = 0;
+        uint64_t startUs = 0;
+        int64_t startMemoryBytes = 0;
+        int32_t startGdiObjects = 0;
     };
 
     using GetProcessMemoryInfoFn = BOOL(WINAPI*)(HANDLE, ProcessMemCounters*, DWORD);
 
-    inline uint64_t TickToMicroseconds(LONGLONG tick) const {
+    inline uint64_t TickToMicroseconds(LONGLONG tick) const
+    {
         // Convert QPC ticks to microseconds: (tick * 1,000,000) / frequency
         // Use double to avoid overflow on high tick values
-        return static_cast<uint64_t>(
-            static_cast<double>(tick) * 1000000.0 / static_cast<double>(m_qpcFrequency));
+        return static_cast<uint64_t>(static_cast<double>(tick) * 1000000.0 / static_cast<double>(m_qpcFrequency));
     }
 
-    inline int64_t GetCurrentWorkingSetBytes() const {
-        if (!m_fnGetProcessMemoryInfo) return 0;
+    inline int64_t GetCurrentWorkingSetBytes() const
+    {
+        if (!m_fnGetProcessMemoryInfo)
+            return 0;
 
         ProcessMemCounters pmc{};
         pmc.cb = sizeof(pmc);
@@ -343,9 +352,9 @@ private:
 
     // Members
     mutable SRWLOCK m_lock{};
-    LONGLONG        m_qpcFrequency = 1;
-    std::atomic<uint64_t> m_nextSessionId{ 1 };
-    uint64_t        m_slowThresholdUs = 10000; // 10ms default
+    LONGLONG m_qpcFrequency = 1;
+    std::atomic<uint64_t> m_nextSessionId{1};
+    uint64_t m_slowThresholdUs = 10000;  // 10ms default
 
     std::unordered_map<uint64_t, ActiveSession> m_activeSessions;
     std::unordered_map<std::wstring, std::vector<ProfileRecord>> m_records;
@@ -353,5 +362,5 @@ private:
     GetProcessMemoryInfoFn m_fnGetProcessMemoryInfo = nullptr;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

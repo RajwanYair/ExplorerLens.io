@@ -3,27 +3,24 @@
 // QOI Specification: https://qoiformat.org/
 
 #include "QOIDecoder.h"
-#include "DecoderSecurityHardening.h"
-#include <fstream>
 #include <algorithm>
+#include <fstream>
+#include "DecoderSecurityHardening.h"
 
 namespace ExplorerLens {
 namespace Engine {
 
 // Static members
-const wchar_t* QOIDecoder::m_extensions[] = {
- L".qoi"
-};
+const wchar_t* QOIDecoder::m_extensions[] = {L".qoi"};
 
 const uint32_t QOIDecoder::m_extensionCount = 1;
 
-QOIDecoder::QOIDecoder() {
-}
+QOIDecoder::QOIDecoder() {}
 
-QOIDecoder::~QOIDecoder() {
-}
+QOIDecoder::~QOIDecoder() {}
 
-bool QOIDecoder::CanDecode(const wchar_t* filePath) {
+bool QOIDecoder::CanDecode(const wchar_t* filePath)
+{
     if (!filePath || filePath[0] == L'\0') {
         return false;
     }
@@ -40,7 +37,8 @@ bool QOIDecoder::CanDecode(const wchar_t* filePath) {
     return false;
 }
 
-HRESULT QOIDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
+HRESULT QOIDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result)
+{
     result.hBitmap = nullptr;
     result.width = 0;
     result.height = 0;
@@ -62,7 +60,8 @@ HRESULT QOIDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& res
     return hr;
 }
 
-DecoderInfo QOIDecoder::GetInfo() const {
+DecoderInfo QOIDecoder::GetInfo() const
+{
     DecoderInfo info;
     info.name = L"QOIDecoder";
     info.version = L"1.0.0";
@@ -73,11 +72,13 @@ DecoderInfo QOIDecoder::GetInfo() const {
     return info;
 }
 
-const wchar_t** QOIDecoder::GetSupportedExtensions() const {
+const wchar_t** QOIDecoder::GetSupportedExtensions() const
+{
     return m_extensions;
 }
 
-HRESULT QOIDecoder::DecodeFromFile(const wchar_t* path, HBITMAP* phBitmap) {
+HRESULT QOIDecoder::DecodeFromFile(const wchar_t* path, HBITMAP* phBitmap)
+{
     if (!phBitmap) {
         return E_POINTER;
     }
@@ -111,8 +112,9 @@ HRESULT QOIDecoder::DecodeFromFile(const wchar_t* path, HBITMAP* phBitmap) {
     return (*phBitmap) ? S_OK : E_FAIL;
 }
 
-HRESULT QOIDecoder::DecodeQOI(const uint8_t* data, size_t size, uint8_t** ppPixels,
-    uint32_t* pWidth, uint32_t* pHeight, uint8_t* pChannels) {
+HRESULT QOIDecoder::DecodeQOI(const uint8_t* data, size_t size, uint8_t** ppPixels, uint32_t* pWidth, uint32_t* pHeight,
+                              uint8_t* pChannels)
+{
     if (!Security::ValidatePtr(ppPixels, pWidth, pHeight, pChannels)) {
         return E_POINTER;
     }
@@ -154,14 +156,15 @@ HRESULT QOIDecoder::DecodeQOI(const uint8_t* data, size_t size, uint8_t** ppPixe
 
     uint32_t pixelCount = width * height;
     uint8_t* pixels = new (std::nothrow) uint8_t[pixelBufSize];
-    if (!pixels) return E_OUTOFMEMORY;
+    if (!pixels)
+        return E_OUTOFMEMORY;
 
     // QOI decoding
     const uint8_t* p = data + sizeof(QOIHeader);
-    const uint8_t* end = data + size - 8; // QOI ends with 8-byte marker
+    const uint8_t* end = data + size - 8;  // QOI ends with 8-byte marker
 
-    uint8_t px[4] = { 0, 0, 0, 255 }; // Current pixel (RGBA)
-    uint8_t index[64][4] = {}; // Color index array
+    uint8_t px[4] = {0, 0, 0, 255};  // Current pixel (RGBA)
+    uint8_t index[64][4] = {};       // Color index array
 
     uint32_t pixelIndex = 0;
 
@@ -170,43 +173,47 @@ HRESULT QOIDecoder::DecodeQOI(const uint8_t* data, size_t size, uint8_t** ppPixe
 
         if (b1 == QOI_OP_RGB) {
             // RGB: 3 bytes follow
-            if (p + 3 > end) { delete[] pixels; return E_FAIL; }
+            if (p + 3 > end) {
+                delete[] pixels;
+                return E_FAIL;
+            }
             px[0] = *p++;
             px[1] = *p++;
             px[2] = *p++;
-        }
-        else if (b1 == QOI_OP_RGBA) {
+        } else if (b1 == QOI_OP_RGBA) {
             // RGBA: 4 bytes follow
-            if (p + 4 > end) { delete[] pixels; return E_FAIL; }
+            if (p + 4 > end) {
+                delete[] pixels;
+                return E_FAIL;
+            }
             px[0] = *p++;
             px[1] = *p++;
             px[2] = *p++;
             px[3] = *p++;
-        }
-        else if ((b1 & 0xC0) == QOI_OP_INDEX) {
+        } else if ((b1 & 0xC0) == QOI_OP_INDEX) {
             // Index: use cached color
             uint8_t idx = b1 & 0x3F;
             px[0] = index[idx][0];
             px[1] = index[idx][1];
             px[2] = index[idx][2];
             px[3] = index[idx][3];
-        }
-        else if ((b1 & 0xC0) == QOI_OP_DIFF) {
+        } else if ((b1 & 0xC0) == QOI_OP_DIFF) {
             // Diff: small RGB difference
             px[0] += ((b1 >> 4) & 0x03) - 2;
             px[1] += ((b1 >> 2) & 0x03) - 2;
             px[2] += (b1 & 0x03) - 2;
-        }
-        else if ((b1 & 0xC0) == QOI_OP_LUMA) {
+        } else if ((b1 & 0xC0) == QOI_OP_LUMA) {
             // Luma: green difference + RB offsets
-            if (p >= end) { delete[] pixels; return E_FAIL; }
+            if (p >= end) {
+                delete[] pixels;
+                return E_FAIL;
+            }
             uint8_t b2 = *p++;
             int8_t vg = (b1 & 0x3F) - 32;
             px[0] += vg - 8 + ((b2 >> 4) & 0x0F);
             px[1] += vg;
             px[2] += vg - 8 + (b2 & 0x0F);
-        }
-        else if ((b1 & 0xC0) == QOI_OP_RUN) {
+        } else if ((b1 & 0xC0) == QOI_OP_RUN) {
             // Run: repeat current pixel
             // This is handled by not reading new data
             // The pixel copy loop below handles it
@@ -227,10 +234,10 @@ HRESULT QOIDecoder::DecodeQOI(const uint8_t* data, size_t size, uint8_t** ppPixe
 
         // Write pixels
         for (uint32_t r = 0; r < run && pixelIndex < pixelCount; ++r) {
-            pixels[pixelIndex * 4 + 0] = px[0]; // R
-            pixels[pixelIndex * 4 + 1] = px[1]; // G
-            pixels[pixelIndex * 4 + 2] = px[2]; // B
-            pixels[pixelIndex * 4 + 3] = px[3]; // A
+            pixels[pixelIndex * 4 + 0] = px[0];  // R
+            pixels[pixelIndex * 4 + 1] = px[1];  // G
+            pixels[pixelIndex * 4 + 2] = px[2];  // B
+            pixels[pixelIndex * 4 + 3] = px[3];  // A
             pixelIndex++;
         }
     }
@@ -238,19 +245,21 @@ HRESULT QOIDecoder::DecodeQOI(const uint8_t* data, size_t size, uint8_t** ppPixe
     *ppPixels = pixels;
     *pWidth = width;
     *pHeight = height;
-    *pChannels = 4; // Always RGBA
+    *pChannels = 4;  // Always RGBA
 
     return S_OK;
 }
 
-bool QOIDecoder::IsQOIFormat(const wchar_t* path) {
+bool QOIDecoder::IsQOIFormat(const wchar_t* path)
+{
     size_t fileSize = 0;
     auto data = ReadFileData(path, fileSize);
 
     return data && IsQOIFormat(data.get(), fileSize);
 }
 
-bool QOIDecoder::IsQOIFormat(const uint8_t* data, size_t size) {
+bool QOIDecoder::IsQOIFormat(const uint8_t* data, size_t size)
+{
     if (!data || size < sizeof(QOIHeader)) {
         return false;
     }
@@ -259,9 +268,9 @@ bool QOIDecoder::IsQOIFormat(const uint8_t* data, size_t size) {
     return (data[0] == 'q' && data[1] == 'o' && data[2] == 'i' && data[3] == 'f');
 }
 
-HBITMAP QOIDecoder::CreateBitmapFromRGBA(const uint8_t* pixels, uint32_t width,
-    uint32_t height, uint8_t channels) {
-    (void)channels; // Always RGBA (4 channels) for QOI format
+HBITMAP QOIDecoder::CreateBitmapFromRGBA(const uint8_t* pixels, uint32_t width, uint32_t height, uint8_t channels)
+{
+    (void)channels;  // Always RGBA (4 channels) for QOI format
 
     if (!pixels || width == 0 || height == 0) {
         return nullptr;
@@ -271,15 +280,14 @@ HBITMAP QOIDecoder::CreateBitmapFromRGBA(const uint8_t* pixels, uint32_t width,
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -(LONG)height; // Top-down
+    bmi.bmiHeader.biHeight = -(LONG)height;  // Top-down
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
 
     void* pBits = nullptr;
     HDC hdcScreen = GetDC(nullptr);
-    HBITMAP hBitmap = CreateDIBSection(hdcScreen, &bmi, DIB_RGB_COLORS,
-        &pBits, nullptr, 0);
+    HBITMAP hBitmap = CreateDIBSection(hdcScreen, &bmi, DIB_RGB_COLORS, &pBits, nullptr, 0);
     ReleaseDC(nullptr, hdcScreen);
 
     if (!hBitmap || !pBits) {
@@ -291,10 +299,10 @@ HBITMAP QOIDecoder::CreateBitmapFromRGBA(const uint8_t* pixels, uint32_t width,
     const uint8_t* src = pixels;
 
     for (uint32_t i = 0; i < width * height; ++i) {
-        dest[0] = src[2]; // B
-        dest[1] = src[1]; // G
-        dest[2] = src[0]; // R
-        dest[3] = src[3]; // A
+        dest[0] = src[2];  // B
+        dest[1] = src[1];  // G
+        dest[2] = src[0];  // R
+        dest[3] = src[3];  // A
 
         src += 4;
         dest += 4;
@@ -303,14 +311,14 @@ HBITMAP QOIDecoder::CreateBitmapFromRGBA(const uint8_t* pixels, uint32_t width,
     return hBitmap;
 }
 
-uint32_t QOIDecoder::ReadBE32(const uint8_t* data) {
-    return (static_cast<uint32_t>(data[0]) << 24) |
-        (static_cast<uint32_t>(data[1]) << 16) |
-        (static_cast<uint32_t>(data[2]) << 8) |
-        static_cast<uint32_t>(data[3]);
+uint32_t QOIDecoder::ReadBE32(const uint8_t* data)
+{
+    return (static_cast<uint32_t>(data[0]) << 24) | (static_cast<uint32_t>(data[1]) << 16)
+           | (static_cast<uint32_t>(data[2]) << 8) | static_cast<uint32_t>(data[3]);
 }
 
-std::unique_ptr<uint8_t[]> QOIDecoder::ReadFileData(const wchar_t* path, size_t& fileSize) {
+std::unique_ptr<uint8_t[]> QOIDecoder::ReadFileData(const wchar_t* path, size_t& fileSize)
+{
     std::ifstream file(path, std::ios::binary | std::ios::ate);
 
     if (!file.is_open()) {
@@ -334,5 +342,5 @@ std::unique_ptr<uint8_t[]> QOIDecoder::ReadFileData(const wchar_t* path, size_t&
     return data;
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

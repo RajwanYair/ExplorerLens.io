@@ -21,7 +21,8 @@ enum class RegistryCheckResult : uint8_t {
     AccessDenied = 4
 };
 
-struct RegistryEntry {
+struct RegistryEntry
+{
     std::wstring keyPath;
     std::wstring valueName;
     std::wstring expectedValue;
@@ -29,29 +30,42 @@ struct RegistryEntry {
     RegistryCheckResult status = RegistryCheckResult::OK;
 };
 
-struct RegistryAuditResult {
+struct RegistryAuditResult
+{
     uint32_t totalChecked = 0;
     uint32_t okCount = 0;
     uint32_t missingCount = 0;
     uint32_t corruptedCount = 0;
     uint32_t wrongValueCount = 0;
     std::vector<RegistryEntry> entries;
-    bool allOK() const { return missingCount == 0 && corruptedCount == 0 && wrongValueCount == 0; }
+    bool allOK() const
+    {
+        return missingCount == 0 && corruptedCount == 0 && wrongValueCount == 0;
+    }
 };
 
-struct RepairResult {
+struct RepairResult
+{
     uint32_t entriesRepaired = 0;
     uint32_t entriesFailed = 0;
     std::vector<std::wstring> failedKeys;
     bool requiresElevation = false;
 };
 
-class RegistryRepairTool {
-public:
-    void SetCLSID(const std::wstring& clsid) { m_clsid = clsid; }
-    void SetDllPath(const std::wstring& path) { m_dllPath = path; }
+class RegistryRepairTool
+{
+  public:
+    void SetCLSID(const std::wstring& clsid)
+    {
+        m_clsid = clsid;
+    }
+    void SetDllPath(const std::wstring& path)
+    {
+        m_dllPath = path;
+    }
 
-    std::vector<RegistryEntry> GetExpectedEntries() const {
+    std::vector<RegistryEntry> GetExpectedEntries() const
+    {
         std::vector<RegistryEntry> entries;
         RegistryEntry e;
 
@@ -76,7 +90,8 @@ public:
         return entries;
     }
 
-    void Audit(RegistryAuditResult& result) const {
+    void Audit(RegistryAuditResult& result) const
+    {
         auto expected = GetExpectedEntries();
         result.totalChecked = static_cast<uint32_t>(expected.size());
         result.entries = expected;
@@ -85,14 +100,15 @@ public:
         result.okCount = result.totalChecked;
     }
 
-    bool NeedsRepair(const RegistryAuditResult& audit) const {
+    bool NeedsRepair(const RegistryAuditResult& audit) const
+    {
         return !audit.allOK();
     }
 
-private:
+  private:
     std::wstring m_clsid = L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}";
     std::wstring m_dllPath;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

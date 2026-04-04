@@ -7,15 +7,15 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
-#include <cstdint>
-#include <vector>
-#include <string>
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <mutex>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -29,28 +29,33 @@ enum class CompactionTrigger : uint32_t {
     AppMinimized = 5
 };
 
-struct CompactionStats {
+struct CompactionStats
+{
     uint64_t totalCompactions = 0;
     uint64_t bytesRecovered = 0;
     uint64_t avgCompactionTimeUs = 0;
     uint64_t lastCompactionTimeUs = 0;
     uint64_t peakReclaimBytes = 0;
     CompactionTrigger lastTrigger = CompactionTrigger::Idle;
-    double   successRate = 1.0;
+    double successRate = 1.0;
 
-    uint64_t AverageRecovery() const {
+    uint64_t AverageRecovery() const
+    {
         return totalCompactions > 0 ? bytesRecovered / totalCompactions : 0;
     }
 };
 
-class MemoryCompactionScheduler {
-public:
-    static MemoryCompactionScheduler& Instance() {
+class MemoryCompactionScheduler
+{
+  public:
+    static MemoryCompactionScheduler& Instance()
+    {
         static MemoryCompactionScheduler s;
         return s;
     }
 
-    void ScheduleCompaction(CompactionTrigger trigger, uint32_t delayMs = 0) {
+    void ScheduleCompaction(CompactionTrigger trigger, uint32_t delayMs = 0)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         ScheduledEntry entry{};
         entry.trigger = trigger;
@@ -59,7 +64,8 @@ public:
         m_scheduled.push_back(entry);
     }
 
-    uint64_t RunImmediately() {
+    uint64_t RunImmediately()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -72,8 +78,8 @@ public:
         }
 
         auto end = std::chrono::high_resolution_clock::now();
-        uint64_t elapsedUs = static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
+        uint64_t elapsedUs =
+            static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count());
 
         m_stats.totalCompactions++;
         m_stats.bytesRecovered += recovered;
@@ -88,7 +94,8 @@ public:
         return recovered;
     }
 
-    void ProcessScheduled() {
+    void ProcessScheduled()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint64_t now = GetTickCount64();
         for (auto& entry : m_scheduled) {
@@ -99,42 +106,47 @@ public:
             }
         }
         m_scheduled.erase(
-            std::remove_if(m_scheduled.begin(), m_scheduled.end(),
-                [](const ScheduledEntry& e) { return e.executed; }),
+            std::remove_if(m_scheduled.begin(), m_scheduled.end(), [](const ScheduledEntry& e) { return e.executed; }),
             m_scheduled.end());
     }
 
-    CompactionStats GetStats() const {
+    CompactionStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    size_t GetPendingCount() const {
+    size_t GetPendingCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_scheduled.size();
     }
 
-    void Reset() {
+    void Reset()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_scheduled.clear();
         m_stats = CompactionStats{};
     }
 
-    bool Validate() const {
+    bool Validate() const
+    {
         auto stats = GetStats();
-        if (stats.successRate < 0.0 || stats.successRate > 1.0) return false;
-        if (stats.totalCompactions > 0 && stats.avgCompactionTimeUs == 0 &&
-            stats.lastCompactionTimeUs == 0) return false;
+        if (stats.successRate < 0.0 || stats.successRate > 1.0)
+            return false;
+        if (stats.totalCompactions > 0 && stats.avgCompactionTimeUs == 0 && stats.lastCompactionTimeUs == 0)
+            return false;
         return true;
     }
 
-private:
+  private:
     MemoryCompactionScheduler() = default;
     ~MemoryCompactionScheduler() = default;
     MemoryCompactionScheduler(const MemoryCompactionScheduler&) = delete;
     MemoryCompactionScheduler& operator=(const MemoryCompactionScheduler&) = delete;
 
-    struct ScheduledEntry {
+    struct ScheduledEntry
+    {
         CompactionTrigger trigger = CompactionTrigger::Idle;
         uint64_t scheduledTime = 0;
         bool executed = false;
@@ -145,5 +157,5 @@ private:
     CompactionStats m_stats;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -5,10 +5,22 @@
 
 namespace ExplorerLens::Engine {
 
-bool StyleTransferRenderer::ApplyStyle(void*, uint32_t, uint32_t, const StyleParams&) { return false; }
-bool StyleTransferRenderer::LoadStyleModel(const std::string&) { return false; }
+bool StyleTransferRenderer::ApplyStyle(void*, uint32_t, uint32_t, const StyleParams&)
+{
+    return false;
+}
+bool StyleTransferRenderer::LoadStyleModel(const std::string&)
+{
+    return false;
+}
 void StyleTransferRenderer::UnloadStyleModel() {}
-std::vector<ArtisticStyle> StyleTransferRenderer::GetAvailableStyles() const { return {}; }
-std::optional<ArtisticStyle> StyleTransferRenderer::GetLastAppliedStyle() const { return {}; }
+std::vector<ArtisticStyle> StyleTransferRenderer::GetAvailableStyles() const
+{
+    return {};
+}
+std::optional<ArtisticStyle> StyleTransferRenderer::GetLastAppliedStyle() const
+{
+    return {};
+}
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

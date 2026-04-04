@@ -33,14 +33,17 @@ enum class GPUCapability : uint32_t {
     DirectMLSupport = 1 << 7
 };
 
-inline GPUCapability operator|(GPUCapability a, GPUCapability b) {
+inline GPUCapability operator|(GPUCapability a, GPUCapability b)
+{
     return static_cast<GPUCapability>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
-inline GPUCapability operator&(GPUCapability a, GPUCapability b) {
+inline GPUCapability operator&(GPUCapability a, GPUCapability b)
+{
     return static_cast<GPUCapability>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 }
 
-struct GPUDeviceProfile {
+struct GPUDeviceProfile
+{
     GPUVendorId vendor = GPUVendorId::Unknown;
     std::string deviceName;
     uint32_t deviceId = 0;
@@ -49,39 +52,52 @@ struct GPUDeviceProfile {
     GPUCapability capabilities = GPUCapability::None;
 };
 
-class GPUVendorCapabilityMap {
-public:
+class GPUVendorCapabilityMap
+{
+  public:
     GPUVendorCapabilityMap() = default;
 
-    void RegisterDevice(const GPUDeviceProfile& profile) {
+    void RegisterDevice(const GPUDeviceProfile& profile)
+    {
         m_devices.push_back(profile);
     }
 
-    bool HasCapability(GPUCapability cap) const {
+    bool HasCapability(GPUCapability cap) const
+    {
         for (const auto& dev : m_devices) {
-            if ((dev.capabilities & cap) != GPUCapability::None) return true;
+            if ((dev.capabilities & cap) != GPUCapability::None)
+                return true;
         }
         return false;
     }
 
-    GPUDeviceProfile GetPrimaryDevice() const {
+    GPUDeviceProfile GetPrimaryDevice() const
+    {
         return m_devices.empty() ? GPUDeviceProfile{} : m_devices[0];
     }
 
-    std::vector<GPUDeviceProfile> GetDevicesByVendor(GPUVendorId vendor) const {
+    std::vector<GPUDeviceProfile> GetDevicesByVendor(GPUVendorId vendor) const
+    {
         std::vector<GPUDeviceProfile> result;
         for (const auto& dev : m_devices) {
-            if (dev.vendor == vendor) result.push_back(dev);
+            if (dev.vendor == vendor)
+                result.push_back(dev);
         }
         return result;
     }
 
-    size_t GetDeviceCount() const { return m_devices.size(); }
-    bool HasAnyGPU() const { return !m_devices.empty(); }
+    size_t GetDeviceCount() const
+    {
+        return m_devices.size();
+    }
+    bool HasAnyGPU() const
+    {
+        return !m_devices.empty();
+    }
 
-private:
+  private:
     std::vector<GPUDeviceProfile> m_devices;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

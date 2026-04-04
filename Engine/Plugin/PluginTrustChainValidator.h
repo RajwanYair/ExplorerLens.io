@@ -15,19 +15,19 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <windows.h>
 #include <wincrypt.h>
-#include <string>
-#include <vector>
-#include <unordered_set>
-#include <mutex>
-#include <cstdint>
+#include <windows.h>
 #include <chrono>
-#include <sstream>
+#include <cstdint>
 #include <iomanip>
+#include <mutex>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 #pragma comment(lib, "crypt32.lib")
 
@@ -38,39 +38,42 @@ namespace Engine {
 // Minimal WinTrust structures defined inline (avoids <wintrust.h> dependency)
 // ──────────────────────────────────────────────────────────────────────────────
 #pragma pack(push, 8)
-struct WINTRUST_FILE_INFO_INLINE {
-    DWORD    cbStruct;
-    LPCWSTR  pcwszFilePath;
-    HANDLE   hFile;
+struct WINTRUST_FILE_INFO_INLINE
+{
+    DWORD cbStruct;
+    LPCWSTR pcwszFilePath;
+    HANDLE hFile;
     GUID* pgKnownSubject;
 };
 
-struct WINTRUST_DATA_INLINE {
-    DWORD   cbStruct;
-    LPVOID  pPolicyCallbackData;
-    LPVOID  pSIPClientData;
-    DWORD   dwUIChoice;
-    DWORD   fdwRevocationChecks;
-    DWORD   dwUnionChoice;
-    union {
+struct WINTRUST_DATA_INLINE
+{
+    DWORD cbStruct;
+    LPVOID pPolicyCallbackData;
+    LPVOID pSIPClientData;
+    DWORD dwUIChoice;
+    DWORD fdwRevocationChecks;
+    DWORD dwUnionChoice;
+    union
+    {
         WINTRUST_FILE_INFO_INLINE* pFile;
         LPVOID pCatalog;
         LPVOID pBlob;
         LPVOID pSgnr;
         LPVOID pCert;
     };
-    DWORD   dwStateAction;
-    HANDLE  hWVTStateData;
+    DWORD dwStateAction;
+    HANDLE hWVTStateData;
     WCHAR* pwszURLReference;
-    DWORD   dwProvFlags;
-    DWORD   dwUIContext;
-    LPVOID  pSignatureSettings;
+    DWORD dwProvFlags;
+    DWORD dwUIContext;
+    LPVOID pSignatureSettings;
 };
 #pragma pack(pop)
 
 // WinTrust constants
-static const GUID WINTRUST_ACTION_GENERIC_VERIFY_V2_INLINE =
-{ 0xaac56b, 0xcd44, 0x11d0, { 0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee } };
+static const GUID WINTRUST_ACTION_GENERIC_VERIFY_V2_INLINE = {
+    0xaac56b, 0xcd44, 0x11d0, {0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee}};
 
 static constexpr DWORD WTD_UI_NONE_VAL = 2;
 static constexpr DWORD WTD_REVOKE_NONE_VAL = 0;
@@ -91,17 +94,19 @@ enum class TrustLevel : uint32_t {
 // Alias used by tests and external consumers
 using PluginTrustLevel = TrustLevel;
 
-struct TrustChainCertificateInfo {
+struct TrustChainCertificateInfo
+{
     std::wstring subject;
     std::wstring issuer;
     std::wstring serial;
     std::wstring thumbprint;
-    FILETIME     validFrom{};
-    FILETIME     validTo{};
-    bool         isExpired = false;
+    FILETIME validFrom{};
+    FILETIME validTo{};
+    bool isExpired = false;
 };
 
-struct TrustStats {
+struct TrustStats
+{
     uint64_t pluginsValidated = 0;
     uint64_t untrustedCount = 0;
     uint64_t selfSignedCount = 0;
@@ -111,22 +116,27 @@ struct TrustStats {
     uint64_t rejectedCount = 0;
 };
 
-class TrustChainValidatorV2 {
-public:
-    TrustChainValidatorV2() {
+class TrustChainValidatorV2
+{
+  public:
+    TrustChainValidatorV2()
+    {
         InitializeSRWLock(&m_lock);
         LoadApis();
     }
 
-    ~TrustChainValidatorV2() {
-        if (m_wintrustModule) FreeLibrary(m_wintrustModule);
+    ~TrustChainValidatorV2()
+    {
+        if (m_wintrustModule)
+            FreeLibrary(m_wintrustModule);
         // crypt32 is loaded via pragma comment(lib), no need to free
     }
 
     TrustChainValidatorV2(const TrustChainValidatorV2&) = delete;
     TrustChainValidatorV2& operator=(const TrustChainValidatorV2&) = delete;
 
-    inline TrustLevel ValidateSignature(const std::wstring& dllPath) {
+    inline TrustLevel ValidateSignature(const std::wstring& dllPath)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_stats.pluginsValidated++;
         ReleaseSRWLockExclusive(&m_lock);
@@ -160,10 +170,7 @@ public:
         auto fnVerify = reinterpret_cast<WinVerifyTrustFn>(m_fnWinVerifyTrust);
 
         GUID action = WINTRUST_ACTION_GENERIC_VERIFY_V2_INLINE;
-        LONG status = fnVerify(
-            static_cast<HWND>(INVALID_HANDLE_VALUE),
-            &action,
-            &wtd);
+        LONG status = fnVerify(static_cast<HWND>(INVALID_HANDLE_VALUE), &action, &wtd);
 
         if (status == 0) {
             // Signature is valid
@@ -174,24 +181,21 @@ public:
             if (!certInfo.thumbprint.empty()) {
                 // Check Microsoft signature
                 std::wstring lowerIssuer = certInfo.issuer;
-                for (auto& ch : lowerIssuer) ch = static_cast<wchar_t>(towlower(ch));
+                for (auto& ch : lowerIssuer)
+                    ch = static_cast<wchar_t>(towlower(ch));
                 if (lowerIssuer.find(L"microsoft") != std::wstring::npos) {
                     level = TrustLevel::MicrosoftSigned;
-                }
-                else if (IsTrustedPublisher(certInfo.thumbprint)) {
+                } else if (IsTrustedPublisher(certInfo.thumbprint)) {
                     level = TrustLevel::TrustedPublisher;
                 }
             }
-        }
-        else if (status == static_cast<LONG>(0x800B0100L)) {
+        } else if (status == static_cast<LONG>(0x800B0100L)) {
             // TRUST_E_NOSIGNATURE — no signature found
             level = TrustLevel::Untrusted;
-        }
-        else if (status == static_cast<LONG>(0x800B0101L)) {
+        } else if (status == static_cast<LONG>(0x800B0101L)) {
             // CERT_E_EXPIRED
-            level = TrustLevel::SelfSigned; // Expired but was signed
-        }
-        else if (status == static_cast<LONG>(0x800B010AL)) {
+            level = TrustLevel::SelfSigned;  // Expired but was signed
+        } else if (status == static_cast<LONG>(0x800B010AL)) {
             // CERT_E_CHAINING — self-signed or untrusted root
             level = TrustLevel::SelfSigned;
         }
@@ -204,40 +208,37 @@ public:
         return level;
     }
 
-    inline TrustChainCertificateInfo GetSignerInfo(const std::wstring& dllPath) {
+    inline TrustChainCertificateInfo GetSignerInfo(const std::wstring& dllPath)
+    {
         TrustChainCertificateInfo info;
 
         // Use CryptQueryObject to get the signer certificate from the file
         DWORD dwEncoding = 0, dwContentType = 0, dwFormatType = 0;
         HCERTSTORE hStore = nullptr;
-        HCRYPTMSG  hMsg = nullptr;
+        HCRYPTMSG hMsg = nullptr;
 
-        BOOL ok = CryptQueryObject(
-            CERT_QUERY_OBJECT_FILE,
-            dllPath.c_str(),
-            CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED,
-            CERT_QUERY_FORMAT_FLAG_BINARY,
-            0, &dwEncoding, &dwContentType, &dwFormatType,
-            &hStore, &hMsg, nullptr);
+        BOOL ok = CryptQueryObject(CERT_QUERY_OBJECT_FILE, dllPath.c_str(), CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED,
+                                   CERT_QUERY_FORMAT_FLAG_BINARY, 0, &dwEncoding, &dwContentType, &dwFormatType,
+                                   &hStore, &hMsg, nullptr);
 
         if (!ok || !hMsg || !hStore) {
-            if (hMsg)   CryptMsgClose(hMsg);
-            if (hStore) CertCloseStore(hStore, 0);
+            if (hMsg)
+                CryptMsgClose(hMsg);
+            if (hStore)
+                CertCloseStore(hStore, 0);
             return info;
         }
 
         // Get signer info size
         DWORD signerInfoSize = 0;
-        if (!CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, nullptr, &signerInfoSize) ||
-            signerInfoSize == 0) {
+        if (!CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, nullptr, &signerInfoSize) || signerInfoSize == 0) {
             CryptMsgClose(hMsg);
             CertCloseStore(hStore, 0);
             return info;
         }
 
         std::vector<uint8_t> signerInfoBuf(signerInfoSize);
-        if (!CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0,
-            signerInfoBuf.data(), &signerInfoSize)) {
+        if (!CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, signerInfoBuf.data(), &signerInfoSize)) {
             CryptMsgClose(hMsg);
             CertCloseStore(hStore, 0);
             return info;
@@ -250,37 +251,31 @@ public:
         certSearchInfo.Issuer = signerInfo->Issuer;
         certSearchInfo.SerialNumber = signerInfo->SerialNumber;
 
-        PCCERT_CONTEXT pCert = CertFindCertificateInStore(
-            hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
-            0, CERT_FIND_SUBJECT_CERT,
-            &certSearchInfo, nullptr);
+        PCCERT_CONTEXT pCert = CertFindCertificateInStore(hStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
+                                                          CERT_FIND_SUBJECT_CERT, &certSearchInfo, nullptr);
 
         if (pCert) {
             // Extract subject name
             wchar_t nameBuf[512]{};
-            DWORD nameLen = CertGetNameStringW(pCert, CERT_NAME_SIMPLE_DISPLAY_TYPE,
-                0, nullptr, nameBuf, 512);
+            DWORD nameLen = CertGetNameStringW(pCert, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, nullptr, nameBuf, 512);
             if (nameLen > 1) {
                 info.subject.assign(nameBuf, nameLen - 1);
             }
 
             // Extract issuer name
-            nameLen = CertGetNameStringW(pCert, CERT_NAME_SIMPLE_DISPLAY_TYPE,
-                CERT_NAME_ISSUER_FLAG, nullptr, nameBuf, 512);
+            nameLen =
+                CertGetNameStringW(pCert, CERT_NAME_SIMPLE_DISPLAY_TYPE, CERT_NAME_ISSUER_FLAG, nullptr, nameBuf, 512);
             if (nameLen > 1) {
                 info.issuer.assign(nameBuf, nameLen - 1);
             }
 
             // Extract serial number
-            info.serial = BlobToHexString(
-                pCert->pCertInfo->SerialNumber.pbData,
-                pCert->pCertInfo->SerialNumber.cbData);
+            info.serial = BlobToHexString(pCert->pCertInfo->SerialNumber.pbData, pCert->pCertInfo->SerialNumber.cbData);
 
             // Compute SHA-1 thumbprint
             uint8_t thumbHash[20]{};
             DWORD thumbSize = sizeof(thumbHash);
-            if (CertGetCertificateContextProperty(pCert,
-                CERT_HASH_PROP_ID, thumbHash, &thumbSize)) {
+            if (CertGetCertificateContextProperty(pCert, CERT_HASH_PROP_ID, thumbHash, &thumbSize)) {
                 info.thumbprint = BlobToHexString(thumbHash, thumbSize);
             }
 
@@ -302,21 +297,24 @@ public:
         return info;
     }
 
-    inline void AddTrustedPublisher(const std::wstring& thumbprint) {
+    inline void AddTrustedPublisher(const std::wstring& thumbprint)
+    {
         std::wstring lower = NormalizeThumbprint(thumbprint);
         AcquireSRWLockExclusive(&m_lock);
         m_trustedPublishers.insert(lower);
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    inline void RemoveTrustedPublisher(const std::wstring& thumbprint) {
+    inline void RemoveTrustedPublisher(const std::wstring& thumbprint)
+    {
         std::wstring lower = NormalizeThumbprint(thumbprint);
         AcquireSRWLockExclusive(&m_lock);
         m_trustedPublishers.erase(lower);
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    inline bool IsTrustedPublisher(const std::wstring& thumbprint) const {
+    inline bool IsTrustedPublisher(const std::wstring& thumbprint) const
+    {
         std::wstring lower = NormalizeThumbprint(thumbprint);
         AcquireSRWLockShared(&m_lock);
         bool found = m_trustedPublishers.count(lower) > 0;
@@ -324,50 +322,65 @@ public:
         return found;
     }
 
-    inline void SetPolicy(TrustLevel minimumLevel) {
+    inline void SetPolicy(TrustLevel minimumLevel)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_minimumTrustLevel = minimumLevel;
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    inline TrustLevel GetPolicy() const {
+    inline TrustLevel GetPolicy() const
+    {
         AcquireSRWLockShared(&m_lock);
         TrustLevel lvl = m_minimumTrustLevel;
         ReleaseSRWLockShared(&m_lock);
         return lvl;
     }
 
-    inline bool MeetsPolicy(TrustLevel level) const {
+    inline bool MeetsPolicy(TrustLevel level) const
+    {
         AcquireSRWLockShared(&m_lock);
         bool ok = static_cast<uint32_t>(level) >= static_cast<uint32_t>(m_minimumTrustLevel);
         ReleaseSRWLockShared(&m_lock);
         return ok;
     }
 
-    inline TrustStats GetStats() const {
+    inline TrustStats GetStats() const
+    {
         AcquireSRWLockShared(&m_lock);
         TrustStats s = m_stats;
         ReleaseSRWLockShared(&m_lock);
         return s;
     }
 
-private:
-    inline void LoadApis() {
+  private:
+    inline void LoadApis()
+    {
         m_wintrustModule = LoadLibraryW(L"wintrust.dll");
         if (m_wintrustModule) {
-            m_fnWinVerifyTrust = reinterpret_cast<void*>(
-                GetProcAddress(m_wintrustModule, "WinVerifyTrust"));
+            m_fnWinVerifyTrust = reinterpret_cast<void*>(GetProcAddress(m_wintrustModule, "WinVerifyTrust"));
         }
     }
 
-    inline void RecordTrustLevel(TrustLevel level) {
+    inline void RecordTrustLevel(TrustLevel level)
+    {
         AcquireSRWLockExclusive(&m_lock);
         switch (level) {
-        case TrustLevel::Untrusted:        m_stats.untrustedCount++; break;
-        case TrustLevel::SelfSigned:       m_stats.selfSignedCount++; break;
-        case TrustLevel::ValidSignature:   m_stats.validSignatureCount++; break;
-        case TrustLevel::TrustedPublisher: m_stats.trustedPublisherCount++; break;
-        case TrustLevel::MicrosoftSigned:  m_stats.microsoftSignedCount++; break;
+            case TrustLevel::Untrusted:
+                m_stats.untrustedCount++;
+                break;
+            case TrustLevel::SelfSigned:
+                m_stats.selfSignedCount++;
+                break;
+            case TrustLevel::ValidSignature:
+                m_stats.validSignatureCount++;
+                break;
+            case TrustLevel::TrustedPublisher:
+                m_stats.trustedPublisherCount++;
+                break;
+            case TrustLevel::MicrosoftSigned:
+                m_stats.microsoftSignedCount++;
+                break;
         }
         if (static_cast<uint32_t>(level) < static_cast<uint32_t>(m_minimumTrustLevel)) {
             m_stats.rejectedCount++;
@@ -375,7 +388,8 @@ private:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    static inline std::wstring NormalizeThumbprint(const std::wstring& tp) {
+    static inline std::wstring NormalizeThumbprint(const std::wstring& tp)
+    {
         std::wstring result;
         result.reserve(tp.size());
         for (wchar_t ch : tp) {
@@ -386,29 +400,29 @@ private:
         return result;
     }
 
-    static inline std::wstring BlobToHexString(const uint8_t* data, DWORD size) {
+    static inline std::wstring BlobToHexString(const uint8_t* data, DWORD size)
+    {
         std::wostringstream oss;
         for (DWORD i = 0; i < size; ++i) {
-            oss << std::hex << std::setw(2) << std::setfill(L'0')
-                << static_cast<unsigned>(data[i]);
+            oss << std::hex << std::setw(2) << std::setfill(L'0') << static_cast<unsigned>(data[i]);
         }
         return oss.str();
     }
 
     // Members
-    mutable SRWLOCK           m_lock{};
-    HMODULE                   m_wintrustModule = nullptr;
+    mutable SRWLOCK m_lock{};
+    HMODULE m_wintrustModule = nullptr;
     void* m_fnWinVerifyTrust = nullptr;
-    TrustLevel                m_minimumTrustLevel = TrustLevel::Untrusted;
+    TrustLevel m_minimumTrustLevel = TrustLevel::Untrusted;
     std::unordered_set<std::wstring> m_trustedPublishers;
-    TrustStats                m_stats{};
+    TrustStats m_stats{};
 };
 
-} // namespace Engine
+}  // namespace Engine
 
 // Bridge alias so ExplorerLens::Plugin::PluginTrustLevel resolves
 namespace Plugin {
-    using PluginTrustLevel = ExplorerLens::Engine::TrustLevel;
-} // namespace Plugin
+using PluginTrustLevel = ExplorerLens::Engine::TrustLevel;
+}  // namespace Plugin
 
-} // namespace ExplorerLens
+}  // namespace ExplorerLens

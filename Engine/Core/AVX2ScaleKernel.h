@@ -6,51 +6,65 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <cmath>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <vector>
 
 #ifdef __AVX2__
-#include <immintrin.h>
+    #include <immintrin.h>
 #endif
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct AVX2ScaleConfig {
+struct AVX2ScaleConfig
+{
     uint32_t srcWidth = 0;
     uint32_t srcHeight = 0;
     uint32_t dstWidth = 0;
     uint32_t dstHeight = 0;
     uint32_t srcStride = 0;
     uint32_t dstStride = 0;
-    uint32_t channels = 4;    // BGRA
-    bool     premulAlpha = false;
+    uint32_t channels = 4;  // BGRA
+    bool premulAlpha = false;
 };
 
-struct AVX2ScaleStats {
+struct AVX2ScaleStats
+{
     uint64_t pixelsProcessed = 0;
     uint64_t rowsProcessed = 0;
-    bool     usedAVX2 = false;
+    bool usedAVX2 = false;
 };
 
-class AVX2ScaleKernel {
-public:
-    static AVX2ScaleKernel& Instance() { static AVX2ScaleKernel s; return s; }
+class AVX2ScaleKernel
+{
+  public:
+    static AVX2ScaleKernel& Instance()
+    {
+        static AVX2ScaleKernel s;
+        return s;
+    }
 
-    bool Configure(const AVX2ScaleConfig& config) {
-        if (config.srcWidth == 0 || config.srcHeight == 0) return false;
-        if (config.dstWidth == 0 || config.dstHeight == 0) return false;
+    bool Configure(const AVX2ScaleConfig& config)
+    {
+        if (config.srcWidth == 0 || config.srcHeight == 0)
+            return false;
+        if (config.dstWidth == 0 || config.dstHeight == 0)
+            return false;
         m_config = config;
-        if (m_config.srcStride == 0) m_config.srcStride = m_config.srcWidth * m_config.channels;
-        if (m_config.dstStride == 0) m_config.dstStride = m_config.dstWidth * m_config.channels;
+        if (m_config.srcStride == 0)
+            m_config.srcStride = m_config.srcWidth * m_config.channels;
+        if (m_config.dstStride == 0)
+            m_config.dstStride = m_config.dstWidth * m_config.channels;
         m_configured = true;
         return true;
     }
 
-    void ScaleRow(const uint8_t* srcRow, uint8_t* dstRow, uint32_t srcW, uint32_t dstW, uint32_t channels) {
-        if (!srcRow || !dstRow || srcW == 0 || dstW == 0) return;
+    void ScaleRow(const uint8_t* srcRow, uint8_t* dstRow, uint32_t srcW, uint32_t dstW, uint32_t channels)
+    {
+        if (!srcRow || !dstRow || srcW == 0 || dstW == 0)
+            return;
         float ratio = static_cast<float>(srcW) / static_cast<float>(dstW);
 
 #ifdef __AVX2__
@@ -64,7 +78,10 @@ public:
                     sx = (std::min)(sx, srcW - 1);
                     const uint8_t* sp = srcRow + sx * channels;
                     uint8_t* dp = dstRow + (x + i) * channels;
-                    dp[0] = sp[0]; dp[1] = sp[1]; dp[2] = sp[2]; dp[3] = sp[3];
+                    dp[0] = sp[0];
+                    dp[1] = sp[1];
+                    dp[2] = sp[2];
+                    dp[3] = sp[3];
                 }
             }
             // Remainder
@@ -74,11 +91,11 @@ public:
                 sx = (std::min)(sx, srcW - 1);
                 const uint8_t* sp = srcRow + sx * channels;
                 uint8_t* dp = dstRow + x * channels;
-                for (uint32_t c = 0; c < channels; ++c) dp[c] = sp[c];
+                for (uint32_t c = 0; c < channels; ++c)
+                    dp[c] = sp[c];
             }
             m_stats.usedAVX2 = true;
-        }
-        else
+        } else
 #endif
         {
             // Scalar fallback
@@ -88,15 +105,18 @@ public:
                 sx = (std::min)(sx, srcW - 1);
                 const uint8_t* sp = srcRow + sx * channels;
                 uint8_t* dp = dstRow + x * channels;
-                for (uint32_t c = 0; c < channels; ++c) dp[c] = sp[c];
+                for (uint32_t c = 0; c < channels; ++c)
+                    dp[c] = sp[c];
             }
         }
         ++m_stats.rowsProcessed;
         m_stats.pixelsProcessed += dstW;
     }
 
-    bool ScaleBilinear(const uint8_t* src, uint8_t* dst) {
-        if (!m_configured || !src || !dst) return false;
+    bool ScaleBilinear(const uint8_t* src, uint8_t* dst)
+    {
+        if (!m_configured || !src || !dst)
+            return false;
         float xRatio = static_cast<float>(m_config.srcWidth) / static_cast<float>(m_config.dstWidth);
         float yRatio = static_cast<float>(m_config.srcHeight) / static_cast<float>(m_config.dstHeight);
 
@@ -135,16 +155,21 @@ public:
         return true;
     }
 
-    static float LanczosWeight(float x, float a = 3.0f) {
-        if (x == 0.0f) return 1.0f;
-        if (x < -a || x > a) return 0.0f;
+    static float LanczosWeight(float x, float a = 3.0f)
+    {
+        if (x == 0.0f)
+            return 1.0f;
+        if (x < -a || x > a)
+            return 0.0f;
         constexpr float PI = 3.14159265358979323846f;
         float px = PI * x;
         return (a * std::sin(px) * std::sin(px / a)) / (px * px);
     }
 
-    bool ScaleLanczos(const uint8_t* src, uint8_t* dst) {
-        if (!m_configured || !src || !dst) return false;
+    bool ScaleLanczos(const uint8_t* src, uint8_t* dst)
+    {
+        if (!m_configured || !src || !dst)
+            return false;
         float xRatio = static_cast<float>(m_config.srcWidth) / static_cast<float>(m_config.dstWidth);
         float yRatio = static_cast<float>(m_config.srcHeight) / static_cast<float>(m_config.dstHeight);
         constexpr int A = 3;
@@ -185,25 +210,32 @@ public:
         return true;
     }
 
-    const AVX2ScaleStats& GetStats() const { return m_stats; }
+    const AVX2ScaleStats& GetStats() const
+    {
+        return m_stats;
+    }
 
-    bool Validate() const {
-        if (!m_configured) return true; // un-configured is valid initial state
-        if (m_config.srcWidth == 0 || m_config.dstWidth == 0) return false;
-        if (m_config.channels == 0 || m_config.channels > 4) return false;
+    bool Validate() const
+    {
+        if (!m_configured)
+            return true;  // un-configured is valid initial state
+        if (m_config.srcWidth == 0 || m_config.dstWidth == 0)
+            return false;
+        if (m_config.channels == 0 || m_config.channels > 4)
+            return false;
         return true;
     }
 
-private:
+  private:
     AVX2ScaleKernel() = default;
     ~AVX2ScaleKernel() = default;
     AVX2ScaleKernel(const AVX2ScaleKernel&) = delete;
     AVX2ScaleKernel& operator=(const AVX2ScaleKernel&) = delete;
 
     AVX2ScaleConfig m_config{};
-    AVX2ScaleStats  m_stats{};
-    bool            m_configured = false;
+    AVX2ScaleStats m_stats{};
+    bool m_configured = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

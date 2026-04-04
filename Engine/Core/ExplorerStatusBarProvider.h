@@ -8,51 +8,63 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <cstdint>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct StatusBarInfo {
-    std::wstring primaryText;     // Main status text
-    std::wstring secondaryText;   // Detailed status
-    std::wstring tooltipText;     // Full explanation
-    uint32_t     iconId = 0;     // 0=none, 1=ok, 2=warning, 3=error
-    bool         isAnimating = false; // Show activity indicator
+struct StatusBarInfo
+{
+    std::wstring primaryText;    // Main status text
+    std::wstring secondaryText;  // Detailed status
+    std::wstring tooltipText;    // Full explanation
+    uint32_t iconId = 0;         // 0=none, 1=ok, 2=warning, 3=error
+    bool isAnimating = false;    // Show activity indicator
 };
 
-struct StatusBarConfig {
-    bool     showDecodeCount = true;
-    bool     showCacheHitRate = true;
-    bool     showFormatCount = true;
-    bool     showMemoryUsage = true;
+struct StatusBarConfig
+{
+    bool showDecodeCount = true;
+    bool showCacheHitRate = true;
+    bool showFormatCount = true;
+    bool showMemoryUsage = true;
     uint32_t updateIntervalMs = 500;
 };
 
-struct StatusBarStats {
+struct StatusBarStats
+{
     uint32_t updatesGenerated = 0;
     uint32_t warningsShown = 0;
     uint32_t errorsShown = 0;
 };
 
-class ExplorerStatusBarProvider {
-public:
-    ExplorerStatusBarProvider() {
+class ExplorerStatusBarProvider
+{
+  public:
+    ExplorerStatusBarProvider()
+    {
         InitializeSRWLock(&m_lock);
     }
     ~ExplorerStatusBarProvider() = default;
 
-    static const wchar_t* GetName() { return L"ExplorerStatusBarProvider"; }
+    static const wchar_t* GetName()
+    {
+        return L"ExplorerStatusBarProvider";
+    }
 
-    void Configure(const StatusBarConfig& config) { m_config = config; }
+    void Configure(const StatusBarConfig& config)
+    {
+        m_config = config;
+    }
 
     /// Update the decode counters.
-    void SetDecodeCount(uint32_t total, uint32_t cached, uint32_t errors) {
+    void SetDecodeCount(uint32_t total, uint32_t cached, uint32_t errors)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_totalDecodes = total;
         m_cachedDecodes = cached;
@@ -61,7 +73,8 @@ public:
     }
 
     /// Update memory usage info.
-    void SetMemoryUsage(uint64_t usedBytes, uint64_t budgetBytes) {
+    void SetMemoryUsage(uint64_t usedBytes, uint64_t budgetBytes)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_memUsedBytes = usedBytes;
         m_memBudgetBytes = budgetBytes;
@@ -69,12 +82,14 @@ public:
     }
 
     /// Set the active format count.
-    void SetFormatCount(uint32_t count) {
+    void SetFormatCount(uint32_t count)
+    {
         m_formatCount = count;
     }
 
     /// Generate current status bar content.
-    StatusBarInfo Generate() const {
+    StatusBarInfo Generate() const
+    {
         StatusBarInfo info;
 
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
@@ -104,13 +119,11 @@ public:
 
         // Icon state
         if (m_errorDecodes > 0) {
-            info.iconId = 3; // Error
-        }
-        else if (m_memBudgetBytes > 0 && m_memUsedBytes > m_memBudgetBytes * 0.9) {
-            info.iconId = 2; // Warning
-        }
-        else {
-            info.iconId = 1; // OK
+            info.iconId = 3;  // Error
+        } else if (m_memBudgetBytes > 0 && m_memUsedBytes > m_memBudgetBytes * 0.9) {
+            info.iconId = 2;  // Warning
+        } else {
+            info.iconId = 1;  // OK
         }
 
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
@@ -120,16 +133,23 @@ public:
     }
 
     /// Format a byte count to human-readable string.
-    static std::wstring FormatBytes(uint64_t bytes) {
-        if (bytes < 1024) return std::to_wstring(bytes) + L" B";
-        if (bytes < 1048576) return std::to_wstring(bytes / 1024) + L" KB";
-        if (bytes < 1073741824) return std::to_wstring(bytes / 1048576) + L" MB";
+    static std::wstring FormatBytes(uint64_t bytes)
+    {
+        if (bytes < 1024)
+            return std::to_wstring(bytes) + L" B";
+        if (bytes < 1048576)
+            return std::to_wstring(bytes / 1024) + L" KB";
+        if (bytes < 1073741824)
+            return std::to_wstring(bytes / 1048576) + L" MB";
         return std::to_wstring(bytes / 1073741824) + L" GB";
     }
 
-    StatusBarStats GetStats() const { return m_stats; }
+    StatusBarStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     SRWLOCK m_lock{};
     StatusBarConfig m_config;
     uint32_t m_totalDecodes = 0;
@@ -141,5 +161,5 @@ private:
     mutable StatusBarStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

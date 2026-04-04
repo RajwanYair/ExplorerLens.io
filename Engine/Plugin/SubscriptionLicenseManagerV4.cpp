@@ -8,4 +8,4 @@ namespace ExplorerLens::Engine {
 SubscriptionLicenseManagerV4::SubscriptionLicenseManagerV4(SubscriptionLicenseTier) {}
 SubscriptionLicenseManagerV4::~SubscriptionLicenseManagerV4() noexcept = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

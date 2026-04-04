@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class DolphinPluginType : uint8_t {
     ThumbCreator,
@@ -25,7 +26,8 @@ enum class DolphinPriority : uint8_t {
     Realtime
 };
 
-struct DolphinPluginConfig {
+struct DolphinPluginConfig
+{
     DolphinPluginType pluginType = DolphinPluginType::ThumbCreator;
     DolphinPriority priority = DolphinPriority::Normal;
     std::string serviceName;
@@ -33,8 +35,9 @@ struct DolphinPluginConfig {
     uint32_t maxConcurrentJobs = 4;
 };
 
-class KDEDolphinExtension {
-public:
+class KDEDolphinExtension
+{
+  public:
     KDEDolphinExtension() = default;
     ~KDEDolphinExtension() = default;
 
@@ -43,39 +46,46 @@ public:
     KDEDolphinExtension(KDEDolphinExtension&&) noexcept = default;
     KDEDolphinExtension& operator=(KDEDolphinExtension&&) noexcept = default;
 
-    bool Initialize(DolphinPluginConfig const& config) {
+    bool Initialize(DolphinPluginConfig const& config)
+    {
         m_config = config;
         return true;
     }
 
-    bool RegisterThumbCreator() {
+    bool RegisterThumbCreator()
+    {
         if (m_active)
             return false;
         m_active = true;
         return true;
     }
 
-    bool UnregisterThumbCreator() {
+    bool UnregisterThumbCreator()
+    {
         m_active = false;
         return true;
     }
 
-    [[nodiscard]] bool IsActive() const {
+    [[nodiscard]] bool IsActive() const
+    {
         return m_active;
     }
 
-    bool SetPriority(DolphinPriority priority) {
+    bool SetPriority(DolphinPriority priority)
+    {
         m_config.priority = priority;
         return true;
     }
 
-    [[nodiscard]] DolphinPluginConfig const& GetConfig() const {
+    [[nodiscard]] DolphinPluginConfig const& GetConfig() const
+    {
         return m_config;
     }
 
-private:
+  private:
     DolphinPluginConfig m_config;
     bool m_active = false;
 };
 
-} }
+}  // namespace Engine
+}  // namespace ExplorerLens

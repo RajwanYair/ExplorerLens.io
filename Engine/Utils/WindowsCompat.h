@@ -23,19 +23,19 @@
 // Thread Safety: All functions are thread-safe (read-only or use TLS).
 // ============================================================================
 
+#include <ShellScalingApi.h>
 #include <Windows.h>
 #include <winternl.h>  // NTSTATUS, RTL_OSVERSIONINFOW, PRTL_OSVERSIONINFOW
-#include <ShellScalingApi.h>
-#include <d3d11.h>
-#include <dxgi1_6.h>
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <optional>
 #include <string>
 #include <vector>
-#include <array>
-#include <cstdint>
-#include <optional>
-#include <functional>
-#include <cstddef>
-#include <algorithm>
+#include <d3d11.h>
+#include <dxgi1_6.h>
 
 #pragma comment(lib, "Shcore.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -48,26 +48,28 @@ namespace ExplorerLens {
 
 /// Windows 11 release identifier
 enum class Win11Release {
-    NOT_WIN11, ///< Windows 10 or earlier
-    WIN11_21H2, ///< Build 22000 (initial release)
-    WIN11_22H2, ///< Build 22621
-    WIN11_23H2, ///< Build 22631
-    WIN11_24H2, ///< Build 26100+
-    WIN11_FUTURE ///< Unknown future build
+    NOT_WIN11,    ///< Windows 10 or earlier
+    WIN11_21H2,   ///< Build 22000 (initial release)
+    WIN11_22H2,   ///< Build 22621
+    WIN11_23H2,   ///< Build 22631
+    WIN11_24H2,   ///< Build 26100+
+    WIN11_FUTURE  ///< Unknown future build
 };
 
 /// GPU adapter information
-struct CompatGPUInfo {
+struct CompatGPUInfo
+{
     std::wstring description;
     UINT vendorId;
     size_t dedicatedVideoMemoryMB;
-    bool isDiscrete; ///< true = dGPU, false = iGPU
+    bool isDiscrete;  ///< true = dGPU, false = iGPU
     bool supportsD3D11;
     D3D_FEATURE_LEVEL featureLevel;
 };
 
 /// System compatibility report
-struct CompatibilityReport {
+struct CompatibilityReport
+{
     Win11Release win11Release = Win11Release::NOT_WIN11;
     DWORD buildNumber = 0;
     std::wstring architecture;
@@ -76,22 +78,24 @@ struct CompatibilityReport {
     bool isHDRSupported = false;
     bool isPerMonitorV2 = false;
     int monitorCount = 0;
-    std::vector<int> dpiScales; ///< Per-monitor DPI scale percentages
+    std::vector<int> dpiScales;  ///< Per-monitor DPI scale percentages
     std::vector<CompatGPUInfo> gpus;
     bool hasDiscreteGPU = false;
     bool hasIntegratedGPU = false;
 };
 
 /// Detect Windows 11 release from build number
-inline Win11Release DetectWin11Release() {
-    typedef NTSTATUS(WINAPI* RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
+inline Win11Release DetectWin11Release()
+{
+    typedef NTSTATUS(WINAPI * RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
 
     HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
-    if (!hNtdll) return Win11Release::NOT_WIN11;
+    if (!hNtdll)
+        return Win11Release::NOT_WIN11;
 
-    auto RtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(
-        GetProcAddress(hNtdll, "RtlGetVersion"));
-    if (!RtlGetVersion) return Win11Release::NOT_WIN11;
+    auto RtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(GetProcAddress(hNtdll, "RtlGetVersion"));
+    if (!RtlGetVersion)
+        return Win11Release::NOT_WIN11;
 
     RTL_OSVERSIONINFOW osInfo = {};
     osInfo.dwOSVersionInfoSize = sizeof(osInfo);
@@ -99,24 +103,31 @@ inline Win11Release DetectWin11Release() {
 
     DWORD build = osInfo.dwBuildNumber;
 
-    if (build < 22000) return Win11Release::NOT_WIN11;
-    if (build < 22621) return Win11Release::WIN11_21H2;
-    if (build < 22631) return Win11Release::WIN11_22H2;
-    if (build < 26000) return Win11Release::WIN11_23H2;
-    if (build < 30000) return Win11Release::WIN11_24H2;
+    if (build < 22000)
+        return Win11Release::NOT_WIN11;
+    if (build < 22621)
+        return Win11Release::WIN11_21H2;
+    if (build < 22631)
+        return Win11Release::WIN11_22H2;
+    if (build < 26000)
+        return Win11Release::WIN11_23H2;
+    if (build < 30000)
+        return Win11Release::WIN11_24H2;
     return Win11Release::WIN11_FUTURE;
 }
 
 /// Get build number
-inline DWORD GetWindowsBuildNumber() {
-    typedef NTSTATUS(WINAPI* RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
+inline DWORD GetWindowsBuildNumber()
+{
+    typedef NTSTATUS(WINAPI * RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
 
     HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
-    if (!hNtdll) return 0;
+    if (!hNtdll)
+        return 0;
 
-    auto RtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(
-        GetProcAddress(hNtdll, "RtlGetVersion"));
-    if (!RtlGetVersion) return 0;
+    auto RtlGetVersion = reinterpret_cast<RtlGetVersionPtr>(GetProcAddress(hNtdll, "RtlGetVersion"));
+    if (!RtlGetVersion)
+        return 0;
 
     RTL_OSVERSIONINFOW osInfo = {};
     osInfo.dwOSVersionInfoSize = sizeof(osInfo);
@@ -126,15 +137,23 @@ inline DWORD GetWindowsBuildNumber() {
 }
 
 /// Get Win11 release name as string
-inline const char* Win11ReleaseName(Win11Release rel) {
+inline const char* Win11ReleaseName(Win11Release rel)
+{
     switch (rel) {
-    case Win11Release::NOT_WIN11: return "Not Windows 11";
-    case Win11Release::WIN11_21H2: return "Windows 11 21H2";
-    case Win11Release::WIN11_22H2: return "Windows 11 22H2";
-    case Win11Release::WIN11_23H2: return "Windows 11 23H2";
-    case Win11Release::WIN11_24H2: return "Windows 11 24H2";
-    case Win11Release::WIN11_FUTURE: return "Windows 11 (Future)";
-    default: return "Unknown";
+        case Win11Release::NOT_WIN11:
+            return "Not Windows 11";
+        case Win11Release::WIN11_21H2:
+            return "Windows 11 21H2";
+        case Win11Release::WIN11_22H2:
+            return "Windows 11 22H2";
+        case Win11Release::WIN11_23H2:
+            return "Windows 11 23H2";
+        case Win11Release::WIN11_24H2:
+            return "Windows 11 24H2";
+        case Win11Release::WIN11_FUTURE:
+            return "Windows 11 (Future)";
+        default:
+            return "Unknown";
     }
 }
 
@@ -143,49 +162,60 @@ inline const char* Win11ReleaseName(Win11Release rel) {
 // ============================================================================
 
 /// Get DPI for a specific monitor
-inline UINT GetMonitorDPI(HMONITOR hMonitor) {
+inline UINT GetMonitorDPI(HMONITOR hMonitor)
+{
     UINT dpiX = 96, dpiY = 96;
     GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
     return dpiX;
 }
 
 /// Get DPI scale percentage for a monitor (100%, 125%, 150%, 200%, etc.)
-inline int GetMonitorScalePercent(HMONITOR hMonitor) {
+inline int GetMonitorScalePercent(HMONITOR hMonitor)
+{
     return (GetMonitorDPI(hMonitor) * 100) / 96;
 }
 
 /// Scale a pixel value for the current DPI context
-inline int ScaleForDPI(int value, UINT dpi) {
+inline int ScaleForDPI(int value, UINT dpi)
+{
     return MulDiv(value, dpi, 96);
 }
 
 /// Scale a pixel value for a specific window's DPI
-inline int ScaleForWindow(int value, HWND hWnd) {
+inline int ScaleForWindow(int value, HWND hWnd)
+{
     UINT dpi = GetDpiForWindow(hWnd);
     return MulDiv(value, dpi, 96);
 }
 
 /// Get all monitor DPI scales
-inline std::vector<int> GetAllMonitorDPIScales() {
+inline std::vector<int> GetAllMonitorDPIScales()
+{
     std::vector<int> scales;
 
-    EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMon, HDC, LPRECT, LPARAM lParam) -> BOOL {
-        auto* pScales = reinterpret_cast<std::vector<int>*>(lParam);
-        pScales->push_back(GetMonitorScalePercent(hMon));
-        return TRUE;
-        }, reinterpret_cast<LPARAM>(&scales));
+    EnumDisplayMonitors(
+        nullptr, nullptr,
+        [](HMONITOR hMon, HDC, LPRECT, LPARAM lParam) -> BOOL {
+            auto* pScales = reinterpret_cast<std::vector<int>*>(lParam);
+            pScales->push_back(GetMonitorScalePercent(hMon));
+            return TRUE;
+        },
+        reinterpret_cast<LPARAM>(&scales));
 
     return scales;
 }
 
 /// Check if system has mixed DPI monitors
-inline bool HasMixedDPI() {
+inline bool HasMixedDPI()
+{
     auto scales = GetAllMonitorDPIScales();
-    if (scales.size() <= 1) return false;
+    if (scales.size() <= 1)
+        return false;
 
     int first = scales[0];
     for (int s : scales) {
-        if (s != first) return true;
+        if (s != first)
+            return true;
     }
     return false;
 }
@@ -195,16 +225,16 @@ inline bool HasMixedDPI() {
 // ============================================================================
 
 /// Check if system-wide dark mode is enabled
-inline bool IsSystemDarkMode() {
+inline bool IsSystemDarkMode()
+{
     DWORD value = 1;
     DWORD size = sizeof(DWORD);
     HKEY key;
 
-    if (RegOpenKeyExW(HKEY_CURRENT_USER,
-        L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-        0, KEY_READ, &key) == ERROR_SUCCESS) {
-        RegQueryValueExW(key, L"AppsUseLightTheme", nullptr, nullptr,
-            reinterpret_cast<BYTE*>(&value), &size);
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0,
+                      KEY_READ, &key)
+        == ERROR_SUCCESS) {
+        RegQueryValueExW(key, L"AppsUseLightTheme", nullptr, nullptr, reinterpret_cast<BYTE*>(&value), &size);
         RegCloseKey(key);
     }
 
@@ -216,7 +246,8 @@ inline bool IsSystemDarkMode() {
 // ============================================================================
 
 /// Enumerate all GPU adapters with capability info
-inline std::vector<CompatGPUInfo> EnumerateGPUs() {
+inline std::vector<CompatGPUInfo> EnumerateGPUs()
+{
     std::vector<CompatGPUInfo> gpus;
 
     IDXGIFactory1* pFactory = nullptr;
@@ -239,8 +270,8 @@ inline std::vector<CompatGPUInfo> EnumerateGPUs() {
         // Test D3D11 device creation
         ID3D11Device* pDevice = nullptr;
         D3D_FEATURE_LEVEL fl;
-        if (SUCCEEDED(D3D11CreateDevice(pAdapter, D3D_DRIVER_TYPE_UNKNOWN,
-            nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &pDevice, &fl, nullptr))) {
+        if (SUCCEEDED(D3D11CreateDevice(pAdapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION,
+                                        &pDevice, &fl, nullptr))) {
             info.supportsD3D11 = true;
             info.featureLevel = fl;
             pDevice->Release();
@@ -259,7 +290,8 @@ inline std::vector<CompatGPUInfo> EnumerateGPUs() {
 // ============================================================================
 
 /// Generate a complete compatibility report for the current system
-inline CompatibilityReport GenerateCompatibilityReport() {
+inline CompatibilityReport GenerateCompatibilityReport()
+{
     CompatibilityReport report;
 
     // OS detection
@@ -275,7 +307,7 @@ inline CompatibilityReport GenerateCompatibilityReport() {
     // DPI
     report.dpiScales = GetAllMonitorDPIScales();
     report.monitorCount = static_cast<int>(report.dpiScales.size());
-    report.isPerMonitorV2 = true; // We declare it in manifest
+    report.isPerMonitorV2 = true;  // We declare it in manifest
 
     // Dark mode
     report.isDarkMode = IsSystemDarkMode();
@@ -283,32 +315,30 @@ inline CompatibilityReport GenerateCompatibilityReport() {
     // GPU
     report.gpus = EnumerateGPUs();
     for (const auto& gpu : report.gpus) {
-        if (gpu.isDiscrete) report.hasDiscreteGPU = true;
-        else report.hasIntegratedGPU = true;
+        if (gpu.isDiscrete)
+            report.hasDiscreteGPU = true;
+        else
+            report.hasIntegratedGPU = true;
     }
 
     return report;
 }
 
 /// Log compatibility report to OutputDebugString
-inline void LogCompatibilityReport(const CompatibilityReport& report) {
+inline void LogCompatibilityReport(const CompatibilityReport& report)
+{
     char buf[512];
 
     snprintf(buf, sizeof(buf),
-        "[ExplorerLens] Win11 Compat: %s (build %lu), Arch=%ls, DarkMode=%s, HDR=%s, Monitors=%d, GPUs=%zu\n",
-        Win11ReleaseName(report.win11Release),
-        report.buildNumber,
-        report.architecture.c_str(),
-        report.isDarkMode ? "yes" : "no",
-        report.isHDRSupported ? "yes" : "no",
-        report.monitorCount,
-        report.gpus.size());
+             "[ExplorerLens] Win11 Compat: %s (build %lu), Arch=%ls, DarkMode=%s, HDR=%s, Monitors=%d, GPUs=%zu\n",
+             Win11ReleaseName(report.win11Release), report.buildNumber, report.architecture.c_str(),
+             report.isDarkMode ? "yes" : "no", report.isHDRSupported ? "yes" : "no", report.monitorCount,
+             report.gpus.size());
 
     OutputDebugStringA(buf);
 }
 
-} // namespace ExplorerLens
-
+}  // namespace ExplorerLens
 
 // ============================================================================
 // Section 2 — Win11IntegrationManager
@@ -322,114 +352,120 @@ namespace Engine {
 /// Windows 11 integration feature set (manager-level, distinct from
 /// Win11Integration::Win11Feature)
 enum class Win11MgrFeature : uint8_t {
-    ModernContextMenu, // IExplorerCommand for Win11 context menus
-    TabbedExplorer, // Multi-tab thumbnail refresh handling
-    DarkModeAware, // Auto-detect system dark/light mode
-    RoundedCorners, // Rounded thumbnail corners (Win11 style)
-    MicaEffect, // Mica/Acrylic backdrop support
-    SnapLayouts, // Snap layout aware thumbnail sizing
-    FileRecommendations, // Windows 11 Start recommendations
-    WidgetIntegration, // Widgets board integration
+    ModernContextMenu,    // IExplorerCommand for Win11 context menus
+    TabbedExplorer,       // Multi-tab thumbnail refresh handling
+    DarkModeAware,        // Auto-detect system dark/light mode
+    RoundedCorners,       // Rounded thumbnail corners (Win11 style)
+    MicaEffect,           // Mica/Acrylic backdrop support
+    SnapLayouts,          // Snap layout aware thumbnail sizing
+    FileRecommendations,  // Windows 11 Start recommendations
+    WidgetIntegration,    // Widgets board integration
     COUNT
 };
 
 /// Windows version detection
 enum class WindowsVersion : uint8_t {
-    Windows10_1809, // RS5 — minimum supported
+    Windows10_1809,  // RS5 — minimum supported
     Windows10_1903,
     Windows10_2004,
-    Windows10_21H2, // Last Win10 feature update
-    Windows11_21H2, // Initial Win11
+    Windows10_21H2,  // Last Win10 feature update
+    Windows11_21H2,  // Initial Win11
     Windows11_22H2,
     Windows11_23H2,
-    Windows11_24H2, // Latest — modern context menus, copilot
+    Windows11_24H2,  // Latest — modern context menus, copilot
     Unknown
 };
 
 /// Windows 11 integration config
-struct Win11IntegrationConfig {
+struct Win11IntegrationConfig
+{
     WindowsVersion detectedVersion = WindowsVersion::Unknown;
     bool enableModernMenu = true;
     bool enableRoundedCorners = true;
     bool enableDarkMode = true;
-    uint32_t cornerRadius = 8; // Win11 default
+    uint32_t cornerRadius = 8;  // Win11 default
 };
 
 /// Windows 11 integration manager
-class Win11IntegrationManager {
-public:
+class Win11IntegrationManager
+{
+  public:
     /// Feature name
-    static const wchar_t* FeatureName(Win11MgrFeature f) {
+    static const wchar_t* FeatureName(Win11MgrFeature f)
+    {
         switch (f) {
-        case Win11MgrFeature::ModernContextMenu:
-            return L"Modern Context Menu";
-        case Win11MgrFeature::TabbedExplorer:
-            return L"Tabbed Explorer";
-        case Win11MgrFeature::DarkModeAware:
-            return L"Dark Mode Aware";
-        case Win11MgrFeature::RoundedCorners:
-            return L"Rounded Corners";
-        case Win11MgrFeature::MicaEffect:
-            return L"Mica Effect";
-        case Win11MgrFeature::SnapLayouts:
-            return L"Snap Layouts";
-        case Win11MgrFeature::FileRecommendations:
-            return L"File Recommendations";
-        case Win11MgrFeature::WidgetIntegration:
-            return L"Widget Integration";
-        default:
-            return L"Unknown";
+            case Win11MgrFeature::ModernContextMenu:
+                return L"Modern Context Menu";
+            case Win11MgrFeature::TabbedExplorer:
+                return L"Tabbed Explorer";
+            case Win11MgrFeature::DarkModeAware:
+                return L"Dark Mode Aware";
+            case Win11MgrFeature::RoundedCorners:
+                return L"Rounded Corners";
+            case Win11MgrFeature::MicaEffect:
+                return L"Mica Effect";
+            case Win11MgrFeature::SnapLayouts:
+                return L"Snap Layouts";
+            case Win11MgrFeature::FileRecommendations:
+                return L"File Recommendations";
+            case Win11MgrFeature::WidgetIntegration:
+                return L"Widget Integration";
+            default:
+                return L"Unknown";
         }
     }
 
     /// Version display string
-    static const wchar_t* VersionName(WindowsVersion v) {
+    static const wchar_t* VersionName(WindowsVersion v)
+    {
         switch (v) {
-        case WindowsVersion::Windows10_1809:
-            return L"Windows 10 1809";
-        case WindowsVersion::Windows10_1903:
-            return L"Windows 10 1903";
-        case WindowsVersion::Windows10_2004:
-            return L"Windows 10 2004";
-        case WindowsVersion::Windows10_21H2:
-            return L"Windows 10 21H2";
-        case WindowsVersion::Windows11_21H2:
-            return L"Windows 11 21H2";
-        case WindowsVersion::Windows11_22H2:
-            return L"Windows 11 22H2";
-        case WindowsVersion::Windows11_23H2:
-            return L"Windows 11 23H2";
-        case WindowsVersion::Windows11_24H2:
-            return L"Windows 11 24H2";
-        default:
-            return L"Unknown";
+            case WindowsVersion::Windows10_1809:
+                return L"Windows 10 1809";
+            case WindowsVersion::Windows10_1903:
+                return L"Windows 10 1903";
+            case WindowsVersion::Windows10_2004:
+                return L"Windows 10 2004";
+            case WindowsVersion::Windows10_21H2:
+                return L"Windows 10 21H2";
+            case WindowsVersion::Windows11_21H2:
+                return L"Windows 11 21H2";
+            case WindowsVersion::Windows11_22H2:
+                return L"Windows 11 22H2";
+            case WindowsVersion::Windows11_23H2:
+                return L"Windows 11 23H2";
+            case WindowsVersion::Windows11_24H2:
+                return L"Windows 11 24H2";
+            default:
+                return L"Unknown";
         }
     }
 
     /// Check if Win11 feature is available for detected version
-    static bool IsFeatureAvailable(Win11MgrFeature f, WindowsVersion v) {
+    static bool IsFeatureAvailable(Win11MgrFeature f, WindowsVersion v)
+    {
         if (v < WindowsVersion::Windows11_21H2)
             return false;
-        if (f == Win11MgrFeature::TabbedExplorer &&
-            v < WindowsVersion::Windows11_22H2)
+        if (f == Win11MgrFeature::TabbedExplorer && v < WindowsVersion::Windows11_22H2)
             return false;
-        if (f == Win11MgrFeature::WidgetIntegration &&
-            v < WindowsVersion::Windows11_23H2)
+        if (f == Win11MgrFeature::WidgetIntegration && v < WindowsVersion::Windows11_23H2)
             return false;
         return true;
     }
 
-    static constexpr size_t FeatureCount() {
+    static constexpr size_t FeatureCount()
+    {
         return static_cast<size_t>(Win11MgrFeature::COUNT);
     }
 
     /// Version count
-    static constexpr size_t VersionCount() { return 8; }
+    static constexpr size_t VersionCount()
+    {
+        return 8;
+    }
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
-
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 // ============================================================================
 // Section 3 — Windows11CompatMatrix
@@ -445,7 +481,8 @@ namespace Compat {
 //==============================================================================
 // Windows 11 Build Thresholds
 //==============================================================================
-struct Win11Build {
+struct Win11Build
+{
     static constexpr DWORD Win11_21H2 = 22000;
     static constexpr DWORD Win11_22H2 = 22621;
     static constexpr DWORD Win11_23H2 = 22631;
@@ -456,21 +493,27 @@ struct Win11Build {
 //==============================================================================
 // Windows Version Info
 //==============================================================================
-struct CompatWinVersionInfo {
+struct CompatWinVersionInfo
+{
     DWORD majorVersion = 0;
     DWORD minorVersion = 0;
     DWORD buildNumber = 0;
-    std::wstring displayVersion; // e.g., "23H2", "24H2"
-    std::wstring editionId; // e.g., "Professional", "Enterprise"
+    std::wstring displayVersion;  // e.g., "23H2", "24H2"
+    std::wstring editionId;       // e.g., "Professional", "Enterprise"
     bool isWindows11 = false;
     bool isServer = false;
     bool isARM64 = false;
 
-    std::string BuildLabel() const {
-        if (!isWindows11) return "Windows 10 (or earlier)";
-        if (buildNumber >= Win11Build::Win11_24H2) return "Windows 11 24H2";
-        if (buildNumber >= Win11Build::Win11_23H2) return "Windows 11 23H2";
-        if (buildNumber >= Win11Build::Win11_22H2) return "Windows 11 22H2";
+    std::string BuildLabel() const
+    {
+        if (!isWindows11)
+            return "Windows 10 (or earlier)";
+        if (buildNumber >= Win11Build::Win11_24H2)
+            return "Windows 11 24H2";
+        if (buildNumber >= Win11Build::Win11_23H2)
+            return "Windows 11 23H2";
+        if (buildNumber >= Win11Build::Win11_22H2)
+            return "Windows 11 22H2";
         return "Windows 11 21H2";
     }
 };
@@ -479,23 +522,23 @@ struct CompatWinVersionInfo {
 // Dark Mode State
 //==============================================================================
 enum class DarkModeState : uint32_t {
-    Unavailable = 0, // OS doesn't support dark mode
-    Light = 1, // User is in light mode
-    Dark = 2, // User is in dark mode
-    HighContrast = 3 // High contrast override theme
+    Unavailable = 0,  // OS doesn't support dark mode
+    Light = 1,        // User is in light mode
+    Dark = 2,         // User is in dark mode
+    HighContrast = 3  // High contrast override theme
 };
 
-inline const char* DarkModeStateName(DarkModeState s) {
-    static const char* names[] = {
-    "Unavailable", "Light", "Dark", "HighContrast"
-    };
+inline const char* DarkModeStateName(DarkModeState s)
+{
+    static const char* names[] = {"Unavailable", "Light", "Dark", "HighContrast"};
     return names[static_cast<uint32_t>(s)];
 }
 
 //==============================================================================
 // HDR Display Information
 //==============================================================================
-struct HDRDisplayInfo {
+struct HDRDisplayInfo
+{
     bool hdrSupported = false;
     bool hdrEnabled = false;
     bool wideColorGamut = false;
@@ -511,7 +554,8 @@ struct HDRDisplayInfo {
 //==============================================================================
 // GPU Adapter Information
 //==============================================================================
-struct CompatGPUAdapterInfo {
+struct CompatGPUAdapterInfo
+{
     std::wstring description;
     uint32_t vendorId = 0;
     uint32_t deviceId = 0;
@@ -523,20 +567,27 @@ struct CompatGPUAdapterInfo {
     bool supportsD3D12 = false;
     D3D_FEATURE_LEVEL maxFeatureLevel = D3D_FEATURE_LEVEL_9_1;
 
-    std::string VRAMLabel() const {
+    std::string VRAMLabel() const
+    {
         double gb = static_cast<double>(dedicatedVRAM) / (1024.0 * 1024.0 * 1024.0);
         char buf[64]{};
         snprintf(buf, sizeof(buf), "%.1f GB", gb);
         return buf;
     }
 
-    std::string VendorName() const {
+    std::string VendorName() const
+    {
         switch (vendorId) {
-        case 0x10DE: return "NVIDIA";
-        case 0x1002: return "AMD";
-        case 0x8086: return "Intel";
-        case 0x1414: return "Microsoft (WARP)";
-        default: return "Unknown";
+            case 0x10DE:
+                return "NVIDIA";
+            case 0x1002:
+                return "AMD";
+            case 0x8086:
+                return "Intel";
+            case 0x1414:
+                return "Microsoft (WARP)";
+            default:
+                return "Unknown";
         }
     }
 };
@@ -544,36 +595,48 @@ struct CompatGPUAdapterInfo {
 //==============================================================================
 // DPI Scaling Information
 //==============================================================================
-struct DPIScalingInfo {
+struct DPIScalingInfo
+{
     uint32_t systemDPI = 96;
     uint32_t effectiveDPI = 96;
     float scaleFactor = 1.0f;
-    bool perMonitorV2 = false; // Per-Monitor DPI v2 support
+    bool perMonitorV2 = false;  // Per-Monitor DPI v2 support
     uint32_t monitorCount = 0;
 
-    bool IsHighDPI() const { return scaleFactor > 1.0f; }
-    uint32_t ScalePercent() const { return static_cast<uint32_t>(scaleFactor * 100.0f); }
+    bool IsHighDPI() const
+    {
+        return scaleFactor > 1.0f;
+    }
+    uint32_t ScalePercent() const
+    {
+        return static_cast<uint32_t>(scaleFactor * 100.0f);
+    }
 };
 
 //==============================================================================
 // ARM64 Feature Detection
 //==============================================================================
-struct ARM64Features {
+struct ARM64Features
+{
     bool isARM64 = false;
-    bool hasNEON = false; // SIMD (always true on ARM64)
+    bool hasNEON = false;  // SIMD (always true on ARM64)
     bool hasCRC32 = false;
-    bool hasAtomics = false; // LSE atomics
-    bool hasSVE = false; // Scalable Vector Extensions
+    bool hasAtomics = false;  // LSE atomics
+    bool hasSVE = false;      // Scalable Vector Extensions
     bool hasSVE2 = false;
-    bool isEmulated = false; // x64 on ARM64 via emulation
+    bool isEmulated = false;  // x64 on ARM64 via emulation
 
-    bool CanRunNative() const { return isARM64 && !isEmulated; }
+    bool CanRunNative() const
+    {
+        return isARM64 && !isEmulated;
+    }
 };
 
 //==============================================================================
 // Compatibility Test Result
 //==============================================================================
-struct CompatTestResult {
+struct CompatTestResult
+{
     std::string testName;
     bool passed = false;
     std::string details;
@@ -583,7 +646,8 @@ struct CompatTestResult {
 //==============================================================================
 // Full Compatibility Matrix
 //==============================================================================
-struct CompatibilityMatrix {
+struct CompatibilityMatrix
+{
     CompatWinVersionInfo osInfo;
     DarkModeState darkMode = DarkModeState::Unavailable;
     HDRDisplayInfo hdrInfo;
@@ -592,27 +656,37 @@ struct CompatibilityMatrix {
     std::vector<CompatGPUAdapterInfo> gpuAdapters;
     std::vector<CompatTestResult> testResults;
 
-    bool AllTestsPassed() const {
+    bool AllTestsPassed() const
+    {
         for (auto& t : testResults)
-            if (!t.passed) return false;
+            if (!t.passed)
+                return false;
         return !testResults.empty();
     }
 
-    size_t PassCount() const {
+    size_t PassCount() const
+    {
         size_t c = 0;
         for (auto& t : testResults)
-            if (t.passed) ++c;
+            if (t.passed)
+                ++c;
         return c;
     }
 
-    size_t FailCount() const {
+    size_t FailCount() const
+    {
         return testResults.size() - PassCount();
     }
 
-    size_t GPUCount() const { return gpuAdapters.size(); }
-    bool HasDiscreteGPU() const {
+    size_t GPUCount() const
+    {
+        return gpuAdapters.size();
+    }
+    bool HasDiscreteGPU() const
+    {
         for (auto& g : gpuAdapters)
-            if (g.isHardware && g.vendorId != 0x8086) return true;
+            if (g.isHardware && g.vendorId != 0x8086)
+                return true;
         return false;
     }
 };
@@ -620,17 +694,18 @@ struct CompatibilityMatrix {
 //==============================================================================
 // Windows Version Detector
 //==============================================================================
-class WindowsVersionDetector {
-public:
-    static CompatWinVersionInfo Detect() {
+class WindowsVersionDetector
+{
+  public:
+    static CompatWinVersionInfo Detect()
+    {
         CompatWinVersionInfo info{};
 
         // Use RtlGetVersion for accurate version (avoids manifest issues)
         using RtlGetVersionFn = NTSTATUS(WINAPI*)(PRTL_OSVERSIONINFOW);
         auto ntdll = GetModuleHandleW(L"ntdll.dll");
         if (ntdll) {
-            auto RtlGetVersion = reinterpret_cast<RtlGetVersionFn>(
-                GetProcAddress(ntdll, "RtlGetVersion"));
+            auto RtlGetVersion = reinterpret_cast<RtlGetVersionFn>(GetProcAddress(ntdll, "RtlGetVersion"));
             if (RtlGetVersion) {
                 RTL_OSVERSIONINFOW osvi{};
                 osvi.dwOSVersionInfoSize = sizeof(osvi);
@@ -642,23 +717,21 @@ public:
             }
         }
 
-        info.isWindows11 = (info.majorVersion >= 10 &&
-            info.buildNumber >= Win11Build::Win11_21H2);
+        info.isWindows11 = (info.majorVersion >= 10 && info.buildNumber >= Win11Build::Win11_21H2);
 
         // Read display version from registry
         HKEY hKey = nullptr;
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
-            0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &hKey)
+            == ERROR_SUCCESS) {
             wchar_t buf[64]{};
             DWORD bufSize = sizeof(buf);
-            if (RegQueryValueExW(hKey, L"DisplayVersion", nullptr, nullptr,
-                reinterpret_cast<LPBYTE>(buf), &bufSize) == ERROR_SUCCESS) {
+            if (RegQueryValueExW(hKey, L"DisplayVersion", nullptr, nullptr, reinterpret_cast<LPBYTE>(buf), &bufSize)
+                == ERROR_SUCCESS) {
                 info.displayVersion = buf;
             }
             bufSize = sizeof(buf);
-            if (RegQueryValueExW(hKey, L"EditionID", nullptr, nullptr,
-                reinterpret_cast<LPBYTE>(buf), &bufSize) == ERROR_SUCCESS) {
+            if (RegQueryValueExW(hKey, L"EditionID", nullptr, nullptr, reinterpret_cast<LPBYTE>(buf), &bufSize)
+                == ERROR_SUCCESS) {
                 info.editionId = buf;
             }
             RegCloseKey(hKey);
@@ -676,9 +749,11 @@ public:
 //==============================================================================
 // Dark Mode Detector
 //==============================================================================
-class DarkModeDetector {
-public:
-    static DarkModeState Detect() {
+class DarkModeDetector
+{
+  public:
+    static DarkModeState Detect()
+    {
         // Check high contrast first
         HIGHCONTRASTW hc{};
         hc.cbSize = sizeof(hc);
@@ -690,13 +765,14 @@ public:
 
         // Read AppsUseLightTheme from registry
         HKEY hKey = nullptr;
-        if (RegOpenKeyExW(HKEY_CURRENT_USER,
-            L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-            0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0,
+                          KEY_READ, &hKey)
+            == ERROR_SUCCESS) {
             DWORD useLightTheme = 1;
             DWORD dataSize = sizeof(useLightTheme);
-            if (RegQueryValueExW(hKey, L"AppsUseLightTheme", nullptr, nullptr,
-                reinterpret_cast<LPBYTE>(&useLightTheme), &dataSize) == ERROR_SUCCESS) {
+            if (RegQueryValueExW(hKey, L"AppsUseLightTheme", nullptr, nullptr, reinterpret_cast<LPBYTE>(&useLightTheme),
+                                 &dataSize)
+                == ERROR_SUCCESS) {
                 RegCloseKey(hKey);
                 return useLightTheme == 0 ? DarkModeState::Dark : DarkModeState::Light;
             }
@@ -710,36 +786,35 @@ public:
 //==============================================================================
 // HDR Display Detector
 //==============================================================================
-class HDRDisplayDetector {
-public:
-    static HDRDisplayInfo Detect() {
+class HDRDisplayDetector
+{
+  public:
+    static HDRDisplayInfo Detect()
+    {
         HDRDisplayInfo info{};
 
         IDXGIFactory6* factory = nullptr;
-        HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory6),
-            reinterpret_cast<void**>(&factory));
-        if (FAILED(hr) || !factory) return info;
+        HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory6), reinterpret_cast<void**>(&factory));
+        if (FAILED(hr) || !factory)
+            return info;
 
         IDXGIAdapter1* adapter = nullptr;
         if (SUCCEEDED(factory->EnumAdapters1(0, &adapter)) && adapter) {
             IDXGIOutput* output = nullptr;
             if (SUCCEEDED(adapter->EnumOutputs(0, &output)) && output) {
                 IDXGIOutput6* output6 = nullptr;
-                if (SUCCEEDED(output->QueryInterface(__uuidof(IDXGIOutput6),
-                    reinterpret_cast<void**>(&output6))) && output6) {
+                if (SUCCEEDED(output->QueryInterface(__uuidof(IDXGIOutput6), reinterpret_cast<void**>(&output6)))
+                    && output6) {
                     DXGI_OUTPUT_DESC1 desc{};
                     if (SUCCEEDED(output6->GetDesc1(&desc))) {
-                        info.hdrSupported = (desc.ColorSpace ==
-                            DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
+                        info.hdrSupported = (desc.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
                         info.maxLuminance = desc.MaxLuminance;
                         info.minLuminance = desc.MinLuminance;
                         info.maxFullFrameLum = desc.MaxFullFrameLuminance;
                         info.colorSpace = desc.ColorSpace;
                         info.monitorName = desc.DeviceName;
-                        info.resolutionX = desc.DesktopCoordinates.right -
-                            desc.DesktopCoordinates.left;
-                        info.resolutionY = desc.DesktopCoordinates.bottom -
-                            desc.DesktopCoordinates.top;
+                        info.resolutionX = desc.DesktopCoordinates.right - desc.DesktopCoordinates.left;
+                        info.resolutionY = desc.DesktopCoordinates.bottom - desc.DesktopCoordinates.top;
 
                         // Wide color gamut if red primary > sRGB
                         info.wideColorGamut = (desc.RedPrimary[0] > 0.64f);
@@ -758,16 +833,17 @@ public:
         return info;
     }
 
-private:
-    static bool IsHDREnabled() {
+  private:
+    static bool IsHDREnabled()
+    {
         HKEY hKey = nullptr;
-        if (RegOpenKeyExW(HKEY_CURRENT_USER,
-            L"Software\\Microsoft\\Windows\\CurrentVersion\\AdvancedColor",
-            0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\AdvancedColor", 0,
+                          KEY_READ, &hKey)
+            == ERROR_SUCCESS) {
             DWORD enabled = 0;
             DWORD dataSize = sizeof(enabled);
-            RegQueryValueExW(hKey, L"EnableAdvancedColor", nullptr, nullptr,
-                reinterpret_cast<LPBYTE>(&enabled), &dataSize);
+            RegQueryValueExW(hKey, L"EnableAdvancedColor", nullptr, nullptr, reinterpret_cast<LPBYTE>(&enabled),
+                             &dataSize);
             RegCloseKey(hKey);
             return enabled != 0;
         }
@@ -778,14 +854,15 @@ private:
 //==============================================================================
 // GPU Enumerator
 //==============================================================================
-class GPUEnumerator {
-public:
-    static std::vector<CompatGPUAdapterInfo> EnumerateAll() {
+class GPUEnumerator
+{
+  public:
+    static std::vector<CompatGPUAdapterInfo> EnumerateAll()
+    {
         std::vector<CompatGPUAdapterInfo> adapters;
 
         IDXGIFactory1* factory = nullptr;
-        if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1),
-            reinterpret_cast<void**>(&factory))) || !factory) {
+        if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory))) || !factory) {
             return adapters;
         }
 
@@ -804,17 +881,13 @@ public:
 
                 // Test D3D11 support
                 D3D_FEATURE_LEVEL featureLevels[] = {
-                D3D_FEATURE_LEVEL_12_1, D3D_FEATURE_LEVEL_12_0,
-                D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0,
-                D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0,
-                D3D_FEATURE_LEVEL_9_3, D3D_FEATURE_LEVEL_9_1
-                };
+                    D3D_FEATURE_LEVEL_12_1, D3D_FEATURE_LEVEL_12_0, D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0,
+                    D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0, D3D_FEATURE_LEVEL_9_3,  D3D_FEATURE_LEVEL_9_1};
                 D3D_FEATURE_LEVEL achievedLevel = D3D_FEATURE_LEVEL_9_1;
                 ID3D11Device* testDevice = nullptr;
-                HRESULT hr = D3D11CreateDevice(
-                    adapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr,
-                    0, featureLevels, _countof(featureLevels),
-                    D3D11_SDK_VERSION, &testDevice, &achievedLevel, nullptr);
+                HRESULT hr =
+                    D3D11CreateDevice(adapter, D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0, featureLevels,
+                                      _countof(featureLevels), D3D11_SDK_VERSION, &testDevice, &achievedLevel, nullptr);
                 if (SUCCEEDED(hr)) {
                     info.supportsD3D11 = true;
                     info.maxFeatureLevel = achievedLevel;
@@ -832,10 +905,12 @@ public:
         return adapters;
     }
 
-    static std::optional<CompatGPUAdapterInfo> GetPrimaryAdapter() {
+    static std::optional<CompatGPUAdapterInfo> GetPrimaryAdapter()
+    {
         auto all = EnumerateAll();
         for (auto& a : all) {
-            if (a.isHardware) return a;
+            if (a.isHardware)
+                return a;
         }
         return all.empty() ? std::nullopt : std::optional(all[0]);
     }
@@ -844,9 +919,11 @@ public:
 //==============================================================================
 // DPI Scaling Detector
 //==============================================================================
-class DPIScalingDetector {
-public:
-    static DPIScalingInfo Detect() {
+class DPIScalingDetector
+{
+  public:
+    static DPIScalingInfo Detect()
+    {
         DPIScalingInfo info{};
 
         // System DPI
@@ -868,8 +945,9 @@ public:
         return info;
     }
 
-private:
-    static bool IsPerMonitorV2Available() {
+  private:
+    static bool IsPerMonitorV2Available()
+    {
         // Per-Monitor v2 available since Win10 1703 (build 15063)
         auto ver = WindowsVersionDetector::Detect();
         return ver.buildNumber >= 15063;
@@ -879,16 +957,19 @@ private:
 //==============================================================================
 // ARM64 Feature Detector
 //==============================================================================
-class ARM64FeatureDetector {
-public:
-    static ARM64Features Detect() {
+class ARM64FeatureDetector
+{
+  public:
+    static ARM64Features Detect()
+    {
         ARM64Features features{};
 
         SYSTEM_INFO si{};
         GetNativeSystemInfo(&si);
         features.isARM64 = (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64);
 
-        if (!features.isARM64) return features;
+        if (!features.isARM64)
+            return features;
 
         // On ARM64, NEON is always available
         features.hasNEON = true;
@@ -898,13 +979,11 @@ public:
         using IsWow64Process2Fn = BOOL(WINAPI*)(HANDLE, USHORT*, USHORT*);
         auto kernel32 = GetModuleHandleW(L"kernel32.dll");
         if (kernel32) {
-            auto pIsWow64Process2 = reinterpret_cast<IsWow64Process2Fn>(
-                GetProcAddress(kernel32, "IsWow64Process2"));
+            auto pIsWow64Process2 = reinterpret_cast<IsWow64Process2Fn>(GetProcAddress(kernel32, "IsWow64Process2"));
             if (pIsWow64Process2) {
                 USHORT processMachine = 0, nativeMachine = 0;
-                if (pIsWow64Process2(GetCurrentProcess(), &processMachine,
-                    &nativeMachine)) {
-                    features.isEmulated = (processMachine != 0); // 0 = native
+                if (pIsWow64Process2(GetCurrentProcess(), &processMachine, &nativeMachine)) {
+                    features.isEmulated = (processMachine != 0);  // 0 = native
                 }
             }
         }
@@ -922,9 +1001,11 @@ public:
 //==============================================================================
 // Compatibility Matrix Builder
 //==============================================================================
-class CompatibilityMatrixBuilder {
-public:
-    static CompatibilityMatrix Build() {
+class CompatibilityMatrixBuilder
+{
+  public:
+    static CompatibilityMatrix Build()
+    {
         CompatibilityMatrix matrix{};
 
         matrix.osInfo = WindowsVersionDetector::Detect();
@@ -940,15 +1021,17 @@ public:
         return matrix;
     }
 
-private:
-    static void RunCompatTests(CompatibilityMatrix& matrix) {
+  private:
+    static void RunCompatTests(CompatibilityMatrix& matrix)
+    {
         // Test 1: OS Version
         {
             CompatTestResult test;
             test.testName = "Windows 11 Version Check";
             test.passed = matrix.osInfo.isWindows11;
             test.details = matrix.osInfo.BuildLabel();
-            if (!test.passed) test.recommendation = "Windows 11 22H2+ recommended";
+            if (!test.passed)
+                test.recommendation = "Windows 11 22H2+ recommended";
             matrix.testResults.push_back(std::move(test));
         }
 
@@ -967,15 +1050,12 @@ private:
             test.testName = "GPU Hardware Adapter";
             test.passed = !matrix.gpuAdapters.empty();
             if (test.passed) {
-                test.details = std::string("Found ") +
-                    std::to_string(matrix.gpuAdapters.size()) + " adapter(s)";
+                test.details = std::string("Found ") + std::to_string(matrix.gpuAdapters.size()) + " adapter(s)";
                 if (!matrix.gpuAdapters.empty()) {
                     auto& primary = matrix.gpuAdapters[0];
-                    test.details += ": " + primary.VendorName() +
-                        " (" + primary.VRAMLabel() + ")";
+                    test.details += ": " + primary.VendorName() + " (" + primary.VRAMLabel() + ")";
                 }
-            }
-            else {
+            } else {
                 test.recommendation = "Hardware GPU recommended for thumbnail acceleration";
             }
             matrix.testResults.push_back(std::move(test));
@@ -987,7 +1067,10 @@ private:
             test.testName = "Direct3D 11 Support";
             test.passed = false;
             for (auto& g : matrix.gpuAdapters) {
-                if (g.supportsD3D11) { test.passed = true; break; }
+                if (g.supportsD3D11) {
+                    test.passed = true;
+                    break;
+                }
             }
             test.details = test.passed ? "D3D11 available" : "No D3D11 support";
             matrix.testResults.push_back(std::move(test));
@@ -997,11 +1080,10 @@ private:
         {
             CompatTestResult test;
             test.testName = "DPI Scaling";
-            test.passed = true; // Always pass, but note status
+            test.passed = true;  // Always pass, but note status
             auto& dpi = matrix.dpiInfo;
-            test.details = std::to_string(dpi.ScalePercent()) + "% scale, " +
-                std::to_string(dpi.monitorCount) + " monitor(s), " +
-                (dpi.perMonitorV2 ? "Per-Monitor v2" : "System DPI");
+            test.details = std::to_string(dpi.ScalePercent()) + "% scale, " + std::to_string(dpi.monitorCount)
+                           + " monitor(s), " + (dpi.perMonitorV2 ? "Per-Monitor v2" : "System DPI");
             if (dpi.IsHighDPI() && !dpi.perMonitorV2) {
                 test.recommendation = "Enable Per-Monitor DPI v2 in manifest";
             }
@@ -1012,14 +1094,11 @@ private:
         {
             CompatTestResult test;
             test.testName = "HDR Display";
-            test.passed = true; // Info only
+            test.passed = true;  // Info only
             if (matrix.hdrInfo.hdrSupported) {
-                test.details = std::string("HDR ") +
-                    (matrix.hdrInfo.hdrEnabled ? "enabled" : "available but disabled");
-                test.details += ", max " +
-                    std::to_string(static_cast<int>(matrix.hdrInfo.maxLuminance)) + " nits";
-            }
-            else {
+                test.details = std::string("HDR ") + (matrix.hdrInfo.hdrEnabled ? "enabled" : "available but disabled");
+                test.details += ", max " + std::to_string(static_cast<int>(matrix.hdrInfo.maxLuminance)) + " nits";
+            } else {
                 test.details = "SDR display";
             }
             matrix.testResults.push_back(std::move(test));
@@ -1029,13 +1108,10 @@ private:
         {
             CompatTestResult test;
             test.testName = "ARM64 Platform";
-            test.passed = true; // Info only
+            test.passed = true;  // Info only
             if (matrix.arm64Info.isARM64) {
-                test.details = matrix.arm64Info.isEmulated
-                    ? "ARM64 (running x64 emulated)"
-                    : "ARM64 native";
-            }
-            else {
+                test.details = matrix.arm64Info.isEmulated ? "ARM64 (running x64 emulated)" : "ARM64 native";
+            } else {
                 test.details = "x64 native";
             }
             matrix.testResults.push_back(std::move(test));
@@ -1043,10 +1119,9 @@ private:
     }
 };
 
-} // namespace Compat
-} // namespace Engine
-} // namespace ExplorerLens
-
+}  // namespace Compat
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 // ============================================================================
 // Section 4 — Windows12Compatibility
@@ -1059,62 +1134,103 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class Win12Feature : uint8_t {
-    DynamicIsland = 0, // Windows 12 Dynamic Island shell integration
-    FluentV4 = 1, // Fluent Design System V4
-    AIProcessingUnit = 2, // NPU tile APIs
-    SmartDock = 3, // Snap / Smart Dock layouts V2
-    UnifiedSearch = 4, // Unified search provider protocol
+    DynamicIsland = 0,     // Windows 12 Dynamic Island shell integration
+    FluentV4 = 1,          // Fluent Design System V4
+    AIProcessingUnit = 2,  // NPU tile APIs
+    SmartDock = 3,         // Snap / Smart Dock layouts V2
+    UnifiedSearch = 4,     // Unified search provider protocol
     COUNT
 };
 
-enum class Win12CompatMode : uint8_t { Native = 0, Adaptive, Fallback11, Fallback10, COUNT };
-enum class Win12APIFamily : uint8_t { Shell = 0, Compositor, InputMethod, SystemTray, COUNT };
+enum class Win12CompatMode : uint8_t {
+    Native = 0,
+    Adaptive,
+    Fallback11,
+    Fallback10,
+    COUNT
+};
+enum class Win12APIFamily : uint8_t {
+    Shell = 0,
+    Compositor,
+    InputMethod,
+    SystemTray,
+    COUNT
+};
 
-struct Win12FeatureAvailability {
+struct Win12FeatureAvailability
+{
     Win12Feature feature = Win12Feature::FluentV4;
     bool available = false;
     Win12CompatMode mode = Win12CompatMode::Fallback11;
     std::wstring minBuildNumber;
 };
 
-class Windows12Compatibility {
-public:
-    static const wchar_t* FeatureName(Win12Feature f) {
+class Windows12Compatibility
+{
+  public:
+    static const wchar_t* FeatureName(Win12Feature f)
+    {
         switch (f) {
-        case Win12Feature::DynamicIsland: return L"Dynamic Island Shell";
-        case Win12Feature::FluentV4: return L"Fluent Design V4";
-        case Win12Feature::AIProcessingUnit: return L"NPU AI Processing Unit";
-        case Win12Feature::SmartDock: return L"Smart Dock Layouts V2";
-        case Win12Feature::UnifiedSearch: return L"Unified Search Provider";
-        default: return L"Unknown";
+            case Win12Feature::DynamicIsland:
+                return L"Dynamic Island Shell";
+            case Win12Feature::FluentV4:
+                return L"Fluent Design V4";
+            case Win12Feature::AIProcessingUnit:
+                return L"NPU AI Processing Unit";
+            case Win12Feature::SmartDock:
+                return L"Smart Dock Layouts V2";
+            case Win12Feature::UnifiedSearch:
+                return L"Unified Search Provider";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* CompatModeName(Win12CompatMode m) {
+    static const wchar_t* CompatModeName(Win12CompatMode m)
+    {
         switch (m) {
-        case Win12CompatMode::Native: return L"Native";
-        case Win12CompatMode::Adaptive: return L"Adaptive";
-        case Win12CompatMode::Fallback11: return L"Fallback (Win11)";
-        case Win12CompatMode::Fallback10: return L"Fallback (Win10)";
-        default: return L"Unknown";
+            case Win12CompatMode::Native:
+                return L"Native";
+            case Win12CompatMode::Adaptive:
+                return L"Adaptive";
+            case Win12CompatMode::Fallback11:
+                return L"Fallback (Win11)";
+            case Win12CompatMode::Fallback10:
+                return L"Fallback (Win10)";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* APIFamilyName(Win12APIFamily a) {
+    static const wchar_t* APIFamilyName(Win12APIFamily a)
+    {
         switch (a) {
-        case Win12APIFamily::Shell: return L"Shell";
-        case Win12APIFamily::Compositor: return L"Compositor";
-        case Win12APIFamily::InputMethod: return L"Input Method";
-        case Win12APIFamily::SystemTray: return L"System Tray";
-        default: return L"Unknown";
+            case Win12APIFamily::Shell:
+                return L"Shell";
+            case Win12APIFamily::Compositor:
+                return L"Compositor";
+            case Win12APIFamily::InputMethod:
+                return L"Input Method";
+            case Win12APIFamily::SystemTray:
+                return L"System Tray";
+            default:
+                return L"Unknown";
         }
     }
-    static constexpr size_t FeatureCount() { return static_cast<size_t>(Win12Feature::COUNT); }
-    static constexpr size_t CompatModeCount() { return static_cast<size_t>(Win12CompatMode::COUNT); }
-    static constexpr size_t APIFamilyCount() { return static_cast<size_t>(Win12APIFamily::COUNT); }
+    static constexpr size_t FeatureCount()
+    {
+        return static_cast<size_t>(Win12Feature::COUNT);
+    }
+    static constexpr size_t CompatModeCount()
+    {
+        return static_cast<size_t>(Win12CompatMode::COUNT);
+    }
+    static constexpr size_t APIFamilyCount()
+    {
+        return static_cast<size_t>(Win12APIFamily::COUNT);
+    }
 };
 
-}
-} // namespace ExplorerLens::Engine
-
+}  // namespace Engine
+}  // namespace ExplorerLens
 
 // ============================================================================
 // Section 5 — CompatibilityMatrix
@@ -1136,19 +1252,28 @@ enum class WindowsBuild : uint16_t {
     Unknown = 0
 };
 
-inline const char* WindowsBuildName(WindowsBuild b) {
+inline const char* WindowsBuildName(WindowsBuild b)
+{
     switch (b) {
-    case WindowsBuild::Win10_21H2: return "Windows 10 21H2 (19044)";
-    case WindowsBuild::Win10_22H2: return "Windows 10 22H2 (19045)";
-    case WindowsBuild::Win11_21H2: return "Windows 11 21H2 (22000)";
-    case WindowsBuild::Win11_22H2: return "Windows 11 22H2 (22621)";
-    case WindowsBuild::Win11_23H2: return "Windows 11 23H2 (22631)";
-    case WindowsBuild::Win11_24H2: return "Windows 11 24H2 (26100)";
-    default: return "Unknown";
+        case WindowsBuild::Win10_21H2:
+            return "Windows 10 21H2 (19044)";
+        case WindowsBuild::Win10_22H2:
+            return "Windows 10 22H2 (19045)";
+        case WindowsBuild::Win11_21H2:
+            return "Windows 11 21H2 (22000)";
+        case WindowsBuild::Win11_22H2:
+            return "Windows 11 22H2 (22621)";
+        case WindowsBuild::Win11_23H2:
+            return "Windows 11 23H2 (22631)";
+        case WindowsBuild::Win11_24H2:
+            return "Windows 11 24H2 (26100)";
+        default:
+            return "Unknown";
     }
 }
 
-inline bool IsWindows11(WindowsBuild b) {
+inline bool IsWindows11(WindowsBuild b)
+{
     return static_cast<uint16_t>(b) >= 22000;
 }
 
@@ -1157,38 +1282,47 @@ enum class CompatGPUVendor : uint8_t {
     NVIDIA = 0,
     AMD = 1,
     Intel = 2,
-    Software = 3, // WARP / software renderer
+    Software = 3,  // WARP / software renderer
     Unknown = 255
 };
 
-inline const char* GPUVendorName(CompatGPUVendor v) {
+inline const char* GPUVendorName(CompatGPUVendor v)
+{
     switch (v) {
-    case CompatGPUVendor::NVIDIA: return "NVIDIA";
-    case CompatGPUVendor::AMD: return "AMD";
-    case CompatGPUVendor::Intel: return "Intel";
-    case CompatGPUVendor::Software: return "Software (WARP)";
-    default: return "Unknown";
+        case CompatGPUVendor::NVIDIA:
+            return "NVIDIA";
+        case CompatGPUVendor::AMD:
+            return "AMD";
+        case CompatGPUVendor::Intel:
+            return "Intel";
+        case CompatGPUVendor::Software:
+            return "Software (WARP)";
+        default:
+            return "Unknown";
     }
 }
 
 // --- DPI scaling factors ---
 enum class CompatDPIScale : uint8_t {
-    Scale_100 = 100, // 96 DPI
-    Scale_125 = 125, // 120 DPI
-    Scale_150 = 150, // 144 DPI
-    Scale_175 = 175, // 168 DPI
-    Scale_200 = 200, // 192 DPI
-    Scale_250 = 250, // 240 DPI
-    Scale_300 = 0 // 288 DPI (overflow in uint8_t, use 0 as sentinel)
+    Scale_100 = 100,  // 96 DPI
+    Scale_125 = 125,  // 120 DPI
+    Scale_150 = 150,  // 144 DPI
+    Scale_175 = 175,  // 168 DPI
+    Scale_200 = 200,  // 192 DPI
+    Scale_250 = 250,  // 240 DPI
+    Scale_300 = 0     // 288 DPI (overflow in uint8_t, use 0 as sentinel)
 };
 
-inline uint32_t DPIFromScale(CompatDPIScale s) {
-    if (s == CompatDPIScale::Scale_300) return 288;
+inline uint32_t DPIFromScale(CompatDPIScale s)
+{
+    if (s == CompatDPIScale::Scale_300)
+        return 288;
     return static_cast<uint32_t>(s) * 96 / 100;
 }
 
 // --- Compatibility test scenario ---
-struct CompatTestScenario {
+struct CompatTestScenario
+{
     std::string name;
     WindowsBuild osBuild = WindowsBuild::Unknown;
     CompatGPUVendor gpu = CompatGPUVendor::Unknown;
@@ -1196,10 +1330,10 @@ struct CompatTestScenario {
     bool darkMode = false;
     bool multiMonitor = false;
 
-    std::string Description() const {
-        return name + " [" + WindowsBuildName(osBuild) + ", " +
-            GPUVendorName(gpu) + ", DPI=" +
-            std::to_string(DPIFromScale(dpi)) + "]";
+    std::string Description() const
+    {
+        return name + " [" + WindowsBuildName(osBuild) + ", " + GPUVendorName(gpu)
+               + ", DPI=" + std::to_string(DPIFromScale(dpi)) + "]";
     }
 };
 
@@ -1207,24 +1341,32 @@ struct CompatTestScenario {
 enum class CompatKitResult : uint8_t {
     Pass = 0,
     Fail = 1,
-    Warning = 2, // Works but with visual artifacts
-    Skipped = 3, // Environment not available
+    Warning = 2,  // Works but with visual artifacts
+    Skipped = 3,  // Environment not available
     NotTested = 4
 };
 
-inline const char* CompatResultName(CompatKitResult r) {
+inline const char* CompatResultName(CompatKitResult r)
+{
     switch (r) {
-    case CompatKitResult::Pass: return "PASS";
-    case CompatKitResult::Fail: return "FAIL";
-    case CompatKitResult::Warning: return "WARNING";
-    case CompatKitResult::Skipped: return "SKIPPED";
-    case CompatKitResult::NotTested: return "NOT TESTED";
-    default: return "Unknown";
+        case CompatKitResult::Pass:
+            return "PASS";
+        case CompatKitResult::Fail:
+            return "FAIL";
+        case CompatKitResult::Warning:
+            return "WARNING";
+        case CompatKitResult::Skipped:
+            return "SKIPPED";
+        case CompatKitResult::NotTested:
+            return "NOT TESTED";
+        default:
+            return "Unknown";
     }
 }
 
 // --- Test execution record ---
-struct CompatTestExecution {
+struct CompatTestExecution
+{
     CompatTestScenario scenario;
     CompatKitResult result = CompatKitResult::NotTested;
     std::string notes;
@@ -1238,15 +1380,16 @@ struct CompatTestExecution {
     bool gpuAccelOk = false;
     bool shellIntegrationOk = false;
 
-    bool IsFullPass() const {
-        return result == CompatKitResult::Pass &&
-            comRegistrationOk && thumbnailRenderOk &&
-            dpiScalingOk && gpuAccelOk && shellIntegrationOk;
+    bool IsFullPass() const
+    {
+        return result == CompatKitResult::Pass && comRegistrationOk && thumbnailRenderOk && dpiScalingOk && gpuAccelOk
+               && shellIntegrationOk;
     }
 };
 
 // --- Compatibility matrix ---
-struct CompatMatrixStats {
+struct CompatMatrixStats
+{
     uint32_t totalScenarios = 0;
     uint32_t passed = 0;
     uint32_t failed = 0;
@@ -1254,72 +1397,95 @@ struct CompatMatrixStats {
     uint32_t skipped = 0;
     uint32_t notTested = 0;
 
-    double PassRate() const {
+    double PassRate() const
+    {
         uint32_t tested = passed + failed + warnings;
         return tested > 0 ? static_cast<double>(passed) / tested : 0.0;
     }
 
-    bool MeetsMinimum(double threshold = 0.95) const {
+    bool MeetsMinimum(double threshold = 0.95) const
+    {
         return PassRate() >= threshold;
     }
 };
 
-class CompatibilityMatrixExec {
-public:
-    CompatibilityMatrixExec() { BuildDefaultMatrix(); }
+class CompatibilityMatrixExec
+{
+  public:
+    CompatibilityMatrixExec()
+    {
+        BuildDefaultMatrix();
+    }
 
-    void AddScenario(const CompatTestScenario& scenario) {
+    void AddScenario(const CompatTestScenario& scenario)
+    {
         CompatTestExecution exec;
         exec.scenario = scenario;
         m_executions.push_back(exec);
     }
 
-    void RecordResult(size_t index, CompatKitResult result) {
+    void RecordResult(size_t index, CompatKitResult result)
+    {
         if (index < m_executions.size()) {
             m_executions[index].result = result;
         }
     }
 
-    void RecordExecution(const CompatTestExecution& exec) {
+    void RecordExecution(const CompatTestExecution& exec)
+    {
         m_executions.push_back(exec);
     }
 
-    CompatMatrixStats GetStats() const {
+    CompatMatrixStats GetStats() const
+    {
         CompatMatrixStats stats;
         stats.totalScenarios = static_cast<uint32_t>(m_executions.size());
         for (auto& e : m_executions) {
             switch (e.result) {
-            case CompatKitResult::Pass: stats.passed++; break;
-            case CompatKitResult::Fail: stats.failed++; break;
-            case CompatKitResult::Warning: stats.warnings++; break;
-            case CompatKitResult::Skipped: stats.skipped++; break;
-            case CompatKitResult::NotTested: stats.notTested++; break;
+                case CompatKitResult::Pass:
+                    stats.passed++;
+                    break;
+                case CompatKitResult::Fail:
+                    stats.failed++;
+                    break;
+                case CompatKitResult::Warning:
+                    stats.warnings++;
+                    break;
+                case CompatKitResult::Skipped:
+                    stats.skipped++;
+                    break;
+                case CompatKitResult::NotTested:
+                    stats.notTested++;
+                    break;
             }
         }
         return stats;
     }
 
-    size_t ScenarioCount() const { return m_executions.size(); }
+    size_t ScenarioCount() const
+    {
+        return m_executions.size();
+    }
 
-    const std::vector<CompatTestExecution>& Executions() const { return m_executions; }
+    const std::vector<CompatTestExecution>& Executions() const
+    {
+        return m_executions;
+    }
 
-    static CompatibilityMatrixExec Create() { return CompatibilityMatrixExec(); }
+    static CompatibilityMatrixExec Create()
+    {
+        return CompatibilityMatrixExec();
+    }
 
-private:
-    void BuildDefaultMatrix() {
+  private:
+    void BuildDefaultMatrix()
+    {
         // Core OS builds x GPU vendors
-        static const WindowsBuild builds[] = {
-        WindowsBuild::Win10_22H2,
-        WindowsBuild::Win11_22H2,
-        WindowsBuild::Win11_23H2,
-        WindowsBuild::Win11_24H2
-        };
-        static const CompatGPUVendor gpus[] = {
-        CompatGPUVendor::NVIDIA, CompatGPUVendor::AMD, CompatGPUVendor::Intel
-        };
-        static const CompatDPIScale dpis[] = {
-        CompatDPIScale::Scale_100, CompatDPIScale::Scale_150, CompatDPIScale::Scale_200
-        };
+        static const WindowsBuild builds[] = {WindowsBuild::Win10_22H2, WindowsBuild::Win11_22H2,
+                                              WindowsBuild::Win11_23H2, WindowsBuild::Win11_24H2};
+        static const CompatGPUVendor gpus[] = {CompatGPUVendor::NVIDIA, CompatGPUVendor::AMD, CompatGPUVendor::Intel};
+        static const CompatDPIScale dpis[] = {CompatDPIScale::Scale_100, CompatDPIScale::Scale_150,
+                                              CompatDPIScale::Scale_200};
 
         int idx = 0;
         for (auto build : builds) {
@@ -1340,8 +1506,7 @@ private:
     std::vector<CompatTestExecution> m_executions;
 };
 
-} // namespace ExplorerLens::Utils
-
+}  // namespace ExplorerLens::Utils
 
 // ============================================================================
 // Tail — Related Windows platform headers (separate TUs for .cpp files)

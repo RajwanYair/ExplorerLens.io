@@ -6,19 +6,20 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <cmath>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <vector>
 
 #ifdef _M_ARM64
-#include <arm_neon.h>
+    #include <arm_neon.h>
 #endif
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct NEONScaleConfig {
+struct NEONScaleConfig
+{
     uint32_t srcWidth = 0;
     uint32_t srcHeight = 0;
     uint32_t dstWidth = 0;
@@ -26,31 +27,44 @@ struct NEONScaleConfig {
     uint32_t srcStride = 0;
     uint32_t dstStride = 0;
     uint32_t channels = 4;
-    bool     clampOutput = true;
+    bool clampOutput = true;
 };
 
-struct NEONScaleStats {
+struct NEONScaleStats
+{
     uint64_t pixelsProcessed = 0;
     uint64_t rowsProcessed = 0;
-    bool     usedNEON = false;
+    bool usedNEON = false;
 };
 
-class NEONScaleKernel {
-public:
-    static NEONScaleKernel& Instance() { static NEONScaleKernel s; return s; }
+class NEONScaleKernel
+{
+  public:
+    static NEONScaleKernel& Instance()
+    {
+        static NEONScaleKernel s;
+        return s;
+    }
 
-    bool Configure(const NEONScaleConfig& config) {
-        if (config.srcWidth == 0 || config.srcHeight == 0) return false;
-        if (config.dstWidth == 0 || config.dstHeight == 0) return false;
+    bool Configure(const NEONScaleConfig& config)
+    {
+        if (config.srcWidth == 0 || config.srcHeight == 0)
+            return false;
+        if (config.dstWidth == 0 || config.dstHeight == 0)
+            return false;
         m_config = config;
-        if (m_config.srcStride == 0) m_config.srcStride = m_config.srcWidth * m_config.channels;
-        if (m_config.dstStride == 0) m_config.dstStride = m_config.dstWidth * m_config.channels;
+        if (m_config.srcStride == 0)
+            m_config.srcStride = m_config.srcWidth * m_config.channels;
+        if (m_config.dstStride == 0)
+            m_config.dstStride = m_config.dstWidth * m_config.channels;
         m_configured = true;
         return true;
     }
 
-    void ScaleRow(const uint8_t* srcRow, uint8_t* dstRow, uint32_t srcW, uint32_t dstW, uint32_t channels) {
-        if (!srcRow || !dstRow || srcW == 0 || dstW == 0) return;
+    void ScaleRow(const uint8_t* srcRow, uint8_t* dstRow, uint32_t srcW, uint32_t dstW, uint32_t channels)
+    {
+        if (!srcRow || !dstRow || srcW == 0 || dstW == 0)
+            return;
         float ratio = static_cast<float>(srcW) / static_cast<float>(dstW);
 
 #ifdef _M_ARM64
@@ -64,7 +78,10 @@ public:
                     sx = (std::min)(sx, srcW - 1);
                     const uint8_t* sp = srcRow + sx * channels;
                     uint8_t* dp = dstRow + (x + i) * channels;
-                    dp[0] = sp[0]; dp[1] = sp[1]; dp[2] = sp[2]; dp[3] = sp[3];
+                    dp[0] = sp[0];
+                    dp[1] = sp[1];
+                    dp[2] = sp[2];
+                    dp[3] = sp[3];
                 }
             }
             for (; x < dstW; ++x) {
@@ -73,11 +90,11 @@ public:
                 sx = (std::min)(sx, srcW - 1);
                 const uint8_t* sp = srcRow + sx * channels;
                 uint8_t* dp = dstRow + x * channels;
-                for (uint32_t c = 0; c < channels; ++c) dp[c] = sp[c];
+                for (uint32_t c = 0; c < channels; ++c)
+                    dp[c] = sp[c];
             }
             m_stats.usedNEON = true;
-        }
-        else
+        } else
 #endif
         {
             for (uint32_t x = 0; x < dstW; ++x) {
@@ -86,15 +103,18 @@ public:
                 sx = (std::min)(sx, srcW - 1);
                 const uint8_t* sp = srcRow + sx * channels;
                 uint8_t* dp = dstRow + x * channels;
-                for (uint32_t c = 0; c < channels; ++c) dp[c] = sp[c];
+                for (uint32_t c = 0; c < channels; ++c)
+                    dp[c] = sp[c];
             }
         }
         ++m_stats.rowsProcessed;
         m_stats.pixelsProcessed += dstW;
     }
 
-    bool ScaleBilinear(const uint8_t* src, uint8_t* dst) {
-        if (!m_configured || !src || !dst) return false;
+    bool ScaleBilinear(const uint8_t* src, uint8_t* dst)
+    {
+        if (!m_configured || !src || !dst)
+            return false;
 
         float xRatio = static_cast<float>(m_config.srcWidth) / static_cast<float>(m_config.dstWidth);
         float yRatio = static_cast<float>(m_config.srcHeight) / static_cast<float>(m_config.dstHeight);
@@ -136,7 +156,8 @@ public:
         return true;
     }
 
-    bool IsNEONAvailable() const {
+    bool IsNEONAvailable() const
+    {
 #ifdef _M_ARM64
         return true;
 #else
@@ -144,26 +165,34 @@ public:
 #endif
     }
 
-    const NEONScaleStats& GetStats() const { return m_stats; }
+    const NEONScaleStats& GetStats() const
+    {
+        return m_stats;
+    }
 
-    bool Validate() const {
-        if (!m_configured) return true;
-        if (m_config.srcWidth == 0 || m_config.dstWidth == 0) return false;
-        if (m_config.srcHeight == 0 || m_config.dstHeight == 0) return false;
-        if (m_config.channels == 0 || m_config.channels > 4) return false;
+    bool Validate() const
+    {
+        if (!m_configured)
+            return true;
+        if (m_config.srcWidth == 0 || m_config.dstWidth == 0)
+            return false;
+        if (m_config.srcHeight == 0 || m_config.dstHeight == 0)
+            return false;
+        if (m_config.channels == 0 || m_config.channels > 4)
+            return false;
         return true;
     }
 
-private:
+  private:
     NEONScaleKernel() = default;
     ~NEONScaleKernel() = default;
     NEONScaleKernel(const NEONScaleKernel&) = delete;
     NEONScaleKernel& operator=(const NEONScaleKernel&) = delete;
 
     NEONScaleConfig m_config{};
-    NEONScaleStats  m_stats{};
-    bool            m_configured = false;
+    NEONScaleStats m_stats{};
+    bool m_configured = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

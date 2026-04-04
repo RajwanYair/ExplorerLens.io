@@ -10,61 +10,71 @@
 
 #pragma once
 
-#include "../Core/IThumbnailDecoder.h"
 #include <cstdint>
+#include "../Core/IThumbnailDecoder.h"
 
 #ifdef HAS_MUPDF
-#pragma warning(push)
-#pragma warning(disable: 4100 4611)  // MuPDF headers: unreferenced parameter, setjmp non-portable
-extern "C" {
-#include <mupdf/fitz.h>
+    #pragma warning(push)
+    #pragma warning(disable : 4100 4611)  // MuPDF headers: unreferenced parameter, setjmp non-portable
+extern "C"
+{
+    #include <mupdf/fitz.h>
 }
-#pragma warning(pop)
+    #pragma warning(pop)
 #endif
 
 namespace ExplorerLens {
 namespace Engine {
 
-class PDFDecoder : public IThumbnailDecoder {
-public:
-  PDFDecoder();
-  ~PDFDecoder() override;
+class PDFDecoder : public IThumbnailDecoder
+{
+  public:
+    PDFDecoder();
+    ~PDFDecoder() override;
 
-  // IThumbnailDecoder interface
-  bool CanDecode(const wchar_t* filePath) override;
-  HRESULT Decode(const ThumbnailRequest& request,
-    ThumbnailResult& result) override;
-  DecoderInfo GetInfo() const override;
-  const wchar_t* GetName() const override { return L"PDFDecoder"; }
-  const wchar_t** GetSupportedExtensions() const override;
-  uint32_t GetExtensionCount() const override { return m_extensionCount; }
-  bool SupportsGPU() const override { return false; }
-  bool IsArchiveDecoder() const override { return false; }
+    // IThumbnailDecoder interface
+    bool CanDecode(const wchar_t* filePath) override;
+    HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
+    DecoderInfo GetInfo() const override;
+    const wchar_t* GetName() const override
+    {
+        return L"PDFDecoder";
+    }
+    const wchar_t** GetSupportedExtensions() const override;
+    uint32_t GetExtensionCount() const override
+    {
+        return m_extensionCount;
+    }
+    bool SupportsGPU() const override
+    {
+        return false;
+    }
+    bool IsArchiveDecoder() const override
+    {
+        return false;
+    }
 
-  /// Returns true if MuPDF native rendering is available
-  static bool HasNativeRenderer();
+    /// Returns true if MuPDF native rendering is available
+    static bool HasNativeRenderer();
 
-private:
+  private:
 #ifdef HAS_MUPDF
-  // MuPDF native rendering (preferred path)
-  HRESULT RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
-    uint32_t height, HBITMAP* phBitmap);
+    // MuPDF native rendering (preferred path)
+    HRESULT RenderWithMuPDF(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP* phBitmap);
 #endif
 
-  // Shell-based thumbnail extraction (fallback)
-  HRESULT ExtractThumbnailShell(const wchar_t* filePath, uint32_t width,
-    uint32_t height, HBITMAP* phBitmap);
+    // Shell-based thumbnail extraction (fallback)
+    HRESULT ExtractThumbnailShell(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP* phBitmap);
 
-  // Placeholder generation
-  HBITMAP CreatePDFPlaceholder(uint32_t width, uint32_t height,
-    const wchar_t* filePath);
+    // Placeholder generation
+    HBITMAP CreatePDFPlaceholder(uint32_t width, uint32_t height, const wchar_t* filePath);
 
-  // Verify PDF signature (%PDF)
-  bool IsPDFFormat(const wchar_t* path);
+    // Verify PDF signature (%PDF)
+    bool IsPDFFormat(const wchar_t* path);
 
-  static const wchar_t* m_extensions[];
-  static const uint32_t m_extensionCount;
+    static const wchar_t* m_extensions[];
+    static const uint32_t m_extensionCount;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

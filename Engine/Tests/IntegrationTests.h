@@ -6,16 +6,16 @@
 // round-trips.
 #pragma once
 
-#include "../Cache/SubMillisecondCacheEngine.h"
-#include "../Core/DecoderHealthCheck.h"
-#include "../Core/ExplorerLensEngine.h"
-#include "../Core/GPU_ThumbnailRenderer.h"
+#include <windows.h>
 #include <chrono>
 #include <cstdio>
 #include <filesystem>
 #include <string>
 #include <vector>
-#include <windows.h>
+#include "../Cache/SubMillisecondCacheEngine.h"
+#include "../Core/DecoderHealthCheck.h"
+#include "../Core/ExplorerLensEngine.h"
+#include "../Core/GPU_ThumbnailRenderer.h"
 
 namespace ExplorerLens {
 namespace Engine {
@@ -24,7 +24,8 @@ namespace Engine {
 // IntegrationTestResult
 // ============================================================================
 
-struct IntegrationTestResult {
+struct IntegrationTestResult
+{
     std::wstring testName;
     std::wstring filePath;
     bool passed = false;
@@ -38,15 +39,20 @@ struct IntegrationTestResult {
 // IntegrationTestSuite — End-to-end decode and render tests
 // ============================================================================
 
-class IntegrationTestSuite {
-public:
+class IntegrationTestSuite
+{
+  public:
     // Corpus directory (test-archives/ in project root)
-    void SetCorpusPath(const std::wstring& path) { m_corpusPath = path; }
+    void SetCorpusPath(const std::wstring& path)
+    {
+        m_corpusPath = path;
+    }
 
     // ====================================================================
     // Run all integration tests
     // ====================================================================
-    std::vector<IntegrationTestResult> RunAll() {
+    std::vector<IntegrationTestResult> RunAll()
+    {
         std::vector<IntegrationTestResult> results;
 
         // Category: Archive thumbnails
@@ -101,7 +107,8 @@ public:
     // ====================================================================
     // Print results summary
     // ====================================================================
-    static void PrintSummary(const std::vector<IntegrationTestResult>& results) {
+    static void PrintSummary(const std::vector<IntegrationTestResult>& results)
+    {
         int passed = 0, failed = 0, skipped = 0;
         for (const auto& r : results) {
             if (r.passed)
@@ -122,19 +129,18 @@ public:
         // Print failures
         for (const auto& r : results) {
             if (!r.passed && r.errorMessage != L"No corpus files found") {
-                wprintf(L" FAIL: %s — %s\n", r.testName.c_str(),
-                    r.errorMessage.c_str());
+                wprintf(L" FAIL: %s — %s\n", r.testName.c_str(), r.errorMessage.c_str());
             }
         }
     }
 
-private:
+  private:
     // ====================================================================
     // Test corpus files of a specific format
     // ====================================================================
-    void RunCorpusTest(std::vector<IntegrationTestResult>& results,
-        const std::wstring& formatName,
-        const std::wstring& pattern, int targetSize) {
+    void RunCorpusTest(std::vector<IntegrationTestResult>& results, const std::wstring& formatName,
+                       const std::wstring& pattern, int targetSize)
+    {
         namespace fs = std::filesystem;
 
         IntegrationTestResult result;
@@ -161,9 +167,7 @@ private:
                     }
                 }
             }
-        }
-        catch (...) {
-        }
+        } catch (...) {}
 
         if (files.empty()) {
             result.passed = false;
@@ -178,15 +182,13 @@ private:
         auto start = std::chrono::high_resolution_clock::now();
         // Actual decode would call ExplorerLensEngine here
         // For now, validate file exists and is readable
-        HANDLE hFile =
-            CreateFileW(result.filePath.c_str(), GENERIC_READ, FILE_SHARE_READ,
-                nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        HANDLE hFile = CreateFileW(result.filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                                   FILE_ATTRIBUTE_NORMAL, nullptr);
 
         if (hFile == INVALID_HANDLE_VALUE) {
             result.passed = false;
             result.errorMessage = L"Cannot open file";
-        }
-        else {
+        } else {
             LARGE_INTEGER fileSize;
             GetFileSizeEx(hFile, &fileSize);
             CloseHandle(hFile);
@@ -194,8 +196,7 @@ private:
             if (fileSize.QuadPart == 0) {
                 result.passed = false;
                 result.errorMessage = L"File is empty (0 bytes)";
-            }
-            else {
+            } else {
                 result.passed = true;
                 result.outputWidth = targetSize;
                 result.outputHeight = targetSize;
@@ -203,15 +204,15 @@ private:
         }
 
         auto end = std::chrono::high_resolution_clock::now();
-        result.durationMs =
-            std::chrono::duration<double, std::milli>(end - start).count();
+        result.durationMs = std::chrono::duration<double, std::milli>(end - start).count();
         results.push_back(result);
     }
 
     // ====================================================================
     // Test cache round-trip
     // ====================================================================
-    void RunCacheRoundTrip(std::vector<IntegrationTestResult>& results) {
+    void RunCacheRoundTrip(std::vector<IntegrationTestResult>& results)
+    {
         IntegrationTestResult result;
         result.testName = L"CacheRoundTrip";
 
@@ -220,7 +221,7 @@ private:
         // Test that cache can store and retrieve without data corruption
         SubMillisecondCacheEngine cache;
         const std::wstring testKey = L"__integration_test_key__";
-        const std::vector<uint8_t> testPayload = { 0xDE, 0xAD, 0xBE, 0xEF, 0x42 };
+        const std::vector<uint8_t> testPayload = {0xDE, 0xAD, 0xBE, 0xEF, 0x42};
 
         // Store, then retrieve
         cache.Put(testKey, testPayload.data(), testPayload.size());
@@ -233,15 +234,15 @@ private:
             result.errorMessage = L"Cache round-trip data mismatch";
 
         auto end = std::chrono::high_resolution_clock::now();
-        result.durationMs =
-            std::chrono::duration<double, std::milli>(end - start).count();
+        result.durationMs = std::chrono::duration<double, std::milli>(end - start).count();
         results.push_back(result);
     }
 
     // ====================================================================
     // Test decoder health check
     // ====================================================================
-    void RunDecoderHealthTest(std::vector<IntegrationTestResult>& results) {
+    void RunDecoderHealthTest(std::vector<IntegrationTestResult>& results)
+    {
         IntegrationTestResult result;
         result.testName = L"DecoderHealth";
 
@@ -260,15 +261,15 @@ private:
         }
 
         auto end = std::chrono::high_resolution_clock::now();
-        result.durationMs =
-            std::chrono::duration<double, std::milli>(end - start).count();
+        result.durationMs = std::chrono::duration<double, std::milli>(end - start).count();
         results.push_back(result);
     }
 
     // ====================================================================
     // Test performance gate (avg thumbnail < 17ms target)
     // ====================================================================
-    void RunPerformanceGate(std::vector<IntegrationTestResult>& results) {
+    void RunPerformanceGate(std::vector<IntegrationTestResult>& results)
+    {
         IntegrationTestResult result;
         result.testName = L"PerformanceGate";
 
@@ -282,11 +283,9 @@ private:
         }
 
         result.durationMs = maxMs;
-        result.passed =
-            (maxMs <= 50.0); // Integration test gate: 50ms (relaxed for I/O)
+        result.passed = (maxMs <= 50.0);  // Integration test gate: 50ms (relaxed for I/O)
         if (!result.passed) {
-            result.errorMessage = L"Max decode time " + std::to_wstring(maxMs) +
-                L"ms exceeds 50ms gate";
+            result.errorMessage = L"Max decode time " + std::to_wstring(maxMs) + L"ms exceeds 50ms gate";
         }
         results.push_back(result);
     }
@@ -294,5 +293,5 @@ private:
     std::wstring m_corpusPath;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

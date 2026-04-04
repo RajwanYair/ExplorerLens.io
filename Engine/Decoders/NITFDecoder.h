@@ -6,11 +6,11 @@
 //
 #pragma once
 
+#include <array>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <array>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -29,7 +29,8 @@ enum class NITFSecurityLevel : uint8_t {
     TopSecret
 };
 
-struct NITFImageSegment {
+struct NITFImageSegment
+{
     uint32_t segmentIndex = 0;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -43,7 +44,8 @@ struct NITFImageSegment {
     uint64_t dataLength = 0;
 };
 
-struct NITFSecurityMetadata {
+struct NITFSecurityMetadata
+{
     NITFSecurityLevel classification = NITFSecurityLevel::Unclassified;
     std::string classificationSystem;
     std::string codewords;
@@ -54,7 +56,8 @@ struct NITFSecurityMetadata {
     std::string declassDate;
 };
 
-struct NITFFileHeader {
+struct NITFFileHeader
+{
     std::string fileProfile;
     std::string fileVersion;
     uint32_t imageSegmentCount = 0;
@@ -66,8 +69,9 @@ struct NITFFileHeader {
     std::string originatorPhone;
 };
 
-class NITFDecoder {
-public:
+class NITFDecoder
+{
+  public:
     NITFDecoder() = default;
     ~NITFDecoder() = default;
 
@@ -76,7 +80,8 @@ public:
     NITFDecoder(NITFDecoder&&) noexcept = default;
     NITFDecoder& operator=(NITFDecoder&&) noexcept = default;
 
-    bool DecodeFromFile(const std::wstring& filePath, uint32_t targetWidth, uint32_t targetHeight) {
+    bool DecodeFromFile(const std::wstring& filePath, uint32_t targetWidth, uint32_t targetHeight)
+    {
         m_filePath = filePath;
         m_targetWidth = targetWidth;
         m_targetHeight = targetHeight;
@@ -84,36 +89,65 @@ public:
         return m_decoded;
     }
 
-    const std::vector<NITFImageSegment>& GetImageSegments() const { return m_segments; }
+    const std::vector<NITFImageSegment>& GetImageSegments() const
+    {
+        return m_segments;
+    }
 
-    bool DecodeSegment(uint32_t segmentIndex, std::vector<uint8_t>& pixelData) const {
-        if (segmentIndex >= m_segments.size()) return false;
+    bool DecodeSegment(uint32_t segmentIndex, std::vector<uint8_t>& pixelData) const
+    {
+        if (segmentIndex >= m_segments.size())
+            return false;
         const auto& seg = m_segments[segmentIndex];
         const size_t expectedSize = static_cast<size_t>(seg.width) * seg.height * (seg.bitsPerPixel / 8);
         pixelData.resize(expectedSize, 0);
         return DecompressSegment(seg, pixelData);
     }
 
-    const NITFSecurityMetadata& GetSecurityMetadata() const { return m_fileHeader.security; }
-    const NITFFileHeader& GetFileHeader() const { return m_fileHeader; }
+    const NITFSecurityMetadata& GetSecurityMetadata() const
+    {
+        return m_fileHeader.security;
+    }
+    const NITFFileHeader& GetFileHeader() const
+    {
+        return m_fileHeader;
+    }
 
-    bool ValidateCompliance() const {
-        if (!m_decoded) return false;
-        if (m_fileHeader.fileProfile.empty()) return false;
+    bool ValidateCompliance() const
+    {
+        if (!m_decoded)
+            return false;
+        if (m_fileHeader.fileProfile.empty())
+            return false;
         for (const auto& seg : m_segments) {
-            if (seg.width == 0 || seg.height == 0) return false;
-            if (seg.bitsPerPixel == 0 || seg.bitsPerPixel > 64) return false;
+            if (seg.width == 0 || seg.height == 0)
+                return false;
+            if (seg.bitsPerPixel == 0 || seg.bitsPerPixel > 64)
+                return false;
         }
         return true;
     }
 
-    uint32_t GetSegmentCount() const { return static_cast<uint32_t>(m_segments.size()); }
-    bool IsDecoded() const { return m_decoded; }
+    uint32_t GetSegmentCount() const
+    {
+        return static_cast<uint32_t>(m_segments.size());
+    }
+    bool IsDecoded() const
+    {
+        return m_decoded;
+    }
 
-private:
-    bool ParseFileHeader() { return true; }
-    bool ParseImageSegments() { return true; }
-    bool DecompressSegment(const NITFImageSegment& /*seg*/, std::vector<uint8_t>& /*out*/) const {
+  private:
+    bool ParseFileHeader()
+    {
+        return true;
+    }
+    bool ParseImageSegments()
+    {
+        return true;
+    }
+    bool DecompressSegment(const NITFImageSegment& /*seg*/, std::vector<uint8_t>& /*out*/) const
+    {
         return true;
     }
 
@@ -125,5 +159,5 @@ private:
     std::vector<NITFImageSegment> m_segments;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

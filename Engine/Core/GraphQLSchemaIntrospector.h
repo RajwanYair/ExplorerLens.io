@@ -6,38 +6,54 @@
 #pragma once
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct GQLTypeInfo {
-    std::string              name;
-    std::string              kind;  // OBJECT, SCALAR, ENUM, etc.
+struct GQLTypeInfo
+{
+    std::string name;
+    std::string kind;  // OBJECT, SCALAR, ENUM, etc.
     std::vector<std::string> fields;
 };
 
-struct GQLIntrospectResult {
-    bool                      success    = false;
-    std::vector<GQLTypeInfo>  types;
-    std::string               errorMsg;
+struct GQLIntrospectResult
+{
+    bool success = false;
+    std::vector<GQLTypeInfo> types;
+    std::string errorMsg;
 };
 
-class GraphQLSchemaIntrospector {
-public:
-    void RegisterType(const GQLTypeInfo& type) { m_types[type.name] = type; }
+class GraphQLSchemaIntrospector
+{
+  public:
+    void RegisterType(const GQLTypeInfo& type)
+    {
+        m_types[type.name] = type;
+    }
 
-    GQLIntrospectResult Introspect() const {
+    GQLIntrospectResult Introspect() const
+    {
         GQLIntrospectResult r;
-        for (const auto& [name, t] : m_types) r.types.push_back(t);
+        for (const auto& [name, t] : m_types)
+            r.types.push_back(t);
         r.success = true;
         return r;
     }
-    bool TypeExists(const std::string& name) const { return m_types.count(name) > 0; }
-    uint32_t TypeCount() const { return static_cast<uint32_t>(m_types.size()); }
+    bool TypeExists(const std::string& name) const
+    {
+        return m_types.count(name) > 0;
+    }
+    uint32_t TypeCount() const
+    {
+        return static_cast<uint32_t>(m_types.size());
+    }
 
-private:
+  private:
     std::unordered_map<std::string, GQLTypeInfo> m_types;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

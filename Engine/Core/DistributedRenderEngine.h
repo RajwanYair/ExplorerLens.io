@@ -6,16 +6,16 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <queue>
-#include <mutex>
-#include <functional>
-#include <chrono>
-#include <atomic>
-#include <unordered_map>
 #include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -28,7 +28,8 @@ enum class RenderNodeStatus : uint8_t {
     Draining
 };
 
-struct RenderNode {
+struct RenderNode
+{
     std::string nodeId;
     std::string address;
     uint16_t port = 0;
@@ -39,7 +40,8 @@ struct RenderNode {
     uint64_t completedJobs = 0;
 };
 
-struct RenderJob {
+struct RenderJob
+{
     uint64_t jobId = 0;
     std::string filePath;
     uint32_t targetWidth = 256;
@@ -49,7 +51,8 @@ struct RenderJob {
     std::string assignedNode;
 };
 
-struct RenderResult {
+struct RenderResult
+{
     uint64_t jobId = 0;
     std::vector<uint8_t> thumbnailData;
     uint32_t width = 0;
@@ -59,15 +62,18 @@ struct RenderResult {
     std::string errorMessage;
 };
 
-class DistributedRenderEngine {
-public:
-    static DistributedRenderEngine& Instance() {
+class DistributedRenderEngine
+{
+  public:
+    static DistributedRenderEngine& Instance()
+    {
         static DistributedRenderEngine instance;
         return instance;
     }
 
-    inline bool RegisterNode(const std::string& nodeId, const std::string& address,
-        uint16_t port, uint32_t maxConcurrency = 4) {
+    inline bool RegisterNode(const std::string& nodeId, const std::string& address, uint16_t port,
+                             uint32_t maxConcurrency = 4)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         RenderNode node;
         node.nodeId = nodeId;
@@ -79,10 +85,12 @@ public:
         return true;
     }
 
-    inline bool UnregisterNode(const std::string& nodeId) {
+    inline bool UnregisterNode(const std::string& nodeId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_nodes.find(nodeId);
-        if (it == m_nodes.end()) return false;
+        if (it == m_nodes.end())
+            return false;
         it->second.status = RenderNodeStatus::Draining;
         if (it->second.activeJobs == 0) {
             m_nodes.erase(it);
@@ -90,7 +98,8 @@ public:
         return true;
     }
 
-    inline uint64_t SubmitJob(const std::string& filePath, uint32_t width, uint32_t height, uint8_t priority = 5) {
+    inline uint64_t SubmitJob(const std::string& filePath, uint32_t width, uint32_t height, uint8_t priority = 5)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         RenderJob job;
         job.jobId = m_nextJobId++;
@@ -103,14 +112,17 @@ public:
         return job.jobId;
     }
 
-    inline std::string SelectBestNode() const {
+    inline std::string SelectBestNode() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::string bestNode;
         double bestScore = -1.0;
 
         for (const auto& [id, node] : m_nodes) {
-            if (node.status != RenderNodeStatus::Idle && node.status != RenderNodeStatus::Busy) continue;
-            if (node.activeJobs >= node.maxConcurrency) continue;
+            if (node.status != RenderNodeStatus::Idle && node.status != RenderNodeStatus::Busy)
+                continue;
+            if (node.activeJobs >= node.maxConcurrency)
+                continue;
 
             double capacityRatio = 1.0 - static_cast<double>(node.activeJobs) / node.maxConcurrency;
             double latencyFactor = 1.0 / (1.0 + node.avgLatencyMs / 100.0);
@@ -124,12 +136,14 @@ public:
         return bestNode;
     }
 
-    inline size_t GetPendingJobCount() const {
+    inline size_t GetPendingJobCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_pendingJobs.size();
     }
 
-    inline std::vector<RenderNode> GetNodeSnapshot() const {
+    inline std::vector<RenderNode> GetNodeSnapshot() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::vector<RenderNode> result;
         result.reserve(m_nodes.size());
@@ -139,7 +153,8 @@ public:
         return result;
     }
 
-    inline uint64_t GetTotalCompletedJobs() const {
+    inline uint64_t GetTotalCompletedJobs() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         uint64_t total = 0;
         for (const auto& [id, node] : m_nodes) {
@@ -148,11 +163,13 @@ public:
         return total;
     }
 
-private:
+  private:
     DistributedRenderEngine() = default;
 
-    struct JobComparator {
-        bool operator()(const RenderJob& a, const RenderJob& b) const {
+    struct JobComparator
+    {
+        bool operator()(const RenderJob& a, const RenderJob& b) const
+        {
             return a.priority < b.priority;
         }
     };
@@ -163,5 +180,5 @@ private:
     uint64_t m_nextJobId = 1;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -7,9 +7,9 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,7 +23,8 @@ enum class GPUCommandType : uint8_t {
     Barrier
 };
 
-struct GPUCommand {
+struct GPUCommand
+{
     uint64_t commandId = 0;
     GPUCommandType type = GPUCommandType::Decode;
     uint32_t resourceIndex = 0;
@@ -31,14 +32,16 @@ struct GPUCommand {
     uint32_t height = 0;
 };
 
-struct BatchSubmitResult {
+struct BatchSubmitResult
+{
     uint64_t batchId = 0;
     uint32_t commandCount = 0;
     bool submitted = false;
     double submitTimeUs = 0.0;
 };
 
-struct BatchSubmitterMetrics {
+struct BatchSubmitterMetrics
+{
     uint64_t totalBatches = 0;
     uint64_t totalCommands = 0;
     double avgBatchSize = 0.0;
@@ -46,18 +49,19 @@ struct BatchSubmitterMetrics {
     uint32_t maxBatchSize = 0;
 };
 
-class GPUBatchSubmitter {
-public:
-    explicit GPUBatchSubmitter(uint32_t maxBatchSize = 64)
-        : m_maxBatchSize(maxBatchSize) {
-    }
+class GPUBatchSubmitter
+{
+  public:
+    explicit GPUBatchSubmitter(uint32_t maxBatchSize = 64) : m_maxBatchSize(maxBatchSize) {}
 
-    void AddCommand(const GPUCommand& cmd) {
+    void AddCommand(const GPUCommand& cmd)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_pendingCommands.push_back(cmd);
     }
 
-    BatchSubmitResult FlushBatch() {
+    BatchSubmitResult FlushBatch()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         BatchSubmitResult result;
         result.batchId = ++m_nextBatchId;
@@ -71,21 +75,32 @@ public:
         return result;
     }
 
-    bool ShouldFlush() const {
+    bool ShouldFlush() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_pendingCommands.size() >= m_maxBatchSize;
     }
 
-    uint32_t GetPendingCount() const {
+    uint32_t GetPendingCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return static_cast<uint32_t>(m_pendingCommands.size());
     }
 
-    void SetMaxBatchSize(uint32_t size) { m_maxBatchSize = size; }
-    uint32_t GetMaxBatchSize() const { return m_maxBatchSize; }
-    BatchSubmitterMetrics GetMetrics() const { return m_metrics; }
+    void SetMaxBatchSize(uint32_t size)
+    {
+        m_maxBatchSize = size;
+    }
+    uint32_t GetMaxBatchSize() const
+    {
+        return m_maxBatchSize;
+    }
+    BatchSubmitterMetrics GetMetrics() const
+    {
+        return m_metrics;
+    }
 
-private:
+  private:
     mutable std::mutex m_mutex;
     std::vector<GPUCommand> m_pendingCommands;
     uint32_t m_maxBatchSize;
@@ -93,5 +108,5 @@ private:
     BatchSubmitterMetrics m_metrics;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

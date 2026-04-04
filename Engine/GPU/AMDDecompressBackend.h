@@ -10,49 +10,57 @@
 #include <string>
 
 #ifdef _WIN32
-#include <windows.h>
+    #include <windows.h>
 #endif
 
 namespace ExplorerLens {
 namespace Engine {
 
 enum class AMDDecompressStatus : uint8_t {
-    Success        = 0,
-    NotSupported   = 1,
-    DeviceError    = 2,
-    InvalidData    = 3,
+    Success = 0,
+    NotSupported = 1,
+    DeviceError = 2,
+    InvalidData = 3,
     BufferTooSmall = 4,
-    DriverTooOld   = 5
+    DriverTooOld = 5
 };
 
-struct AMDDecompressResult {
+struct AMDDecompressResult
+{
     AMDDecompressStatus status = AMDDecompressStatus::NotSupported;
-    uint64_t            outputBytes = 0;
-    double              elapsedMs = 0.0;
-    double              throughputMBps = 0.0;
+    uint64_t outputBytes = 0;
+    double elapsedMs = 0.0;
+    double throughputMBps = 0.0;
 };
 
-struct AMDDeviceInfo {
+struct AMDDeviceInfo
+{
     std::string deviceName;
-    uint32_t    rdnaGeneration = 0;
-    bool        gdeflateSupported = false;
-    uint32_t    driverMajor = 0;
-    uint32_t    driverMinor = 0;
+    uint32_t rdnaGeneration = 0;
+    bool gdeflateSupported = false;
+    uint32_t driverMajor = 0;
+    uint32_t driverMinor = 0;
 };
 
-class AMDDecompressBackend {
-public:
+class AMDDecompressBackend
+{
+  public:
     static constexpr uint32_t MIN_RDNA_GENERATION = 2;
     static constexpr const char* BACKEND_NAME = "AMD-RDNA-Decompress";
 
     AMDDecompressBackend() = default;
-    ~AMDDecompressBackend() { Shutdown(); }
+    ~AMDDecompressBackend()
+    {
+        Shutdown();
+    }
 
     AMDDecompressBackend(const AMDDecompressBackend&) = delete;
     AMDDecompressBackend& operator=(const AMDDecompressBackend&) = delete;
 
-    inline bool Initialize() {
-        if (m_initialized) return true;
+    inline bool Initialize()
+    {
+        if (m_initialized)
+            return true;
 #ifdef _WIN32
         m_supported = DetectRDNA2();
         m_initialized = true;
@@ -69,8 +77,8 @@ public:
 #endif
     }
 
-    inline AMDDecompressResult Decompress(const void* src, uint64_t srcSize,
-                                          void* dst, uint64_t dstCapacity) {
+    inline AMDDecompressResult Decompress(const void* src, uint64_t srcSize, void* dst, uint64_t dstCapacity)
+    {
         AMDDecompressResult result;
         if (!m_initialized || !m_supported) {
             result.status = AMDDecompressStatus::NotSupported;
@@ -86,19 +94,31 @@ public:
         return result;
     }
 
-    inline bool IsSupported() const { return m_supported; }
-    inline const std::string& GetDeviceName() const { return m_deviceInfo.deviceName; }
-    inline const AMDDeviceInfo& GetDeviceInfo() const { return m_deviceInfo; }
+    inline bool IsSupported() const
+    {
+        return m_supported;
+    }
+    inline const std::string& GetDeviceName() const
+    {
+        return m_deviceInfo.deviceName;
+    }
+    inline const AMDDeviceInfo& GetDeviceInfo() const
+    {
+        return m_deviceInfo;
+    }
 
-    inline void Shutdown() {
-        if (!m_initialized) return;
+    inline void Shutdown()
+    {
+        if (!m_initialized)
+            return;
         m_supported = false;
         m_initialized = false;
         m_deviceInfo = AMDDeviceInfo{};
     }
 
-private:
-    inline bool DetectRDNA2() {
+  private:
+    inline bool DetectRDNA2()
+    {
 #ifdef _WIN32
         HMODULE hAGS = LoadLibraryW(L"amd_ags_x64.dll");
         if (hAGS) {
@@ -109,10 +129,10 @@ private:
         return false;
     }
 
-    bool          m_initialized = false;
-    bool          m_supported = false;
+    bool m_initialized = false;
+    bool m_supported = false;
     AMDDeviceInfo m_deviceInfo{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

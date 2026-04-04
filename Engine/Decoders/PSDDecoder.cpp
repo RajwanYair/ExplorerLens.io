@@ -3,13 +3,13 @@
 // Specification: Adobe Photoshop File Formats Specification (2024)
 
 #include "PSDDecoder.h"
-#include "DecoderSecurityHardening.h"
-#include <fstream>
-#include <algorithm>
-#include <cstring>
 #include <windows.h>
 #include <objidl.h>
 #include <gdiplus.h>
+#include <algorithm>
+#include <cstring>
+#include <fstream>
+#include "DecoderSecurityHardening.h"
 
 #pragma comment(lib, "gdiplus.lib")
 
@@ -17,21 +17,20 @@ namespace ExplorerLens {
 namespace Engine {
 
 // Static members
-const wchar_t* PSDDecoder::m_extensions[] = {
- L".psd",
- L".psb"
-};
+const wchar_t* PSDDecoder::m_extensions[] = {L".psd", L".psb"};
 
-const uint32_t PSDDecoder::m_extensionCount =
-static_cast<uint32_t>(sizeof(m_extensions) / sizeof(m_extensions[0]));
+const uint32_t PSDDecoder::m_extensionCount = static_cast<uint32_t>(sizeof(m_extensions) / sizeof(m_extensions[0]));
 
 PSDDecoder::PSDDecoder() {}
 PSDDecoder::~PSDDecoder() {}
 
-bool PSDDecoder::CanDecode(const wchar_t* filePath) {
-    if (!filePath || filePath[0] == L'\0') return false;
+bool PSDDecoder::CanDecode(const wchar_t* filePath)
+{
+    if (!filePath || filePath[0] == L'\0')
+        return false;
     const wchar_t* ext = wcsrchr(filePath, L'.');
-    if (!ext) return false;
+    if (!ext)
+        return false;
     for (uint32_t i = 0; i < m_extensionCount; ++i) {
         if (_wcsicmp(ext, m_extensions[i]) == 0)
             return IsPSDFormat(filePath);
@@ -39,11 +38,13 @@ bool PSDDecoder::CanDecode(const wchar_t* filePath) {
     return false;
 }
 
-HRESULT PSDDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
+HRESULT PSDDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result)
+{
     result.hBitmap = nullptr;
     result.width = 0;
     result.height = 0;
-    if (!request.filePath) return E_INVALIDARG;
+    if (!request.filePath)
+        return E_INVALIDARG;
     HRESULT hr = DecodeFromFile(request.filePath, &result.hBitmap);
     if (SUCCEEDED(hr) && result.hBitmap) {
         BITMAP bm;
@@ -55,7 +56,8 @@ HRESULT PSDDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& res
     return hr;
 }
 
-DecoderInfo PSDDecoder::GetInfo() const {
+DecoderInfo PSDDecoder::GetInfo() const
+{
     DecoderInfo info;
     info.name = L"PSDDecoder";
     info.version = L"1.0.0";
@@ -66,37 +68,47 @@ DecoderInfo PSDDecoder::GetInfo() const {
     return info;
 }
 
-const wchar_t** PSDDecoder::GetSupportedExtensions() const {
+const wchar_t** PSDDecoder::GetSupportedExtensions() const
+{
     return m_extensions;
 }
 
-bool PSDDecoder::IsPSDFormat(const wchar_t* path) {
+bool PSDDecoder::IsPSDFormat(const wchar_t* path)
+{
     size_t fileSize = 0;
     auto data = ReadFileData(path, fileSize);
-    if (!data || fileSize < sizeof(PSDHeader)) return false;
+    if (!data || fileSize < sizeof(PSDHeader))
+        return false;
     return memcmp(data.get(), "8BPS", 4) == 0;
 }
 
-HRESULT PSDDecoder::DecodeFromFile(const wchar_t* path, HBITMAP* phBitmap) {
-    if (!Security::ValidatePtr(phBitmap)) return E_POINTER;
+HRESULT PSDDecoder::DecodeFromFile(const wchar_t* path, HBITMAP* phBitmap)
+{
+    if (!Security::ValidatePtr(phBitmap))
+        return E_POINTER;
     *phBitmap = nullptr;
 
     size_t fileSize = 0;
     auto fileData = ReadFileData(path, fileSize);
-    if (!fileData || fileSize < sizeof(PSDHeader)) return E_FAIL;
+    if (!fileData || fileSize < sizeof(PSDHeader))
+        return E_FAIL;
 
     // Security: File size limit
-    if (!Security::ValidateFileSize(fileSize, Security::MAX_IMAGE_FILE_SIZE)) return E_FAIL;
+    if (!Security::ValidateFileSize(fileSize, Security::MAX_IMAGE_FILE_SIZE))
+        return E_FAIL;
 
     const PSDHeader* header = reinterpret_cast<const PSDHeader*>(fileData.get());
-    if (memcmp(header->signature, "8BPS", 4) != 0) return E_FAIL;
+    if (memcmp(header->signature, "8BPS", 4) != 0)
+        return E_FAIL;
 
     uint16_t version = ReadBE16(reinterpret_cast<const uint8_t*>(&header->version));
-    if (version != 1 && version != 2) return E_FAIL;
+    if (version != 1 && version != 2)
+        return E_FAIL;
 
     // Try to extract the embedded JPEG thumbnail from Image Resources first
     HRESULT hr = ExtractThumbnailResource(fileData.get(), fileSize, phBitmap);
-    if (SUCCEEDED(hr) && *phBitmap) return S_OK;
+    if (SUCCEEDED(hr) && *phBitmap)
+        return S_OK;
 
     // Fall back to reading the composite (merged) image data
     PSDHeader parsedHeader;
@@ -110,28 +122,33 @@ HRESULT PSDDecoder::DecodeFromFile(const wchar_t* path, HBITMAP* phBitmap) {
     return ExtractCompositeImage(fileData.get(), fileSize, parsedHeader, phBitmap);
 }
 
-HRESULT PSDDecoder::ExtractThumbnailResource(const uint8_t* data, size_t size,
-    HBITMAP* phBitmap) {
+HRESULT PSDDecoder::ExtractThumbnailResource(const uint8_t* data, size_t size, HBITMAP* phBitmap)
+{
     // Skip header (26 bytes)
     size_t pos = 26;
-    if (pos >= size) return E_FAIL;
+    if (pos >= size)
+        return E_FAIL;
 
     // Skip Color Mode Data section
-    if (pos + 4 > size) return E_FAIL;
+    if (pos + 4 > size)
+        return E_FAIL;
     uint32_t colorModeLen = ReadBE32(data + pos);
     pos += 4 + colorModeLen;
 
     // Image Resources section
-    if (pos + 4 > size) return E_FAIL;
+    if (pos + 4 > size)
+        return E_FAIL;
     uint32_t resourcesLen = ReadBE32(data + pos);
     pos += 4;
     size_t resourcesEnd = pos + resourcesLen;
-    if (resourcesEnd > size) resourcesEnd = size;
+    if (resourcesEnd > size)
+        resourcesEnd = size;
 
     // Scan image resource blocks for thumbnail (ID 1036)
     while (pos + 12 <= resourcesEnd) {
         // Signature "8BIM"
-        if (memcmp(data + pos, "8BIM", 4) != 0) break;
+        if (memcmp(data + pos, "8BIM", 4) != 0)
+            break;
         pos += 4;
 
         uint16_t resourceId = ReadBE16(data + pos);
@@ -140,9 +157,11 @@ HRESULT PSDDecoder::ExtractThumbnailResource(const uint8_t* data, size_t size,
         // Pascal string (name) - padded to even
         uint8_t nameLen = data[pos];
         pos += 1 + nameLen;
-        if (pos % 2 != 0) pos++; // pad to even
+        if (pos % 2 != 0)
+            pos++;  // pad to even
 
-        if (pos + 4 > resourcesEnd) break;
+        if (pos + 4 > resourcesEnd)
+            break;
         uint32_t dataLen = ReadBE32(data + pos);
         pos += 4;
 
@@ -177,51 +196,62 @@ HRESULT PSDDecoder::ExtractThumbnailResource(const uint8_t* data, size_t size,
                                     Gdiplus::GdiplusShutdown(gdipToken);
                                 }
                                 pStream->Release();
-                            }
-                            else {
+                            } else {
                                 GlobalFree(hMem);
                             }
-                        }
-                        else {
+                        } else {
                             GlobalFree(hMem);
                         }
                     }
-                    if (*phBitmap) return S_OK;
+                    if (*phBitmap)
+                        return S_OK;
                 }
             }
         }
 
         pos += dataLen;
-        if (pos % 2 != 0) pos++; // pad to even
+        if (pos % 2 != 0)
+            pos++;  // pad to even
     }
 
     return E_FAIL;
 }
 
-HRESULT PSDDecoder::ExtractCompositeImage(const uint8_t* data, size_t size,
-    const PSDHeader& header, HBITMAP* phBitmap) {
+HRESULT PSDDecoder::ExtractCompositeImage(const uint8_t* data, size_t size, const PSDHeader& header, HBITMAP* phBitmap)
+{
     // Only support 8-bit RGB/Grayscale for composite extraction
-    if (header.depth != 8) return E_FAIL;
-    if (header.colorMode != 3 && header.colorMode != 1) return E_FAIL; // RGB or Grayscale
-    if (header.width == 0 || header.height == 0) return E_FAIL;
+    if (header.depth != 8)
+        return E_FAIL;
+    if (header.colorMode != 3 && header.colorMode != 1)
+        return E_FAIL;  // RGB or Grayscale
+    if (header.width == 0 || header.height == 0)
+        return E_FAIL;
 
     // Security: Dimension validation with overflow protection
-    if (!Security::ValidateDimensions(header.width, header.height)) return E_FAIL;
+    if (!Security::ValidateDimensions(header.width, header.height))
+        return E_FAIL;
 
     uint16_t channels = (std::min)(header.channels, (uint16_t)4);
 
     // Navigate to composite image data (at the very end of the file)
     // Skip: Header(26) + ColorMode + ImageResources + LayerMask + then ImageData
     size_t pos = 26;
-    if (pos + 4 > size) return E_FAIL;
-    uint32_t colorModeLen = ReadBE32(data + pos); pos += 4 + colorModeLen;
-    if (pos + 4 > size) return E_FAIL;
-    uint32_t resourcesLen = ReadBE32(data + pos); pos += 4 + resourcesLen;
-    if (pos + 4 > size) return E_FAIL;
-    uint32_t layerMaskLen = ReadBE32(data + pos); pos += 4 + layerMaskLen;
+    if (pos + 4 > size)
+        return E_FAIL;
+    uint32_t colorModeLen = ReadBE32(data + pos);
+    pos += 4 + colorModeLen;
+    if (pos + 4 > size)
+        return E_FAIL;
+    uint32_t resourcesLen = ReadBE32(data + pos);
+    pos += 4 + resourcesLen;
+    if (pos + 4 > size)
+        return E_FAIL;
+    uint32_t layerMaskLen = ReadBE32(data + pos);
+    pos += 4 + layerMaskLen;
 
     // Image data section: compression(2) + pixel data
-    if (pos + 2 > size) return E_FAIL;
+    if (pos + 2 > size)
+        return E_FAIL;
     uint16_t compression = ReadBE16(data + pos);
     pos += 2;
 
@@ -229,25 +259,25 @@ HRESULT PSDDecoder::ExtractCompositeImage(const uint8_t* data, size_t size,
         // Raw uncompressed
         uint32_t planeSize = header.width * header.height;
         uint32_t neededSize = planeSize * channels;
-        if (pos + neededSize > size) return E_FAIL;
+        if (pos + neededSize > size)
+            return E_FAIL;
 
         // Interleave planar to BGRA
         uint32_t pixelCount = header.width * header.height;
         auto pixels = std::make_unique<uint8_t[]>(pixelCount * 4);
 
         for (uint32_t i = 0; i < pixelCount; ++i) {
-            if (header.colorMode == 3) { // RGB
-                pixels[i * 4 + 2] = data[pos + i]; // R → B
-                pixels[i * 4 + 1] = data[pos + planeSize + i]; // G
-                pixels[i * 4 + 0] = data[pos + planeSize * 2 + i]; // B → R (BGR)
+            if (header.colorMode == 3) {                            // RGB
+                pixels[i * 4 + 2] = data[pos + i];                  // R → B
+                pixels[i * 4 + 1] = data[pos + planeSize + i];      // G
+                pixels[i * 4 + 0] = data[pos + planeSize * 2 + i];  // B → R (BGR)
                 // Wait, HBITMAP is BGRA: B=0,G=1,R=2,A=3
                 // PSD planes: R,G,B,A
-                pixels[i * 4 + 0] = data[pos + planeSize * 2 + i]; // B
-                pixels[i * 4 + 1] = data[pos + planeSize + i]; // G
-                pixels[i * 4 + 2] = data[pos + i]; // R
+                pixels[i * 4 + 0] = data[pos + planeSize * 2 + i];  // B
+                pixels[i * 4 + 1] = data[pos + planeSize + i];      // G
+                pixels[i * 4 + 2] = data[pos + i];                  // R
                 pixels[i * 4 + 3] = (channels >= 4) ? data[pos + planeSize * 3 + i] : 255;
-            }
-            else { // Grayscale
+            } else {  // Grayscale
                 uint8_t gray = data[pos + i];
                 pixels[i * 4 + 0] = gray;
                 pixels[i * 4 + 1] = gray;
@@ -264,9 +294,10 @@ HRESULT PSDDecoder::ExtractCompositeImage(const uint8_t* data, size_t size,
         // RLE (PackBits) compression
         // After the compression type, there are (channels * height) row byte counts
         uint32_t rowCountEntries = channels * header.height;
-        size_t countSize = (header.version == 2) ? 4 : 2; // PSB uses 4-byte counts
+        size_t countSize = (header.version == 2) ? 4 : 2;  // PSB uses 4-byte counts
         size_t rowCountsSize = rowCountEntries * countSize;
-        if (pos + rowCountsSize > size) return E_FAIL;
+        if (pos + rowCountsSize > size)
+            return E_FAIL;
 
         // Read row byte counts (skip them, we'll decompress sequentially)
         pos += rowCountsSize;
@@ -282,15 +313,16 @@ HRESULT PSDDecoder::ExtractCompositeImage(const uint8_t* data, size_t size,
             if (n >= 0) {
                 // Copy next (n+1) bytes literally
                 uint32_t count = static_cast<uint32_t>(n) + 1;
-                if (pos + count > size || outPos + count > totalOut) break;
+                if (pos + count > size || outPos + count > totalOut)
+                    break;
                 memcpy(decompressed.get() + outPos, data + pos, count);
                 pos += count;
                 outPos += count;
-            }
-            else if (n != -128) {
+            } else if (n != -128) {
                 // Repeat next byte (1 - n) times
                 uint32_t count = static_cast<uint32_t>(1 - n);
-                if (pos >= size || outPos + count > totalOut) break;
+                if (pos >= size || outPos + count > totalOut)
+                    break;
                 uint8_t val = data[pos++];
                 memset(decompressed.get() + outPos, val, count);
                 outPos += count;
@@ -303,13 +335,12 @@ HRESULT PSDDecoder::ExtractCompositeImage(const uint8_t* data, size_t size,
         auto pixels = std::make_unique<uint8_t[]>(pixelCount * 4);
 
         for (uint32_t i = 0; i < pixelCount; ++i) {
-            if (header.colorMode == 3) { // RGB
-                pixels[i * 4 + 0] = decompressed[planeSize * 2 + i]; // B
-                pixels[i * 4 + 1] = decompressed[planeSize + i]; // G
-                pixels[i * 4 + 2] = decompressed[i]; // R
+            if (header.colorMode == 3) {                              // RGB
+                pixels[i * 4 + 0] = decompressed[planeSize * 2 + i];  // B
+                pixels[i * 4 + 1] = decompressed[planeSize + i];      // G
+                pixels[i * 4 + 2] = decompressed[i];                  // R
                 pixels[i * 4 + 3] = (channels >= 4) ? decompressed[planeSize * 3 + i] : 255;
-            }
-            else { // Grayscale
+            } else {  // Grayscale
                 uint8_t gray = decompressed[i];
                 pixels[i * 4 + 0] = gray;
                 pixels[i * 4 + 1] = gray;
@@ -322,16 +353,16 @@ HRESULT PSDDecoder::ExtractCompositeImage(const uint8_t* data, size_t size,
         return (*phBitmap) ? S_OK : E_FAIL;
     }
 
-    return E_FAIL; // Unsupported compression (ZIP/2,3)
+    return E_FAIL;  // Unsupported compression (ZIP/2,3)
 }
 
-HBITMAP PSDDecoder::CreateBitmapFromRGB(const uint8_t* pixels, uint32_t width,
-    uint32_t height, uint16_t channels) {
-    (void)channels; // Always outputs 32bpp BGRA
+HBITMAP PSDDecoder::CreateBitmapFromRGB(const uint8_t* pixels, uint32_t width, uint32_t height, uint16_t channels)
+{
+    (void)channels;  // Always outputs 32bpp BGRA
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -(LONG)height; // top-down
+    bmi.bmiHeader.biHeight = -(LONG)height;  // top-down
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     bmi.bmiHeader.biCompression = BI_RGB;
@@ -347,19 +378,22 @@ HBITMAP PSDDecoder::CreateBitmapFromRGB(const uint8_t* pixels, uint32_t width,
     return hBmp;
 }
 
-uint16_t PSDDecoder::ReadBE16(const uint8_t* data) {
+uint16_t PSDDecoder::ReadBE16(const uint8_t* data)
+{
     return (uint16_t)((data[0] << 8) | data[1]);
 }
 
-uint32_t PSDDecoder::ReadBE32(const uint8_t* data) {
-    return ((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) |
-        ((uint32_t)data[2] << 8) | data[3];
+uint32_t PSDDecoder::ReadBE32(const uint8_t* data)
+{
+    return ((uint32_t)data[0] << 24) | ((uint32_t)data[1] << 16) | ((uint32_t)data[2] << 8) | data[3];
 }
 
-std::unique_ptr<uint8_t[]> PSDDecoder::ReadFileData(const wchar_t* path, size_t& fileSize) {
+std::unique_ptr<uint8_t[]> PSDDecoder::ReadFileData(const wchar_t* path, size_t& fileSize)
+{
     fileSize = 0;
     std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file.is_open()) return nullptr;
+    if (!file.is_open())
+        return nullptr;
     fileSize = static_cast<size_t>(file.tellg());
     // For thumbnails, cap at 50 MB to avoid huge PSD files
     size_t readSize = (std::min)(fileSize, (size_t)(50 * 1024 * 1024));
@@ -370,5 +404,5 @@ std::unique_ptr<uint8_t[]> PSDDecoder::ReadFileData(const wchar_t* path, size_t&
     return data;
 }
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

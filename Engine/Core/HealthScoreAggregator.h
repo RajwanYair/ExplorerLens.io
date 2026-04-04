@@ -8,57 +8,74 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include <cstdint>
 #include <algorithm>
+#include <cstdint>
 #include <string>
 #include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-enum class AggregateHealthLevel : uint8_t { Healthy = 0, Degraded = 1, Warning = 2, Critical = 3 };
+enum class AggregateHealthLevel : uint8_t {
+    Healthy = 0,
+    Degraded = 1,
+    Warning = 2,
+    Critical = 3
+};
 
-struct HealthSignal {
+struct HealthSignal
+{
     std::string name;
-    double      value = 0.0;     // Raw value
-    double      weight = 1.0;    // 0.0-1.0
-    double      score = 100.0;   // Normalized 0-100
+    double value = 0.0;    // Raw value
+    double weight = 1.0;   // 0.0-1.0
+    double score = 100.0;  // Normalized 0-100
     AggregateHealthLevel level = AggregateHealthLevel::Healthy;
 };
 
-struct HealthThresholds {
+struct HealthThresholds
+{
     double healthyMin = 80.0;
     double degradedMin = 60.0;
     double warningMin = 30.0;
     // Below warningMin = Critical
 };
 
-struct HealthAggregateStats {
-    double       overallScore = 100.0;
-    AggregateHealthLevel  overallLevel = AggregateHealthLevel::Healthy;
-    uint32_t     signalCount = 0;
-    uint32_t     degradedCount = 0;
-    uint32_t     criticalCount = 0;
-    uint64_t     assessmentCount = 0;
-    double       trendDelta = 0.0;  // Score change over last window
+struct HealthAggregateStats
+{
+    double overallScore = 100.0;
+    AggregateHealthLevel overallLevel = AggregateHealthLevel::Healthy;
+    uint32_t signalCount = 0;
+    uint32_t degradedCount = 0;
+    uint32_t criticalCount = 0;
+    uint64_t assessmentCount = 0;
+    double trendDelta = 0.0;  // Score change over last window
 };
 
-class HealthScoreAggregator {
-public:
-    HealthScoreAggregator() {
+class HealthScoreAggregator
+{
+  public:
+    HealthScoreAggregator()
+    {
         InitializeSRWLock(&m_lock);
     }
     ~HealthScoreAggregator() = default;
 
-    static const wchar_t* GetName() { return L"HealthScoreAggregator"; }
+    static const wchar_t* GetName()
+    {
+        return L"HealthScoreAggregator";
+    }
 
-    void SetThresholds(const HealthThresholds& t) { m_thresholds = t; }
+    void SetThresholds(const HealthThresholds& t)
+    {
+        m_thresholds = t;
+    }
 
     /// Add or update a health signal.
-    void UpdateSignal(const std::string& name, double rawValue, double score, double weight = 1.0) {
+    void UpdateSignal(const std::string& name, double rawValue, double score, double weight = 1.0)
+    {
         AcquireSRWLockExclusive(&m_lock);
         score = std::clamp(score, 0.0, 100.0);
         weight = std::clamp(weight, 0.0, 1.0);
@@ -72,14 +89,20 @@ public:
 
         bool found = false;
         for (auto& s : m_signals) {
-            if (s.name == name) { s = sig; found = true; break; }
+            if (s.name == name) {
+                s = sig;
+                found = true;
+                break;
+            }
         }
-        if (!found) m_signals.push_back(sig);
+        if (!found)
+            m_signals.push_back(sig);
         ReleaseSRWLockExclusive(&m_lock);
     }
 
     /// Compute overall health score.
-    double Assess() {
+    double Assess()
+    {
         AcquireSRWLockExclusive(&m_lock);
         if (m_signals.empty()) {
             ReleaseSRWLockExclusive(&m_lock);
@@ -104,24 +127,35 @@ public:
         return m_lastScore;
     }
 
-    AggregateHealthLevel ClassifyScore(double score) const {
-        if (score >= m_thresholds.healthyMin) return AggregateHealthLevel::Healthy;
-        if (score >= m_thresholds.degradedMin) return AggregateHealthLevel::Degraded;
-        if (score >= m_thresholds.warningMin)  return AggregateHealthLevel::Warning;
+    AggregateHealthLevel ClassifyScore(double score) const
+    {
+        if (score >= m_thresholds.healthyMin)
+            return AggregateHealthLevel::Healthy;
+        if (score >= m_thresholds.degradedMin)
+            return AggregateHealthLevel::Degraded;
+        if (score >= m_thresholds.warningMin)
+            return AggregateHealthLevel::Warning;
         return AggregateHealthLevel::Critical;
     }
 
-    static const char* LevelName(AggregateHealthLevel level) {
+    static const char* LevelName(AggregateHealthLevel level)
+    {
         switch (level) {
-        case AggregateHealthLevel::Healthy:  return "Healthy";
-        case AggregateHealthLevel::Degraded: return "Degraded";
-        case AggregateHealthLevel::Warning:  return "Warning";
-        case AggregateHealthLevel::Critical: return "Critical";
-        default: return "Unknown";
+            case AggregateHealthLevel::Healthy:
+                return "Healthy";
+            case AggregateHealthLevel::Degraded:
+                return "Degraded";
+            case AggregateHealthLevel::Warning:
+                return "Warning";
+            case AggregateHealthLevel::Critical:
+                return "Critical";
+            default:
+                return "Unknown";
         }
     }
 
-    HealthAggregateStats GetStats() const {
+    HealthAggregateStats GetStats() const
+    {
         HealthAggregateStats stats;
         stats.overallScore = m_lastScore;
         stats.overallLevel = ClassifyScore(m_lastScore);
@@ -129,13 +163,15 @@ public:
         stats.assessmentCount = m_assessmentCount;
         stats.trendDelta = m_trendDelta;
         for (const auto& s : m_signals) {
-            if (s.level == AggregateHealthLevel::Degraded || s.level == AggregateHealthLevel::Warning) stats.degradedCount++;
-            if (s.level == AggregateHealthLevel::Critical) stats.criticalCount++;
+            if (s.level == AggregateHealthLevel::Degraded || s.level == AggregateHealthLevel::Warning)
+                stats.degradedCount++;
+            if (s.level == AggregateHealthLevel::Critical)
+                stats.criticalCount++;
         }
         return stats;
     }
 
-private:
+  private:
     SRWLOCK m_lock{};
     std::vector<HealthSignal> m_signals;
     HealthThresholds m_thresholds;
@@ -144,5 +180,5 @@ private:
     uint64_t m_assessmentCount = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -6,12 +6,12 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -23,7 +23,8 @@ enum class EnvironmentMapFormat : uint8_t {
     Unknown
 };
 
-struct EnvironmentMapInfo {
+struct EnvironmentMapInfo
+{
     uint32_t width = 0;
     uint32_t height = 0;
     EnvironmentMapFormat format = EnvironmentMapFormat::Unknown;
@@ -32,41 +33,52 @@ struct EnvironmentMapInfo {
     uint32_t channels = 3;
 };
 
-class HDRIEnvironmentDecoder {
-public:
+class HDRIEnvironmentDecoder
+{
+  public:
     static constexpr double PI = 3.14159265358979323846;
 
-    static HDRIEnvironmentDecoder& Instance() {
+    static HDRIEnvironmentDecoder& Instance()
+    {
         static HDRIEnvironmentDecoder instance;
         return instance;
     }
 
-    inline bool IsHDRFile(const uint8_t* data, size_t size) const {
-        if (!data || size < 10) return false;
+    inline bool IsHDRFile(const uint8_t* data, size_t size) const
+    {
+        if (!data || size < 10)
+            return false;
         return (data[0] == '#' && data[1] == '?');
     }
 
     inline EnvironmentMapInfo AnalyzeEnvironment(const float* hdrData, uint32_t width, uint32_t height,
-        uint32_t channels) const {
+                                                 uint32_t channels) const
+    {
         EnvironmentMapInfo info;
         info.width = width;
         info.height = height;
         info.channels = channels;
 
-        if (!hdrData || width == 0 || height == 0) return info;
+        if (!hdrData || width == 0 || height == 0)
+            return info;
 
-        if (width == height * 2) info.format = EnvironmentMapFormat::Equirectangular;
-        else if (width == height) info.format = EnvironmentMapFormat::AngularMap;
+        if (width == height * 2)
+            info.format = EnvironmentMapFormat::Equirectangular;
+        else if (width == height)
+            info.format = EnvironmentMapFormat::AngularMap;
 
         float totalLum = 0.0f;
         float maxLum = 0.0f;
         size_t pixelCount = static_cast<size_t>(width) * height;
         for (size_t i = 0; i < pixelCount; ++i) {
             float lum = 0.2126f * hdrData[i * channels];
-            if (channels > 1) lum += 0.7152f * hdrData[i * channels + 1];
-            if (channels > 2) lum += 0.0722f * hdrData[i * channels + 2];
+            if (channels > 1)
+                lum += 0.7152f * hdrData[i * channels + 1];
+            if (channels > 2)
+                lum += 0.0722f * hdrData[i * channels + 2];
             totalLum += lum;
-            if (lum > maxLum) maxLum = lum;
+            if (lum > maxLum)
+                maxLum = lum;
         }
         info.averageLuminance = totalLum / static_cast<float>(pixelCount);
         info.peakLuminance = maxLum;
@@ -74,10 +86,12 @@ public:
     }
 
     inline std::vector<uint8_t> GenerateSpherePreview(const float* hdrData, uint32_t envWidth, uint32_t envHeight,
-        uint32_t channels, uint32_t thumbWidth, uint32_t thumbHeight,
-        float rotationDeg = 0.0f) const {
+                                                      uint32_t channels, uint32_t thumbWidth, uint32_t thumbHeight,
+                                                      float rotationDeg = 0.0f) const
+    {
         std::vector<uint8_t> output(static_cast<size_t>(thumbWidth) * thumbHeight * 3, 30);
-        if (!hdrData || envWidth == 0 || envHeight == 0 || thumbWidth == 0 || thumbHeight == 0) return output;
+        if (!hdrData || envWidth == 0 || envHeight == 0 || thumbWidth == 0 || thumbHeight == 0)
+            return output;
 
         float cx = thumbWidth / 2.0f, cy = thumbHeight / 2.0f;
         float radius = (std::min)(thumbWidth, thumbHeight) * 0.45f;
@@ -120,8 +134,7 @@ public:
                     output[outIdx + 0] = GammaEncode(r);
                     output[outIdx + 1] = GammaEncode(g);
                     output[outIdx + 2] = GammaEncode(b);
-                }
-                else {
+                } else {
                     float edgeDist = std::sqrt(distSq) - 1.0f;
                     if (edgeDist < 0.02f) {
                         output[outIdx + 0] = 80;
@@ -134,41 +147,51 @@ public:
         return output;
     }
 
-    inline std::string FormatToString(EnvironmentMapFormat fmt) const {
+    inline std::string FormatToString(EnvironmentMapFormat fmt) const
+    {
         switch (fmt) {
-        case EnvironmentMapFormat::Equirectangular: return "Equirectangular";
-        case EnvironmentMapFormat::CubeMap:         return "Cube Map";
-        case EnvironmentMapFormat::AngularMap:      return "Angular Map";
-        default:                                    return "Unknown";
+            case EnvironmentMapFormat::Equirectangular:
+                return "Equirectangular";
+            case EnvironmentMapFormat::CubeMap:
+                return "Cube Map";
+            case EnvironmentMapFormat::AngularMap:
+                return "Angular Map";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     HDRIEnvironmentDecoder() = default;
 
-    inline float ComputeAutoExposure(const float* data, size_t pixelCount, uint32_t channels) const {
+    inline float ComputeAutoExposure(const float* data, size_t pixelCount, uint32_t channels) const
+    {
         double logSum = 0.0;
         size_t count = 0;
         size_t step = (std::max)(static_cast<size_t>(1), pixelCount / 10000);
         for (size_t i = 0; i < pixelCount; i += step) {
             float lum = 0.2126f * data[i * channels];
-            if (channels > 1) lum += 0.7152f * data[i * channels + 1];
-            if (channels > 2) lum += 0.0722f * data[i * channels + 2];
+            if (channels > 1)
+                lum += 0.7152f * data[i * channels + 1];
+            if (channels > 2)
+                lum += 0.0722f * data[i * channels + 2];
             if (lum > 0.001f) {
                 logSum += std::log(static_cast<double>(lum));
                 ++count;
             }
         }
-        if (count == 0) return 1.0f;
+        if (count == 0)
+            return 1.0f;
         float logAvg = static_cast<float>(std::exp(logSum / count));
         return 0.18f / (logAvg + 0.001f);
     }
 
-    inline uint8_t GammaEncode(float linear) const {
+    inline uint8_t GammaEncode(float linear) const
+    {
         float v = (std::max)(0.0f, (std::min)(1.0f, linear));
         return static_cast<uint8_t>(std::pow(v, 1.0f / 2.2f) * 255.0f + 0.5f);
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

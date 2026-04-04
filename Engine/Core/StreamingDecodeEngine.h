@@ -8,18 +8,24 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <functional>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
 
 enum class StreamState : uint8_t {
-    NotStarted, HeaderParsed, PartialDecode,
-    FullDecode, Error, Cancelled, COUNT
+    NotStarted,
+    HeaderParsed,
+    PartialDecode,
+    FullDecode,
+    Error,
+    Cancelled,
+    COUNT
 };
 
-struct StreamProgress {
+struct StreamProgress
+{
     StreamState state = StreamState::NotStarted;
     float percent = 0.0f;
     uint64_t bytesRead = 0;
@@ -31,64 +37,98 @@ struct StreamProgress {
 
 using StreamProgressCallback = std::function<void(const StreamProgress&)>;
 
-class StreamDecodeEngine {
-public:
-    void SetCallback(StreamProgressCallback cb) { m_callback = std::move(cb); }
+class StreamDecodeEngine
+{
+  public:
+    void SetCallback(StreamProgressCallback cb)
+    {
+        m_callback = std::move(cb);
+    }
 
-    void Begin(uint64_t totalBytes) {
+    void Begin(uint64_t totalBytes)
+    {
         m_progress = {};
         m_progress.totalBytes = totalBytes;
         m_progress.state = StreamState::HeaderParsed;
         Notify();
     }
 
-    void FeedData(const uint8_t* data, uint32_t size) {
-        if (!data || size == 0) return;
+    void FeedData(const uint8_t* data, uint32_t size)
+    {
+        if (!data || size == 0)
+            return;
         m_progress.bytesRead += size;
         if (m_progress.totalBytes > 0) {
-            m_progress.percent = static_cast<float>(m_progress.bytesRead) /
-                static_cast<float>(m_progress.totalBytes) * 100.0f;
+            m_progress.percent =
+                static_cast<float>(m_progress.bytesRead) / static_cast<float>(m_progress.totalBytes) * 100.0f;
         }
         m_progress.state = StreamState::PartialDecode;
-        m_progress.rowsDecoded += size / 1024; // Approximate
-        if (m_progress.percent >= 10.0f) m_progress.previewReady = true;
+        m_progress.rowsDecoded += size / 1024;  // Approximate
+        if (m_progress.percent >= 10.0f)
+            m_progress.previewReady = true;
         Notify();
     }
 
-    void Complete() {
+    void Complete()
+    {
         m_progress.state = StreamState::FullDecode;
         m_progress.percent = 100.0f;
         m_progress.previewReady = true;
         Notify();
     }
 
-    void Cancel() {
+    void Cancel()
+    {
         m_progress.state = StreamState::Cancelled;
         Notify();
     }
 
-    const StreamProgress& Progress() const { return m_progress; }
-    bool IsPreviewReady() const { return m_progress.previewReady; }
-    bool IsComplete() const { return m_progress.state == StreamState::FullDecode; }
+    const StreamProgress& Progress() const
+    {
+        return m_progress;
+    }
+    bool IsPreviewReady() const
+    {
+        return m_progress.previewReady;
+    }
+    bool IsComplete() const
+    {
+        return m_progress.state == StreamState::FullDecode;
+    }
 
-    static const wchar_t* StateName(StreamState s) {
+    static const wchar_t* StateName(StreamState s)
+    {
         switch (s) {
-        case StreamState::NotStarted:    return L"NotStarted";
-        case StreamState::HeaderParsed:  return L"HeaderParsed";
-        case StreamState::PartialDecode: return L"PartialDecode";
-        case StreamState::FullDecode:    return L"FullDecode";
-        case StreamState::Error:         return L"Error";
-        case StreamState::Cancelled:     return L"Cancelled";
-        default: return L"Unknown";
+            case StreamState::NotStarted:
+                return L"NotStarted";
+            case StreamState::HeaderParsed:
+                return L"HeaderParsed";
+            case StreamState::PartialDecode:
+                return L"PartialDecode";
+            case StreamState::FullDecode:
+                return L"FullDecode";
+            case StreamState::Error:
+                return L"Error";
+            case StreamState::Cancelled:
+                return L"Cancelled";
+            default:
+                return L"Unknown";
         }
     }
-    static size_t StateCount() { return static_cast<size_t>(StreamState::COUNT); }
+    static size_t StateCount()
+    {
+        return static_cast<size_t>(StreamState::COUNT);
+    }
 
-private:
-    void Notify() { if (m_callback) m_callback(m_progress); }
+  private:
+    void Notify()
+    {
+        if (m_callback)
+            m_callback(m_progress);
+    }
     StreamProgress m_progress;
     StreamProgressCallback m_callback;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

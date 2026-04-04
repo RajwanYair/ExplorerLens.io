@@ -8,7 +8,7 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
 #include <cstdint>
@@ -19,10 +19,18 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class ClipboardContentType : uint8_t {
-    None, Bitmap, DIB, FileList, FilePaths, PNG, Text, Unknown
+    None,
+    Bitmap,
+    DIB,
+    FileList,
+    FilePaths,
+    PNG,
+    Text,
+    Unknown
 };
 
-struct ClipboardSnapshot {
+struct ClipboardSnapshot
+{
     ClipboardContentType type = ClipboardContentType::None;
     uint32_t dataSize = 0;
     uint32_t fileCount = 0;
@@ -32,40 +40,52 @@ struct ClipboardSnapshot {
     uint64_t sequenceNumber = 0;
 };
 
-struct ClipboardStats {
+struct ClipboardStats
+{
     uint32_t snapshotsTaken = 0;
     uint32_t bitmapClips = 0;
     uint32_t fileClips = 0;
     uint64_t totalDataBytes = 0;
 };
 
-class ClipboardMonitorIntegration {
-public:
+class ClipboardMonitorIntegration
+{
+  public:
     ClipboardMonitorIntegration() = default;
     ~ClipboardMonitorIntegration() = default;
 
-    static const wchar_t* GetName() { return L"ClipboardMonitorIntegration"; }
+    static const wchar_t* GetName()
+    {
+        return L"ClipboardMonitorIntegration";
+    }
 
     /// Get current clipboard sequence number (changes on each clipboard update).
-    uint64_t GetSequenceNumber() const {
+    uint64_t GetSequenceNumber() const
+    {
         return GetClipboardSequenceNumber();
     }
 
     /// Detect what type of content is on the clipboard.
-    ClipboardContentType DetectContent() const {
-        if (IsClipboardFormatAvailable(CF_HDROP)) return ClipboardContentType::FileList;
-        if (IsClipboardFormatAvailable(CF_BITMAP)) return ClipboardContentType::Bitmap;
-        if (IsClipboardFormatAvailable(CF_DIB)) return ClipboardContentType::DIB;
+    ClipboardContentType DetectContent() const
+    {
+        if (IsClipboardFormatAvailable(CF_HDROP))
+            return ClipboardContentType::FileList;
+        if (IsClipboardFormatAvailable(CF_BITMAP))
+            return ClipboardContentType::Bitmap;
+        if (IsClipboardFormatAvailable(CF_DIB))
+            return ClipboardContentType::DIB;
         // Check for PNG format
         UINT pngFormat = RegisterClipboardFormatW(L"PNG");
         if (pngFormat && IsClipboardFormatAvailable(pngFormat))
             return ClipboardContentType::PNG;
-        if (IsClipboardFormatAvailable(CF_UNICODETEXT)) return ClipboardContentType::Text;
+        if (IsClipboardFormatAvailable(CF_UNICODETEXT))
+            return ClipboardContentType::Text;
         return ClipboardContentType::None;
     }
 
     /// Take a snapshot of clipboard state (without reading data).
-    ClipboardSnapshot TakeSnapshot() const {
+    ClipboardSnapshot TakeSnapshot() const
+    {
         ClipboardSnapshot snap;
         snap.type = DetectContent();
         snap.sequenceNumber = GetSequenceNumber();
@@ -88,9 +108,8 @@ public:
         }
 
         m_stats.snapshotsTaken++;
-        if (snap.type == ClipboardContentType::Bitmap ||
-            snap.type == ClipboardContentType::DIB ||
-            snap.type == ClipboardContentType::PNG)
+        if (snap.type == ClipboardContentType::Bitmap || snap.type == ClipboardContentType::DIB
+            || snap.type == ClipboardContentType::PNG)
             m_stats.bitmapClips++;
         if (snap.type == ClipboardContentType::FileList)
             m_stats.fileClips++;
@@ -98,11 +117,14 @@ public:
         return snap;
     }
 
-    ClipboardStats GetStats() const { return m_stats; }
+    ClipboardStats GetStats() const
+    {
+        return m_stats;
+    }
 
-private:
+  private:
     mutable ClipboardStats m_stats{};
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

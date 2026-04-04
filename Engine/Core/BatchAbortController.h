@@ -5,40 +5,62 @@
 // Workers check the abort token between decode stages for fast teardown.
 //
 #pragma once
-#include <string>
-#include <cstdint>
 #include <atomic>
+#include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct BatchAbortControllerConfig {
+struct BatchAbortControllerConfig
+{
     bool enabled = true;
     uint32_t gracePeriodMs = 500;
     std::string label = "BatchAbortController";
 };
 
-class BatchAbortController {
-public:
-    bool Initialize() {
-        if (m_initialized) return true;
+class BatchAbortController
+{
+  public:
+    bool Initialize()
+    {
+        if (m_initialized)
+            return true;
         m_aborted.store(false, std::memory_order_relaxed);
         m_initialized = true;
         return true;
     }
-    bool IsInitialized() const { return m_initialized; }
-    BatchAbortControllerConfig GetConfig() const { return m_config; }
-    std::string GetName() const { return m_config.label; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    BatchAbortControllerConfig GetConfig() const
+    {
+        return m_config;
+    }
+    std::string GetName() const
+    {
+        return m_config.label;
+    }
 
-    void Abort() { m_aborted.store(true, std::memory_order_release); }
-    bool IsAborted() const { return m_aborted.load(std::memory_order_acquire); }
-    void Reset() { m_aborted.store(false, std::memory_order_release); }
+    void Abort()
+    {
+        m_aborted.store(true, std::memory_order_release);
+    }
+    bool IsAborted() const
+    {
+        return m_aborted.load(std::memory_order_acquire);
+    }
+    void Reset()
+    {
+        m_aborted.store(false, std::memory_order_release);
+    }
 
-private:
+  private:
     bool m_initialized = false;
     BatchAbortControllerConfig m_config;
-    std::atomic<bool> m_aborted{ false };
+    std::atomic<bool> m_aborted{false};
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

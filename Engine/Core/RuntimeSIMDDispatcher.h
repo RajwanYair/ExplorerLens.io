@@ -7,12 +7,12 @@
 //
 #pragma once
 
-#include <windows.h>
-#include <cstdint>
-#include <intrin.h>
 #include <immintrin.h>
-#include <string>
+#include <intrin.h>
+#include <windows.h>
 #include <array>
+#include <cstdint>
+#include <string>
 
 #include "../Pipeline/SIMDDispatchRouter.h"
 #include "../Utils/HardwareCapabilities.h"
@@ -30,16 +30,20 @@ namespace Engine {
 ///   RuntimeSIMDDispatcher::Instance().Initialize();
 ///   if (RuntimeSIMDDispatcher::Instance().GetTier() >= SIMDTier::AVX2) { ... }
 ///
-class RuntimeSIMDDispatcher {
-public:
-    static RuntimeSIMDDispatcher& Instance() {
+class RuntimeSIMDDispatcher
+{
+  public:
+    static RuntimeSIMDDispatcher& Instance()
+    {
         static RuntimeSIMDDispatcher instance;
         return instance;
     }
 
     /// Detect CPU capabilities. Safe to call multiple times (no-op after first).
-    void Initialize() {
-        if (m_initialized) return;
+    void Initialize()
+    {
+        if (m_initialized)
+            return;
 
 #ifdef _M_ARM64
         DetectARM64();
@@ -54,68 +58,89 @@ public:
         m_initialized = true;
     }
 
-    const CPUCapabilities& GetCapabilities() const { return m_caps; }
-    SIMDTier GetTier() const { return m_tier; }
-    SIMDFeature GetFeatures() const { return m_features; }
-    bool IsInitialized() const { return m_initialized; }
+    const CPUCapabilities& GetCapabilities() const
+    {
+        return m_caps;
+    }
+    SIMDTier GetTier() const
+    {
+        return m_tier;
+    }
+    SIMDFeature GetFeatures() const
+    {
+        return m_features;
+    }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
     /// Human-readable description of detected capabilities
-    std::string Describe() const {
+    std::string Describe() const
+    {
         std::string desc = "CPU: " + m_caps.brandString + "\n";
         desc += "Cores: " + std::to_string(m_caps.logicalCores) + "\n";
         desc += "Tier: ";
         desc += SIMDTierToString(m_tier);
         desc += "\nFeatures:";
-        if (HasFeature(m_features, SIMDFeature::SSE2)) desc += " SSE2";
-        if (HasFeature(m_features, SIMDFeature::SSE41)) desc += " SSE4.1";
-        if (HasFeature(m_features, SIMDFeature::AVX2)) desc += " AVX2";
-        if (HasFeature(m_features, SIMDFeature::FMA)) desc += " FMA";
-        if (HasFeature(m_features, SIMDFeature::AVX512F)) desc += " AVX-512F";
+        if (HasFeature(m_features, SIMDFeature::SSE2))
+            desc += " SSE2";
+        if (HasFeature(m_features, SIMDFeature::SSE41))
+            desc += " SSE4.1";
+        if (HasFeature(m_features, SIMDFeature::AVX2))
+            desc += " AVX2";
+        if (HasFeature(m_features, SIMDFeature::FMA))
+            desc += " FMA";
+        if (HasFeature(m_features, SIMDFeature::AVX512F))
+            desc += " AVX-512F";
         return desc;
     }
 
     /// Dispatch-friendly: returns function pointers for optimized pixel ops
     /// based on detected tier. Callers get the fastest available implementation.
-    using ResizeRowFn = void(*)(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW);
-    using BlendRowFn = void(*)(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha);
-    using ConvertRowFn = void(*)(const uint8_t* src, uint8_t* dst, uint32_t width);
+    using ResizeRowFn = void (*)(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW);
+    using BlendRowFn = void (*)(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha);
+    using ConvertRowFn = void (*)(const uint8_t* src, uint8_t* dst, uint32_t width);
 
-    ResizeRowFn GetResizeRowFn() const {
+    ResizeRowFn GetResizeRowFn() const
+    {
         switch (m_tier) {
-        case SIMDTier::AVX2:
-        case SIMDTier::AVX512:
-            return ResizeRow_AVX2;
-        case SIMDTier::SSE:
-            return ResizeRow_SSE2;
-        default:
-            return ResizeRow_Scalar;
-        }
-        }
-
-    BlendRowFn GetBlendRowFn() const {
-        switch (m_tier) {
-        case SIMDTier::AVX2:
-        case SIMDTier::AVX512:
-            return BlendRow_AVX2;
-        case SIMDTier::SSE:
-            return BlendRow_SSE2;
-        default:
-            return BlendRow_Scalar;
+            case SIMDTier::AVX2:
+            case SIMDTier::AVX512:
+                return ResizeRow_AVX2;
+            case SIMDTier::SSE:
+                return ResizeRow_SSE2;
+            default:
+                return ResizeRow_Scalar;
         }
     }
 
-private:
+    BlendRowFn GetBlendRowFn() const
+    {
+        switch (m_tier) {
+            case SIMDTier::AVX2:
+            case SIMDTier::AVX512:
+                return BlendRow_AVX2;
+            case SIMDTier::SSE:
+                return BlendRow_SSE2;
+            default:
+                return BlendRow_Scalar;
+        }
+    }
+
+  private:
     RuntimeSIMDDispatcher() = default;
     RuntimeSIMDDispatcher(const RuntimeSIMDDispatcher&) = delete;
     RuntimeSIMDDispatcher& operator=(const RuntimeSIMDDispatcher&) = delete;
 
-    bool            m_initialized = false;
-    SIMDFeature     m_features = SIMDFeature::None;
-    SIMDTier        m_tier = SIMDTier::Scalar;
+    bool m_initialized = false;
+    SIMDFeature m_features = SIMDFeature::None;
+    SIMDTier m_tier = SIMDTier::Scalar;
     CPUCapabilities m_caps{};
 
 #ifndef _M_ARM64
-    void DetectX86() {
+    void DetectX86()
+    {
         std::array<int, 4> cpuInfo = {};
         __cpuid(cpuInfo.data(), 0);
         int maxFunc = cpuInfo[0];
@@ -125,28 +150,66 @@ private:
             uint32_t ecx = cpuInfo[2];
             uint32_t edx = cpuInfo[3];
 
-            if (edx & (1 << 26)) { m_features = m_features | SIMDFeature::SSE2; m_caps.hasSSE2 = true; }
-            if (ecx & (1 << 0)) { m_caps.hasSSE3 = true; }
-            if (ecx & (1 << 9)) { m_caps.hasSSSE3 = true; }
-            if (ecx & (1 << 19)) { m_features = m_features | SIMDFeature::SSE41; m_caps.hasSSE41 = true; }
-            if (ecx & (1 << 20)) { m_features = m_features | SIMDFeature::SSE42; m_caps.hasSSE42 = true; }
-            if (ecx & (1 << 23)) { m_features = m_features | SIMDFeature::POPCNT; m_caps.hasPOPCNT = true; }
-            if (ecx & (1 << 28)) { m_features = m_features | SIMDFeature::AVX; m_caps.hasAVX = true; }
-            if (ecx & (1 << 12)) { m_features = m_features | SIMDFeature::FMA; m_caps.hasFMA = true; }
-            if (ecx & (1 << 29)) { m_caps.hasF16C = true; }
+            if (edx & (1 << 26)) {
+                m_features = m_features | SIMDFeature::SSE2;
+                m_caps.hasSSE2 = true;
+            }
+            if (ecx & (1 << 0)) {
+                m_caps.hasSSE3 = true;
+            }
+            if (ecx & (1 << 9)) {
+                m_caps.hasSSSE3 = true;
+            }
+            if (ecx & (1 << 19)) {
+                m_features = m_features | SIMDFeature::SSE41;
+                m_caps.hasSSE41 = true;
+            }
+            if (ecx & (1 << 20)) {
+                m_features = m_features | SIMDFeature::SSE42;
+                m_caps.hasSSE42 = true;
+            }
+            if (ecx & (1 << 23)) {
+                m_features = m_features | SIMDFeature::POPCNT;
+                m_caps.hasPOPCNT = true;
+            }
+            if (ecx & (1 << 28)) {
+                m_features = m_features | SIMDFeature::AVX;
+                m_caps.hasAVX = true;
+            }
+            if (ecx & (1 << 12)) {
+                m_features = m_features | SIMDFeature::FMA;
+                m_caps.hasFMA = true;
+            }
+            if (ecx & (1 << 29)) {
+                m_caps.hasF16C = true;
+            }
         }
 
         if (maxFunc >= 7) {
             __cpuidex(cpuInfo.data(), 7, 0);
             uint32_t ebx = cpuInfo[1];
-            if (ebx & (1 << 5)) { m_features = m_features | SIMDFeature::AVX2; m_caps.hasAVX2 = true; }
-            if (ebx & (1 << 3)) { m_caps.hasBMI1 = true; }
-            if (ebx & (1 << 8)) { m_features = m_features | SIMDFeature::BMI2; m_caps.hasBMI2 = true; }
-            if (ebx & (1 << 16)) { m_features = m_features | SIMDFeature::AVX512F; m_caps.hasAVX512F = true; }
-            if (ebx & (1 << 30)) { m_features = m_features | SIMDFeature::AVX512BW; m_caps.hasAVX512BW = true; }
+            if (ebx & (1 << 5)) {
+                m_features = m_features | SIMDFeature::AVX2;
+                m_caps.hasAVX2 = true;
+            }
+            if (ebx & (1 << 3)) {
+                m_caps.hasBMI1 = true;
+            }
+            if (ebx & (1 << 8)) {
+                m_features = m_features | SIMDFeature::BMI2;
+                m_caps.hasBMI2 = true;
+            }
+            if (ebx & (1 << 16)) {
+                m_features = m_features | SIMDFeature::AVX512F;
+                m_caps.hasAVX512F = true;
+            }
+            if (ebx & (1 << 30)) {
+                m_features = m_features | SIMDFeature::AVX512BW;
+                m_caps.hasAVX512BW = true;
+            }
 
             uint32_t ecx7 = cpuInfo[2];
-            (void)ecx7; // Reserved for future use
+            (void)ecx7;  // Reserved for future use
         }
 
         // Brand string
@@ -171,10 +234,12 @@ private:
         // Cache line detection
         __cpuid(cpuInfo.data(), 1);
         m_caps.cacheLineSize = ((cpuInfo[1] >> 8) & 0xFF) * 8;
-        if (m_caps.cacheLineSize == 0) m_caps.cacheLineSize = 64;
+        if (m_caps.cacheLineSize == 0)
+            m_caps.cacheLineSize = 64;
     }
 #else
-    void DetectARM64() {
+    void DetectARM64()
+    {
         m_features = SIMDFeature::NEON;
         m_tier = SIMDTier::NEON;
         m_caps.brandString = "ARM64 Processor";
@@ -183,16 +248,18 @@ private:
 #endif
 
     // Scalar fallback implementations
-    static void ResizeRow_Scalar(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW) {
+    static void ResizeRow_Scalar(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW)
+    {
         for (uint32_t x = 0; x < dstW; x++) {
             uint32_t sx = x * srcW / dstW;
             memcpy(dst + x * 4, src + sx * 4, 4);
         }
     }
 
-    static void ResizeRow_SSE2(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW) {
+    static void ResizeRow_SSE2(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW)
+    {
         // SSE2-optimized nearest-neighbor row resize — processes 4 BGRA pixels per iteration
-        const uint32_t step = 4; // 4 pixels x 4 bytes = 16 bytes = one __m128i
+        const uint32_t step = 4;  // 4 pixels x 4 bytes = 16 bytes = one __m128i
         const uint32_t aligned = dstW & ~(step - 1);
         for (uint32_t x = 0; x < aligned; x += step) {
             // Compute 4 source x-coordinates
@@ -216,23 +283,19 @@ private:
         }
     }
 
-    static void ResizeRow_AVX2(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW) {
+    static void ResizeRow_AVX2(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW)
+    {
         // AVX2-optimized nearest-neighbor row resize — processes 8 BGRA pixels per iteration
-        const uint32_t step = 8; // 8 pixels x 4 bytes = 32 bytes = one __m256i
+        const uint32_t step = 8;  // 8 pixels x 4 bytes = 32 bytes = one __m256i
         const uint32_t aligned = dstW & ~(step - 1);
         for (uint32_t x = 0; x < aligned; x += step) {
             // Compute 8 source indices and use VGATHERDD for true AVX2 gather
-            __m256i idx = _mm256_set_epi32(
-                static_cast<int>((x + 7) * srcW / dstW),
-                static_cast<int>((x + 6) * srcW / dstW),
-                static_cast<int>((x + 5) * srcW / dstW),
-                static_cast<int>((x + 4) * srcW / dstW),
-                static_cast<int>((x + 3) * srcW / dstW),
-                static_cast<int>((x + 2) * srcW / dstW),
-                static_cast<int>((x + 1) * srcW / dstW),
-                static_cast<int>((x + 0) * srcW / dstW));
-            __m256i px = _mm256_i32gather_epi32(
-                reinterpret_cast<const int*>(src), idx, 4);
+            __m256i idx =
+                _mm256_set_epi32(static_cast<int>((x + 7) * srcW / dstW), static_cast<int>((x + 6) * srcW / dstW),
+                                 static_cast<int>((x + 5) * srcW / dstW), static_cast<int>((x + 4) * srcW / dstW),
+                                 static_cast<int>((x + 3) * srcW / dstW), static_cast<int>((x + 2) * srcW / dstW),
+                                 static_cast<int>((x + 1) * srcW / dstW), static_cast<int>((x + 0) * srcW / dstW));
+            __m256i px = _mm256_i32gather_epi32(reinterpret_cast<const int*>(src), idx, 4);
             _mm256_storeu_si256(reinterpret_cast<__m256i*>(dst + x * 4), px);
         }
         // Handle remaining pixels
@@ -242,16 +305,17 @@ private:
         }
     }
 
-    static void BlendRow_Scalar(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha) {
+    static void BlendRow_Scalar(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha)
+    {
         for (uint32_t x = 0; x < width; x++) {
             for (int c = 0; c < 4; c++) {
-                dst[x * 4 + c] = static_cast<uint8_t>(
-                    (src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
+                dst[x * 4 + c] = static_cast<uint8_t>((src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
             }
         }
     }
 
-    static void BlendRow_SSE2(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha) {
+    static void BlendRow_SSE2(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha)
+    {
         // SSE2 alpha blend — processes 4 BGRA pixels (16 bytes) per iteration
         // Formula per channel: out = (src * alpha + dst * (255 - alpha)) / 255
         // Approximated as: out = (src * alpha + dst * invAlpha + 128) >> 8 using _mm_mulhi_epu16
@@ -275,13 +339,11 @@ private:
 
             // Blend: (src * alpha + dst * invAlpha + 128) >> 8
             __m128i rLo = _mm_srli_epi16(
-                _mm_add_epi16(_mm_add_epi16(
-                    _mm_mullo_epi16(sLo, alphaVec),
-                    _mm_mullo_epi16(dLo, invAlphaVec)), half), 8);
+                _mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(sLo, alphaVec), _mm_mullo_epi16(dLo, invAlphaVec)), half),
+                8);
             __m128i rHi = _mm_srli_epi16(
-                _mm_add_epi16(_mm_add_epi16(
-                    _mm_mullo_epi16(sHi, alphaVec),
-                    _mm_mullo_epi16(dHi, invAlphaVec)), half), 8);
+                _mm_add_epi16(_mm_add_epi16(_mm_mullo_epi16(sHi, alphaVec), _mm_mullo_epi16(dHi, invAlphaVec)), half),
+                8);
 
             // Pack 16-bit results back to 8-bit with unsigned saturation
             __m128i result = _mm_packus_epi16(rLo, rHi);
@@ -290,13 +352,13 @@ private:
         // Handle remaining pixels
         for (uint32_t x = aligned; x < width; x++) {
             for (int c = 0; c < 4; c++) {
-                dst[x * 4 + c] = static_cast<uint8_t>(
-                    (src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
+                dst[x * 4 + c] = static_cast<uint8_t>((src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
             }
         }
     }
 
-    static void BlendRow_AVX2(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha) {
+    static void BlendRow_AVX2(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha)
+    {
         // AVX2 alpha blend — processes 8 BGRA pixels (32 bytes) per iteration
         const __m256i zero = _mm256_setzero_si256();
         const __m256i alphaVec = _mm256_set1_epi16(static_cast<short>(alpha));
@@ -317,13 +379,13 @@ private:
 
             // Blend: (src * alpha + dst * invAlpha + 128) >> 8
             __m256i rLo = _mm256_srli_epi16(
-                _mm256_add_epi16(_mm256_add_epi16(
-                    _mm256_mullo_epi16(sLo, alphaVec),
-                    _mm256_mullo_epi16(dLo, invAlphaVec)), half), 8);
+                _mm256_add_epi16(
+                    _mm256_add_epi16(_mm256_mullo_epi16(sLo, alphaVec), _mm256_mullo_epi16(dLo, invAlphaVec)), half),
+                8);
             __m256i rHi = _mm256_srli_epi16(
-                _mm256_add_epi16(_mm256_add_epi16(
-                    _mm256_mullo_epi16(sHi, alphaVec),
-                    _mm256_mullo_epi16(dHi, invAlphaVec)), half), 8);
+                _mm256_add_epi16(
+                    _mm256_add_epi16(_mm256_mullo_epi16(sHi, alphaVec), _mm256_mullo_epi16(dHi, invAlphaVec)), half),
+                8);
 
             __m256i result = _mm256_packus_epi16(rLo, rHi);
             _mm256_storeu_si256(reinterpret_cast<__m256i*>(dst + x * 4), result);
@@ -331,12 +393,11 @@ private:
         // Handle remaining pixels
         for (uint32_t x = aligned; x < width; x++) {
             for (int c = 0; c < 4; c++) {
-                dst[x * 4 + c] = static_cast<uint8_t>(
-                    (src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
+                dst[x * 4 + c] = static_cast<uint8_t>((src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
             }
         }
     }
-    };
+};
 
-    } // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

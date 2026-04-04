@@ -6,14 +6,14 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <queue>
-#include <mutex>
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -41,7 +41,8 @@ enum class StorageDeviceType : uint8_t {
     Unknown
 };
 
-struct StorageRequest {
+struct StorageRequest
+{
     uint64_t requestId = 0;
     std::string filePath;
     uint64_t offset = 0;
@@ -51,7 +52,8 @@ struct StorageRequest {
     bool directToGPU = false;
 };
 
-struct StorageStats {
+struct StorageStats
+{
     uint64_t totalBytesRead = 0;
     uint64_t totalRequests = 0;
     uint64_t completedRequests = 0;
@@ -61,7 +63,8 @@ struct StorageStats {
     double currentBandwidthMBps = 0.0;
 };
 
-struct StorageDeviceInfo {
+struct StorageDeviceInfo
+{
     StorageDeviceType type = StorageDeviceType::Unknown;
     std::string deviceName;
     uint64_t capacityBytes = 0;
@@ -70,16 +73,19 @@ struct StorageDeviceInfo {
     double maxBandwidthMBps = 0.0;
 };
 
-class DirectStorageIntegration {
-public:
-    static DirectStorageIntegration& Instance() {
+class DirectStorageIntegration
+{
+  public:
+    static DirectStorageIntegration& Instance()
+    {
         static DirectStorageIntegration instance;
         return instance;
     }
 
     inline uint64_t SubmitReadRequest(const std::string& filePath, uint64_t offset, uint64_t size,
-        StorageRequestPriority priority = StorageRequestPriority::Normal,
-        bool directToGPU = false) {
+                                      StorageRequestPriority priority = StorageRequestPriority::Normal,
+                                      bool directToGPU = false)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         StorageRequest req;
         req.requestId = m_nextRequestId++;
@@ -94,7 +100,8 @@ public:
         return req.requestId;
     }
 
-    inline bool CancelRequest(uint64_t requestId) {
+    inline bool CancelRequest(uint64_t requestId)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_activeRequests.find(requestId);
         if (it != m_activeRequests.end()) {
@@ -104,58 +111,78 @@ public:
         return false;
     }
 
-    inline StorageRequestStatus GetRequestStatus(uint64_t requestId) const {
+    inline StorageRequestStatus GetRequestStatus(uint64_t requestId) const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto it = m_activeRequests.find(requestId);
-        if (it != m_activeRequests.end()) return it->second.status;
+        if (it != m_activeRequests.end())
+            return it->second.status;
         return StorageRequestStatus::Failed;
     }
 
-    inline StorageStats GetStats() const {
+    inline StorageStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    inline void UpdateBandwidthMeasurement(uint64_t bytesTransferred, double elapsedUs) {
+    inline void UpdateBandwidthMeasurement(uint64_t bytesTransferred, double elapsedUs)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalBytesRead += bytesTransferred;
         if (elapsedUs > 0.0) {
             double mbps = (bytesTransferred / (1024.0 * 1024.0)) / (elapsedUs / 1000000.0);
             m_stats.currentBandwidthMBps = mbps;
-            if (mbps > m_stats.peakBandwidthMBps) m_stats.peakBandwidthMBps = mbps;
+            if (mbps > m_stats.peakBandwidthMBps)
+                m_stats.peakBandwidthMBps = mbps;
         }
     }
 
-    inline uint32_t GetOptimalQueueDepth(StorageDeviceType deviceType) const {
+    inline uint32_t GetOptimalQueueDepth(StorageDeviceType deviceType) const
+    {
         switch (deviceType) {
-        case StorageDeviceType::NVMe:         return 64;
-        case StorageDeviceType::SATA_SSD:     return 32;
-        case StorageDeviceType::HDD:          return 4;
-        case StorageDeviceType::NetworkDrive:  return 8;
-        default:                               return 16;
+            case StorageDeviceType::NVMe:
+                return 64;
+            case StorageDeviceType::SATA_SSD:
+                return 32;
+            case StorageDeviceType::HDD:
+                return 4;
+            case StorageDeviceType::NetworkDrive:
+                return 8;
+            default:
+                return 16;
         }
     }
 
-    inline size_t GetPendingCount() const {
+    inline size_t GetPendingCount() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_pendingQueue.size();
     }
 
-    inline std::string DeviceTypeToString(StorageDeviceType type) const {
+    inline std::string DeviceTypeToString(StorageDeviceType type) const
+    {
         switch (type) {
-        case StorageDeviceType::NVMe:         return "NVMe SSD";
-        case StorageDeviceType::SATA_SSD:     return "SATA SSD";
-        case StorageDeviceType::HDD:          return "HDD";
-        case StorageDeviceType::NetworkDrive:  return "Network Drive";
-        default:                               return "Unknown";
+            case StorageDeviceType::NVMe:
+                return "NVMe SSD";
+            case StorageDeviceType::SATA_SSD:
+                return "SATA SSD";
+            case StorageDeviceType::HDD:
+                return "HDD";
+            case StorageDeviceType::NetworkDrive:
+                return "Network Drive";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     DirectStorageIntegration() = default;
 
-    struct RequestComparator {
-        bool operator()(const StorageRequest& a, const StorageRequest& b) const {
+    struct RequestComparator
+    {
+        bool operator()(const StorageRequest& a, const StorageRequest& b) const
+        {
             return static_cast<uint8_t>(a.priority) < static_cast<uint8_t>(b.priority);
         }
     };
@@ -167,5 +194,5 @@ private:
     uint64_t m_nextRequestId = 1;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

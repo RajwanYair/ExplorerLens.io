@@ -6,16 +6,17 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct MipLevel {
+struct MipLevel
+{
     std::vector<uint8_t> data;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -23,7 +24,8 @@ struct MipLevel {
     uint32_t channels = 4;
 };
 
-struct MipChainInfo {
+struct MipChainInfo
+{
     uint32_t baseWidth = 0;
     uint32_t baseHeight = 0;
     uint32_t levelCount = 0;
@@ -38,14 +40,17 @@ enum class MipFilter : uint8_t {
     Kaiser
 };
 
-class StreamingMipChain {
-public:
-    static StreamingMipChain& Instance() {
+class StreamingMipChain
+{
+  public:
+    static StreamingMipChain& Instance()
+    {
         static StreamingMipChain instance;
         return instance;
     }
 
-    inline MipChainInfo ComputeChainInfo(uint32_t width, uint32_t height, uint32_t channels = 4) const {
+    inline MipChainInfo ComputeChainInfo(uint32_t width, uint32_t height, uint32_t channels = 4) const
+    {
         MipChainInfo info;
         info.baseWidth = width;
         info.baseHeight = height;
@@ -64,7 +69,8 @@ public:
     }
 
     inline std::vector<MipLevel> GenerateFullChain(const uint8_t* baseData, uint32_t width, uint32_t height,
-        uint32_t channels = 4, MipFilter filter = MipFilter::Box) const {
+                                                   uint32_t channels = 4, MipFilter filter = MipFilter::Box) const
+    {
         std::vector<MipLevel> chain;
         uint32_t levelCount = ComputeLevelCount(width, height);
 
@@ -84,7 +90,8 @@ public:
         return chain;
     }
 
-    inline MipLevel GenerateNextLevel(const MipLevel& source, MipFilter filter = MipFilter::Box) const {
+    inline MipLevel GenerateNextLevel(const MipLevel& source, MipFilter filter = MipFilter::Box) const
+    {
         MipLevel next;
         next.width = (std::max)(1u, source.width / 2);
         next.height = (std::max)(1u, source.height / 2);
@@ -92,7 +99,8 @@ public:
         next.channels = source.channels;
         next.data.resize(static_cast<size_t>(next.width) * next.height * next.channels);
 
-        if (source.data.empty()) return next;
+        if (source.data.empty())
+            return next;
 
         for (uint32_t y = 0; y < next.height; ++y) {
             for (uint32_t x = 0; x < next.width; ++x) {
@@ -106,8 +114,9 @@ public:
         return next;
     }
 
-    inline MipLevel GetCoarsestLevel(const uint8_t* baseData, uint32_t width, uint32_t height,
-        uint32_t channels, uint32_t targetSize = 4) const {
+    inline MipLevel GetCoarsestLevel(const uint8_t* baseData, uint32_t width, uint32_t height, uint32_t channels,
+                                     uint32_t targetSize = 4) const
+    {
         MipLevel current;
         current.width = width;
         current.height = height;
@@ -122,24 +131,29 @@ public:
         return current;
     }
 
-    inline uint32_t ComputeLevelCount(uint32_t width, uint32_t height) const {
+    inline uint32_t ComputeLevelCount(uint32_t width, uint32_t height) const
+    {
         uint32_t maxDim = (std::max)(width, height);
         return maxDim > 0 ? static_cast<uint32_t>(std::floor(std::log2(static_cast<double>(maxDim)))) + 1 : 1;
     }
 
-private:
+  private:
     StreamingMipChain() = default;
 
-    inline float SampleFiltered(const MipLevel& level, uint32_t x, uint32_t y, uint32_t c,
-        MipFilter filter) const {
+    inline float SampleFiltered(const MipLevel& level, uint32_t x, uint32_t y, uint32_t c, MipFilter filter) const
+    {
         switch (filter) {
-        case MipFilter::Box: return SampleBox(level, x, y, c);
-        case MipFilter::Triangle: return SampleTriangle(level, x, y, c);
-        default: return SampleBox(level, x, y, c);
+            case MipFilter::Box:
+                return SampleBox(level, x, y, c);
+            case MipFilter::Triangle:
+                return SampleTriangle(level, x, y, c);
+            default:
+                return SampleBox(level, x, y, c);
         }
     }
 
-    inline float SampleBox(const MipLevel& level, uint32_t x, uint32_t y, uint32_t c) const {
+    inline float SampleBox(const MipLevel& level, uint32_t x, uint32_t y, uint32_t c) const
+    {
         float sum = 0.0f;
         int count = 0;
         for (int dy = 0; dy < 2; ++dy) {
@@ -154,7 +168,8 @@ private:
         return sum / count;
     }
 
-    inline float SampleTriangle(const MipLevel& level, uint32_t x, uint32_t y, uint32_t c) const {
+    inline float SampleTriangle(const MipLevel& level, uint32_t x, uint32_t y, uint32_t c) const
+    {
         float sum = 0.0f;
         float weightSum = 0.0f;
         for (int dy = -1; dy <= 2; ++dy) {
@@ -174,5 +189,5 @@ private:
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

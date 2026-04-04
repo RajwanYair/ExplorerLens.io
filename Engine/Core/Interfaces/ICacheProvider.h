@@ -18,7 +18,7 @@ namespace Engine {
 //==============================================================================
 class ICacheProvider
 {
-public:
+  public:
     virtual ~ICacheProvider() = default;
 
     //==========================================================================
@@ -29,10 +29,7 @@ public:
     /// @param height Thumbnail height
     /// @return true if thumbnail exists in cache
     //==========================================================================
-    virtual bool Exists(
-        const wchar_t* filePath,
-        uint32_t width,
-        uint32_t height) const = 0;
+    virtual bool Exists(const wchar_t* filePath, uint32_t width, uint32_t height) const = 0;
 
     //==========================================================================
     /// Retrieve a thumbnail from cache
@@ -43,11 +40,7 @@ public:
     /// @param outBitmap Output HBITMAP (caller must delete with DeleteObject)
     /// @return S_OK on success, error HRESULT on failure
     //==========================================================================
-    virtual HRESULT Get(
-        const wchar_t* filePath,
-        uint32_t width,
-        uint32_t height,
-        HBITMAP* outBitmap) = 0;
+    virtual HRESULT Get(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP* outBitmap) = 0;
 
     //==========================================================================
     /// Store a thumbnail in cache
@@ -58,11 +51,7 @@ public:
     /// @param hBitmap Thumbnail bitmap to cache
     /// @return S_OK on success, error HRESULT on failure
     //==========================================================================
-    virtual HRESULT Put(
-        const wchar_t* filePath,
-        uint32_t width,
-        uint32_t height,
-        HBITMAP hBitmap) = 0;
+    virtual HRESULT Put(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP hBitmap) = 0;
 
     //==========================================================================
     /// Remove a thumbnail from cache
@@ -86,10 +75,8 @@ public:
     /// @param outTotalSizeMB Output: Total cache size in MB (can be nullptr)
     /// @return S_OK on success, error HRESULT on failure
     //==========================================================================
-    virtual HRESULT GetStats(
-        uint32_t* outEntryCount,
-        uint32_t* outTotalSizeMB) const = 0;
+    virtual HRESULT GetStats(uint32_t* outEntryCount, uint32_t* outTotalSizeMB) const = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

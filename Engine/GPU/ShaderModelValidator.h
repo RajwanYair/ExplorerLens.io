@@ -6,12 +6,12 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
+#include <array>
+#include <cstdint>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -43,7 +43,8 @@ enum class ShaderFeature : uint32_t {
     WorkGraphs = 1 << 8
 };
 
-struct ShaderBytecodeInfo {
+struct ShaderBytecodeInfo
+{
     ShaderModelLevel requiredModel = ShaderModelLevel::Unknown;
     uint32_t requiredFeatures = 0;
     uint32_t registerCount = 0;
@@ -54,7 +55,8 @@ struct ShaderBytecodeInfo {
     bool isValid = false;
 };
 
-struct ShaderGPUCaps {
+struct ShaderGPUCaps
+{
     ShaderModelLevel maxShaderModel = ShaderModelLevel::SM_5_0;
     uint32_t supportedFeatures = 0;
     uint32_t maxComputeThreadGroupSize = 1024;
@@ -65,7 +67,8 @@ struct ShaderGPUCaps {
     uint32_t deviceId = 0;
 };
 
-struct ShaderValidationResult {
+struct ShaderValidationResult
+{
     bool compatible = false;
     std::vector<std::string> errors;
     std::vector<std::string> warnings;
@@ -73,14 +76,17 @@ struct ShaderValidationResult {
     ShaderModelLevel deviceModel = ShaderModelLevel::Unknown;
 };
 
-class ShaderModelValidator {
-public:
-    static ShaderModelValidator& Instance() {
+class ShaderModelValidator
+{
+  public:
+    static ShaderModelValidator& Instance()
+    {
         static ShaderModelValidator instance;
         return instance;
     }
 
-    inline ShaderValidationResult Validate(const ShaderBytecodeInfo& shader, const ShaderGPUCaps& gpu) const {
+    inline ShaderValidationResult Validate(const ShaderBytecodeInfo& shader, const ShaderGPUCaps& gpu) const
+    {
         ShaderValidationResult result;
         result.requiredModel = shader.requiredModel;
         result.deviceModel = gpu.maxShaderModel;
@@ -91,8 +97,8 @@ public:
         }
 
         if (static_cast<uint8_t>(shader.requiredModel) > static_cast<uint8_t>(gpu.maxShaderModel)) {
-            result.errors.push_back("Shader requires " + ShaderModelToString(shader.requiredModel) +
-                " but device supports " + ShaderModelToString(gpu.maxShaderModel));
+            result.errors.push_back("Shader requires " + ShaderModelToString(shader.requiredModel)
+                                    + " but device supports " + ShaderModelToString(gpu.maxShaderModel));
         }
 
         uint32_t missingFeatures = shader.requiredFeatures & ~gpu.supportedFeatures;
@@ -109,60 +115,72 @@ public:
 
         uint32_t totalThreads = shader.threadGroupSizeX * shader.threadGroupSizeY * shader.threadGroupSizeZ;
         if (totalThreads > gpu.maxComputeThreadGroupSize) {
-            result.errors.push_back("Thread group size " + std::to_string(totalThreads) +
-                " exceeds max " + std::to_string(gpu.maxComputeThreadGroupSize));
+            result.errors.push_back("Thread group size " + std::to_string(totalThreads) + " exceeds max "
+                                    + std::to_string(gpu.maxComputeThreadGroupSize));
         }
 
         result.compatible = result.errors.empty();
         return result;
     }
 
-    inline ShaderBytecodeInfo AnalyzeBytecode(const uint8_t* data, size_t size) const {
+    inline ShaderBytecodeInfo AnalyzeBytecode(const uint8_t* data, size_t size) const
+    {
         ShaderBytecodeInfo info;
         info.bytecodeSizeBytes = size;
 
-        if (!data || size < 20) return info;
+        if (!data || size < 20)
+            return info;
 
-        uint32_t magic = static_cast<uint32_t>(data[0]) |
-            (static_cast<uint32_t>(data[1]) << 8) |
-            (static_cast<uint32_t>(data[2]) << 16) |
-            (static_cast<uint32_t>(data[3]) << 24);
+        uint32_t magic = static_cast<uint32_t>(data[0]) | (static_cast<uint32_t>(data[1]) << 8)
+                         | (static_cast<uint32_t>(data[2]) << 16) | (static_cast<uint32_t>(data[3]) << 24);
 
         if (magic == 0x43425844) {
             info.isValid = true;
             uint8_t majorVersion = data[4];
             uint8_t minorVersion = data[5];
             if (majorVersion >= 6) {
-                info.requiredModel = static_cast<ShaderModelLevel>(
-                    static_cast<uint8_t>(ShaderModelLevel::SM_6_0) + (std::min)(static_cast<uint8_t>(8), minorVersion));
-            }
-            else {
+                info.requiredModel = static_cast<ShaderModelLevel>(static_cast<uint8_t>(ShaderModelLevel::SM_6_0)
+                                                                   + (std::min)(static_cast<uint8_t>(8), minorVersion));
+            } else {
                 info.requiredModel = minorVersion >= 1 ? ShaderModelLevel::SM_5_1 : ShaderModelLevel::SM_5_0;
             }
         }
         return info;
     }
 
-    inline std::string ShaderModelToString(ShaderModelLevel sm) const {
+    inline std::string ShaderModelToString(ShaderModelLevel sm) const
+    {
         switch (sm) {
-        case ShaderModelLevel::SM_5_0: return "SM 5.0";
-        case ShaderModelLevel::SM_5_1: return "SM 5.1";
-        case ShaderModelLevel::SM_6_0: return "SM 6.0";
-        case ShaderModelLevel::SM_6_1: return "SM 6.1";
-        case ShaderModelLevel::SM_6_2: return "SM 6.2";
-        case ShaderModelLevel::SM_6_3: return "SM 6.3";
-        case ShaderModelLevel::SM_6_4: return "SM 6.4";
-        case ShaderModelLevel::SM_6_5: return "SM 6.5";
-        case ShaderModelLevel::SM_6_6: return "SM 6.6";
-        case ShaderModelLevel::SM_6_7: return "SM 6.7";
-        case ShaderModelLevel::SM_6_8: return "SM 6.8";
-        default:                  return "Unknown";
+            case ShaderModelLevel::SM_5_0:
+                return "SM 5.0";
+            case ShaderModelLevel::SM_5_1:
+                return "SM 5.1";
+            case ShaderModelLevel::SM_6_0:
+                return "SM 6.0";
+            case ShaderModelLevel::SM_6_1:
+                return "SM 6.1";
+            case ShaderModelLevel::SM_6_2:
+                return "SM 6.2";
+            case ShaderModelLevel::SM_6_3:
+                return "SM 6.3";
+            case ShaderModelLevel::SM_6_4:
+                return "SM 6.4";
+            case ShaderModelLevel::SM_6_5:
+                return "SM 6.5";
+            case ShaderModelLevel::SM_6_6:
+                return "SM 6.6";
+            case ShaderModelLevel::SM_6_7:
+                return "SM 6.7";
+            case ShaderModelLevel::SM_6_8:
+                return "SM 6.8";
+            default:
+                return "Unknown";
         }
     }
 
-private:
+  private:
     ShaderModelValidator() = default;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

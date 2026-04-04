@@ -7,4 +7,4 @@ namespace ExplorerLens::Engine {
 
 UsageAnomalyDetector::UsageAnomalyDetector(ThresholdConfig) {}
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

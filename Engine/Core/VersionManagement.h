@@ -17,8 +17,8 @@
 #include "VersionDriftGate.h"
 
 // Library tracking — external library version audit
-#include "LibraryVersionAudit.h"
 #include "LibraryInventoryManager.h"
+#include "LibraryVersionAudit.h"
 
 // Historical baseline
 #include "VersionSyncV14.h"

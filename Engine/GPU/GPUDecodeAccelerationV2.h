@@ -23,17 +23,17 @@
 // ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#include <dxgi1_4.h>
-#include <d3d11_4.h>
-#include <string>
-#include <vector>
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <mutex>
-#include <algorithm>
+#include <string>
+#include <vector>
+#include <d3d11_4.h>
+#include <dxgi1_4.h>
 
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -56,58 +56,69 @@ enum class GPUDecodeVendor : uint8_t {
     Microsoft_D3D11VA = 4
 };
 
-inline const char* GPUDecodeVendorName(GPUDecodeVendor v) noexcept {
+inline const char* GPUDecodeVendorName(GPUDecodeVendor v) noexcept
+{
     switch (v) {
-    case GPUDecodeVendor::NVIDIA_NVDEC:      return "NVIDIA NVDEC";
-    case GPUDecodeVendor::Intel_QuickSync:   return "Intel QuickSync";
-    case GPUDecodeVendor::AMD_AMF:           return "AMD AMF";
-    case GPUDecodeVendor::Microsoft_D3D11VA: return "Microsoft D3D11VA";
-    default:                                 return "None";
+        case GPUDecodeVendor::NVIDIA_NVDEC:
+            return "NVIDIA NVDEC";
+        case GPUDecodeVendor::Intel_QuickSync:
+            return "Intel QuickSync";
+        case GPUDecodeVendor::AMD_AMF:
+            return "AMD AMF";
+        case GPUDecodeVendor::Microsoft_D3D11VA:
+            return "Microsoft D3D11VA";
+        default:
+            return "None";
     }
 }
 
 /// Adapter information gathered from DXGI enumeration
-struct GPUDecodeAdapterInfo {
+struct GPUDecodeAdapterInfo
+{
     std::wstring description;
-    uint32_t     vendorId = 0;
-    uint32_t     deviceId = 0;
-    uint64_t     dedicatedVRAM = 0;
-    uint64_t     sharedMemory = 0;
-    LUID         adapterLuid = {};
+    uint32_t vendorId = 0;
+    uint32_t deviceId = 0;
+    uint64_t dedicatedVRAM = 0;
+    uint64_t sharedMemory = 0;
+    LUID adapterLuid = {};
 };
 
 /// Capability descriptor for a detected GPU decoder
-struct GPUDecodeCapability {
-    GPUDecodeVendor          vendor = GPUDecodeVendor::None;
-    uint32_t                 maxWidth = 0;
-    uint32_t                 maxHeight = 0;
+struct GPUDecodeCapability
+{
+    GPUDecodeVendor vendor = GPUDecodeVendor::None;
+    uint32_t maxWidth = 0;
+    uint32_t maxHeight = 0;
     std::vector<std::string> supportedCodecs;
-    bool                     isHardwareAccelerated = false;
+    bool isHardwareAccelerated = false;
 };
 
 /// GPU-accelerated decode router. Probes DXGI adapters at initialization
 /// and provides decode capability queries + D3D11 Video Decoder integration.
-class GPUDecodeAccelerationV2 {
-public:
+class GPUDecodeAccelerationV2
+{
+  public:
     /// Singleton accessor.
-    static GPUDecodeAccelerationV2& Instance() {
+    static GPUDecodeAccelerationV2& Instance()
+    {
         static GPUDecodeAccelerationV2 s_instance;
         return s_instance;
     }
 
     /// Probe the system for GPU adapters via DXGI and create D3D11 device.
     /// Returns true if at least one GPU was detected.
-    inline bool Initialize() {
+    inline bool Initialize()
+    {
         std::lock_guard<std::mutex> guard(m_initMutex);
-        if (m_initialized) return m_hasGPU;
+        if (m_initialized)
+            return m_hasGPU;
 
         m_initialized = true;
         m_adapters.clear();
 
         // Create DXGI factory
         IDXGIFactory1* factory = nullptr;
-        HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1),
-            reinterpret_cast<void**>(&factory));
+        HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory));
         if (FAILED(hr) || !factory) {
             m_hasGPU = false;
             return false;
@@ -156,40 +167,47 @@ public:
     }
 
     /// Returns the detected vendor from the primary adapter.
-    inline GPUDecodeVendor DetectVendor() {
-        if (!m_initialized) Initialize();
+    inline GPUDecodeVendor DetectVendor()
+    {
+        if (!m_initialized)
+            Initialize();
         return m_detectedVendor;
     }
 
     /// Check if a specific codec is supported by the given vendor decoder.
-    inline bool IsCodecSupported(GPUDecodeVendor vendor, const std::string& codec) const {
+    inline bool IsCodecSupported(GPUDecodeVendor vendor, const std::string& codec) const
+    {
         const auto& codecs = GetVendorCodecTable(vendor);
         return std::find(codecs.begin(), codecs.end(), codec) != codecs.end();
     }
 
     /// Returns the full capability descriptor for the detected GPU.
-    inline GPUDecodeCapability GetCapabilities() {
-        if (!m_initialized) Initialize();
+    inline GPUDecodeCapability GetCapabilities()
+    {
+        if (!m_initialized)
+            Initialize();
         return m_capability;
     }
 
     /// Returns all detected adapter information.
-    inline const std::vector<GPUDecodeAdapterInfo>& GetAdapters() const noexcept {
+    inline const std::vector<GPUDecodeAdapterInfo>& GetAdapters() const noexcept
+    {
         return m_adapters;
     }
 
     /// Attempt to decode a compressed video frame using D3D11 Video Decoder.
     /// Returns false if GPU decode is unavailable (caller should use CPU path).
-    inline bool DecodeFrame(const uint8_t* compressedData, size_t size,
-        std::vector<uint8_t>& outRGBA,
-        uint32_t& outWidth, uint32_t& outHeight) {
-        if (!m_hasGPU || !m_device || !compressedData || size == 0) return false;
+    inline bool DecodeFrame(const uint8_t* compressedData, size_t size, std::vector<uint8_t>& outRGBA,
+                            uint32_t& outWidth, uint32_t& outHeight)
+    {
+        if (!m_hasGPU || !m_device || !compressedData || size == 0)
+            return false;
 
         // Query D3D11 video device interface
         ID3D11VideoDevice* videoDevice = nullptr;
-        HRESULT hr = m_device->QueryInterface(__uuidof(ID3D11VideoDevice),
-            reinterpret_cast<void**>(&videoDevice));
-        if (FAILED(hr) || !videoDevice) return false;
+        HRESULT hr = m_device->QueryInterface(__uuidof(ID3D11VideoDevice), reinterpret_cast<void**>(&videoDevice));
+        if (FAILED(hr) || !videoDevice)
+            return false;
 
         // Check decoder profile support (H.264 Baseline for broad compat)
         UINT profileCount = videoDevice->GetVideoDecoderProfileCount();
@@ -199,8 +217,8 @@ public:
         for (UINT i = 0; i < profileCount; ++i) {
             GUID profile{};
             if (SUCCEEDED(videoDevice->GetVideoDecoderProfile(i, &profile))) {
-                if (IsEqualGUID(profile, D3D11_DECODER_PROFILE_H264_VLD_NOFGT) ||
-                    IsEqualGUID(profile, D3D11_DECODER_PROFILE_H264_VLD_FGT)) {
+                if (IsEqualGUID(profile, D3D11_DECODER_PROFILE_H264_VLD_NOFGT)
+                    || IsEqualGUID(profile, D3D11_DECODER_PROFILE_H264_VLD_FGT)) {
                     h264Found = true;
                     h264Profile = profile;
                     break;
@@ -277,12 +295,14 @@ public:
         hr = videoDevice->CreateVideoDecoderOutputView(outputTexture, &viewDesc, &outputView);
 
         // Clean up intermediate resources
-        if (outputView) outputView->Release();
+        if (outputView)
+            outputView->Release();
         outputTexture->Release();
         decoder->Release();
         videoDevice->Release();
 
-        if (FAILED(hr)) return false;
+        if (FAILED(hr))
+            return false;
 
         // On success, fill output with a placeholder RGBA buffer
         // (full bitstream parsing requires NAL unit splitter which is out of scope
@@ -294,101 +314,114 @@ public:
     }
 
     /// Check if GPU decode is available after initialization.
-    inline bool IsAvailable() const noexcept { return m_hasGPU; }
+    inline bool IsAvailable() const noexcept
+    {
+        return m_hasGPU;
+    }
 
-private:
+  private:
     GPUDecodeAccelerationV2() = default;
-    ~GPUDecodeAccelerationV2() {
-        if (m_context) { m_context->Release(); m_context = nullptr; }
-        if (m_device) { m_device->Release();  m_device = nullptr; }
+    ~GPUDecodeAccelerationV2()
+    {
+        if (m_context) {
+            m_context->Release();
+            m_context = nullptr;
+        }
+        if (m_device) {
+            m_device->Release();
+            m_device = nullptr;
+        }
     }
 
     GPUDecodeAccelerationV2(const GPUDecodeAccelerationV2&) = delete;
     GPUDecodeAccelerationV2& operator=(const GPUDecodeAccelerationV2&) = delete;
 
     /// Classify vendor from DXGI VendorId.
-    inline GPUDecodeVendor ClassifyVendor(uint32_t vendorId) const noexcept {
+    inline GPUDecodeVendor ClassifyVendor(uint32_t vendorId) const noexcept
+    {
         switch (vendorId) {
-        case GPU_VENDOR_NVIDIA:    return GPUDecodeVendor::NVIDIA_NVDEC;
-        case GPU_VENDOR_INTEL:     return GPUDecodeVendor::Intel_QuickSync;
-        case GPU_VENDOR_AMD:       return GPUDecodeVendor::AMD_AMF;
-        case GPU_VENDOR_MICROSOFT: return GPUDecodeVendor::Microsoft_D3D11VA;
-        default:                   return GPUDecodeVendor::None;
+            case GPU_VENDOR_NVIDIA:
+                return GPUDecodeVendor::NVIDIA_NVDEC;
+            case GPU_VENDOR_INTEL:
+                return GPUDecodeVendor::Intel_QuickSync;
+            case GPU_VENDOR_AMD:
+                return GPUDecodeVendor::AMD_AMF;
+            case GPU_VENDOR_MICROSOFT:
+                return GPUDecodeVendor::Microsoft_D3D11VA;
+            default:
+                return GPUDecodeVendor::None;
         }
     }
 
     /// Return the codec table for a given vendor (compile-time known sets).
-    inline static const std::vector<std::string>& GetVendorCodecTable(GPUDecodeVendor vendor) {
-        static const std::vector<std::string> nvidia = { "H.264", "H.265", "VP9", "AV1" };
-        static const std::vector<std::string> intel = { "H.264", "H.265", "VP9", "AV1", "JPEG" };
-        static const std::vector<std::string> amd = { "H.264", "H.265", "VP9" };
-        static const std::vector<std::string> msft = { "H.264", "H.265" };
+    inline static const std::vector<std::string>& GetVendorCodecTable(GPUDecodeVendor vendor)
+    {
+        static const std::vector<std::string> nvidia = {"H.264", "H.265", "VP9", "AV1"};
+        static const std::vector<std::string> intel = {"H.264", "H.265", "VP9", "AV1", "JPEG"};
+        static const std::vector<std::string> amd = {"H.264", "H.265", "VP9"};
+        static const std::vector<std::string> msft = {"H.264", "H.265"};
         static const std::vector<std::string> empty;
         switch (vendor) {
-        case GPUDecodeVendor::NVIDIA_NVDEC:      return nvidia;
-        case GPUDecodeVendor::Intel_QuickSync:   return intel;
-        case GPUDecodeVendor::AMD_AMF:           return amd;
-        case GPUDecodeVendor::Microsoft_D3D11VA: return msft;
-        default:                                 return empty;
+            case GPUDecodeVendor::NVIDIA_NVDEC:
+                return nvidia;
+            case GPUDecodeVendor::Intel_QuickSync:
+                return intel;
+            case GPUDecodeVendor::AMD_AMF:
+                return amd;
+            case GPUDecodeVendor::Microsoft_D3D11VA:
+                return msft;
+            default:
+                return empty;
         }
     }
 
     /// Build a capability struct for the detected vendor.
-    inline GPUDecodeCapability BuildCapability(GPUDecodeVendor vendor) const {
+    inline GPUDecodeCapability BuildCapability(GPUDecodeVendor vendor) const
+    {
         GPUDecodeCapability cap;
         cap.vendor = vendor;
         cap.isHardwareAccelerated = (vendor != GPUDecodeVendor::None);
         cap.supportedCodecs = GetVendorCodecTable(vendor);
 
         switch (vendor) {
-        case GPUDecodeVendor::NVIDIA_NVDEC:
-            cap.maxWidth = 8192;
-            cap.maxHeight = 8192;
-            break;
-        case GPUDecodeVendor::Intel_QuickSync:
-            cap.maxWidth = 8192;
-            cap.maxHeight = 8192;
-            break;
-        case GPUDecodeVendor::AMD_AMF:
-            cap.maxWidth = 4096;
-            cap.maxHeight = 4096;
-            break;
-        case GPUDecodeVendor::Microsoft_D3D11VA:
-            cap.maxWidth = 4096;
-            cap.maxHeight = 4096;
-            break;
-        default:
-            break;
+            case GPUDecodeVendor::NVIDIA_NVDEC:
+                cap.maxWidth = 8192;
+                cap.maxHeight = 8192;
+                break;
+            case GPUDecodeVendor::Intel_QuickSync:
+                cap.maxWidth = 8192;
+                cap.maxHeight = 8192;
+                break;
+            case GPUDecodeVendor::AMD_AMF:
+                cap.maxWidth = 4096;
+                cap.maxHeight = 4096;
+                break;
+            case GPUDecodeVendor::Microsoft_D3D11VA:
+                cap.maxWidth = 4096;
+                cap.maxHeight = 4096;
+                break;
+            default:
+                break;
         }
         return cap;
     }
 
     /// Create D3D11 device for video decode acceleration.
-    inline void CreateD3D11Device() {
-        D3D_FEATURE_LEVEL featureLevels[] = {
-            D3D_FEATURE_LEVEL_11_1,
-            D3D_FEATURE_LEVEL_11_0,
-            D3D_FEATURE_LEVEL_10_1,
-            D3D_FEATURE_LEVEL_10_0
-        };
+    inline void CreateD3D11Device()
+    {
+        D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1,
+                                             D3D_FEATURE_LEVEL_10_0};
 
         D3D_FEATURE_LEVEL achievedLevel{};
         UINT flags = D3D11_CREATE_DEVICE_VIDEO_SUPPORT;
 #ifdef _DEBUG
         flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-        HRESULT hr = D3D11CreateDevice(
-            nullptr,                      // default adapter
-            D3D_DRIVER_TYPE_HARDWARE,
-            nullptr,                      // no software rasterizer
-            flags,
-            featureLevels,
-            _countof(featureLevels),
-            D3D11_SDK_VERSION,
-            &m_device,
-            &achievedLevel,
-            &m_context
-        );
+        HRESULT hr = D3D11CreateDevice(nullptr,  // default adapter
+                                       D3D_DRIVER_TYPE_HARDWARE,
+                                       nullptr,  // no software rasterizer
+                                       flags, featureLevels, _countof(featureLevels), D3D11_SDK_VERSION, &m_device,
+                                       &achievedLevel, &m_context);
 
         if (FAILED(hr)) {
             m_device = nullptr;
@@ -396,16 +429,16 @@ private:
         }
     }
 
-    std::mutex                    m_initMutex;
-    bool                          m_initialized = false;
-    bool                          m_hasGPU = false;
-    GPUDecodeVendor               m_detectedVendor = GPUDecodeVendor::None;
-    GPUDecodeCapability           m_capability;
-    std::vector<GPUDecodeAdapterInfo>   m_adapters;
+    std::mutex m_initMutex;
+    bool m_initialized = false;
+    bool m_hasGPU = false;
+    GPUDecodeVendor m_detectedVendor = GPUDecodeVendor::None;
+    GPUDecodeCapability m_capability;
+    std::vector<GPUDecodeAdapterInfo> m_adapters;
 
     ID3D11Device* m_device = nullptr;
     ID3D11DeviceContext* m_context = nullptr;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

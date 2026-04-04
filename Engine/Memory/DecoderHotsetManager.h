@@ -39,40 +39,43 @@
 // ============================================================================
 
 #include <windows.h>
-#include <vector>
-#include <unordered_map>
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <cstdint>
 #include <functional>
 #include <mutex>
-#include <atomic>
 #include <thread>
-#include <chrono>
-#include <algorithm>
-#include <cstdint>
+#include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 // ── Instance descriptor ──────────────────────────────────────────────────────
 
-struct DecoderInstance {
+struct DecoderInstance
+{
     uint32_t decoderType = 0;
     void* instance = nullptr;
-    size_t   memoryFootprint = 0;
-    uint64_t lastUsed = 0;   // tick counter
+    size_t memoryFootprint = 0;
+    uint64_t lastUsed = 0;  // tick counter
     uint32_t useCount = 0;
 };
 
 // ── Factory pair ─────────────────────────────────────────────────────────────
 
-struct DecoderFactory {
-    std::function<void* ()>    create;
+struct DecoderFactory
+{
+    std::function<void*()> create;
     std::function<void(void*)> destroy;
 };
 
 // ── Statistics ───────────────────────────────────────────────────────────────
 
-struct HotsetStats {
-    size_t   poolSizeBytes = 0;
+struct HotsetStats
+{
+    size_t poolSizeBytes = 0;
     uint32_t instancesCached = 0;
     uint32_t hotSetCount = 0;
     uint64_t cacheHits = 0;
@@ -82,15 +85,18 @@ struct HotsetStats {
 
 // ── Main class ───────────────────────────────────────────────────────────────
 
-class DecoderHotsetManager {
-public:
-    explicit DecoderHotsetManager(size_t maxPoolBytes = 256ULL * 1024 * 1024,
-        uint32_t hotSetSize = 8) noexcept
-        : m_maxPoolBytes(maxPoolBytes), m_hotSetSize(hotSetSize) {
+class DecoderHotsetManager
+{
+  public:
+    explicit DecoderHotsetManager(size_t maxPoolBytes = 256ULL * 1024 * 1024, uint32_t hotSetSize = 8) noexcept
+        : m_maxPoolBytes(maxPoolBytes)
+        , m_hotSetSize(hotSetSize)
+    {
         InitializeSRWLock(&m_lock);
     }
 
-    ~DecoderHotsetManager() {
+    ~DecoderHotsetManager()
+    {
         StopBackgroundThread();
 
         AcquireSRWLockExclusive(&m_lock);
@@ -98,8 +104,7 @@ public:
         for (auto& [type, instances] : m_pool) {
             auto factIt = m_factories.find(type);
             for (auto& inst : instances) {
-                if (inst.instance && factIt != m_factories.end() &&
-                    factIt->second.destroy) {
+                if (inst.instance && factIt != m_factories.end() && factIt->second.destroy) {
                     factIt->second.destroy(inst.instance);
                 }
                 inst.instance = nullptr;
@@ -115,9 +120,8 @@ public:
 
     // ── Factory registration ─────────────────────────────────────
 
-    void RegisterFactory(uint32_t decoderType,
-        std::function<void* ()> create,
-        std::function<void(void*)> destroy) {
+    void RegisterFactory(uint32_t decoderType, std::function<void*()> create, std::function<void(void*)> destroy)
+    {
         AcquireSRWLockExclusive(&m_lock);
         DecoderFactory factory;
         factory.create = std::move(create);
@@ -128,7 +132,8 @@ public:
 
     // ── Acquire / Release ────────────────────────────────────────
 
-    void* AcquireDecoder(uint32_t decoderType) {
+    void* AcquireDecoder(uint32_t decoderType)
+    {
         AcquireSRWLockExclusive(&m_lock);
 
         auto poolIt = m_pool.find(decoderType);
@@ -169,9 +174,10 @@ public:
         return nullptr;
     }
 
-    void ReleaseDecoder(uint32_t decoderType, void* instance,
-        size_t footprint) {
-        if (!instance) return;
+    void ReleaseDecoder(uint32_t decoderType, void* instance, size_t footprint)
+    {
+        if (!instance)
+            return;
 
         AcquireSRWLockExclusive(&m_lock);
 
@@ -196,27 +202,32 @@ public:
 
     // ── Pool size management ─────────────────────────────────────
 
-    void SetMaxPoolSize(size_t maxBytes) {
+    void SetMaxPoolSize(size_t maxBytes)
+    {
         AcquireSRWLockExclusive(&m_lock);
         m_maxPoolBytes = maxBytes;
         // Evict if over new budget
         while (m_currentPoolBytes > m_maxPoolBytes) {
-            if (!EvictLRULocked(0)) break;
+            if (!EvictLRULocked(0))
+                break;
         }
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    void Trim(size_t targetBytes) {
+    void Trim(size_t targetBytes)
+    {
         AcquireSRWLockExclusive(&m_lock);
         while (m_currentPoolBytes > targetBytes) {
-            if (!EvictLRULocked(0)) break;
+            if (!EvictLRULocked(0))
+                break;
         }
         ReleaseSRWLockExclusive(&m_lock);
     }
 
     // ── Statistics ───────────────────────────────────────────────
 
-    HotsetStats GetStats() {
+    HotsetStats GetStats()
+    {
         AcquireSRWLockExclusive(&m_lock);
         HotsetStats stats = m_stats;
         stats.poolSizeBytes = m_currentPoolBytes;
@@ -231,22 +242,24 @@ public:
 
     // ── Background hot-set recalculation ─────────────────────────
 
-    void StartBackgroundThread(uint32_t intervalMs = 30000) {
+    void StartBackgroundThread(uint32_t intervalMs = 30000)
+    {
         StopBackgroundThread();
 
         m_bgRunning.store(true, std::memory_order_release);
         m_bgIntervalMs = intervalMs;
         m_bgThread = std::thread([this]() {
             while (m_bgRunning.load(std::memory_order_acquire)) {
-                std::this_thread::sleep_for(
-                    std::chrono::milliseconds(m_bgIntervalMs));
-                if (!m_bgRunning.load(std::memory_order_acquire)) break;
+                std::this_thread::sleep_for(std::chrono::milliseconds(m_bgIntervalMs));
+                if (!m_bgRunning.load(std::memory_order_acquire))
+                    break;
                 RecalculateHotSet();
             }
-            });
+        });
     }
 
-    void StopBackgroundThread() {
+    void StopBackgroundThread()
+    {
         m_bgRunning.store(false, std::memory_order_release);
         if (m_bgThread.joinable()) {
             m_bgThread.join();
@@ -255,28 +268,27 @@ public:
 
     // ── Manual hot-set recalculation ─────────────────────────────
 
-    void RecalculateHotSet() {
+    void RecalculateHotSet()
+    {
         AcquireSRWLockExclusive(&m_lock);
 
         // Build a sorted list of decoder types by usage count (descending)
-        struct TypeUsage {
+        struct TypeUsage
+        {
             uint32_t type;
             uint64_t count;
         };
         std::vector<TypeUsage> usageList;
         usageList.reserve(m_usageCounts.size());
         for (const auto& [type, count] : m_usageCounts) {
-            usageList.push_back({ type, count });
+            usageList.push_back({type, count});
         }
         std::sort(usageList.begin(), usageList.end(),
-            [](const TypeUsage& a, const TypeUsage& b) {
-                return a.count > b.count;
-            });
+                  [](const TypeUsage& a, const TypeUsage& b) { return a.count > b.count; });
 
         // Top N become the hot set
         m_hotSet.clear();
-        uint32_t n = (std::min)(m_hotSetSize,
-            static_cast<uint32_t>(usageList.size()));
+        uint32_t n = (std::min)(m_hotSetSize, static_cast<uint32_t>(usageList.size()));
         for (uint32_t i = 0; i < n; ++i) {
             m_hotSet.push_back(usageList[i].type);
         }
@@ -286,15 +298,16 @@ public:
 
     // ── Query ────────────────────────────────────────────────────
 
-    bool IsInHotSet(uint32_t decoderType) {
+    bool IsInHotSet(uint32_t decoderType)
+    {
         AcquireSRWLockExclusive(&m_lock);
-        bool found = std::find(m_hotSet.begin(), m_hotSet.end(),
-            decoderType) != m_hotSet.end();
+        bool found = std::find(m_hotSet.begin(), m_hotSet.end(), decoderType) != m_hotSet.end();
         ReleaseSRWLockExclusive(&m_lock);
         return found;
     }
 
-    uint32_t GetPooledInstanceCount(uint32_t decoderType) {
+    uint32_t GetPooledInstanceCount(uint32_t decoderType)
+    {
         AcquireSRWLockExclusive(&m_lock);
         uint32_t count = 0;
         auto it = m_pool.find(decoderType);
@@ -305,20 +318,21 @@ public:
         return count;
     }
 
-private:
+  private:
     // ── Eviction (caller holds lock) ─────────────────────────────
 
-    bool EvictLRULocked([[maybe_unused]] size_t spaceNeeded) {
+    bool EvictLRULocked([[maybe_unused]] size_t spaceNeeded)
+    {
         // Find the pool entry with the oldest lastUsed that is NOT in hot set
         uint32_t bestType = UINT32_MAX;
-        size_t   bestIdx = SIZE_MAX;
+        size_t bestIdx = SIZE_MAX;
         uint64_t oldestTick = UINT64_MAX;
 
         for (auto& [type, instances] : m_pool) {
-            if (instances.empty()) continue;
+            if (instances.empty())
+                continue;
             // Skip hot set types
-            if (std::find(m_hotSet.begin(), m_hotSet.end(), type)
-                != m_hotSet.end()) {
+            if (std::find(m_hotSet.begin(), m_hotSet.end(), type) != m_hotSet.end()) {
                 continue;
             }
             for (size_t i = 0; i < instances.size(); ++i) {
@@ -333,7 +347,8 @@ private:
         // If all non-hot entries are exhausted, evict from hot set too
         if (bestType == UINT32_MAX) {
             for (auto& [type, instances] : m_pool) {
-                if (instances.empty()) continue;
+                if (instances.empty())
+                    continue;
                 for (size_t i = 0; i < instances.size(); ++i) {
                     if (instances[i].lastUsed < oldestTick) {
                         oldestTick = instances[i].lastUsed;
@@ -344,15 +359,15 @@ private:
             }
         }
 
-        if (bestType == UINT32_MAX) return false;
+        if (bestType == UINT32_MAX)
+            return false;
 
         auto& instances = m_pool[bestType];
         DecoderInstance& victim = instances[bestIdx];
 
         // Destroy the instance
         auto factIt = m_factories.find(bestType);
-        if (factIt != m_factories.end() && factIt->second.destroy &&
-            victim.instance) {
+        if (factIt != m_factories.end() && factIt->second.destroy && victim.instance) {
             factIt->second.destroy(victim.instance);
         }
 
@@ -389,10 +404,10 @@ private:
     HotsetStats m_stats{};
 
     // Background thread
-    std::atomic<bool> m_bgRunning{ false };
-    uint32_t          m_bgIntervalMs = 30000;
-    std::thread       m_bgThread;
+    std::atomic<bool> m_bgRunning{false};
+    uint32_t m_bgIntervalMs = 30000;
+    std::thread m_bgThread;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

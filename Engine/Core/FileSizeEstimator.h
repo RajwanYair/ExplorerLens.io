@@ -5,30 +5,44 @@
 // without performing full extraction, enabling informed decode decisions.
 //
 #pragma once
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct FileSizeEstimatorConfig {
+struct FileSizeEstimatorConfig
+{
     bool enabled = true;
     uint64_t maxHeaderRead = 4096;
     std::string label = "FileSizeEstimator";
 };
 
-class FileSizeEstimator {
-public:
-    bool Initialize() {
-        if (m_initialized) return true;
+class FileSizeEstimator
+{
+  public:
+    bool Initialize()
+    {
+        if (m_initialized)
+            return true;
         m_initialized = true;
         return true;
     }
-    bool IsInitialized() const { return m_initialized; }
-    FileSizeEstimatorConfig GetConfig() const { return m_config; }
-    std::string GetName() const { return m_config.label; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
+    FileSizeEstimatorConfig GetConfig() const
+    {
+        return m_config;
+    }
+    std::string GetName() const
+    {
+        return m_config.label;
+    }
 
-    struct SizeEstimate {
+    struct SizeEstimate
+    {
         uint64_t compressedSize = 0;
         uint64_t uncompressedSize = 0;
         uint32_t fileCount = 0;
@@ -36,7 +50,8 @@ public:
         bool isEstimate = true;
     };
 
-    SizeEstimate EstimateFromHeader(const uint8_t* header, size_t len) const {
+    SizeEstimate EstimateFromHeader(const uint8_t* header, size_t len) const
+    {
         SizeEstimate est;
         if (len >= 30 && header[0] == 0x50 && header[1] == 0x4B) {
             // ZIP local file header — read compressed/uncompressed sizes
@@ -49,14 +64,15 @@ public:
         return est;
     }
 
-    bool IsLargeArchive(const SizeEstimate& est, uint64_t threshold = 100 * 1024 * 1024) const {
+    bool IsLargeArchive(const SizeEstimate& est, uint64_t threshold = 100 * 1024 * 1024) const
+    {
         return est.uncompressedSize > threshold;
     }
 
-private:
+  private:
     bool m_initialized = false;
     FileSizeEstimatorConfig m_config;
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

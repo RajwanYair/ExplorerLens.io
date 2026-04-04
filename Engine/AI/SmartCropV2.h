@@ -5,13 +5,13 @@
 //
 #pragma once
 #include <windows.h>
-#include <string>
-#include <vector>
-#include <cstdint>
-#include <cmath>
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <cstdint>
 #include <numeric>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -19,49 +19,60 @@ namespace Engine {
 // ── SmartCropEngine V1 types (consolidated from SmartCropEngine.h) ─────────
 
 /// A candidate crop rectangle with its saliency score.
-struct CropRect {
+struct CropRect
+{
     uint32_t x = 0;
     uint32_t y = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    float    score = 0.0f;
+    float score = 0.0f;
 };
 
 /// Cumulative crop-operation statistics.
-struct CropStats {
+struct CropStats
+{
     uint64_t cropsComputed = 0;
-    double   totalSaliency = 0.0;
-    double   totalComputeMs = 0.0;
-    double AvgSaliency()  const { return cropsComputed ? totalSaliency / static_cast<double>(cropsComputed) : 0.0; }
-    double AvgComputeMs() const { return cropsComputed ? totalComputeMs / static_cast<double>(cropsComputed) : 0.0; }
+    double totalSaliency = 0.0;
+    double totalComputeMs = 0.0;
+    double AvgSaliency() const
+    {
+        return cropsComputed ? totalSaliency / static_cast<double>(cropsComputed) : 0.0;
+    }
+    double AvgComputeMs() const
+    {
+        return cropsComputed ? totalComputeMs / static_cast<double>(cropsComputed) : 0.0;
+    }
 };
 
 /// Intelligent saliency-based image cropper.
-class SmartCropEngine {
-public:
-    SmartCropEngine() {
+class SmartCropEngine
+{
+  public:
+    SmartCropEngine()
+    {
         InitializeSRWLock(&m_statsLock);
     }
 
     /// Set center-bias weight (default 0.15). Must be in [0, 1].
-    inline void SetCenterBias(float weight) {
+    inline void SetCenterBias(float weight)
+    {
         m_centerBiasWeight = (std::max)(0.0f, (std::min)(weight, 1.0f));
     }
 
     /// Find the single best crop rectangle.
-    inline CropRect FindBestCrop(const uint8_t* rgbaData,
-        uint32_t srcWidth, uint32_t srcHeight,
-        uint32_t targetWidth, uint32_t targetHeight) {
+    inline CropRect FindBestCrop(const uint8_t* rgbaData, uint32_t srcWidth, uint32_t srcHeight, uint32_t targetWidth,
+                                 uint32_t targetHeight)
+    {
         auto crops = FindTopCrops(rgbaData, srcWidth, srcHeight, targetWidth, targetHeight, 1);
-        if (crops.empty()) return CropRect{ 0, 0, targetWidth, targetHeight, 0.0f };
+        if (crops.empty())
+            return CropRect{0, 0, targetWidth, targetHeight, 0.0f};
         return crops.front();
     }
 
     /// Find the top-N crop rectangles ranked by saliency score.
-    inline std::vector<CropRect> FindTopCrops(const uint8_t* rgbaData,
-        uint32_t srcW, uint32_t srcH,
-        uint32_t targetW, uint32_t targetH,
-        uint32_t count) {
+    inline std::vector<CropRect> FindTopCrops(const uint8_t* rgbaData, uint32_t srcW, uint32_t srcH, uint32_t targetW,
+                                              uint32_t targetH, uint32_t count)
+    {
         using Clock = std::chrono::high_resolution_clock;
         auto t0 = Clock::now();
 
@@ -75,13 +86,13 @@ public:
             cropH = srcH;
             cropW = static_cast<uint32_t>(srcH * targetAspect);
             cropW = (std::min)(cropW, srcW);
-        }
-        else {
+        } else {
             cropW = srcW;
             cropH = static_cast<uint32_t>(srcW / targetAspect);
             cropH = (std::min)(cropH, srcH);
         }
-        if (cropW == 0 || cropH == 0) return results;
+        if (cropW == 0 || cropH == 0)
+            return results;
 
         uint32_t qW = (std::max)(srcW / 4, 1u);
         uint32_t qH = (std::max)(srcH / 4, 1u);
@@ -95,19 +106,23 @@ public:
         uint32_t stepX = (std::max)((qW - qCropW) / 16, 1u);
         uint32_t stepY = (std::max)((qH - qCropH) / 16, 1u);
 
-        struct Candidate { uint32_t qx, qy; float score; };
+        struct Candidate
+        {
+            uint32_t qx, qy;
+            float score;
+        };
         std::vector<Candidate> candidates;
         candidates.reserve(256);
 
         for (uint32_t qy = 0; qy + qCropH <= qH; qy += stepY) {
             for (uint32_t qx = 0; qx + qCropW <= qW; qx += stepX) {
                 float s = SumRegion(saliency, qW, qx, qy, qCropW, qCropH);
-                candidates.push_back({ qx, qy, s });
+                candidates.push_back({qx, qy, s});
             }
         }
 
         std::sort(candidates.begin(), candidates.end(),
-            [](const Candidate& a, const Candidate& b) { return a.score > b.score; });
+                  [](const Candidate& a, const Candidate& b) { return a.score > b.score; });
 
         uint32_t n = (std::min)(count, static_cast<uint32_t>(candidates.size()));
         for (uint32_t i = 0; i < n; ++i) {
@@ -125,7 +140,8 @@ public:
 
         AcquireSRWLockExclusive(&m_statsLock);
         m_stats.cropsComputed++;
-        if (!results.empty()) m_stats.totalSaliency += results.front().score;
+        if (!results.empty())
+            m_stats.totalSaliency += results.front().score;
         m_stats.totalComputeMs += ms;
         ReleaseSRWLockExclusive(&m_statsLock);
 
@@ -133,17 +149,18 @@ public:
     }
 
     /// Retrieve cumulative statistics.
-    inline CropStats GetStats() const {
+    inline CropStats GetStats() const
+    {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_statsLock));
         CropStats copy = m_stats;
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_statsLock));
         return copy;
     }
 
-private:
-    inline std::vector<float> BuildSaliencyMap(const uint8_t* rgba,
-        uint32_t srcW, uint32_t srcH,
-        uint32_t qW, uint32_t qH) const {
+  private:
+    inline std::vector<float> BuildSaliencyMap(const uint8_t* rgba, uint32_t srcW, uint32_t srcH, uint32_t qW,
+                                               uint32_t qH) const
+    {
         const uint32_t qCount = qW * qH;
         std::vector<float> gray(qCount, 0.0f);
         std::vector<float> contrastMap(qCount, 0.0f);
@@ -222,10 +239,12 @@ private:
 
         for (uint32_t qy = 1; qy + 1 < qH; ++qy) {
             for (uint32_t qx = 1; qx + 1 < qW; ++qx) {
-                float gx = -gray[(qy - 1) * qW + (qx - 1)] - 2.0f * gray[qy * qW + (qx - 1)] - gray[(qy + 1) * qW + (qx - 1)]
-                    + gray[(qy - 1) * qW + (qx + 1)] + 2.0f * gray[qy * qW + (qx + 1)] + gray[(qy + 1) * qW + (qx + 1)];
-                float gy = -gray[(qy - 1) * qW + (qx - 1)] - 2.0f * gray[(qy - 1) * qW + qx] - gray[(qy - 1) * qW + (qx + 1)]
-                    + gray[(qy + 1) * qW + (qx - 1)] + 2.0f * gray[(qy + 1) * qW + qx] + gray[(qy + 1) * qW + (qx + 1)];
+                float gx = -gray[(qy - 1) * qW + (qx - 1)] - 2.0f * gray[qy * qW + (qx - 1)]
+                           - gray[(qy + 1) * qW + (qx - 1)] + gray[(qy - 1) * qW + (qx + 1)]
+                           + 2.0f * gray[qy * qW + (qx + 1)] + gray[(qy + 1) * qW + (qx + 1)];
+                float gy = -gray[(qy - 1) * qW + (qx - 1)] - 2.0f * gray[(qy - 1) * qW + qx]
+                           - gray[(qy - 1) * qW + (qx + 1)] + gray[(qy + 1) * qW + (qx - 1)]
+                           + 2.0f * gray[(qy + 1) * qW + qx] + gray[(qy + 1) * qW + (qx + 1)];
                 edgeMap[qy * qW + qx] = std::sqrt(gx * gx + gy * gy) / 1442.0f;
             }
         }
@@ -238,18 +257,15 @@ private:
 
         std::vector<float> saliency(qCount, 0.0f);
         for (uint32_t i = 0; i < qCount; ++i) {
-            saliency[i] = wContrast * contrastMap[i]
-                + wEdge * edgeMap[i]
-                + wColorUniq * colorUniq[i]
-                + wCenter * centerBias[i]
-                + wSkin * skinMap[i];
+            saliency[i] = wContrast * contrastMap[i] + wEdge * edgeMap[i] + wColorUniq * colorUniq[i]
+                          + wCenter * centerBias[i] + wSkin * skinMap[i];
         }
         return saliency;
     }
 
-    static inline float SumRegion(const std::vector<float>& map, uint32_t mapW,
-        uint32_t rx, uint32_t ry,
-        uint32_t rw, uint32_t rh) {
+    static inline float SumRegion(const std::vector<float>& map, uint32_t mapW, uint32_t rx, uint32_t ry, uint32_t rw,
+                                  uint32_t rh)
+    {
         float s = 0.0f;
         for (uint32_t y = ry; y < ry + rh; ++y) {
             for (uint32_t x = rx; x < rx + rw; ++x) {
@@ -260,20 +276,40 @@ private:
         return (area > 0.0f) ? s / area : 0.0f;
     }
 
-    float       m_centerBiasWeight = 0.15f;
+    float m_centerBiasWeight = 0.15f;
     mutable SRWLOCK m_statsLock{};
-    CropStats   m_stats{};
+    CropStats m_stats{};
 };
 
 // ── SmartCropV2 (strategy-based cropper) ───────────────────────────────────
 
 enum class CropStrategy : uint8_t {
-    CenterCrop = 0, SaliencyMap, FaceCentered, RuleOfThirds, GoldenRatio, SubjectAware, COUNT
+    CenterCrop = 0,
+    SaliencyMap,
+    FaceCentered,
+    RuleOfThirds,
+    GoldenRatio,
+    SubjectAware,
+    COUNT
 };
-enum class CropAspectRatio : uint8_t { Square = 0, Landscape4_3, Portrait3_4, Wide16_9, Auto, COUNT };
-enum class CropPaddingMode : uint8_t { None = 0, Extend, Blur, SolidColor, COUNT };
+enum class CropAspectRatio : uint8_t {
+    Square = 0,
+    Landscape4_3,
+    Portrait3_4,
+    Wide16_9,
+    Auto,
+    COUNT
+};
+enum class CropPaddingMode : uint8_t {
+    None = 0,
+    Extend,
+    Blur,
+    SolidColor,
+    COUNT
+};
 
-struct SmartCropRequest {
+struct SmartCropRequest
+{
     uint32_t targetWidth = 256;
     uint32_t targetHeight = 256;
     CropStrategy strategy = CropStrategy::SaliencyMap;
@@ -281,48 +317,80 @@ struct SmartCropRequest {
     CropPaddingMode padding = CropPaddingMode::Blur;
 };
 
-struct SmartCropResult {
+struct SmartCropResult
+{
     uint32_t cropX = 0, cropY = 0, cropW = 0, cropH = 0;
     CropStrategy usedStrategy = CropStrategy::CenterCrop;
     float saliencyScore = 0.0f;
     bool faceDetected = false;
 };
 
-class SmartCropV2 {
-public:
-    static const wchar_t* StrategyName(CropStrategy s) {
+class SmartCropV2
+{
+  public:
+    static const wchar_t* StrategyName(CropStrategy s)
+    {
         switch (s) {
-        case CropStrategy::CenterCrop: return L"Center Crop";
-        case CropStrategy::SaliencyMap: return L"Saliency Map";
-        case CropStrategy::FaceCentered: return L"Face Centered";
-        case CropStrategy::RuleOfThirds: return L"Rule of Thirds";
-        case CropStrategy::GoldenRatio: return L"Golden Ratio";
-        case CropStrategy::SubjectAware: return L"Subject Aware";
-        default: return L"Unknown";
+            case CropStrategy::CenterCrop:
+                return L"Center Crop";
+            case CropStrategy::SaliencyMap:
+                return L"Saliency Map";
+            case CropStrategy::FaceCentered:
+                return L"Face Centered";
+            case CropStrategy::RuleOfThirds:
+                return L"Rule of Thirds";
+            case CropStrategy::GoldenRatio:
+                return L"Golden Ratio";
+            case CropStrategy::SubjectAware:
+                return L"Subject Aware";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* AspectRatioName(CropAspectRatio a) {
+    static const wchar_t* AspectRatioName(CropAspectRatio a)
+    {
         switch (a) {
-        case CropAspectRatio::Square: return L"1:1 Square";
-        case CropAspectRatio::Landscape4_3: return L"4:3 Landscape";
-        case CropAspectRatio::Portrait3_4: return L"3:4 Portrait";
-        case CropAspectRatio::Wide16_9: return L"16:9 Wide";
-        case CropAspectRatio::Auto: return L"Auto";
-        default: return L"Unknown";
+            case CropAspectRatio::Square:
+                return L"1:1 Square";
+            case CropAspectRatio::Landscape4_3:
+                return L"4:3 Landscape";
+            case CropAspectRatio::Portrait3_4:
+                return L"3:4 Portrait";
+            case CropAspectRatio::Wide16_9:
+                return L"16:9 Wide";
+            case CropAspectRatio::Auto:
+                return L"Auto";
+            default:
+                return L"Unknown";
         }
     }
-    static const wchar_t* PaddingModeName(CropPaddingMode p) {
+    static const wchar_t* PaddingModeName(CropPaddingMode p)
+    {
         switch (p) {
-        case CropPaddingMode::None: return L"None";
-        case CropPaddingMode::Extend: return L"Extend";
-        case CropPaddingMode::Blur: return L"Blur";
-        case CropPaddingMode::SolidColor: return L"Solid Color";
-        default: return L"Unknown";
+            case CropPaddingMode::None:
+                return L"None";
+            case CropPaddingMode::Extend:
+                return L"Extend";
+            case CropPaddingMode::Blur:
+                return L"Blur";
+            case CropPaddingMode::SolidColor:
+                return L"Solid Color";
+            default:
+                return L"Unknown";
         }
     }
-    static constexpr size_t StrategyCount() { return static_cast<size_t>(CropStrategy::COUNT); }
-    static constexpr size_t AspectRatioCount() { return static_cast<size_t>(CropAspectRatio::COUNT); }
-    static constexpr size_t PaddingCount() { return static_cast<size_t>(CropPaddingMode::COUNT); }
+    static constexpr size_t StrategyCount()
+    {
+        return static_cast<size_t>(CropStrategy::COUNT);
+    }
+    static constexpr size_t AspectRatioCount()
+    {
+        return static_cast<size_t>(CropAspectRatio::COUNT);
+    }
+    static constexpr size_t PaddingCount()
+    {
+        return static_cast<size_t>(CropPaddingMode::COUNT);
+    }
 
     //==========================================================================
     // Smart Crop — Gradient-weighted center of interest
@@ -331,23 +399,24 @@ public:
     /// Compute center-of-interest using gradient energy (Sobel magnitude).
     /// Returns (cx, cy) as the weighted center of visual interest.
     /// Input: 8-bit grayscale, width, height, stride.
-    static void ComputeCenterOfInterest(const uint8_t* gray, uint32_t width,
-        uint32_t height, uint32_t stride, float& outCX, float& outCY) {
+    static void ComputeCenterOfInterest(const uint8_t* gray, uint32_t width, uint32_t height, uint32_t stride,
+                                        float& outCX, float& outCY)
+    {
         outCX = static_cast<float>(width) / 2.0f;
         outCY = static_cast<float>(height) / 2.0f;
-        if (!gray || width < 3 || height < 3) return;
+        if (!gray || width < 3 || height < 3)
+            return;
         double weightedX = 0, weightedY = 0, totalWeight = 0;
         for (uint32_t y = 1; y < height - 1; ++y) {
             for (uint32_t x = 1; x < width - 1; ++x) {
                 // Sobel gradient magnitude (simplified)
                 int gx = -gray[(y - 1) * stride + (x - 1)] + gray[(y - 1) * stride + (x + 1)]
-                    - 2 * gray[y * stride + (x - 1)] + 2 * gray[y * stride + (x + 1)]
-                    - gray[(y + 1) * stride + (x - 1)] + gray[(y + 1) * stride + (x + 1)];
+                         - 2 * gray[y * stride + (x - 1)] + 2 * gray[y * stride + (x + 1)]
+                         - gray[(y + 1) * stride + (x - 1)] + gray[(y + 1) * stride + (x + 1)];
                 int gy = -gray[(y - 1) * stride + (x - 1)] - 2 * gray[(y - 1) * stride + x]
-                    - gray[(y - 1) * stride + (x + 1)]
-                    + gray[(y + 1) * stride + (x - 1)] + 2 * gray[(y + 1) * stride + x]
-                    + gray[(y + 1) * stride + (x + 1)];
-                double mag = gx * gx + gy * gy; // skip sqrt for perf
+                         - gray[(y - 1) * stride + (x + 1)] + gray[(y + 1) * stride + (x - 1)]
+                         + 2 * gray[(y + 1) * stride + x] + gray[(y + 1) * stride + (x + 1)];
+                double mag = gx * gx + gy * gy;  // skip sqrt for perf
                 weightedX += x * mag;
                 weightedY += y * mag;
                 totalWeight += mag;
@@ -362,32 +431,40 @@ public:
     /// Compute a crop region centered on the visual interest point.
     /// cropWidth/cropHeight: desired output dimensions.
     /// Returns: x, y, w, h of the crop rectangle (clamped to image bounds).
-    static SmartCropResult ComputeCropRegion(const uint8_t* gray, uint32_t width,
-        uint32_t height, uint32_t stride, uint32_t cropWidth, uint32_t cropHeight) {
+    static SmartCropResult ComputeCropRegion(const uint8_t* gray, uint32_t width, uint32_t height, uint32_t stride,
+                                             uint32_t cropWidth, uint32_t cropHeight)
+    {
         SmartCropResult result;
         result.usedStrategy = CropStrategy::SubjectAware;
-        if (!gray || width == 0 || height == 0) return result;
+        if (!gray || width == 0 || height == 0)
+            return result;
         // Clamp crop to image size
-        if (cropWidth > width) cropWidth = width;
-        if (cropHeight > height) cropHeight = height;
+        if (cropWidth > width)
+            cropWidth = width;
+        if (cropHeight > height)
+            cropHeight = height;
         // Find center of interest
         float cx, cy;
         ComputeCenterOfInterest(gray, width, height, stride, cx, cy);
         // Center crop on interest point, clamped to image bounds
         int x0 = static_cast<int>(cx) - static_cast<int>(cropWidth / 2);
         int y0 = static_cast<int>(cy) - static_cast<int>(cropHeight / 2);
-        if (x0 < 0) x0 = 0;
-        if (y0 < 0) y0 = 0;
-        if (x0 + cropWidth > width) x0 = width - cropWidth;
-        if (y0 + cropHeight > height) y0 = height - cropHeight;
+        if (x0 < 0)
+            x0 = 0;
+        if (y0 < 0)
+            y0 = 0;
+        if (x0 + cropWidth > width)
+            x0 = width - cropWidth;
+        if (y0 + cropHeight > height)
+            y0 = height - cropHeight;
         result.cropX = static_cast<uint32_t>(x0);
         result.cropY = static_cast<uint32_t>(y0);
         result.cropW = cropWidth;
         result.cropH = cropHeight;
-        result.saliencyScore = 0.8f; // Gradient-based heuristic
+        result.saliencyScore = 0.8f;  // Gradient-based heuristic
         return result;
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -12,7 +12,8 @@
 #ifdef __clang__
 extern "C" int LLVMFuzzerTestOneInput(const unsigned char* data, size_t size)
 {
-    if (size < 4) return 0;
+    if (size < 4)
+        return 0;
 
     // Minimal guard: reject empty or trivially undersized payloads.
     // The real decoder integration is wired in when the fuzz binary is linked
@@ -23,5 +24,8 @@ extern "C" int LLVMFuzzerTestOneInput(const unsigned char* data, size_t size)
 }
 #else
 // Stub for non-fuzzing builds so the file compiles under MSVC.
-int FuzzImageDecoder_Stub() { return 0; }
+int FuzzImageDecoder_Stub()
+{
+    return 0;
+}
 #endif

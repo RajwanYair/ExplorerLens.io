@@ -6,11 +6,11 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -24,19 +24,22 @@ enum class LODLevel : uint8_t {
     Full = 5
 };
 
-struct DisplayMetrics {
+struct DisplayMetrics
+{
     uint32_t screenWidthPx = 1920;
     uint32_t screenHeightPx = 1080;
     float dpi = 96.0f;
     float scaleFactor = 1.0f;
     bool isHDR = false;
 
-    inline float GetEffectiveDPI() const {
+    inline float GetEffectiveDPI() const
+    {
         return dpi * scaleFactor;
     }
 };
 
-struct LODRequest {
+struct LODRequest
+{
     uint32_t sourceWidth = 0;
     uint32_t sourceHeight = 0;
     uint32_t thumbnailWidth = 256;
@@ -44,7 +47,8 @@ struct LODRequest {
     DisplayMetrics display;
 };
 
-struct LODResult {
+struct LODResult
+{
     uint32_t decodeWidth = 0;
     uint32_t decodeHeight = 0;
     LODLevel level = LODLevel::Medium;
@@ -52,14 +56,17 @@ struct LODResult {
     double memorySavings = 0.0;
 };
 
-class AdaptiveLODEngine {
-public:
-    static AdaptiveLODEngine& Instance() {
+class AdaptiveLODEngine
+{
+  public:
+    static AdaptiveLODEngine& Instance()
+    {
         static AdaptiveLODEngine instance;
         return instance;
     }
 
-    inline LODResult ComputeOptimalLOD(const LODRequest& request) const {
+    inline LODResult ComputeOptimalLOD(const LODRequest& request) const
+    {
         LODResult result;
 
         float effectiveDPI = request.display.GetEffectiveDPI();
@@ -89,54 +96,84 @@ public:
         return result;
     }
 
-    inline LODLevel SelectLODLevel(float displayScale) const {
-        if (displayScale < 0.03f) return LODLevel::Thumbnail;
-        if (displayScale < 0.10f) return LODLevel::Low;
-        if (displayScale < 0.30f) return LODLevel::Medium;
-        if (displayScale < 0.60f) return LODLevel::High;
-        if (displayScale < 0.90f) return LODLevel::Ultra;
+    inline LODLevel SelectLODLevel(float displayScale) const
+    {
+        if (displayScale < 0.03f)
+            return LODLevel::Thumbnail;
+        if (displayScale < 0.10f)
+            return LODLevel::Low;
+        if (displayScale < 0.30f)
+            return LODLevel::Medium;
+        if (displayScale < 0.60f)
+            return LODLevel::High;
+        if (displayScale < 0.90f)
+            return LODLevel::Ultra;
         return LODLevel::Full;
     }
 
-    inline std::string LODLevelToString(LODLevel level) const {
+    inline std::string LODLevelToString(LODLevel level) const
+    {
         switch (level) {
-        case LODLevel::Thumbnail: return "Thumbnail";
-        case LODLevel::Low:       return "Low";
-        case LODLevel::Medium:    return "Medium";
-        case LODLevel::High:      return "High";
-        case LODLevel::Ultra:     return "Ultra";
-        case LODLevel::Full:      return "Full";
-        default:                  return "Unknown";
+            case LODLevel::Thumbnail:
+                return "Thumbnail";
+            case LODLevel::Low:
+                return "Low";
+            case LODLevel::Medium:
+                return "Medium";
+            case LODLevel::High:
+                return "High";
+            case LODLevel::Ultra:
+                return "Ultra";
+            case LODLevel::Full:
+                return "Full";
+            default:
+                return "Unknown";
         }
     }
 
-    inline float GetDecodeScale(LODLevel level) const {
+    inline float GetDecodeScale(LODLevel level) const
+    {
         switch (level) {
-        case LODLevel::Thumbnail: return 0.03125f;
-        case LODLevel::Low:       return 0.125f;
-        case LODLevel::Medium:    return 0.25f;
-        case LODLevel::High:      return 0.5f;
-        case LODLevel::Ultra:     return 0.75f;
-        case LODLevel::Full:      return 1.0f;
-        default:                  return 0.25f;
+            case LODLevel::Thumbnail:
+                return 0.03125f;
+            case LODLevel::Low:
+                return 0.125f;
+            case LODLevel::Medium:
+                return 0.25f;
+            case LODLevel::High:
+                return 0.5f;
+            case LODLevel::Ultra:
+                return 0.75f;
+            case LODLevel::Full:
+                return 1.0f;
+            default:
+                return 0.25f;
         }
     }
 
-private:
+  private:
     AdaptiveLODEngine() = default;
 
-    inline float GetQualityMultiplier(LODLevel level) const {
+    inline float GetQualityMultiplier(LODLevel level) const
+    {
         switch (level) {
-        case LODLevel::Thumbnail: return 0.5f;
-        case LODLevel::Low:       return 0.7f;
-        case LODLevel::Medium:    return 0.85f;
-        case LODLevel::High:      return 0.95f;
-        case LODLevel::Ultra:     return 0.98f;
-        case LODLevel::Full:      return 1.0f;
-        default:                  return 0.85f;
+            case LODLevel::Thumbnail:
+                return 0.5f;
+            case LODLevel::Low:
+                return 0.7f;
+            case LODLevel::Medium:
+                return 0.85f;
+            case LODLevel::High:
+                return 0.95f;
+            case LODLevel::Ultra:
+                return 0.98f;
+            case LODLevel::Full:
+                return 1.0f;
+            default:
+                return 0.85f;
         }
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

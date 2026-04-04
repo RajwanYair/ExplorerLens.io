@@ -12,34 +12,36 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <algorithm>
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <algorithm>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct PluginDependencyDecl {
+struct PluginDependencyDecl
+{
     std::wstring pluginId;
     std::wstring dependsOnId;
-    uint32_t     minVersionMajor = 0;
-    uint32_t     minVersionMinor = 0;
-    bool         optional = false;  // If true, missing dep doesn't block
+    uint32_t minVersionMajor = 0;
+    uint32_t minVersionMinor = 0;
+    bool optional = false;  // If true, missing dep doesn't block
 };
 
-struct ResolverPluginNode {
+struct ResolverPluginNode
+{
     std::wstring pluginId;
-    uint32_t     versionMajor = 1;
-    uint32_t     versionMinor = 0;
+    uint32_t versionMajor = 1;
+    uint32_t versionMinor = 0;
     std::vector<PluginDependencyDecl> dependencies;
-    bool         resolved = false;
-    uint32_t     loadOrder = 0;
+    bool resolved = false;
+    uint32_t loadOrder = 0;
 };
 
 enum class DependencyResolutionStatus : uint32_t {
@@ -50,33 +52,41 @@ enum class DependencyResolutionStatus : uint32_t {
     EmptyGraph = 4
 };
 
-struct DependencyResolutionResult {
+struct DependencyResolutionResult
+{
     DependencyResolutionStatus status = DependencyResolutionStatus::Success;
-    std::vector<std::wstring>  loadOrder;       // Topologically sorted
-    std::vector<std::wstring>  unresolvedDeps;  // Missing dependencies
-    std::vector<std::wstring>  cyclicPlugins;   // Plugins in cycles
-    std::wstring               errorMessage;
+    std::vector<std::wstring> loadOrder;       // Topologically sorted
+    std::vector<std::wstring> unresolvedDeps;  // Missing dependencies
+    std::vector<std::wstring> cyclicPlugins;   // Plugins in cycles
+    std::wstring errorMessage;
 };
 
 // ========================================================================
 // PluginDependencyResolver — Graph-based plugin dependency ordering
 // ========================================================================
-class PluginDependencyResolver {
-public:
-    static PluginDependencyResolver& Instance() {
+class PluginDependencyResolver
+{
+  public:
+    static PluginDependencyResolver& Instance()
+    {
         static PluginDependencyResolver instance;
         return instance;
     }
 
-    void Initialize() {
+    void Initialize()
+    {
         m_nodes.clear();
         m_initialized = true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
     // Register a plugin
-    void RegisterPlugin(const std::wstring& pluginId, uint32_t versionMajor = 1, uint32_t versionMinor = 0) {
+    void RegisterPlugin(const std::wstring& pluginId, uint32_t versionMajor = 1, uint32_t versionMinor = 0)
+    {
         ResolverPluginNode node;
         node.pluginId = pluginId;
         node.versionMajor = versionMajor;
@@ -85,10 +95,12 @@ public:
     }
 
     // Add a dependency
-    void AddDependency(const std::wstring& pluginId, const std::wstring& dependsOnId,
-        uint32_t minMajor = 0, uint32_t minMinor = 0, bool optional = false) {
+    void AddDependency(const std::wstring& pluginId, const std::wstring& dependsOnId, uint32_t minMajor = 0,
+                       uint32_t minMinor = 0, bool optional = false)
+    {
         auto it = m_nodes.find(pluginId);
-        if (it == m_nodes.end()) return;
+        if (it == m_nodes.end())
+            return;
 
         PluginDependencyDecl dep;
         dep.pluginId = pluginId;
@@ -100,7 +112,8 @@ public:
     }
 
     // Resolve all dependencies (topological sort)
-    DependencyResolutionResult Resolve() {
+    DependencyResolutionResult Resolve()
+    {
         DependencyResolutionResult result;
 
         if (m_nodes.empty()) {
@@ -129,8 +142,8 @@ public:
                 auto depIt = m_nodes.find(dep.dependsOnId);
                 if (depIt != m_nodes.end()) {
                     auto& depNode = depIt->second;
-                    if (depNode.versionMajor < dep.minVersionMajor ||
-                        (depNode.versionMajor == dep.minVersionMajor && depNode.versionMinor < dep.minVersionMinor)) {
+                    if (depNode.versionMajor < dep.minVersionMajor
+                        || (depNode.versionMajor == dep.minVersionMajor && depNode.versionMinor < dep.minVersionMinor)) {
                         result.status = DependencyResolutionStatus::VersionConflict;
                         result.errorMessage = L"Version conflict: " + dep.dependsOnId;
                         return result;
@@ -141,7 +154,8 @@ public:
 
         // Topological sort using Kahn's algorithm
         std::unordered_map<std::wstring, uint32_t> inDegree;
-        for (auto& [id, node] : m_nodes) inDegree[id] = 0;
+        for (auto& [id, node] : m_nodes)
+            inDegree[id] = 0;
 
         for (auto& [id, node] : m_nodes) {
             for (auto& dep : node.dependencies) {
@@ -153,7 +167,8 @@ public:
 
         std::vector<std::wstring> queue;
         for (auto& [id, deg] : inDegree) {
-            if (deg == 0) queue.push_back(id);
+            if (deg == 0)
+                queue.push_back(id);
         }
 
         while (!queue.empty()) {
@@ -179,7 +194,8 @@ public:
             result.status = DependencyResolutionStatus::CyclicDependency;
             result.errorMessage = L"Cyclic dependencies detected";
             for (auto& [id, deg] : inDegree) {
-                if (deg > 0) result.cyclicPlugins.push_back(id);
+                if (deg > 0)
+                    result.cyclicPlugins.push_back(id);
             }
             return result;
         }
@@ -189,19 +205,23 @@ public:
     }
 
     // Get registered plugin count
-    uint32_t GetPluginCount() const { return static_cast<uint32_t>(m_nodes.size()); }
+    uint32_t GetPluginCount() const
+    {
+        return static_cast<uint32_t>(m_nodes.size());
+    }
 
     // Check if a plugin is registered
-    bool HasPlugin(const std::wstring& pluginId) const {
+    bool HasPlugin(const std::wstring& pluginId) const
+    {
         return m_nodes.find(pluginId) != m_nodes.end();
     }
 
-private:
+  private:
     PluginDependencyResolver() = default;
 
     std::unordered_map<std::wstring, ResolverPluginNode> m_nodes;
     bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

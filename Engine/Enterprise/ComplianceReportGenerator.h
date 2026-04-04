@@ -6,62 +6,65 @@
 //
 #pragma once
 
-#include <string>
-#include <vector>
-#include <functional>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens::Engine {
 
 enum class ComplianceFramework : uint8_t {
-    GDPR     = 0,
-    HIPAA    = 1,
-    SOC2     = 2,
+    GDPR = 0,
+    HIPAA = 1,
+    SOC2 = 2,
     ISO27001 = 3,
     NIST_CSF = 4
 };
 
 enum class ReportFormat : uint8_t {
-    PDF     = 0,
+    PDF = 0,
     JSON_LD = 1,
-    HTML    = 2,
-    XLSX    = 3
+    HTML = 2,
+    XLSX = 3
 };
 
 enum class ControlStatus : uint8_t {
-    Compliant     = 0,
-    NonCompliant  = 1,
-    Partial       = 2,
+    Compliant = 0,
+    NonCompliant = 1,
+    Partial = 2,
     NotApplicable = 3,
-    InReview      = 4
+    InReview = 4
 };
 
-struct ComplianceEvidence {
+struct ComplianceEvidence
+{
     ComplianceFramework framework{ComplianceFramework::SOC2};
-    std::string         controlId;
-    std::string         status;
-    std::string         evidence;
-    std::string         collectedBy;
+    std::string controlId;
+    std::string status;
+    std::string evidence;
+    std::string collectedBy;
     std::chrono::system_clock::time_point timestamp;
 };
 
-struct ComplianceSummary {
+struct ComplianceSummary
+{
     ComplianceFramework framework{ComplianceFramework::SOC2};
-    uint32_t            totalControls{0};
-    uint32_t            compliantControls{0};
-    uint32_t            nonCompliantControls{0};
-    uint32_t            partialControls{0};
-    double              compliancePercentage{0.0};
+    uint32_t totalControls{0};
+    uint32_t compliantControls{0};
+    uint32_t nonCompliantControls{0};
+    uint32_t partialControls{0};
+    double compliancePercentage{0.0};
 };
 
-class ComplianceReportGenerator {
-public:
-    ComplianceReportGenerator()  = default;
+class ComplianceReportGenerator
+{
+  public:
+    ComplianceReportGenerator() = default;
     ~ComplianceReportGenerator() = default;
 
-    ComplianceReportGenerator(const ComplianceReportGenerator&)            = delete;
+    ComplianceReportGenerator(const ComplianceReportGenerator&) = delete;
     ComplianceReportGenerator& operator=(const ComplianceReportGenerator&) = delete;
 
     // Evidence management
@@ -70,34 +73,29 @@ public:
     std::vector<ComplianceEvidence> GetEvidence(ComplianceFramework framework) const;
 
     // Control status
-    ControlStatus GetControlStatus(const std::string& controlId,
-                                   ComplianceFramework framework) const;
-    bool          SetControlStatus(const std::string& controlId,
-                                   ComplianceFramework framework,
-                                   ControlStatus       status);
+    ControlStatus GetControlStatus(const std::string& controlId, ComplianceFramework framework) const;
+    bool SetControlStatus(const std::string& controlId, ComplianceFramework framework, ControlStatus status);
 
     // Report generation
-    bool GenerateReport(ComplianceFramework framework, ReportFormat format,
-                        const std::string& outputPath);
-    bool ExportToFormat(const std::string& reportId, ReportFormat format,
-                        const std::string& outputPath);
+    bool GenerateReport(ComplianceFramework framework, ReportFormat format, const std::string& outputPath);
+    bool ExportToFormat(const std::string& reportId, ReportFormat format, const std::string& outputPath);
 
     // Summary access
-    ComplianceSummary              GetSummary(ComplianceFramework framework) const;
+    ComplianceSummary GetSummary(ComplianceFramework framework) const;
     std::vector<ComplianceSummary> GetAllSummaries() const;
 
     // Progress notification
     using ReportCallback = std::function<void(const std::string& reportId, bool success)>;
     void SetReportCallback(ReportCallback cb);
 
-private:
+  private:
     std::vector<ComplianceEvidence> m_evidence;
-    ReportCallback                  m_reportCallback;
+    ReportCallback m_reportCallback;
 
     ComplianceSummary ComputeSummary(ComplianceFramework framework) const;
-    std::string       GenerateReportId() const;
-    bool              ValidateFrameworkControls(ComplianceFramework framework) const;
-    std::string       SerializeEvidence(const ComplianceEvidence& ev) const;
+    std::string GenerateReportId() const;
+    bool ValidateFrameworkControls(ComplianceFramework framework) const;
+    std::string SerializeEvidence(const ComplianceEvidence& ev) const;
 };
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

@@ -6,10 +6,10 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -30,52 +30,62 @@ enum class FontPreviewStyle : uint8_t {
     Custom = 4
 };
 
-struct FontPreviewConfig {
-    uint32_t          pointSize = 24;
-    uint32_t          dpi = 96;
-    uint32_t          maxWidth = 512;
-    uint32_t          maxHeight = 512;
-    GlyphHinting      hinting = GlyphHinting::Normal;
-    FontPreviewStyle   style = FontPreviewStyle::Pangram;
-    uint32_t          bgColor = 0xFFFFFFFF;
-    uint32_t          fgColor = 0xFF000000;
-    bool              antiAlias = true;
-    std::string       customText;
+struct FontPreviewConfig
+{
+    uint32_t pointSize = 24;
+    uint32_t dpi = 96;
+    uint32_t maxWidth = 512;
+    uint32_t maxHeight = 512;
+    GlyphHinting hinting = GlyphHinting::Normal;
+    FontPreviewStyle style = FontPreviewStyle::Pangram;
+    uint32_t bgColor = 0xFFFFFFFF;
+    uint32_t fgColor = 0xFF000000;
+    bool antiAlias = true;
+    std::string customText;
 };
 
-struct FTGlyphMetrics {
-    int32_t  bearingX = 0;
-    int32_t  bearingY = 0;
+struct FTGlyphMetrics
+{
+    int32_t bearingX = 0;
+    int32_t bearingY = 0;
     uint32_t advanceX = 0;
     uint32_t width = 0;
     uint32_t height = 0;
 };
 
-struct FontFileInfo {
-    std::string   familyName;
-    std::string   styleName;
-    uint32_t      numGlyphs = 0;
-    uint32_t      unitsPerEM = 0;
-    int32_t       ascender = 0;
-    int32_t       descender = 0;
-    bool          isScalable = false;
-    bool          hasKerning = false;
-    bool          isFixedWidth = false;
+struct FontFileInfo
+{
+    std::string familyName;
+    std::string styleName;
+    uint32_t numGlyphs = 0;
+    uint32_t unitsPerEM = 0;
+    int32_t ascender = 0;
+    int32_t descender = 0;
+    bool isScalable = false;
+    bool hasKerning = false;
+    bool isFixedWidth = false;
 };
 
-struct GlyphBitmap {
-    uint32_t              width = 0;
-    uint32_t              height = 0;
-    uint32_t              pitch = 0;
-    std::vector<uint8_t>  pixels;
-    FTGlyphMetrics          metrics;
+struct GlyphBitmap
+{
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t pitch = 0;
+    std::vector<uint8_t> pixels;
+    FTGlyphMetrics metrics;
 };
 
-class FreeTypeRenderer {
-public:
-    static FreeTypeRenderer& Instance() { static FreeTypeRenderer s; return s; }
+class FreeTypeRenderer
+{
+  public:
+    static FreeTypeRenderer& Instance()
+    {
+        static FreeTypeRenderer s;
+        return s;
+    }
 
-    bool Initialize(const FontPreviewConfig& config) {
+    bool Initialize(const FontPreviewConfig& config)
+    {
         m_config = config;
         m_config.pointSize = (std::max)(m_config.pointSize, uint32_t(6));
         m_config.pointSize = (std::min)(m_config.pointSize, uint32_t(200));
@@ -85,9 +95,11 @@ public:
         return true;
     }
 
-    std::vector<GlyphBitmap> RenderGlyphs(const std::string& text) {
+    std::vector<GlyphBitmap> RenderGlyphs(const std::string& text)
+    {
         std::vector<GlyphBitmap> result;
-        if (!m_initialized || text.empty()) return result;
+        if (!m_initialized || text.empty())
+            return result;
 
 #ifdef HAS_FREETYPE
         // Actual FreeType rendering would go here
@@ -108,7 +120,8 @@ public:
         return result;
     }
 
-    FontFileInfo GetFontInfo() const {
+    FontFileInfo GetFontInfo() const
+    {
         FontFileInfo info{};
 #ifdef HAS_FREETYPE
         // Extract actual font info
@@ -120,7 +133,8 @@ public:
         return info;
     }
 
-    bool IsAvailable() const {
+    bool IsAvailable() const
+    {
 #ifdef HAS_FREETYPE
         return true;
 #else
@@ -128,24 +142,31 @@ public:
 #endif
     }
 
-    const FontPreviewConfig& GetConfig() const { return m_config; }
+    const FontPreviewConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-    bool Validate() const {
-        if (m_config.pointSize < 6 || m_config.pointSize > 200) return false;
-        if (m_config.dpi < 36 || m_config.dpi > 600) return false;
-        if (m_config.maxWidth == 0 || m_config.maxHeight == 0) return false;
+    bool Validate() const
+    {
+        if (m_config.pointSize < 6 || m_config.pointSize > 200)
+            return false;
+        if (m_config.dpi < 36 || m_config.dpi > 600)
+            return false;
+        if (m_config.maxWidth == 0 || m_config.maxHeight == 0)
+            return false;
         return true;
     }
 
-private:
+  private:
     FreeTypeRenderer() = default;
     ~FreeTypeRenderer() = default;
     FreeTypeRenderer(const FreeTypeRenderer&) = delete;
     FreeTypeRenderer& operator=(const FreeTypeRenderer&) = delete;
 
     FontPreviewConfig m_config{};
-    bool              m_initialized = false;
+    bool m_initialized = false;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

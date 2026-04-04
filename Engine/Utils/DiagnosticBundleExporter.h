@@ -15,21 +15,33 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class DiagnosticSection : uint8_t {
-    SystemInfo, Configuration, Logs, CrashDump, GPUInfo, RegistryState, TelemetrySnapshot, COUNT
+    SystemInfo,
+    Configuration,
+    Logs,
+    CrashDump,
+    GPUInfo,
+    RegistryState,
+    TelemetrySnapshot,
+    COUNT
 };
 
 enum class BundleFormat : uint8_t {
-    ZIP, EncryptedZIP, JSON, COUNT
+    ZIP,
+    EncryptedZIP,
+    JSON,
+    COUNT
 };
 
-struct BundleDiagEntry {
+struct BundleDiagEntry
+{
     DiagnosticSection section = DiagnosticSection::SystemInfo;
     std::wstring key;
     std::wstring value;
     bool containsPII = false;
 };
 
-struct BundleConfig {
+struct BundleConfig
+{
     BundleFormat format = BundleFormat::ZIP;
     bool redactPII = true;
     bool includeGPUDiag = true;
@@ -39,7 +51,8 @@ struct BundleConfig {
     std::wstring outputPath;
 };
 
-struct BundleResult {
+struct BundleResult
+{
     bool success = false;
     std::wstring outputFilePath;
     uint64_t bundleSizeBytes = 0;
@@ -48,16 +61,25 @@ struct BundleResult {
     std::wstring error;
 };
 
-class DiagnosticBundleExporter {
-public:
-    void Configure(const BundleConfig& cfg) { m_config = cfg; }
-    const BundleConfig& GetConfig() const { return m_config; }
+class DiagnosticBundleExporter
+{
+  public:
+    void Configure(const BundleConfig& cfg)
+    {
+        m_config = cfg;
+    }
+    const BundleConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-    void AddEntry(const BundleDiagEntry& entry) {
+    void AddEntry(const BundleDiagEntry& entry)
+    {
         m_entries.push_back(entry);
     }
 
-    BundleResult Export() const {
+    BundleResult Export() const
+    {
         BundleResult result;
         result.sectionsIncluded = 0;
         bool sections[static_cast<size_t>(DiagnosticSection::COUNT)] = {};
@@ -68,23 +90,36 @@ public:
             }
         }
         for (size_t i = 0; i < static_cast<size_t>(DiagnosticSection::COUNT); ++i) {
-            if (sections[i]) result.sectionsIncluded++;
+            if (sections[i])
+                result.sectionsIncluded++;
         }
         result.success = true;
-        result.bundleSizeBytes = m_entries.size() * 128; // Estimated
+        result.bundleSizeBytes = m_entries.size() * 128;  // Estimated
         return result;
     }
 
-    size_t EntryCount() const { return m_entries.size(); }
-    void Clear() { m_entries.clear(); }
+    size_t EntryCount() const
+    {
+        return m_entries.size();
+    }
+    void Clear()
+    {
+        m_entries.clear();
+    }
 
-    static size_t SectionTypeCount() { return static_cast<size_t>(DiagnosticSection::COUNT); }
-    static size_t FormatCount() { return static_cast<size_t>(BundleFormat::COUNT); }
+    static size_t SectionTypeCount()
+    {
+        return static_cast<size_t>(DiagnosticSection::COUNT);
+    }
+    static size_t FormatCount()
+    {
+        return static_cast<size_t>(BundleFormat::COUNT);
+    }
 
-private:
+  private:
     BundleConfig m_config;
     std::vector<BundleDiagEntry> m_entries;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

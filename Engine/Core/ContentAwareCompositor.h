@@ -6,17 +6,18 @@
 //
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <cstdint>
 #include <numeric>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct CropRegion {
+struct CropRegion
+{
     uint32_t x = 0;
     uint32_t y = 0;
     uint32_t width = 0;
@@ -31,27 +32,43 @@ enum class CompositorAspectRatio : uint8_t {
     FreeForm
 };
 
-class ContentAwareCompositor {
-public:
-    static ContentAwareCompositor& Instance() {
+class ContentAwareCompositor
+{
+  public:
+    static ContentAwareCompositor& Instance()
+    {
         static ContentAwareCompositor instance;
         return instance;
     }
 
-    inline CropRegion FindInterestRegion(const uint8_t* pixelData, uint32_t width, uint32_t height,
-        uint32_t channels, CompositorAspectRatio aspect = CompositorAspectRatio::Square) const {
+    inline CropRegion FindInterestRegion(const uint8_t* pixelData, uint32_t width, uint32_t height, uint32_t channels,
+                                         CompositorAspectRatio aspect = CompositorAspectRatio::Square) const
+    {
         CropRegion best;
-        if (!pixelData || width == 0 || height == 0 || channels == 0) return best;
+        if (!pixelData || width == 0 || height == 0 || channels == 0)
+            return best;
 
         auto edgeMap = ComputeEdgeDensityMap(pixelData, width, height, channels);
         auto integralMap = ComputeIntegralImage(edgeMap, width, height);
 
         double aspectW = 1.0, aspectH = 1.0;
         switch (aspect) {
-        case CompositorAspectRatio::Square:         aspectW = 1.0; aspectH = 1.0; break;
-        case CompositorAspectRatio::FourByThree:    aspectW = 4.0; aspectH = 3.0; break;
-        case CompositorAspectRatio::SixteenByNine:  aspectW = 16.0; aspectH = 9.0; break;
-        case CompositorAspectRatio::FreeForm:       aspectW = 1.0; aspectH = 1.0; break;
+            case CompositorAspectRatio::Square:
+                aspectW = 1.0;
+                aspectH = 1.0;
+                break;
+            case CompositorAspectRatio::FourByThree:
+                aspectW = 4.0;
+                aspectH = 3.0;
+                break;
+            case CompositorAspectRatio::SixteenByNine:
+                aspectW = 16.0;
+                aspectH = 9.0;
+                break;
+            case CompositorAspectRatio::FreeForm:
+                aspectW = 1.0;
+                aspectH = 1.0;
+                break;
         }
 
         double bestScore = -1.0;
@@ -94,16 +111,18 @@ public:
     }
 
     inline std::vector<double> ComputeEdgeDensityMap(const uint8_t* pixelData, uint32_t width, uint32_t height,
-        uint32_t channels) const {
+                                                     uint32_t channels) const
+    {
         std::vector<double> edgeMap(static_cast<size_t>(width) * height, 0.0);
-        if (!pixelData || width < 3 || height < 3) return edgeMap;
+        if (!pixelData || width < 3 || height < 3)
+            return edgeMap;
 
         for (uint32_t y = 1; y + 1 < height; ++y) {
             for (uint32_t x = 1; x + 1 < width; ++x) {
-                double gx = GetLuminance(pixelData, width, x + 1, y, channels) -
-                    GetLuminance(pixelData, width, x - 1, y, channels);
-                double gy = GetLuminance(pixelData, width, x, y + 1, channels) -
-                    GetLuminance(pixelData, width, x, y - 1, channels);
+                double gx = GetLuminance(pixelData, width, x + 1, y, channels)
+                            - GetLuminance(pixelData, width, x - 1, y, channels);
+                double gy = GetLuminance(pixelData, width, x, y + 1, channels)
+                            - GetLuminance(pixelData, width, x, y - 1, channels);
                 edgeMap[static_cast<size_t>(y) * width + x] = std::sqrt(gx * gx + gy * gy);
             }
         }
@@ -111,19 +130,22 @@ public:
     }
 
     inline double ComputeImageComplexity(const uint8_t* pixelData, uint32_t width, uint32_t height,
-        uint32_t channels) const {
+                                         uint32_t channels) const
+    {
         auto edgeMap = ComputeEdgeDensityMap(pixelData, width, height, channels);
-        if (edgeMap.empty()) return 0.0;
+        if (edgeMap.empty())
+            return 0.0;
         double total = 0.0;
-        for (auto v : edgeMap) total += v;
+        for (auto v : edgeMap)
+            total += v;
         return total / static_cast<double>(edgeMap.size());
     }
 
-private:
+  private:
     ContentAwareCompositor() = default;
 
-    inline double GetLuminance(const uint8_t* data, uint32_t width, uint32_t x, uint32_t y,
-        uint32_t channels) const {
+    inline double GetLuminance(const uint8_t* data, uint32_t width, uint32_t x, uint32_t y, uint32_t channels) const
+    {
         size_t idx = (static_cast<size_t>(y) * width + x) * channels;
         if (channels >= 3) {
             return 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
@@ -131,8 +153,9 @@ private:
         return data[idx];
     }
 
-    inline std::vector<double> ComputeIntegralImage(const std::vector<double>& map,
-        uint32_t width, uint32_t height) const {
+    inline std::vector<double> ComputeIntegralImage(const std::vector<double>& map, uint32_t width,
+                                                    uint32_t height) const
+    {
         std::vector<double> integral(static_cast<size_t>(width) * height, 0.0);
         for (uint32_t y = 0; y < height; ++y) {
             double rowSum = 0.0;
@@ -145,17 +168,21 @@ private:
         return integral;
     }
 
-    inline double SumRegion(const std::vector<double>& integral, uint32_t stride,
-        uint32_t x, uint32_t y, uint32_t w, uint32_t h) const {
+    inline double SumRegion(const std::vector<double>& integral, uint32_t stride, uint32_t x, uint32_t y, uint32_t w,
+                            uint32_t h) const
+    {
         uint32_t x2 = x + w - 1;
         uint32_t y2 = y + h - 1;
         double total = integral[static_cast<size_t>(y2) * stride + x2];
-        if (x > 0) total -= integral[static_cast<size_t>(y2) * stride + (x - 1)];
-        if (y > 0) total -= integral[(static_cast<size_t>(y) - 1) * stride + x2];
-        if (x > 0 && y > 0) total += integral[(static_cast<size_t>(y) - 1) * stride + (x - 1)];
+        if (x > 0)
+            total -= integral[static_cast<size_t>(y2) * stride + (x - 1)];
+        if (y > 0)
+            total -= integral[(static_cast<size_t>(y) - 1) * stride + x2];
+        if (x > 0 && y > 0)
+            total += integral[(static_cast<size_t>(y) - 1) * stride + (x - 1)];
         return total;
     }
 };
 
-}
-} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

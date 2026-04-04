@@ -10,40 +10,47 @@
 #include <string>
 
 #ifdef _WIN32
-#include <windows.h>
+    #include <windows.h>
 #endif
 
 namespace ExplorerLens {
 namespace Engine {
 
 enum class NvDecompressStatus : uint8_t {
-    Success       = 0,
-    NotSupported  = 1,
-    DeviceError   = 2,
-    InvalidData   = 3,
+    Success = 0,
+    NotSupported = 1,
+    DeviceError = 2,
+    InvalidData = 3,
     BufferTooSmall = 4
 };
 
-struct NvDecompressResult {
+struct NvDecompressResult
+{
     NvDecompressStatus status = NvDecompressStatus::NotSupported;
-    uint64_t           outputBytes = 0;
-    double             elapsedMs = 0.0;
-    double             throughputMBps = 0.0;
+    uint64_t outputBytes = 0;
+    double elapsedMs = 0.0;
+    double throughputMBps = 0.0;
 };
 
-class NvGDeflateBackend {
-public:
+class NvGDeflateBackend
+{
+  public:
     static constexpr uint32_t MIN_COMPUTE_CAPABILITY = 89;
     static constexpr const char* BACKEND_NAME = "NvGDeflate-RTX";
 
     NvGDeflateBackend() = default;
-    ~NvGDeflateBackend() { Shutdown(); }
+    ~NvGDeflateBackend()
+    {
+        Shutdown();
+    }
 
     NvGDeflateBackend(const NvGDeflateBackend&) = delete;
     NvGDeflateBackend& operator=(const NvGDeflateBackend&) = delete;
 
-    inline bool Initialize() {
-        if (m_initialized) return true;
+    inline bool Initialize()
+    {
+        if (m_initialized)
+            return true;
 #ifdef _WIN32
         m_supported = DetectRTXGDeflate();
         m_initialized = true;
@@ -58,8 +65,8 @@ public:
 #endif
     }
 
-    inline NvDecompressResult Decompress(const void* src, uint64_t srcSize,
-                                         void* dst, uint64_t dstCapacity) {
+    inline NvDecompressResult Decompress(const void* src, uint64_t srcSize, void* dst, uint64_t dstCapacity)
+    {
         NvDecompressResult result;
         if (!m_initialized || !m_supported) {
             result.status = NvDecompressStatus::NotSupported;
@@ -75,18 +82,27 @@ public:
         return result;
     }
 
-    inline bool IsSupported() const { return m_supported; }
-    inline const std::string& GetDeviceName() const { return m_deviceName; }
+    inline bool IsSupported() const
+    {
+        return m_supported;
+    }
+    inline const std::string& GetDeviceName() const
+    {
+        return m_deviceName;
+    }
 
-    inline void Shutdown() {
-        if (!m_initialized) return;
+    inline void Shutdown()
+    {
+        if (!m_initialized)
+            return;
         m_supported = false;
         m_initialized = false;
         m_deviceName.clear();
     }
 
-private:
-    inline bool DetectRTXGDeflate() {
+  private:
+    inline bool DetectRTXGDeflate()
+    {
 #ifdef _WIN32
         HMODULE hNvApi = LoadLibraryW(L"nvapi64.dll");
         if (hNvApi) {
@@ -97,10 +113,10 @@ private:
         return false;
     }
 
-    bool        m_initialized = false;
-    bool        m_supported = false;
+    bool m_initialized = false;
+    bool m_supported = false;
     std::string m_deviceName;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

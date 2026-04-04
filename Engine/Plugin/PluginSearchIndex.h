@@ -7,9 +7,9 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 #include "PluginPackageManifest.h"
 
 namespace ExplorerLens {
@@ -17,27 +17,30 @@ namespace Engine {
 
 // ---- Search Query -----------------------------------------------------------
 
-struct PluginSearchQuery {
-    std::string  text;              // Full-text search across name/desc/author
-    std::string  extensionFilter;   // ".xyz" — only plugins supporting this ext
-    bool         enabledOnly = false;
-    uint32_t     maxResults  = 20;
+struct PluginSearchQuery
+{
+    std::string text;             // Full-text search across name/desc/author
+    std::string extensionFilter;  // ".xyz" — only plugins supporting this ext
+    bool enabledOnly = false;
+    uint32_t maxResults = 20;
 };
 
 // ---- Search Result ----------------------------------------------------------
 
-struct PluginSearchHit {
-    std::string  pluginId;
-    std::string  displayName;
-    std::string  version;
-    float        score = 0.0f;      // Relevance score [0.0 - 1.0]
+struct PluginSearchHit
+{
+    std::string pluginId;
+    std::string displayName;
+    std::string version;
+    float score = 0.0f;  // Relevance score [0.0 - 1.0]
     std::vector<std::string> matchedTokens;
 };
 
 // ---- PluginSearchIndex ------------------------------------------------------
 
-class PluginSearchIndex {
-public:
+class PluginSearchIndex
+{
+  public:
     PluginSearchIndex();
     ~PluginSearchIndex();
 
@@ -61,13 +64,14 @@ public:
 
     void Clear();
 
-private:
-    struct Impl {};
+  private:
+    struct Impl
+    {};
     std::unique_ptr<Impl> m_impl;
 
     // Tokenise a string into lowercase words for the inverted index.
     static std::vector<std::string> Tokenize(const std::string& text);
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

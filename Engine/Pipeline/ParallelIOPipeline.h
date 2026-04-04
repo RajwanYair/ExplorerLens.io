@@ -21,49 +21,54 @@
 // ============================================================================
 
 #include <windows.h>
-#include <string>
-#include <vector>
-#include <thread>
+#include <algorithm>
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
 #include <cstdint>
-#include <algorithm>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 /// Result of a completed (or failed) I/O operation.
-struct IOResult {
-    std::wstring           filePath;
-    std::vector<uint8_t>   data;
-    bool                   success = false;
-    DWORD                  errorCode = 0;
-    double                 elapsedMs = 0.0;
+struct IOResult
+{
+    std::wstring filePath;
+    std::vector<uint8_t> data;
+    bool success = false;
+    DWORD errorCode = 0;
+    double elapsedMs = 0.0;
 };
 
 /// Internal per-I/O context attached to OVERLAPPED structures.
-struct IOContext {
-    OVERLAPPED       overlapped = {};
-    HANDLE           fileHandle = INVALID_HANDLE_VALUE;
-    std::wstring     filePath;
+struct IOContext
+{
+    OVERLAPPED overlapped = {};
+    HANDLE fileHandle = INVALID_HANDLE_VALUE;
+    std::wstring filePath;
     std::vector<uint8_t> buffer;
-    uint32_t         requestedSize = 0;
-    LARGE_INTEGER    submitTick = {};
-    uint64_t         id = 0;
+    uint32_t requestedSize = 0;
+    LARGE_INTEGER submitTick = {};
+    uint64_t id = 0;
 };
 
 /// IOCP-based parallel file reader with managed thread pool.
-class ParallelIOPipeline {
-public:
+class ParallelIOPipeline
+{
+  public:
     static constexpr ULONG_PTR SHUTDOWN_KEY = 0xDEAD;
 
-    ParallelIOPipeline() {
+    ParallelIOPipeline()
+    {
         QueryPerformanceFrequency(&m_freq);
         InitializeSRWLock(&m_lock);
     }
 
-    ~ParallelIOPipeline() {
+    ~ParallelIOPipeline()
+    {
         Shutdown();
     }
 
@@ -72,8 +77,10 @@ public:
 
     /// Create the IOCP and spawn worker threads.
     /// @param concurrency Number of concurrent threads (0 = auto-detect)
-    inline bool Initialize(uint32_t concurrency = 0) {
-        if (m_running.load()) return true;
+    inline bool Initialize(uint32_t concurrency = 0)
+    {
+        if (m_running.load())
+            return true;
 
         if (concurrency == 0)
             concurrency = (std::max)(2u, std::thread::hardware_concurrency());
@@ -81,7 +88,8 @@ public:
             concurrency = (std::max)(2u, concurrency);
 
         m_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, concurrency);
-        if (!m_iocp) return false;
+        if (!m_iocp)
+            return false;
 
         m_running.store(true);
         m_workers.reserve(concurrency);
@@ -96,19 +104,14 @@ public:
     /// @param offset    Byte offset within the file.
     /// @param size      Number of bytes to read.
     /// @return true if the read was successfully submitted.
-    inline bool SubmitRead(const std::wstring& filePath, uint64_t offset, uint32_t size) {
-        if (!m_running.load() || !m_iocp || filePath.empty() || size == 0) return false;
+    inline bool SubmitRead(const std::wstring& filePath, uint64_t offset, uint32_t size)
+    {
+        if (!m_running.load() || !m_iocp || filePath.empty() || size == 0)
+            return false;
 
         // Open file with overlapped I/O
-        HANDLE hFile = CreateFileW(
-            filePath.c_str(),
-            GENERIC_READ,
-            FILE_SHARE_READ | FILE_SHARE_WRITE,
-            nullptr,
-            OPEN_EXISTING,
-            FILE_FLAG_OVERLAPPED | FILE_FLAG_SEQUENTIAL_SCAN,
-            nullptr
-        );
+        HANDLE hFile = CreateFileW(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                                   OPEN_EXISTING, FILE_FLAG_OVERLAPPED | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 
         if (hFile == INVALID_HANDLE_VALUE) {
             // Record failure result immediately
@@ -194,14 +197,16 @@ public:
 
     /// Wait for all submitted I/Os to complete and return their results.
     /// @param timeoutMs Maximum wait time in milliseconds. 0 = infinite.
-    inline std::vector<IOResult> WaitForAll(uint32_t timeoutMs = 0) {
+    inline std::vector<IOResult> WaitForAll(uint32_t timeoutMs = 0)
+    {
         std::unique_lock<std::mutex> ul(m_cvMutex);
-        auto pred = [this]() { return m_pendingCount.load() == 0; };
+        auto pred = [this]() {
+            return m_pendingCount.load() == 0;
+        };
 
         if (timeoutMs == 0) {
             m_completedEvent.wait(ul, pred);
-        }
-        else {
+        } else {
             m_completedEvent.wait_for(ul, std::chrono::milliseconds(timeoutMs), pred);
         }
 
@@ -213,7 +218,8 @@ public:
     }
 
     /// Cancel all pending I/O operations.
-    inline void CancelAll() {
+    inline void CancelAll()
+    {
         AcquireSRWLockShared(&m_lock);
         for (auto* ctx : m_activeContexts) {
             if (ctx && ctx->fileHandle != INVALID_HANDLE_VALUE) {
@@ -224,8 +230,10 @@ public:
     }
 
     /// Clean shutdown: post sentinel packets to all workers and join threads.
-    inline void Shutdown() {
-        if (!m_running.exchange(false)) return;
+    inline void Shutdown()
+    {
+        if (!m_running.exchange(false))
+            return;
 
         // Cancel remaining I/Os
         CancelAll();
@@ -239,7 +247,8 @@ public:
 
         // Join all workers
         for (auto& t : m_workers) {
-            if (t.joinable()) t.join();
+            if (t.joinable())
+                t.join();
         }
         m_workers.clear();
 
@@ -263,36 +272,36 @@ public:
     }
 
     /// Number of currently pending I/O operations.
-    inline uint32_t PendingCount() const noexcept {
+    inline uint32_t PendingCount() const noexcept
+    {
         return m_pendingCount.load();
     }
 
     /// Number of completed I/O results waiting to be consumed.
-    inline uint32_t ResultCount() {
+    inline uint32_t ResultCount()
+    {
         AcquireSRWLockShared(&m_lock);
         uint32_t count = static_cast<uint32_t>(m_results.size());
         ReleaseSRWLockShared(&m_lock);
         return count;
     }
 
-private:
+  private:
     /// Worker thread procedure — blocks on GetQueuedCompletionStatus.
-    inline void WorkerProc() {
+    inline void WorkerProc()
+    {
         while (m_running.load()) {
             DWORD bytesTransferred = 0;
             ULONG_PTR completionKey = 0;
             LPOVERLAPPED pOverlapped = nullptr;
 
-            BOOL ok = GetQueuedCompletionStatus(
-                m_iocp,
-                &bytesTransferred,
-                &completionKey,
-                &pOverlapped,
-                1000 // 1-second timeout to check m_running flag
+            BOOL ok = GetQueuedCompletionStatus(m_iocp, &bytesTransferred, &completionKey, &pOverlapped,
+                                                1000  // 1-second timeout to check m_running flag
             );
 
             // Check for shutdown sentinel
-            if (completionKey == SHUTDOWN_KEY) break;
+            if (completionKey == SHUTDOWN_KEY)
+                break;
 
             if (!pOverlapped) {
                 // Timeout or spurious wake — loop to check m_running
@@ -300,24 +309,22 @@ private:
             }
 
             // Recover our context from the OVERLAPPED pointer
-            auto* ctx = reinterpret_cast<IOContext*>(
-                reinterpret_cast<char*>(pOverlapped) - offsetof(IOContext, overlapped));
+            auto* ctx =
+                reinterpret_cast<IOContext*>(reinterpret_cast<char*>(pOverlapped) - offsetof(IOContext, overlapped));
 
             LARGE_INTEGER endTick;
             QueryPerformanceCounter(&endTick);
 
             IOResult result;
             result.filePath = ctx->filePath;
-            result.elapsedMs = static_cast<double>(endTick.QuadPart - ctx->submitTick.QuadPart)
-                * 1000.0 / static_cast<double>(m_freq.QuadPart);
+            result.elapsedMs = static_cast<double>(endTick.QuadPart - ctx->submitTick.QuadPart) * 1000.0
+                               / static_cast<double>(m_freq.QuadPart);
 
             if (ok && bytesTransferred > 0) {
                 result.success = true;
                 result.errorCode = 0;
-                result.data.assign(ctx->buffer.begin(),
-                    ctx->buffer.begin() + bytesTransferred);
-            }
-            else {
+                result.data.assign(ctx->buffer.begin(), ctx->buffer.begin() + bytesTransferred);
+            } else {
                 result.success = false;
                 result.errorCode = GetLastError();
             }
@@ -341,25 +348,26 @@ private:
     }
 
     /// Remove a context pointer from the active list (called under exclusive lock).
-    inline void RemoveContext(IOContext* ctx) {
+    inline void RemoveContext(IOContext* ctx)
+    {
         auto it = std::find(m_activeContexts.begin(), m_activeContexts.end(), ctx);
         if (it != m_activeContexts.end()) {
             m_activeContexts.erase(it);
         }
     }
 
-    HANDLE                              m_iocp = nullptr;
-    SRWLOCK                             m_lock{};
-    LARGE_INTEGER                       m_freq{};
-    std::atomic<bool>                   m_running{ false };
-    std::atomic<uint32_t>               m_pendingCount{ 0 };
-    std::atomic<uint64_t>               m_nextId{ 0 };
-    std::vector<std::thread>            m_workers;
-    std::vector<IOResult>               m_results;
-    std::vector<IOContext*>             m_activeContexts;
-    std::mutex                          m_cvMutex;
-    std::condition_variable             m_completedEvent;
+    HANDLE m_iocp = nullptr;
+    SRWLOCK m_lock{};
+    LARGE_INTEGER m_freq{};
+    std::atomic<bool> m_running{false};
+    std::atomic<uint32_t> m_pendingCount{0};
+    std::atomic<uint64_t> m_nextId{0};
+    std::vector<std::thread> m_workers;
+    std::vector<IOResult> m_results;
+    std::vector<IOContext*> m_activeContexts;
+    std::mutex m_cvMutex;
+    std::condition_variable m_completedEvent;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

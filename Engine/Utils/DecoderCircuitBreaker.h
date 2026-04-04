@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include <Windows.h>
 #include <atomic>
 #include <chrono>
+#include <functional>
+#include <mutex>
 #include <string>
 #include <unordered_map>
-#include <mutex>
-#include <Windows.h>
-#include <functional>
 
 namespace ExplorerLens {
 
@@ -20,149 +20,155 @@ namespace ExplorerLens {
 // Circuit Breaker States
 // ============================================================================
 enum class BreakerCircuitState {
-    CLOSED, // Normal operation
-    OPEN, // Failing - decoder disabled
-    HALF_OPEN // Testing if decoder recovered
+    CLOSED,    // Normal operation
+    OPEN,      // Failing - decoder disabled
+    HALF_OPEN  // Testing if decoder recovered
 };
 
 // ============================================================================
 // Circuit Breaker for a Single Decoder
 // ============================================================================
-class DecoderCircuitBreaker {
-public:
+class DecoderCircuitBreaker
+{
+  public:
     explicit DecoderCircuitBreaker(const std::string& decoderName)
         : m_decoderName(decoderName)
         , m_state(BreakerCircuitState::CLOSED)
         , m_failureCount(0)
         , m_successCount(0)
         , m_lastFailureTime(std::chrono::steady_clock::now())
-        , m_failureThreshold(5) // Open circuit after 5 consecutive failures
-        , m_recoveryTimeout(std::chrono::minutes(5)) // Try recovery after 5 minutes
-        , m_recoverySuccessThreshold(3) // Need 3 successes to close circuit
-    {
-    }
+        , m_failureThreshold(5)                       // Open circuit after 5 consecutive failures
+        , m_recoveryTimeout(std::chrono::minutes(5))  // Try recovery after 5 minutes
+        , m_recoverySuccessThreshold(3)               // Need 3 successes to close circuit
+    {}
 
     // Check if decoder is available for use
-    bool IsAvailable() {
+    bool IsAvailable()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         switch (m_state) {
-        case BreakerCircuitState::CLOSED:
-            return true;
+            case BreakerCircuitState::CLOSED:
+                return true;
 
-        case BreakerCircuitState::OPEN:
-            // Check if recovery timeout elapsed
-            if (ShouldAttemptRecovery()) {
-                m_state = BreakerCircuitState::HALF_OPEN;
-                m_successCount = 0;
-                return true; // Allow one test attempt
-            }
-            return false; // Still disabled
+            case BreakerCircuitState::OPEN:
+                // Check if recovery timeout elapsed
+                if (ShouldAttemptRecovery()) {
+                    m_state = BreakerCircuitState::HALF_OPEN;
+                    m_successCount = 0;
+                    return true;  // Allow one test attempt
+                }
+                return false;  // Still disabled
 
-        case BreakerCircuitState::HALF_OPEN:
-            return true; // Allow testing
+            case BreakerCircuitState::HALF_OPEN:
+                return true;  // Allow testing
 
-        default:
-            return true;
+            default:
+                return true;
         }
     }
 
     // Report successful decode
-    void ReportSuccess() {
+    void ReportSuccess()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         switch (m_state) {
-        case BreakerCircuitState::CLOSED:
-            m_failureCount = 0; // Reset failure counter
-            break;
+            case BreakerCircuitState::CLOSED:
+                m_failureCount = 0;  // Reset failure counter
+                break;
 
-        case BreakerCircuitState::HALF_OPEN:
-            m_successCount++;
-            if (m_successCount >= m_recoverySuccessThreshold) {
-                // Decoder recovered!
-                m_state = BreakerCircuitState::CLOSED;
+            case BreakerCircuitState::HALF_OPEN:
+                m_successCount++;
+                if (m_successCount >= m_recoverySuccessThreshold) {
+                    // Decoder recovered!
+                    m_state = BreakerCircuitState::CLOSED;
+                    m_failureCount = 0;
+                    m_successCount = 0;
+
+                    OutputDebugStringA(
+                        ("[ExplorerLens] Circuit breaker CLOSED for decoder: " + m_decoderName + " (recovered)\n")
+                            .c_str());
+                }
+                break;
+
+            case BreakerCircuitState::OPEN:
+                // Should not happen, but reset just in case
                 m_failureCount = 0;
-                m_successCount = 0;
-
-                OutputDebugStringA(
-                    ("[ExplorerLens] Circuit breaker CLOSED for decoder: " +
-                        m_decoderName + " (recovered)\n").c_str());
-            }
-            break;
-
-        case BreakerCircuitState::OPEN:
-            // Should not happen, but reset just in case
-            m_failureCount = 0;
-            break;
+                break;
         }
     }
 
     // Report failed decode
-    void ReportFailure(const std::string& reason = "") {
+    void ReportFailure(const std::string& reason = "")
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         m_lastFailureTime = std::chrono::steady_clock::now();
 
         switch (m_state) {
-        case BreakerCircuitState::CLOSED:
-            m_failureCount++;
-            if (m_failureCount >= m_failureThreshold) {
-                // Too many failures - open circuit
-                m_state = BreakerCircuitState::OPEN;
+            case BreakerCircuitState::CLOSED:
+                m_failureCount++;
+                if (m_failureCount >= m_failureThreshold) {
+                    // Too many failures - open circuit
+                    m_state = BreakerCircuitState::OPEN;
 
-                std::string msg = "[ExplorerLens] Circuit breaker OPENED for decoder: " +
-                    m_decoderName +
-                    " (threshold: " + std::to_string(m_failureThreshold) +
-                    " failures)";
-                if (!reason.empty()) {
-                    msg += " - Last error: " + reason;
+                    std::string msg = "[ExplorerLens] Circuit breaker OPENED for decoder: " + m_decoderName
+                                      + " (threshold: " + std::to_string(m_failureThreshold) + " failures)";
+                    if (!reason.empty()) {
+                        msg += " - Last error: " + reason;
+                    }
+                    msg += "\n";
+
+                    OutputDebugStringA(msg.c_str());
                 }
-                msg += "\n";
+                break;
 
-                OutputDebugStringA(msg.c_str());
-            }
-            break;
+            case BreakerCircuitState::HALF_OPEN:
+                // Failed during recovery test - reopen circuit
+                m_state = BreakerCircuitState::OPEN;
+                m_successCount = 0;
+                m_failureCount++;
 
-        case BreakerCircuitState::HALF_OPEN:
-            // Failed during recovery test - reopen circuit
-            m_state = BreakerCircuitState::OPEN;
-            m_successCount = 0;
-            m_failureCount++;
+                OutputDebugStringA(("[ExplorerLens] Circuit breaker reopened for decoder: " + m_decoderName
+                                    + " (recovery test failed)\n")
+                                       .c_str());
+                break;
 
-            OutputDebugStringA(
-                ("[ExplorerLens] Circuit breaker reopened for decoder: " +
-                    m_decoderName + " (recovery test failed)\n").c_str());
-            break;
-
-        case BreakerCircuitState::OPEN:
-            m_failureCount++;
-            break;
+            case BreakerCircuitState::OPEN:
+                m_failureCount++;
+                break;
         }
     }
 
     // Get current state
-    BreakerCircuitState GetState() const { return m_state; }
+    BreakerCircuitState GetState() const
+    {
+        return m_state;
+    }
 
     // Get failure count
-    int GetFailureCount() const { return m_failureCount; }
+    int GetFailureCount() const
+    {
+        return m_failureCount;
+    }
 
     // Manually reset circuit breaker
-    void Reset() {
+    void Reset()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_state = BreakerCircuitState::CLOSED;
         m_failureCount = 0;
         m_successCount = 0;
 
-        OutputDebugStringA(
-            ("[ExplorerLens] Circuit breaker RESET for decoder: " +
-                m_decoderName + "\n").c_str());
+        OutputDebugStringA(("[ExplorerLens] Circuit breaker RESET for decoder: " + m_decoderName + "\n").c_str());
     }
 
-private:
-    bool ShouldAttemptRecovery() const {
+  private:
+    bool ShouldAttemptRecovery() const
+    {
         auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::minutes>(
-            now - m_lastFailureTime);
+        auto elapsed = std::chrono::duration_cast<std::chrono::minutes>(now - m_lastFailureTime);
         return elapsed >= m_recoveryTimeout;
     }
 
@@ -183,30 +189,31 @@ private:
 // ============================================================================
 // Global Circuit Breaker Manager
 // ============================================================================
-class CircuitBreakerManager {
-public:
-    static CircuitBreakerManager& Instance() {
+class CircuitBreakerManager
+{
+  public:
+    static CircuitBreakerManager& Instance()
+    {
         static CircuitBreakerManager instance;
         return instance;
     }
 
     // Get or create circuit breaker for a decoder
-    DecoderCircuitBreaker& GetCircuitBreaker(const std::string& decoderName) {
+    DecoderCircuitBreaker& GetCircuitBreaker(const std::string& decoderName)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         auto it = m_breakers.find(decoderName);
         if (it == m_breakers.end()) {
-            it = m_breakers.emplace(
-                decoderName,
-                std::make_unique<DecoderCircuitBreaker>(decoderName)
-            ).first;
+            it = m_breakers.emplace(decoderName, std::make_unique<DecoderCircuitBreaker>(decoderName)).first;
         }
 
         return *it->second;
     }
 
     // Reset all circuit breakers
-    void ResetAll() {
+    void ResetAll()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (auto& pair : m_breakers) {
             pair.second->Reset();
@@ -214,14 +221,16 @@ public:
     }
 
     // Get statistics
-    struct Stats {
+    struct Stats
+    {
         int totalBreakers = 0;
         int closedBreakers = 0;
         int openBreakers = 0;
         int halfOpenBreakers = 0;
     };
 
-    Stats GetStats() const {
+    Stats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         Stats stats;
@@ -229,22 +238,22 @@ public:
 
         for (const auto& pair : m_breakers) {
             switch (pair.second->GetState()) {
-            case BreakerCircuitState::CLOSED:
-                stats.closedBreakers++;
-                break;
-            case BreakerCircuitState::OPEN:
-                stats.openBreakers++;
-                break;
-            case BreakerCircuitState::HALF_OPEN:
-                stats.halfOpenBreakers++;
-                break;
+                case BreakerCircuitState::CLOSED:
+                    stats.closedBreakers++;
+                    break;
+                case BreakerCircuitState::OPEN:
+                    stats.openBreakers++;
+                    break;
+                case BreakerCircuitState::HALF_OPEN:
+                    stats.halfOpenBreakers++;
+                    break;
             }
         }
 
         return stats;
     }
 
-private:
+  private:
     CircuitBreakerManager() = default;
     ~CircuitBreakerManager() = default;
 
@@ -260,36 +269,37 @@ private:
 // Convenience Macros
 // ============================================================================
 
-#define DECODER_CIRCUIT_CHECK(decoderName) \
- auto& __circuitBreaker = ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName); \
- if (!__circuitBreaker.IsAvailable()) { \
- return E_FAIL; /* Decoder disabled by circuit breaker */ \
- }
+#define DECODER_CIRCUIT_CHECK(decoderName)                                                                   \
+    auto& __circuitBreaker = ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName); \
+    if (!__circuitBreaker.IsAvailable()) {                                                                   \
+        return E_FAIL; /* Decoder disabled by circuit breaker */                                             \
+    }
 
 #define DECODER_CIRCUIT_SUCCESS(decoderName) \
- ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportSuccess()
+    ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportSuccess()
 
 #define DECODER_CIRCUIT_FAILURE(decoderName, reason) \
- ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportFailure(reason)
+    ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportFailure(reason)
 
-} // namespace ExplorerLens
+}  // namespace ExplorerLens
 
 // ─── DecoderTimeout ─────────────────────────────────────────────────────────
 namespace ExplorerLens {
 
 /// Timeout result codes
 enum class BreakerTimeoutResult {
-    SUCCESS, ///< Decoder completed within timeout
-    TIMED_OUT, ///< Decoder exceeded wall-clock timeout
-    EXCEPTION, ///< SEH or C++ exception caught
-    CIRCUIT_OPEN ///< Circuit breaker prevented execution
+    SUCCESS,      ///< Decoder completed within timeout
+    TIMED_OUT,    ///< Decoder exceeded wall-clock timeout
+    EXCEPTION,    ///< SEH or C++ exception caught
+    CIRCUIT_OPEN  ///< Circuit breaker prevented execution
 };
 
 /// Configuration for timeout enforcement
-struct BreakerTimeoutConfig {
-    uint32_t timeoutMs = 5000; ///< Wall-clock timeout in milliseconds
-    bool notifyCircuitBreaker = true; ///< Report failures to circuit breaker
-    bool captureException = true; ///< Wrap in SEH __try/__except
+struct BreakerTimeoutConfig
+{
+    uint32_t timeoutMs = 5000;         ///< Wall-clock timeout in milliseconds
+    bool notifyCircuitBreaker = true;  ///< Report failures to circuit breaker
+    bool captureException = true;      ///< Wrap in SEH __try/__except
 };
 
 /// RAII timeout guard for decoder operations
@@ -301,25 +311,25 @@ struct BreakerTimeoutConfig {
 /// 4. Automatic circuit breaker notification on failure
 ///
 /// Thread Safety: Each guard instance is single-use. Create per decode call.
-class DecoderTimeoutGuard {
-public:
+class DecoderTimeoutGuard
+{
+  public:
     /// Construct a timeout guard for a specific decoder
     /// @param decoderName Name for circuit breaker tracking
     /// @param timeoutMs Wall-clock timeout (default: 5000ms)
-    explicit DecoderTimeoutGuard(
-        const std::string& decoderName,
-        uint32_t timeoutMs = 5000)
+    explicit DecoderTimeoutGuard(const std::string& decoderName, uint32_t timeoutMs = 5000)
         : m_decoderName(decoderName)
         , m_timeoutMs(timeoutMs)
         , m_result(BreakerTimeoutResult::SUCCESS)
-        , m_exceptionCode(0) {
-    }
+        , m_exceptionCode(0)
+    {}
 
     /// Execute a decoder operation with timeout enforcement
     /// @param operation The decode function to execute
     /// @return BreakerTimeoutResult indicating outcome
-    template<typename Func>
-    BreakerTimeoutResult Execute(Func&& operation) {
+    template <typename Func>
+    BreakerTimeoutResult Execute(Func&& operation)
+    {
         // Step 1: Circuit breaker pre-check
         auto& cb = CircuitBreakerManager::Instance().GetCircuitBreaker(m_decoderName);
         if (!cb.IsAvailable()) {
@@ -343,63 +353,74 @@ public:
                 cb.ReportFailure("Soft timeout exceeded: " + std::to_string(elapsedMs) + "ms");
 
                 OutputDebugStringA(
-                    ("[ExplorerLens] Decoder " + m_decoderName +
-                        " soft timeout: " + std::to_string(elapsedMs) + "ms\n").c_str());
-            }
-            else if (SUCCEEDED(hr)) {
+                    ("[ExplorerLens] Decoder " + m_decoderName + " soft timeout: " + std::to_string(elapsedMs) + "ms\n")
+                        .c_str());
+            } else if (SUCCEEDED(hr)) {
                 m_result = BreakerTimeoutResult::SUCCESS;
                 cb.ReportSuccess();
-            }
-            else {
+            } else {
                 m_result = BreakerTimeoutResult::EXCEPTION;
                 cb.ReportFailure("HRESULT: " + std::to_string(hr));
             }
-        }
-        __except (HandleSEHException(GetExceptionCode(), GetExceptionInformation())) {
+        } __except (HandleSEHException(GetExceptionCode(), GetExceptionInformation())) {
             m_result = BreakerTimeoutResult::EXCEPTION;
             cb.ReportFailure("SEH exception: 0x" + FormatHex(m_exceptionCode));
 
             OutputDebugStringA(
-                ("[ExplorerLens] SEH exception in " + m_decoderName +
-                    ": 0x" + FormatHex(m_exceptionCode) + "\n").c_str());
+                ("[ExplorerLens] SEH exception in " + m_decoderName + ": 0x" + FormatHex(m_exceptionCode) + "\n")
+                    .c_str());
         }
 
         return m_result;
     }
 
     /// Get the result of the last Execute call
-    BreakerTimeoutResult GetResult() const { return m_result; }
+    BreakerTimeoutResult GetResult() const
+    {
+        return m_result;
+    }
 
     /// Get the SEH exception code (if any)
-    DWORD GetExceptionCode() const { return m_exceptionCode; }
+    DWORD GetExceptionCode() const
+    {
+        return m_exceptionCode;
+    }
 
     /// Get the decoder name
-    const std::string& GetDecoderName() const { return m_decoderName; }
+    const std::string& GetDecoderName() const
+    {
+        return m_decoderName;
+    }
 
     /// Check if the operation succeeded
-    bool Succeeded() const { return m_result == BreakerTimeoutResult::SUCCESS; }
+    bool Succeeded() const
+    {
+        return m_result == BreakerTimeoutResult::SUCCESS;
+    }
 
-private:
+  private:
     /// SEH exception filter — captures the exception code
-    int HandleSEHException(DWORD exceptionCode, [[maybe_unused]] LPEXCEPTION_POINTERS pExInfo) {
+    int HandleSEHException(DWORD exceptionCode, [[maybe_unused]] LPEXCEPTION_POINTERS pExInfo)
+    {
         m_exceptionCode = exceptionCode;
 
         // Log critical exceptions
         switch (exceptionCode) {
-        case STATUS_ACCESS_VIOLATION:
-        case STATUS_STACK_OVERFLOW:
-        case STATUS_INTEGER_DIVIDE_BY_ZERO:
-        case STATUS_ILLEGAL_INSTRUCTION:
-        case STATUS_HEAP_CORRUPTION:
-            return EXCEPTION_EXECUTE_HANDLER; // Catch and handle
+            case STATUS_ACCESS_VIOLATION:
+            case STATUS_STACK_OVERFLOW:
+            case STATUS_INTEGER_DIVIDE_BY_ZERO:
+            case STATUS_ILLEGAL_INSTRUCTION:
+            case STATUS_HEAP_CORRUPTION:
+                return EXCEPTION_EXECUTE_HANDLER;  // Catch and handle
 
-        default:
-            return EXCEPTION_EXECUTE_HANDLER; // Catch all SEH exceptions
+            default:
+                return EXCEPTION_EXECUTE_HANDLER;  // Catch all SEH exceptions
         }
     }
 
     /// Format a DWORD as hex string
-    static std::string FormatHex(DWORD value) {
+    static std::string FormatHex(DWORD value)
+    {
         char buf[16];
         snprintf(buf, sizeof(buf), "%08X", value);
         return std::string(buf);
@@ -413,14 +434,17 @@ private:
 
 /// Convenience macro for decoder timeout enforcement
 /// Usage: DECODER_WITH_TIMEOUT("WebPDecoder", 5000, decoder->Decode(path, result))
-#define DECODER_WITH_TIMEOUT(decoderName, timeoutMs, operation) \
- [&]() -> HRESULT { \
- ExplorerLens::DecoderTimeoutGuard guard(decoderName, timeoutMs); \
- auto result = guard.Execute([&]() -> HRESULT { return (operation); }); \
- if (result == ExplorerLens::BreakerTimeoutResult::SUCCESS) return S_OK; \
- if (result == ExplorerLens::BreakerTimeoutResult::CIRCUIT_OPEN) return HRESULT_FROM_WIN32(ERROR_SERVICE_DISABLED); \
- if (result == ExplorerLens::BreakerTimeoutResult::TIMED_OUT) return HRESULT_FROM_WIN32(ERROR_TIMEOUT); \
- return E_FAIL; \
- }()
+#define DECODER_WITH_TIMEOUT(decoderName, timeoutMs, operation)                \
+    [&]() -> HRESULT {                                                         \
+        ExplorerLens::DecoderTimeoutGuard guard(decoderName, timeoutMs);       \
+        auto result = guard.Execute([&]() -> HRESULT { return (operation); }); \
+        if (result == ExplorerLens::BreakerTimeoutResult::SUCCESS)             \
+            return S_OK;                                                       \
+        if (result == ExplorerLens::BreakerTimeoutResult::CIRCUIT_OPEN)        \
+            return HRESULT_FROM_WIN32(ERROR_SERVICE_DISABLED);                 \
+        if (result == ExplorerLens::BreakerTimeoutResult::TIMED_OUT)           \
+            return HRESULT_FROM_WIN32(ERROR_TIMEOUT);                          \
+        return E_FAIL;                                                         \
+    }()
 
-} // namespace ExplorerLens
+}  // namespace ExplorerLens

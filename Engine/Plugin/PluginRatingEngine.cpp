@@ -8,4 +8,4 @@ namespace ExplorerLens::Engine {
 PluginRatingEngine::PluginRatingEngine(const RatingThreshold&) {}
 PluginRatingEngine::~PluginRatingEngine() noexcept = default;
 
-} // namespace ExplorerLens::Engine
+}  // namespace ExplorerLens::Engine

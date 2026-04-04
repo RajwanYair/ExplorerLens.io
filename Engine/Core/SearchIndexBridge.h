@@ -4,30 +4,51 @@
 // Bridges ExplorerLens to Windows Search indexer via IFilter — exposes image metadata as indexed properties.
 //
 #pragma once
+#include <atomic>
 #include <cstdint>
+#include <functional>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <memory>
-#include <atomic>
-#include <mutex>
-#include <functional>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct IndexProperty { std::wstring key; std::wstring value; };
-class SearchIndexBridge {
-public:
-    void   AddProperty(IndexProperty prop)       { m_props.push_back(std::move(prop)); }
-    size_t PropertyCount() const                 { return m_props.size(); }
-    bool   IsIndexingEnabled() const             { return m_enabled; }
-    void   SetEnabled(bool en)                   { m_enabled = en; }
-    std::vector<IndexProperty> QueryFile(const std::wstring& path) const {
-        (void)path; return m_props;
+struct IndexProperty
+{
+    std::wstring key;
+    std::wstring value;
+};
+class SearchIndexBridge
+{
+  public:
+    void AddProperty(IndexProperty prop)
+    {
+        m_props.push_back(std::move(prop));
     }
-private:
-    bool                       m_enabled = true;
+    size_t PropertyCount() const
+    {
+        return m_props.size();
+    }
+    bool IsIndexingEnabled() const
+    {
+        return m_enabled;
+    }
+    void SetEnabled(bool en)
+    {
+        m_enabled = en;
+    }
+    std::vector<IndexProperty> QueryFile(const std::wstring& path) const
+    {
+        (void)path;
+        return m_props;
+    }
+
+  private:
+    bool m_enabled = true;
     std::vector<IndexProperty> m_props;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

@@ -7,14 +7,15 @@
 #pragma once
 
 #include <cstdint>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct PerfSection {
+struct PerfSection
+{
     std::string name;
     double avgMs = 0.0;
     double p50Ms = 0.0;
@@ -24,7 +25,8 @@ struct PerfSection {
     double throughputPerSec = 0.0;
 };
 
-struct SystemPerfSnapshot {
+struct SystemPerfSnapshot
+{
     double cpuPercent = 0.0;
     uint64_t memoryUsedMB = 0;
     uint64_t gpuMemoryUsedMB = 0;
@@ -32,7 +34,8 @@ struct SystemPerfSnapshot {
     double diskReadMBps = 0.0;
 };
 
-struct PerformanceReport {
+struct PerformanceReport
+{
     std::string reportId;
     uint64_t timestampMs = 0;
     uint64_t durationMs = 0;
@@ -42,42 +45,47 @@ struct PerformanceReport {
     uint32_t cacheHits = 0;
     double overallThroughput = 0.0;
 
-    std::string ToSummaryString() const {
+    std::string ToSummaryString() const
+    {
         std::ostringstream ss;
         ss << "=== Performance Report ===\n";
-        ss << "Duration: " << durationMs << "ms | Decodes: " << totalDecodes
-            << " | Cache Hits: " << cacheHits << "\n";
-        ss << "CPU: " << systemSnapshot.cpuPercent << "% | RAM: "
-            << systemSnapshot.memoryUsedMB << "MB\n";
+        ss << "Duration: " << durationMs << "ms | Decodes: " << totalDecodes << " | Cache Hits: " << cacheHits << "\n";
+        ss << "CPU: " << systemSnapshot.cpuPercent << "% | RAM: " << systemSnapshot.memoryUsedMB << "MB\n";
         for (const auto& s : sections) {
-            ss << "  " << s.name << ": avg=" << s.avgMs << "ms p95=" << s.p95Ms
-                << "ms (" << s.invocations << " calls)\n";
+            ss << "  " << s.name << ": avg=" << s.avgMs << "ms p95=" << s.p95Ms << "ms (" << s.invocations
+               << " calls)\n";
         }
         return ss.str();
     }
 };
 
-class PerformanceReportGenerator {
-public:
-    void BeginReport(const std::string& id) {
+class PerformanceReportGenerator
+{
+  public:
+    void BeginReport(const std::string& id)
+    {
         m_report = {};
         m_report.reportId = id;
     }
 
-    void AddSection(const PerfSection& section) {
+    void AddSection(const PerfSection& section)
+    {
         m_report.sections.push_back(section);
     }
 
-    void SetSystemSnapshot(const SystemPerfSnapshot& snap) {
+    void SetSystemSnapshot(const SystemPerfSnapshot& snap)
+    {
         m_report.systemSnapshot = snap;
     }
 
-    void SetDecodeStats(uint32_t totalDecodes, uint32_t cacheHits) {
+    void SetDecodeStats(uint32_t totalDecodes, uint32_t cacheHits)
+    {
         m_report.totalDecodes = totalDecodes;
         m_report.cacheHits = cacheHits;
     }
 
-    PerformanceReport Finalize(uint64_t durationMs) {
+    PerformanceReport Finalize(uint64_t durationMs)
+    {
         m_report.durationMs = durationMs;
         if (durationMs > 0) {
             m_report.overallThroughput = m_report.totalDecodes * 1000.0 / durationMs;
@@ -85,17 +93,18 @@ public:
         return m_report;
     }
 
-    bool MeetsTargets(const PerformanceReport& report, double maxAvgMs,
-        double minThroughput) const {
+    bool MeetsTargets(const PerformanceReport& report, double maxAvgMs, double minThroughput) const
+    {
         for (const auto& s : report.sections) {
-            if (s.avgMs > maxAvgMs) return false;
+            if (s.avgMs > maxAvgMs)
+                return false;
         }
         return report.overallThroughput >= minThroughput;
     }
 
-private:
+  private:
     PerformanceReport m_report;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

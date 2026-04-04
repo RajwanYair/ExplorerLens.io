@@ -6,41 +6,57 @@
 #pragma once
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-enum class PIEPresenceState { Active, Idle, Offline };
-
-struct PIEUser {
-    std::string     userId;
-    PIEPresenceState state      = PIEPresenceState::Offline;
-    uint64_t         lastSeenMs = 0;
-    std::string      displayName;
+enum class PIEPresenceState {
+    Active,
+    Idle,
+    Offline
 };
 
-class PresenceIndicatorEngine {
-public:
-    void UpdatePresence(const PIEUser& user) { m_users[user.userId] = user; }
+struct PIEUser
+{
+    std::string userId;
+    PIEPresenceState state = PIEPresenceState::Offline;
+    uint64_t lastSeenMs = 0;
+    std::string displayName;
+};
 
-    PIEPresenceState GetPresence(const std::string& userId) const {
+class PresenceIndicatorEngine
+{
+  public:
+    void UpdatePresence(const PIEUser& user)
+    {
+        m_users[user.userId] = user;
+    }
+
+    PIEPresenceState GetPresence(const std::string& userId) const
+    {
         auto it = m_users.find(userId);
         return it != m_users.end() ? it->second.state : PIEPresenceState::Offline;
     }
-    std::vector<PIEUser> ActiveUsers() const {
+    std::vector<PIEUser> ActiveUsers() const
+    {
         std::vector<PIEUser> out;
         for (const auto& [id, u] : m_users)
-            if (u.state == PIEPresenceState::Active) out.push_back(u);
+            if (u.state == PIEPresenceState::Active)
+                out.push_back(u);
         return out;
     }
-    void SetOffline(const std::string& userId) {
+    void SetOffline(const std::string& userId)
+    {
         auto it = m_users.find(userId);
-        if (it != m_users.end()) it->second.state = PIEPresenceState::Offline;
+        if (it != m_users.end())
+            it->second.state = PIEPresenceState::Offline;
     }
 
-private:
+  private:
     std::unordered_map<std::string, PIEUser> m_users;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

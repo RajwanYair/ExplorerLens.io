@@ -4,31 +4,36 @@
 // Pre-seeds the thumbnail cache on first launch by scanning commonly accessed folders.
 //
 #pragma once
+#include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct CSFBConfig {
-    uint32_t             maxFilesPerFolder = 100;
+struct CSFBConfig
+{
+    uint32_t maxFilesPerFolder = 100;
     std::vector<std::wstring> seedFolders;
-    bool                 backgroundScan  = true;
+    bool backgroundScan = true;
 };
 
-struct CSFBBootstrapResult {
-    bool     success         = false;
-    uint32_t foldersScanned  = 0;
-    uint32_t filesQueued     = 0;
-    uint32_t elapsedMs       = 0;
+struct CSFBBootstrapResult
+{
+    bool success = false;
+    uint32_t foldersScanned = 0;
+    uint32_t filesQueued = 0;
+    uint32_t elapsedMs = 0;
 };
 
-class ColdStartFolderBootstrapper {
-public:
+class ColdStartFolderBootstrapper
+{
+  public:
     explicit ColdStartFolderBootstrapper(const CSFBConfig& config) : m_config(config) {}
 
-    CSFBBootstrapResult Bootstrap() {
+    CSFBBootstrapResult Bootstrap()
+    {
         CSFBBootstrapResult r;
         r.foldersScanned = static_cast<uint32_t>(m_config.seedFolders.size());
         for (const auto& folder : m_config.seedFolders) {
@@ -36,15 +41,22 @@ public:
             r.filesQueued += m_config.maxFilesPerFolder / 2;  // Simulate half-full folders
         }
         r.elapsedMs = r.foldersScanned * 50;
-        r.success   = true;
+        r.success = true;
         return r;
     }
-    bool IsBootstrapComplete() const { return m_bootstrapDone; }
-    void MarkComplete()              { m_bootstrapDone = true; }
+    bool IsBootstrapComplete() const
+    {
+        return m_bootstrapDone;
+    }
+    void MarkComplete()
+    {
+        m_bootstrapDone = true;
+    }
 
-private:
+  private:
     CSFBConfig m_config;
-    bool       m_bootstrapDone = false;
+    bool m_bootstrapDone = false;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

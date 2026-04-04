@@ -15,14 +15,29 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class LogSeverity : uint8_t {
-    Trace, Debug, Info, Warning, Error, Fatal, COUNT
+    Trace,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal,
+    COUNT
 };
 
 enum class LogCategory : uint8_t {
-    Decoder, Pipeline, Cache, GPU, Plugin, Memory, Shell, General, COUNT
+    Decoder,
+    Pipeline,
+    Cache,
+    GPU,
+    Plugin,
+    Memory,
+    Shell,
+    General,
+    COUNT
 };
 
-struct LogEntry {
+struct LogEntry
+{
     LogSeverity severity = LogSeverity::Info;
     LogCategory category = LogCategory::General;
     std::wstring message;
@@ -32,7 +47,8 @@ struct LogEntry {
     uint32_t threadId = 0;
 };
 
-struct LoggerConfig {
+struct LoggerConfig
+{
     LogSeverity minSeverity = LogSeverity::Info;
     bool enableETW = true;
     bool enableFileLog = true;
@@ -41,19 +57,28 @@ struct LoggerConfig {
     bool structuredJSON = true;
 };
 
-struct LoggerStats {
+struct LoggerStats
+{
     uint64_t totalEntries = 0;
     uint64_t entriesByLevel[static_cast<size_t>(LogSeverity::COUNT)] = {};
     uint64_t droppedEntries = 0;
     bool overflow = false;
 };
 
-class StructuredDiagnosticLogger {
-public:
-    void Configure(const LoggerConfig& cfg) { m_config = cfg; }
-    const LoggerConfig& GetConfig() const { return m_config; }
+class StructuredDiagnosticLogger
+{
+  public:
+    void Configure(const LoggerConfig& cfg)
+    {
+        m_config = cfg;
+    }
+    const LoggerConfig& GetConfig() const
+    {
+        return m_config;
+    }
 
-    bool Log(const LogEntry& entry) {
+    bool Log(const LogEntry& entry)
+    {
         if (static_cast<uint8_t>(entry.severity) < static_cast<uint8_t>(m_config.minSeverity))
             return false;
 
@@ -69,7 +94,8 @@ public:
         return true;
     }
 
-    bool LogMessage(LogSeverity sev, LogCategory cat, const std::wstring& msg) {
+    bool LogMessage(LogSeverity sev, LogCategory cat, const std::wstring& msg)
+    {
         LogEntry entry;
         entry.severity = sev;
         entry.category = cat;
@@ -77,23 +103,39 @@ public:
         return Log(entry);
     }
 
-    const std::vector<LogEntry>& GetEntries() const { return m_entries; }
-    const LoggerStats& GetStats() const { return m_stats; }
-    size_t EntryCount() const { return m_entries.size(); }
+    const std::vector<LogEntry>& GetEntries() const
+    {
+        return m_entries;
+    }
+    const LoggerStats& GetStats() const
+    {
+        return m_stats;
+    }
+    size_t EntryCount() const
+    {
+        return m_entries.size();
+    }
 
-    void Clear() {
+    void Clear()
+    {
         m_entries.clear();
         m_stats = {};
     }
 
-    static size_t SeverityCount() { return static_cast<size_t>(LogSeverity::COUNT); }
-    static size_t CategoryCount() { return static_cast<size_t>(LogCategory::COUNT); }
+    static size_t SeverityCount()
+    {
+        return static_cast<size_t>(LogSeverity::COUNT);
+    }
+    static size_t CategoryCount()
+    {
+        return static_cast<size_t>(LogCategory::COUNT);
+    }
 
-private:
+  private:
     LoggerConfig m_config;
     std::vector<LogEntry> m_entries;
     LoggerStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

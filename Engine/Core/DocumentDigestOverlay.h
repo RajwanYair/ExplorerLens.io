@@ -7,12 +7,12 @@
 //
 #pragma once
 
-#include <string>
-#include <cstddef>
-#include <cstdint>
 #include <algorithm>
 #include <cctype>
+#include <cstddef>
+#include <cstdint>
 #include <cwctype>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -20,22 +20,25 @@ namespace Engine {
 // Generates text digest overlays for document thumbnails.
 // Provides word counting, read-time estimation, language hinting,
 // and smart text truncation at word boundaries.
-class DocumentDigestOverlay {
-public:
-    DocumentDigestOverlay()
-        : m_wordsPerMinute(200) {
-    }
+class DocumentDigestOverlay
+{
+  public:
+    DocumentDigestOverlay() : m_wordsPerMinute(200) {}
 
     // Set the full document text for analysis
-    void SetText(const std::wstring& fullText) {
+    void SetText(const std::wstring& fullText)
+    {
         m_fullText = fullText;
     }
 
     // Generate a digest (preview snippet) of at most maxChars characters.
     // Truncates at a word boundary to avoid cutting words.
-    std::wstring GenerateDigest(size_t maxChars) const {
-        if (m_fullText.empty()) return std::wstring();
-        if (maxChars == 0) return std::wstring();
+    std::wstring GenerateDigest(size_t maxChars) const
+    {
+        if (m_fullText.empty())
+            return std::wstring();
+        if (maxChars == 0)
+            return std::wstring();
 
         // Strip leading whitespace for the digest
         size_t start = 0;
@@ -44,28 +47,34 @@ public:
         }
 
         std::wstring trimmed = m_fullText.substr(start);
-        if (trimmed.empty()) return std::wstring();
+        if (trimmed.empty())
+            return std::wstring();
 
         return TruncateAtWord(trimmed, maxChars);
     }
 
     // Count the number of whitespace-delimited words in the stored text
-    size_t GetWordCount() const {
+    size_t GetWordCount() const
+    {
         return CountWords(m_fullText);
     }
 
     // Estimate reading time in seconds based on word count and words-per-minute
-    double GetEstimatedReadTime() const {
+    double GetEstimatedReadTime() const
+    {
         size_t words = GetWordCount();
-        if (words == 0 || m_wordsPerMinute == 0) return 0.0;
+        if (words == 0 || m_wordsPerMinute == 0)
+            return 0.0;
         return (static_cast<double>(words) / static_cast<double>(m_wordsPerMinute)) * 60.0;
     }
 
     // Provide a simple language hint based on character analysis.
     // Returns "CJK" for ideographic-heavy text, "Cyrillic" for Cyrillic,
     // "Arabic" for Arabic/Hebrew scripts, or "Latin" as default.
-    static std::string GetLanguageHint(const std::wstring& text) {
-        if (text.empty()) return "Unknown";
+    static std::string GetLanguageHint(const std::wstring& text)
+    {
+        if (text.empty())
+            return "Unknown";
 
         size_t cjkCount = 0;
         size_t cyrillicCount = 0;
@@ -77,30 +86,44 @@ public:
 
         for (size_t i = 0; i < sampleSize; ++i) {
             wchar_t ch = text[i];
-            if (std::iswspace(ch) || std::iswpunct(ch)) continue;
+            if (std::iswspace(ch) || std::iswpunct(ch))
+                continue;
             ++total;
 
-            if (ch >= 0x4E00 && ch <= 0x9FFF)      ++cjkCount;      // CJK Unified
-            else if (ch >= 0x3040 && ch <= 0x30FF)  ++cjkCount;      // Hiragana/Katakana
-            else if (ch >= 0x0400 && ch <= 0x04FF)  ++cyrillicCount;  // Cyrillic
-            else if (ch >= 0x0600 && ch <= 0x06FF)  ++arabicCount;    // Arabic
-            else if (ch >= 0x0590 && ch <= 0x05FF)  ++arabicCount;    // Hebrew
-            else if ((ch >= 0x0041 && ch <= 0x007A))++latinCount;     // Basic Latin
+            if (ch >= 0x4E00 && ch <= 0x9FFF)
+                ++cjkCount;  // CJK Unified
+            else if (ch >= 0x3040 && ch <= 0x30FF)
+                ++cjkCount;  // Hiragana/Katakana
+            else if (ch >= 0x0400 && ch <= 0x04FF)
+                ++cyrillicCount;  // Cyrillic
+            else if (ch >= 0x0600 && ch <= 0x06FF)
+                ++arabicCount;  // Arabic
+            else if (ch >= 0x0590 && ch <= 0x05FF)
+                ++arabicCount;  // Hebrew
+            else if ((ch >= 0x0041 && ch <= 0x007A))
+                ++latinCount;  // Basic Latin
         }
 
-        if (total == 0) return "Unknown";
+        if (total == 0)
+            return "Unknown";
 
         double threshold = 0.3;
-        if (static_cast<double>(cjkCount) / total > threshold) return "CJK";
-        if (static_cast<double>(cyrillicCount) / total > threshold) return "Cyrillic";
-        if (static_cast<double>(arabicCount) / total > threshold) return "Arabic";
+        if (static_cast<double>(cjkCount) / total > threshold)
+            return "CJK";
+        if (static_cast<double>(cyrillicCount) / total > threshold)
+            return "Cyrillic";
+        if (static_cast<double>(arabicCount) / total > threshold)
+            return "Arabic";
         return "Latin";
     }
 
     // Truncate text at a word boundary, appending ellipsis if truncated.
-    static std::wstring TruncateAtWord(const std::wstring& text, size_t maxLen) {
-        if (maxLen < 4) maxLen = 4;
-        if (text.size() <= maxLen) return text;
+    static std::wstring TruncateAtWord(const std::wstring& text, size_t maxLen)
+    {
+        if (maxLen < 4)
+            maxLen = 4;
+        if (text.size() <= maxLen)
+            return text;
 
         // Find last space before maxLen - 3 (room for "...")
         size_t cutoff = maxLen - 3;
@@ -120,16 +143,27 @@ public:
     }
 
     // Configuration
-    void SetWordsPerMinute(uint32_t wpm) { m_wordsPerMinute = (std::max)(wpm, 1u); }
-    uint32_t GetWordsPerMinute() const { return m_wordsPerMinute; }
+    void SetWordsPerMinute(uint32_t wpm)
+    {
+        m_wordsPerMinute = (std::max)(wpm, 1u);
+    }
+    uint32_t GetWordsPerMinute() const
+    {
+        return m_wordsPerMinute;
+    }
 
     // Access stored text
-    const std::wstring& GetText() const { return m_fullText; }
+    const std::wstring& GetText() const
+    {
+        return m_fullText;
+    }
 
-private:
+  private:
     // Count whitespace-delimited words
-    static size_t CountWords(const std::wstring& text) {
-        if (text.empty()) return 0;
+    static size_t CountWords(const std::wstring& text)
+    {
+        if (text.empty())
+            return 0;
 
         size_t count = 0;
         bool inWord = false;
@@ -137,9 +171,9 @@ private:
         for (size_t i = 0; i < text.size(); ++i) {
             if (std::iswspace(text[i])) {
                 inWord = false;
-            }
-            else {
-                if (!inWord) ++count;
+            } else {
+                if (!inWord)
+                    ++count;
                 inWord = true;
             }
         }
@@ -150,5 +184,5 @@ private:
     uint32_t m_wordsPerMinute;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

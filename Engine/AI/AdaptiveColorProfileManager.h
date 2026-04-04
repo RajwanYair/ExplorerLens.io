@@ -35,7 +35,8 @@ enum class ToneMappingMode : uint8_t {
     Auto
 };
 
-struct AdaptiveColorProfile {
+struct AdaptiveColorProfile
+{
     AdaptiveColorSpace sourceSpace = AdaptiveColorSpace::SRGB;
     AdaptiveColorSpace targetSpace = AdaptiveColorSpace::SRGB;
     ToneMappingMode toneMapping = ToneMappingMode::None;
@@ -44,7 +45,8 @@ struct AdaptiveColorProfile {
     float maxLuminanceNits = 100.0f;
 };
 
-struct ColorProfileStats {
+struct ColorProfileStats
+{
     uint64_t totalProfileMatches = 0;
     uint64_t hdrConversions = 0;
     uint64_t gamutMappings = 0;
@@ -52,15 +54,17 @@ struct ColorProfileStats {
     bool initialized = false;
 };
 
-class AdaptiveColorProfileManager {
-public:
-    static AdaptiveColorProfileManager& Instance() {
+class AdaptiveColorProfileManager
+{
+  public:
+    static AdaptiveColorProfileManager& Instance()
+    {
         static AdaptiveColorProfileManager instance;
         return instance;
     }
 
-    void Initialize(AdaptiveColorSpace displaySpace = AdaptiveColorSpace::SRGB,
-                    float displayMaxNits = 100.0f) {
+    void Initialize(AdaptiveColorSpace displaySpace = AdaptiveColorSpace::SRGB, float displayMaxNits = 100.0f)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_displaySpace = displaySpace;
         m_displayMaxNits = displayMaxNits;
@@ -68,7 +72,8 @@ public:
         m_stats.initialized = true;
     }
 
-    AdaptiveColorProfile MatchProfile(AdaptiveColorSpace sourceSpace) {
+    AdaptiveColorProfile MatchProfile(AdaptiveColorSpace sourceSpace)
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalProfileMatches++;
 
@@ -80,8 +85,7 @@ public:
 
         if (sourceSpace == m_displaySpace) {
             profile.toneMapping = ToneMappingMode::None;
-        } else if (sourceSpace == AdaptiveColorSpace::HDR10 ||
-                   sourceSpace == AdaptiveColorSpace::Rec2020) {
+        } else if (sourceSpace == AdaptiveColorSpace::HDR10 || sourceSpace == AdaptiveColorSpace::Rec2020) {
             if (profile.hdrCapable) {
                 profile.toneMapping = ToneMappingMode::ACES;
                 m_stats.hdrConversions++;
@@ -98,22 +102,25 @@ public:
         return profile;
     }
 
-    bool IsInitialized() const {
+    bool IsInitialized() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats.initialized;
     }
 
-    ColorProfileStats GetStats() const {
+    ColorProfileStats GetStats() const
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
     }
 
-    void Shutdown() {
+    void Shutdown()
+    {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.initialized = false;
     }
 
-private:
+  private:
     AdaptiveColorProfileManager() = default;
     ~AdaptiveColorProfileManager() = default;
     AdaptiveColorProfileManager(const AdaptiveColorProfileManager&) = delete;
@@ -125,5 +132,5 @@ private:
     ColorProfileStats m_stats;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens

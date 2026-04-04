@@ -32,7 +32,8 @@ enum class VideoStreamState : uint8_t {
     Error
 };
 
-struct StreamInfo {
+struct StreamInfo
+{
     std::wstring url;
     VideoStreamProtocol protocol = VideoStreamProtocol::Local;
     uint64_t totalBytes = 0;
@@ -44,7 +45,8 @@ struct StreamInfo {
     double bitrateKbps = 0.0;
 };
 
-struct KeyFrameInfo {
+struct KeyFrameInfo
+{
     uint32_t frameIndex = 0;
     double timestampSec = 0.0;
     uint64_t offsetBytes = 0;
@@ -52,7 +54,8 @@ struct KeyFrameInfo {
     bool isIDR = false;
 };
 
-struct StreamDecodeResult {
+struct StreamDecodeResult
+{
     bool success = false;
     uint32_t thumbnailWidth = 0;
     uint32_t thumbnailHeight = 0;
@@ -60,23 +63,27 @@ struct StreamDecodeResult {
     VideoStreamState state = VideoStreamState::Idle;
 };
 
-class StreamingVideoDecoder {
-public:
+class StreamingVideoDecoder
+{
+  public:
     StreamingVideoDecoder() = default;
 
-    void SetStreamInfo(const StreamInfo& info) {
+    void SetStreamInfo(const StreamInfo& info)
+    {
         m_info = info;
         m_state = VideoStreamState::Buffering;
     }
 
-    bool HasSufficientBuffer() const {
+    bool HasSufficientBuffer() const
+    {
         return m_info.bufferPercent >= m_minBufferPercent;
     }
 
-    std::vector<KeyFrameInfo> FindKeyFrames(const uint8_t* data, size_t size,
-        uint32_t maxFrames = 5) const {
+    std::vector<KeyFrameInfo> FindKeyFrames(const uint8_t* data, size_t size, uint32_t maxFrames = 5) const
+    {
         std::vector<KeyFrameInfo> frames;
-        if (!data || size < 4) return frames;
+        if (!data || size < 4)
+            return frames;
 
         // Simple NAL unit start code detection for H.264/H.265
         for (size_t i = 0; i + 3 < size && frames.size() < maxFrames; i++) {
@@ -91,7 +98,8 @@ public:
         return frames;
     }
 
-    StreamDecodeResult TryDecode(uint32_t targetSize = 256) {
+    StreamDecodeResult TryDecode(uint32_t targetSize = 256)
+    {
         StreamDecodeResult result;
         result.state = m_state;
         if (!HasSufficientBuffer()) {
@@ -107,17 +115,29 @@ public:
         return result;
     }
 
-    VideoStreamState GetState() const { return m_state; }
-    StreamInfo GetStreamInfo() const { return m_info; }
-    void SetMinBufferPercent(float percent) { m_minBufferPercent = percent; }
-    uint64_t GetTotalDecoded() const { return m_totalDecoded; }
+    VideoStreamState GetState() const
+    {
+        return m_state;
+    }
+    StreamInfo GetStreamInfo() const
+    {
+        return m_info;
+    }
+    void SetMinBufferPercent(float percent)
+    {
+        m_minBufferPercent = percent;
+    }
+    uint64_t GetTotalDecoded() const
+    {
+        return m_totalDecoded;
+    }
 
-private:
+  private:
     StreamInfo m_info;
     VideoStreamState m_state = VideoStreamState::Idle;
     float m_minBufferPercent = 5.0f;
     uint64_t m_totalDecoded = 0;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
