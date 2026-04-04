@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 32.3.1 (Codename: Fomalhaut-T)
+- **Version:** 32.4.0 (Codename: Fomalhaut-U)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -211,7 +211,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~4483 unit tests, 5 benchmarks (v32.3.1 baseline)
+- **Test count:** ~4483 unit tests, 5 benchmarks (v32.4.0 baseline)
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -262,9 +262,8 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v32.3.1 "Fomalhaut-T"
+- **Current version:** v32.4.0 "Fomalhaut-U"
 - **Source of truth:** `CHANGELOG.md`
-- **Sprint plans:** `docs/SPRINT_PLAN_500.md` (Sprints 461–560) · `docs/SPRINT_PLAN_600.md` (561–660) · `docs/SPRINT_PLAN_700.md` (661–760) · `docs/SPRINT_PLAN_800.md` (761–860)
 - **Gen-6 Roadmap:** `docs/ROADMAP_V30.md` — v30.x "Deneb" Platform Unification + v31.x "Achernar" Generative AI
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas
 - **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
@@ -274,63 +273,67 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Release Procedure (EVERY version bump)
 
-> **Critical:** Every version bump MUST trigger a GitHub Release with all binaries.
-> This applies to EVERY version (X.Y.Z) — patch, minor, and major — without exception.
-> Use `Bump-Version.ps1 -TagAndPush` on every bump. The tag push fires `release.yml` which
-> builds and publishes: LENSShell.dll, LENSManager.exe, lens.exe, MSI, ZIP, SHA256SUMS.txt, SBOM.json.
+> **Non-negotiable:** Every version bump MUST trigger a GitHub Release with all binaries AND
+> publish to all 5 package registries. This applies to EVERY version (X.Y.Z) without exception.
+> `Bump-Version.ps1 -TagAndPush` is the ONE command to rule them all:
+> - Updates all 18 version-bearing files (including npm/ruby/Dockerfile packaging manifests)
+> - Commits with a descriptive message
+> - Creates the `vX.Y.Z` git tag
+> - Pushes tag → fires `release.yml` → builds LENSShell.dll + LENSManager.exe + lens.exe + MSI + ZIP + SBOM
+> - The GitHub Release creation (`release: published`) then triggers `publish-packages.yml` →
+>   publishes simultaneously to NuGet, npm, Container (ghcr.io), Maven, and RubyGems
 
 ```powershell
-# 1. Update all version references (ALL of these, every time)
-#    - VERSION file
-#    - CHANGELOG.md  (new [X.Y.Z] section, move planned items to released)
-#    - Engine/Core/BuildValidation.h  (VersionString, Codename, MinorVersion, milestones, UnitTestCount)
-#    - Engine/Core/SBOMGenerator.h  (two hardcoded "ExplorerLens-X.Y.Z" strings)
-#    - .github/copilot-instructions.md  (version line at top + test count + current version line)
-#    - .github/standards/tool-versions.md  (date + version in header)
-#    - docs/assets/social-preview.svg  (version chip + test count chip)
-#    - docs/assets/architecture-build.svg  (MSI artifact filename chip)
-#    - README.md  (Tests badge + Tests row in feature table)
-#    - vcpkg.json  ("version" field)
-#    - docs/SBOM.json  (serialNumber + metadata.component.version + timestamp)
-#    - Engine/Tests/benchmarks/baseline.json  (_comment, _updated, version)
+# ─── The COMPLETE release command (do this on every version bump, no exceptions) ───
 
-# 2. Scrub corporate artefacts from ALL tracked files before any public push
-#    git grep -rn "intel.com" -- "*.ps1" "*.yml" "*.yaml" "*.md" "*.json" "*.h" "*.cpp"
-#    git grep -rn "proxy" --  "*.ps1" "*.yml" "*.yaml" "*.md" "*.json"
-#    git grep -rn "928\b"    -- "*.ps1" "*.yml" "*.yaml"   # port 928 = Intel proxy
-
-# 3. Build and verify locally
-.\build-scripts\Build-MSVC.ps1 -Test
-
-# 4. Commit + tag using Bump-Version.ps1 (ALWAYS use -TagAndPush)
-#    This script updates all version files, commits, creates the tag, and pushes.
-#    The tag push fires release.yml → builds all binaries → publishes GitHub Release.
-#
 .\build-scripts\Bump-Version.ps1 -Version "X.Y.Z" -Codename "Codename" -TestCount NNNN `
     -ChangelogEntry "Short release summary" -TagAndPush
+
+# What -TagAndPush does automatically:
+#  1. Updates ALL 18 version-bearing files:
+#       VERSION, CHANGELOG.md, Engine/Core/BuildValidation.h, Engine/Core/SBOMGenerator.h
+#       .github/copilot-instructions.md, .github/standards/tool-versions.md
+#       .github/standards/build-method.md, docs/assets/social-preview.svg
+#       docs/assets/architecture-build.svg, README.md, vcpkg.json
+#       docs/SBOM.json, Engine/Tests/benchmarks/baseline.json
+#       CMakeLists.txt, Engine/CMakeLists.txt, LENSManager/LENSManager.rc
+#       packaging/npm/package.json, packaging/ruby/lib/explorerlens/version.rb, Dockerfile
+#  2. git add -A && git commit -m "chore: bump version to X.Y.Z (Codename)"
+#  3. git tag vX.Y.Z
+#  4. git push origin main --tags
 #
-# IMPORTANT: -TagAndPush is REQUIRED on every version bump.
-# Do NOT manually git tag / git push — always use Bump-Version.ps1 -TagAndPush.
+# ── What happens automatically in CI after push ──
+#   tag vX.Y.Z pushed → release.yml fires:
+#     Build Engine lib + LENSShell.dll + LENSManager.exe + lens.exe CLI + Manager.WinUI.exe
+#     Build MSI (WiX) + ZIP + SHA256SUMS.txt + SBOM.json + verification-report.json
+#     Create GitHub Release (not draft) with all artifacts attached
+#   release: published → publish-packages.yml fires (5 parallel jobs):
+#     NuGet   → nuget.pkg.github.com/RajwanYair
+#     npm     → npm.pkg.github.com  (@rajwanyair/explorerlens)
+#     Container → ghcr.io/rajwanyair/explorerlens
+#     Maven   → maven.pkg.github.com/RajwanYair
+#     RubyGems → rubygems.pkg.github.com/RajwanYair
+#     publish-summary: aggregates all 5 results into step summary, exits 1 on any failure
 ```
 
-> `release.yml` kicks off automatically on every `vX.Y.Z` tag and publishes:
-> `LENSShell.dll`, `LENSManager.exe`, `lens.exe`, `Manager.WinUI.exe` (when available),
-> **.msi** (WiX), **.zip** (portable), `SHA256SUMS.txt`, `SBOM.json`, `verification-report.json`
->
-> **Release artifacts built:** Engine lib → LENSShell.dll → LENSManager.exe → lens.exe CLI →
-> Manager.WinUI.exe (optional) → MSI (WiX, with `HasLensCLI` preprocessor) → ZIP → checksums
+> **Before pushing:** scrub corporate artefacts from ALL tracked files:
+> ```powershell
+> git grep -rn "intel.com" -- "*.ps1" "*.yml" "*.yaml" "*.md" "*.json" "*.h" "*.cpp"
+> git grep -rn "proxy"     -- "*.ps1" "*.yml" "*.yaml" "*.md" "*.json"
+> git grep -rn "928\b"     -- "*.ps1" "*.yml" "*.yaml"   # port 928 = Intel proxy
+> ```
 
 ### Per-revision GitHub Release checklist
 
 | Step | Action |
 |------|--------|
 | ✅ | CHANGELOG.md has new `[X.Y.Z]` section with all deliverables |
-| ✅ | All 12 version-bearing files updated (see list above) |
+| ✅ | All 18 version-bearing files updated via `Bump-Version.ps1 -TagAndPush` |
 | ✅ | Corporate proxy URLs scrubbed from tracked files |
-| ✅ | Local build passes with 0 errors, 0 warnings |
-| ✅ | `git tag vX.Y.Z` pushed to origin → `release.yml` triggered |
-| ✅ | GitHub Releases page shows new release with all artifacts |
-| ✅ | SHA256SUMS.txt and SBOM.json attached to release |
+| ✅ | Local build passes: `.\build-scripts\Build-MSVC.ps1 -Test` → 0 errors, 0 warnings |
+| ✅ | `git tag vX.Y.Z` pushed to origin → `release.yml` triggered → GitHub Release published |
+| ✅ | GitHub Release page shows all artifacts: .dll, .exe, .msi, .zip, SHA256SUMS.txt, SBOM.json |
+| ✅ | `publish-packages.yml` summary shows ✅ for all 5 registries (NuGet/npm/Container/Maven/RubyGems) |
 
 ## Release Artifact Checklist
 
@@ -345,10 +348,21 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 | `SHA256SUMS.txt` | Always | Checksums for all artifacts |
 | `ExplorerLens-X.Y.Z-SBOM.json` | Always | CycloneDX SBOM |
 
+## GitHub Packages (published on every release)
+
+| Registry | Package | URL |
+|----------|---------|-----|
+| NuGet | `ExplorerLens.SDK` | `nuget.pkg.github.com/RajwanYair/index.json` |
+| npm | `@rajwanyair/explorerlens` | `npm.pkg.github.com` |
+| Container | `explorerlens` | `ghcr.io/rajwanyair/explorerlens` |
+| Apache Maven | `io.github.rajwanyair:explorerlens` | `maven.pkg.github.com/RajwanYair` |
+| RubyGems | `explorerlens` | `rubygems.pkg.github.com/RajwanYair` |
+
 ## Key Architecture Patterns
 
 - **Namespace:** All engine classes use `namespace ExplorerLens { namespace Engine { } }` — use `using namespace ExplorerLens::Engine;` in tests
 - **Test framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with `g_testsRun/g_testsPassed/g_testsFailed` counters — NOT GTest
+- **Test file split:** EngineTests.cpp (28,866 lines, ~2296 tests) + EngineTests_Mid.cpp (22,199 lines, ~2187 tests) share EngineTestsMacros.h
 - **Release gates:** Unified `Utils/ReleaseGate.h` — single header covering all gate versions (V2–V32)
 - **Plugin architecture:** Plugin files go in `Engine/Plugin/`; use `ICADDecoderPlugin` / `IThumbnailPlugin` patterns
 - **Memory pressure ladder:** 5-tier (None/Low/Medium/High/Critical) with bitmask `PressureAction` flags

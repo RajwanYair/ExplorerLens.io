@@ -9,26 +9,23 @@
 
 #include <atomic>
 #include <cstdint>
-#include <functional>
-#include <memory>
 #include <string>
-#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 enum class DSBackend : uint8_t {
-    DirectStorage12,  // DirectStorage 1.2 — GPU staging path
-    DirectStorage10,  // DirectStorage 1.0 — basic NVMe streaming
-    CPUFallback       // OS read + CPU decompress (legacy / HDD)
+    DIRECT_STORAGE12,  // DirectStorage 1.2 — GPU staging path
+    DIRECT_STORAGE10,  // DirectStorage 1.0 — basic NVMe streaming
+    CPU_FALLBACK       // OS read + CPU decompress (legacy / HDD)
 };
 
 enum class DSCompressionFormat : uint8_t {
-    None,
-    GDeflate,   // NVIDIA RTX GDeflate (hardware-native)
-    ZStandard,  // ZStd GPU kernel (Intel/AMD)
+    NONE,
+    GDEFLATE,   // NVIDIA RTX GDeflate (hardware-native)
+    ZSTANDARD,  // ZStd GPU kernel (Intel/AMD)
     LZ4,        // LZ4 GPU kernel
-    Custom      // Format-provided decompressor
+    CUSTOM      // Format-provided decompressor
 };
 
 struct DSStreamRequest
@@ -37,7 +34,7 @@ struct DSStreamRequest
     uint64_t fileOffset = 0;
     uint32_t readLength = 0;
     uint32_t stagingOffset = 0;
-    DSCompressionFormat compression = DSCompressionFormat::None;
+    DSCompressionFormat compression = DSCompressionFormat::NONE;
     uint32_t uncompressedSize = 0;
     uint32_t priority = 0;  // 0 = normal, 1 = high, 2 = critical
 };
@@ -47,7 +44,7 @@ struct DSStreamResult
     bool success = false;
     uint32_t bytesRead = 0;
     double latencyMs = 0.0;
-    DSBackend backendUsed = DSBackend::CPUFallback;
+    DSBackend backendUsed = DSBackend::CPU_FALLBACK;
     std::string errorMessage;
 };
 
@@ -66,8 +63,8 @@ class DirectStorageManager
   public:
     static DirectStorageManager& Instance()
     {
-        static DirectStorageManager s_instance;
-        return s_instance;
+        static DirectStorageManager instance;
+        return instance;
     }
 
     bool Initialize()
@@ -120,9 +117,10 @@ class DirectStorageManager
 
     DSBackend GetActiveBackend() const
     {
-        if (m_caps.directStorage12Available)
-            return DSBackend::DirectStorage12;
-        return DSBackend::CPUFallback;
+        if (m_caps.directStorage12Available) {
+            return DSBackend::DIRECT_STORAGE12;
+        }
+        return DSBackend::CPU_FALLBACK;
     }
 
     const DSCapabilities& GetCapabilities() const
@@ -142,18 +140,18 @@ class DirectStorageManager
 
     static bool IsSupportedCompressionFormat(DSCompressionFormat fmt)
     {
-        return fmt == DSCompressionFormat::GDeflate || fmt == DSCompressionFormat::ZStandard
+        return fmt == DSCompressionFormat::GDEFLATE || fmt == DSCompressionFormat::ZSTANDARD
                || fmt == DSCompressionFormat::LZ4;
     }
 
     static const char* BackendName(DSBackend b)
     {
         switch (b) {
-            case DSBackend::DirectStorage12:
+            case DSBackend::DIRECT_STORAGE12:
                 return "DirectStorage-1.2";
-            case DSBackend::DirectStorage10:
+            case DSBackend::DIRECT_STORAGE10:
                 return "DirectStorage-1.0";
-            case DSBackend::CPUFallback:
+            case DSBackend::CPU_FALLBACK:
                 return "CPU-Fallback";
             default:
                 return "Unknown";
@@ -170,19 +168,19 @@ class DirectStorageManager
         // Placeholder: Full DirectStorage 1.2 implementation requires dstorage.dll linkage.
         // Actual GPU staging buffer submission performed here via IDStorageQueue1::EnqueueRead.
         r.success = true;
-        r.backendUsed = DSBackend::DirectStorage12;
+        r.backendUsed = DSBackend::DIRECT_STORAGE12;
         r.latencyMs = 8.0;  // Expected GPU decompression latency
         r.bytesRead = req.readLength;
         m_queueDepth.fetch_sub(1);
         return r;
     }
 
-    DSStreamResult StreamViaCPUFallback(const DSStreamRequest& req)
+    static DSStreamResult StreamViaCPUFallback(const DSStreamRequest& req)
     {
         DSStreamResult r;
         // Standard OS file read — data lands in CPU user buffer, not GPU staging.
         r.success = true;
-        r.backendUsed = DSBackend::CPUFallback;
+        r.backendUsed = DSBackend::CPU_FALLBACK;
         r.latencyMs = 85.0;  // Typical CPU inflate latency for 50 MB RAW
         r.bytesRead = req.readLength;
         return r;

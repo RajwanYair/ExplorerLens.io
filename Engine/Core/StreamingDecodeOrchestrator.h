@@ -8,9 +8,9 @@
 //
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -19,21 +19,21 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class SDOFileType : uint8_t {
-    Unknown,
-    RAWCamera,  // CR3, ARW, NEF, DNG, etc. — TIFF-container RAW
-    MultiTIFF,  // Multi-page / BigTIFF / strip-tile TIFF
-    FITS,       // Astronomical FITS (.fit/.fits/.fts)
-    PSD_PSB,    // Photoshop Document (layer stack)
-    HDR_EXR,    // OpenEXR / Radiance HDR
-    Video       // Large video — keyframe extraction mode
+    UNKNOWN,
+    RAW_CAMERA,  // CR3, ARW, NEF, DNG, etc. — TIFF-container RAW
+    MULTI_TIFF,  // Multi-page / BigTIFF / strip-tile TIFF
+    FITS,        // Astronomical FITS (.fit/.fits/.fts)
+    PSD_PSB,     // Photoshop Document (layer stack)
+    HDR_EXR,     // OpenEXR / Radiance HDR
+    VIDEO        // Large video — keyframe extraction mode
 };
 
 enum class SDOStrategy : uint8_t {
-    EmbeddedThumb,  // Extract embedded JPEG/EXIF thumbnail directly (fastest)
-    SubfileIFD,     // TIFF IFD sub-file at reduced resolution
-    RegionRead,     // Read only the top-left X×X strip for a fast preview
-    FullDecode,     // Full decode with progressive display (slowest, max quality)
-    Cancelled       // Request was cancelled during stage probing
+    EMBEDDED_THUMB,  // Extract embedded JPEG/EXIF thumbnail directly (fastest)
+    SUBFILE_IFD,     // TIFF IFD sub-file at reduced resolution
+    REGION_READ,     // Read only the top-left X×X strip for a fast preview
+    FULL_DECODE,     // Full decode with progressive display (slowest, max quality)
+    CANCELLED        // Request was cancelled during stage probing
 };
 
 struct SDORegion
@@ -48,8 +48,8 @@ struct SDORegion
 
 struct SDOProbeResult
 {
-    SDOFileType fileType = SDOFileType::Unknown;
-    SDOStrategy strategy = SDOStrategy::FullDecode;
+    SDOFileType fileType = SDOFileType::UNKNOWN;
+    SDOStrategy strategy = SDOStrategy::FULL_DECODE;
     uint64_t totalBytes = 0;
     uint64_t bytesToRead = 0;       // Bytes actually needed for thumbnail
     double byteReductionPct = 0.0;  // How much less we read vs. full file
@@ -64,7 +64,7 @@ struct SDODecodeResult
     uint32_t width = 0;
     uint32_t height = 0;
     std::vector<uint8_t> pixelsBGRA;
-    SDOStrategy strategyUsed = SDOStrategy::FullDecode;
+    SDOStrategy strategyUsed = SDOStrategy::FULL_DECODE;
     double totalLatencyMs = 0.0;
     double probeLatencyMs = 0.0;
     double readLatencyMs = 0.0;
@@ -80,11 +80,11 @@ class StreamingDecodeOrchestrator
   public:
     static StreamingDecodeOrchestrator& Instance()
     {
-        static StreamingDecodeOrchestrator s_instance;
-        return s_instance;
+        static StreamingDecodeOrchestrator instance;
+        return instance;
     }
 
-    SDOProbeResult Probe(const std::wstring& filePath)
+    static SDOProbeResult Probe(const std::wstring& filePath)
     {
         SDOProbeResult p;
 
@@ -95,7 +95,7 @@ class StreamingDecodeOrchestrator
         p.strategy = SelectStrategy(p.fileType);
 
         // Estimate target region (if applicable)
-        if (p.strategy == SDOStrategy::RegionRead) {
+        if (p.strategy == SDOStrategy::REGION_READ) {
             SDORegion r{};
             r.fileOffset = 0;
             r.byteLength = 256 * 1024;  // Read first 256 KB for strip/tile header
@@ -110,34 +110,38 @@ class StreamingDecodeOrchestrator
 
         p.totalBytes = 0;
         p.byteReductionPct =
-            (p.totalBytes > 0) ? 100.0 * (1.0 - static_cast<double>(p.bytesToRead) / static_cast<double>(p.totalBytes))
-                               : 0.0;
+            (p.totalBytes > 0)
+                ? 100.0 * (1.0 - (static_cast<double>(p.bytesToRead) / static_cast<double>(p.totalBytes)))
+                : 0.0;
         return p;
     }
 
-    SDODecodeResult Decode(const std::wstring& filePath, uint32_t thumbSize, SDOProgressCallback progress = nullptr)
+    SDODecodeResult Decode(const std::wstring& filePath, uint32_t thumbSize, const SDOProgressCallback& progress = {})
     {
         SDODecodeResult r;
 
-        SDOProbeResult probe = Probe(filePath);
+        const SDOProbeResult probe = Probe(filePath);
 
-        if (progress)
+        if (progress) {
             progress(10, "Probing");
+        }
 
         if (!probe.errorMessage.empty()) {
             r.errorMessage = probe.errorMessage;
             return r;
         }
 
-        if (progress)
+        if (progress) {
             progress(30, "Reading");
+        }
 
         // Perform targeted region read using the probe result
         r.strategyUsed = probe.strategy;
         r.bytesReadFromStorage = probe.bytesToRead > 0 ? probe.bytesToRead : 1024 * 1024;
 
-        if (progress)
+        if (progress) {
             progress(60, "Decoding");
+        }
 
         // Decode into BGRA thumbnail
         r.success = true;
@@ -150,17 +154,18 @@ class StreamingDecodeOrchestrator
         r.decodeLatencyMs = 5.0;
         r.totalLatencyMs = r.probeLatencyMs + r.readLatencyMs + r.decodeLatencyMs;
 
-        if (progress)
+        if (progress) {
             progress(100, "Complete");
+        }
         return r;
     }
 
     static uint64_t EstimateMinBytesNeeded(SDOFileType type, uint64_t fileSizeBytes)
     {
         switch (type) {
-            case SDOFileType::RAWCamera:
+            case SDOFileType::RAW_CAMERA:
                 return std::min<uint64_t>(512 * 1024, fileSizeBytes);
-            case SDOFileType::MultiTIFF:
+            case SDOFileType::MULTI_TIFF:
                 return std::min<uint64_t>(256 * 1024, fileSizeBytes);
             case SDOFileType::FITS:
                 return std::min<uint64_t>(64 * 1024, fileSizeBytes);
@@ -174,15 +179,15 @@ class StreamingDecodeOrchestrator
     static const char* StrategyName(SDOStrategy s)
     {
         switch (s) {
-            case SDOStrategy::EmbeddedThumb:
+            case SDOStrategy::EMBEDDED_THUMB:
                 return "EmbeddedThumb";
-            case SDOStrategy::SubfileIFD:
+            case SDOStrategy::SUBFILE_IFD:
                 return "SubfileIFD";
-            case SDOStrategy::RegionRead:
+            case SDOStrategy::REGION_READ:
                 return "RegionRead";
-            case SDOStrategy::FullDecode:
+            case SDOStrategy::FULL_DECODE:
                 return "FullDecode";
-            case SDOStrategy::Cancelled:
+            case SDOStrategy::CANCELLED:
                 return "Cancelled";
             default:
                 return "Unknown";
@@ -194,39 +199,46 @@ class StreamingDecodeOrchestrator
 
     static SDOFileType ClassifyFile(const std::wstring& path)
     {
-        if (path.empty())
-            return SDOFileType::Unknown;
+        if (path.empty()) {
+            return SDOFileType::UNKNOWN;
+        }
         auto ext = path.substr(path.rfind(L'.') + 1);
-        for (auto& c : ext)
+        for (auto& c : ext) {
             c = static_cast<wchar_t>(towlower(c));
+        }
 
         if (ext == L"cr3" || ext == L"arw" || ext == L"nef" || ext == L"dng" || ext == L"raf" || ext == L"rw2"
-            || ext == L"orf")
-            return SDOFileType::RAWCamera;
-        if (ext == L"tif" || ext == L"tiff")
-            return SDOFileType::MultiTIFF;
-        if (ext == L"fit" || ext == L"fits" || ext == L"fts")
+            || ext == L"orf") {
+            return SDOFileType::RAW_CAMERA;
+        }
+        if (ext == L"tif" || ext == L"tiff") {
+            return SDOFileType::MULTI_TIFF;
+        }
+        if (ext == L"fit" || ext == L"fits" || ext == L"fts") {
             return SDOFileType::FITS;
-        if (ext == L"psd" || ext == L"psb")
+        }
+        if (ext == L"psd" || ext == L"psb") {
             return SDOFileType::PSD_PSB;
-        if (ext == L"exr" || ext == L"hdr")
+        }
+        if (ext == L"exr" || ext == L"hdr") {
             return SDOFileType::HDR_EXR;
-        return SDOFileType::Unknown;
+        }
+        return SDOFileType::UNKNOWN;
     }
 
     static SDOStrategy SelectStrategy(SDOFileType type)
     {
         switch (type) {
-            case SDOFileType::RAWCamera:
-                return SDOStrategy::EmbeddedThumb;
-            case SDOFileType::MultiTIFF:
-                return SDOStrategy::SubfileIFD;
+            case SDOFileType::RAW_CAMERA:
+                return SDOStrategy::EMBEDDED_THUMB;
+            case SDOFileType::MULTI_TIFF:
+                return SDOStrategy::SUBFILE_IFD;
             case SDOFileType::FITS:
-                return SDOStrategy::RegionRead;
+                return SDOStrategy::REGION_READ;
             case SDOFileType::PSD_PSB:
-                return SDOStrategy::EmbeddedThumb;
+                return SDOStrategy::EMBEDDED_THUMB;
             default:
-                return SDOStrategy::FullDecode;
+                return SDOStrategy::FULL_DECODE;
         }
     }
 };

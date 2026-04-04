@@ -1,7 +1,7 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** March 2026
-**Version:** 32.3.1 (Codename: Fomalhaut-T)
+**Version:** 32.4.0 (Codename: Fomalhaut-U)
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---
@@ -27,11 +27,11 @@ $MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
 $vcvars64 = "$VSPath\VC\Auxiliary\Build\vcvars64.bat" # Preferred over vcvarsall
 $cl = "$VSPath\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe" # v19.50.35720
 
-# CMake 4.3.0 (via Scoop)
-$CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
+# CMake 4.3.1 (via Scoop — auto-detected from PATH)
+$CMake = "$env:USERPROFILE\scoop\shims\cmake.exe"
 
-# Ninja 1.13.2 (via Scoop)
-$Ninja = "C:\Users\ryair\scoop\shims\ninja.exe"
+# Ninja 1.13.2 (via Scoop — auto-detected from PATH)
+$Ninja = "$env:USERPROFILE\scoop\shims\ninja.exe"
 ```
 
 **Note:** Tools are auto-detected by `build-scripts\Find-All-Tools.ps1`.

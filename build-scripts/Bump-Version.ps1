@@ -189,7 +189,7 @@ if (Test-Path $bmPath) {
     Write-Host "[bump] build-method.md updated"
 }
 
-# 12b. copilot-instructions.md — test count line
+# 13b. copilot-instructions.md — test count line
 if ($TestCount -gt 0) {
     $ci2 = Get-Content $ciPath -Raw
     $ci2 = $ci2 -replace '~\d+ unit tests', "~$TestCount unit tests"
@@ -198,7 +198,36 @@ if ($TestCount -gt 0) {
     Write-Host "[bump] copilot-instructions.md test count updated"
 }
 
-# 13. CHANGELOG.md — prepend new versioned section (proper Keep-a-Changelog format)
+# 14. Packaging manifests — always in sync with main version
+
+# 14a. packaging/npm/package.json — "version" field
+$npmPath = "$rootDir\packaging\npm\package.json"
+if (Test-Path $npmPath) {
+    $npm = Get-Content $npmPath -Raw
+    $npm = $npm -replace '("version":\s*")[\d.]+(")', "`${1}$Version`${2}"
+    Set-Content $npmPath -Value $npm -NoNewline
+    Write-Host "[bump] packaging/npm/package.json updated"
+}
+
+# 14b. packaging/ruby VERSION constant
+$rubyPath = "$rootDir\packaging\ruby\lib\explorerlens\version.rb"
+if (Test-Path $rubyPath) {
+    $ruby = Get-Content $rubyPath -Raw
+    $ruby = $ruby -replace "(VERSION = ')[\d.]+(')", "`${1}$Version`${2}"
+    Set-Content $rubyPath -Value $ruby -NoNewline
+    Write-Host "[bump] packaging/ruby/lib/explorerlens/version.rb updated"
+}
+
+# 14c. Dockerfile — ARG EXPLORERLENS_VERSION default
+$dockerPath = "$rootDir\Dockerfile"
+if (Test-Path $dockerPath) {
+    $docker = Get-Content $dockerPath -Raw
+    $docker = $docker -replace '(ARG EXPLORERLENS_VERSION=)[\d.]+', "`${1}$Version"
+    Set-Content $dockerPath -Value $docker -NoNewline
+    Write-Host "[bump] Dockerfile ARG EXPLORERLENS_VERSION updated"
+}
+
+# 15. CHANGELOG.md — prepend new versioned section (proper Keep-a-Changelog format)
 $clPath = "$rootDir\CHANGELOG.md"
 $cl = Get-Content $clPath -Raw
 $marker = "## [Unreleased]"
@@ -219,7 +248,7 @@ if ($idx -ge 0) {
 
 # 6. Commit
 $commitMsg = "chore: bump version to $Version ($Codename)"
-$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md"
+$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md, packaging/npm/package.json, packaging/ruby/lib/explorerlens/version.rb, Dockerfile"
 $fullMsg = "$commitMsg`n`n$details"
 [IO.File]::WriteAllText("$rootDir\.git\BUMP_MSG.txt", $fullMsg)
 git add -A

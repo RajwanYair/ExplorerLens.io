@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 5 April 2026 (v32.3.1 Fomalhaut-T release)
-**Version:** 32.3.1 "Fomalhaut-T"
+**Last Updated:** 5 April 2026 (v32.4.0 Fomalhaut-U release)
+**Version:** 32.4.0 "Fomalhaut-U"
 
 ---
 

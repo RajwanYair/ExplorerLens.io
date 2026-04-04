@@ -22,6 +22,7 @@ Checks: >
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-owning-memory,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-type-cstyle-cast,
   -cppcoreguidelines-pro-type-reinterpret-cast,
@@ -44,7 +45,8 @@ Checks: >
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
   concurrency-*,
-  -concurrency-mt-unsafe
+  -concurrency-mt-unsafe,
+  -cppcoreguidelines-avoid-non-const-global-variables
 
 # Suppression rationale:
 #   bugprone-easily-swappable-parameters — COM-style (HRESULT, UINT, SIZE*) signatures cause false positives
@@ -56,6 +58,7 @@ Checks: >
 #   cppcoreguidelines-no-malloc — libmupdf / LibRaw use malloc internally
 #   cppcoreguidelines-owning-memory — COM AddRef/Release ownership is not gsl::owner-compatible
 #   cppcoreguidelines-pro-bounds-array-to-pointer-decay — WCHAR[] to Win32 API is unavoidable
+#   cppcoreguidelines-pro-bounds-constant-array-index — test MockDecoder uses variable index in C array (test-only pattern)
 #   cppcoreguidelines-pro-bounds-pointer-arithmetic — pixel buffer math (buf + stride*y)
 #   cppcoreguidelines-pro-type-cstyle-cast — MAKEINTRESOURCE, HIWORD/LOWORD expand to C casts
 #   cppcoreguidelines-pro-type-reinterpret-cast — HBITMAP <-> void* in COM thumbnail path
@@ -77,6 +80,12 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.FunctionCase
     value: CamelCase
+  - key: readability-identifier-naming.ScopedEnumConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: g_
   - key: readability-identifier-naming.VariableCase
     value: camelBack
   - key: readability-identifier-naming.ConstantCase

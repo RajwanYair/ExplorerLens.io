@@ -11,27 +11,27 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class AISearchMode : uint8_t {  // NOLINT(readability-identifier-naming)
-    SemanticSimilarity = 0,
-    Keywords,
-    Visual,
-    Hybrid,
+enum class AISearchMode : uint8_t {
+    SEMANTIC_SIMILARITY = 0,
+    KEYWORDS,
+    VISUAL,
+    HYBRID,
     COUNT
 };
 
-enum class EmbeddingModel : uint8_t {  // NOLINT(readability-identifier-naming)
+enum class EmbeddingModel : uint8_t {
     CLIP = 0,
-    ResNet,
+    RESNET,
     BLIP,
-    Sentence,
+    SENTENCE,
     COUNT
 };
 
-enum class SearchIndexStatus : uint8_t {  // NOLINT(readability-identifier-naming)
-    Building = 0,
-    Ready,
-    Stale,
-    Error,
+enum class SearchIndexStatus : uint8_t {
+    BUILDING = 0,
+    READY,
+    STALE,
+    INDEX_ERROR,
     COUNT
 };
 
@@ -41,13 +41,13 @@ class AISearchIntegration
     static const wchar_t* ModeName(AISearchMode m) noexcept
     {
         switch (m) {
-            case AISearchMode::SemanticSimilarity:
+            case AISearchMode::SEMANTIC_SIMILARITY:
                 return L"Semantic Similarity";
-            case AISearchMode::Keywords:
+            case AISearchMode::KEYWORDS:
                 return L"Keywords";
-            case AISearchMode::Visual:
+            case AISearchMode::VISUAL:
                 return L"Visual";
-            case AISearchMode::Hybrid:
+            case AISearchMode::HYBRID:
                 return L"Hybrid";
             default:
                 return L"Unknown";
@@ -58,11 +58,11 @@ class AISearchIntegration
         switch (m) {
             case EmbeddingModel::CLIP:
                 return L"CLIP";
-            case EmbeddingModel::ResNet:
+            case EmbeddingModel::RESNET:
                 return L"ResNet";
             case EmbeddingModel::BLIP:
                 return L"BLIP";
-            case EmbeddingModel::Sentence:
+            case EmbeddingModel::SENTENCE:
                 return L"Sentence";
             default:
                 return L"Unknown";
@@ -71,13 +71,13 @@ class AISearchIntegration
     static const wchar_t* IndexStatusName(SearchIndexStatus s) noexcept
     {
         switch (s) {
-            case SearchIndexStatus::Building:
+            case SearchIndexStatus::BUILDING:
                 return L"Building";
-            case SearchIndexStatus::Ready:
+            case SearchIndexStatus::READY:
                 return L"Ready";
-            case SearchIndexStatus::Stale:
+            case SearchIndexStatus::STALE:
                 return L"Stale";
-            case SearchIndexStatus::Error:
+            case SearchIndexStatus::INDEX_ERROR:
                 return L"Error";
             default:
                 return L"Unknown";
@@ -104,12 +104,12 @@ class AISearchIntegration
                 sum += data[(y * stride) + x];
             }
         }
-        const uint64_t mean = sum / (static_cast<uint64_t>(W) * H);
+        const uint64_t PIXEL_MEAN = sum / (static_cast<uint64_t>(W) * H);
         uint64_t hash = 0;
         uint32_t bits = 0;
         for (uint32_t y = 0; y < H && bits < 64; ++y) {
             for (uint32_t x = 0; x < W && bits < 64; ++x) {
-                hash |= (static_cast<uint64_t>(data[(y * stride) + x] > mean) << bits++);
+                hash |= (static_cast<uint64_t>(data[(y * stride) + x] > PIXEL_MEAN) << bits++);
             }
         }
         return hash;

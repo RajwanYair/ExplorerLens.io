@@ -1,10 +1,66 @@
 # ExplorerLens v30.x "Deneb" — Gen-6 Roadmap
 
-**Status:** Planned  
-**Current Active Version:** v25.2.0 "Rigel-S"  
-**This Major Series Begins:** v30.0.0 "Deneb" (sprint 961)  
-**Pre-requisite Series:** [ROADMAP_V25.md](ROADMAP_V25.md) (v25.x Rigel through v26.x Canopus)  
-**Sprint Detail:** Sprints 961–1060 (historical — plans archived)
+**Status:** Historical — v30.x through v32.x completed; v33.x planning active
+**When written:** v25.2.0 "Rigel-S" was current active version
+**Current Active Version:** v32.4.0 "Fomalhaut-U" (2026-04-05)
+**Next Major:** v33.0.0 "Spica" (see [v33.x Forward Plan](#v33x-spica--forward-plan) below)
+
+---
+
+## v33.x "Spica" — Forward Plan
+
+> New major series starting after v32.x "Fomalhaut" completes.
+
+```
+v32.4.0  Fomalhaut-U  ── Release infra: 5-registry packages, manifest sync  (2026-04-05)  ← NOW
+v32.5.0  Fomalhaut-V  ── DirectStorage 1.2 zero-copy GPU decompress path     (planned)
+v32.6.0  Fomalhaut-W  ── CLIP semantic search + HNSW index (NPU INT8)         (planned)
+v32.7.0  Fomalhaut-X  ── Live Preview Scrubber (video seek + frame extraction)(planned)
+   │
+   ├── v33.0.0  Spica        Cross-Platform Shell (macOS Quick Look + Linux) ★★ (planned)
+   ├── v33.1.0  Spica-R      Platform Abstraction Layer — Metal + Vulkan EGL   (planned)
+   ├── v33.2.0  Spica-S      Enterprise Console v4 + GPO Policy Templates      (planned)
+   ├── v33.3.0  Spica-T      Generative AI Thumbnails (on-device NPU)          (planned)
+   ├── v33.4.0  Spica-U      Plugin Marketplace v5 + SDK Compat Kit v3         (planned)
+   └── v33.5.0  Spica-V      LTS Hardening + Security Audit                   (planned)
+
+★★ = Landmark MAJOR release
+```
+
+### v32.5.0 "Fomalhaut-V" — DirectStorage Zero-Copy
+
+**Theme:** Eliminate CPU-side decompression bottleneck for large format files.
+
+- DirectStorage 1.2 streams to GPU staging buffer directly from NVMe
+- GDeflate (NVIDIA) + ZStd compute kernel (Intel/AMD) — GPU decompression in ~8 ms
+- P99 target: 340 ms (current large RAW) → 55 ms (6×)
+
+### v33.0.0 "Spica" — Cross-Platform Shell ★★
+
+**Theme:** ExplorerLens beyond Windows — macOS Quick Look + Linux Nautilus/Dolphin.
+
+| Platform | Shell Provider | GPU Backend |
+|----------|---------------|-------------|
+| Windows 11 | IThumbnailProvider / COM | D3D12 |
+| macOS Sequoia | QLThumbnailRequest | Metal v2 |
+| Linux (GTK4) | Nautilus / Dolphin / Tumbler | Vulkan (EGL) |
+
+Engine internals unchanged across platforms. Platform Abstraction Layer (PAL) isolates
+GPU surface creation, shell-provider registration, and file-system notifications.
+
+---
+
+## v30.x–v32.x Completion Summary
+
+| Series | Theme | Status | Key Deliverables |
+|--------|-------|--------|-----------------|
+| v30.0–v30.7 | Platform Unification (Deneb) | Completed | PAL scaffolding, D3D12 renderer |
+| v31.0–v31.7 | Generative AI (Achernar) | Completed | AI scene understanding, NPU routing |
+| v32.0–v32.3 | Performance + CI (Fomalhaut-T) | Completed | Sub-ms cache, 5-registry publish, EngineTests split |
+
+---
+
+## Original Gen-6 Vision (written at v25.2.0)
 
 ---
 

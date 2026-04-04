@@ -365,3 +365,59 @@ jobs:
             --key github \
             --host "https://rubygems.pkg.github.com/${{ env.GH_OWNER }}" \
             "explorerlens-${{ steps.version.outputs.version }}.gem"
+
+  # ── Publish Summary ───────────────────────────────────────────────────────────
+  publish-summary:
+    name: "Publish Summary"
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - publish-nuget
+      - publish-npm
+      - publish-container
+      - publish-maven
+      - publish-rubygems
+    permissions:
+      contents: read
+
+    steps:
+      - name: Report publish results
+        env:
+          NUGET_RESULT:     ${{ needs.publish-nuget.result }}
+          NPM_RESULT:       ${{ needs.publish-npm.result }}
+          CONTAINER_RESULT: ${{ needs.publish-container.result }}
+          MAVEN_RESULT:     ${{ needs.publish-maven.result }}
+          RUBYGEMS_RESULT:  ${{ needs.publish-rubygems.result }}
+        run: |
+          status_icon() {
+            case "$1" in
+              success)  echo "✅" ;;
+              skipped)  echo "⏭️" ;;
+              *)        echo "❌" ;;
+            esac
+          }
+
+          echo "## GitHub Packages Publish Summary"                >> "$GITHUB_STEP_SUMMARY"
+          echo ""                                                   >> "$GITHUB_STEP_SUMMARY"
+          echo "| Registry          | Status |"                    >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------------------|--------|"                    >> "$GITHUB_STEP_SUMMARY"
+          echo "| NuGet             | $(status_icon "$NUGET_RESULT")     $NUGET_RESULT |"     >> "$GITHUB_STEP_SUMMARY"
+          echo "| npm               | $(status_icon "$NPM_RESULT")       $NPM_RESULT |"       >> "$GITHUB_STEP_SUMMARY"
+          echo "| Container (ghcr)  | $(status_icon "$CONTAINER_RESULT") $CONTAINER_RESULT |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Apache Maven      | $(status_icon "$MAVEN_RESULT")     $MAVEN_RESULT |"     >> "$GITHUB_STEP_SUMMARY"
+          echo "| RubyGems          | $(status_icon "$RUBYGEMS_RESULT")  $RUBYGEMS_RESULT |"  >> "$GITHUB_STEP_SUMMARY"
+          echo ""                                                   >> "$GITHUB_STEP_SUMMARY"
+
+          FAILED=0
+          for result in "$NUGET_RESULT" "$NPM_RESULT" "$CONTAINER_RESULT" "$MAVEN_RESULT" "$RUBYGEMS_RESULT"; do
+            [ "$result" = "failure" ] && FAILED=$((FAILED + 1))
+          done
+
+          if [ "$FAILED" -eq 0 ]; then
+            echo "All package registries published successfully." >> "$GITHUB_STEP_SUMMARY"
+            echo "All package registries published successfully."
+          else
+            echo "⚠️  $FAILED registry/registries failed." >> "$GITHUB_STEP_SUMMARY"
+            echo "$FAILED registry/registries failed — check individual job logs."
+            exit 1
+          fi

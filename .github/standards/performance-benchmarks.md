@@ -1,6 +1,6 @@
 # ExplorerLens — Performance Benchmarks Baseline
 
-**Version:** 32.3.0 "Fomalhaut-T"  
+**Version:** 32.3.1 "Fomalhaut-T"  
 **Last Updated:** April 2026  
 **Hardware:** Intel Core Ultra 9 285K, 64 GB DDR5-6400, NVIDIA RTX 4090, NVMe SSD (7 GB/s)  
 **NPU Target:** Intel AI Boost NPU (Meteor Lake / Arrow Lake, 48 TOPS)  

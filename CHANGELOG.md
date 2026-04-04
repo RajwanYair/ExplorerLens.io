@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.4.0] — 2026-04-05 — Fomalhaut-U
+
+### Added
+- Engine/Tests: Split EngineTests.cpp (47K lines) into dual-file architecture — EngineTests.cpp (28,866 lines) + EngineTests_Mid.cpp (22,199 lines) + EngineTestsMacros.h; eliminates compiler memory pressure, enables parallel -j8 compilation
+- Engine/Tests: EngineTestsMacros.h — shared test infrastructure header with extern counter declarations, TEST/ASSERT/RUN_TEST macros, and MockDecoder stub for IThumbnailDecoder testing
+- .github/workflows/publish-packages.yml: publish-summary gate job aggregating all 5 registry publish results (NuGet/npm/Container/Maven/RubyGems) with Markdown step-summary table and failure exit gate
+- build-scripts/Bump-Version.ps1: Auto-sync packaging manifests (npm package.json, RubyGems version.rb, Dockerfile ARG) on every version bump — all 18 version-bearing files now updated atomically
+- docs/ROADMAP_V30.md: Update status to Historical; document v30.x–v32.x completion; add v33.x Spica series forward plan with v32.5.x Fomalhaut-V milestones
+
+### Fixed
+- Engine/Core/ThumbnailPipelineMetrics.h: Rename TPMStage enum values to UPPER_CASE (FILE_READ, DECOMPRESS, DECODE, COLOR_CONVERT, SCALE, RENDER, SHELL_DELIVER, COUNT) and BottleneckStage values (NONE, IO, CPU, GPU, SHELL_DELIVER) per clang-tidy ScopedEnumConstantCase rule
+- Engine/Tests/EngineTestsMacros.h: Replace transitive Engine.h include with direct Core/IThumbnailDecoder.h + windows.h; remove deprecated string.h; zero-initialize m_extensions[3] and DecoderInfo struct
+- Engine/Tests/EngineTests_Mid.cpp: Update all TPMStage and BottleneckStage test references to UPPER_CASE enum values matching renamed ThumbnailPipelineMetrics.h constants
+
+### Changed
+- .clang-tidy: Add ScopedEnumConstantCase:UPPER_CASE, GlobalVariablePrefix:g_, GlobalVariableCase:camelBack; disable cppcoreguidelines-pro-bounds-constant-array-index for MockDecoder test patterns
+- .github/copilot-instructions.md: Reinforce Release Procedure section — mandate Bump-Version.ps1 -TagAndPush on every bump, document 18 version-bearing files, document 5-registry auto-publish via publish-packages.yml; add GitHub Packages registry table
+- .github/standards/build-method.md: Replace hardcoded absolute user-specific paths with portable env:USERPROFILE variables
+
+---
+
 ## [32.3.1] — 2026-04-05 — Fomalhaut-T
 
 ### Fixed

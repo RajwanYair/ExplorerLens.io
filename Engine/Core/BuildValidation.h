@@ -22,10 +22,10 @@ namespace BuildValidation {
 struct BuildInfo
 {
     static constexpr int MajorVersion = 32;
-    static constexpr int MinorVersion = 3;
-    static constexpr int PatchVersion = 1;
-    static constexpr const char* VersionString = "32.3.1";
-    static constexpr const char* Codename = "Fomalhaut-T";
+    static constexpr int MinorVersion = 4;
+    static constexpr int PatchVersion = 0;
+    static constexpr const char* VersionString = "32.4.0";
+    static constexpr const char* Codename = "Fomalhaut-U";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;
 
