@@ -1424,7 +1424,7 @@ Performance and benchmarking milestone - v17.1.0 Nova-R
 ### Fixed
 - ExplorerLens.adml ADML display string formatting (Sprint 108)
 
-## [17.0.0] "Nova" — 
+## [17.0.0] "Nova" —
 
 ### Summary
 **GRAND MILESTONE — 100-Sprint Roadmap Complete**
@@ -1593,7 +1593,7 @@ $date = Get-Date -Format "yyyy-MM-dd"
 ### Added
 - **LENSManager.WinUI (full 9-page app):** NavigationView shell, DashboardPage (status cards + throughput),
   FormatsPage (searchable toggle table), GpuPage (vendor waterfall + NVDEC/QuickSync/AMF),
-  SettingsPage (GPU/cache/theme/quality), CachePage (budget slider + eviction), 
+  SettingsPage (GPU/cache/theme/quality), CachePage (budget slider + eviction),
   PluginsPage (trust-chain list), DiagnosticsPage (ETW + live counters + export), AboutPage.
 - **Build-scripts/Bump-Version.ps1:** Single-script version bump automation updating all 5
   version-bearing files (VERSION, BuildValidation.h, copilot-instructions.md, social-preview.svg,
@@ -1923,7 +1923,7 @@ graceful degradation catalog, archive security hardening, and fuzz harness scaff
 - **Version consistency** — Python setup.py and PROJECT_SPEC_PROMPT.md aligned to v15.0.0
 - **Linting configuration** — pyproject.toml, setup.cfg, markdownlint, VS Code Python analysis
 
-### Added
+### Added (Engine Features)
 
 #### Core Engine & Libraries
 - **libarchive 3.7.6** — Integrated as static library, replacing per-format archive handlers
