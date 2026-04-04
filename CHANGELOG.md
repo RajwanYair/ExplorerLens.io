@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.6.0] — 2026-04-05 — Fomalhaut-W
+
+### Added
+- Engine/AI/HNSWIndexEngine.h/.cpp: HNSW graph for O(log n) semantic search over 512-dim CLIP embeddings; Insert/Remove, cosine scan, topK Query, SaveToFile/LoadFromFile, Reset
+- Engine/AI/CLIPQueryProcessor.h/.cpp: Text-to-CLIP-embedding processor; DirectML/ONNX/CPU backend enum, LoadModel, Query, BackendName
+- Engine/AI/SemanticSearchOrchestrator.h/.cpp: Coordinator wiring CLIP + HNSW + persistence; Initialize, IndexFile, Search with minRelevance filter, IndexedCount, LastStats
+- Engine/AI/EmbeddingPersistenceEngine.h/.cpp: Append-only journal for persisting CLIP embeddings; Open/Close, Append, Flush, LoadAll, Stats
+- Engine/AI/VisualQueryOptimizer.h: Search space pruner using folder/date/type hints; inline PruneSearchSpace with estimatedSpeedup, SetActive toggle
+- Engine/Tests: 25 new unit tests covering all five new classes
+
+### Changed
+- Engine/CMakeLists.txt: Register 5 new headers + 4 new sources under Sprint 1121-1130
+
+---
+
 ## [32.5.0] — 2026-04-05 — Fomalhaut-V
 
 ### Added

@@ -229,6 +229,12 @@
 #include "../Pipeline/DirectStorageBatchScheduler.h"
 #include "../Core/DirectStorageProfiler.h"
 #include "../Core/ZeroCopyDecodeSession.h"
+// Sprint 1121-1130: CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
+#include "../AI/HNSWIndexEngine.h"
+#include "../AI/CLIPQueryProcessor.h"
+#include "../AI/SemanticSearchOrchestrator.h"
+#include "../AI/EmbeddingPersistenceEngine.h"
+#include "../AI/VisualQueryOptimizer.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -22586,6 +22592,32 @@ extern void TestZCS_TotalMs_Runner();
 extern void TestZCS_IsTerminal_Runner();
 extern void TestZCS_StateName_Runner();
 extern void TestZCS_GpuDecompressFlag_Runner();
+// Sprint 1121-1130: CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
+extern void TestHNSW_InsertAndCount_Runner();
+extern void TestHNSW_Remove_Runner();
+extern void TestHNSW_QueryTopK_Runner();
+extern void TestHNSW_SaveLoad_Runner();
+extern void TestHNSW_Reset_Runner();
+extern void TestCQP_BackendName_Runner();
+extern void TestCQP_LoadModelFails_EmptyPath_Runner();
+extern void TestCQP_LoadModelSucceeds_Runner();
+extern void TestCQP_QueryEmpty_WhenNotLoaded_Runner();
+extern void TestCQP_LastEmbedMsDefault_Runner();
+extern void TestSSO_InitializeSucceeds_Runner();
+extern void TestSSO_IsReadyAfterInit_Runner();
+extern void TestSSO_IndexFile_Runner();
+extern void TestSSO_SearchEmpty_BeforeIndex_Runner();
+extern void TestSSO_IndexedCountTracked_Runner();
+extern void TestEPE_OpenAndClose_Runner();
+extern void TestEPE_AppendEntry_Runner();
+extern void TestEPE_FlushUpdatesStats_Runner();
+extern void TestEPE_LoadAllEmpty_Runner();
+extern void TestEPE_StatsJournalBytes_Runner();
+extern void TestVQO_DefaultActive_Runner();
+extern void TestVQO_SetActive_Runner();
+extern void TestVQO_PruneNoHint_Runner();
+extern void TestVQO_PruneReducesCandidates_Runner();
+extern void TestVQO_PruneResultFields_Runner();
 
 int main()
 {
@@ -27252,6 +27284,32 @@ int main()
     RUN_TEST(TestZCS_IsTerminal);
     RUN_TEST(TestZCS_StateName);
     RUN_TEST(TestZCS_GpuDecompressFlag);
+    // Sprint 1121-1130: CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
+    RUN_TEST(TestHNSW_InsertAndCount);
+    RUN_TEST(TestHNSW_Remove);
+    RUN_TEST(TestHNSW_QueryTopK);
+    RUN_TEST(TestHNSW_SaveLoad);
+    RUN_TEST(TestHNSW_Reset);
+    RUN_TEST(TestCQP_BackendName);
+    RUN_TEST(TestCQP_LoadModelFails_EmptyPath);
+    RUN_TEST(TestCQP_LoadModelSucceeds);
+    RUN_TEST(TestCQP_QueryEmpty_WhenNotLoaded);
+    RUN_TEST(TestCQP_LastEmbedMsDefault);
+    RUN_TEST(TestSSO_InitializeSucceeds);
+    RUN_TEST(TestSSO_IsReadyAfterInit);
+    RUN_TEST(TestSSO_IndexFile);
+    RUN_TEST(TestSSO_SearchEmpty_BeforeIndex);
+    RUN_TEST(TestSSO_IndexedCountTracked);
+    RUN_TEST(TestEPE_OpenAndClose);
+    RUN_TEST(TestEPE_AppendEntry);
+    RUN_TEST(TestEPE_FlushUpdatesStats);
+    RUN_TEST(TestEPE_LoadAllEmpty);
+    RUN_TEST(TestEPE_StatsJournalBytes);
+    RUN_TEST(TestVQO_DefaultActive);
+    RUN_TEST(TestVQO_SetActive);
+    RUN_TEST(TestVQO_PruneNoHint);
+    RUN_TEST(TestVQO_PruneReducesCandidates);
+    RUN_TEST(TestVQO_PruneResultFields);
 
     std::wcout << std::endl;
 

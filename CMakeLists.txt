@@ -1,7 +1,7 @@
 #==============================================================================
 # ExplorerLens - Root CMake Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 32.5.0 "Fomalhaut-V"
+# Version: 32.6.0 "Fomalhaut-W"
 #
 # vcpkg Integration (Optional):
 #   cmake -B build -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLens
-    VERSION 32.5.0
+    VERSION 32.6.0
     DESCRIPTION "ExplorerLens.io - Universal File Preview Engine for Windows Explorer"
     LANGUAGES CXX
     HOMEPAGE_URL "https://github.com/ExplorerLens/ExplorerLens.io"

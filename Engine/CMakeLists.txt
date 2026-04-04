@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 32.5.0
+# Version: 32.6.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 32.5.0
+    VERSION 32.6.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1696,6 +1696,12 @@ set(ENGINE_HEADERS
     Pipeline/DirectStorageBatchScheduler.h
     Core/DirectStorageProfiler.h
     Core/ZeroCopyDecodeSession.h
+    # Sprint 1121-1130 — CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
+    AI/HNSWIndexEngine.h
+    AI/CLIPQueryProcessor.h
+    AI/SemanticSearchOrchestrator.h
+    AI/EmbeddingPersistenceEngine.h
+    AI/VisualQueryOptimizer.h
 )
 
 set(ENGINE_SOURCES
@@ -1933,6 +1939,11 @@ set(ENGINE_SOURCES
     GPU/GPUDecompressOrchestrator.cpp
     Pipeline/DirectStorageBatchScheduler.cpp
     Core/DirectStorageProfiler.cpp
+    # Sprint 1121-1130 — CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
+    AI/HNSWIndexEngine.cpp
+    AI/CLIPQueryProcessor.cpp
+    AI/SemanticSearchOrchestrator.cpp
+    AI/EmbeddingPersistenceEngine.cpp
 )
 
 #==============================================================================

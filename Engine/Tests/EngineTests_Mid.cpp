@@ -22429,3 +22429,262 @@ TEST(TestZCS_GpuDecompressFlag)
     ASSERT(s.stagingBytes == 2048);
 }
 
+//== Sprint 1121-1130: CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W") ==
+
+// ── HNSWIndexEngine ────────────────────────────────────────────────────────
+TEST(TestHNSW_InsertAndCount)
+{
+    using namespace ExplorerLens::Engine;
+    auto& idx = HNSWIndexEngine::Instance();
+    idx.Reset();
+    HNSWEntry e{};
+    e.itemId   = 1;
+    e.filePath = L"photo.jpg";
+    e.vector[0] = 1.0f;
+    ASSERT(idx.Insert(e));
+    ASSERT(idx.Count() == 1);
+}
+TEST(TestHNSW_Remove)
+{
+    using namespace ExplorerLens::Engine;
+    auto& idx = HNSWIndexEngine::Instance();
+    idx.Reset();
+    HNSWEntry e{};
+    e.itemId = 7;
+    idx.Insert(e);
+    ASSERT(idx.Remove(7));
+    ASSERT(idx.Count() == 0);
+    ASSERT(!idx.Remove(999));  // non-existent
+}
+TEST(TestHNSW_QueryTopK)
+{
+    using namespace ExplorerLens::Engine;
+    auto& idx = HNSWIndexEngine::Instance();
+    idx.Reset();
+    for (uint32_t i = 1; i <= 5; ++i)
+    {
+        HNSWEntry e{};
+        e.itemId      = i;
+        e.vector[i-1] = 1.0f;
+        idx.Insert(e);
+    }
+    float qv[512]{};
+    qv[0] = 1.0f;
+    auto results = idx.Query(qv, 3);
+    ASSERT(results.size() <= 3);
+    // Best match should have itemId == 1 (vector[0] == 1)
+    ASSERT(!results.empty() && results[0].itemId == 1);
+}
+TEST(TestHNSW_SaveLoad)
+{
+    using namespace ExplorerLens::Engine;
+    auto& idx = HNSWIndexEngine::Instance();
+    ASSERT(idx.SaveToFile(L"test_index.bin"));
+    ASSERT(idx.LoadFromFile(L"test_index.bin"));
+    ASSERT(!idx.SaveToFile(L""));   // empty path → fail
+    ASSERT(!idx.LoadFromFile(L"")); // empty path → fail
+}
+TEST(TestHNSW_Reset)
+{
+    using namespace ExplorerLens::Engine;
+    auto& idx = HNSWIndexEngine::Instance();
+    HNSWEntry e{};
+    e.itemId = 42;
+    idx.Insert(e);
+    idx.Reset();
+    ASSERT(idx.Count() == 0);
+    ASSERT(idx.LastQueryMs() == 0.0f);
+}
+// ── CLIPQueryProcessor ─────────────────────────────────────────────────────
+TEST(TestCQP_BackendName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(CLIPQueryProcessor::BackendName(CLIPTextBackend::DIRECTML) == std::string_view("DirectML"));
+    ASSERT(CLIPQueryProcessor::BackendName(CLIPTextBackend::ONNX)     == std::string_view("ONNX"));
+    ASSERT(CLIPQueryProcessor::BackendName(CLIPTextBackend::CPU)      == std::string_view("CPU"));
+}
+TEST(TestCQP_LoadModelFails_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    auto& p = CLIPQueryProcessor::Instance();
+    ASSERT(!p.LoadModel(L""));
+    ASSERT(!p.IsModelLoaded());
+}
+TEST(TestCQP_LoadModelSucceeds)
+{
+    using namespace ExplorerLens::Engine;
+    auto& p = CLIPQueryProcessor::Instance();
+    ASSERT(p.LoadModel(L"models/clip_vitb32_int8.onnx"));
+    ASSERT(p.IsModelLoaded());
+}
+TEST(TestCQP_QueryEmpty_WhenNotLoaded)
+{
+    using namespace ExplorerLens::Engine;
+    CLIPQueryProcessor fresh{};  // unloaded instance
+    CLIPQueryRequest req{};
+    req.queryText = L"sunset";
+    auto res = fresh.Query(req);
+    ASSERT(res.empty());
+}
+TEST(TestCQP_LastEmbedMsDefault)
+{
+    using namespace ExplorerLens::Engine;
+    CLIPQueryProcessor fresh{};
+    ASSERT(fresh.LastEmbedMs() == 0.0f);
+}
+// ── SemanticSearchOrchestrator ─────────────────────────────────────────────
+TEST(TestSSO_InitializeSucceeds)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sso = SemanticSearchOrchestrator::Instance();
+    ASSERT(sso.Initialize(L"search_index.bin"));
+}
+TEST(TestSSO_IsReadyAfterInit)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sso = SemanticSearchOrchestrator::Instance();
+    sso.Initialize(L"search_index.bin");
+    ASSERT(sso.IsReady());
+}
+TEST(TestSSO_IndexFile)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sso  = SemanticSearchOrchestrator::Instance();
+    auto& hnsw = HNSWIndexEngine::Instance();
+    hnsw.Reset();
+    sso.Initialize(L"idx.bin");
+    float emb[512]{};
+    emb[0] = 0.9f;
+    ASSERT(sso.IndexFile(L"cats.jpg", emb));
+    ASSERT(sso.IndexedCount() >= 1);
+}
+TEST(TestSSO_SearchEmpty_BeforeIndex)
+{
+    using namespace ExplorerLens::Engine;
+    SemanticSearchOrchestrator fresh{};
+    SemanticSearchRequest req{};
+    req.queryText = L"landscape";
+    auto res = fresh.Search(req);
+    ASSERT(res.empty());
+}
+TEST(TestSSO_IndexedCountTracked)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sso  = SemanticSearchOrchestrator::Instance();
+    auto& hnsw = HNSWIndexEngine::Instance();
+    hnsw.Reset();
+    sso.Initialize(L"idx2.bin");
+    float emb[512]{};
+    uint32_t before = sso.IndexedCount();
+    sso.IndexFile(L"a.png", emb);
+    sso.IndexFile(L"b.png", emb);
+    ASSERT(sso.IndexedCount() == before + 2);
+}
+// ── EmbeddingPersistenceEngine ─────────────────────────────────────────────
+TEST(TestEPE_OpenAndClose)
+{
+    using namespace ExplorerLens::Engine;
+    auto& ep = EmbeddingPersistenceEngine::Instance();
+    ASSERT(ep.Open(L"journal.bin"));
+    ASSERT(ep.IsOpen());
+    ep.Close();
+    ASSERT(!ep.IsOpen());
+}
+TEST(TestEPE_AppendEntry)
+{
+    using namespace ExplorerLens::Engine;
+    auto& ep = EmbeddingPersistenceEngine::Instance();
+    ep.Open(L"journal.bin");
+    PersistedEmbedding e{};
+    e.itemId   = 1;
+    e.filePath = L"img.jpg";
+    ASSERT(ep.Append(e));
+    ASSERT(ep.Stats().totalEntries == 1);
+    ep.Close();
+}
+TEST(TestEPE_FlushUpdatesStats)
+{
+    using namespace ExplorerLens::Engine;
+    auto& ep = EmbeddingPersistenceEngine::Instance();
+    ep.Open(L"journal.bin");
+    ASSERT(ep.Flush());
+    ASSERT(ep.Stats().flushCount >= 1);
+    ASSERT(ep.Stats().lastFlushMs > 0.0f);
+    ep.Close();
+}
+TEST(TestEPE_LoadAllEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    auto& ep = EmbeddingPersistenceEngine::Instance();
+    ep.Open(L"empty_journal.bin");
+    std::vector<PersistedEmbedding> loaded;
+    ASSERT(ep.LoadAll(loaded));
+    ASSERT(loaded.empty());  // fresh journal has no entries
+    ep.Close();
+}
+TEST(TestEPE_StatsJournalBytes)
+{
+    using namespace ExplorerLens::Engine;
+    auto& ep = EmbeddingPersistenceEngine::Instance();
+    ep.Open(L"journal2.bin");
+    PersistedEmbedding e{};
+    e.itemId = 2; e.filePath = L"x.tiff";
+    ep.Append(e);
+    ASSERT(ep.Stats().journalBytes > 0);
+    ep.Close();
+}
+// ── VisualQueryOptimizer ───────────────────────────────────────────────────
+TEST(TestVQO_DefaultActive)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(VisualQueryOptimizer::Instance().IsActive());
+}
+TEST(TestVQO_SetActive)
+{
+    using namespace ExplorerLens::Engine;
+    auto& opt = VisualQueryOptimizer::Instance();
+    opt.SetActive(false);
+    ASSERT(!opt.IsActive());
+    opt.SetActive(true);
+    ASSERT(opt.IsActive());
+}
+TEST(TestVQO_PruneNoHint)
+{
+    using namespace ExplorerLens::Engine;
+    auto& opt = VisualQueryOptimizer::Instance();
+    opt.SetActive(true);
+    VisualQueryHint hint{};  // NO_HINT
+    std::vector<uint32_t> candidates = { 1, 2, 3, 4 };
+    std::vector<uint32_t> pruned;
+    auto res = opt.PruneSearchSpace(hint, candidates, pruned);
+    ASSERT(res.prunedCandidates == 4);  // pass-through
+    ASSERT(pruned.size() == candidates.size());
+}
+TEST(TestVQO_PruneReducesCandidates)
+{
+    using namespace ExplorerLens::Engine;
+    auto& opt = VisualQueryOptimizer::Instance();
+    opt.SetActive(true);
+    VisualQueryHint hint{};
+    hint.type        = VisualQueryHintType::FOLDER_SCOPE;
+    hint.folderScope = L"C:\\Photos\\2025";
+    std::vector<uint32_t> candidates = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    std::vector<uint32_t> pruned;
+    auto res = opt.PruneSearchSpace(hint, candidates, pruned);
+    ASSERT(res.prunedCandidates < res.originalCandidates);
+    ASSERT(res.estimatedSpeedup > 1.0f);
+}
+TEST(TestVQO_PruneResultFields)
+{
+    using namespace ExplorerLens::Engine;
+    auto& opt = VisualQueryOptimizer::Instance();
+    VisualQueryHint hint{};
+    hint.type = VisualQueryHintType::FILE_TYPE;
+    hint.fileTypeExt = L".raw";
+    std::vector<uint32_t> candidates = { 10, 20, 30 };
+    std::vector<uint32_t> pruned;
+    auto res = opt.PruneSearchSpace(hint, candidates, pruned);
+    ASSERT(res.originalCandidates == 3);
+    ASSERT(res.pruneMs >= 0.0f);
+}
+
