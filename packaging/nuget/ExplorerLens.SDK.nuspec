@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>ExplorerLens.SDK</id>
+    <version>$version$</version>
+    <title>ExplorerLens Native SDK</title>
+    <authors>ExplorerLens Project</authors>
+    <description>
+      Native C++ SDK for ExplorerLens — GPU-accelerated thumbnail provider supporting 200+
+      file formats on Windows. Includes plugin headers, public API surface, and pre-built
+      ExplorerLensEngine binaries for Windows x64. Requires Windows 10 22H2+ / Windows 11.
+    </description>
+    <projectUrl>https://github.com/RajwanYair/ExplorerLens.io</projectUrl>
+    <license type="expression">MIT</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <readme>README.md</readme>
+    <tags>thumbnail windows shell-extension c++ gpu native image preview com</tags>
+    <repository type="git" url="https://github.com/RajwanYair/ExplorerLens.io.git" branch="main" />
+    <dependencies>
+      <group targetFramework="native" />
+    </dependencies>
+  </metadata>
+  <files>
+    <!-- Public C API and plugin headers -->
+    <file src="stage\include\**" target="build\native\include" />
+    <!-- Import library (Release x64) -->
+    <file src="stage\lib\ExplorerLensEngine.lib" target="lib\native\x64\ExplorerLensEngine.lib" />
+    <!-- Runtime DLL (Release x64) -->
+    <file src="stage\bin\ExplorerLensEngine.dll" target="runtimes\win-x64\native\ExplorerLensEngine.dll" />
+    <!-- Documentation -->
+    <file src="stage\README.md"    target="" />
+    <file src="stage\LICENSE"      target="" />
+    <file src="stage\CHANGELOG.md" target="" />
+  </files>
+</package>
