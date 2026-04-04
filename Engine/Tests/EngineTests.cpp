@@ -1,4 +1,4 @@
-//==============================================================================
+﻿//==============================================================================
 // ExplorerLens Engine - Unit Tests
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
@@ -223,6 +223,12 @@
 #include "../Core/MemoryMappedDecoder.h"
 #include "../Core/ThumbnailAnnotationOverlay.h"
 #include "../Pipeline/BatchThumbnailExporter.h"
+// Sprint 1111-1120: DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
+#include "../GPU/ZStdGPUKernel.h"
+#include "../GPU/GPUDecompressOrchestrator.h"
+#include "../Pipeline/DirectStorageBatchScheduler.h"
+#include "../Core/DirectStorageProfiler.h"
+#include "../Core/ZeroCopyDecodeSession.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -22557,6 +22563,29 @@ extern void TestMMD_Decode_ReturnsPixels_Runner();
 extern void TestMMD_Stats_Tracked_Runner();
 extern void TestMMD_RecommendedForFile_Runner();
 extern void TestMMD_BackendName_Runner();
+// Sprint 1111-1120: DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
+extern void TestZSK_VendorName_Runner();
+extern void TestZSK_FallbackWhenUnavailable_Runner();
+extern void TestZSK_DecompressReturnsBytesOnFallback_Runner();
+extern void TestGDO_DefaultBackendIsCPU_Runner();
+extern void TestGDO_BackendName_Runner();
+extern void TestGDO_DecompressCPUPath_Runner();
+extern void TestGDO_DecompressInvalidSizeFails_Runner();
+extern void TestDSBS_AddAndFlush_Runner();
+extern void TestDSBS_EmptyFlush_Runner();
+extern void TestDSBS_PendingCount_Runner();
+extern void TestDSBS_ResultsAfterFlush_Runner();
+extern void TestDSBS_ResetClearsAll_Runner();
+extern void TestDSP_PathName_Runner();
+extern void TestDSP_RecommendedPath_Runner();
+extern void TestDSP_AddSampleAndStats_Runner();
+extern void TestDSP_ResetClearsSamples_Runner();
+extern void TestDSP_P99LargerThanP50_Runner();
+extern void TestZCS_DefaultState_Runner();
+extern void TestZCS_TotalMs_Runner();
+extern void TestZCS_IsTerminal_Runner();
+extern void TestZCS_StateName_Runner();
+extern void TestZCS_GpuDecompressFlag_Runner();
 
 int main()
 {
@@ -27200,6 +27229,29 @@ int main()
     RUN_TEST(TestMMD_Stats_Tracked);
     RUN_TEST(TestMMD_RecommendedForFile);
     RUN_TEST(TestMMD_BackendName);
+    // Sprint 1111-1120: DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
+    RUN_TEST(TestZSK_VendorName);
+    RUN_TEST(TestZSK_FallbackWhenUnavailable);
+    RUN_TEST(TestZSK_DecompressReturnsBytesOnFallback);
+    RUN_TEST(TestGDO_DefaultBackendIsCPU);
+    RUN_TEST(TestGDO_BackendName);
+    RUN_TEST(TestGDO_DecompressCPUPath);
+    RUN_TEST(TestGDO_DecompressInvalidSizeFails);
+    RUN_TEST(TestDSBS_AddAndFlush);
+    RUN_TEST(TestDSBS_EmptyFlush);
+    RUN_TEST(TestDSBS_PendingCount);
+    RUN_TEST(TestDSBS_ResultsAfterFlush);
+    RUN_TEST(TestDSBS_ResetClearsAll);
+    RUN_TEST(TestDSP_PathName);
+    RUN_TEST(TestDSP_RecommendedPath);
+    RUN_TEST(TestDSP_AddSampleAndStats);
+    RUN_TEST(TestDSP_ResetClearsSamples);
+    RUN_TEST(TestDSP_P99LargerThanP50);
+    RUN_TEST(TestZCS_DefaultState);
+    RUN_TEST(TestZCS_TotalMs);
+    RUN_TEST(TestZCS_IsTerminal);
+    RUN_TEST(TestZCS_StateName);
+    RUN_TEST(TestZCS_GpuDecompressFlag);
 
     std::wcout << std::endl;
 

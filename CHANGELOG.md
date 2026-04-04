@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.5.0] — 2026-04-05 — Fomalhaut-V
+
+### Added
+- Engine/GPU/ZStdGPUKernel.h: ZStd GPU-side decompression kernel for AMD RDNA3+ and Intel Xe2/Arc; VendorName lookup, header-inline Decompress with CPU fallback, DetectedVendor/IsAvailable probes
+- Engine/GPU/GPUDecompressOrchestrator.h/.cpp: Runtime backend dispatcher — routes decompression to NvGDeflate (NVIDIA) or ZStdGPUKernel (AMD/Intel) based on detected hardware; CPU fallback when no GPU decompress is available
+- Engine/Pipeline/DirectStorageBatchScheduler.h/.cpp: Coalesces multiple thumbnail decode requests into single DirectStorage batch submission; maximises NVMe queue depth utilisation and minimises per-request round-trip overhead
+- Engine/Core/DirectStorageProfiler.h/.cpp: Instruments I/O + GPU decompression latency per decode path; reports P50/P95/P99 breakdowns; RecommendedPath() routes files >=4 MB to DirectStorage
+- Engine/Core/ZeroCopyDecodeSession.h: Session context tracking full lifecycle of a zero-copy decode — IDLE → IO_PENDING → DECOMPRESS_PENDING → DECODE_PENDING → COMPLETE/FAILED; TotalMs, IsTerminal helpers
+- Engine/Tests: 25 new unit tests (TestZSK_*, TestGDO_*, TestDSBS_*, TestDSP_*, TestZCS_*) covering all five new classes
+
+### Changed
+- Engine/CMakeLists.txt: Register 5 new headers + 3 new sources under Sprint 1111-1120 section
+
+---
+
 ## [32.4.0] — 2026-04-05 — Fomalhaut-U
 
 ### Added

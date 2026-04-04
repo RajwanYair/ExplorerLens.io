@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 32.4.0
+# Version: 32.5.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 32.4.0
+    VERSION 32.5.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1690,6 +1690,12 @@ set(ENGINE_HEADERS
     Pipeline/BatchThumbnailExporter.h
     Core/FormatSignatureDetector.h
     Core/MemoryMappedDecoder.h
+    # Sprint 1111-1120 — DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
+    GPU/ZStdGPUKernel.h
+    GPU/GPUDecompressOrchestrator.h
+    Pipeline/DirectStorageBatchScheduler.h
+    Core/DirectStorageProfiler.h
+    Core/ZeroCopyDecodeSession.h
 )
 
 set(ENGINE_SOURCES
@@ -1923,6 +1929,10 @@ set(ENGINE_SOURCES
     Pipeline/BatchThumbnailExporter.cpp
     Core/FormatSignatureDetector.cpp
     Core/MemoryMappedDecoder.cpp
+    # Sprint 1111-1120 — DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
+    GPU/GPUDecompressOrchestrator.cpp
+    Pipeline/DirectStorageBatchScheduler.cpp
+    Core/DirectStorageProfiler.cpp
 )
 
 #==============================================================================

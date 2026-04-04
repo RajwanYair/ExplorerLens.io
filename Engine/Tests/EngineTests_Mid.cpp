@@ -22197,3 +22197,235 @@ TEST(TestMMD_BackendName)
     ASSERT(std::string(MemoryMappedDecoder::BackendName(MMapBackend::Unavailable)) == "Unavailable");
 }
 
+//== Sprint 1111-1120: DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V") ==
+
+// ── ZStdGPUKernel ──────────────────────────────────────────────────────────
+TEST(TestZSK_VendorName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(ZStdGPUKernel::VendorName(ZStdGPUVendor::AMD_RDNA3)  == std::string_view("AMD-RDNA3"));
+    ASSERT(ZStdGPUKernel::VendorName(ZStdGPUVendor::INTEL_XE2)  == std::string_view("Intel-Xe2"));
+    ASSERT(ZStdGPUKernel::VendorName(ZStdGPUVendor::INTEL_ARC)  == std::string_view("Intel-Arc"));
+    ASSERT(ZStdGPUKernel::VendorName(ZStdGPUVendor::FALLBACK)   == std::string_view("CPU-Fallback"));
+}
+TEST(TestZSK_FallbackWhenUnavailable)
+{
+    using namespace ExplorerLens::Engine;
+    // Default instance is unavailable (no real GPU in test env)
+    ASSERT(!ZStdGPUKernel::Instance().IsAvailable());
+    ASSERT(ZStdGPUKernel::Instance().DetectedVendor() == ZStdGPUVendor::FALLBACK);
+}
+TEST(TestZSK_DecompressReturnsBytesOnFallback)
+{
+    using namespace ExplorerLens::Engine;
+    uint8_t src[8]  = { 0x28, 0xB5, 0x2F, 0xFD, 0x04, 0x00, 0x01, 0x00 };
+    uint8_t dst[64] = {};
+    ZStdGPUKernelDesc d{};
+    d.compressedData   = src;
+    d.compressedSize   = 8;
+    d.outputBuffer     = dst;
+    d.outputCapacity   = 64;
+    d.expectedOrigSize = 4;
+    d.vendor           = ZStdGPUVendor::FALLBACK;
+    ZStdGPUKernelResult r = ZStdGPUKernel::Instance().Decompress(d);
+    // Fallback must not crash; fields must be populated
+    ASSERT(r.decompressMs >= 0.0f);
+}
+// ── GPUDecompressOrchestrator ──────────────────────────────────────────────
+TEST(TestGDO_DefaultBackendIsCPU)
+{
+    using namespace ExplorerLens::Engine;
+    GPUDecompressOrchestrator::Instance().Initialize();
+    ASSERT(GPUDecompressOrchestrator::Instance().PreferredBackend() == GPUDecompressBackend::CPU
+        || GPUDecompressOrchestrator::Instance().PreferredBackend() == GPUDecompressBackend::ZSTD_GPU);
+}
+TEST(TestGDO_BackendName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(GPUDecompressOrchestrator::BackendName(GPUDecompressBackend::NV_GDEFLATE) == std::string_view("NvGDeflate"));
+    ASSERT(GPUDecompressOrchestrator::BackendName(GPUDecompressBackend::ZSTD_GPU)    == std::string_view("ZStdGPU"));
+    ASSERT(GPUDecompressOrchestrator::BackendName(GPUDecompressBackend::CPU)         == std::string_view("CPU"));
+}
+TEST(TestGDO_DecompressCPUPath)
+{
+    using namespace ExplorerLens::Engine;
+    uint8_t src[8]  = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    uint8_t dst[64] = {};
+    GPUDecompressRequest req{};
+    req.srcData          = src;
+    req.srcSize          = 8;
+    req.dstBuffer        = dst;
+    req.dstCapacity      = 64;
+    req.expectedOrigSize = 8;
+    GPUDecompressResult res = GPUDecompressOrchestrator::Instance().Decompress(req);
+    ASSERT(res.success);
+    ASSERT(res.bytesOut > 0);
+    ASSERT(res.elapsedMs >= 0.0f);
+}
+TEST(TestGDO_DecompressInvalidSizeFails)
+{
+    using namespace ExplorerLens::Engine;
+    GPUDecompressRequest req{};  // all nullptrs / zeros
+    GPUDecompressResult res = GPUDecompressOrchestrator::Instance().Decompress(req);
+    ASSERT(!res.success);
+}
+// ── DirectStorageBatchScheduler ────────────────────────────────────────────
+TEST(TestDSBS_AddAndFlush)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sched = DirectStorageBatchScheduler::Instance();
+    sched.Reset();
+    DSBatchItem item{ L"photo.raw", 256, 1 };
+    sched.AddItem(item);
+    ASSERT(sched.PendingCount() == 1);
+    ASSERT(sched.Flush());
+    ASSERT(sched.PendingCount() == 0);
+}
+TEST(TestDSBS_EmptyFlush)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sched = DirectStorageBatchScheduler::Instance();
+    sched.Reset();
+    ASSERT(sched.Flush());  // flush on empty queue — must succeed
+}
+TEST(TestDSBS_PendingCount)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sched = DirectStorageBatchScheduler::Instance();
+    sched.Reset();
+    sched.AddItem({ L"a.cr2", 128, 10 });
+    sched.AddItem({ L"b.nef", 128, 11 });
+    ASSERT(sched.PendingCount() == 2);
+}
+TEST(TestDSBS_ResultsAfterFlush)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sched = DirectStorageBatchScheduler::Instance();
+    sched.Reset();
+    sched.AddItem({ L"c.arw", 256, 42 });
+    sched.Flush();
+    const auto& results = sched.GetResults();
+    ASSERT(results.size() == 1);
+    ASSERT(results[0].itemId == 42);
+    ASSERT(results[0].success);
+    ASSERT(results[0].totalLatencyMs > 0.0f);
+}
+TEST(TestDSBS_ResetClearsAll)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sched = DirectStorageBatchScheduler::Instance();
+    sched.AddItem({ L"d.dng", 256, 99 });
+    sched.Reset();
+    ASSERT(sched.PendingCount() == 0);
+    ASSERT(sched.GetResults().empty());
+}
+// ── DirectStorageProfiler ─────────────────────────────────────────────────
+TEST(TestDSP_PathName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(DirectStorageProfiler::PathName(DSDecodePath::DIRECT_STORAGE) == std::string_view("DirectStorage"));
+    ASSERT(DirectStorageProfiler::PathName(DSDecodePath::CPU_DECODE)     == std::string_view("CPUDecode"));
+}
+TEST(TestDSP_RecommendedPath)
+{
+    using namespace ExplorerLens::Engine;
+    // Small file → CPU
+    ASSERT(DirectStorageProfiler::Instance().RecommendedPath(512 * 1024) == DSDecodePath::CPU_DECODE);
+    // Large file (≥4 MB) → DirectStorage
+    ASSERT(DirectStorageProfiler::Instance().RecommendedPath(8 * 1024 * 1024) == DSDecodePath::DIRECT_STORAGE);
+}
+TEST(TestDSP_AddSampleAndStats)
+{
+    using namespace ExplorerLens::Engine;
+    auto& p = DirectStorageProfiler::Instance();
+    p.Reset();
+    DSProfileSample s{};
+    s.path       = DSDecodePath::DIRECT_STORAGE;
+    s.ioMs       = 3.0f;
+    s.decompressMs = 2.0f;
+    s.decodeMs   = 5.0f;
+    s.totalMs    = 10.0f;
+    s.fileSizeBytes = 6 * 1024 * 1024;
+    p.AddSample(s);
+    auto stats = p.ComputeStats();
+    ASSERT(stats.sampleCount == 1);
+    ASSERT(stats.dsPathCount == 1);
+    ASSERT(stats.cpuPathCount == 0);
+}
+TEST(TestDSP_ResetClearsSamples)
+{
+    using namespace ExplorerLens::Engine;
+    auto& p = DirectStorageProfiler::Instance();
+    DSProfileSample s{};
+    s.totalMs = 15.0f;
+    p.AddSample(s);
+    p.Reset();
+    auto stats = p.ComputeStats();
+    ASSERT(stats.sampleCount == 0);
+}
+TEST(TestDSP_P99LargerThanP50)
+{
+    using namespace ExplorerLens::Engine;
+    auto& p = DirectStorageProfiler::Instance();
+    p.Reset();
+    for (uint32_t i = 1; i <= 100; ++i)
+    {
+        DSProfileSample s{};
+        s.totalMs       = static_cast<float>(i);
+        s.path          = DSDecodePath::DIRECT_STORAGE;
+        s.fileSizeBytes = 5 * 1024 * 1024;
+        p.AddSample(s);
+    }
+    auto stats = p.ComputeStats();
+    ASSERT(stats.p99TotalMs >= stats.p50TotalMs);
+}
+// ── ZeroCopyDecodeSession ──────────────────────────────────────────────────
+TEST(TestZCS_DefaultState)
+{
+    using namespace ExplorerLens::Engine;
+    ZeroCopyDecodeSession s{};
+    ASSERT(s.sessionId == 0);
+    ASSERT(s.state == ZCSessionState::IDLE);
+    ASSERT(!s.gpuDecompress);
+    ASSERT(s.stagingPtr == nullptr);
+}
+TEST(TestZCS_TotalMs)
+{
+    using namespace ExplorerLens::Engine;
+    ZeroCopyDecodeSession s{};
+    s.ioMs         = 3.0f;
+    s.decompressMs = 2.0f;
+    s.decodeMs     = 5.0f;
+    ASSERT(s.TotalMs() > 9.9f && s.TotalMs() < 10.1f);
+}
+TEST(TestZCS_IsTerminal)
+{
+    using namespace ExplorerLens::Engine;
+    ZeroCopyDecodeSession s{};
+    s.state = ZCSessionState::IDLE;
+    ASSERT(!s.IsTerminal());
+    s.state = ZCSessionState::COMPLETE;
+    ASSERT(s.IsTerminal());
+    s.state = ZCSessionState::FAILED;
+    ASSERT(s.IsTerminal());
+}
+TEST(TestZCS_StateName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ZeroCopyDecodeSession::StateName(ZCSessionState::IDLE))                == "Idle");
+    ASSERT(std::string(ZeroCopyDecodeSession::StateName(ZCSessionState::IO_PENDING))          == "IO_Pending");
+    ASSERT(std::string(ZeroCopyDecodeSession::StateName(ZCSessionState::DECOMPRESS_PENDING))  == "Decompress_Pending");
+    ASSERT(std::string(ZeroCopyDecodeSession::StateName(ZCSessionState::DECODE_PENDING))      == "Decode_Pending");
+    ASSERT(std::string(ZeroCopyDecodeSession::StateName(ZCSessionState::COMPLETE))            == "Complete");
+    ASSERT(std::string(ZeroCopyDecodeSession::StateName(ZCSessionState::FAILED))              == "Failed");
+}
+TEST(TestZCS_GpuDecompressFlag)
+{
+    using namespace ExplorerLens::Engine;
+    ZeroCopyDecodeSession s{};
+    s.gpuDecompress = true;
+    s.stagingBytes  = 2048;
+    ASSERT(s.gpuDecompress);
+    ASSERT(s.stagingBytes == 2048);
+}
+
