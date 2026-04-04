@@ -48,7 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LENSShell + LENSManager (64 files): apply clang-format -i to eliminate all
   style deviations reported by CI lint check
 
-
 ## [32.1.4] — 2026-04-03
 
 ### Changed
@@ -61,7 +60,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - build-scripts/utilities/fix_duplicates.py: replaced stale hardcoded line-number
   removals with dynamic duplicate-include detection — safe to re-run at any time
 - build-scripts/utilities/Fix-EngineTests-Duplicates.ps1: same — fully dynamic
-
 
 ## [32.1.3] — 2026-04-03
 
@@ -93,7 +91,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### No code or API changes — CI infrastructure patch only
 
-
 ## [32.1.1] — 2026-04-03
 
 ### Fixed
@@ -103,7 +100,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before these fixes, causing every release.yml run to fail with LENSShell.dll not found.
 
 #### No code or API changes — CI infrastructure patch only
-
 
 ## [32.1.0] — 2026-04-01
 
@@ -122,7 +118,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Test Coverage
 - Unit tests: 4362 → 4434 (+72)
 
-
 ## [32.0.0] — 2026-04-01
 
 ### v32.0.0 "Fomalhaut" — Post-Quantum Security & Zero-Trust
@@ -139,7 +134,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Test Coverage
 - Unit tests: 4290 → 4362 (+72)
-
 
 ## [31.9.0] — 2026-04-01
 
@@ -169,7 +163,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - +72 tests across all 8 new v31.9.0 component groups
 - Total: 4,290 unit tests
 
-
 ## [31.8.0] — 2026-04-01
 
 ### v31.8.0 "Achernar-Y" — Intelligent Workflow Automation
@@ -191,7 +184,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Tests
 - 79 test coverage additions across all 8 new component groups
 - Total: 4218 unit tests
-
 
 ## [31.7.0] — 2026-04-01
 
@@ -215,7 +207,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 67 test coverage additions across all 8 new component groups
 - Total: 4218 unit tests
 
-
 ## [31.6.0] — 2026-04-01
 
 ### v31.6.0 "Achernar-W" — Format Routing & Enhanced Accessibility
@@ -237,99 +228,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 17 new RUN_TEST entries: CrossMeta extensions, StreamingDecodeCoordinator (7), RenderPipelineProfiler (7)
 - Total: 4218 unit tests
 
-
 Intelligent Format Routing & Enhanced Accessibility — 7 headers, 49 tests (AdaptiveColorProfileManager, ThumbnailAccessibilityEngine, SmartFileTypeRouter, DecoderVersionManager, CrossFormatMetadataEngine, StreamingDecodeCoordinator, RenderPipelineProfiler)
-
 
 Contextual Intelligence & Self-Healing Diagnostics: ContextualRenderingEngine, SmartThumbnailCompositor, FormatComplexityAnalyzer, FaultTolerantDecodeOrchestrator, DiagnosticTelemetryCollector, DecoderFaultIsolator, SmartRetryOrchestrator, PipelineHealthMonitor. +67 tests.
 
-
 Intelligent Workflow Automation: PredictivePregenEngine, ContentCategorizationEngine, ThumbnailQualityPredictor, SmartBatchProcessor, WorkflowAutomationEngine, UserBehaviorAnalytics, AdaptivePipelineOptimizer, IntelligentPrefetchScheduler. +79 tests.
-
 
 v31.2.0 Achernar-S: Build Quality and Release Infrastructure Hardening. Warning hardening (CloudNativeSync _wdupenv_s, GTestShim [[maybe_unused]]), resolved 40+ compilation errors, consolidated header stubs, fixed PluginRuntimeValidator redefinition, sandbox types, COM namespace types. Release workflow non-blocking test gate. +0 tests (4367 total).
 
-
 v31.1.0 Achernar-R: Cross-Platform Shell Extensions.
-
 
 v31.0.0 Achernar: Generative AI Thumbnails.
 
-
 v30.7.0 Deneb-X: Enterprise Console v3. 8 headers for admin console, fleet deployment, compliance reports, metrics dashboard, policy version control, remote decoder control, anomaly detection, and SIEM audit export. +72 tests (4228 total).
-
 
 v30.6.0 Deneb-W: Plugin Marketplace v4. 8 Plugin headers for marketplace REST+gRPC client, Bayesian rating engine, dependency resolver, bundle installer, JWT license manager v4, reputation scorer, auto-update policy v4, pre-publish review gateway. +72 tests (3965 total).
 
-
 v30.5.0 Deneb-V: Universal Format Decoder Library. 8 Core headers for UFDL public API facade, capability matrix, SemVer registry, family resolver, hotfix applicator, schema validator, compat layer, SPDX manifest. +72 tests (3893 total).
-
 
 v30.4.0 Deneb-U: Geospatial, Medical and Scientific Formats. 8 Decoder headers: GeoTIFF multi-band, NITF national imagery, DICOM Advanced 3D/4D, NRRD medical, HDF5 scientific, NetCDF climate, FITS astronomy, ECW wavelet. +72 tests (3821 total).
 
-
 v30.3.0 Deneb-T: Live Preview Scrubber and Rich Media. 8 Core headers: live preview scrubber, video keyframe extractor, animated frame scrubber, audio waveform renderer, document page previewer, shader syntax highlighter, font glyph sampler, spreadsheet chart renderer. +72 tests (3749 total).
-
 
 v30.2.0 Deneb-S: CLIP Semantic Search and Discovery. 8 AI headers: CLIP embedding engine, HNSW search index, NL query parser, visual similarity graph, embedding cache, multi-modal ranker, deduplicator, incremental updater. +72 tests (3677 total).
 
-
 v30.1.0 Deneb-R: DirectStorage and GPU Decompression. 8 headers: DS engine, GPU decompress scheduler, NV GDeflate + AMD backends, DS cache tier, async stream broker, staging buffer pool. +72 tests (3605 total).
-
 
 v30.0.0 Deneb: Gen-6 Platform Unification MAJOR release. Cross-platform abstraction layer (8 headers): PAL, Metal pipeline, Linux DRM, window broker, filesystem adapter, shell provider, UI scaling, build matrix. +72 tests (3533 total). First post-consolidation feature release.
 
-
 v29.7.0 Capella-X: Project Consolidation Phase 6 — Plugin cleanup (98->37 headers), AI scope reduction (88->17 headers), CLI consolidation (11->2 headers). 140 duplicate/scope-creep headers removed, 2989 build/test lines consolidated. Consolidation era complete.
-
 
 v29.7.0 Capella-X: Project Consolidation Phase 6 — Plugin cleanup (98→37 headers), AI scope reduction (88→17 headers), CLI consolidation (11→2 headers). 140 duplicate/scope-creep headers removed, 2989 build/test lines consolidated. Consolidation era complete.
 
-
 v29.6.0 Capella-W: Project Consolidation Phase 5 — Scope creep extraction. Removed 10 non-core directories (85 files): Enterprise, Platform, AR, Security, UX, Cloud, i18n, Telemetry, Shell, SDK. 568 build/test lines consolidated
-
 
 v29.5.0 Capella-V: Project Consolidation Phase 4 — Scheduler consolidation (14 schedulers→5), router consolidation (7→2). 14 duplicate headers removed, 131 build/test lines consolidated
 
-
 v29.4.0 Capella-U: Project Consolidation Phase 3 — Recovery unification (6 engines→2), telemetry unification (7 engines→2), audit logger dedup. 15 duplicate headers removed, 184 test lines consolidated
-
 
 v29.3.0 Capella-T: Project Consolidation Phase 2 — Cache subsystem dedup (77→26 headers), removed 51 duplicate cache headers (3 migration→1, 8 warming→1, 5 replication→1, 3 partition→1, 6 analytics→1, 4 prediction→1, 2 compression→1, 2 eviction→1), cleaned CMakeLists.txt and EngineTests.cpp, 5600 lines removed
 
-
 v29.2.0 Capella-S: Project Consolidation Phase 1 — Archived obsolete docs (SPRINT_PLAN_600/700/800, ROADMAP_V25), enhanced Bump-Version.ps1 to handle all 12 version-bearing files (SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg), synced all stale v25.3.0 references to current version, rewrote sprint plan 901-960 with consolidation themes
-
 
 v29.1.0 Capella-R: Accessibility & Inclusive Design v2 — BLIP-2 on-device alt-text synthesis, ARIA thumbnail annotator, WCAG 2.2 audit engine, high-contrast theme adapter, caption quality scorer, screen reader bridge, keyboard navigation controller, a11y telemetry reporter
 
-
 v29.0.0 Capella (MAJOR): Gen-5 Platform WinUI 4 — async preview broker, universal file provider, WinUI 4 preview handler, shell property handler v2, preview pipeline v5, persistent L3 disk cache, live preview file watcher, shell extension health monitor v2
-
 
 v28.7.0 Polaris-X: Cross-Platform Preview (macOS+Linux) — Metal render bridge, Linux Vulkan preview, platform-neutral pixel buffer, GTK4 thumbnail widget, macOS Quick Look bridge, XDG thumbnail provider, Metal shader compiler, platform capability probe
 
-
 v28.6.0 Polaris-W: Post-Quantum Cryptography & Signatures — PQC signature verifier, hybrid trust chain v2, quantum-safe key exchange, Dilithium certificate store, PQC plugin manifest, signature audit logger, crypto agility broker, key rotation scheduler
-
 
 v28.5.0 Polaris-V: Quantum-Safe Key Management v2 — ML-KEM-768 key encapsulation, ML-DSA-65 signatures, Hybrid PQ+Classic KEM (X25519), TPM2 attestation v2, key rotation orchestrator, HSM PKCS#11 bridge, FIPS 205 SLH-DSA, post-quantum TLS adapter
 
-
 v28.4.0 Polaris-U: Adaptive UX & Personalization — user preference learner, adaptive grid density, eye-tracking focus optimizer, ThemeEngine v3 with WCAG design tokens, A/B experiment framework, accessible palette generator, thumbnail badge system, UX telemetry privacy dashboard
-
 
 v28.3.0 Polaris-T: Enterprise Console 2.0 — fleet dashboard v2, AI anomaly detection, compliance scoring (SOC2/ISO27001/NIST/GDPR), remediation playbooks, RBAC v2, executive reports, SLA monitoring, MSP multi-tenant portal
 
-
 v28.2.0 Polaris-S: Live AR Preview Engine — ARKit/ARCore/OpenXR bridge, spatial anchor persistence v2, plane surface detection, occlusion-aware rendering, QR thumbnail triggers, passthrough video compositing, shared AR spaces, spatial audio annotation
-
 
 v28.1.0 Polaris-R: Generative AI Caption Synthesis — VLM/CLIP embedding, Florence-2 caption pipeline, on-device ONNX inferer, style transfer (formal/casual/a11y), WCAG AltText v2, batch+incremental caption updates, semantic search index
 
-
 v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/Win32 FS crawler, cloud-first cache, PWA offline manager, auto-update Squirrel/MSIX, Docker+K8s container runtimes, cross-platform UI IPC bridge
-
 
 ## [27.7.0] — Sirius-X (2026-03-29)
 
@@ -353,7 +312,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
 - 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3724 total)
 
-
 ## [27.6.0] — Sirius-W (2026-03-29)
 
 ### Added — Sprint 781-790: Protocol Surface v2
@@ -374,7 +332,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 ### Build
 - All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
 - 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3716 total)
-
 
 ## [27.5.0] — Sirius-V (2026-03-29)
 
@@ -398,7 +355,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
 - 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3708 total)
 
-
 ## [27.4.0] — Sirius-U (2026-03-29)
 
 ### Added — Sprint 761-770: Predictive Pre-Generation
@@ -419,7 +375,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 ### Build
 - All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
 - 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3700 total)
-
 
 ## [27.3.0] — Sirius-T (2026-03-29)
 
@@ -443,7 +398,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
 - 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3692 total)
 
-
 ## [27.2.0] — Sirius-S (2026-03-29)
 
 ### Added — Sprint 741-750: Distributed Rendering
@@ -456,7 +410,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Core/SecureClusterChannel.h: mTLS-simulated secure inter-node channel
 - Engine/Core/ClusterObservabilityBus.h: Distributed tracing span bus with snapshot support
 - Test coverage: 8 new TEST() blocks (3684 total unit tests)
-
 
 ## [27.1.0] — Sirius-R (2026-03-29)
 
@@ -471,7 +424,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/GPU/VideoTextureStreamEngine.h: Zero-copy GPU texture upload via DMA
 - Test coverage: 8 new TEST() blocks (3676 total unit tests)
 
-
 ## [27.0.0] — Sirius (2026-03-29)
 
 ### Added — Sprint 721-730: Federated AI
@@ -484,7 +436,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/AI/ModelVersioningController.h: Version registry with rollback and activation history
 - Engine/AI/FederatedSearchEnhancer.h: Federated document search with inverted index
 - Test coverage: 8 new TEST() blocks (3668 total unit tests)
-
 
 ## [26.7.0] — Canopus-X (2026-03-29)
 
@@ -499,7 +450,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Core/PrivacyAuditLogger.h: Immutable audit chain with std::hash verification
 - Test coverage: 8 new TEST() blocks (3660 total unit tests)
 
-
 ## [26.6.0] — Canopus-W (2026-03-29)
 
 ### Added — Sprint 701-710: XR Thumbnails
@@ -512,7 +462,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Decoders/NerfDecoder.h: NeRF scene decoder (NerfSynthetic/Instant-NGP/TinyNeRF/Mip-NeRF360)
 - Engine/Core/XRMetadataExtractor.h: XR metadata extraction (anchors, target FPS, bounds)
 - Test coverage: 23 new TEST() blocks (3652 total unit tests)
-
 
 ## [26.5.0] — Canopus-V (2026-03-29)
 
@@ -527,7 +476,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Core/TextScalabilityEngine.h: Dynamic text scaling engine (DPI-aware, 100-400%)
 - Test coverage: 8 new TEST() blocks (3644 total unit tests)
 
-
 ## [26.4.0] — Canopus-U (2026-03-29)
 
 ### Added — Sprint 681-690: Adaptive Performance Governor v2
@@ -540,7 +488,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Pipeline/LatencySpikeDetector.h: Wavelet-based anomaly detector for P99 tail latency
 - Engine/Pipeline/ThroughputOptimizer.h: Work-stealing pipeline throughput optimizer
 - Test coverage: 8 new TEST() blocks (3636 total unit tests)
-
 
 ## [26.3.0] — Canopus-T (2026-03-29)
 
@@ -555,7 +502,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Utils/CollabPermissionGate.h: Fine-grained RBAC permission gate for collaboration
 - Test coverage: 8 new TEST() blocks (3628 total unit tests)
 
-
 ## [26.2.0] — Canopus-S (2026-03-29)
 
 ### Added — Sprint 661-670: Immersive 3D Preview Engine
@@ -568,7 +514,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Core/MaterialPreviewEngine.h: MTL/MaterialX/MDL material preview renderer
 - Engine/GPU/GPUPathTracerPreview.h: DXR/Vulkan RT path tracer preview (Preview_1spp/Quality_4spp/Final_16spp)
 - Test coverage: 8 new TEST() blocks (3620 total unit tests)
-
 
 ## [26.1.0] — Canopus-R (2026-03-29)
 
@@ -583,7 +528,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Core/Win32PropertyStoreAdapter.h: Win32 property store COM adapter
 - Test coverage: 8 new TEST() blocks (3612 total unit tests)
 
-
 ## [26.0.0] — Canopus (2026-03-29)
 
 ### Added — Sprint 641-650: Post-Quantum Security (MAJOR v26)
@@ -596,7 +540,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 ### Changed
 - Major version bumped to 26 — post-quantum cryptographic baseline established
 - Test coverage: 8 new TEST() blocks (3604 total unit tests)
-
 
 ## [25.7.0] — Rigel-X (2026-03-29)
 
@@ -611,7 +554,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Utils/AccessibilityNavigatorV3.h: UIA accessibility tree navigator with ANV3ControlType enum
 - Test coverage: 8 new TEST() blocks (3596 total unit tests)
 
-
 ## [25.6.0] — Rigel-W (2026-03-29)
 
 ### Added — Sprint 621-630: Collaborative Annotations & Sharing
@@ -624,7 +566,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Core/ThumbnailExportPipeline.h: Multi-format thumbnail export (PNG/JPEG/WebP/AVIF) pipeline
 - Engine/Utils/CertificateMigrationTool.h: RSA→post-quantum cert migration planner (BuildPlan API)
 - Test coverage: 8 new TEST() blocks, 8 new RUN_TEST() calls (3588 total unit tests)
-
 
 ## [25.5.0] — Rigel-V (2026-03-29)
 
@@ -849,7 +790,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/CLI/LensPluginCLI.h: Plugin lifecycle CLI (install, remove, list, verify)
 - Engine/CLI/CICDWebhookReceiver.h: CI/CD webhook receiver (GitHub Actions, Jenkins) for cache invalidation
 
-
 ## [23.4.0] — Vega-U (2026-03-27)
 
 ### Added — Sprints 441-450: Smart Cache v4
@@ -861,7 +801,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Cache/CacheEncryptionLayer.h: AES-GCM cache encryption layer with key rotation
 - Engine/Cache/ShardedCachePartitionV2.h: Sharded cache v2 with consistent key distribution
 - Engine/Cache/ConsistentHashRing.h: Consistent-hash ring with virtual nodes for cache topology
-
 
 ## [23.3.0] — Vega-T (2026-03-27)
 
@@ -875,7 +814,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Memory/JemallocSlabAllocator.h: jemalloc-style slab allocator for size-class buckets
 - Engine/Memory/SharedMemoryRegionManager.h: Named shared memory region manager (IPC thumbnails)
 
-
 ## [23.2.0] — Vega-S (2026-03-27)
 
 ### Added — Sprints 421-430: Plugin Ecosystem v3
@@ -887,7 +825,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Plugin/PluginTelemetryAggregatorV3.h: Plugin telemetry aggregator v3 with percentiles
 - Engine/Plugin/PluginComplianceAuditorV2.h: Enterprise compliance audit v2 (signing, SBOM, capabilities)
 - Engine/Plugin/PluginHotConfigReceiver.h: Hot-reload config receiver with subscriber callbacks
-
 
 ## [23.1.0] — Vega-R (2026-03-27)
 
@@ -901,7 +838,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/GPU/GPUMemoryDefragmenterV2.h: GPU heap defragmentation planner v2
 - Engine/GPU/GPUThumbnailAtlasManager.h: GPU-resident thumbnail atlas with LRU eviction
 
-
 ## [23.0.0] — Vega (2026-03-27)
 
 ### Added — Sprints 401-410: Reactive Pipeline Architecture
@@ -913,7 +849,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Pipeline/SnapshotStoreEngine.h: Snapshot/restore store for pipeline state recovery
 - Engine/Pipeline/DomainEventBus.h: Domain event publish/subscribe bus
 - Engine/Pipeline/ReactiveAPIGateway.h: Named-pipe and COM reactive API gateway with flow control
-
 
 ## [22.7.0] — Sirius-X (2026-03-27)
 
@@ -927,7 +862,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Utils/ArtifactIntegrityMonitor.h: Artifact integrity monitoring with alert system
 - Engine/Utils/CIEnvironmentValidator.h: CI/CD environment variable validator with required/optional specs
 
-
 ## [22.6.0] — Sirius-W (2026-03-27)
 
 ### Added — Sprints 381-390: Windows Shell Integration v2
@@ -939,7 +873,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Core/ThumbnailOverlayRenderer.h: Badge and emblem overlay compositor (cloud, lock, format)
 - Engine/Core/DragDropPreviewEngine.h: Live thumbnail preview for drag-and-drop operations
 - Engine/Core/ShellDataObjectExtractor.h: IDataObject thumbnail payload extractor
-
 
 ## [22.5.0] — Sirius-V (2026-03-27)
 
@@ -953,7 +886,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Decoders/SunRasterDecoder.h: Sun Raster image format (SunOS legacy)
 - Engine/Decoders/JPEGXTDecoder.h: JPEG XT HDR residual layer extension
 
-
 ## [22.4.0] — Sirius-U (2026-03-27)
 
 ### Added — Sprints 361-370: Advanced Scheduling & Concurrency v2
@@ -965,7 +897,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Engine/Pipeline/AdaptiveConcurrencyLimiter.h: AIMD adaptive concurrency window limiter
 - Engine/Core/CooperativeTaskScheduler.h: Cooperative yield-based micro-task scheduler
 - Engine/Core/ThreadLocalContextPool.h: Per-thread decode context pool with zero cross-thread contention
-
 
 ## [22.3.0] Sirius-T — AI Inference Pipeline v2
 
@@ -980,7 +911,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - AI/SemanticColorPalette.h: dominant color palette extraction with LAB distances
 - 6 new unit tests covering AI Inference Pipeline v2 subsystem
 
-
 ## [22.2.0] Sirius-S — Security & Audit v3
 
 ### Added
@@ -993,7 +923,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - AI/NSFWContentGuard.h: NSFW content detection gate (enterprise feature)
 - AI/BlurDetectionFilter.h: blur detection and deblur sharpening filter
 - 6 new unit tests covering Security & Audit v3 subsystem
-
 
 ## [22.1.0] Sirius-R — Performance Profiling v2
 
@@ -1008,7 +937,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Utils/AccessibilityAudit.h: UIA compliance and contrast ratio auditing
 - 6 new unit tests covering Performance Profiling v2 subsystem
 
-
 ## [22.0.0] Sirius — Cross-Platform Foundation (MAJOR)
 
 ### Added
@@ -1021,7 +949,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Core/MonitorConfigWatcher.h: WM_DPICHANGED / WM_DISPLAYCHANGE event watcher
 - Core/MultiMonitorContext.h: multi-monitor DPI context tracker
 - 6 new unit tests covering Cross-Platform Foundation subsystem
-
 
 ## [21.3.0] Rigel-T — Storage & Caching v3
 
@@ -1036,7 +963,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Utils/FeatureCompatMatrix.h: platform feature compatibility matrix
 - 5 new unit tests covering Storage & Caching v3 subsystem
 
-
 ## [21.2.0] Rigel-S — Enterprise Policy v2
 
 ### Added
@@ -1049,7 +975,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Core/SandboxEscapeGuard.h: sandbox escape attempt detection guard
 - Core/CodeIntegrityChecker.h: PE signature and binary integrity verification
 - 6 new unit tests covering Enterprise Policy v2 subsystem
-
 
 ## [21.1.0] Rigel-R — Advanced GPU Compute v2
 
@@ -1064,7 +989,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Core/SIMDImageProcessor.h: AVX2/SSE4 SIMD pixel processing pipeline
 - 6 new unit tests covering Advanced GPU Compute v2 subsystem
 
-
 ## [21.0.0] Rigel — Format Expansion III (MAJOR)
 
 ### Added
@@ -1076,7 +1000,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Decoders/TIFFMultiPageDecoder.h: multi-page TIFF thumbnail selector
 - Decoders/WebPAnimationDecoder.h: WebP animation frame splitter
 - 7 new unit tests covering Format Expansion III decoder subsystem
-
 
 ## [20.7.0] Quasar-X — Observability v2
 
@@ -1091,7 +1014,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - Utils/AutoUpdateManager.h: auto-update checker via Microsoft Store/WinGet
 - 8 new unit tests covering Observability v2 subsystem
 
-
 ## [20.6.0] Quasar-W — Plugin Marketplace v2
 
 ### Added
@@ -1105,7 +1027,6 @@ v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/W
 - PluginUsageTracker.h: per-plugin usage telemetry and crash reporting
 - PluginVersionResolver.h: SemVer resolution and conflict detection
 - 8 new unit tests covering Plugin Marketplace v2 subsystem
-
 
 ## [20.5.0] "Quasar-V" - 2026-03-26
 ### Summary
@@ -1125,7 +1046,6 @@ plugin management, system tray, and auto-update checker.
 ### Infrastructure
 - TestCount raised to 5100 (9 new WinUI3 test suites)
 
-
 ## [20.4.0] "Quasar-U" - 2026-07-14
 ### Summary
 CLI tool and SDK v2: Stable C ABI public API, thumbnail provider registration,
@@ -1144,7 +1064,6 @@ batch processing engine, ABI version guard, and plugin test harness.
 ### Infrastructure
 - TestCount raised to 5000 (9 new CLI/SDK test suites)
 
-
 ## [20.3.0] "Quasar-T" - 2026-07-14
 ### Summary
 Security Hardening v2: Authenticode PE verification, Job Object sandbox isolation,
@@ -1162,7 +1081,6 @@ boundary input validation, COM minimal-privilege, and ACL hardening.
 - docs/SECURITY_HARDENING.md: v2 hardening guide all components
 ### Infrastructure
 - TestCount raised to 4900 (9 new security test suites)
-
 
 ## [20.2.0] "Quasar-S" - 2026-03-26
 ### Summary
@@ -1185,7 +1103,6 @@ SQLite persistent cache, and EWMA predictive prefetch.
 - Cache hit latency: <3ms
 - TestCount raised to 4800 (9 new performance test suites)
 
-
 ## [20.1.0] "Quasar-R" - 2026-03-26
 ### Summary
 Store and Packaging v2. Full Microsoft Store submission pipeline: license key validation,
@@ -1203,7 +1120,6 @@ in-app feedback, and feature flag system with GP/cloud/registry priority chain.
 - docs/STORE_CERTIFICATION.md: Updated for v20.1.0 MSIX bundle submission
 ### Infrastructure
 - TestCount raised to 4700 (9 new Store/Packaging test suites)
-
 
 ## [20.0.0] "Quasar" - 2026-03-26
 ### Summary
@@ -1223,7 +1139,6 @@ mirroring, responsive DPI layout, and locale-aware date/number formatting.
 ### Infrastructure
 - TestCount raised to 4600 (9 new Accessibility/i18n test suites)
 - Engine/i18n/ directory introduced for i18n subsystem
-
 
 ## [19.2.0] "Pulsar-S" - 2026-03-26
 
@@ -1260,7 +1175,6 @@ auto-update infrastructure, and an in-process diagnostics REPL for support engin
 ### Infrastructure
 - TestCount raised to 4500 (9 new Final Polish / certification test suites)
 
-
 ## [19.1.0] "Pulsar-R" - 2026-03-26
 
 ### Summary
@@ -1289,7 +1203,6 @@ Config remote delivery, Prometheus health dashboard, and SAML/OIDC/WAM SSO bridg
 
 ### Infrastructure
 - TestCount raised to 4400 (9 new Enterprise module test suites)
-
 
 ## [19.0.0] "Pulsar" - 2026-03-26
 
@@ -1323,7 +1236,6 @@ blur detection/deblur, NSFW safety guard, and synthesis fallback for undecoded f
 ### Infrastructure
 - TestCount raised to 4300 (9 new AI module test suites)
 
-
 ## [18.3.0] "Orion-T" - 2026-03-26
 
 ### Summary
@@ -1350,7 +1262,6 @@ background auto-update with rollback, and per-plugin usage telemetry.
 ### Infrastructure
 - TestCount raised to 4200 (9 new plugin marketplace test suites)
 
-
 ## [18.2.0] "Orion-S" - 2026-03-26
 
 ### Summary
@@ -1376,7 +1287,6 @@ and CfApi header hydration, with sync status and co-author overlay badges.
 ### Infrastructure
 - TestCount raised to 4100 (9 new cloud/collaboration test suites)
 
-
 ## [18.1.0] "Orion-R" - 2026-03-26
 
 ### Summary
@@ -1400,7 +1310,6 @@ invalidation on monitor connect/disconnect.
 
 ### Infrastructure
 - TestCount raised to 4000 (9 new HiDPI/multi-monitor test suites)
-
 
 ## [18.0.0] "Orion" - 2026-03-26
 
@@ -1430,7 +1339,6 @@ priority-based capability negotiation in CodecPlatformV2.
 - All Sprint 131-139 headers registered in ENGINE_HEADERS (CMakeLists.txt)
 - TestCount raised to 3900 (8 new format test suites)
 
-
 ## [17.3.0] "Nova-T" - 2026-03-26
 
 ### Summary
@@ -1450,7 +1358,6 @@ Accessibility and compliance milestone - v17.3.0 Nova-T
 - Narrator/JAWS/NVDA tested across all 9 WinUI pages
 - ColorBlindFilter validates UI color pairs at QA build step
 
-
 ## [17.2.0] "Nova-S" - 2026-03-26
 
 ### Summary
@@ -1468,7 +1375,6 @@ Security hardening milestone - v17.2.0 Nova-S
 - High-risk formats (PDF, SVG, RAR, AI, EPS) now decoded in isolated child process
 - All plugins require valid Authenticode + marketplace manifest hash before load
 - CodeQL SAST runs on every PR via .github/workflows/codeql.yml
-
 
 ## [17.1.0] "Nova-R" - 2026-03-26
 
@@ -1492,7 +1398,6 @@ Performance and benchmarking milestone - v17.1.0 Nova-R
 
 ### Fixed
 - ExplorerLens.adml ADML display string formatting (Sprint 108)
-
 
 ## [17.0.0] "Nova" — 
 
@@ -1525,9 +1430,7 @@ Performance and benchmarking milestone - v17.1.0 Nova-R
 - StoreReadinessChecker MSIX/WACK validator
 - Migration guide v15 -> v16 (docs/MIGRATION_GUIDE_V16.md)
 
-
 $date = Get-Date -Format "yyyy-MM-dd"
-
 
 ## [16.3.0] "Horizon-T" — 2026-03-26
 
@@ -1555,7 +1458,6 @@ $date = Get-Date -Format "yyyy-MM-dd"
 - FIPS mode automatically redirects cache checksums from XXH3 → SHA-256
 - Intune deployment supported via ADMX ingestion in Settings Catalog
 
-
 ## [16.2.0] "Horizon-S" — 2026-03-26
 
 ### Summary
@@ -1581,7 +1483,6 @@ $date = Get-Date -Format "yyyy-MM-dd"
 - GPU-decoded 4K images upscaled to display resolution in <5ms additional latency (DLSS path)
 - Animated thumbnails play at native frame rate with RIFE interpolation
 
-
 ## [16.1.0] "Horizon-R" — 2026-03-26
 
 ### Summary
@@ -1601,7 +1502,6 @@ $date = Get-Date -Format "yyyy-MM-dd"
 - **Engine/Cloud/DeltaUpdateManager:** Incremental bsdiff binary updates with SHA-256
   verification; Stable / Preview / Enterprise channels; WSUS-friendly quarterly batching;
   elevation detection for system-component updates.
-
 
 ## [16.0.0] "Horizon" — 2026-03-26
 
@@ -1634,7 +1534,6 @@ $date = Get-Date -Format "yyyy-MM-dd"
 - Zero critical accessibility findings
 - Zero format regressions vs v15.8.0 baseline
 
-
 ## [15.8.0] "Zenith-Y" — 2026-03-26
 
 ### Summary
@@ -1658,7 +1557,6 @@ $date = Get-Date -Format "yyyy-MM-dd"
 - **Engine/Telemetry/AnonymousTelemetry:** Opt-in batched telemetry with privacy-first
   design — no PII, HKCU consent flag, random session GUID, LENS_TELEMETRY_TRACK macro.
 
-
 ## [15.7.0] "Zenith-X" — 2026-03-26
 
 ### Summary
@@ -1675,7 +1573,6 @@ $date = Get-Date -Format "yyyy-MM-dd"
 - **Build-scripts/Bump-Version.ps1:** Single-script version bump automation updating all 5
   version-bearing files (VERSION, BuildValidation.h, copilot-instructions.md, social-preview.svg,
   CHANGELOG.md) atomically, with optional -TagAndPush for full release in one command.
-
 
 ## [15.6.0] "Zenith-W" — 2026-03-27
 
@@ -1931,8 +1828,6 @@ graceful degradation catalog, archive security hardening, and fuzz harness scaff
 ### Changed
 - **Version:** 15.1.0 "Zenith-R" → 15.2.0 "Zenith-S"
 - **Engine.h:** `EXPLORERLENS_ENGINE_VERSION_MINOR` 1 → 2
-
-
 
 ### Changed — Major Refactoring Sprint
 
