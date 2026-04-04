@@ -24,7 +24,7 @@ enum class BitDepthSource : uint8_t {
     RAW_Linear      // Linear light RAW camera data
 };
 
-enum class ToneMappingOperator : uint8_t {
+enum class ABDCToneMappingOp : uint8_t {
     Reinhard,          // Classic Reinhard — mild highlight compression
     ReinhardExtended,  // Extended Reinhard — configurable white point
     ACES_Filmic,       // ACES filmic curve — cinematic look
@@ -35,7 +35,7 @@ enum class ToneMappingOperator : uint8_t {
 
 struct ToneMappingParams
 {
-    ToneMappingOperator op = ToneMappingOperator::ACES_Filmic;
+    ABDCToneMappingOp op = ABDCToneMappingOp::ACES_Filmic;
     float exposure = 1.0f;
     float whitePoint = 11.2f;   // Reinhard white point
     float gamma = 2.2f;         // Output gamma
@@ -160,20 +160,20 @@ class AdaptiveBitDepthConverter
         }
     }
 
-    static const char* ToneMappingName(ToneMappingOperator op)
+    static const char* ToneMappingName(ABDCToneMappingOp op)
     {
         switch (op) {
-            case ToneMappingOperator::Reinhard:
+            case ABDCToneMappingOp::Reinhard:
                 return "Reinhard";
-            case ToneMappingOperator::ReinhardExtended:
+            case ABDCToneMappingOp::ReinhardExtended:
                 return "Reinhard-Extended";
-            case ToneMappingOperator::ACES_Filmic:
+            case ABDCToneMappingOp::ACES_Filmic:
                 return "ACES-Filmic";
-            case ToneMappingOperator::HejlDawson:
+            case ABDCToneMappingOp::HejlDawson:
                 return "Hejl-Dawson";
-            case ToneMappingOperator::Uncharted2:
+            case ABDCToneMappingOp::Uncharted2:
                 return "Uncharted2";
-            case ToneMappingOperator::Clamp:
+            case ABDCToneMappingOp::Clamp:
                 return "Clamp";
             default:
                 return "Unknown";
@@ -187,14 +187,14 @@ class AdaptiveBitDepthConverter
     {
         v *= m_params.exposure;
         switch (m_params.op) {
-            case ToneMappingOperator::Reinhard:
+            case ABDCToneMappingOp::Reinhard:
                 return v / (1.0f + v);
-            case ToneMappingOperator::ACES_Filmic: {
+            case ABDCToneMappingOp::ACES_Filmic: {
                 float a = 2.51f, b = 0.03f, c = 2.43f, d = 0.59f, e = 0.14f;
                 float numer = v * (a * v + b), denom = v * (c * v + d) + e;
                 return (denom > 0.0f) ? (numer / denom) : 0.0f;
             }
-            case ToneMappingOperator::Clamp:
+            case ABDCToneMappingOp::Clamp:
                 return (v < 0.0f) ? 0.0f : (v > 1.0f) ? 1.0f : v;
             default:
                 return v / (1.0f + v);
@@ -240,3 +240,4 @@ class AdaptiveBitDepthConverter
 
 }  // namespace Engine
 }  // namespace ExplorerLens
+

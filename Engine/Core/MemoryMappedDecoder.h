@@ -22,7 +22,7 @@ enum class MMapBackend : uint8_t {
     Unavailable       // Address space exhausted or file > mapping limit
 };
 
-enum class MMapAccessPattern : uint8_t {
+enum class MMD_AccessPattern : uint8_t {
     Sequential,    // MADV_SEQUENTIAL — hint for large decode
     RandomAccess,  // No prefetch hint — for archive seek patterns
     FullScan       // Pre-fault all pages — for small files that fit in cache
@@ -41,7 +41,7 @@ struct MMapDecodeRequest
     std::wstring filePath;
     uint64_t regionOffset = 0;  // 0 = whole file
     uint64_t regionLength = 0;  // 0 = whole file
-    MMapAccessPattern accessPattern = MMapAccessPattern::Sequential;
+    MMD_AccessPattern accessPattern = MMD_AccessPattern::Sequential;
     uint32_t thumbSize = 256;
     bool preferGPUDecode = false;
 };
@@ -60,7 +60,7 @@ struct MMapDecodeResult
     std::string errorMessage;
 };
 
-struct MMapStats
+struct MMD_Stats
 {
     uint64_t mappingsCreated = 0;
     uint64_t mappingsReleased = 0;
@@ -122,7 +122,7 @@ class MemoryMappedDecoder
         return r;
     }
 
-    const MMapStats& GetStats() const
+    const MMD_Stats& GetStats() const
     {
         return m_stats;
     }
@@ -194,7 +194,7 @@ class MemoryMappedDecoder
 
     bool m_initialized = false;
     MMapBackend m_backend = MMapBackend::Unavailable;
-    MMapStats m_stats;
+    MMD_Stats m_stats;
 };
 
 }  // namespace Engine

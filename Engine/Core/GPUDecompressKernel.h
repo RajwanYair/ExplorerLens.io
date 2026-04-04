@@ -15,7 +15,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class GPUDecompressVendor : uint8_t {
+enum class GDKVendor : uint8_t {
     Auto,  // Detect at runtime — prefer highest-throughput available
     NvidiaGDeflate,
     IntelDSB,  // DirectStorage Buffer decompressor (Xe HPC / Arc)
@@ -38,7 +38,7 @@ struct GPUDecompressInput
     uint8_t* outputBuffer = nullptr;  // Pre-allocated by caller
     uint32_t outputCapacity = 0;
     GPUCompressedFormat format = GPUCompressedFormat::ZStandard;
-    GPUDecompressVendor preferredVendor = GPUDecompressVendor::Auto;
+    GDKVendor preferredVendor = GDKVendor::Auto;
 };
 
 struct GPUDecompressOutput
@@ -46,7 +46,7 @@ struct GPUDecompressOutput
     bool success = false;
     uint32_t decompressedBytes = 0;
     double kernelLatencyUs = 0.0;  // Microseconds for kernel invocation
-    GPUDecompressVendor vendorUsed = GPUDecompressVendor::CPUFallback;
+    GDKVendor vendorUsed = GDKVendor::CPUFallback;
     std::string errorMessage;
 };
 
@@ -71,7 +71,7 @@ class GPUDecompressKernel
         return s_instance;
     }
 
-    bool Initialize(GPUDecompressVendor preferredVendor = GPUDecompressVendor::Auto)
+    bool Initialize(GDKVendor preferredVendor = GDKVendor::Auto)
     {
         m_caps = ProbeCapabilities();
         m_activeVendor = SelectBestVendor(preferredVendor, m_caps);
@@ -85,11 +85,11 @@ class GPUDecompressKernel
             Initialize();
 
         switch (m_activeVendor) {
-            case GPUDecompressVendor::NvidiaGDeflate:
+            case GDKVendor::NvidiaGDeflate:
                 return DecompressGDeflate(input);
-            case GPUDecompressVendor::IntelDSB:
+            case GDKVendor::IntelDSB:
                 return DecompressDSB(input);
-            case GPUDecompressVendor::AmdComputeShader:
+            case GDKVendor::AmdComputeShader:
                 return DecompressAMDCS(input);
             default:
                 return DecompressCPU(input);
@@ -112,7 +112,7 @@ class GPUDecompressKernel
         return caps;
     }
 
-    GPUDecompressVendor GetActiveVendor() const
+    GDKVendor GetActiveVendor() const
     {
         return m_activeVendor;
     }
@@ -122,16 +122,16 @@ class GPUDecompressKernel
         return m_caps;
     }
 
-    static const char* VendorName(GPUDecompressVendor v)
+    static const char* VendorName(GDKVendor v)
     {
         switch (v) {
-            case GPUDecompressVendor::NvidiaGDeflate:
+            case GDKVendor::NvidiaGDeflate:
                 return "NVIDIA-GDeflate";
-            case GPUDecompressVendor::IntelDSB:
+            case GDKVendor::IntelDSB:
                 return "Intel-DSB";
-            case GPUDecompressVendor::AmdComputeShader:
+            case GDKVendor::AmdComputeShader:
                 return "AMD-ComputeShader";
-            case GPUDecompressVendor::CPUFallback:
+            case GDKVendor::CPUFallback:
                 return "CPU-Fallback";
             default:
                 return "Auto";
@@ -166,17 +166,17 @@ class GPUDecompressKernel
   private:
     GPUDecompressKernel() = default;
 
-    static GPUDecompressVendor SelectBestVendor(GPUDecompressVendor pref, const GPUDecompressCapability& caps)
+    static GDKVendor SelectBestVendor(GDKVendor pref, const GPUDecompressCapability& caps)
     {
-        if (pref != GPUDecompressVendor::Auto)
+        if (pref != GDKVendor::Auto)
             return pref;
         if (caps.gdeflateSupported)
-            return GPUDecompressVendor::NvidiaGDeflate;
+            return GDKVendor::NvidiaGDeflate;
         if (caps.dsbSupported)
-            return GPUDecompressVendor::IntelDSB;
+            return GDKVendor::IntelDSB;
         if (caps.amdCSSupported)
-            return GPUDecompressVendor::AmdComputeShader;
-        return GPUDecompressVendor::CPUFallback;
+            return GDKVendor::AmdComputeShader;
+        return GDKVendor::CPUFallback;
     }
 
     GPUDecompressOutput DecompressGDeflate(const GPUDecompressInput& in)
@@ -186,7 +186,7 @@ class GPUDecompressKernel
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 45.0;
-        out.vendorUsed = GPUDecompressVendor::NvidiaGDeflate;
+        out.vendorUsed = GDKVendor::NvidiaGDeflate;
         return out;
     }
 
@@ -196,7 +196,7 @@ class GPUDecompressKernel
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 55.0;
-        out.vendorUsed = GPUDecompressVendor::IntelDSB;
+        out.vendorUsed = GDKVendor::IntelDSB;
         return out;
     }
 
@@ -206,7 +206,7 @@ class GPUDecompressKernel
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 60.0;
-        out.vendorUsed = GPUDecompressVendor::AmdComputeShader;
+        out.vendorUsed = GDKVendor::AmdComputeShader;
         return out;
     }
 
@@ -217,14 +217,15 @@ class GPUDecompressKernel
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 850.0;  // ~850 µs for 1 MB on AVX2 CPU
-        out.vendorUsed = GPUDecompressVendor::CPUFallback;
+        out.vendorUsed = GDKVendor::CPUFallback;
         return out;
     }
 
     bool m_initialized = false;
-    GPUDecompressVendor m_activeVendor = GPUDecompressVendor::CPUFallback;
+    GDKVendor m_activeVendor = GDKVendor::CPUFallback;
     GPUDecompressCapability m_caps;
 };
 
 }  // namespace Engine
 }  // namespace ExplorerLens
+

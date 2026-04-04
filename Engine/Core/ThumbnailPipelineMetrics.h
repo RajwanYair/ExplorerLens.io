@@ -17,7 +17,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class PipelineStage : uint8_t {
+enum class TPMStage : uint8_t {
     FileRead = 0,
     Decompress,
     Decode,
@@ -49,7 +49,7 @@ struct StageStats
 
 struct PipelineSnapshot
 {
-    std::array<StageStats, static_cast<size_t>(PipelineStage::Count)> stages;
+    std::array<StageStats, static_cast<size_t>(TPMStage::Count)> stages;
     double totalP50Ms = 0.0;
     double totalP99Ms = 0.0;
     double throughput = 0.0;  // Images/sec
@@ -69,10 +69,10 @@ class ThumbnailPipelineMetrics
         return s_instance;
     }
 
-    void RecordSample(PipelineStage stage, double latencyMs)
+    void RecordSample(TPMStage stage, double latencyMs)
     {
         auto idx = static_cast<size_t>(stage);
-        if (idx >= static_cast<size_t>(PipelineStage::Count))
+        if (idx >= static_cast<size_t>(TPMStage::Count))
             return;
 
         int bucket = static_cast<int>(latencyMs);
@@ -85,10 +85,10 @@ class ThumbnailPipelineMetrics
         m_totals[idx].fetch_add(1, std::memory_order_relaxed);
     }
 
-    StageStats ComputeStats(PipelineStage stage) const
+    StageStats ComputeStats(TPMStage stage) const
     {
         auto idx = static_cast<size_t>(stage);
-        if (idx >= static_cast<size_t>(PipelineStage::Count))
+        if (idx >= static_cast<size_t>(TPMStage::Count))
             return {};
 
         StageStats s;
@@ -144,13 +144,13 @@ class ThumbnailPipelineMetrics
         PipelineSnapshot snap;
         snap.totalSamples = m_totals[0].load(std::memory_order_relaxed);
 
-        for (int i = 0; i < static_cast<int>(PipelineStage::Count); ++i) {
-            snap.stages[i] = ComputeStats(static_cast<PipelineStage>(i));
+        for (int i = 0; i < static_cast<int>(TPMStage::Count); ++i) {
+            snap.stages[i] = ComputeStats(static_cast<TPMStage>(i));
         }
 
         snap.totalP50Ms = snap.stages[0].p50Ms;
         snap.totalP99Ms = snap.stages[0].p99Ms;
-        for (int i = 0; i < static_cast<int>(PipelineStage::Count); ++i) {
+        for (int i = 0; i < static_cast<int>(TPMStage::Count); ++i) {
             snap.totalP50Ms += snap.stages[i].p50Ms;
             snap.totalP99Ms += snap.stages[i].p99Ms;
         }
@@ -169,22 +169,22 @@ class ThumbnailPipelineMetrics
             t.store(0, std::memory_order_relaxed);
     }
 
-    static const char* StageName(PipelineStage s)
+    static const char* StageName(TPMStage s)
     {
         switch (s) {
-            case PipelineStage::FileRead:
+            case TPMStage::FileRead:
                 return "FileRead";
-            case PipelineStage::Decompress:
+            case TPMStage::Decompress:
                 return "Decompress";
-            case PipelineStage::Decode:
+            case TPMStage::Decode:
                 return "Decode";
-            case PipelineStage::ColorConvert:
+            case TPMStage::ColorConvert:
                 return "ColorConvert";
-            case PipelineStage::Scale:
+            case TPMStage::Scale:
                 return "Scale";
-            case PipelineStage::Render:
+            case TPMStage::Render:
                 return "Render";
-            case PipelineStage::ShellDeliver:
+            case TPMStage::ShellDeliver:
                 return "ShellDeliver";
             default:
                 return "Unknown";
@@ -193,13 +193,13 @@ class ThumbnailPipelineMetrics
 
     static BottleneckStage DetectBottleneck(const PipelineSnapshot& snap)
     {
-        double ioMs = snap.stages[static_cast<size_t>(PipelineStage::FileRead)].p99Ms
-                      + snap.stages[static_cast<size_t>(PipelineStage::Decompress)].p99Ms;
-        double cpuMs = snap.stages[static_cast<size_t>(PipelineStage::Decode)].p99Ms
-                       + snap.stages[static_cast<size_t>(PipelineStage::ColorConvert)].p99Ms
-                       + snap.stages[static_cast<size_t>(PipelineStage::Scale)].p99Ms;
-        double gpuMs = snap.stages[static_cast<size_t>(PipelineStage::Render)].p99Ms;
-        double dlvMs = snap.stages[static_cast<size_t>(PipelineStage::ShellDeliver)].p99Ms;
+        double ioMs = snap.stages[static_cast<size_t>(TPMStage::FileRead)].p99Ms
+                      + snap.stages[static_cast<size_t>(TPMStage::Decompress)].p99Ms;
+        double cpuMs = snap.stages[static_cast<size_t>(TPMStage::Decode)].p99Ms
+                       + snap.stages[static_cast<size_t>(TPMStage::ColorConvert)].p99Ms
+                       + snap.stages[static_cast<size_t>(TPMStage::Scale)].p99Ms;
+        double gpuMs = snap.stages[static_cast<size_t>(TPMStage::Render)].p99Ms;
+        double dlvMs = snap.stages[static_cast<size_t>(TPMStage::ShellDeliver)].p99Ms;
 
         double maxMs = std::max({ioMs, cpuMs, gpuMs, dlvMs});
         if (maxMs < 1.0)
@@ -241,9 +241,10 @@ class ThumbnailPipelineMetrics
 
     using Histogram = std::array<std::atomic<uint64_t>, HIST_BUCKETS>;
 
-    std::array<Histogram, static_cast<size_t>(PipelineStage::Count)> m_histograms;
-    std::array<std::atomic<uint64_t>, static_cast<size_t>(PipelineStage::Count)> m_totals;
+    std::array<Histogram, static_cast<size_t>(TPMStage::Count)> m_histograms;
+    std::array<std::atomic<uint64_t>, static_cast<size_t>(TPMStage::Count)> m_totals;
 };
 
 }  // namespace Engine
 }  // namespace ExplorerLens
+

@@ -16,7 +16,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class ExportFormat : uint8_t {
+enum class BTE_ExportFormat : uint8_t {
     JPEG,  // Lossy — default 92%
     PNG,   // Lossless
     WebP,  // WebP lossy or lossless
@@ -44,7 +44,7 @@ struct ExportJob
     std::wstring sourceFile;
     std::wstring outputDir;
     std::vector<ExportSize> sizes;
-    ExportFormat format = ExportFormat::JPEG;
+    BTE_ExportFormat format = BTE_ExportFormat::JPEG;
     ExportQuality quality = ExportQuality::High;
     bool overwrite = true;
     bool writeManifest = false;  // Write manifest JSON after batch
@@ -131,37 +131,37 @@ class BatchThumbnailExporter
         return m_totalExported;
     }
 
-    static const char* FormatExtension(ExportFormat fmt)
+    static const char* FormatExtension(BTE_ExportFormat fmt)
     {
         switch (fmt) {
-            case ExportFormat::JPEG:
+            case BTE_ExportFormat::JPEG:
                 return ".jpg";
-            case ExportFormat::PNG:
+            case BTE_ExportFormat::PNG:
                 return ".png";
-            case ExportFormat::WebP:
+            case BTE_ExportFormat::WebP:
                 return ".webp";
-            case ExportFormat::AVIF:
+            case BTE_ExportFormat::AVIF:
                 return ".avif";
-            case ExportFormat::BMP:
+            case BTE_ExportFormat::BMP:
                 return ".bmp";
-            case ExportFormat::TIFF:
+            case BTE_ExportFormat::TIFF:
                 return ".tiff";
             default:
                 return ".bin";
         }
     }
 
-    static bool FormatSupportsLossless(ExportFormat fmt)
+    static bool FormatSupportsLossless(BTE_ExportFormat fmt)
     {
-        return fmt == ExportFormat::PNG || fmt == ExportFormat::BMP || fmt == ExportFormat::TIFF
-               || fmt == ExportFormat::WebP || fmt == ExportFormat::AVIF;
+        return fmt == BTE_ExportFormat::PNG || fmt == BTE_ExportFormat::BMP || fmt == BTE_ExportFormat::TIFF
+               || fmt == BTE_ExportFormat::WebP || fmt == BTE_ExportFormat::AVIF;
     }
 
   private:
     BatchThumbnailExporter() = default;
 
     static std::wstring BuildOutputPath(const std::wstring& dir, const std::wstring& src, const ExportSize& sz,
-                                        ExportFormat fmt)
+                                        BTE_ExportFormat fmt)
     {
         (void)src;
         std::wstring path = dir;
@@ -172,7 +172,7 @@ class BatchThumbnailExporter
         return path;
     }
 
-    static double EncodeThumb(const uint8_t* src, uint32_t sw, uint32_t sh, uint32_t dw, uint32_t dh, ExportFormat fmt,
+    static double EncodeThumb(const uint8_t* src, uint32_t sw, uint32_t sh, uint32_t dw, uint32_t dh, BTE_ExportFormat fmt,
                               ExportQuality q, const std::wstring& dest, uint64_t& outSize)
     {
         // Placeholder: actual encode via libjpeg-turbo / libpng / libwebp / libavif

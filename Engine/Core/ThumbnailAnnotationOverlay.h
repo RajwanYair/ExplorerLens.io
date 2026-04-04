@@ -28,7 +28,7 @@ enum class AnnotationBadge : uint8_t {
     Shared = 0x80         // Shared/collaborative — people icon
 };
 
-enum class BadgePosition : uint8_t {
+enum class OverlayBadgePosition : uint8_t {
     TopLeft,
     TopRight,
     BottomLeft,
@@ -36,17 +36,17 @@ enum class BadgePosition : uint8_t {
     Center
 };
 
-enum class BadgeSize : uint8_t {
+enum class OverlayBadgeSize : uint8_t {
     Small = 16,   // px — for 64×64 thumbs
     Medium = 24,  // px — for 128×128 thumbs
     Large = 32    // px — for 256×256+ thumbs
 };
 
-struct AnnotationConfig
+struct OverlayAnnotationConfig
 {
     uint8_t enabledBadges = static_cast<uint8_t>(AnnotationBadge::None);
-    BadgePosition position = BadgePosition::BottomRight;
-    BadgeSize badgeSize = BadgeSize::Medium;
+    OverlayBadgePosition position = OverlayBadgePosition::BottomRight;
+    OverlayBadgeSize badgeSize = OverlayBadgeSize::Medium;
     float opacity = 0.85f;  // 0..1
     bool showDRMBadge = true;
     bool showCloudBadge = true;
@@ -71,17 +71,17 @@ class ThumbnailAnnotationOverlay
         return s_instance;
     }
 
-    void SetConfig(const AnnotationConfig& cfg)
+    void SetConfig(const OverlayAnnotationConfig& cfg)
     {
         m_config = cfg;
     }
-    const AnnotationConfig& GetConfig() const
+    const OverlayAnnotationConfig& GetConfig() const
     {
         return m_config;
     }
 
     AnnotationResult Apply(uint8_t* pixelsBGRA, uint32_t width, uint32_t height, uint8_t badgeMask,
-                           BadgePosition position = BadgePosition::BottomRight)
+                           OverlayBadgePosition position = OverlayBadgePosition::BottomRight)
     {
         AnnotationResult r;
         if (!pixelsBGRA || width < 32 || height < 32) {
@@ -126,13 +126,13 @@ class ThumbnailAnnotationOverlay
         return mask;
     }
 
-    static BadgeSize RecommendedBadgeSize(uint32_t thumbSize)
+    static OverlayBadgeSize RecommendedOverlayBadgeSize(uint32_t thumbSize)
     {
         if (thumbSize >= 256)
-            return BadgeSize::Large;
+            return OverlayBadgeSize::Large;
         if (thumbSize >= 128)
-            return BadgeSize::Medium;
-        return BadgeSize::Small;
+            return OverlayBadgeSize::Medium;
+        return OverlayBadgeSize::Small;
     }
 
     uint64_t GetTotalBadgesRendered() const
@@ -150,26 +150,26 @@ class ThumbnailAnnotationOverlay
         ReadOnly
     };
 
-    void DrawBadge(uint8_t* pixels, uint32_t w, uint32_t h, BadgeType type, BadgePosition pos)
+    void DrawBadge(uint8_t* pixels, uint32_t w, uint32_t h, BadgeType type, OverlayBadgePosition pos)
     {
         // Real impl: Blit a pre-rendered monochrome badge icon with alpha compositing.
         // Here we mark a 4×4 pixel region to represent badge presence.
         uint32_t bx = 0, by = 0;
         uint32_t bw = static_cast<uint32_t>(m_config.badgeSize);
         switch (pos) {
-            case BadgePosition::BottomRight:
+            case OverlayBadgePosition::BottomRight:
                 bx = w - bw - 2;
                 by = h - bw - 2;
                 break;
-            case BadgePosition::TopLeft:
+            case OverlayBadgePosition::TopLeft:
                 bx = 2;
                 by = 2;
                 break;
-            case BadgePosition::TopRight:
+            case OverlayBadgePosition::TopRight:
                 bx = w - bw - 2;
                 by = 2;
                 break;
-            case BadgePosition::BottomLeft:
+            case OverlayBadgePosition::BottomLeft:
                 bx = 2;
                 by = h - bw - 2;
                 break;
@@ -188,7 +188,7 @@ class ThumbnailAnnotationOverlay
         (void)bw;
     }
 
-    AnnotationConfig m_config;
+    OverlayAnnotationConfig m_config;
     uint64_t m_totalBadgesRendered = 0;
 };
 
