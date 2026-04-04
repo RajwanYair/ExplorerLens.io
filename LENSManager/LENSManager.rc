@@ -179,8 +179,8 @@ IDR_MAINFRAME      ICON           "ExplorerLensIcon.ico"
 // Version Information resources
 //
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     32, 3, 0, 0
-PRODUCTVERSION  32, 3, 0, 0
+FILEVERSION     32, 3, 1, 0
+PRODUCTVERSION  32, 3, 1, 0
 FILEOS          VOS__WINDOWS32
 FILETYPE        VFT_APP
 FILESUBTYPE     VFT2_UNKNOWN
@@ -193,10 +193,10 @@ FILEFLAGS       0x00000000
     {
       VALUE "CompanyName", "ExplorerLens.io\0"
         VALUE "FileDescription", "ExplorerLens Shell Manager x64\0"
-        VALUE "FileVersion", "32.3.0.0\0"
+        VALUE "FileVersion", "32.3.1.0\0"
         VALUE "LegalCopyright", "ExplorerLens.io © 2011-2026\0"
         VALUE "ProductName", "ExplorerLens Shell Extension\0"
-        VALUE "ProductVersion", "32.3.0.0\0"
+        VALUE "ProductVersion", "32.3.1.0\0"
     }
   }
   BLOCK "VarFileInfo"

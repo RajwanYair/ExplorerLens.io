@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.3.1] — 2026-04-05 — Fomalhaut-T
+
+### Fixed
+- Engine/Core: Resolve type redefinition conflicts in ThumbnailAnnotationOverlay,
+  AdaptiveBitDepthConverter, FormatSignatureDetector, MemoryMappedDecoder, BatchThumbnailExporter,
+  ThumbnailPipelineMetrics, GPUDecompressKernel, MemoryMappedDecoder headers (7 sprint headers)
+- Engine/Tests: Remove stray closing brace at EngineTests.cpp:41429 that blocked TestMMD_* tests
+- .clang-format: Change IncludeBlocks Regroup->Preserve to retain intentional include ordering
+- CHANGELOG.md: Fix MD012/no-multiple-blanks (50+ consecutive blank line violations)
+
+### Added
+- .github/workflows/publish-packages.yml: GitHub Packages publishing for NuGet, npm, Container,
+  Maven, RubyGems (5 parallel package registry jobs)
+- packaging/nuget/, packaging/npm/, packaging/maven/, packaging/ruby/: Registry-specific manifests
+- Dockerfile: SDK dev container targeting ubuntu:24.04 / ghcr.io
+- ci: fix CHANGELOG section parsing and Bump-Version CHANGELOG update logic
+
+### Changed
+- style: Apply clang-format normalization to all 1407 Engine headers (Allman braces, include preserve)
+- refactor: Project consolidation — remove dead src/Engine/, src/Manager.WinUI/,
+  packaging/inno, nsis, vdproj, msix, marketplace empty dirs; remove stale MSBuild .dir/ artifacts
+- docs: Update .github/standards/performance-benchmarks.md version to 32.3.1
+
+---
+
 ## [32.3.0] — 2026-04-03 — Fomalhaut-T
 
 ### Added
