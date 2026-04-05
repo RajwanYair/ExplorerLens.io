@@ -16,7 +16,7 @@ namespace ExplorerLens { namespace Engine {
 
 struct PersistedEmbedding {
     uint32_t     itemId  = 0;
-    std::wstring filePath{};
+    std::wstring filePath;
     float        vector[512]{};
 };
 
@@ -43,7 +43,7 @@ public:
 private:
     bool                  m_isOpen = false;
     EmbeddingJournalStats m_stats{};
-    std::wstring          m_journalPath{};
+    std::wstring          m_journalPath;
 };
 
 }} // namespace ExplorerLens::Engine

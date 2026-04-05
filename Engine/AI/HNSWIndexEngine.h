@@ -16,13 +16,13 @@ namespace ExplorerLens { namespace Engine {
 
 struct HNSWEntry {
     uint32_t     itemId  = 0;
-    std::wstring filePath{};
+    std::wstring filePath;
     float        vector[512]{};
 };
 
 struct HNSWQueryResult {
     uint32_t     itemId     = 0;
-    std::wstring filePath{};
+    std::wstring filePath;
     float        similarity = 0.0f;
 };
 
@@ -47,7 +47,7 @@ private:
     static constexpr uint32_t STUB_CAPACITY = 64;
     HNSWEntry m_entries[STUB_CAPACITY]{};
     uint32_t  m_count       = 0;
-    float     m_lastQueryMs = 0.0f;
+    mutable float m_lastQueryMs = 0.0f;
 };
 
 }} // namespace ExplorerLens::Engine

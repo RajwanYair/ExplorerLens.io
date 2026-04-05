@@ -19,7 +19,7 @@ enum class ZCSessionState : uint8_t {
 
 struct ZeroCopyDecodeSession {
     uint32_t       sessionId     = 0;
-    std::wstring   filePath{};
+    std::wstring   filePath;
     uint32_t       thumbSize     = 256;
     ZCSessionState state         = ZCSessionState::IDLE;
     float          ioMs          = 0.0f;

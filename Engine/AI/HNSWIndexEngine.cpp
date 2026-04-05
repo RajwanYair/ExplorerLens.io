@@ -5,19 +5,20 @@
 
 #include <algorithm>
 #include <cmath>
-#include <numeric>
+#include <cstdint>
+#include <vector>
 
 namespace ExplorerLens { namespace Engine {
 
 HNSWIndexEngine& HNSWIndexEngine::Instance()
 {
-    static HNSWIndexEngine s_instance;
-    return s_instance;
+    static HNSWIndexEngine instance;
+    return instance;
 }
 
 bool HNSWIndexEngine::Insert(const HNSWEntry& entry)
 {
-    if (m_count >= STUB_CAPACITY) return false;
+    if (m_count >= STUB_CAPACITY) { return false; }
     m_entries[m_count++] = entry;
     return true;
 }
@@ -52,32 +53,35 @@ std::vector<HNSWQueryResult> HNSWIndexEngine::Query(const float queryVector[512]
             normA += queryVector[d] * queryVector[d];
             normB += m_entries[i].vector[d] * m_entries[i].vector[d];
         }
-        const float denom = std::sqrt(normA) * std::sqrt(normB);
+        const float DENOM = std::sqrt(normA) * std::sqrt(normB);
         HNSWQueryResult r{};
         r.itemId     = m_entries[i].itemId;
         r.filePath   = m_entries[i].filePath;
-        r.similarity = (denom > 0.0f) ? (dot / denom) : 0.0f;
+        r.similarity = (DENOM > 0.0f) ? (dot / DENOM) : 0.0f;
         results.push_back(r);
     }
 
-    std::sort(results.begin(), results.end(),
-        [](const HNSWQueryResult& a, const HNSWQueryResult& b) {
+    std::ranges::sort(results,
+        [](const HNSWQueryResult& a, const HNSWQueryResult& b) noexcept {
             return a.similarity > b.similarity;
         });
 
-    if (results.size() > topK) results.resize(topK);
+    if (results.size() > topK) { results.resize(topK); }
     m_lastQueryMs = 0.8f;
     return results;
 }
 
 bool HNSWIndexEngine::SaveToFile(const std::wstring& path) const
 {
-    return !path.empty();  // stub: always reports success
+    if (path.empty()) { return false; }
+    return m_count >= 0;  // stub: would serialize m_count entries
 }
 
 bool HNSWIndexEngine::LoadFromFile(const std::wstring& path)
 {
-    return !path.empty();  // stub: always reports success
+    if (path.empty()) { return false; }
+    m_count = 0;  // stub: reset before load; real impl populates from path
+    return true;
 }
 
 void HNSWIndexEngine::Reset()

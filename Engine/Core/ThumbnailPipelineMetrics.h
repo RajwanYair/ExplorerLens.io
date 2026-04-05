@@ -246,4 +246,3 @@ class ThumbnailPipelineMetrics
 
 }  // namespace Engine
 }  // namespace ExplorerLens
-

@@ -12,9 +12,10 @@
 > New major series starting after v32.x "Fomalhaut" completes.
 
 ```
-v32.4.0  Fomalhaut-U  ── Release infra: 5-registry packages, manifest sync  (2026-04-05)  ← NOW
-v32.5.0  Fomalhaut-V  ── DirectStorage 1.2 zero-copy GPU decompress path     (planned)
-v32.6.0  Fomalhaut-W  ── CLIP semantic search + HNSW index (NPU INT8)         (planned)
+v32.4.0  Fomalhaut-U  ── Release infra: 5-registry packages, manifest sync  (2026-04-05)
+v32.5.0  Fomalhaut-V  ── DirectStorage 1.2 zero-copy GPU decompress path     (2026-04-05)
+v32.6.0  Fomalhaut-W  ── CLIP semantic search + HNSW index (NPU INT8)        (2026-04-05)
+v32.6.1  Fomalhaut-W  ── Patch: clang-tidy fixes + missing test includes      (2026-04-05)
 v32.7.0  Fomalhaut-X  ── Live Preview Scrubber (video seek + frame extraction)(planned)
    │
    ├── v33.0.0  Spica        Cross-Platform Shell (macOS Quick Look + Linux) ★★ (planned)

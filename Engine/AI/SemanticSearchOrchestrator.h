@@ -15,14 +15,14 @@
 namespace ExplorerLens { namespace Engine {
 
 struct SemanticSearchRequest {
-    std::wstring queryText{};
+    std::wstring queryText;
     uint32_t     topK         = 20;
     float        minRelevance = 0.15f;
     bool         reloadIndex  = false;
 };
 
 struct SemanticSearchResult {
-    std::wstring filePath{};
+    std::wstring filePath;
     float        relevance = 0.0f;
     uint32_t     rank      = 0;
 };

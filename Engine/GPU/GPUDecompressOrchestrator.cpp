@@ -2,31 +2,38 @@
 // Copyright (c) 2026 ExplorerLens Project
 
 #include "GPUDecompressOrchestrator.h"
+#include "ZStdGPUKernel.h"
+
+#include <string_view>
 
 namespace ExplorerLens { namespace Engine {
 
 GPUDecompressOrchestrator& GPUDecompressOrchestrator::Instance()
 {
-    static GPUDecompressOrchestrator s_instance;
-    return s_instance;
+    static GPUDecompressOrchestrator instance;
+    return instance;
 }
 
 void GPUDecompressOrchestrator::Initialize()
 {
-    if (m_initialized) return;
+    if (m_initialized) { return; }
 
     const ZStdGPUKernel& zstd = ZStdGPUKernel::Instance();
     if (zstd.IsAvailable() && zstd.DetectedVendor() != ZStdGPUVendor::FALLBACK)
+    {
         m_backend = GPUDecompressBackend::ZSTD_GPU;
+    }
     else
+    {
         m_backend = GPUDecompressBackend::CPU;
+    }
 
     m_initialized = true;
 }
 
 GPUDecompressResult GPUDecompressOrchestrator::Decompress(const GPUDecompressRequest& req) noexcept
 {
-    if (!m_initialized) Initialize();
+    if (!m_initialized) { Initialize(); }
 
     GPUDecompressResult res{};
 
@@ -40,16 +47,16 @@ GPUDecompressResult GPUDecompressOrchestrator::Decompress(const GPUDecompressReq
         kd.expectedOrigSize = req.expectedOrigSize;
         kd.vendor           = ZStdGPUKernel::Instance().DetectedVendor();
 
-        const ZStdGPUKernelResult kr = ZStdGPUKernel::Instance().Decompress(kd);
-        res.success     = kr.success;
-        res.bytesOut    = kr.bytesWritten;
-        res.elapsedMs   = kr.decompressMs;
+        ZStdGPUKernelResult kernelResult = ZStdGPUKernel::Instance().Decompress(kd);
+        res.success     = kernelResult.success;
+        res.bytesOut    = kernelResult.bytesWritten;
+        res.elapsedMs   = kernelResult.decompressMs;
         res.backendUsed = GPUDecompressBackend::ZSTD_GPU;
     }
     else
     {
         // CPU fallback — validate sizes and report success placeholder
-        const bool sizeOk = req.srcSize > 0
+        bool sizeOk = req.srcSize > 0
             && req.dstCapacity >= req.expectedOrigSize
             && req.dstBuffer != nullptr;
         res.success     = sizeOk;

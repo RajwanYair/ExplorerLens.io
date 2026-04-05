@@ -15,7 +15,7 @@
 namespace ExplorerLens { namespace Engine {
 
 struct DSBatchItem {
-    std::wstring filePath{};
+    std::wstring filePath;
     uint32_t     thumbSize   = 256;
     uint32_t     itemId      = 0;
 };
@@ -41,8 +41,8 @@ public:
     bool     IsNvmeDirectStorageEnabled()          const noexcept { return m_nvmeEnabled; }
 
 private:
-    std::vector<DSBatchItem>   m_pending{};
-    std::vector<DSBatchResult> m_results{};
+    std::vector<DSBatchItem>   m_pending;
+    std::vector<DSBatchResult> m_results;
     bool                       m_nvmeEnabled = true;
 };
 

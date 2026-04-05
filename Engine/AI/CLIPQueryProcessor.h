@@ -18,14 +18,14 @@ namespace ExplorerLens { namespace Engine {
 enum class CLIPTextBackend : uint8_t { DIRECTML, ONNX, CPU };
 
 struct CLIPQueryRequest {
-    std::wstring    queryText{};
+    std::wstring    queryText;
     uint32_t        topK      = 10;
     float           minScore  = 0.20f;
     CLIPTextBackend backend   = CLIPTextBackend::DIRECTML;
 };
 
 struct CLIPQueryMatch {
-    std::wstring filePath{};
+    std::wstring filePath;
     float        score    = 0.0f;
     uint32_t     itemId   = 0;
 };
@@ -42,8 +42,8 @@ public:
     static std::string_view BackendName(CLIPTextBackend b) noexcept;
 
 private:
-    bool  m_modelLoaded = false;
-    float m_lastEmbedMs = 0.0f;
+    bool          m_modelLoaded = false;
+    mutable float m_lastEmbedMs = 0.0f;
     char  m_modelVersion[32] = "ViT-B/32-INT8";
 };
 

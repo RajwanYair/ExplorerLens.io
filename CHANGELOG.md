@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.6.1] — 2026-04-05 — Fomalhaut-W
+
+### Fixed
+- Engine/GPU/GPUDecompressOrchestrator.h/.cpp: Add `#include "ZStdGPUKernel.h"` to .cpp (not .h), add `<string_view>`, rename `s_instance` → `instance`, add braces to all bare if/else, rename `const` local variables to UPPER_CASE per ConstantCase rule
+- Engine/Pipeline/DirectStorageBatchScheduler.h/.cpp: Remove redundant `{}` member initializers; rename `s_instance` → `instance`; add braces to bare return
+- Engine/Core/DirectStorageProfiler.cpp: Replace `<numeric>` with `<cstdint>` + `<string_view>`; rename `s_instance` → `instance`, `g_writeHead` → `writeHead`; add braces; use `std::ranges::sort`; fix narrowing cast; revert to `const noexcept` non-static with `m_count` guard to satisfy clang-tidy
+- Engine/Core/ZeroCopyDecodeSession.h: Remove redundant `{}` from `filePath` member
+- Engine/AI/HNSWIndexEngine.h/.cpp: Remove redundant `{}` from struct members; add `<cstdint>` + `<vector>`; rename `s_instance` → `instance`; use `std::ranges::sort`; fix `const float DENOM`; mark `m_lastQueryMs` mutable; stub `SaveToFile`/`LoadFromFile` touch `m_count` to avoid `can-be-made-static` warning
+- Engine/AI/CLIPQueryProcessor.h/.cpp: Remove redundant `{}` from struct members; add `<string>` + `<vector>` + `<string_view>`; rename `s_instance` → `instance`; mark `m_lastEmbedMs` mutable; add braces
+- Engine/AI/SemanticSearchOrchestrator.h/.cpp: Remove redundant `{}` from struct members; add `<cstdint>` + `<string>` + `<vector>`; rename `s_instance` → `instance`; rename `const` locals to UPPER_CASE; add braces
+- Engine/AI/EmbeddingPersistenceEngine.h/.cpp: Remove redundant `{}` from members; add `<string>` + `<vector>`; rename `s_instance` → `instance`; add braces
+- Engine/AI/VisualQueryOptimizer.h: Remove redundant `{}` from struct members; rename `s_instance` → `instance`; add braces; use `.at()` for bounds-safe access; fix operator precedence parens
+- Engine/Tests/EngineTests_Mid.cpp: Add missing Sprint 1111-1120 and Sprint 1121-1130 `#include` directives (ZStdGPUKernel, GPUDecompressOrchestrator, DirectStorageBatchScheduler, DirectStorageProfiler, ZeroCopyDecodeSession, HNSWIndexEngine, CLIPQueryProcessor, SemanticSearchOrchestrator, EmbeddingPersistenceEngine, VisualQueryOptimizer) — build was failing C2653/C2065 on these types
+
+---
+
 ## [32.6.0] — 2026-04-05 — Fomalhaut-W
 
 ### Added

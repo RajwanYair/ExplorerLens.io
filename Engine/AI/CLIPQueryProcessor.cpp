@@ -3,12 +3,16 @@
 
 #include "CLIPQueryProcessor.h"
 
+#include <string>
+#include <string_view>
+#include <vector>
+
 namespace ExplorerLens { namespace Engine {
 
 CLIPQueryProcessor& CLIPQueryProcessor::Instance()
 {
-    static CLIPQueryProcessor s_instance;
-    return s_instance;
+    static CLIPQueryProcessor instance;
+    return instance;
 }
 
 bool CLIPQueryProcessor::LoadModel(const std::wstring& modelPath)
@@ -21,7 +25,7 @@ std::vector<CLIPQueryMatch> CLIPQueryProcessor::Query(const CLIPQueryRequest& re
 {
     // Stub: return an empty result set when model is not loaded;
     // real implementation dispatches to DirectML/ONNX text encoder.
-    if (!m_modelLoaded || req.queryText.empty()) return {};
+    if (!m_modelLoaded || req.queryText.empty()) { return {}; }
 
     m_lastEmbedMs = 18.0f;  // simulated INT8 NPU embed latency
     std::vector<CLIPQueryMatch> matches;

@@ -1,6 +1,6 @@
 {
   "name": "@rajwanyair/explorerlens",
-  "version": "32.6.0",
+  "version": "32.6.1",
   "description": "Node.js downloader and wrapper for lens.exe — ExplorerLens GPU-accelerated thumbnail CLI for Windows",
   "keywords": [
     "thumbnail",

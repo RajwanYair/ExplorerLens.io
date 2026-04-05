@@ -226,6 +226,18 @@
 #include "../Core/MemoryMappedDecoder.h"
 #include "../Core/ThumbnailAnnotationOverlay.h"
 #include "../Pipeline/BatchThumbnailExporter.h"
+// Sprint 1111-1120: DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
+#include "../GPU/ZStdGPUKernel.h"
+#include "../GPU/GPUDecompressOrchestrator.h"
+#include "../Pipeline/DirectStorageBatchScheduler.h"
+#include "../Core/DirectStorageProfiler.h"
+#include "../Core/ZeroCopyDecodeSession.h"
+// Sprint 1121-1130: CLIP Semantic Search + HNSW (v32.6.0 "Fomalhaut-W")
+#include "../AI/HNSWIndexEngine.h"
+#include "../AI/CLIPQueryProcessor.h"
+#include "../AI/SemanticSearchOrchestrator.h"
+#include "../AI/EmbeddingPersistenceEngine.h"
+#include "../AI/VisualQueryOptimizer.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -22687,4 +22699,3 @@ TEST(TestVQO_PruneResultFields)
     ASSERT(res.originalCandidates == 3);
     ASSERT(res.pruneMs >= 0.0f);
 }
-

@@ -20,8 +20,8 @@ enum class VisualQueryHintType : uint8_t {
 
 struct VisualQueryHint {
     VisualQueryHintType type          = VisualQueryHintType::NO_HINT;
-    std::wstring        folderScope{};
-    std::wstring        fileTypeExt{};
+    std::wstring        folderScope;
+    std::wstring        fileTypeExt;
     uint64_t            dateRangeFrom = 0;
     uint64_t            dateRangeTo   = 0;
 };
@@ -37,8 +37,8 @@ class VisualQueryOptimizer {
 public:
     static VisualQueryOptimizer& Instance()
     {
-        static VisualQueryOptimizer s_instance;
-        return s_instance;
+        static VisualQueryOptimizer instance;
+        return instance;
     }
 
     VisualQueryPruneResult PruneSearchSpace(
@@ -59,9 +59,11 @@ public:
 
         // Simulated pruning: keep every other ID as a stand-in for scope filtering
         prunedOut.clear();
-        prunedOut.reserve(candidateIds.size() / 2 + 1);
+        prunedOut.reserve((candidateIds.size() / 2) + 1);
         for (uint32_t i = 0; i < static_cast<uint32_t>(candidateIds.size()); i += 2)
-            prunedOut.push_back(candidateIds[i]);
+        {
+            prunedOut.push_back(candidateIds.at(i));
+        }
 
         res.prunedCandidates = static_cast<uint32_t>(prunedOut.size());
         res.pruneMs          = 0.1f;

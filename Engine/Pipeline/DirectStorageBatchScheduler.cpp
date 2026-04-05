@@ -7,8 +7,8 @@ namespace ExplorerLens { namespace Engine {
 
 DirectStorageBatchScheduler& DirectStorageBatchScheduler::Instance()
 {
-    static DirectStorageBatchScheduler s_instance;
-    return s_instance;
+    static DirectStorageBatchScheduler instance;
+    return instance;
 }
 
 void DirectStorageBatchScheduler::AddItem(const DSBatchItem& item)
@@ -18,7 +18,7 @@ void DirectStorageBatchScheduler::AddItem(const DSBatchItem& item)
 
 bool DirectStorageBatchScheduler::Flush()
 {
-    if (m_pending.empty()) return true;
+    if (m_pending.empty()) { return true; }
 
     m_results.clear();
     m_results.reserve(m_pending.size());
