@@ -2,7 +2,7 @@
 
 **Status:** Historical — v30.x through v32.x completed; v33.x planning active
 **When written:** v25.2.0 "Rigel-S" was current active version
-**Current Active Version:** v32.4.0 "Fomalhaut-U" (2026-04-05)
+**Current Active Version:** v32.7.0 "Fomalhaut-X" (2026-04-05)
 **Next Major:** v33.0.0 "Spica" (see [v33.x Forward Plan](#v33x-spica--forward-plan) below)
 
 ---
@@ -16,7 +16,7 @@ v32.4.0  Fomalhaut-U  ── Release infra: 5-registry packages, manifest sync  
 v32.5.0  Fomalhaut-V  ── DirectStorage 1.2 zero-copy GPU decompress path     (2026-04-05)
 v32.6.0  Fomalhaut-W  ── CLIP semantic search + HNSW index (NPU INT8)        (2026-04-05)
 v32.6.1  Fomalhaut-W  ── Patch: clang-tidy fixes + missing test includes      (2026-04-05)
-v32.7.0  Fomalhaut-X  ── Live Preview Scrubber (video seek + frame extraction)(planned)
+v32.7.0  Fomalhaut-X  ── Live Preview Scrubber (video seek + frame extraction)(2026-04-05)
    │
    ├── v33.0.0  Spica        Cross-Platform Shell (macOS Quick Look + Linux) ★★ (planned)
    ├── v33.1.0  Spica-R      Platform Abstraction Layer — Metal + Vulkan EGL   (planned)
