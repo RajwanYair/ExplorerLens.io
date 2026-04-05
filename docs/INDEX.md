@@ -19,7 +19,8 @@
 
 | Document | Description |
 |----------|-------------|
-| [ROADMAP_V30.md](ROADMAP_V30.md) | Gen-6 Roadmap — v30.x "Deneb" + v31.x "Achernar" + v32.x "Fomalhaut" |
+| [ROADMAP_V30.md](ROADMAP_V30.md) | Gen-6 Roadmap — v30.x "Deneb" + v31.x "Achernar" + v32.x "Fomalhaut" + v33.x "Spica" |
+| [ROADMAP_V34.md](ROADMAP_V34.md) | Gen-7 Roadmap — v34.x "Arcturus" — Best-in-Class Formats & Performance |
 
 ## Development
 

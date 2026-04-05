@@ -1,9 +1,9 @@
 # ExplorerLens v30.x "Deneb" — Gen-6 Roadmap
 
-**Status:** Historical — v30.x through v32.x completed; v33.x planning active
+**Status:** Historical — v30.x through v33.0.0 completed; v33.x minor releases active
 **When written:** v25.2.0 "Rigel-S" was current active version
-**Current Active Version:** v32.7.0 "Fomalhaut-X" (2026-04-05)
-**Next Major:** v33.0.0 "Spica" (see [v33.x Forward Plan](#v33x-spica--forward-plan) below)
+**Current Active Version:** v33.0.0 "Spica" (2026-04-05)
+**Next Major:** v34.0.0 "Arcturus" — see [ROADMAP_V34.md](ROADMAP_V34.md)
 
 ---
 
@@ -18,12 +18,14 @@ v32.6.0  Fomalhaut-W  ── CLIP semantic search + HNSW index (NPU INT8)       
 v32.6.1  Fomalhaut-W  ── Patch: clang-tidy fixes + missing test includes      (2026-04-05)
 v32.7.0  Fomalhaut-X  ── Live Preview Scrubber (video seek + frame extraction)(2026-04-05)
    │
-   ├── v33.0.0  Spica        Cross-Platform Shell (macOS Quick Look + Linux) ★★ (planned)
+   ├── v33.0.0  Spica        Cross-Platform Shell (macOS Quick Look + Linux) ★★ (2026-04-05) ✅
    ├── v33.1.0  Spica-R      Platform Abstraction Layer — Metal + Vulkan EGL   (planned)
    ├── v33.2.0  Spica-S      Enterprise Console v4 + GPO Policy Templates      (planned)
    ├── v33.3.0  Spica-T      Generative AI Thumbnails (on-device NPU)          (planned)
    ├── v33.4.0  Spica-U      Plugin Marketplace v5 + SDK Compat Kit v3         (planned)
-   └── v33.5.0  Spica-V      LTS Hardening + Security Audit                   (planned)
+   ├── v33.5.0  Spica-V      LTS Hardening + Security Audit                   (planned)
+   │
+   └── v34.0.0  Arcturus     Best-in-Class Formats + Performance ★★            (see ROADMAP_V34.md)
 
 ★★ = Landmark MAJOR release
 ```
@@ -57,7 +59,8 @@ GPU surface creation, shell-provider registration, and file-system notifications
 |--------|-------|--------|-----------------|
 | v30.0–v30.7 | Platform Unification (Deneb) | Completed | PAL scaffolding, D3D12 renderer |
 | v31.0–v31.7 | Generative AI (Achernar) | Completed | AI scene understanding, NPU routing |
-| v32.0–v32.3 | Performance + CI (Fomalhaut-T) | Completed | Sub-ms cache, 5-registry publish, EngineTests split |
+| v32.0–v32.7 | Performance + CI (Fomalhaut) | Completed | Sub-ms cache, 5-registry publish, live preview scrubber |
+| v33.0.0 | Cross-Platform Shell (Spica) | **Released** | macOS QL + Linux Nautilus stubs, GenAI, Enterprise v4 |
 
 ---
 
