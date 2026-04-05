@@ -231,18 +231,23 @@ if (Test-Path $dockerPath) {
 $clPath = "$rootDir\CHANGELOG.md"
 $cl = Get-Content $clPath -Raw
 $marker = "## [Unreleased]"
-$idx = $cl.IndexOf($marker)
-if ($idx -ge 0) {
-    $afterMarker = $cl.IndexOf("`n---", $idx)
-    if ($afterMarker -ge 0) {
-        $today = (Get-Date).ToString("yyyy-MM-dd")
-        $sectionHeader = "## [$Version] — $today — $Codename"
-        # Build a proper versioned section with a separator after it
-        $newSection = "`n`n$sectionHeader`n`n$ChangelogEntry`n`n---"
-        # Insert after the [Unreleased] separator, replacing nothing
-        $cl = $cl.Substring(0, $afterMarker + 4) + $newSection + $cl.Substring($afterMarker + 4)
-        Set-Content $clPath -Value $cl -NoNewline
-        Write-Host "[bump] CHANGELOG.md updated — added $sectionHeader"
+$sectionGuard = "## [$Version]"
+if ($cl.Contains($sectionGuard)) {
+    Write-Host "[bump] CHANGELOG.md already contains $sectionGuard — skipping"
+} else {
+    $idx = $cl.IndexOf($marker)
+    if ($idx -ge 0) {
+        $afterMarker = $cl.IndexOf("`n---", $idx)
+        if ($afterMarker -ge 0) {
+            $today = (Get-Date).ToString("yyyy-MM-dd")
+            $sectionHeader = "## [$Version] — $today — $Codename"
+            # Build a proper versioned section with a separator after it
+            $newSection = "`n`n$sectionHeader`n`n$ChangelogEntry`n`n---"
+            # Insert after the [Unreleased] separator, replacing nothing
+            $cl = $cl.Substring(0, $afterMarker + 4) + $newSection + $cl.Substring($afterMarker + 4)
+            Set-Content $clPath -Value $cl -NoNewline
+            Write-Host "[bump] CHANGELOG.md updated — added $sectionHeader"
+        }
     }
 }
 
