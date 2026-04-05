@@ -1,4 +1,4 @@
-name: CodeQL Security Analysis
+﻿name: CodeQL Security Analysis
 
 on:
   push:
@@ -30,17 +30,37 @@ jobs:
       contents: read
       security-events: write   # Required to upload SARIF results
 
+    # GIT_CONFIG_COUNT: inject safe.directory via git env-var config so ALL
+    # git invocations — including those inside github/codeql-action — bypass
+    # the Windows runner ownership check without needing write access to the
+    # system git config file.
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
+
     steps:
-      - name: Configure git safe.directory
+      - name: Configure git safe.directory (pre-checkout)
         shell: pwsh
         run: |
           git config --global safe.directory '*'
+          # Write to system config — suppressed because runner may lack permission;
+          # GIT_CONFIG_COUNT env vars (set at job level below) provide a fallback.
           git config --system safe.directory '*' 2>&1 | Out-Null
 
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Configure git safe.directory (post-checkout)
+        shell: pwsh
+        run: |
+          # Set safe.directory in every scope so codeql-action's internal git
+          # calls and the checkout POST-STEP both succeed on Windows runners.
+          git config --global safe.directory '*'
+          git config safe.directory '*'
+          git config --system safe.directory '*' 2>&1 | Out-Null
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
