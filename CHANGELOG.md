@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [33.2.0] — 2026-04-05 — Spica-S
+
+### Added
+- Sprint 1161-1170: Enterprise Policy V4 — EnterprisePolicyV4, GPOPolicyTemplate, IntuneComplianceEngine, EnterpriseAuditLogger, ConfigMgrPolicyBridge
+- GPO ADMX template generation, Intune compliance reporting, structured enterprise audit logging
+- PolicySourceV4 enum: GPO > Intune > ConfigMgr > Manual policy source hierarchy v4
+
+---
+
 ## [33.1.0] — 2026-04-05 — Spica-R
 
 ### Added
