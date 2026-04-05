@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [33.4.0] — 2026-04-05 — Spica-U
+
+### Added
+- Sprint 1181-1190: Plugin Marketplace V5 — PluginMarketplaceV5, SDKCompatKit3, PluginDistributionManager, MarketplaceSearchIndex, PluginSignatureValidator
+- Curated plugin catalog with tier-based (Free/Commercial/Enterprise) discovery and install orchestration
+- SDK Compatibility Kit v3: ABI-stable shims for SDK v1/v2 plugins running on v3+ host
+- Inverted search index for sub-ms plugin catalog queries
+- ECDSA/RSA signature validation with trusted thumbprint management
+
+---
+
 ## [33.3.0] — 2026-04-05 — Spica-T
 
 ### Added

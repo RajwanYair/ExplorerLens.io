@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 5 April 2026 (v33.3.0 Spica-T release)
-**Version:** 33.3.0 "Spica-T"
+**Last Updated:** 5 April 2026 (v33.4.0 Spica-U release)
+**Version:** 33.4.0 "Spica-U"
 
 ---
 
