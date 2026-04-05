@@ -32,6 +32,10 @@ jobs:
     name: Build x64 Release
     runs-on: windows-latest
     timeout-minutes: 90
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       # ── Checkout ──────────────────────────────────────────────

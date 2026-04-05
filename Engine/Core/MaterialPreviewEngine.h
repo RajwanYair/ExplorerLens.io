@@ -74,17 +74,16 @@ class MaterialPreviewEngine
 
     static MaterialFileFormat DetectFormat(const std::wstring& path) noexcept
     {
-        if (path.size() > 4) {
+        if (path.size() >= 10) {
+            if (path.substr(path.size() - 10) == L".materialx")
+                return MaterialFileFormat::MaterialX;
+        }
+        if (path.size() >= 4) {
             auto ext = path.substr(path.size() - 4);
             if (ext == L".mtl")
                 return MaterialFileFormat::MTL;
             if (ext == L".mdl")
                 return MaterialFileFormat::MDL;
-        }
-        if (path.size() > 6) {
-            auto ext = path.substr(path.size() - 6);
-            if (ext == L".mtlx")
-                return MaterialFileFormat::MaterialX;
         }
         return MaterialFileFormat::Unknown;
     }

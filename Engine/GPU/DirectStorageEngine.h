@@ -104,8 +104,6 @@ class DirectStorageEngine
 
     inline void Shutdown()
     {
-        if (!m_initialized)
-            return;
         m_pendingReads.store(0, std::memory_order_relaxed);
         m_initialized = false;
         m_status = DSStatus::Unavailable;

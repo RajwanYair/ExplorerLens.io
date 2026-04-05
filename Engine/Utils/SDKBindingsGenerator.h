@@ -97,10 +97,12 @@ class SDKBindingsGenerator
     SDKBindingResult GeneratePython() const
     {
         std::ostringstream oss;
-        oss << "# Auto-generated ExplorerLens SDK bindings — Python\nimport ctypes\n_lib = ctypes.CDLL('LENSShell.dll')\n";
+        oss << "# Auto-generated ExplorerLens SDK bindings — Python\nimport ctypes\n_lib = ctypes.CDLL('LENSShell.dll')\nclass ExplorerLensSDK:\n";
         for (const auto& fn : m_functions) {
-            oss << "_lib." << fn.name << ".restype = None\n";
+            oss << "    def " << fn.name << "(self): return _lib." << fn.name << "()\n";
         }
+        if (m_functions.empty())
+            oss << "    pass\n";
         return {true, oss.str(), static_cast<int>(m_functions.size())};
     }
     SDKBindingResult GenerateTypeScript() const

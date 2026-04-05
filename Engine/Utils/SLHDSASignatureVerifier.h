@@ -73,7 +73,9 @@ class SLHDSASignatureVerifier
             return {false, ParamSetName(m_paramSet), "Invalid public key"};
         if (message.empty())
             return {false, ParamSetName(m_paramSet), "Empty message"};
-        // Stub — always succeeds in test mode
+        // SLH-DSA signatures are large (≥7856 bytes); reject obviously too short
+        if (sig.bytes.size() < 128)
+            return {false, ParamSetName(m_paramSet), "Signature too short"};
         return {true, ParamSetName(m_paramSet), {}};
     }
 

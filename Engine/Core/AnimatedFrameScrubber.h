@@ -27,7 +27,7 @@ enum class DisposalMethod : uint8_t {
 struct FrameInfo
 {
     uint32_t index = 0;
-    uint32_t delayMs = 100;
+    uint32_t delayMs = 0;
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t offsetX = 0;

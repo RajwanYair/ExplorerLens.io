@@ -44,6 +44,12 @@ jobs:
             preset: ci-debug
             build_preset: ci-debug
 
+    # GIT_CONFIG_COUNT: inject safe.directory via env so ALL git calls (incl. POST-STEP) bypass the Windows runner ownership check.
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
+
     steps:
       - name: Configure git safe.directory
         shell: pwsh
@@ -136,6 +142,11 @@ jobs:
     # Shell build requires ALL external libs; CI currently builds only a subset.
     # Allow failure until full external lib CI support is implemented.
     continue-on-error: true
+
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       - name: Configure git safe.directory

@@ -7,6 +7,7 @@
 //
 #pragma once
 #include <cstdint>
+#include <set>
 #include <string>
 
 namespace ExplorerLens {
@@ -39,13 +40,15 @@ class ShellExtensionLifecycleManager
         return inst;
     }
 
-    bool Register(const std::string& /*extensionId*/)
+    bool Register(const std::string& extensionId)
     {
+        m_registered.insert(extensionId);
         ++m_stats.registrations;
         return true;
     }
-    bool Unregister(const std::string& /*extensionId*/)
+    bool Unregister(const std::string& extensionId)
     {
+        m_registered.erase(extensionId);
         return true;
     }
     void Suspend(const std::string& /*extensionId*/) {}
@@ -54,8 +57,10 @@ class ShellExtensionLifecycleManager
         ++m_stats.recoveries;
         return true;
     }
-    ExtensionState GetState(const std::string& /*extensionId*/) const
+    ExtensionState GetState(const std::string& extensionId) const
     {
+        if (m_registered.count(extensionId) == 0)
+            return ExtensionState::Unregistered;
         return ExtensionState::Active;
     }
     void Heartbeat(const std::string& /*extensionId*/) {}
@@ -67,6 +72,7 @@ class ShellExtensionLifecycleManager
   private:
     ShellExtensionLifecycleManager() = default;
     LifecycleStats m_stats;
+    std::set<std::string> m_registered;
 };
 
 }  // namespace Engine

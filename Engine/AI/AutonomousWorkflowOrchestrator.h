@@ -40,11 +40,13 @@ struct WorkflowJobStats
 
 class AutonomousWorkflowOrchestrator
 {
-public:
+  public:
     explicit AutonomousWorkflowOrchestrator(OrchestrationPolicy policy = OrchestrationPolicy::Adaptive)
         : m_policy(policy)
-    {}
-jobId, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/)
+    {
+    }
+
+    void Enqueue(uint64_t jobId, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/)
     {
         m_queue.push_back(jobId);
         ++m_stats.jobsQueued;
@@ -52,9 +54,6 @@ jobId, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/)
     bool Dispatch(uint64_t& outJobId)
     {
         if (m_queue.empty())
-            return false;
-        outJobId = m_queue.front();
-        m_queue.erase(m_queue.begin())empty())
             return false;
         outJobId = m_queue.front();
         m_queue.erase(m_queue.begin());
@@ -67,13 +66,18 @@ jobId, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/)
         ++m_stats.jobsCompleted;
         m_stats.avgLatencyMs = latencyMs;
     }
-    void SetPolicy(OrchestrationPm_queue.clear(); }
+    void SetPolicy(OrchestrationPolicy p) { m_policy = p; }
+    OrchestrationPolicy GetPolicy() const { return m_policy; }
+    void SetConcurrencyLimit(uint32_t limit) { m_concurrencyLimit = limit; }
+    uint32_t GetConcurrencyLimit() const { return m_concurrencyLimit; }
+    WorkflowJobStats GetStats() const { return m_stats; }
+    void Reset()
+    {
+        m_stats = {};
+        m_queue.clear();
+    }
 
-private:
-    OrchestrationPolicy m_policy;
-    uint32_t m_concurrencyLimit = 4;
-    WorkflowJobStats m_stats;
-    std::vector<uint64_t> m_queue
+  private:
     OrchestrationPolicy m_policy;
     uint32_t m_concurrencyLimit = 4;
     WorkflowJobStats m_stats;

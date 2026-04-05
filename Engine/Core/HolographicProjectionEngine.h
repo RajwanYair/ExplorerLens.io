@@ -73,8 +73,7 @@ class HolographicProjectionEngine
         result.renderMs = stereo ? 34.0 : 18.0;
         size_t frameSize = static_cast<size_t>(req.width) * req.height * 4;
         result.leftRGBA.assign(frameSize, 0xE0);
-        if (stereo)
-            result.rightRGBA.assign(frameSize, 0xE8);
+        result.rightRGBA.assign(frameSize, 0xE8);
         return result;
     }
 

@@ -1,4 +1,4 @@
-name: Code Coverage
+﻿name: Code Coverage
 
 # v23.6.0 "Vega-W": Measures Engine/Core + Engine/Decoders
 # coverage via OpenCppCoverage (Windows) / gcov-llvm (Linux). Enforces a
@@ -34,6 +34,10 @@ jobs:
     name: Coverage (Windows / OpenCppCoverage)
     runs-on: windows-latest
     timeout-minutes: 45
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       - name: Configure git safe.directory

@@ -81,6 +81,9 @@ public:
         entry.compressed = (m_config.compression != CacheCompression::None);
 
         m_cache[fileHash] = std::move(entry);
+        // Enforce max entries — evict oldest
+        while (m_cache.size() > m_maxEntries && !m_cache.empty())
+            m_cache.erase(m_cache.begin());
         m_stats.totalEntries = m_cache.size();
         m_stats.bytesUsed += m_config.embeddingDim * sizeof(float);
         return true;

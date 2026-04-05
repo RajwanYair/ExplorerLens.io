@@ -1,4 +1,4 @@
-name: Performance Regression Gate
+﻿name: Performance Regression Gate
 
 on:
   pull_request:
@@ -32,6 +32,9 @@ jobs:
       BASELINE_BATCH_IPS: '235'       # target batch: >235 img/sec (CPU path, >350 with NPU)
       THRESHOLD_LATENCY_PCT: '15'     # block if +15% over baseline (tightened from 20%)
       THRESHOLD_THROUGHPUT_PCT: '10'  # block if -10% under baseline (tightened from 15%)
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       - name: Configure git safe.directory

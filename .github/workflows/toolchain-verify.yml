@@ -29,6 +29,11 @@ jobs:
       matrix:
         os: [windows-latest]
 
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4

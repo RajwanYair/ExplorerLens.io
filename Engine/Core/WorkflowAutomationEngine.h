@@ -138,8 +138,6 @@ class WorkflowAutomationEngine
         m_rules.clear();
         m_stats = {};
         m_nextId = 1;
-        m_stats = {};
-        m_nextId = 1;
         m_initialized = false;
     }
 

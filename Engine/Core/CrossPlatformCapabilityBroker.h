@@ -43,6 +43,7 @@ class CrossPlatformCapabilityBroker
 
     bool Has(PlatformCapability cap) const
     {
+        ++m_stats.queriesAnswered;
         return (m_bitmask & static_cast<uint32_t>(cap)) != 0;
     }
     uint32_t GetCapabilityBitmask() const

@@ -1,4 +1,4 @@
-name: Code Quality
+﻿name: Code Quality
 
 on:
   push:
@@ -20,6 +20,10 @@ jobs:
     name: Lint Code
     runs-on: windows-latest
     timeout-minutes: 15
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       - name: Configure git safe.directory
@@ -75,6 +79,10 @@ jobs:
     name: Static Analysis
     runs-on: windows-latest
     timeout-minutes: 30
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       - name: Configure git safe.directory
@@ -135,6 +143,10 @@ jobs:
     name: Header Guard Validation
     runs-on: windows-latest
     timeout-minutes: 10
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       - name: Configure git safe.directory
@@ -167,6 +179,10 @@ jobs:
     name: Version Consistency Check
     runs-on: windows-latest
     timeout-minutes: 5
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
 
     steps:
       - name: Configure git safe.directory
