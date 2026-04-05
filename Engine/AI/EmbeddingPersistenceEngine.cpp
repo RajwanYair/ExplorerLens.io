@@ -18,7 +18,7 @@ bool EmbeddingPersistenceEngine::Open(const std::wstring& journalPath)
 {
     if (journalPath.empty()) { return false; }
     m_journalPath = journalPath;
-    m_isOpen      = true;
+    m_isOpen = true;
     return true;
 }
 

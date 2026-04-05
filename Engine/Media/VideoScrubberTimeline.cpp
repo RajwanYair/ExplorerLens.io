@@ -71,8 +71,9 @@ double VideoScrubberTimeline::NearestKeyframePts(double target) const noexcept
     {
         return 0.0;
     }
-    const auto IT = std::ranges::lower_bound(
-        m_keyframes, target, std::ranges::less{}, &KeyframeEntry::ptsSec);
+    const auto IT = std::lower_bound(
+        m_keyframes.begin(), m_keyframes.end(), target,
+        [](const KeyframeEntry& kf, double t) noexcept { return kf.ptsSec < t; });
     if (IT == m_keyframes.end())
     {
         return m_keyframes.back().ptsSec;

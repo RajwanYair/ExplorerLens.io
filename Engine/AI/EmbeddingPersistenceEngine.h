@@ -15,15 +15,15 @@
 namespace ExplorerLens { namespace Engine {
 
 struct PersistedEmbedding {
-    uint32_t     itemId  = 0;
+    uint32_t itemId = 0;
     std::wstring filePath;
-    float        vector[512]{};
+    float vector[512]{};
 };
 
 struct EmbeddingJournalStats {
     uint32_t totalEntries = 0;
-    uint32_t flushCount   = 0;
-    float    lastFlushMs  = 0.0f;
+    uint32_t flushCount = 0;
+    float lastFlushMs = 0.0f;
     uint64_t journalBytes = 0;
 };
 
@@ -41,9 +41,9 @@ public:
     EmbeddingJournalStats Stats()  const noexcept { return m_stats; }
 
 private:
-    bool                  m_isOpen = false;
+    bool m_isOpen = false;
     EmbeddingJournalStats m_stats{};
-    std::wstring          m_journalPath;
+    std::wstring m_journalPath;
 };
 
 }} // namespace ExplorerLens::Engine

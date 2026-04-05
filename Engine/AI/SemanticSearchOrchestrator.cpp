@@ -30,7 +30,7 @@ bool SemanticSearchOrchestrator::IndexFile(const std::wstring& filePath, const f
 {
     if (!m_initialized) { return false; }
     HNSWEntry e{};
-    e.itemId   = ++m_indexedCount;
+    e.itemId = ++m_indexedCount;
     e.filePath = filePath;
     for (int d = 0; d < 512; ++d) { e.vector[d] = embedding[d]; }
     return HNSWIndexEngine::Instance().Insert(e);
@@ -55,16 +55,16 @@ std::vector<SemanticSearchResult> SemanticSearchOrchestrator::Search(const Seman
     {
         if (r.similarity < req.minRelevance) { continue; }
         SemanticSearchResult sr{};
-        sr.filePath  = r.filePath;
+        sr.filePath = r.filePath;
         sr.relevance = r.similarity;
-        sr.rank      = rank++;
+        sr.rank = rank++;
         out.push_back(sr);
     }
 
-    m_lastStats.searchMs     = HNSWIndexEngine::Instance().LastQueryMs();
+    m_lastStats.searchMs = HNSWIndexEngine::Instance().LastQueryMs();
     m_lastStats.indexedCount = m_indexedCount;
     m_lastStats.resultsFound = static_cast<uint32_t>(out.size());
-    m_lastStats.totalMs      = m_lastStats.embedMs + m_lastStats.searchMs;
+    m_lastStats.totalMs = m_lastStats.embedMs + m_lastStats.searchMs;
     return out;
 }
 

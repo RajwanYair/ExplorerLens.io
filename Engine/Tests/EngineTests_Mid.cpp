@@ -21840,7 +21840,7 @@ TEST(TestZLP_Initialize)
     using namespace ExplorerLens::Engine;
     auto& p = ZeroLatencyPipeline::Instance();
     ASSERT(p.Initialize());
-    ASSERT(p.GetState() == ZLPState::Idle);
+    ASSERT(p.GetState() == ZLPState::IDLE);
 }
 TEST(TestZLP_Process_CPUPath)
 {
@@ -21885,7 +21885,7 @@ TEST(TestZLP_Shutdown_Resets)
     p.Initialize();
     p.Shutdown();
     p.Initialize();
-    ASSERT(p.GetState() == ZLPState::Idle);
+    ASSERT(p.GetState() == ZLPState::IDLE);
 }
 
 // ThumbnailPipelineMetrics

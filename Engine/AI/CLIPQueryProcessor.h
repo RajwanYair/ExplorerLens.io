@@ -18,33 +18,33 @@ namespace ExplorerLens { namespace Engine {
 enum class CLIPTextBackend : uint8_t { DIRECTML, ONNX, CPU };
 
 struct CLIPQueryRequest {
-    std::wstring    queryText;
-    uint32_t        topK      = 10;
-    float           minScore  = 0.20f;
-    CLIPTextBackend backend   = CLIPTextBackend::DIRECTML;
+    std::wstring queryText;
+    uint32_t topK = 10;
+    float minScore = 0.20f;
+    CLIPTextBackend backend = CLIPTextBackend::DIRECTML;
 };
 
 struct CLIPQueryMatch {
     std::wstring filePath;
-    float        score    = 0.0f;
-    uint32_t     itemId   = 0;
+    float score = 0.0f;
+    uint32_t itemId = 0;
 };
 
 class CLIPQueryProcessor {
 public:
     static CLIPQueryProcessor& Instance();
 
-    bool IsModelLoaded()                              const noexcept { return m_modelLoaded; }
+    bool IsModelLoaded() const noexcept { return m_modelLoaded; }
     bool LoadModel(const std::wstring& modelPath);
     std::vector<CLIPQueryMatch> Query(const CLIPQueryRequest& req) const;
-    float LastEmbedMs()                               const noexcept { return m_lastEmbedMs; }
+    float LastEmbedMs() const noexcept { return m_lastEmbedMs; }
 
     static std::string_view BackendName(CLIPTextBackend b) noexcept;
 
 private:
-    bool          m_modelLoaded = false;
+    bool m_modelLoaded = false;
     mutable float m_lastEmbedMs = 0.0f;
-    char  m_modelVersion[32] = "ViT-B/32-INT8";
+    char m_modelVersion[32] = "ViT-B/32-INT8";
 };
 
 }} // namespace ExplorerLens::Engine

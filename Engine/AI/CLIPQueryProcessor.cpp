@@ -38,8 +38,8 @@ std::string_view CLIPQueryProcessor::BackendName(CLIPTextBackend b) noexcept
     switch (b)
     {
         case CLIPTextBackend::DIRECTML: return "DirectML";
-        case CLIPTextBackend::ONNX:     return "ONNX";
-        default:                        return "CPU";
+        case CLIPTextBackend::ONNX: return "ONNX";
+        default: return "CPU";
     }
 }
 
