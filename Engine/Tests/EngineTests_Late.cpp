@@ -27,13 +27,9 @@
 #include "../Utils/DilithiumCertificateStore.h"
 #include "../Utils/KeyRotationScheduler.h"
 #include "../Utils/SignatureAuditLogger.h"
-// Sprint 871-880 — Cross-Platform GPU/Core/Utils
-#include "../Core/MacOSShellBridge.h"
+// Sprint 871-880 — Cross-Platform GPU/Core/Utils (Windows-only subset)
 #include "../Core/PlatformNeutralBuffer.h"
 #include "../Core/XDGThumbnailProvider.h"
-#include "../GPU/LinuxVulkanPreview.h"
-#include "../GPU/MetalRenderBridge.h"
-#include "../GPU/MetalShaderCompiler.h"
 #include "../Utils/GTK4ThumbnailWidget.h"
 #include "../Utils/PlatformCapabilityProbe.h"
 // Sprint 881-890 — Gen-5 Platform WinUI 4
@@ -6334,30 +6330,6 @@ TEST(TestKeyRotationScheduler_TickFire)
 // ============================================================
 // Sprint 871-880 — Cross-Platform GPU/Core/Utils Tests (v28.7.0)
 // ============================================================
-TEST(TestMetalRenderBridge_Initialize)
-{
-    using namespace ExplorerLens::Engine;
-    MetalRenderBridge bridge;
-    ASSERT(bridge.Initialize());
-    ASSERT(bridge.IsReady());
-#if defined(__APPLE__)
-    ASSERT(bridge.IsMetalAvailable());
-#endif
-    bridge.Shutdown();
-}
-TEST(TestLinuxVulkanPreview_Enumerate)
-{
-    using namespace ExplorerLens::Engine;
-    LinuxVulkanPreview vk;
-    ASSERT(vk.Initialize());
-#if defined(__linux__)
-    auto devs = vk.EnumerateDevices();
-    ASSERT(!devs.empty());
-#else
-    ASSERT(!vk.IsPlatformOk());
-#endif
-    vk.Shutdown();
-}
 TEST(TestGTK4ThumbnailWidget_Render)
 {
     using namespace ExplorerLens::Engine;
@@ -6373,16 +6345,6 @@ TEST(TestGTK4ThumbnailWidget_Render)
     ASSERT(out.success);
 #endif
     widget.Shutdown();
-}
-TEST(TestMacOSShellBridge_CanHandle)
-{
-    using namespace ExplorerLens::Engine;
-    MacOSShellBridge bridge;
-    ASSERT(bridge.Initialize());
-    ASSERT(bridge.CanHandleExtension("jpg"));
-    ASSERT(bridge.CanHandleExtension("png"));
-    ASSERT(!bridge.CanHandleExtension("xyz123"));
-    bridge.Shutdown();
 }
 TEST(TestXDGThumbnailProvider_Create)
 {
@@ -6400,22 +6362,6 @@ TEST(TestXDGThumbnailProvider_Create)
     ASSERT(!res.cachePath.empty());
 #endif
     prov.Shutdown();
-}
-TEST(TestMetalShaderCompiler_Compile)
-{
-    using namespace ExplorerLens::Engine;
-    MetalShaderCompiler comp;
-    ASSERT(comp.Initialize());
-#if defined(__APPLE__)
-    MetalShaderDesc desc;
-    desc.name = "resize_kernel";
-    desc.source = "kernel void resize_kernel(...){}";
-    auto h = comp.Compile(desc);
-    ASSERT(h.compiled);
-    auto h2 = comp.Compile(desc);
-    ASSERT(comp.GetStats().cacheHits == 1);
-#endif
-    comp.Shutdown();
 }
 TEST(TestPlatformCapabilityProbe_Summary)
 {
@@ -6670,36 +6616,6 @@ TEST(TestPAL_ZeroSurface)
     auto surface = pal.CreateRenderSurface(0, 0);
     ASSERT(surface.width == 0 && surface.height == 0);
 }
-TEST(TestMetalV2_Init)
-{
-    using namespace ExplorerLens::Engine;
-    MetalPipelineV2 pipeline;
-    auto result = pipeline.Initialize();
-#ifdef __APPLE__
-    ASSERT(result);
-#else
-    ASSERT(!result);
-#endif
-}
-TEST(TestMetalV2_Shutdown)
-{
-    using namespace ExplorerLens::Engine;
-    MetalPipelineV2 pipeline;
-    pipeline.Initialize();
-    pipeline.Shutdown();
-    ASSERT(!pipeline.IsAvailable());
-}
-TEST(TestDRM_Init)
-{
-    using namespace ExplorerLens::Engine;
-    LinuxDRMBackend drm;
-    auto result = drm.InitializeEGL();
-#ifdef __linux__
-    (void)result;
-#else
-    ASSERT(!result);
-#endif
-}
 TEST(TestNFA_Watch)
 {
     using namespace ExplorerLens::Engine;
@@ -6740,69 +6656,6 @@ TEST(TestNFA_MaxPath)
     using namespace ExplorerLens::Engine;
     NativeFilesystemAdapter fs;
     ASSERT(fs.GetMaxPathLength() >= 260);
-}
-TEST(TestCSP_Type)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    auto type = shell.GetProviderType();
-#ifdef _WIN32
-    ASSERT(type == ShellProviderType::WindowsShell);
-#endif
-}
-TEST(TestCSP_Register)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    bool ok = shell.RegisterProvider();
-    (void)ok;
-}
-TEST(TestCSP_Unregister)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    shell.UnregisterProvider();
-}
-TEST(TestCSP_Generate)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    std::vector<uint8_t> thumb;
-    bool ok = shell.GenerateThumbnail(L"test.png", 256, thumb);
-    (void)ok;
-}
-TEST(TestCSP_Ext)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    auto exts = shell.GetSupportedExtensions();
-    ASSERT(!exts.empty());
-}
-TEST(TestCSP_Registered)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    auto reg = shell.IsRegistered();
-    (void)reg;
-}
-TEST(TestCSP_Version)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    auto ver = shell.GetProviderVersion();
-    ASSERT(!ver.empty());
-}
-TEST(TestCSP_MaxSize)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    ASSERT(shell.GetMaxThumbnailSize() >= 256);
-}
-TEST(TestCSP_Formats)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformShellProvider shell;
-    ASSERT(shell.GetSupportedFormatCount() > 0);
 }
 TEST(TestBuildMatrix_Validate)
 {
@@ -10800,72 +10653,6 @@ TEST(TestTRR_Stats)
     ASSERT(s.filesRanked >= 0);
 }
 
-TEST(TestCPCB_Instance)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    ASSERT(b.GetCapabilityBitmask() >= 0);
-}
-TEST(TestCPCB_D3D12)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    bool hasD3D = b.Has(PlatformCapability::D3D12);
-    ASSERT(hasD3D == true || hasD3D == false);
-}
-TEST(TestCPCB_Refresh)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    b.Refresh();
-    ASSERT(b.GetCapabilityBitmask() >= 0);
-}
-TEST(TestCPCB_Describe)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    auto desc = b.Describe(PlatformCapability::VulkanCompute);
-    ASSERT(!desc.empty());
-}
-TEST(TestCPCB_Stats)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    b.Has(PlatformCapability::NPUAcceleration);
-    auto s = b.GetStats();
-    ASSERT(s.queriesAnswered >= 1);
-}
-TEST(TestCPCB_MultiQuery)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    b.Has(PlatformCapability::DirectStorage);
-    b.Has(PlatformCapability::QuickLook);
-    b.Has(PlatformCapability::XDGThumbnailSpec);
-    ASSERT(b.GetStats().queriesAnswered >= 3);
-}
-TEST(TestCPCB_Bitmask)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    uint32_t mask = b.GetCapabilityBitmask();
-    ASSERT((mask & ~0x3FFu) == 0);
-}
-TEST(TestCPCB_TPM)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    bool tpm = b.Has(PlatformCapability::TPM2Attestation);
-    ASSERT(tpm == true || tpm == false);
-}
-TEST(TestCPCB_SpatialAudio)
-{
-    using namespace ExplorerLens::Engine;
-    auto& b = CrossPlatformCapabilityBroker::Instance();
-    bool sa = b.Has(PlatformCapability::SpatialAudio);
-    ASSERT(sa == true || sa == false);
-}
-
 TEST(TestASIE_Initialize)
 {
     using namespace ExplorerLens::Engine;
@@ -12185,86 +11972,6 @@ TEST(TestPSP_Win32ThumbnailNonzeroSize)
     ASSERT(res.width >= 0);
     ASSERT(res.height >= 0);
 }
-// ── MacOSQLProvider ───────────────────────────────────────────────────────────
-TEST(TestPSP_MacOSPlatformKind)
-{
-    using namespace ExplorerLens::Engine;
-    MacOSQLProvider p;
-    ASSERT(p.GetPlatform() == PlatformKind::MACOS);
-}
-TEST(TestPSP_MacOSPlatformName)
-{
-    using namespace ExplorerLens::Engine;
-    MacOSQLProvider p;
-    ASSERT(p.GetPlatformName() != nullptr);
-    ASSERT(std::string(p.GetPlatformName()).size() > 0);
-}
-TEST(TestPSP_MacOSNotAvailableOnWindows)
-{
-    using namespace ExplorerLens::Engine;
-    MacOSQLProvider p;
-    bool ok = p.RegisterProvider();
-    ASSERT(!ok);
-}
-TEST(TestPSP_MacOSThumbnailEmpty)
-{
-    using namespace ExplorerLens::Engine;
-    MacOSQLProvider p;
-    PlatformThumbnailRequest req{};
-    auto res = p.GenerateThumbnail(req);
-    ASSERT(!res.success);
-}
-TEST(TestPSP_MacOSThumbnailNotSupported)
-{
-    using namespace ExplorerLens::Engine;
-    MacOSQLProvider p;
-    PlatformThumbnailRequest req{};
-    req.filePath = L"test.heic";
-    auto res = p.GenerateThumbnail(req);
-    ASSERT(!res.success);
-    ASSERT(!res.errorMsg.empty());
-}
-TEST(TestPSP_MacOSIsNotRegistered)
-{
-    using namespace ExplorerLens::Engine;
-    MacOSQLProvider p;
-    ASSERT(!p.IsRegistered());
-}
-// ── LinuxNautilusProvider ─────────────────────────────────────────────────────
-TEST(TestPSP_LinuxPlatformKind)
-{
-    using namespace ExplorerLens::Engine;
-    LinuxNautilusProvider p;
-    ASSERT(p.GetPlatform() == PlatformKind::LINUX);
-}
-TEST(TestPSP_LinuxPlatformName)
-{
-    using namespace ExplorerLens::Engine;
-    LinuxNautilusProvider p;
-    ASSERT(p.GetPlatformName() != nullptr);
-    ASSERT(std::string(p.GetPlatformName()).size() > 0);
-}
-TEST(TestPSP_LinuxNotAvailableOnWindows)
-{
-    using namespace ExplorerLens::Engine;
-    LinuxNautilusProvider p;
-    bool ok = p.RegisterProvider();
-    ASSERT(!ok);
-}
-TEST(TestPSP_LinuxThumbnailEmpty)
-{
-    using namespace ExplorerLens::Engine;
-    LinuxNautilusProvider p;
-    PlatformThumbnailRequest req{};
-    auto res = p.GenerateThumbnail(req);
-    ASSERT(!res.success);
-}
-TEST(TestPSP_LinuxIsNotRegistered)
-{
-    using namespace ExplorerLens::Engine;
-    LinuxNautilusProvider p;
-    ASSERT(!p.IsRegistered());
-}
 // ── PlatformDetector ─────────────────────────────────────────────────────────
 TEST(TestPD_DetectCurrentPlatform)
 {
@@ -12284,20 +11991,6 @@ TEST(TestPD_MakeWin32Provider)
     ASSERT(p != nullptr);
     ASSERT(p->GetPlatform() == PlatformKind::WINDOWS);
 }
-TEST(TestPD_MakeMacOSProvider)
-{
-    using namespace ExplorerLens::Engine;
-    auto p = PlatformDetector::MakeProvider(PlatformKind::MACOS);
-    ASSERT(p != nullptr);
-    ASSERT(p->GetPlatform() == PlatformKind::MACOS);
-}
-TEST(TestPD_MakeLinuxProvider)
-{
-    using namespace ExplorerLens::Engine;
-    auto p = PlatformDetector::MakeProvider(PlatformKind::LINUX);
-    ASSERT(p != nullptr);
-    ASSERT(p->GetPlatform() == PlatformKind::LINUX);
-}
 TEST(TestPD_PlatformDescString)
 {
     using namespace ExplorerLens::Engine;
@@ -12313,31 +12006,7 @@ TEST(TestPD_CurrentProviderForPlatform)
     ASSERT(p->GetPlatform() == PlatformDetector::Detect());
 }
 
-//== Sprint 1151-1160: Platform GPU Extensions (v33.1.0 "Spica-R") ==
-TEST(TestMGB_InitialState)
-{
-    using namespace ExplorerLens::Engine;
-    MetalGPUBackend b;
-    ASSERT(b.GetState() == MetalBackendState::Uninitialized);
-}
-TEST(TestMGB_BackendName)
-{
-    using namespace ExplorerLens::Engine;
-    MetalGPUBackend b;
-    ASSERT(std::string(b.BackendName()) == "Metal-v2-Stub");
-}
-TEST(TestVEB_NotAvailableOnWindows)
-{
-    using namespace ExplorerLens::Engine;
-    VulkanEGLBackend b;
-    ASSERT(!b.IsAvailable());
-}
-TEST(TestVEB_BackendName)
-{
-    using namespace ExplorerLens::Engine;
-    VulkanEGLBackend b;
-    ASSERT(std::string(b.BackendName()) == "Vulkan-EGL-Stub");
-}
+//== Sprint 1151-1160: Platform GPU Router (v33.1.0 Windows-only) ==
 TEST(TestPGR_SelectsD3D12OnWindows)
 {
     using namespace ExplorerLens::Engine;
@@ -12351,37 +12020,6 @@ TEST(TestPGR_BackendNameNotNull)
     PlatformGPURouter r;
     r.Initialize();
     ASSERT(r.BackendName() != nullptr);
-}
-TEST(TestPDB_InitiallyDetached)
-{
-    using namespace ExplorerLens::Engine;
-    PlatformDisplayBridge b;
-    ASSERT(!b.IsAttached());
-}
-TEST(TestPDB_AttachSucceeds)
-{
-    using namespace ExplorerLens::Engine;
-    PlatformDisplayBridge b;
-    ASSERT(b.Attach());
-    ASSERT(b.IsAttached());
-    b.Detach();
-}
-TEST(TestCPSF_CreateDestroy)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformSyncFence f;
-    ASSERT(f.Create());
-    ASSERT(f.IsCreated());
-    f.Destroy();
-    ASSERT(!f.IsCreated());
-}
-TEST(TestCPSF_SignalWait)
-{
-    using namespace ExplorerLens::Engine;
-    CrossPlatformSyncFence f;
-    f.Create();
-    f.Signal(1);
-    ASSERT(f.Wait(1, 100) == SyncFenceState::Signaled);
 }
 
 //== Sprint 1161-1170: Enterprise Console v4 (v33.2.0 "Spica-S") ==

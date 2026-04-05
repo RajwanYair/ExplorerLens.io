@@ -575,3 +575,99 @@ perf-gate:
 | `ROADMAP_V30.md` | v25.x–v33.x | v30–v32 Completed, v33.x Active |
 | `ROADMAP_V34.md` | v34.x "Arcturus" | **This document** |
 | Future: `ROADMAP_V35.md` | v35.x "Vega" | Streaming & Cloud-Native Thumbnails |
+
+---
+
+## Sprint: Windows-Only Consolidation & Minimal Footprint (Planned)
+
+**Status:** Planned — next execution sprint
+**Scope Lock:** Windows-only, thumbnail-provider-only deliverables
+**Role:** Repo maintainer + release engineer
+**Goal:** Dramatically reduce project footprint; deliver exactly: Manager EXE + Thumbnail DLL
+
+### Primary Objective
+
+Continue the roadmap by executing the next 20 tasks as one sprint. For each revision bump:
+
+1. Create/track GitHub Issues for non-trivial work.
+2. Implement via a Pull Request.
+3. Ensure clean build with **0 errors and 0 warnings** (no suppression).
+4. Update docs + graphics to match the actual state.
+5. Publish a GitHub Release with compiled artifacts attached (do NOT commit binaries into the repo; prefer Actions artifacts/release assets).
+6. Tag the revision and update CHANGELOG.
+
+### Scope Lock (Mandatory)
+
+- **Windows-only** support.
+- Feature scope reduced to **Windows Explorer thumbnail support only**.
+- Deliverables must be:
+  - **(A)** One single Manager EXE (for install/register/unregister/diagnostics).
+  - **(B)** One thumbnail provider DLL (COM in-proc server) registered for Explorer thumbnail generation.
+  - **(C)** Any additional DLLs only if strictly necessary; minimize footprint.
+- Remove all non-related files and implementations, including any Python code/methods/scripts and any cross-platform scaffolding.
+- Consolidate and deduplicate aggressively: configs, code paths, duplicated utilities, docs.
+- Goal: **dramatically smaller project footprint**.
+
+### Quality Gates (Mandatory)
+
+- 0 build errors, 0 build warnings, 0 analyzer warnings.
+- No warning suppressions (no pragma disables, no `/wd`, no "ignore warnings"). Fix root causes.
+- Ensure VS Code extension diagnostics are clean (configure recommended extensions + settings; fix issues they flag where reasonable).
+- Ensure CI passes (add/adjust GitHub Actions workflows accordingly).
+- Run clean builds for all supported configs (at minimum Release x64; include Debug x64 if the repo supports it).
+- Add/adjust tests or minimal verification harness for the thumbnail provider if possible.
+
+### Execution Plan
+
+#### Step 0 — Baseline Verification
+
+- Identify current latest release/tag and current version number in repo.
+- Run the build/tests locally (or via CI config) to confirm whether last release is truly passing.
+- If failures/warnings exist: create Issues and fix first until clean.
+
+#### Step 1 — Sprint Backlog (20 Tasks)
+
+Implement tasks in logical PR-sized chunks. Each PR must include: summary, build/test evidence, checklist confirming 0 warnings and scope lock.
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Inventory & delete non-Windows code paths; remove cross-platform build options; update docs accordingly. | [ ] |
+| 2 | Remove all Python scripts/methods and any pipeline references to Python; ensure replacements exist in PowerShell/MSBuild/CMake as needed. | [ ] |
+| 3 | Define the minimal architecture: Manager EXE + Thumbnail DLL; document it in `ARCHITECTURE.md`. | [ ] |
+| 4 | Implement/confirm COM in-proc thumbnail provider DLL using `IThumbnailProvider` (or existing repo approach) and ensure correct registry entries. | [ ] |
+| 5 | Ensure Manager EXE supports: install/register, uninstall/unregister, status/diagnostics, and logging path selection. | [ ] |
+| 6 | Consolidate project structure: `src/` (manager, shell_ext), `include/`, `tests/`, `docs/`; remove unused directories. | [ ] |
+| 7 | Deduplicate utilities (logging, error handling, COM helpers); enforce a single implementation. | [ ] |
+| 8 | Enforce "warnings as errors" across toolchains (MSVC `/W4 /WX` or equivalent; C# `TreatWarningsAsErrors`; clang-cl if used). | [ ] |
+| 9 | Fix all warnings (compiler, static analysis, style), without suppressions. | [ ] |
+| 10 | Add GitHub Actions CI: build + test + package artifacts; ensure clean logs with zero warnings. | [ ] |
+| 11 | Add GitHub Actions Release workflow: on tag, build artifacts and attach Manager EXE + DLL + checksums to GitHub Release. | [ ] |
+| 12 | Add `.vscode`: `settings.json`, `extensions.json`, `tasks.json` to standardize builds, formatting, and diagnostics. | [ ] |
+| 13 | Add `.github`: issue templates (bug/feature), PR template, `CODEOWNERS`, `CONTRIBUTING.md`, `SECURITY.md`. | [ ] |
+| 14 | Add Dependabot (if dependencies exist) and minimal policy docs. | [ ] |
+| 15 | Update README to Windows-only + thumbnail scope; include install/uninstall instructions and troubleshooting. | [ ] |
+| 16 | Update `CHANGELOG.md` for this sprint; adopt SemVer and document version bump rules. | [ ] |
+| 17 | Update or generate diagrams/graphics with correct current data (prefer Mermaid in Markdown; any images must match current architecture). | [ ] |
+| 18 | Remove/merge redundant config files (multiple formatters, linters, build configs); keep a single source of truth. | [ ] |
+| 19 | Consolidate documentation: eliminate duplicates, ensure links are correct, and docs match code behavior. | [ ] |
+| 20 | Final consolidation pass: reduce footprint (delete unused assets, samples, legacy docs, dead code); verify size reduction and report what changed. | [ ] |
+
+#### Step 2 — Release Discipline
+
+For each "revision bump":
+
+- Update version in a single canonical location.
+- Update CHANGELOG.
+- Open PR, pass CI, merge.
+- Create a Git tag.
+- Publish a GitHub Release with artifacts (EXE + DLL + checksums).
+- Keep binaries out of git history; publish through Releases unless the repository policy requires otherwise.
+
+### Required Outputs (On Completion)
+
+- A checklist of all 20 tasks with links to Issues/PRs/commits.
+- Confirmation of last release status + evidence (CI links/logs references).
+- Build commands used and configs tested.
+- Where the artifacts are published (Release link) and what files are attached.
+- A footprint reduction summary (what removed, size reduction estimate if available).
+- Updated diagrams/graphics references and where they live in the repo.

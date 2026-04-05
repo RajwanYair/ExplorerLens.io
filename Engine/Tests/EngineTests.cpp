@@ -4407,16 +4407,6 @@ int main()
     RUN_TEST(TestTRR_ScoreRange);
     RUN_TEST(TestTRR_LargeBatch);
     RUN_TEST(TestTRR_Stats);
-    // v31.9.0 — Cross-Platform Capability Broker
-    RUN_TEST(TestCPCB_Instance);
-    RUN_TEST(TestCPCB_D3D12);
-    RUN_TEST(TestCPCB_Refresh);
-    RUN_TEST(TestCPCB_Describe);
-    RUN_TEST(TestCPCB_Stats);
-    RUN_TEST(TestCPCB_MultiQuery);
-    RUN_TEST(TestCPCB_Bitmask);
-    RUN_TEST(TestCPCB_TPM);
-    RUN_TEST(TestCPCB_SpatialAudio);
     // v31.9.0 — Adaptive Shell Integration Engine
     RUN_TEST(TestASIE_Initialize);
     RUN_TEST(TestASIE_Probe);
@@ -4741,35 +4731,14 @@ int main()
     RUN_TEST(TestPSP_Win32ThumbnailEmpty);
     RUN_TEST(TestPSP_Win32ThumbnailPath);
     RUN_TEST(TestPSP_Win32ThumbnailNonzeroSize);
-    RUN_TEST(TestPSP_MacOSPlatformKind);
-    RUN_TEST(TestPSP_MacOSPlatformName);
-    RUN_TEST(TestPSP_MacOSNotAvailableOnWindows);
-    RUN_TEST(TestPSP_MacOSThumbnailEmpty);
-    RUN_TEST(TestPSP_MacOSThumbnailNotSupported);
-    RUN_TEST(TestPSP_MacOSIsNotRegistered);
-    RUN_TEST(TestPSP_LinuxPlatformKind);
-    RUN_TEST(TestPSP_LinuxPlatformName);
-    RUN_TEST(TestPSP_LinuxNotAvailableOnWindows);
-    RUN_TEST(TestPSP_LinuxThumbnailEmpty);
-    RUN_TEST(TestPSP_LinuxIsNotRegistered);
     RUN_TEST(TestPD_DetectCurrentPlatform);
     RUN_TEST(TestPD_PlatformNameWindows);
     RUN_TEST(TestPD_MakeWin32Provider);
-    RUN_TEST(TestPD_MakeMacOSProvider);
-    RUN_TEST(TestPD_MakeLinuxProvider);
     RUN_TEST(TestPD_PlatformDescString);
     RUN_TEST(TestPD_CurrentProviderForPlatform);
-    // Sprint 1151-1160: Platform GPU Extensions (v33.1.0 "Spica-R")
-    RUN_TEST(TestMGB_InitialState);
-    RUN_TEST(TestMGB_BackendName);
-    RUN_TEST(TestVEB_NotAvailableOnWindows);
-    RUN_TEST(TestVEB_BackendName);
+    // Sprint 1151-1160: Platform GPU Router (v33.1.0 Windows-only)
     RUN_TEST(TestPGR_SelectsD3D12OnWindows);
     RUN_TEST(TestPGR_BackendNameNotNull);
-    RUN_TEST(TestPDB_InitiallyDetached);
-    RUN_TEST(TestPDB_AttachSucceeds);
-    RUN_TEST(TestCPSF_CreateDestroy);
-    RUN_TEST(TestCPSF_SignalWait);
     // Sprint 1161-1170: Enterprise Console v4 (v33.2.0 "Spica-S")
     RUN_TEST(TestEPV4_Initialize);
     RUN_TEST(TestEPV4_ApplyPolicy);
@@ -5819,12 +5788,8 @@ int main()
     RUN_TEST(TestCryptoAgilityBroker_Preferred);
     RUN_TEST(TestKeyRotationScheduler_TickFire);
     // Sprint 871-880 — Cross-Platform (v28.7.0 Polaris-X)
-    RUN_TEST(TestMetalRenderBridge_Initialize);
-    RUN_TEST(TestLinuxVulkanPreview_Enumerate);
     RUN_TEST(TestGTK4ThumbnailWidget_Render);
-    RUN_TEST(TestMacOSShellBridge_CanHandle);
     RUN_TEST(TestXDGThumbnailProvider_Create);
-    RUN_TEST(TestMetalShaderCompiler_Compile);
     RUN_TEST(TestPlatformCapabilityProbe_Summary);
     // Sprint 881-890 — Gen-5 WinUI 4 (v29.0.0 Capella)
     RUN_TEST(TestAsyncPreviewBroker_EnqueueFlush);
@@ -5851,24 +5816,12 @@ int main()
     RUN_TEST(TestPAL_TempDir);
     RUN_TEST(TestPAL_ThreadCount);
     RUN_TEST(TestPAL_ZeroSurface);
-    RUN_TEST(TestMetalV2_Init);
-    RUN_TEST(TestMetalV2_Shutdown);
-    RUN_TEST(TestDRM_Init);
     RUN_TEST(TestNFA_Watch);
     RUN_TEST(TestNFA_StopAll);
     RUN_TEST(TestNFA_Exists);
     RUN_TEST(TestNFA_IsDir);
     RUN_TEST(TestNFA_Temp);
     RUN_TEST(TestNFA_MaxPath);
-    RUN_TEST(TestCSP_Type);
-    RUN_TEST(TestCSP_Register);
-    RUN_TEST(TestCSP_Unregister);
-    RUN_TEST(TestCSP_Generate);
-    RUN_TEST(TestCSP_Ext);
-    RUN_TEST(TestCSP_Registered);
-    RUN_TEST(TestCSP_Version);
-    RUN_TEST(TestCSP_MaxSize);
-    RUN_TEST(TestCSP_Formats);
     RUN_TEST(TestBuildMatrix_Validate);
 
     // Sprint 971-980 — DirectStorage & GPU Decompression (v30.1.0 "Deneb-R")

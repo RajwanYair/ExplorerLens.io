@@ -1708,18 +1708,11 @@ set(ENGINE_HEADERS
     Media/LivePreviewSession.h
     Media/ThumbnailStripGenerator.h
     Media/ScrubberCacheEngine.h
-    # Sprint 1141-1150 — Cross-Platform Shell PAL (v33.0.0 "Spica")
+    # Platform (Windows-only)
     Platform/PlatformShellProvider.h
     Platform/Win32ShellProvider.h
-    Platform/MacOSQLProvider.h
-    Platform/LinuxNautilusProvider.h
     Platform/PlatformDetector.h
-    # Sprint 1151-1160 — Platform GPU Extensions (v33.1.0 "Spica-R")
-    Platform/MetalGPUBackend.h
-    Platform/VulkanEGLBackend.h
     Platform/PlatformGPURouter.h
-    Platform/PlatformDisplayBridge.h
-    Platform/CrossPlatformSyncFence.h
     # Sprint 1161-1170 — Enterprise Console v4 (v33.2.0 "Spica-S")
     Enterprise/EnterprisePolicyV4.h
     Enterprise/GPOPolicyTemplate.h
@@ -1921,17 +1914,10 @@ set(ENGINE_SOURCES
     Media/VideoScrubberTimeline.cpp
     Media/ThumbnailStripGenerator.cpp
     Media/ScrubberCacheEngine.cpp
-    # Sprint 1141-1150 — Cross-Platform Shell PAL (v33.0.0 "Spica")
+    # Platform (Windows-only)
     Platform/Win32ShellProvider.cpp
-    Platform/MacOSQLProvider.cpp
-    Platform/LinuxNautilusProvider.cpp
     Platform/PlatformDetector.cpp
-    # Sprint 1151-1160 — Platform GPU Extensions (v33.1.0 "Spica-R")
-    Platform/MetalGPUBackend.cpp
-    Platform/VulkanEGLBackend.cpp
     Platform/PlatformGPURouter.cpp
-    Platform/PlatformDisplayBridge.cpp
-    Platform/CrossPlatformSyncFence.cpp
     # Sprint 1161-1170 — Enterprise Console v4 (v33.2.0 "Spica-S")
     Enterprise/EnterprisePolicyV4.cpp
     Enterprise/GPOPolicyTemplate.cpp

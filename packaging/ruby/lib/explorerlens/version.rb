@@ -1,5 +1,0 @@
-# frozen_string_literal: true
-
-module ExplorerLens
-  VERSION = '33.5.0'
-end

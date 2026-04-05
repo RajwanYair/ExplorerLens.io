@@ -37,6 +37,13 @@ add_executable(EngineTests
     # Sprint 25 + 29: Integration Test Framework + COM Integration (also in IntegrationTests)
     Integration/IntegrationTestRunner.cpp
     Integration/COMIntegrationTest.cpp
+    # CLI command implementations (linked directly for CLI unit tests in EngineTests_Late.cpp)
+    ${CMAKE_SOURCE_DIR}/src/Tools.CLI/BenchmarkCommand.cpp
+    ${CMAKE_SOURCE_DIR}/src/Tools.CLI/CacheCommand.cpp
+    ${CMAKE_SOURCE_DIR}/src/Tools.CLI/CommandRouter.cpp
+    ${CMAKE_SOURCE_DIR}/src/Tools.CLI/DoctorCommand.cpp
+    ${CMAKE_SOURCE_DIR}/src/Tools.CLI/InfoCommand.cpp
+    ${CMAKE_SOURCE_DIR}/src/Tools.CLI/RegisterCommand.cpp
 )
 
 # Windows-specific defines (NOMINMAX prevents min/max macro conflicts)

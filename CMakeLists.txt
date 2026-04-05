@@ -167,7 +167,7 @@ find_package(WindowsSDK QUIET)
 # Always build the Engine
 add_subdirectory(Engine)
 
-if(BUILD_MODERN_RUNTIME)
+if(BUILD_MODERN_RUNTIME AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src")
     add_subdirectory(src)
 
     # Cross-subdirectory link: allow EngineTests to unit-test the CLI layer.
