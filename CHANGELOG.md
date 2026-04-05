@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [33.5.0] — 2026-04-05 — Spica-V
+
+### Added
+- Sprint 1191-1200: LTS Hardening Suite — LTSHardeningController, SecurityAuditEngine, VulnerabilityFingerprintDB, LTSCertificationGate, SecureKeyStore
+- LTS certification gate with multi-pass gate evaluation (SecurityAudit/DependencyFreeze/PerformanceClear)
+- CVE vulnerability fingerprint database for tracking known issues in bundled libraries
+- Secure key store with InMemory/DPAPI/TPM backends for signing keys and credentials
+- SecurityAuditEngine with FindingSeverity-ranked findings for SOC2/ISO27001 compliance
+
+### Changed
+- Build: 0 errors, 0 warnings — all Sprint 1151-1200 type naming conflicts resolved
+- Test count: 4630 (Sprint 1191-1200 adds 10 LTS tests)
+
+---
+
 ## [33.4.0] — 2026-04-05 — Spica-U
 
 ### Added
