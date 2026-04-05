@@ -250,6 +250,36 @@
 #include "../Platform/MacOSQLProvider.h"
 #include "../Platform/LinuxNautilusProvider.h"
 #include "../Platform/PlatformDetector.h"
+// Sprint 1151-1160: Platform GPU Extensions (v33.1.0 "Spica-R")
+#include "../Platform/MetalGPUBackend.h"
+#include "../Platform/VulkanEGLBackend.h"
+#include "../Platform/PlatformGPURouter.h"
+#include "../Platform/PlatformDisplayBridge.h"
+#include "../Platform/CrossPlatformSyncFence.h"
+// Sprint 1161-1170: Enterprise Console v4 (v33.2.0 "Spica-S")
+#include "../Enterprise/EnterprisePolicyV4.h"
+#include "../Enterprise/GPOPolicyTemplate.h"
+#include "../Enterprise/IntuneComplianceEngine.h"
+#include "../Enterprise/EnterpriseAuditLogger.h"
+#include "../Enterprise/ConfigMgrPolicyBridge.h"
+// Sprint 1171-1180: Generative AI Thumbnails (v33.3.0 "Spica-T")
+#include "../AI/NPUThumbnailSynthesizer.h"
+#include "../AI/DiffusionModelEngine.h"
+#include "../AI/ThumbnailInpaintEngine.h"
+#include "../AI/OffDeviceInferenceRouter.h"
+#include "../AI/AIThumbnailBatchProcessor.h"
+// Sprint 1181-1190: Plugin Marketplace v5 (v33.4.0 "Spica-U")
+#include "../Plugin/PluginMarketplaceV5.h"
+#include "../Plugin/SDKCompatKit3.h"
+#include "../Plugin/PluginDistributionManager.h"
+#include "../Plugin/MarketplaceSearchIndex.h"
+#include "../Plugin/PluginSignatureValidator.h"
+// Sprint 1191-1200: LTS Hardening + Security Audit (v33.5.0 "Spica-V")
+#include "../Utils/LTSHardeningController.h"
+#include "../Utils/SecurityAuditEngine.h"
+#include "../Utils/VulnerabilityFingerprintDB.h"
+#include "../Utils/LTSCertificationGate.h"
+#include "../Utils/SecureKeyStore.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"

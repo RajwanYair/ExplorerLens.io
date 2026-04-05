@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 32.7.0
+# Version: 33.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 32.7.0
+    VERSION 33.0.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1714,6 +1714,36 @@ set(ENGINE_HEADERS
     Platform/MacOSQLProvider.h
     Platform/LinuxNautilusProvider.h
     Platform/PlatformDetector.h
+    # Sprint 1151-1160 — Platform GPU Extensions (v33.1.0 "Spica-R")
+    Platform/MetalGPUBackend.h
+    Platform/VulkanEGLBackend.h
+    Platform/PlatformGPURouter.h
+    Platform/PlatformDisplayBridge.h
+    Platform/CrossPlatformSyncFence.h
+    # Sprint 1161-1170 — Enterprise Console v4 (v33.2.0 "Spica-S")
+    Enterprise/EnterprisePolicyV4.h
+    Enterprise/GPOPolicyTemplate.h
+    Enterprise/IntuneComplianceEngine.h
+    Enterprise/EnterpriseAuditLogger.h
+    Enterprise/ConfigMgrPolicyBridge.h
+    # Sprint 1171-1180 — Generative AI Thumbnails (v33.3.0 "Spica-T")
+    AI/NPUThumbnailSynthesizer.h
+    AI/DiffusionModelEngine.h
+    AI/ThumbnailInpaintEngine.h
+    AI/OffDeviceInferenceRouter.h
+    AI/AIThumbnailBatchProcessor.h
+    # Sprint 1181-1190 — Plugin Marketplace v5 (v33.4.0 "Spica-U")
+    Plugin/PluginMarketplaceV5.h
+    Plugin/SDKCompatKit3.h
+    Plugin/PluginDistributionManager.h
+    Plugin/MarketplaceSearchIndex.h
+    Plugin/PluginSignatureValidator.h
+    # Sprint 1191-1200 — LTS Hardening + Security Audit (v33.5.0 "Spica-V")
+    Utils/LTSHardeningController.h
+    Utils/SecurityAuditEngine.h
+    Utils/VulnerabilityFingerprintDB.h
+    Utils/LTSCertificationGate.h
+    Utils/SecureKeyStore.h
 )
 
 set(ENGINE_SOURCES
@@ -1896,6 +1926,36 @@ set(ENGINE_SOURCES
     Platform/MacOSQLProvider.cpp
     Platform/LinuxNautilusProvider.cpp
     Platform/PlatformDetector.cpp
+    # Sprint 1151-1160 — Platform GPU Extensions (v33.1.0 "Spica-R")
+    Platform/MetalGPUBackend.cpp
+    Platform/VulkanEGLBackend.cpp
+    Platform/PlatformGPURouter.cpp
+    Platform/PlatformDisplayBridge.cpp
+    Platform/CrossPlatformSyncFence.cpp
+    # Sprint 1161-1170 — Enterprise Console v4 (v33.2.0 "Spica-S")
+    Enterprise/EnterprisePolicyV4.cpp
+    Enterprise/GPOPolicyTemplate.cpp
+    Enterprise/IntuneComplianceEngine.cpp
+    Enterprise/EnterpriseAuditLogger.cpp
+    Enterprise/ConfigMgrPolicyBridge.cpp
+    # Sprint 1171-1180 — Generative AI Thumbnails (v33.3.0 "Spica-T")
+    AI/NPUThumbnailSynthesizer.cpp
+    AI/DiffusionModelEngine.cpp
+    AI/ThumbnailInpaintEngine.cpp
+    AI/OffDeviceInferenceRouter.cpp
+    AI/AIThumbnailBatchProcessor.cpp
+    # Sprint 1181-1190 — Plugin Marketplace v5 (v33.4.0 "Spica-U")
+    Plugin/PluginMarketplaceV5.cpp
+    Plugin/SDKCompatKit3.cpp
+    Plugin/PluginDistributionManager.cpp
+    Plugin/MarketplaceSearchIndex.cpp
+    Plugin/PluginSignatureValidator.cpp
+    # Sprint 1191-1200 — LTS Hardening + Security Audit (v33.5.0 "Spica-V")
+    Utils/LTSHardeningController.cpp
+    Utils/SecurityAuditEngine.cpp
+    Utils/VulnerabilityFingerprintDB.cpp
+    Utils/LTSCertificationGate.cpp
+    Utils/SecureKeyStore.cpp
 )
 
 #==============================================================================

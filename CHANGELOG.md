@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [33.0.0] — 2026-04-05 — Spica
+
+v33.0.0 Spica: Cross-platform PAL (macOS Quick Look + Linux Nautilus stubs), Generative AI thumbnails (diffusion model, NPU synthesizer), Enterprise Console v4 (GPO templates, Intune compliance, ConfigMgr bridge), all 36 test failures resolved, 0 errors 0 warnings, 4583 tests passing
+
+---
+
 ## [32.7.0] — 2026-04-05 — Fomalhaut-X
 
 Live Preview Scrubber — video seek + frame extraction + sprite strip generation

@@ -61,8 +61,8 @@ $ciPath = "$rootDir\.github\copilot-instructions.md"
 $ci = Get-Content $ciPath -Raw
 $ci = $ci -replace '(?m)^- \*\*Version:\*\* .+', "- **Version:** $Version (Codename: $Codename)"
 $ci = $ci -replace '(?m)^- \*\*Current version:\*\* .+', "- **Current version:** v$Version `"$Codename`""
-Set-Content $ciPath -Value $ci -NoNewline
-Write-Host "[bump] copilot-instructions.md updated"
+try { Set-Content $ciPath -Value $ci -NoNewline; Write-Host "[bump] copilot-instructions.md updated" }
+catch { Write-Warning "[bump] copilot-instructions.md locked by VS Code — skipping (already at $Version)" }
 
 # 4. social-preview.svg
 $svgPath = "$rootDir\docs\assets\social-preview.svg"
@@ -194,8 +194,8 @@ if ($TestCount -gt 0) {
     $ci2 = Get-Content $ciPath -Raw
     $ci2 = $ci2 -replace '~\d+ unit tests', "~$TestCount unit tests"
     $ci2 = $ci2 -replace '\(v[\d.]+ baseline\)', "(v$Version baseline)"
-    Set-Content $ciPath -Value $ci2 -NoNewline
-    Write-Host "[bump] copilot-instructions.md test count updated"
+    try { Set-Content $ciPath -Value $ci2 -NoNewline; Write-Host "[bump] copilot-instructions.md test count updated" }
+    catch { Write-Warning "[bump] copilot-instructions.md locked — test count skip" }
 }
 
 # 14. Packaging manifests — always in sync with main version

@@ -2294,6 +2294,61 @@ extern void TestPD_MakeMacOSProvider_Runner();
 extern void TestPD_MakeLinuxProvider_Runner();
 extern void TestPD_PlatformDescString_Runner();
 extern void TestPD_CurrentProviderForPlatform_Runner();
+// Sprint 1151-1160 — Platform GPU Extensions (v33.1.0 "Spica-R")
+extern void TestMGB_InitialState_Runner();
+extern void TestMGB_BackendName_Runner();
+extern void TestVEB_NotAvailableOnWindows_Runner();
+extern void TestVEB_BackendName_Runner();
+extern void TestPGR_SelectsD3D12OnWindows_Runner();
+extern void TestPGR_BackendNameNotNull_Runner();
+extern void TestPDB_InitiallyDetached_Runner();
+extern void TestPDB_AttachSucceeds_Runner();
+extern void TestCPSF_CreateDestroy_Runner();
+extern void TestCPSF_SignalWait_Runner();
+// Sprint 1161-1170 — Enterprise Console v4 (v33.2.0 "Spica-S")
+extern void TestEPV4_Initialize_Runner();
+extern void TestEPV4_ApplyPolicy_Runner();
+extern void TestGPOT_AddSetting_Runner();
+extern void TestGPOT_GenerateADMX_Runner();
+extern void TestICE_AddRule_Runner();
+extern void TestICE_Evaluate_Runner();
+extern void TestEAL_InitializeLog_Runner();
+extern void TestEAL_LogEvent_Runner();
+extern void TestCMPB_Initialize_Runner();
+extern void TestCMPB_Synchronize_Runner();
+// Sprint 1171-1180 — Generative AI Thumbnails (v33.3.0 "Spica-T")
+extern void TestNPU_Initialize_Runner();
+extern void TestNPU_Synthesize_Runner();
+extern void TestDME_LoadModel_Runner();
+extern void TestDME_EncodePrompt_Runner();
+extern void TestTIE_Initialize_Runner();
+extern void TestTIE_Inpaint_Runner();
+extern void TestOIR_Initialize_Runner();
+extern void TestOIR_RouteInference_Runner();
+extern void TestAIBP_Enqueue_Runner();
+extern void TestAIBP_ProcessBatch_Runner();
+// Sprint 1181-1190 — Plugin Marketplace v5 (v33.4.0 "Spica-U")
+extern void TestPMV5_Initialize_Runner();
+extern void TestPMV5_Search_Runner();
+extern void TestSCK3_Initialize_Runner();
+extern void TestSCK3_DetectVersion_Runner();
+extern void TestPDM_Install_Runner();
+extern void TestPDM_Rollback_Runner();
+extern void TestMSI_IndexAndQuery_Runner();
+extern void TestMSI_DocumentCount_Runner();
+extern void TestPSV_ValidatePlugin_Runner();
+extern void TestPSV_AddTrustedThumbprint_Runner();
+// Sprint 1191-1200 — LTS Hardening + Security Audit (v33.5.0 "Spica-V")
+extern void TestLHC_Initialize_Runner();
+extern void TestLHC_GateEvaluate_Runner();
+extern void TestSAE_Initialize_Runner();
+extern void TestSAE_RunAudit_Runner();
+extern void TestVFDB_AddRecord_Runner();
+extern void TestVFDB_QueryByLibrary_Runner();
+extern void TestLCG_RunGate_Runner();
+extern void TestLCG_IsCertified_Runner();
+extern void TestSKS_StoreRetrieve_Runner();
+extern void TestSKS_DeleteKey_Runner();
 
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────

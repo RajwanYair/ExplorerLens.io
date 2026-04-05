@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 5 April 2026 (v32.7.0 Fomalhaut-X release)
-**Version:** 32.7.0 "Fomalhaut-X"
+**Last Updated:** 5 April 2026 (v33.0.0 Spica release)
+**Version:** 33.0.0 "Spica"
 
 ---
 

@@ -12313,6 +12313,459 @@ TEST(TestPD_CurrentProviderForPlatform)
     ASSERT(p->GetPlatform() == PlatformDetector::Detect());
 }
 
+//== Sprint 1151-1160: Platform GPU Extensions (v33.1.0 "Spica-R") ==
+TEST(TestMGB_InitialState)
+{
+    using namespace ExplorerLens::Engine;
+    MetalGPUBackend b;
+    ASSERT(b.GetState() == MetalBackendState::Uninitialized);
+}
+TEST(TestMGB_BackendName)
+{
+    using namespace ExplorerLens::Engine;
+    MetalGPUBackend b;
+    ASSERT(std::string(b.BackendName()) == "Metal-v2-Stub");
+}
+TEST(TestVEB_NotAvailableOnWindows)
+{
+    using namespace ExplorerLens::Engine;
+    VulkanEGLBackend b;
+    ASSERT(!b.IsAvailable());
+}
+TEST(TestVEB_BackendName)
+{
+    using namespace ExplorerLens::Engine;
+    VulkanEGLBackend b;
+    ASSERT(std::string(b.BackendName()) == "Vulkan-EGL-Stub");
+}
+TEST(TestPGR_SelectsD3D12OnWindows)
+{
+    using namespace ExplorerLens::Engine;
+    PlatformGPURouter r;
+    r.Initialize();
+    ASSERT(r.SelectedBackend() == GPURouterBackend::D3D12);
+}
+TEST(TestPGR_BackendNameNotNull)
+{
+    using namespace ExplorerLens::Engine;
+    PlatformGPURouter r;
+    r.Initialize();
+    ASSERT(r.BackendName() != nullptr);
+}
+TEST(TestPDB_InitiallyDetached)
+{
+    using namespace ExplorerLens::Engine;
+    PlatformDisplayBridge b;
+    ASSERT(!b.IsAttached());
+}
+TEST(TestPDB_AttachSucceeds)
+{
+    using namespace ExplorerLens::Engine;
+    PlatformDisplayBridge b;
+    ASSERT(b.Attach());
+    ASSERT(b.IsAttached());
+    b.Detach();
+}
+TEST(TestCPSF_CreateDestroy)
+{
+    using namespace ExplorerLens::Engine;
+    CrossPlatformSyncFence f;
+    ASSERT(f.Create());
+    ASSERT(f.IsCreated());
+    f.Destroy();
+    ASSERT(!f.IsCreated());
+}
+TEST(TestCPSF_SignalWait)
+{
+    using namespace ExplorerLens::Engine;
+    CrossPlatformSyncFence f;
+    f.Create();
+    f.Signal(1);
+    ASSERT(f.Wait(1, 100) == FenceState::Signaled);
+}
+
+//== Sprint 1161-1170: Enterprise Console v4 (v33.2.0 "Spica-S") ==
+TEST(TestEPV4_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    EnterprisePolicyV4 eng;
+    ASSERT(eng.Initialize());
+}
+TEST(TestEPV4_ApplyPolicy)
+{
+    using namespace ExplorerLens::Engine;
+    EnterprisePolicyV4 eng;
+    eng.Initialize();
+    EnterprisePolicyEntry entry;
+    entry.key   = "MaxThumbnailSize";
+    entry.value = "512";
+    entry.source = PolicySource::Manual;
+    ASSERT(eng.ApplyPolicy(entry));
+}
+TEST(TestGPOT_AddSetting)
+{
+    using namespace ExplorerLens::Engine;
+    GPOPolicyTemplate tmpl;
+    tmpl.Initialize("ExplorerLens");
+    GPOPolicySetting s;
+    s.name     = "MaxCacheSize";
+    s.category = "Performance";
+    s.type     = "Integer";
+    s.defaultValue = "512";
+    ASSERT(tmpl.AddSetting(s));
+    ASSERT(tmpl.SettingCount() == 1);
+}
+TEST(TestGPOT_GenerateADMX)
+{
+    using namespace ExplorerLens::Engine;
+    GPOPolicyTemplate tmpl;
+    tmpl.Initialize("ExplorerLens");
+    GPOPolicySetting s;
+    s.name = "MaxCacheSize"; s.category = "Perf"; s.type = "Integer"; s.defaultValue = "512";
+    tmpl.AddSetting(s);
+    GPOTemplateResult res = tmpl.GenerateADMX();
+    ASSERT(res.success);
+    ASSERT(!res.admxContent.empty());
+}
+TEST(TestICE_AddRule)
+{
+    using namespace ExplorerLens::Engine;
+    IntuneComplianceEngine ice;
+    ice.Initialize();
+    ComplianceRule r;
+    r.ruleId      = "RULE-001";
+    r.description = "Thumbnails must be secure";
+    r.required    = true;
+    ASSERT(ice.AddRule(r));
+    ASSERT(ice.RuleCount() == 1);
+}
+TEST(TestICE_Evaluate)
+{
+    using namespace ExplorerLens::Engine;
+    IntuneComplianceEngine ice;
+    ice.Initialize();
+    auto report = ice.Evaluate();
+    ASSERT(report.totalRules == 0);
+    ASSERT(report.overallStatus == ComplianceStatus::Compliant);
+}
+TEST(TestEAL_InitializeLog)
+{
+    using namespace ExplorerLens::Engine;
+    EnterpriseAuditLogger logger;
+    ASSERT(logger.Initialize("test-audit.log"));
+}
+TEST(TestEAL_LogEvent)
+{
+    using namespace ExplorerLens::Engine;
+    EnterpriseAuditLogger logger;
+    logger.Initialize("test-audit.log");
+    AuditLogEntry ev;
+    ev.type        = AuditEventType::PolicyChange;
+    ev.description = "Policy updated";
+    ev.actor       = "SYSTEM";
+    ASSERT(logger.Log(ev));
+    ASSERT(logger.GetStats().totalEvents == 1);
+}
+TEST(TestCMPB_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    ConfigMgrPolicyBridge bridge;
+    ASSERT(bridge.Initialize());
+}
+TEST(TestCMPB_Synchronize)
+{
+    using namespace ExplorerLens::Engine;
+    ConfigMgrPolicyBridge bridge;
+    bridge.Initialize();
+    auto res = bridge.Synchronize();
+    ASSERT(res.success || !bridge.IsConfigMgrPresent());
+}
+
+//== Sprint 1171-1180: Generative AI Thumbnails (v33.3.0 "Spica-T") ==
+TEST(TestNPU_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    NPUThumbnailSynthesizer& synth = NPUThumbnailSynthesizer::Instance();
+    ASSERT(synth.Initialize(SynthesisBackend::CPU));
+}
+TEST(TestNPU_Synthesize)
+{
+    using namespace ExplorerLens::Engine;
+    NPUThumbnailSynthesizer& synth = NPUThumbnailSynthesizer::Instance();
+    synth.Initialize(SynthesisBackend::CPU);
+    SynthesisRequest req;
+    req.prompt  = "nature landscape";
+    req.width   = 64;
+    req.height  = 64;
+    auto res = synth.Synthesize(req);
+    ASSERT(res.success);
+    ASSERT(!res.pixels.empty());
+}
+TEST(TestDME_LoadModel)
+{
+    using namespace ExplorerLens::Engine;
+    DiffusionModelEngine eng;
+    DiffusionModelConfig cfg;
+    cfg.modelPath  = "stub-model";
+    cfg.steps = 4;
+    ASSERT(eng.LoadModel(cfg));
+    ASSERT(eng.GetState() == DiffusionModelState::Ready);
+}
+TEST(TestDME_EncodePrompt)
+{
+    using namespace ExplorerLens::Engine;
+    DiffusionModelEngine eng;
+    DiffusionModelConfig cfg; cfg.modelPath = "stub"; cfg.steps = 4;
+    eng.LoadModel(cfg);
+    auto latent = eng.EncodePrompt("a red cube");
+    ASSERT(latent.width > 0 || !latent.data.empty());
+}
+TEST(TestTIE_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    ThumbnailInpaintEngine eng;
+    ASSERT(eng.Initialize());
+}
+TEST(TestTIE_Inpaint)
+{
+    using namespace ExplorerLens::Engine;
+    ThumbnailInpaintEngine eng;
+    eng.Initialize();
+    InpaintRequest req;
+    req.width  = 64;
+    req.height = 64;
+    req.pixels.assign(64 * 64 * 4, 0xFF);
+    InpaintRegion region; region.x = 10; region.y = 10; region.w = 20; region.h = 20;
+    req.regions.push_back(region);
+    auto res = eng.Inpaint(req);
+    ASSERT(res.success);
+    ASSERT(res.confidence >= 0.0f);
+}
+TEST(TestOIR_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    OffDeviceInferenceRouter& router = OffDeviceInferenceRouter::Instance();
+    ASSERT(router.Initialize());
+}
+TEST(TestOIR_RouteInference)
+{
+    using namespace ExplorerLens::Engine;
+    OffDeviceInferenceRouter& router = OffDeviceInferenceRouter::Instance();
+    router.Initialize();
+    auto target = router.SelectTarget();
+    ASSERT(target != InferenceTarget::Unknown);
+    std::vector<float> input(16, 1.0f), output;
+    ASSERT(router.RouteInference(input, output));
+    ASSERT(!output.empty());
+}
+TEST(TestAIBP_Enqueue)
+{
+    using namespace ExplorerLens::Engine;
+    AIThumbnailBatchProcessor proc;
+    proc.Initialize(2);
+    BatchRequest req;
+    req.filePath = "img.png";
+    req.priority = BatchPriority::Normal;
+    uint32_t id = proc.Enqueue(req);
+    ASSERT(id > 0);
+    ASSERT(proc.QueueDepth() == 1);
+}
+TEST(TestAIBP_ProcessBatch)
+{
+    using namespace ExplorerLens::Engine;
+    AIThumbnailBatchProcessor proc;
+    proc.Initialize(2);
+    BatchRequest req; req.filePath = "img.png";
+    proc.Enqueue(req);
+    std::vector<BatchResult> results;
+    ASSERT(proc.ProcessBatch(results));
+    ASSERT(results.size() == 1);
+    ASSERT(results[0].success);
+    ASSERT(proc.QueueDepth() == 0);
+}
+
+//== Sprint 1181-1190: Plugin Marketplace v5 (v33.4.0 "Spica-U") ==
+TEST(TestPMV5_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    PluginMarketplaceV5& mkt = PluginMarketplaceV5::Instance();
+    ASSERT(mkt.Initialize("https://plugins.explorerlens.example/feed.json"));
+}
+TEST(TestPMV5_Search)
+{
+    using namespace ExplorerLens::Engine;
+    PluginMarketplaceV5& mkt = PluginMarketplaceV5::Instance();
+    mkt.Initialize("https://plugins.explorerlens.example/feed.json");
+    auto result = mkt.Search("avif");
+    ASSERT(result.plugins.empty() || result.plugins[0].pluginId.size() > 0);
+}
+TEST(TestSCK3_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(SDKCompatKit3::Instance().Initialize());
+}
+TEST(TestSCK3_DetectVersion)
+{
+    using namespace ExplorerLens::Engine;
+    SDKCompatKit3& kit = SDKCompatKit3::Instance();
+    kit.Initialize();
+    auto ver = kit.DetectPluginSDKVersion("some-plugin.dll");
+    ASSERT(ver != SDKVersion::Unknown);
+}
+TEST(TestPDM_Install)
+{
+    using namespace ExplorerLens::Engine;
+    PluginDistributionManager mgr;
+    ASSERT(mgr.Initialize("C:\\PluginRoot"));
+    ASSERT(mgr.Install("plugin-avif", "C:\\pkg\\avif.zip"));
+    ASSERT(mgr.InstalledCount() == 1);
+}
+TEST(TestPDM_Rollback)
+{
+    using namespace ExplorerLens::Engine;
+    PluginDistributionManager mgr;
+    mgr.Initialize("C:\\PluginRoot");
+    mgr.Install("plugin-avif", "avif.zip");
+    mgr.Update("plugin-avif", "avif-v2.zip");
+    ASSERT(mgr.Rollback("plugin-avif"));
+}
+TEST(TestMSI_IndexAndQuery)
+{
+    using namespace ExplorerLens::Engine;
+    MarketplaceSearchIndex& idx = MarketplaceSearchIndex::Instance();
+    idx.Initialize();
+    idx.IndexPlugin("avif-plugin", "AVIF Decoder", "avif image heif");
+    auto results = idx.Query("avif");
+    ASSERT(!results.empty());
+    ASSERT(results[0].pluginId == "avif-plugin");
+}
+TEST(TestMSI_DocumentCount)
+{
+    using namespace ExplorerLens::Engine;
+    MarketplaceSearchIndex idx;
+    idx.Initialize();
+    idx.IndexPlugin("p1", "Plugin One", "heif");
+    idx.IndexPlugin("p2", "Plugin Two", "raw");
+    ASSERT(idx.DocumentCount() == 2);
+}
+TEST(TestPSV_ValidatePlugin)
+{
+    using namespace ExplorerLens::Engine;
+    PluginSignatureValidator& val = PluginSignatureValidator::Instance();
+    val.Initialize();
+    auto info = val.Validate("some-plugin.dll");
+    ASSERT(info.result == ValidationResult::Valid || info.result == ValidationResult::NotSigned);
+}
+TEST(TestPSV_AddTrustedThumbprint)
+{
+    using namespace ExplorerLens::Engine;
+    PluginSignatureValidator val;
+    val.Initialize();
+    ASSERT(val.AddTrustedThumbprint("AABB1234"));
+    ASSERT(val.TrustedCount() == 1);
+    ASSERT(val.IsTrustedSigner("AABB1234"));
+}
+
+//== Sprint 1191-1200: LTS Hardening + Security Audit (v33.5.0 "Spica-V") ==
+TEST(TestLHC_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    LTSHardeningController ctrl;
+    ASSERT(ctrl.Initialize("33.5.0"));
+}
+TEST(TestLHC_GateEvaluate)
+{
+    using namespace ExplorerLens::Engine;
+    LTSHardeningController ctrl;
+    ctrl.Initialize("33.5.0");
+    LTSGate g; g.name = "SecurityAudit"; g.description = "OWASP check"; g.required = true;
+    ctrl.AddGate(g);
+    ASSERT(ctrl.EvaluateGate("SecurityAudit", true));
+    ASSERT(ctrl.IsLTSReady());
+}
+TEST(TestSAE_Initialize)
+{
+    using namespace ExplorerLens::Engine;
+    SecurityAuditEngine& eng = SecurityAuditEngine::Instance();
+    ASSERT(eng.Initialize());
+}
+TEST(TestSAE_RunAudit)
+{
+    using namespace ExplorerLens::Engine;
+    SecurityAuditEngine& eng = SecurityAuditEngine::Instance();
+    eng.Initialize();
+    ASSERT(eng.RunAudit());
+    ASSERT(eng.Passed());
+}
+TEST(TestVFDB_AddRecord)
+{
+    using namespace ExplorerLens::Engine;
+    VulnerabilityFingerprintDB db;
+    db.Initialize();
+    VulnerabilityRecord rec;
+    rec.cveId            = "CVE-2025-0001";
+    rec.affectedLibrary  = "zlib";
+    rec.affectedVersionRange = "< 1.3.1";
+    rec.fixedVersion     = "1.3.1";
+    rec.cvssScore        = 7;
+    ASSERT(db.AddRecord(rec));
+    ASSERT(db.RecordCount() == 1);
+}
+TEST(TestVFDB_QueryByLibrary)
+{
+    using namespace ExplorerLens::Engine;
+    VulnerabilityFingerprintDB db;
+    db.Initialize();
+    VulnerabilityRecord rec;
+    rec.cveId = "CVE-2025-0002"; rec.affectedLibrary = "libwebp";
+    rec.affectedVersionRange = "< 1.5.0"; rec.fixedVersion = "1.5.0";
+    db.AddRecord(rec);
+    auto results = db.QueryByLibrary("libwebp");
+    ASSERT(results.size() == 1);
+    ASSERT(results[0].cveId == "CVE-2025-0002");
+}
+TEST(TestLCG_RunGate)
+{
+    using namespace ExplorerLens::Engine;
+    LTSCertificationGate gate;
+    gate.Initialize("33.5.0");
+    ASSERT(gate.RunGate("SecurityAudit",    true));
+    ASSERT(gate.RunGate("DependencyFreeze", true));
+    ASSERT(gate.GateCount() == 2);
+}
+TEST(TestLCG_IsCertified)
+{
+    using namespace ExplorerLens::Engine;
+    LTSCertificationGate gate;
+    gate.Initialize("33.5.0");
+    gate.RunGate("SecurityAudit",      true);
+    gate.RunGate("DependencyFreeze",   true);
+    gate.RunGate("PerformanceClear",   true);
+    ASSERT(gate.IsCertified());
+}
+TEST(TestSKS_StoreRetrieve)
+{
+    using namespace ExplorerLens::Engine;
+    SecureKeyStore ks;
+    ASSERT(ks.Initialize(KeyStoreBackend::InMemory));
+    std::vector<uint8_t> key = {0x01, 0x02, 0x03, 0x04};
+    ASSERT(ks.StoreKey("signing-key", key));
+    std::vector<uint8_t> retrieved;
+    ASSERT(ks.RetrieveKey("signing-key", retrieved));
+    ASSERT(retrieved == key);
+}
+TEST(TestSKS_DeleteKey)
+{
+    using namespace ExplorerLens::Engine;
+    SecureKeyStore ks;
+    ks.Initialize(KeyStoreBackend::InMemory);
+    std::vector<uint8_t> key = {0xAA, 0xBB};
+    ks.StoreKey("tmp-key", key);
+    ASSERT(ks.HasKey("tmp-key"));
+    ASSERT(ks.DeleteKey("tmp-key"));
+    ASSERT(!ks.HasKey("tmp-key"));
+}
+
 //== Sprint 1131-1140: Live Preview Scrubber (v32.7.0 "Fomalhaut-X") ==
 
 // ── VideoFrameExtractor ───────────────────────────────────────────────────

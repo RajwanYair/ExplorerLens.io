@@ -1,4 +1,4 @@
-//==============================================================================
+﻿//==============================================================================
 // ExplorerLens Engine - Unit Tests (Harness)
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
@@ -4759,6 +4759,61 @@ int main()
     RUN_TEST(TestPD_MakeLinuxProvider);
     RUN_TEST(TestPD_PlatformDescString);
     RUN_TEST(TestPD_CurrentProviderForPlatform);
+    // Sprint 1151-1160: Platform GPU Extensions (v33.1.0 "Spica-R")
+    RUN_TEST(TestMGB_InitialState);
+    RUN_TEST(TestMGB_BackendName);
+    RUN_TEST(TestVEB_NotAvailableOnWindows);
+    RUN_TEST(TestVEB_BackendName);
+    RUN_TEST(TestPGR_SelectsD3D12OnWindows);
+    RUN_TEST(TestPGR_BackendNameNotNull);
+    RUN_TEST(TestPDB_InitiallyDetached);
+    RUN_TEST(TestPDB_AttachSucceeds);
+    RUN_TEST(TestCPSF_CreateDestroy);
+    RUN_TEST(TestCPSF_SignalWait);
+    // Sprint 1161-1170: Enterprise Console v4 (v33.2.0 "Spica-S")
+    RUN_TEST(TestEPV4_Initialize);
+    RUN_TEST(TestEPV4_ApplyPolicy);
+    RUN_TEST(TestGPOT_AddSetting);
+    RUN_TEST(TestGPOT_GenerateADMX);
+    RUN_TEST(TestICE_AddRule);
+    RUN_TEST(TestICE_Evaluate);
+    RUN_TEST(TestEAL_InitializeLog);
+    RUN_TEST(TestEAL_LogEvent);
+    RUN_TEST(TestCMPB_Initialize);
+    RUN_TEST(TestCMPB_Synchronize);
+    // Sprint 1171-1180: Generative AI Thumbnails (v33.3.0 "Spica-T")
+    RUN_TEST(TestNPU_Initialize);
+    RUN_TEST(TestNPU_Synthesize);
+    RUN_TEST(TestDME_LoadModel);
+    RUN_TEST(TestDME_EncodePrompt);
+    RUN_TEST(TestTIE_Initialize);
+    RUN_TEST(TestTIE_Inpaint);
+    RUN_TEST(TestOIR_Initialize);
+    RUN_TEST(TestOIR_RouteInference);
+    RUN_TEST(TestAIBP_Enqueue);
+    RUN_TEST(TestAIBP_ProcessBatch);
+    // Sprint 1181-1190: Plugin Marketplace v5 (v33.4.0 "Spica-U")
+    RUN_TEST(TestPMV5_Initialize);
+    RUN_TEST(TestPMV5_Search);
+    RUN_TEST(TestSCK3_Initialize);
+    RUN_TEST(TestSCK3_DetectVersion);
+    RUN_TEST(TestPDM_Install);
+    RUN_TEST(TestPDM_Rollback);
+    RUN_TEST(TestMSI_IndexAndQuery);
+    RUN_TEST(TestMSI_DocumentCount);
+    RUN_TEST(TestPSV_ValidatePlugin);
+    RUN_TEST(TestPSV_AddTrustedThumbprint);
+    // Sprint 1191-1200: LTS Hardening + Security Audit (v33.5.0 "Spica-V")
+    RUN_TEST(TestLHC_Initialize);
+    RUN_TEST(TestLHC_GateEvaluate);
+    RUN_TEST(TestSAE_Initialize);
+    RUN_TEST(TestSAE_RunAudit);
+    RUN_TEST(TestVFDB_AddRecord);
+    RUN_TEST(TestVFDB_QueryByLibrary);
+    RUN_TEST(TestLCG_RunGate);
+    RUN_TEST(TestLCG_IsCertified);
+    RUN_TEST(TestSKS_StoreRetrieve);
+    RUN_TEST(TestSKS_DeleteKey);
 
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;
