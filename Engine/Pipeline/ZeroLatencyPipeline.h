@@ -79,8 +79,8 @@ class ZeroLatencyPipeline
   public:
     static ZeroLatencyPipeline& Instance()
     {
-        static ZeroLatencyPipeline s_instance;
-        return s_instance;
+        static ZeroLatencyPipeline instance;
+        return instance;
     }
 
     bool Initialize()

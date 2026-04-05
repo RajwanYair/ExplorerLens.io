@@ -67,6 +67,8 @@ nav:
       - Decode Pipeline: architecture/decode-pipeline.md
       - Plugin System: architecture/plugin-architecture.md
       - Integration Architecture: architecture/INTEGRATION_ARCHITECTURE.md
+      - AI Architecture: AI_ARCHITECTURE.md
+      - HiDPI Scaling: HIDPI.md
 
   - Developer Guide:
       - Developer Guide: development/DEVELOPER_GUIDE.md
@@ -76,6 +78,7 @@ nav:
       - COM Registration: build/COM_REGISTRATION_DIAGNOSTICS.md
       - vcpkg Setup: build/VCPKG_SETUP_GUIDE.md
       - Code Signing: CODE_SIGNING.md
+      - Deployment: DEPLOYMENT_GUIDE.md
 
   - Formats:
       - Format Support Matrix: formats/FORMAT_SUPPORT_MATRIX.md
@@ -90,6 +93,14 @@ nav:
       - Package Format: plugins/PLUGIN_PACKAGE_FORMAT_V1.md
       - Sandbox Model: plugins/PLUGIN_SANDBOX_MODEL_V1.md
       - Security Guide: plugins/PluginSecurityGuide.md
+
+  - Enterprise:
+      - Enterprise Guide: ENTERPRISE.md
+      - Security Hardening: SECURITY_HARDENING.md
+      - Accessibility: ACCESSIBILITY.md
+
+  - SDK:
+      - SDK Reference: SDK.md
 
   - Testing:
       - Testing Guide: testing/TESTING_GUIDE.md

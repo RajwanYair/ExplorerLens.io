@@ -65,8 +65,8 @@ class GPUDecompressKernel
   public:
     static GPUDecompressKernel& Instance()
     {
-        static GPUDecompressKernel s_instance;
-        return s_instance;
+        static GPUDecompressKernel instance;
+        return instance;
     }
 
     bool Initialize(GDKVendor preferredVendor = GDKVendor::AUTO)
