@@ -1,11 +1,15 @@
 // ThumbnailCache.cpp - Persistent disk-backed thumbnail cache with LRU eviction
 
 #include "ThumbnailCache.h"
-#include <gdiplus.h>
+// clang-format off
+// Windows SDK headers — inclusion order is critical for GDI+ dependency chain:
+// windows.h must precede objidl.h (COM types), which must precede gdiplus.h.
+#include <windows.h>
 #include <objidl.h>
+#include <gdiplus.h>
 #include <shlobj.h>
 #include <wincrypt.h>
-#include <windows.h>
+// clang-format on
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
