@@ -40,11 +40,11 @@ IntuneComplianceReport IntuneComplianceEngine::Evaluate() const
     report.totalRules = static_cast<uint32_t>(m_rules.size());
     for (auto& r : report.rules)
     {
-        r.status = ComplianceStatus::Compliant;
+        r.status = IntuneComplianceStatus::Compliant;
         ++report.passing;
     }
-    report.overallStatus = (report.failing == 0) ? ComplianceStatus::Compliant
-                                                  : ComplianceStatus::NonCompliant;
+    report.overallStatus = (report.failing == 0) ? IntuneComplianceStatus::Compliant
+                                                  : IntuneComplianceStatus::NonCompliant;
     return report;
 }
 

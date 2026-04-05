@@ -12406,11 +12406,10 @@ TEST(TestGPOT_AddSetting)
 {
     using namespace ExplorerLens::Engine;
     GPOPolicyTemplate tmpl;
-    tmpl.Initialize("ExplorerLens");
     GPOPolicySetting s;
-    s.name     = "MaxCacheSize";
-    s.category = "Performance";
-    s.type     = "Integer";
+    s.id           = "MaxCacheSize";
+    s.displayName  = "Maximum Cache Size";
+    s.category     = "Performance";
     s.defaultValue = "512";
     ASSERT(tmpl.AddSetting(s));
     ASSERT(tmpl.SettingCount() == 1);
@@ -12419,9 +12418,8 @@ TEST(TestGPOT_GenerateADMX)
 {
     using namespace ExplorerLens::Engine;
     GPOPolicyTemplate tmpl;
-    tmpl.Initialize("ExplorerLens");
     GPOPolicySetting s;
-    s.name = "MaxCacheSize"; s.category = "Perf"; s.type = "Integer"; s.defaultValue = "512";
+    s.id = "MaxCacheSize"; s.displayName = "Max Cache"; s.category = "Perf"; s.defaultValue = "512";
     tmpl.AddSetting(s);
     GPOTemplateResult res = tmpl.GenerateADMX();
     ASSERT(res.success);
@@ -12446,7 +12444,7 @@ TEST(TestICE_Evaluate)
     ice.Initialize();
     auto report = ice.Evaluate();
     ASSERT(report.totalRules == 0);
-    ASSERT(report.overallStatus == ComplianceStatus::Compliant);
+    ASSERT(report.overallStatus == IntuneComplianceStatus::Compliant);
 }
 TEST(TestEAL_InitializeLog)
 {

@@ -13,7 +13,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class ComplianceStatus : uint8_t
+enum class IntuneComplianceStatus : uint8_t
 {
     Unknown    = 0,
     Compliant  = 1,
@@ -26,13 +26,13 @@ struct ComplianceRule
     std::string      ruleId;
     std::string      description;
     bool             required     = true;
-    ComplianceStatus status       = ComplianceStatus::Unknown;
+    IntuneComplianceStatus status       = IntuneComplianceStatus::Unknown;
     std::string      remediation;
 };
 
 struct IntuneComplianceReport
 {
-    ComplianceStatus      overallStatus = ComplianceStatus::Unknown;
+    IntuneComplianceStatus      overallStatus = IntuneComplianceStatus::Unknown;
     uint32_t              totalRules    = 0;
     uint32_t              passing       = 0;
     uint32_t              failing       = 0;
