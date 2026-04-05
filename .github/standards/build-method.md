@@ -1,7 +1,7 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** March 2026
-**Version:** 33.2.0 (Codename: Spica-S)
+**Version:** 33.3.0 (Codename: Spica-T)
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---

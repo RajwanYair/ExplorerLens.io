@@ -13,7 +13,7 @@
 
 FROM ubuntu:24.04
 
-ARG EXPLORERLENS_VERSION=33.2.0
+ARG EXPLORERLENS_VERSION=33.3.0
 
 LABEL org.opencontainers.image.title="ExplorerLens SDK" \
       org.opencontainers.image.description="GPU-accelerated thumbnail provider SDK — 200+ file formats" \

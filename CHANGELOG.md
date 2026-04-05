@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [33.3.0] — 2026-04-05 — Spica-T
+
+### Added
+- Sprint 1171-1180: On-Device AI Thumbnail Synthesis — NPUThumbnailSynthesizer, DiffusionModelEngine, ThumbnailInpaintEngine, OffDeviceInferenceRouter, AIThumbnailBatchProcessor
+- Intel NPU + DirectML + ONNX + CPU inference routing for generative thumbnail synthesis
+- Diffusion model inpainting for corrupt/damaged thumbnail regions with confidence scoring
+- Batch processing queue with AIBatchPriority and adaptive throughput throttling
+
+---
+
 ## [33.2.0] — 2026-04-05 — Spica-S
 
 ### Added
