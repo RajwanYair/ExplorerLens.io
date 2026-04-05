@@ -49,7 +49,9 @@ jobs:
     steps:
       - name: Configure git safe.directory
         shell: pwsh
-        run: git config --global safe.directory '*'
+        run: |
+          git config --global safe.directory '*'
+          git config --system safe.directory '*' 2>&1 | Out-Null
 
       - name: Checkout (full history for changelog)
         uses: actions/checkout@v4
@@ -505,7 +507,9 @@ jobs:
 
     steps:
       - name: Configure git safe.directory
-        run: git config --global safe.directory '*'
+        run: |
+          git config --global safe.directory '*'
+          git config --system safe.directory '*' 2>&1 | Out-Null
 
       - name: Checkout (for CHANGELOG)
         uses: actions/checkout@v4
