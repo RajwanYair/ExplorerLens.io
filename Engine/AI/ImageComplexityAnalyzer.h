@@ -47,14 +47,11 @@ struct ComplexityStats
 
 class ImageComplexityAnalyzer
 {
-  public:
+public:
     ImageComplexityAnalyzer() = default;
     ~ImageComplexityAnalyzer() = default;
 
-    static const wchar_t* GetName()
-    {
-        return L"ImageComplexityAnalyzer";
-    }
+    static const wchar_t* GetName() { return L"ImageComplexityAnalyzer"; }
 
     /// Estimate complexity from image dimensions and format.
     ComplexityEstimate Estimate(uint32_t width, uint32_t height, uint32_t bitsPerPixel, const std::string& format) const
@@ -146,12 +143,9 @@ class ImageComplexityAnalyzer
         }
     }
 
-    ComplexityStats GetStats() const
-    {
-        return m_stats;
-    }
+    ComplexityStats GetStats() const { return m_stats; }
 
-  private:
+private:
     mutable ComplexityStats m_stats{};
 };
 

@@ -40,16 +40,10 @@ struct FileTypePredictorConfig
 
 class FileTypePredictor
 {
-  public:
-    void Configure(const FileTypePredictorConfig& config)
-    {
-        m_config = config;
-    }
+public:
+    void Configure(const FileTypePredictorConfig& config) { m_config = config; }
 
-    void RegisterSignature(FileTypeSig sig)
-    {
-        m_signatures.push_back(std::move(sig));
-    }
+    void RegisterSignature(FileTypeSig sig) { m_signatures.push_back(std::move(sig)); }
 
     PredictionResult Predict(const uint8_t* headerBytes, size_t headerSize, const std::string& fileExtension) const
     {
@@ -90,15 +84,9 @@ class FileTypePredictor
         return result;
     }
 
-    void RegisterExtensionMapping(const std::string& ext, const std::string& format)
-    {
-        m_extensionMap[ext] = format;
-    }
+    void RegisterExtensionMapping(const std::string& ext, const std::string& format) { m_extensionMap[ext] = format; }
 
-    size_t SignatureCount() const
-    {
-        return m_signatures.size();
-    }
+    size_t SignatureCount() const { return m_signatures.size(); }
 
     void LoadDefaultSignatures()
     {
@@ -114,7 +102,7 @@ class FileTypePredictor
         RegisterSignature({"TIFF-BE", {0x4D, 0x4D, 0x00, 0x2A}, 0, 0.95f});
     }
 
-  private:
+private:
     FileTypePredictorConfig m_config;
     std::vector<FileTypeSig> m_signatures;
     std::unordered_map<std::string, std::string> m_extensionMap;

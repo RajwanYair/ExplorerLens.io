@@ -41,7 +41,7 @@ struct GenerationRequest
 
 class GenerativeThumbnailEngine
 {
-  public:
+public:
     GenerativeThumbnailEngine() = default;
     ~GenerativeThumbnailEngine() = default;
 
@@ -58,7 +58,7 @@ class GenerativeThumbnailEngine
 
     void Shutdown();
 
-  private:
+private:
     GenerativeBackend m_backend = GenerativeBackend::CPU;
     std::string m_activeModel;
     bool m_initialized = false;

@@ -38,7 +38,7 @@ struct InpaintRegion
 
 class ContentAwareInpainter
 {
-  public:
+public:
     ContentAwareInpainter() = default;
     ~ContentAwareInpainter() = default;
 
@@ -56,7 +56,7 @@ class ContentAwareInpainter
 
     void Cancel();
 
-  private:
+private:
     InpaintQuality m_quality = InpaintQuality::Standard;
     bool m_cancelRequested = false;
     std::optional<InpaintRegion> m_processingRegion;

@@ -71,7 +71,7 @@ struct CompositorStats
 
 class SmartThumbnailCompositor
 {
-  public:
+public:
     static SmartThumbnailCompositor& Instance()
     {
         static SmartThumbnailCompositor instance;
@@ -147,7 +147,7 @@ class SmartThumbnailCompositor
         m_stats.initialized = false;
     }
 
-  private:
+private:
     SmartThumbnailCompositor() = default;
     ~SmartThumbnailCompositor() = default;
     SmartThumbnailCompositor(const SmartThumbnailCompositor&) = delete;

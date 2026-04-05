@@ -30,13 +30,10 @@ struct RelevanceStats
 
 class ThumbnailRelevanceRanker
 {
-  public:
+public:
     ThumbnailRelevanceRanker() = default;
 
-    void RecordAccess(const std::string& /*filePath*/)
-    {
-        ++m_stats.filesRanked;
-    }
+    void RecordAccess(const std::string& /*filePath*/) { ++m_stats.filesRanked; }
 
     std::vector<RankedFile> Rank(const std::vector<std::string>& files)
     {
@@ -51,28 +48,13 @@ class ThumbnailRelevanceRanker
         return result;
     }
 
-    void SetRecencyWeight(float w)
-    {
-        m_recencyW = w;
-    }
-    void SetFrequencyWeight(float w)
-    {
-        m_freqW = w;
-    }
-    void SetVisualInterestWeight(float w)
-    {
-        m_visualW = w;
-    }
-    RelevanceStats GetStats() const
-    {
-        return m_stats;
-    }
-    void Reset()
-    {
-        m_stats = {};
-    }
+    void SetRecencyWeight(float w) { m_recencyW = w; }
+    void SetFrequencyWeight(float w) { m_freqW = w; }
+    void SetVisualInterestWeight(float w) { m_visualW = w; }
+    RelevanceStats GetStats() const { return m_stats; }
+    void Reset() { m_stats = {}; }
 
-  private:
+private:
     float m_recencyW = 0.4f;
     float m_freqW = 0.4f;
     float m_visualW = 0.2f;

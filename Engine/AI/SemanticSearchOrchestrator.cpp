@@ -8,7 +8,8 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 SemanticSearchOrchestrator& SemanticSearchOrchestrator::Instance()
 {
@@ -18,29 +19,36 @@ SemanticSearchOrchestrator& SemanticSearchOrchestrator::Instance()
 
 bool SemanticSearchOrchestrator::Initialize(const std::wstring& indexPath)
 {
-    if (m_initialized) { return true; }
+    if (m_initialized) {
+        return true;
+    }
     // Attempt to load persisted HNSW index from disk
     const bool LOADED = HNSWIndexEngine::Instance().LoadFromFile(indexPath);
-    if (LOADED) { m_indexedCount = HNSWIndexEngine::Instance().Count(); }
+    if (LOADED) {
+        m_indexedCount = HNSWIndexEngine::Instance().Count();
+    }
     m_initialized = true;
     return true;
 }
 
 bool SemanticSearchOrchestrator::IndexFile(const std::wstring& filePath, const float embedding[512])
 {
-    if (!m_initialized) { return false; }
+    if (!m_initialized) {
+        return false;
+    }
     HNSWEntry e{};
     e.itemId = ++m_indexedCount;
     e.filePath = filePath;
-    for (int d = 0; d < 512; ++d) { e.vector[d] = embedding[d]; }
+    for (int d = 0; d < 512; ++d) {
+        e.vector[d] = embedding[d];
+    }
     return HNSWIndexEngine::Instance().Insert(e);
 }
 
 std::vector<SemanticSearchResult> SemanticSearchOrchestrator::Search(const SemanticSearchRequest& req)
 {
     m_lastStats = {};
-    if (!m_initialized || req.queryText.empty())
-    {
+    if (!m_initialized || req.queryText.empty()) {
         return {};
     }
 
@@ -51,9 +59,10 @@ std::vector<SemanticSearchResult> SemanticSearchOrchestrator::Search(const Seman
     std::vector<SemanticSearchResult> out;
     out.reserve(QUERY_RESULTS.size());
     uint32_t rank = 1;
-    for (const auto& r : QUERY_RESULTS)
-    {
-        if (r.similarity < req.minRelevance) { continue; }
+    for (const auto& r : QUERY_RESULTS) {
+        if (r.similarity < req.minRelevance) {
+            continue;
+        }
         SemanticSearchResult sr{};
         sr.filePath = r.filePath;
         sr.relevance = r.similarity;
@@ -68,4 +77,5 @@ std::vector<SemanticSearchResult> SemanticSearchOrchestrator::Search(const Seman
     return out;
 }
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

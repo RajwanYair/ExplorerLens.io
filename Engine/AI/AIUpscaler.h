@@ -65,7 +65,7 @@ struct UpscaleResult
 // Thread-safe for concurrent calls from different decoder threads.
 class AIUpscaler
 {
-  public:
+public:
     AIUpscaler() noexcept;
     ~AIUpscaler() noexcept;
 
@@ -93,7 +93,7 @@ class AIUpscaler
     // Singleton accessor.
     static AIUpscaler& Instance() noexcept;
 
-  private:
+private:
     bool m_initialized{false};
     AIUpscaleBackend m_bestBackend{AIUpscaleBackend::Bicubic};
 

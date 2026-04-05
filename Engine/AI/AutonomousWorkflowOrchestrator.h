@@ -39,7 +39,7 @@ struct WorkflowJobStats
 
 class AutonomousWorkflowOrchestrator
 {
-  public:
+public:
     explicit AutonomousWorkflowOrchestrator(OrchestrationPolicy policy = OrchestrationPolicy::Adaptive)
         : m_policy(policy)
     {}
@@ -62,24 +62,12 @@ class AutonomousWorkflowOrchestrator
         ++m_stats.jobsCompleted;
         m_stats.avgLatencyMs = latencyMs;
     }
-    void SetPolicy(OrchestrationPolicy policy)
-    {
-        m_policy = policy;
-    }
-    void SetConcurrencyLimit(uint32_t limit)
-    {
-        m_concurrencyLimit = limit;
-    }
-    WorkflowJobStats GetStats() const
-    {
-        return m_stats;
-    }
-    void Reset()
-    {
-        m_stats = {};
-    }
+    void SetPolicy(OrchestrationPolicy policy) { m_policy = policy; }
+    void SetConcurrencyLimit(uint32_t limit) { m_concurrencyLimit = limit; }
+    WorkflowJobStats GetStats() const { return m_stats; }
+    void Reset() { m_stats = {}; }
 
-  private:
+private:
     OrchestrationPolicy m_policy;
     uint32_t m_concurrencyLimit = 4;
     WorkflowJobStats m_stats;

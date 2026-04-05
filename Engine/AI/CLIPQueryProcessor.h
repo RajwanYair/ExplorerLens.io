@@ -13,24 +13,32 @@
 #include <string_view>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-enum class CLIPTextBackend : uint8_t { DIRECTML, ONNX, CPU };
+enum class CLIPTextBackend : uint8_t {
+    DIRECTML,
+    ONNX,
+    CPU
+};
 
-struct CLIPQueryRequest {
+struct CLIPQueryRequest
+{
     std::wstring queryText;
     uint32_t topK = 10;
     float minScore = 0.20f;
     CLIPTextBackend backend = CLIPTextBackend::DIRECTML;
 };
 
-struct CLIPQueryMatch {
+struct CLIPQueryMatch
+{
     std::wstring filePath;
     float score = 0.0f;
     uint32_t itemId = 0;
 };
 
-class CLIPQueryProcessor {
+class CLIPQueryProcessor
+{
 public:
     static CLIPQueryProcessor& Instance();
 
@@ -47,4 +55,5 @@ private:
     char m_modelVersion[32] = "ViT-B/32-INT8";
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

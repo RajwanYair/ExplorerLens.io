@@ -51,7 +51,7 @@ struct DeduplicatorConfig
 
 class SearchResultDeduplicator
 {
-  public:
+public:
     inline bool Initialize(const DeduplicatorConfig& config)
     {
         m_config = config;
@@ -132,12 +132,9 @@ class SearchResultDeduplicator
         return static_cast<uint32_t>(result.clusters.size());
     }
 
-    inline bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    inline bool IsInitialized() const { return m_initialized; }
 
-  private:
+private:
     inline uint32_t HammingDistance(uint64_t a, uint64_t b) const
     {
         uint64_t diff = a ^ b;

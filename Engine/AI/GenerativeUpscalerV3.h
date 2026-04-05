@@ -38,7 +38,7 @@ struct UpscaleJob
 
 class GenerativeUpscalerV3
 {
-  public:
+public:
     GenerativeUpscalerV3() = default;
     ~GenerativeUpscalerV3() = default;
 
@@ -56,7 +56,7 @@ class GenerativeUpscalerV3
     [[nodiscard]] uint64_t GetVRAMRequiredBytes(UpscaleJob const& job) const;
     [[nodiscard]] bool IsModelAvailable(UpscaleModel model) const;
 
-  private:
+private:
     std::optional<UpscaleModel> m_loadedModel;
     bool m_gpuAvailable = false;
     uint32_t m_tileSize = 512;

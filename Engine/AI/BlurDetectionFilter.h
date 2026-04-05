@@ -63,7 +63,7 @@ struct DeblurResult
 
 class BlurDetectionFilter
 {
-  public:
+public:
     BlurDetectionFilter();
     ~BlurDetectionFilter();
 
@@ -78,7 +78,7 @@ class BlurDetectionFilter
     void UnloadAIModel();
     bool IsAIModelLoaded() const;
 
-  private:
+private:
     struct Impl
     {};
     std::unique_ptr<Impl> m_impl;

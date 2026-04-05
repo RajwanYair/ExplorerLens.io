@@ -51,7 +51,7 @@ struct ONNXModelInfo
 
 class ONNXModelLoader
 {
-  public:
+public:
     static ONNXModelLoader& Instance()
     {
         static ONNXModelLoader s;
@@ -169,7 +169,7 @@ class ONNXModelLoader
         return true;
     }
 
-  private:
+private:
     ONNXModelLoader() = default;
     ~ONNXModelLoader() = default;
     ONNXModelLoader(const ONNXModelLoader&) = delete;

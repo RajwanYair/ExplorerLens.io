@@ -12,33 +12,37 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct HNSWEntry {
+struct HNSWEntry
+{
     uint32_t itemId = 0;
     std::wstring filePath;
     float vector[512]{};
 };
 
-struct HNSWQueryResult {
+struct HNSWQueryResult
+{
     uint32_t itemId = 0;
     std::wstring filePath;
     float similarity = 0.0f;
 };
 
-class HNSWIndexEngine {
+class HNSWIndexEngine
+{
 public:
     static HNSWIndexEngine& Instance();
 
-    bool   Insert(const HNSWEntry& entry);
-    bool   Remove(uint32_t itemId);
+    bool Insert(const HNSWEntry& entry);
+    bool Remove(uint32_t itemId);
     std::vector<HNSWQueryResult> Query(const float queryVector[512], uint32_t topK = 10) const;
-    bool   SaveToFile(const std::wstring& path) const;
-    bool   LoadFromFile(const std::wstring& path);
+    bool SaveToFile(const std::wstring& path) const;
+    bool LoadFromFile(const std::wstring& path);
 
-    uint32_t Count()        const noexcept { return m_count; }
-    float    LastQueryMs()  const noexcept { return m_lastQueryMs; }
-    void     Reset();
+    uint32_t Count() const noexcept { return m_count; }
+    float LastQueryMs() const noexcept { return m_lastQueryMs; }
+    void Reset();
 
 private:
     static constexpr uint32_t MAX_ENTRIES = 100'000;
@@ -50,4 +54,5 @@ private:
     mutable float m_lastQueryMs = 0.0f;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

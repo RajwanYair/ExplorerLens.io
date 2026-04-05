@@ -46,7 +46,7 @@ struct ComplexityAnalyzerStats
 
 class FormatComplexityAnalyzer
 {
-  public:
+public:
     static FormatComplexityAnalyzer& Instance()
     {
         static FormatComplexityAnalyzer instance;
@@ -122,7 +122,7 @@ class FormatComplexityAnalyzer
         m_stats.initialized = false;
     }
 
-  private:
+private:
     FormatComplexityAnalyzer() = default;
     ~FormatComplexityAnalyzer() = default;
     FormatComplexityAnalyzer(const FormatComplexityAnalyzer&) = delete;

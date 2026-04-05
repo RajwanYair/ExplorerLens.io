@@ -40,7 +40,7 @@ struct StyleParams
 
 class StyleTransferRenderer
 {
-  public:
+public:
     StyleTransferRenderer() = default;
     ~StyleTransferRenderer() = default;
 
@@ -57,7 +57,7 @@ class StyleTransferRenderer
     [[nodiscard]] std::vector<ArtisticStyle> GetAvailableStyles() const;
     [[nodiscard]] std::optional<ArtisticStyle> GetLastAppliedStyle() const;
 
-  private:
+private:
     std::optional<ArtisticStyle> m_loadedStyle;
     std::string m_modelPath;
     bool m_modelLoaded = false;

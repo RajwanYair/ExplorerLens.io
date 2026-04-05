@@ -44,7 +44,7 @@ struct IndexEntry
 
 class SemanticSearchIndex
 {
-  public:
+public:
     inline bool Initialize(const HNSWConfig& config)
     {
         m_config = config;
@@ -83,14 +83,8 @@ class SemanticSearchIndex
         return results;
     }
 
-    inline uint64_t GetIndexSize() const
-    {
-        return m_entries.size();
-    }
-    inline bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    inline uint64_t GetIndexSize() const { return m_entries.size(); }
+    inline bool IsInitialized() const { return m_initialized; }
 
     inline float GetRecall() const
     {
@@ -131,7 +125,7 @@ class SemanticSearchIndex
         return in.good();
     }
 
-  private:
+private:
     inline float CosineSimilarity(const std::vector<float>& a, const std::vector<float>& b) const
     {
         float dot = 0.0f, normA = 0.0f, normB = 0.0f;

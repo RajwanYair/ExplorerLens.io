@@ -55,7 +55,7 @@ struct DMLDeviceInfo
 
 class DirectMLInferenceEngine
 {
-  public:
+public:
     static DirectMLInferenceEngine& Instance()
     {
         static DirectMLInferenceEngine s;
@@ -177,7 +177,7 @@ class DirectMLInferenceEngine
         return true;
     }
 
-  private:
+private:
     DirectMLInferenceEngine() = default;
     ~DirectMLInferenceEngine() = default;
     DirectMLInferenceEngine(const DirectMLInferenceEngine&) = delete;

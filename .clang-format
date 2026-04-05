@@ -15,6 +15,7 @@ NamespaceIndentation: None
 IndentCaseLabels: true
 IndentPPDirectives: BeforeHash
 IndentExternBlock: NoIndent
+AccessModifierOffset: -4
 
 # Line length — 120 cols per coding-standards.md
 ColumnLimit: 120
@@ -84,7 +85,7 @@ AlignTrailingComments:
 # Breaking
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: false

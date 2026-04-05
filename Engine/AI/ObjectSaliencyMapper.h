@@ -44,7 +44,7 @@ struct SaliencyConfig
 
 class ObjectSaliencyMapper
 {
-  public:
+public:
     static ObjectSaliencyMapper& Instance()
     {
         static ObjectSaliencyMapper instance;
@@ -144,7 +144,7 @@ class ObjectSaliencyMapper
         return heatmap;
     }
 
-  private:
+private:
     ObjectSaliencyMapper() = default;
 
     inline std::vector<float> ComputeIntensityChannel(const uint8_t* pixels, uint32_t w, uint32_t h, uint32_t c) const

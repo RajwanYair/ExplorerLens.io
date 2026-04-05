@@ -1,11 +1,11 @@
 // ThumbnailCache.cpp - Persistent disk-backed thumbnail cache with LRU eviction
 
 #include "ThumbnailCache.h"
-#include <windows.h>
-#include <objidl.h>
 #include <gdiplus.h>
+#include <objidl.h>
 #include <shlobj.h>
 #include <wincrypt.h>
+#include <windows.h>
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
@@ -28,17 +28,14 @@ namespace {
 // use rather than at DLL load time, ensuring dependencies are ready.
 class GdiplusInit
 {
-  public:
+public:
     static GdiplusInit& Get()
     {
         static GdiplusInit instance;  // Thread-safe since C++11
         return instance;
     }
 
-    bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    bool IsInitialized() const { return m_initialized; }
 
     // Delete copy/move constructors (singleton pattern)
     GdiplusInit(const GdiplusInit&) = delete;
@@ -46,7 +43,7 @@ class GdiplusInit
     GdiplusInit(GdiplusInit&&) = delete;
     GdiplusInit& operator=(GdiplusInit&&) = delete;
 
-  private:
+private:
     GdiplusInit() : m_initialized(false), m_token(0)
     {
         Gdiplus::GdiplusStartupInput input;

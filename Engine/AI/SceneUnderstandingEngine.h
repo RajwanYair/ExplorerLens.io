@@ -61,7 +61,7 @@ struct SceneUnderstandingResult
 
 class SceneUnderstandingEngine
 {
-  public:
+public:
     static const wchar_t* CategoryName(SceneCategory c)
     {
         switch (c) {
@@ -121,18 +121,9 @@ class SceneUnderstandingEngine
                 return L"Unknown";
         }
     }
-    static constexpr size_t CategoryCount()
-    {
-        return static_cast<size_t>(SceneCategory::COUNT);
-    }
-    static constexpr size_t BackendCount()
-    {
-        return static_cast<size_t>(SceneMLBackend::COUNT);
-    }
-    static constexpr size_t ConfidenceCount()
-    {
-        return static_cast<size_t>(SceneConfidence::COUNT);
-    }
+    static constexpr size_t CategoryCount() { return static_cast<size_t>(SceneCategory::COUNT); }
+    static constexpr size_t BackendCount() { return static_cast<size_t>(SceneMLBackend::COUNT); }
+    static constexpr size_t ConfidenceCount() { return static_cast<size_t>(SceneConfidence::COUNT); }
 
     //==========================================================================
     // Scene Classification — Color histogram heuristics (CPU, no ML required)

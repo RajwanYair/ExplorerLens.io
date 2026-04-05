@@ -34,30 +34,18 @@ struct CropStats
     uint64_t cropsComputed = 0;
     double totalSaliency = 0.0;
     double totalComputeMs = 0.0;
-    double AvgSaliency() const
-    {
-        return cropsComputed ? totalSaliency / static_cast<double>(cropsComputed) : 0.0;
-    }
-    double AvgComputeMs() const
-    {
-        return cropsComputed ? totalComputeMs / static_cast<double>(cropsComputed) : 0.0;
-    }
+    double AvgSaliency() const { return cropsComputed ? totalSaliency / static_cast<double>(cropsComputed) : 0.0; }
+    double AvgComputeMs() const { return cropsComputed ? totalComputeMs / static_cast<double>(cropsComputed) : 0.0; }
 };
 
 /// Intelligent saliency-based image cropper.
 class SmartCropEngine
 {
-  public:
-    SmartCropEngine()
-    {
-        InitializeSRWLock(&m_statsLock);
-    }
+public:
+    SmartCropEngine() { InitializeSRWLock(&m_statsLock); }
 
     /// Set center-bias weight (default 0.15). Must be in [0, 1].
-    inline void SetCenterBias(float weight)
-    {
-        m_centerBiasWeight = (std::max)(0.0f, (std::min)(weight, 1.0f));
-    }
+    inline void SetCenterBias(float weight) { m_centerBiasWeight = (std::max)(0.0f, (std::min)(weight, 1.0f)); }
 
     /// Find the single best crop rectangle.
     inline CropRect FindBestCrop(const uint8_t* rgbaData, uint32_t srcWidth, uint32_t srcHeight, uint32_t targetWidth,
@@ -157,7 +145,7 @@ class SmartCropEngine
         return copy;
     }
 
-  private:
+private:
     inline std::vector<float> BuildSaliencyMap(const uint8_t* rgba, uint32_t srcW, uint32_t srcH, uint32_t qW,
                                                uint32_t qH) const
     {
@@ -327,7 +315,7 @@ struct SmartCropResult
 
 class SmartCropV2
 {
-  public:
+public:
     static const wchar_t* StrategyName(CropStrategy s)
     {
         switch (s) {
@@ -379,18 +367,9 @@ class SmartCropV2
                 return L"Unknown";
         }
     }
-    static constexpr size_t StrategyCount()
-    {
-        return static_cast<size_t>(CropStrategy::COUNT);
-    }
-    static constexpr size_t AspectRatioCount()
-    {
-        return static_cast<size_t>(CropAspectRatio::COUNT);
-    }
-    static constexpr size_t PaddingCount()
-    {
-        return static_cast<size_t>(CropPaddingMode::COUNT);
-    }
+    static constexpr size_t StrategyCount() { return static_cast<size_t>(CropStrategy::COUNT); }
+    static constexpr size_t AspectRatioCount() { return static_cast<size_t>(CropAspectRatio::COUNT); }
+    static constexpr size_t PaddingCount() { return static_cast<size_t>(CropPaddingMode::COUNT); }
 
     //==========================================================================
     // Smart Crop — Gradient-weighted center of interest

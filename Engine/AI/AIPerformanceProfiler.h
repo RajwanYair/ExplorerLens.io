@@ -35,7 +35,7 @@ struct AIModuleProfile
 
 class AIPerformanceProfiler
 {
-  public:
+public:
     AIPerformanceProfiler();
     ~AIPerformanceProfiler();
 
@@ -62,7 +62,7 @@ class AIPerformanceProfiler
 
     static AIPerformanceProfiler& Instance();
 
-  private:
+private:
     struct Impl
     {};
     std::unique_ptr<Impl> m_impl;

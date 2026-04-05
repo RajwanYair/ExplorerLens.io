@@ -57,17 +57,11 @@ struct OptimizerStats
 
 class DecodeStrategyOptimizer
 {
-  public:
-    DecodeStrategyOptimizer()
-    {
-        InitializeSRWLock(&m_lock);
-    }
+public:
+    DecodeStrategyOptimizer() { InitializeSRWLock(&m_lock); }
     ~DecodeStrategyOptimizer() = default;
 
-    static const wchar_t* GetName()
-    {
-        return L"DecodeStrategyOptimizer";
-    }
+    static const wchar_t* GetName() { return L"DecodeStrategyOptimizer"; }
 
     /// Record a trial result for a format+strategy combination.
     void RecordTrial(const std::string& format, DecodeStrategy strategy, double latencyMs, bool success)
@@ -168,12 +162,9 @@ class DecodeStrategyOptimizer
         }
     }
 
-    OptimizerStats GetStats() const
-    {
-        return m_stats;
-    }
+    OptimizerStats GetStats() const { return m_stats; }
 
-  private:
+private:
     mutable SRWLOCK m_lock{};
     std::unordered_map<std::string, std::vector<StrategyPerformance>> m_formatStrategies;
     mutable OptimizerStats m_stats{};

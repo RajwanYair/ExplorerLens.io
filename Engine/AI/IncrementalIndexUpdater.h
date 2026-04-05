@@ -34,7 +34,7 @@ struct IndexFileChangeEvent
 
 class IncrementalIndexUpdater
 {
-  public:
+public:
     IncrementalIndexUpdater() = default;
     ~IncrementalIndexUpdater() = default;
 
@@ -59,20 +59,11 @@ class IncrementalIndexUpdater
         m_initialized = false;
     }
 
-    bool OnFileCreated(const std::wstring& path)
-    {
-        return EnqueueEvent(path, IndexFileChangeType::Created);
-    }
+    bool OnFileCreated(const std::wstring& path) { return EnqueueEvent(path, IndexFileChangeType::Created); }
 
-    bool OnFileDeleted(const std::wstring& path)
-    {
-        return EnqueueEvent(path, IndexFileChangeType::Deleted);
-    }
+    bool OnFileDeleted(const std::wstring& path) { return EnqueueEvent(path, IndexFileChangeType::Deleted); }
 
-    bool OnFileModified(const std::wstring& path)
-    {
-        return EnqueueEvent(path, IndexFileChangeType::Modified);
-    }
+    bool OnFileModified(const std::wstring& path) { return EnqueueEvent(path, IndexFileChangeType::Modified); }
 
     uint32_t GetPendingUpdates() const
     {
@@ -95,17 +86,11 @@ class IncrementalIndexUpdater
         return m_stats.totalFlushed;
     }
 
-    double GetAverageFlushLatencyMs() const
-    {
-        return 0.0;
-    }
+    double GetAverageFlushLatencyMs() const { return 0.0; }
 
-    bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    bool IsInitialized() const { return m_initialized; }
 
-  private:
+private:
     bool EnqueueEvent(const std::wstring& path, IndexFileChangeType type)
     {
         std::lock_guard<std::mutex> lock(m_mutex);

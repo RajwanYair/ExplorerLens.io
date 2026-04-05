@@ -66,7 +66,7 @@ struct RankerConfig
 
 class MultiModalRanker
 {
-  public:
+public:
     inline bool Initialize(const RankerConfig& config)
     {
         m_config = config;
@@ -117,16 +117,10 @@ class MultiModalRanker
         return ranked;
     }
 
-    inline RankWeights GetWeights() const
-    {
-        return m_weights;
-    }
-    inline bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    inline RankWeights GetWeights() const { return m_weights; }
+    inline bool IsInitialized() const { return m_initialized; }
 
-  private:
+private:
     inline void NormalizeWeights()
     {
         float sum = m_weights.clip + m_weights.bm25 + m_weights.recency + m_weights.size;

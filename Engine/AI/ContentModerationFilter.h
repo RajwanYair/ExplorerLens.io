@@ -41,7 +41,7 @@ struct ModerationResult
 
 class ContentModerationFilter
 {
-  public:
+public:
     ContentModerationFilter() = default;
     ~ContentModerationFilter() = default;
 
@@ -59,7 +59,7 @@ class ContentModerationFilter
     [[nodiscard]] ModerationTier GetTier() const;
     [[nodiscard]] std::vector<std::string> GetBlocklistCategories() const;
 
-  private:
+private:
     ModerationTier m_tier = ModerationTier::Standard;
     std::unordered_map<std::string, float> m_blocklist;
     bool m_modelLoaded = false;

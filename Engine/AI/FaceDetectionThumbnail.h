@@ -46,7 +46,7 @@ struct FaceDetectionConfig
 
 class FaceDetectionThumbnail
 {
-  public:
+public:
     static FaceDetectionThumbnail& Instance()
     {
         static FaceDetectionThumbnail instance;
@@ -136,7 +136,7 @@ class FaceDetectionThumbnail
         return (rule1 && rule2 && rule3 && rule4) ? 0.8f : 0.1f;
     }
 
-  private:
+private:
     FaceDetectionThumbnail() = default;
 
     inline std::vector<int64_t> ComputeIntegralImage(const uint8_t* gray, uint32_t w, uint32_t h) const

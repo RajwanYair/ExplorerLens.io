@@ -41,7 +41,7 @@ struct UserPersonalisationProfile
 
 class ThumbnailPersonalisationEngine
 {
-  public:
+public:
     ThumbnailPersonalisationEngine() = default;
     ~ThumbnailPersonalisationEngine() = default;
 
@@ -58,7 +58,7 @@ class ThumbnailPersonalisationEngine
 
     [[nodiscard]] std::optional<UserPersonalisationProfile> GetProfile(std::string const& userId) const;
 
-  private:
+private:
     std::unordered_map<std::string, UserPersonalisationProfile> m_profiles;
     AdaptationStrategy m_strategy = AdaptationStrategy::Balanced;
 };

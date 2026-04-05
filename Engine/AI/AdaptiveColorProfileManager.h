@@ -56,7 +56,7 @@ struct ColorProfileStats
 
 class AdaptiveColorProfileManager
 {
-  public:
+public:
     static AdaptiveColorProfileManager& Instance()
     {
         static AdaptiveColorProfileManager instance;
@@ -120,7 +120,7 @@ class AdaptiveColorProfileManager
         m_stats.initialized = false;
     }
 
-  private:
+private:
     AdaptiveColorProfileManager() = default;
     ~AdaptiveColorProfileManager() = default;
     AdaptiveColorProfileManager(const AdaptiveColorProfileManager&) = delete;

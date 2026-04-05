@@ -46,7 +46,7 @@ struct TextEncoderConfig
 
 class NaturalLanguageQueryParser
 {
-  public:
+public:
     inline bool Initialize(const TextEncoderConfig& config)
     {
         m_config = config;
@@ -103,20 +103,11 @@ class NaturalLanguageQueryParser
         return seq;
     }
 
-    inline uint32_t GetVocabSize() const
-    {
-        return CLIP_VOCAB_SIZE;
-    }
-    inline bool IsInitialized() const
-    {
-        return m_initialized;
-    }
-    inline uint32_t GetMaxTokens() const
-    {
-        return m_config.maxTokens;
-    }
+    inline uint32_t GetVocabSize() const { return CLIP_VOCAB_SIZE; }
+    inline bool IsInitialized() const { return m_initialized; }
+    inline uint32_t GetMaxTokens() const { return m_config.maxTokens; }
 
-  private:
+private:
     inline void BuildBaseVocab()
     {
         for (char c = 'a'; c <= 'z'; ++c)

@@ -80,7 +80,7 @@ struct CategorizationStats
 
 class ContentCategorizationEngine
 {
-  public:
+public:
     static ContentCategorizationEngine& Instance()
     {
         static ContentCategorizationEngine instance;
@@ -108,21 +108,12 @@ class ContentCategorizationEngine
         return result;
     }
 
-    CategorizationStats GetStats() const
-    {
-        return m_stats;
-    }
-    bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    CategorizationStats GetStats() const { return m_stats; }
+    bool IsInitialized() const { return m_initialized; }
 
-    void Shutdown()
-    {
-        m_initialized = false;
-    }
+    void Shutdown() { m_initialized = false; }
 
-  private:
+private:
     ContentCategorizationEngine() = default;
     bool m_initialized = false;
     CategorizationStats m_stats{};

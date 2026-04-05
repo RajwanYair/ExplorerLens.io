@@ -43,7 +43,7 @@ struct GenerativeAuditEntry
 
 class GenerativeAuditTrail
 {
-  public:
+public:
     GenerativeAuditTrail() = default;
     ~GenerativeAuditTrail() = default;
 
@@ -64,7 +64,7 @@ class GenerativeAuditTrail
 
     [[nodiscard]] GenAuditRetention GetRetentionPolicy() const;
 
-  private:
+private:
     std::vector<GenerativeAuditEntry> m_entries;
     GenAuditRetention m_policy = GenAuditRetention::Days30;
     uint32_t m_maxEntries = 100000;

@@ -12,22 +12,26 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct PersistedEmbedding {
+struct PersistedEmbedding
+{
     uint32_t itemId = 0;
     std::wstring filePath;
     float vector[512]{};
 };
 
-struct EmbeddingJournalStats {
+struct EmbeddingJournalStats
+{
     uint32_t totalEntries = 0;
     uint32_t flushCount = 0;
     float lastFlushMs = 0.0f;
     uint64_t journalBytes = 0;
 };
 
-class EmbeddingPersistenceEngine {
+class EmbeddingPersistenceEngine
+{
 public:
     static EmbeddingPersistenceEngine& Instance();
 
@@ -37,8 +41,8 @@ public:
     bool LoadAll(std::vector<PersistedEmbedding>& out) const;
     void Close();
 
-    bool                  IsOpen() const noexcept { return m_isOpen; }
-    EmbeddingJournalStats Stats()  const noexcept { return m_stats; }
+    bool IsOpen() const noexcept { return m_isOpen; }
+    EmbeddingJournalStats Stats() const noexcept { return m_stats; }
 
 private:
     bool m_isOpen = false;
@@ -46,4 +50,5 @@ private:
     std::wstring m_journalPath;
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

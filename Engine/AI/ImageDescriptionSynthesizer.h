@@ -39,7 +39,7 @@ struct SynthesisResult
 
 class ImageDescriptionSynthesizer
 {
-  public:
+public:
     ImageDescriptionSynthesizer() = default;
     ~ImageDescriptionSynthesizer() = default;
 
@@ -56,7 +56,7 @@ class ImageDescriptionSynthesizer
     [[nodiscard]] DescriptionLanguage GetLanguage() const;
     [[nodiscard]] bool IsModelLoaded() const;
 
-  private:
+private:
     DescriptionLanguage m_language = DescriptionLanguage::English;
     std::string m_modelPath;
     bool m_modelLoaded = false;

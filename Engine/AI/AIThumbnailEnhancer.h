@@ -64,7 +64,7 @@ struct SmartCropRegion
 /// </summary>
 class AIThumbnailEnhancer
 {
-  public:
+public:
     AIThumbnailEnhancer();
     ~AIThumbnailEnhancer();
 
@@ -95,18 +95,9 @@ class AIThumbnailEnhancer
     HRESULT EnhanceThumbnail(ID3D12Resource* pSourceTexture, ID3D12Resource** ppOutputTexture, EnhancementMode mode);
 
     // Configuration
-    void SetNSFWThreshold(float threshold)
-    {
-        m_nsfwThreshold = threshold;
-    }
-    void SetMinFaceConfidence(float confidence)
-    {
-        m_minFaceConfidence = confidence;
-    }
-    void EnableModelCaching(bool enable)
-    {
-        m_enableModelCache = enable;
-    }
+    void SetNSFWThreshold(float threshold) { m_nsfwThreshold = threshold; }
+    void SetMinFaceConfidence(float confidence) { m_minFaceConfidence = confidence; }
+    void EnableModelCaching(bool enable) { m_enableModelCache = enable; }
 
     // Statistics
     struct Stats
@@ -118,16 +109,10 @@ class AIThumbnailEnhancer
         uint64_t totalInferenceTimeMs = 0;
         uint64_t modelLoadTimeMs = 0;
     };
-    const Stats& GetStats() const
-    {
-        return m_stats;
-    }
-    void ResetStats()
-    {
-        m_stats = Stats{};
-    }
+    const Stats& GetStats() const { return m_stats; }
+    void ResetStats() { m_stats = Stats{}; }
 
-  private:
+private:
     // DirectML infrastructure
     ComPtr<ID3D12Device> m_d3d12Device;
     ComPtr<IDMLDevice> m_dmlDevice;
@@ -183,7 +168,7 @@ class AIThumbnailEnhancer
 /// </summary>
 class ScopedAIEnhancement
 {
-  public:
+public:
     ScopedAIEnhancement(AIThumbnailEnhancer* enhancer, EnhancementMode mode) : m_enhancer(enhancer), m_mode(mode) {}
 
     ~ScopedAIEnhancement()
@@ -196,7 +181,7 @@ class ScopedAIEnhancement
         return m_enhancer->EnhanceThumbnail(pSource, ppOutput, m_mode);
     }
 
-  private:
+private:
     AIThumbnailEnhancer* m_enhancer;
     EnhancementMode m_mode;
 };

@@ -65,7 +65,7 @@ struct ImageQualityReport
 
 class ImageQualityAssessor
 {
-  public:
+public:
     static const wchar_t* MetricName(IQAMetric m)
     {
         switch (m) {
@@ -117,18 +117,9 @@ class ImageQualityAssessor
                 return L"Unknown";
         }
     }
-    static constexpr size_t MetricCount()
-    {
-        return static_cast<size_t>(IQAMetric::COUNT);
-    }
-    static constexpr size_t DefectCount()
-    {
-        return static_cast<size_t>(IQADefect::COUNT);
-    }
-    static constexpr size_t GradeCount()
-    {
-        return static_cast<size_t>(IQAGrade::COUNT);
-    }
+    static constexpr size_t MetricCount() { return static_cast<size_t>(IQAMetric::COUNT); }
+    static constexpr size_t DefectCount() { return static_cast<size_t>(IQADefect::COUNT); }
+    static constexpr size_t GradeCount() { return static_cast<size_t>(IQAGrade::COUNT); }
 
     static double ComputeLaplacianVariance(const uint8_t* gray, uint32_t width, uint32_t height, uint32_t stride)
     {
@@ -249,24 +240,15 @@ struct AssessmentStatsV2
     double totalScore = 0.0;
     double totalAssessTimeMs = 0.0;
     std::array<uint64_t, 5> tierDistribution{};  // [Excellent..Bad]
-    double AvgScore() const
-    {
-        return imagesAssessed ? totalScore / static_cast<double>(imagesAssessed) : 0.0;
-    }
-    double AvgTimeMs() const
-    {
-        return imagesAssessed ? totalAssessTimeMs / static_cast<double>(imagesAssessed) : 0.0;
-    }
+    double AvgScore() const { return imagesAssessed ? totalScore / static_cast<double>(imagesAssessed) : 0.0; }
+    double AvgTimeMs() const { return imagesAssessed ? totalAssessTimeMs / static_cast<double>(imagesAssessed) : 0.0; }
 };
 
 /// No-reference image quality assessor (BRISQUE-inspired).
 class ImageQualityAssessorV2
 {
-  public:
-    ImageQualityAssessorV2()
-    {
-        InitializeSRWLock(&m_statsLock);
-    }
+public:
+    ImageQualityAssessorV2() { InitializeSRWLock(&m_statsLock); }
 
     /// Full assessment returning all sub-metrics.
     inline QualityScoreV2 Assess(const uint8_t* rgbaData, uint32_t width, uint32_t height)
@@ -364,7 +346,7 @@ class ImageQualityAssessorV2
         return copy;
     }
 
-  private:
+private:
     // ---- Sub-metric implementations ----------------------------------------
 
     /// Sharpness via Laplacian variance. Returns [0, 1].

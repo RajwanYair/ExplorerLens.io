@@ -59,7 +59,7 @@ struct AIPipelineResult
 
 class AIThumbnailPipeline
 {
-  public:
+public:
     explicit AIThumbnailPipeline(AIPipelineConfig config = {});
     ~AIThumbnailPipeline();
 
@@ -80,7 +80,7 @@ class AIThumbnailPipeline
 
     static AIThumbnailPipeline& Instance();
 
-  private:
+private:
     struct Impl
     {};
     std::unique_ptr<Impl> m_impl;

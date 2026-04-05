@@ -37,7 +37,7 @@ enum class SearchIndexStatus : uint8_t {
 
 class AISearchIntegration
 {
-  public:
+public:
     static const wchar_t* ModeName(AISearchMode m) noexcept
     {
         switch (m) {
@@ -83,14 +83,8 @@ class AISearchIntegration
                 return L"Unknown";
         }
     }
-    static size_t ModeCount() noexcept
-    {
-        return static_cast<size_t>(AISearchMode::COUNT);
-    }
-    static size_t EmbeddingModelCount() noexcept
-    {
-        return static_cast<size_t>(EmbeddingModel::COUNT);
-    }
+    static size_t ModeCount() noexcept { return static_cast<size_t>(AISearchMode::COUNT); }
+    static size_t EmbeddingModelCount() noexcept { return static_cast<size_t>(EmbeddingModel::COUNT); }
 
     // Average hash: compare each pixel to the mean; returns 64-bit hash
     static uint64_t ComputeAverageHash(const uint8_t* data, uint32_t W, uint32_t H, uint32_t stride) noexcept

@@ -12,22 +12,26 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-struct SemanticSearchRequest {
+struct SemanticSearchRequest
+{
     std::wstring queryText;
     uint32_t topK = 20;
     float minRelevance = 0.15f;
     bool reloadIndex = false;
 };
 
-struct SemanticSearchResult {
+struct SemanticSearchResult
+{
     std::wstring filePath;
     float relevance = 0.0f;
     uint32_t rank = 0;
 };
 
-struct SemanticSearchStats {
+struct SemanticSearchStats
+{
     float embedMs = 0.0f;
     float searchMs = 0.0f;
     float totalMs = 0.0f;
@@ -35,7 +39,8 @@ struct SemanticSearchStats {
     uint32_t resultsFound = 0;
 };
 
-class SemanticSearchOrchestrator {
+class SemanticSearchOrchestrator
+{
 public:
     static SemanticSearchOrchestrator& Instance();
 
@@ -52,4 +57,5 @@ private:
     SemanticSearchStats m_lastStats{};
 };
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

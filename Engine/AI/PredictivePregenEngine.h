@@ -42,7 +42,7 @@ struct PregenStats
 
 class PredictivePregenEngine
 {
-  public:
+public:
     static PredictivePregenEngine& Instance()
     {
         static PredictivePregenEngine instance;
@@ -76,25 +76,13 @@ class PredictivePregenEngine
         return {p};
     }
 
-    PregenStats GetStats() const
-    {
-        return m_stats;
-    }
-    bool IsInitialized() const
-    {
-        return m_initialized;
-    }
-    PregenStrategy GetStrategy() const
-    {
-        return m_strategy;
-    }
+    PregenStats GetStats() const { return m_stats; }
+    bool IsInitialized() const { return m_initialized; }
+    PregenStrategy GetStrategy() const { return m_strategy; }
 
-    void Shutdown()
-    {
-        m_initialized = false;
-    }
+    void Shutdown() { m_initialized = false; }
 
-  private:
+private:
     PredictivePregenEngine() = default;
     bool m_initialized = false;
     PregenStrategy m_strategy = PregenStrategy::Hybrid;

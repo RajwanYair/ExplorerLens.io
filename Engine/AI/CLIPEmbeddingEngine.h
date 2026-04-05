@@ -49,7 +49,7 @@ struct CLIPModelConfig
 
 class CLIPEmbeddingEngine
 {
-  public:
+public:
     inline bool Initialize(const CLIPModelConfig& config)
     {
         m_config = config;
@@ -88,26 +88,11 @@ class CLIPEmbeddingEngine
         return result;
     }
 
-    inline uint32_t GetEmbeddingDimension() const
-    {
-        return CLIP_EMBEDDING_DIM;
-    }
-    inline float GetInferenceLatencyMs() const
-    {
-        return m_lastLatencyMs;
-    }
-    inline InferenceBackend GetBackend() const
-    {
-        return m_backend;
-    }
-    inline uint64_t GetTotalInferences() const
-    {
-        return m_totalInferences.load();
-    }
-    inline bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    inline uint32_t GetEmbeddingDimension() const { return CLIP_EMBEDDING_DIM; }
+    inline float GetInferenceLatencyMs() const { return m_lastLatencyMs; }
+    inline InferenceBackend GetBackend() const { return m_backend; }
+    inline uint64_t GetTotalInferences() const { return m_totalInferences.load(); }
+    inline bool IsInitialized() const { return m_initialized; }
 
     inline void SetBackend(InferenceBackend backend)
     {
@@ -115,7 +100,7 @@ class CLIPEmbeddingEngine
         m_config.backend = backend;
     }
 
-  private:
+private:
     inline void L2Normalize(std::vector<float>& vec)
     {
         float norm = 0.0f;

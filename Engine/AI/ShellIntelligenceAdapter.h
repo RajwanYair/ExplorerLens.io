@@ -34,7 +34,7 @@ struct ShellAdapterStats
 
 class ShellIntelligenceAdapter
 {
-  public:
+public:
     explicit ShellIntelligenceAdapter(ShellPlatform platform) : m_platform(platform) {}
 
     AIHint QueryHint(const std::string& /*filePath*/, uint32_t /*requestedSize*/)
@@ -47,16 +47,10 @@ class ShellIntelligenceAdapter
         ++m_stats.hintInjections;
         return true;
     }
-    void NotifyShellRender(const std::string& /*filePath*/, float renderMs)
-    {
-        m_stats.avgHintLatencyMs = renderMs;
-    }
-    ShellAdapterStats GetStats() const
-    {
-        return m_stats;
-    }
+    void NotifyShellRender(const std::string& /*filePath*/, float renderMs) { m_stats.avgHintLatencyMs = renderMs; }
+    ShellAdapterStats GetStats() const { return m_stats; }
 
-  private:
+private:
     ShellPlatform m_platform;
     ShellAdapterStats m_stats;
 };

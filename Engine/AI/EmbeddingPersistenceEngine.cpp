@@ -6,7 +6,8 @@
 #include <string>
 #include <vector>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 EmbeddingPersistenceEngine& EmbeddingPersistenceEngine::Instance()
 {
@@ -16,7 +17,9 @@ EmbeddingPersistenceEngine& EmbeddingPersistenceEngine::Instance()
 
 bool EmbeddingPersistenceEngine::Open(const std::wstring& journalPath)
 {
-    if (journalPath.empty()) { return false; }
+    if (journalPath.empty()) {
+        return false;
+    }
     m_journalPath = journalPath;
     m_isOpen = true;
     return true;
@@ -24,7 +27,9 @@ bool EmbeddingPersistenceEngine::Open(const std::wstring& journalPath)
 
 bool EmbeddingPersistenceEngine::Append(const PersistedEmbedding& entry)
 {
-    if (!m_isOpen || entry.filePath.empty()) { return false; }
+    if (!m_isOpen || entry.filePath.empty()) {
+        return false;
+    }
     ++m_stats.totalEntries;
     // Journal byte estimate: itemId(4) + path(256*2) + vector(512*4)
     m_stats.journalBytes += 4u + 512u + 2048u;
@@ -33,7 +38,9 @@ bool EmbeddingPersistenceEngine::Append(const PersistedEmbedding& entry)
 
 bool EmbeddingPersistenceEngine::Flush()
 {
-    if (!m_isOpen) { return false; }
+    if (!m_isOpen) {
+        return false;
+    }
     ++m_stats.flushCount;
     m_stats.lastFlushMs = 1.2f;
     return true;
@@ -50,4 +57,5 @@ void EmbeddingPersistenceEngine::Close()
     m_isOpen = false;
 }
 
-}} // namespace ExplorerLens::Engine
+}  // namespace Engine
+}  // namespace ExplorerLens

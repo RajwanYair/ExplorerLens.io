@@ -38,7 +38,7 @@ struct HWNegotiatorStats
 
 class HardwareCapabilityNegotiator
 {
-  public:
+public:
     HardwareCapabilityNegotiator() = default;
 
     bool Initialize()
@@ -46,10 +46,7 @@ class HardwareCapabilityNegotiator
         m_ready = true;
         return true;
     }
-    bool IsReady() const
-    {
-        return m_ready;
-    }
+    bool IsReady() const { return m_ready; }
 
     HWCapabilityScore Negotiate(const std::string& taskType)
     {
@@ -78,21 +75,12 @@ class HardwareCapabilityNegotiator
         return best;
     }
 
-    bool PrefersNPU(const std::string& taskType)
-    {
-        return Negotiate(taskType).backend == HWBackendChoice::NPU;
-    }
+    bool PrefersNPU(const std::string& taskType) { return Negotiate(taskType).backend == HWBackendChoice::NPU; }
 
-    const HWNegotiatorStats& GetStats() const
-    {
-        return m_stats;
-    }
-    void Reset()
-    {
-        m_stats = {};
-    }
+    const HWNegotiatorStats& GetStats() const { return m_stats; }
+    void Reset() { m_stats = {}; }
 
-  private:
+private:
     bool m_ready = false;
     HWNegotiatorStats m_stats;
 };

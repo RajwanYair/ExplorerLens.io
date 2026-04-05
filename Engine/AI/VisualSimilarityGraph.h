@@ -48,7 +48,7 @@ struct GraphConfig
 
 class VisualSimilarityGraph
 {
-  public:
+public:
     inline bool BuildGraph(const GraphConfig& config, const std::vector<GraphNode>& nodes)
     {
         m_config = config;
@@ -96,10 +96,7 @@ class VisualSimilarityGraph
         return true;
     }
 
-    inline uint64_t GetNodeCount() const
-    {
-        return m_nodes.size();
-    }
+    inline uint64_t GetNodeCount() const { return m_nodes.size(); }
 
     inline uint64_t GetEdgeCount() const
     {
@@ -109,12 +106,9 @@ class VisualSimilarityGraph
         return count;
     }
 
-    inline bool IsBuilt() const
-    {
-        return m_built;
-    }
+    inline bool IsBuilt() const { return m_built; }
 
-  private:
+private:
     inline std::vector<SimilarityResult> ComputeNeighbors(uint64_t sourceId, const std::vector<float>& emb) const
     {
         std::vector<SimilarityResult> candidates;

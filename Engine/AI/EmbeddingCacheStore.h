@@ -56,7 +56,7 @@ struct EmbeddingCacheStats
 
 class EmbeddingCacheStore
 {
-  public:
+public:
     inline bool Initialize(const EmbeddingCacheConfig& config)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -139,10 +139,7 @@ class EmbeddingCacheStore
         Retrieve(std::hash<std::string>{}(key), out);
         return out;
     }
-    inline bool Contains(const std::string& key) const
-    {
-        return Contains(std::hash<std::string>{}(key));
-    }
+    inline bool Contains(const std::string& key) const { return Contains(std::hash<std::string>{}(key)); }
     inline void Clear()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -178,12 +175,9 @@ class EmbeddingCacheStore
         m_stats.totalEntries = m_cache.size();
     }
 
-    inline bool IsInitialized() const
-    {
-        return m_initialized;
-    }
+    inline bool IsInitialized() const { return m_initialized; }
 
-  private:
+private:
     inline void UpdateHitRate()
     {
         uint64_t total = m_stats.hitCount + m_stats.misses;

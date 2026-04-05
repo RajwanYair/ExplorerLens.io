@@ -58,7 +58,7 @@ struct QualityPredictorStats
 
 class ThumbnailQualityPredictor
 {
-  public:
+public:
     static ThumbnailQualityPredictor& Instance()
     {
         static ThumbnailQualityPredictor instance;
@@ -89,25 +89,13 @@ class ThumbnailQualityPredictor
         return pred;
     }
 
-    QualityPredictorStats GetStats() const
-    {
-        return m_stats;
-    }
-    bool IsInitialized() const
-    {
-        return m_initialized;
-    }
-    double GetSkipThreshold() const
-    {
-        return m_skipThreshold;
-    }
+    QualityPredictorStats GetStats() const { return m_stats; }
+    bool IsInitialized() const { return m_initialized; }
+    double GetSkipThreshold() const { return m_skipThreshold; }
 
-    void Shutdown()
-    {
-        m_initialized = false;
-    }
+    void Shutdown() { m_initialized = false; }
 
-  private:
+private:
     ThumbnailQualityPredictor() = default;
     bool m_initialized = false;
     double m_skipThreshold = 0.3;

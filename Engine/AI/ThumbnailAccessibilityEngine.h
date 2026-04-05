@@ -61,7 +61,7 @@ struct AccessibilityStats
 
 class ThumbnailAccessibilityEngine
 {
-  public:
+public:
     static ThumbnailAccessibilityEngine& Instance()
     {
         static ThumbnailAccessibilityEngine instance;
@@ -129,7 +129,7 @@ class ThumbnailAccessibilityEngine
         m_stats.initialized = false;
     }
 
-  private:
+private:
     ThumbnailAccessibilityEngine() = default;
     ~ThumbnailAccessibilityEngine() = default;
     ThumbnailAccessibilityEngine(const ThumbnailAccessibilityEngine&) = delete;

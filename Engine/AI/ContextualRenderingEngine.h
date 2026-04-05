@@ -65,7 +65,7 @@ struct ContextualRenderStats
 
 class ContextualRenderingEngine
 {
-  public:
+public:
     static ContextualRenderingEngine& Instance()
     {
         static ContextualRenderingEngine instance;
@@ -148,7 +148,7 @@ class ContextualRenderingEngine
         m_currentParams = {};
     }
 
-  private:
+private:
     ContextualRenderingEngine() = default;
     ~ContextualRenderingEngine() = default;
     ContextualRenderingEngine(const ContextualRenderingEngine&) = delete;

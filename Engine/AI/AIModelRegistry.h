@@ -54,7 +54,7 @@ struct AIModelDescriptor
 
 class AIModelRegistry
 {
-  public:
+public:
     AIModelRegistry();
     ~AIModelRegistry();
 
@@ -88,7 +88,7 @@ class AIModelRegistry
 
     static AIModelRegistry& Instance();
 
-  private:
+private:
     struct Impl
     {};
     std::unique_ptr<Impl> m_impl;
