@@ -241,6 +241,12 @@
 #include "../Media/LivePreviewSession.h"
 #include "../Media/ThumbnailStripGenerator.h"
 #include "../Media/ScrubberCacheEngine.h"
+// Sprint 1141-1150: Cross-Platform Shell PAL (v33.0.0 "Spica")
+#include "../Platform/PlatformShellProvider.h"
+#include "../Platform/Win32ShellProvider.h"
+#include "../Platform/MacOSQLProvider.h"
+#include "../Platform/LinuxNautilusProvider.h"
+#include "../Platform/PlatformDetector.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -22624,6 +22630,58 @@ extern void TestVQO_SetActive_Runner();
 extern void TestVQO_PruneNoHint_Runner();
 extern void TestVQO_PruneReducesCandidates_Runner();
 extern void TestVQO_PruneResultFields_Runner();
+// Sprint 1131-1140: Live Preview Scrubber (v32.7.0 "Fomalhaut-X")
+extern void TestVFE_BackendName_DXVA2_Runner();
+extern void TestVFE_BackendName_MFSoftware_Runner();
+extern void TestVFE_BackendName_Unavailable_Runner();
+extern void TestVFE_ExtractFrame_ValidPath_Runner();
+extern void TestVFE_ExtractFrame_EmptyPath_Runner();
+extern void TestVST_BuildEmpty_Runner();
+extern void TestVST_BuildPopulates_Runner();
+extern void TestVST_KeyframeAt_Valid_Runner();
+extern void TestVST_KeyframeAt_OutOfBounds_Runner();
+extern void TestVST_NearestKeyframePts_Runner();
+extern void TestLPS_OpenEmpty_Runner();
+extern void TestLPS_OpenValid_Runner();
+extern void TestLPS_SeekNotOpen_Runner();
+extern void TestLPS_SeekOpen_Runner();
+extern void TestLPS_Close_Runner();
+extern void TestTSG_ResetClearsState_Runner();
+extern void TestTSG_GenerateEmpty_Runner();
+extern void TestTSG_GenerateValid_Runner();
+extern void TestTSG_StripWidth_Runner();
+extern void TestTSG_FrameCount_Runner();
+extern void TestSCE_InitialEmpty_Runner();
+extern void TestSCE_PutAndGet_Runner();
+extern void TestSCE_GetMiss_Runner();
+extern void TestSCE_Evict_Runner();
+extern void TestSCE_HitRate_Runner();
+// Sprint 1141-1150: Cross-Platform Shell PAL (v33.0.0 "Spica")
+extern void TestPSP_Win32PlatformKind_Runner();
+extern void TestPSP_Win32PlatformName_Runner();
+extern void TestPSP_Win32NotRegisteredByDefault_Runner();
+extern void TestPSP_Win32RegisterUnregister_Runner();
+extern void TestPSP_Win32ThumbnailEmpty_Runner();
+extern void TestPSP_Win32ThumbnailPath_Runner();
+extern void TestPSP_Win32ThumbnailNonzeroSize_Runner();
+extern void TestPSP_MacOSPlatformKind_Runner();
+extern void TestPSP_MacOSPlatformName_Runner();
+extern void TestPSP_MacOSNotAvailableOnWindows_Runner();
+extern void TestPSP_MacOSThumbnailEmpty_Runner();
+extern void TestPSP_MacOSThumbnailNotSupported_Runner();
+extern void TestPSP_MacOSIsNotRegistered_Runner();
+extern void TestPSP_LinuxPlatformKind_Runner();
+extern void TestPSP_LinuxPlatformName_Runner();
+extern void TestPSP_LinuxNotAvailableOnWindows_Runner();
+extern void TestPSP_LinuxThumbnailEmpty_Runner();
+extern void TestPSP_LinuxIsNotRegistered_Runner();
+extern void TestPD_DetectCurrentPlatform_Runner();
+extern void TestPD_PlatformNameWindows_Runner();
+extern void TestPD_MakeWin32Provider_Runner();
+extern void TestPD_MakeMacOSProvider_Runner();
+extern void TestPD_MakeLinuxProvider_Runner();
+extern void TestPD_PlatformDescString_Runner();
+extern void TestPD_CurrentProviderForPlatform_Runner();
 
 int main()
 {
@@ -27317,9 +27375,60 @@ int main()
     RUN_TEST(TestVQO_PruneReducesCandidates);
     RUN_TEST(TestVQO_PruneResultFields);
 
-    std::wcout << std::endl;
+    // Sprint 1131-1140: Live Preview Scrubber (v32.7.0 "Fomalhaut-X")
+    RUN_TEST(TestVFE_BackendName_DXVA2);
+    RUN_TEST(TestVFE_BackendName_MFSoftware);
+    RUN_TEST(TestVFE_BackendName_Unavailable);
+    RUN_TEST(TestVFE_ExtractFrame_ValidPath);
+    RUN_TEST(TestVFE_ExtractFrame_EmptyPath);
+    RUN_TEST(TestVST_BuildEmpty);
+    RUN_TEST(TestVST_BuildPopulates);
+    RUN_TEST(TestVST_KeyframeAt_Valid);
+    RUN_TEST(TestVST_KeyframeAt_OutOfBounds);
+    RUN_TEST(TestVST_NearestKeyframePts);
+    RUN_TEST(TestLPS_OpenEmpty);
+    RUN_TEST(TestLPS_OpenValid);
+    RUN_TEST(TestLPS_SeekNotOpen);
+    RUN_TEST(TestLPS_SeekOpen);
+    RUN_TEST(TestLPS_Close);
+    RUN_TEST(TestTSG_ResetClearsState);
+    RUN_TEST(TestTSG_GenerateEmpty);
+    RUN_TEST(TestTSG_GenerateValid);
+    RUN_TEST(TestTSG_StripWidth);
+    RUN_TEST(TestTSG_FrameCount);
+    RUN_TEST(TestSCE_InitialEmpty);
+    RUN_TEST(TestSCE_PutAndGet);
+    RUN_TEST(TestSCE_GetMiss);
+    RUN_TEST(TestSCE_Evict);
+    RUN_TEST(TestSCE_HitRate);
+    // Sprint 1141-1150: Cross-Platform Shell PAL (v33.0.0 "Spica")
+    RUN_TEST(TestPSP_Win32PlatformKind);
+    RUN_TEST(TestPSP_Win32PlatformName);
+    RUN_TEST(TestPSP_Win32NotRegisteredByDefault);
+    RUN_TEST(TestPSP_Win32RegisterUnregister);
+    RUN_TEST(TestPSP_Win32ThumbnailEmpty);
+    RUN_TEST(TestPSP_Win32ThumbnailPath);
+    RUN_TEST(TestPSP_Win32ThumbnailNonzeroSize);
+    RUN_TEST(TestPSP_MacOSPlatformKind);
+    RUN_TEST(TestPSP_MacOSPlatformName);
+    RUN_TEST(TestPSP_MacOSNotAvailableOnWindows);
+    RUN_TEST(TestPSP_MacOSThumbnailEmpty);
+    RUN_TEST(TestPSP_MacOSThumbnailNotSupported);
+    RUN_TEST(TestPSP_MacOSIsNotRegistered);
+    RUN_TEST(TestPSP_LinuxPlatformKind);
+    RUN_TEST(TestPSP_LinuxPlatformName);
+    RUN_TEST(TestPSP_LinuxNotAvailableOnWindows);
+    RUN_TEST(TestPSP_LinuxThumbnailEmpty);
+    RUN_TEST(TestPSP_LinuxIsNotRegistered);
+    RUN_TEST(TestPD_DetectCurrentPlatform);
+    RUN_TEST(TestPD_PlatformNameWindows);
+    RUN_TEST(TestPD_MakeWin32Provider);
+    RUN_TEST(TestPD_MakeMacOSProvider);
+    RUN_TEST(TestPD_MakeLinuxProvider);
+    RUN_TEST(TestPD_PlatformDescString);
+    RUN_TEST(TestPD_CurrentProviderForPlatform);
 
-    // Isolation & Stability Tests
+    std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;
     RUN_TEST(TestMalformedArchive_TruncatedZIP);
     RUN_TEST(TestMalformedArchive_GarbageHeader);

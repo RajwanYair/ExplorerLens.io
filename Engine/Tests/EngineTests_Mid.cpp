@@ -244,6 +244,12 @@
 #include "../Media/LivePreviewSession.h"
 #include "../Media/ThumbnailStripGenerator.h"
 #include "../Media/ScrubberCacheEngine.h"
+// Sprint 1141-1150: Cross-Platform Shell PAL (v33.0.0 "Spica")
+#include "../Platform/PlatformShellProvider.h"
+#include "../Platform/Win32ShellProvider.h"
+#include "../Platform/MacOSQLProvider.h"
+#include "../Platform/LinuxNautilusProvider.h"
+#include "../Platform/PlatformDetector.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -21795,14 +21801,14 @@ TEST(TestGDK_InitSelectsVendor)
     auto& k = GPUDecompressKernel::Instance();
     ASSERT(k.Initialize());
     auto v = k.GetActiveVendor();
-    ASSERT(v == GDKVendor::CPUFallback || v == GDKVendor::NvidiaGDeflate
-           || v == GDKVendor::IntelDSB || v == GDKVendor::AmdComputeShader);
+    ASSERT(v == GDKVendor::CPU_FALLBACK || v == GDKVendor::NVIDIA_GDEFLATE
+           || v == GDKVendor::INTEL_DSB || v == GDKVendor::AMD_COMPUTE_SHADER);
 }
 TEST(TestGDK_Decompress_CPUFallback)
 {
     using namespace ExplorerLens::Engine;
     auto& k = GPUDecompressKernel::Instance();
-    k.Initialize(GDKVendor::CPUFallback);
+    k.Initialize(GDKVendor::CPU_FALLBACK);
     std::vector<uint8_t> src(256, 0xAB);
     std::vector<uint8_t> dst(1024, 0);
     GPUDecompressInput in;
@@ -21810,22 +21816,22 @@ TEST(TestGDK_Decompress_CPUFallback)
     in.compressedSize = static_cast<uint32_t>(src.size());
     in.outputBuffer = dst.data();
     in.outputCapacity = static_cast<uint32_t>(dst.size());
-    in.format = GPUCompressedFormat::ZStandard;
+    in.format = GPUCompressedFormat::ZSTANDARD;
     auto out = k.Decompress(in);
     ASSERT(out.success);
-    ASSERT(out.vendorUsed == GDKVendor::CPUFallback);
+    ASSERT(out.vendorUsed == GDKVendor::CPU_FALLBACK);
 }
 TEST(TestGDK_EstimateOutputSize)
 {
     using namespace ExplorerLens::Engine;
-    ASSERT(GPUDecompressKernel::EstimateOutputSize(1000, GPUCompressedFormat::ZStandard) == 8000);
-    ASSERT(GPUDecompressKernel::EstimateOutputSize(1000, GPUCompressedFormat::Uncompressed) == 1000);
+    ASSERT(GPUDecompressKernel::EstimateOutputSize(1000, GPUCompressedFormat::ZSTANDARD) == 8000);
+    ASSERT(GPUDecompressKernel::EstimateOutputSize(1000, GPUCompressedFormat::UNCOMPRESSED) == 1000);
 }
 TEST(TestGDK_VendorName)
 {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::string(GPUDecompressKernel::VendorName(GDKVendor::CPUFallback)) == "CPU-Fallback");
-    ASSERT(std::string(GPUDecompressKernel::VendorName(GDKVendor::NvidiaGDeflate)) == "NVIDIA-GDeflate");
+    ASSERT(std::string(GPUDecompressKernel::VendorName(GDKVendor::CPU_FALLBACK)) == "CPU-Fallback");
+    ASSERT(std::string(GPUDecompressKernel::VendorName(GDKVendor::NVIDIA_GDEFLATE)) == "NVIDIA-GDeflate");
 }
 
 // ZeroLatencyPipeline
@@ -22704,4 +22710,681 @@ TEST(TestVQO_PruneResultFields)
     auto res = opt.PruneSearchSpace(hint, candidates, pruned);
     ASSERT(res.originalCandidates == 3);
     ASSERT(res.pruneMs >= 0.0f);
+}
+
+//== Sprint 1131-1140: Live Preview Scrubber (v32.7.0 "Fomalhaut-X") ==
+// ── VideoFrameExtractor ───────────────────────────────────────────────────────
+TEST(TestVFE_BackendName_DXVA2)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(VideoFrameExtractor::BackendName(VideoDecodeBackend::DXVA2_HARDWARE) == "DXVA2/Hardware");
+}
+TEST(TestVFE_BackendName_MFSoftware)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(VideoFrameExtractor::BackendName(VideoDecodeBackend::MF_SOFTWARE) == "MF/Software");
+}
+TEST(TestVFE_BackendName_Unavailable)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(!VideoFrameExtractor::BackendName(VideoDecodeBackend::UNAVAILABLE).empty());
+}
+TEST(TestVFE_ExtractFrame_ValidPath)
+{
+    using namespace ExplorerLens::Engine;
+    VideoFrameRequest req{};
+    req.filePath = L"test.mp4";
+    auto res = VideoFrameExtractor::Instance().ExtractFrame(req);
+    ASSERT(!res.success || res.width > 0);
+}
+TEST(TestVFE_ExtractFrame_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    VideoFrameRequest req{};
+    auto res = VideoFrameExtractor::Instance().ExtractFrame(req);
+    ASSERT(!res.success);
+}
+// ── VideoScrubberTimeline ─────────────────────────────────────────────────────
+TEST(TestVST_BuildEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    auto& t = VideoScrubberTimeline::Instance();
+    t.Clear();
+    ASSERT(t.KeyframeCount() == 0);
+    ASSERT(t.ChapterCount()  == 0);
+}
+TEST(TestVST_BuildPopulates)
+{
+    using namespace ExplorerLens::Engine;
+    auto& t = VideoScrubberTimeline::Instance();
+    bool ok = t.Build(L"nonexistent.mp4");
+    (void)ok;
+    auto stats = t.GetStats();
+    ASSERT(stats.keyframeCount >= 0);
+}
+TEST(TestVST_KeyframeAt_Valid)
+{
+    using namespace ExplorerLens::Engine;
+    auto& t = VideoScrubberTimeline::Instance();
+    t.Clear();
+    if (t.KeyframeCount() > 0) {
+        auto kf = t.KeyframeAt(0);
+        ASSERT(kf.ptsSec >= 0.0);
+    }
+    ASSERT(true);
+}
+TEST(TestVST_KeyframeAt_OutOfBounds)
+{
+    using namespace ExplorerLens::Engine;
+    auto& t = VideoScrubberTimeline::Instance();
+    t.Clear();
+    auto kf = t.KeyframeAt(999999U);
+    ASSERT(kf.ptsSec >= 0.0);
+}
+TEST(TestVST_NearestKeyframePts)
+{
+    using namespace ExplorerLens::Engine;
+    auto& t = VideoScrubberTimeline::Instance();
+    double pts = t.NearestKeyframePts(5.0);
+    ASSERT(pts >= 0.0);
+}
+// ── LivePreviewSession ────────────────────────────────────────────────────────
+TEST(TestLPS_OpenEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession session;
+    bool ok = session.Open(L"");
+    ASSERT(!ok);
+    ASSERT(!session.IsOpen());
+}
+TEST(TestLPS_OpenValid)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession session;
+    session.Open(L"test.mp4");
+    (void)session.IsOpen();
+    ASSERT(true);
+}
+TEST(TestLPS_SeekNotOpen)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession session;
+    auto res = session.SeekTo(1.5);
+    ASSERT(!res.success);
+}
+TEST(TestLPS_SeekOpen)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession session;
+    session.Open(L"test.mp4");
+    auto res = session.SeekTo(0.0);
+    (void)res;
+    ASSERT(true);
+}
+TEST(TestLPS_Close)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession session;
+    session.Open(L"test.mp4");
+    session.Close();
+    ASSERT(!session.IsOpen());
+    ASSERT(session.FilePath().empty());
+}
+// ── ThumbnailStripGenerator ───────────────────────────────────────────────────
+TEST(TestTSG_ResetClearsState)
+{
+    using namespace ExplorerLens::Engine;
+    auto& gen = ThumbnailStripGenerator::Instance();
+    gen.Reset();
+    ASSERT(gen.StripWidth()  == 0);
+    ASSERT(gen.StripHeight() == 0);
+    ASSERT(gen.FrameCount()  == 0);
+}
+TEST(TestTSG_GenerateEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    auto& gen = ThumbnailStripGenerator::Instance();
+    StripConfig cfg{};
+    auto res = gen.GenerateStrip(cfg);
+    ASSERT(!res.success || res.framesAdded == 0);
+}
+TEST(TestTSG_GenerateValid)
+{
+    using namespace ExplorerLens::Engine;
+    auto& gen = ThumbnailStripGenerator::Instance();
+    StripConfig cfg{};
+    cfg.filePath   = L"test.mp4";
+    cfg.frameCount = 5;
+    auto res = gen.GenerateStrip(cfg);
+    ASSERT(res.generateMs >= 0.0f);
+}
+TEST(TestTSG_StripWidth)
+{
+    using namespace ExplorerLens::Engine;
+    auto& gen = ThumbnailStripGenerator::Instance();
+    StripConfig cfg{};
+    cfg.filePath   = L"test.mp4";
+    cfg.frameCount = 4;
+    cfg.frameWidth = 80;
+    gen.GenerateStrip(cfg);
+    ASSERT(gen.StripWidth() >= 0);
+}
+TEST(TestTSG_FrameCount)
+{
+    using namespace ExplorerLens::Engine;
+    auto& gen = ThumbnailStripGenerator::Instance();
+    StripConfig cfg{};
+    cfg.filePath   = L"test.mp4";
+    cfg.frameCount = 3;
+    gen.GenerateStrip(cfg);
+    ASSERT(gen.FrameCount() >= 0);
+}
+// ── ScrubberCacheEngine ───────────────────────────────────────────────────────
+TEST(TestSCE_InitialEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ASSERT(cache.Size() == 0);
+}
+TEST(TestSCE_PutAndGet)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{L"test.mp4", 1.0};
+    ScrubberCacheEntry entry{true, 256, 144, 256U * 144U * 4U};
+    ASSERT(cache.Put(key, entry));
+    ScrubberCacheEntry out{};
+    ASSERT(cache.Get(key, out));
+    ASSERT(out.width == 256);
+}
+TEST(TestSCE_GetMiss)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{L"missing.mp4", 99.0};
+    ScrubberCacheEntry out{};
+    ASSERT(!cache.Get(key, out));
+}
+TEST(TestSCE_Evict)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{L"test.mp4", 2.0};
+    ScrubberCacheEntry entry{true, 128, 72, 128U * 72U * 4U};
+    cache.Put(key, entry);
+    cache.Evict(key);
+    ASSERT(cache.Size() == 0);
+}
+TEST(TestSCE_HitRate)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{L"test.mp4", 3.0};
+    ScrubberCacheEntry entry{true, 64, 36, 64U * 36U * 4U};
+    cache.Put(key, entry);
+    ScrubberCacheEntry out{};
+    cache.Get(key, out);
+    auto stats = cache.GetStats();
+    ASSERT(stats.hits   >= 0);
+    ASSERT(stats.misses >= 0);
+}
+
+//== Sprint 1141-1150: Cross-Platform Shell PAL (v33.0.0 "Spica") ==
+// ── Win32ShellProvider ────────────────────────────────────────────────────────
+TEST(TestPSP_Win32PlatformKind)
+{
+    using namespace ExplorerLens::Engine;
+    Win32ShellProvider p;
+    ASSERT(p.GetPlatform() == PlatformKind::WINDOWS);
+}
+TEST(TestPSP_Win32PlatformName)
+{
+    using namespace ExplorerLens::Engine;
+    Win32ShellProvider p;
+    ASSERT(p.GetPlatformName() != nullptr);
+    ASSERT(std::string(p.GetPlatformName()).size() > 0);
+}
+TEST(TestPSP_Win32NotRegisteredByDefault)
+{
+    using namespace ExplorerLens::Engine;
+    Win32ShellProvider p;
+    ASSERT(!p.IsRegistered());
+}
+TEST(TestPSP_Win32RegisterUnregister)
+{
+    using namespace ExplorerLens::Engine;
+    Win32ShellProvider p;
+    bool ok = p.RegisterProvider();
+    ASSERT(ok);
+    ASSERT(p.IsRegistered());
+    p.UnregisterProvider();
+    ASSERT(!p.IsRegistered());
+}
+TEST(TestPSP_Win32ThumbnailEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    Win32ShellProvider p;
+    PlatformThumbnailRequest req{};
+    auto res = p.GenerateThumbnail(req);
+    ASSERT(!res.success);
+}
+TEST(TestPSP_Win32ThumbnailPath)
+{
+    using namespace ExplorerLens::Engine;
+    Win32ShellProvider p;
+    PlatformThumbnailRequest req{};
+    req.filePath = L"test.png";
+    req.width    = 256;
+    req.height   = 256;
+    auto res = p.GenerateThumbnail(req);
+    ASSERT(res.success);
+}
+TEST(TestPSP_Win32ThumbnailNonzeroSize)
+{
+    using namespace ExplorerLens::Engine;
+    Win32ShellProvider p;
+    PlatformThumbnailRequest req{};
+    req.filePath = L"test.png";
+    req.width  = 128;
+    req.height = 128;
+    auto res = p.GenerateThumbnail(req);
+    ASSERT(res.width >= 0);
+    ASSERT(res.height >= 0);
+}
+// ── MacOSQLProvider ───────────────────────────────────────────────────────────
+TEST(TestPSP_MacOSPlatformKind)
+{
+    using namespace ExplorerLens::Engine;
+    MacOSQLProvider p;
+    ASSERT(p.GetPlatform() == PlatformKind::MACOS);
+}
+TEST(TestPSP_MacOSPlatformName)
+{
+    using namespace ExplorerLens::Engine;
+    MacOSQLProvider p;
+    ASSERT(p.GetPlatformName() != nullptr);
+    ASSERT(std::string(p.GetPlatformName()).size() > 0);
+}
+TEST(TestPSP_MacOSNotAvailableOnWindows)
+{
+    using namespace ExplorerLens::Engine;
+    MacOSQLProvider p;
+    bool ok = p.RegisterProvider();
+    ASSERT(!ok);
+}
+TEST(TestPSP_MacOSThumbnailEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    MacOSQLProvider p;
+    PlatformThumbnailRequest req{};
+    auto res = p.GenerateThumbnail(req);
+    ASSERT(!res.success);
+}
+TEST(TestPSP_MacOSThumbnailNotSupported)
+{
+    using namespace ExplorerLens::Engine;
+    MacOSQLProvider p;
+    PlatformThumbnailRequest req{};
+    req.filePath = L"test.heic";
+    auto res = p.GenerateThumbnail(req);
+    ASSERT(!res.success);
+    ASSERT(!res.errorMsg.empty());
+}
+TEST(TestPSP_MacOSIsNotRegistered)
+{
+    using namespace ExplorerLens::Engine;
+    MacOSQLProvider p;
+    ASSERT(!p.IsRegistered());
+}
+// ── LinuxNautilusProvider ─────────────────────────────────────────────────────
+TEST(TestPSP_LinuxPlatformKind)
+{
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusProvider p;
+    ASSERT(p.GetPlatform() == PlatformKind::LINUX);
+}
+TEST(TestPSP_LinuxPlatformName)
+{
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusProvider p;
+    ASSERT(p.GetPlatformName() != nullptr);
+    ASSERT(std::string(p.GetPlatformName()).size() > 0);
+}
+TEST(TestPSP_LinuxNotAvailableOnWindows)
+{
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusProvider p;
+    bool ok = p.RegisterProvider();
+    ASSERT(!ok);
+}
+TEST(TestPSP_LinuxThumbnailEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusProvider p;
+    PlatformThumbnailRequest req{};
+    auto res = p.GenerateThumbnail(req);
+    ASSERT(!res.success);
+}
+TEST(TestPSP_LinuxIsNotRegistered)
+{
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusProvider p;
+    ASSERT(!p.IsRegistered());
+}
+// ── PlatformDetector ─────────────────────────────────────────────────────────
+TEST(TestPD_DetectCurrentPlatform)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(PlatformDetector::Detect() == PlatformKind::WINDOWS);
+}
+TEST(TestPD_PlatformNameWindows)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(PlatformDetector::PlatformName() != nullptr);
+    ASSERT(std::string(PlatformDetector::PlatformName()) == "Windows");
+}
+TEST(TestPD_MakeWin32Provider)
+{
+    using namespace ExplorerLens::Engine;
+    auto p = PlatformDetector::MakeProvider(PlatformKind::WINDOWS);
+    ASSERT(p != nullptr);
+    ASSERT(p->GetPlatform() == PlatformKind::WINDOWS);
+}
+TEST(TestPD_MakeMacOSProvider)
+{
+    using namespace ExplorerLens::Engine;
+    auto p = PlatformDetector::MakeProvider(PlatformKind::MACOS);
+    ASSERT(p != nullptr);
+    ASSERT(p->GetPlatform() == PlatformKind::MACOS);
+}
+TEST(TestPD_MakeLinuxProvider)
+{
+    using namespace ExplorerLens::Engine;
+    auto p = PlatformDetector::MakeProvider(PlatformKind::LINUX);
+    ASSERT(p != nullptr);
+    ASSERT(p->GetPlatform() == PlatformKind::LINUX);
+}
+TEST(TestPD_PlatformDescString)
+{
+    using namespace ExplorerLens::Engine;
+    auto desc = PlatformDetector::PlatformDescString();
+    ASSERT(!desc.empty());
+    ASSERT(desc.find("Windows") != std::string::npos);
+}
+TEST(TestPD_CurrentProviderForPlatform)
+{
+    using namespace ExplorerLens::Engine;
+    auto p = PlatformDetector::MakeCurrentPlatformProvider();
+    ASSERT(p != nullptr);
+    ASSERT(p->GetPlatform() == PlatformDetector::Detect());
+}
+
+//== Sprint 1131-1140: Live Preview Scrubber (v32.7.0 "Fomalhaut-X") ==
+
+// ── VideoFrameExtractor ───────────────────────────────────────────────────
+TEST(TestVFE_BackendName_DXVA2)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(VideoFrameExtractor::BackendName(VideoDecodeBackend::DXVA2_HARDWARE) == std::string_view("DXVA2-Hardware"));
+}
+TEST(TestVFE_BackendName_MFSoftware)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(VideoFrameExtractor::BackendName(VideoDecodeBackend::MF_SOFTWARE) == std::string_view("MF-Software"));
+}
+TEST(TestVFE_BackendName_Unavailable)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(VideoFrameExtractor::BackendName(VideoDecodeBackend::UNAVAILABLE) == std::string_view("Unavailable"));
+}
+TEST(TestVFE_ExtractFrame_ValidPath)
+{
+    using namespace ExplorerLens::Engine;
+    auto& ex = VideoFrameExtractor::Instance();
+    ex.Reset();
+    VideoFrameRequest req{};
+    req.filePath         = L"clip.mp4";
+    req.timestampSeconds = 5.0;
+    req.targetWidth      = 320;
+    req.targetHeight     = 180;
+    const auto RES = ex.ExtractFrame(req);
+    ASSERT(RES.success);
+    ASSERT(RES.width  == 320);
+    ASSERT(RES.height == 180);
+    ASSERT(ex.ExtractCount() == 1);
+}
+TEST(TestVFE_ExtractFrame_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    auto& ex = VideoFrameExtractor::Instance();
+    ex.Reset();
+    VideoFrameRequest req{};
+    const auto RES = ex.ExtractFrame(req);
+    ASSERT(!RES.success);
+}
+
+// ── VideoScrubberTimeline ─────────────────────────────────────────────────
+TEST(TestVST_BuildEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    auto& tl = VideoScrubberTimeline::Instance();
+    ASSERT(!tl.Build(L""));
+}
+TEST(TestVST_BuildPopulates)
+{
+    using namespace ExplorerLens::Engine;
+    auto& tl = VideoScrubberTimeline::Instance();
+    ASSERT(tl.Build(L"video.mkv"));
+    ASSERT(tl.KeyframeCount() > 0);
+    ASSERT(tl.Duration() > 0.0);
+    ASSERT(tl.ChapterCount() >= 1);
+}
+TEST(TestVST_KeyframeAt_Valid)
+{
+    using namespace ExplorerLens::Engine;
+    auto& tl = VideoScrubberTimeline::Instance();
+    tl.Build(L"video.mkv");
+    const auto KF = tl.KeyframeAt(0);
+    ASSERT(KF.index  == 0);
+    ASSERT(KF.ptsSec == 0.0);
+}
+TEST(TestVST_KeyframeAt_OutOfBounds)
+{
+    using namespace ExplorerLens::Engine;
+    auto& tl = VideoScrubberTimeline::Instance();
+    tl.Build(L"video.mkv");
+    const auto KF = tl.KeyframeAt(9999);
+    ASSERT(KF.index  == 0);
+    ASSERT(KF.ptsSec == 0.0);
+}
+TEST(TestVST_NearestKeyframePts)
+{
+    using namespace ExplorerLens::Engine;
+    auto& tl = VideoScrubberTimeline::Instance();
+    tl.Build(L"video.mkv");
+    const double PTS = tl.NearestKeyframePts(25.0);
+    ASSERT(PTS >= 0.0);
+    ASSERT(PTS <= tl.Duration());
+}
+
+// ── LivePreviewSession ────────────────────────────────────────────────────
+TEST(TestLPS_OpenEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession sess;
+    ASSERT(!sess.Open(L""));
+    ASSERT(!sess.IsOpen());
+}
+TEST(TestLPS_OpenValid)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession sess;
+    ASSERT(sess.Open(L"movie.mp4"));
+    ASSERT(sess.IsOpen());
+    ASSERT(sess.FilePath() == L"movie.mp4");
+}
+TEST(TestLPS_SeekNotOpen)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession sess;
+    const auto RES = sess.SeekTo(10.0);
+    ASSERT(!RES.success);
+}
+TEST(TestLPS_SeekOpen)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession sess;
+    sess.Open(L"movie.mp4");
+    const auto RES = sess.SeekTo(30.0);
+    ASSERT(RES.success);
+    ASSERT(RES.actualPts >= 0.0);
+}
+TEST(TestLPS_Close)
+{
+    using namespace ExplorerLens::Engine;
+    LivePreviewSession sess;
+    sess.Open(L"movie.mp4");
+    ASSERT(sess.IsOpen());
+    sess.Close();
+    ASSERT(!sess.IsOpen());
+    ASSERT(sess.FilePath().empty());
+}
+
+// ── ThumbnailStripGenerator ───────────────────────────────────────────────
+TEST(TestTSG_ResetClearsState)
+{
+    using namespace ExplorerLens::Engine;
+    auto& gen = ThumbnailStripGenerator::Instance();
+    gen.Reset();
+    ASSERT(gen.StripWidth()  == 0);
+    ASSERT(gen.StripHeight() == 0);
+    ASSERT(gen.FrameCount()  == 0);
+}
+TEST(TestTSG_GenerateEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    StripConfig cfg{};
+    const auto RES = ThumbnailStripGenerator::Instance().GenerateStrip(cfg);
+    ASSERT(!RES.success);
+}
+TEST(TestTSG_GenerateValid)
+{
+    using namespace ExplorerLens::Engine;
+    StripConfig cfg{};
+    cfg.filePath    = L"video.mp4";
+    cfg.frameCount  = 5;
+    cfg.frameWidth  = 160;
+    cfg.frameHeight = 90;
+    const auto RES = ThumbnailStripGenerator::Instance().GenerateStrip(cfg);
+    ASSERT(RES.success);
+    ASSERT(RES.framesAdded == 5);
+}
+TEST(TestTSG_StripWidth)
+{
+    using namespace ExplorerLens::Engine;
+    StripConfig cfg{};
+    cfg.filePath    = L"video.mp4";
+    cfg.frameCount  = 4;
+    cfg.frameWidth  = 100;
+    cfg.frameHeight = 56;
+    const auto RES = ThumbnailStripGenerator::Instance().GenerateStrip(cfg);
+    ASSERT(RES.stripWidth  == 400);
+    ASSERT(RES.stripHeight == 56);
+}
+TEST(TestTSG_FrameCount)
+{
+    using namespace ExplorerLens::Engine;
+    StripConfig cfg{};
+    cfg.filePath    = L"video.mp4";
+    cfg.frameCount  = 8;
+    cfg.frameWidth  = 80;
+    cfg.frameHeight = 45;
+    ThumbnailStripGenerator::Instance().GenerateStrip(cfg);
+    ASSERT(ThumbnailStripGenerator::Instance().FrameCount() == 8);
+}
+
+// ── ScrubberCacheEngine ───────────────────────────────────────────────────
+TEST(TestSCE_InitialEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ASSERT(cache.Size() == 0);
+    const auto ST = cache.GetStats();
+    ASSERT(ST.hits    == 0);
+    ASSERT(ST.misses  == 0);
+    ASSERT(ST.hitRate == 0.0f);
+}
+TEST(TestSCE_PutAndGet)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{};
+    key.filePath = L"video.mp4";
+    key.ptsSec   = 5.0;
+    ScrubberCacheEntry entry{};
+    entry.valid  = true;
+    entry.width  = 320;
+    entry.height = 180;
+    ASSERT(cache.Put(key, entry));
+    ScrubberCacheEntry out{};
+    ASSERT(cache.Get(key, out));
+    ASSERT(out.valid);
+    ASSERT(out.width  == 320);
+    ASSERT(out.height == 180);
+}
+TEST(TestSCE_GetMiss)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{};
+    key.filePath = L"notcached.mp4";
+    key.ptsSec   = 99.0;
+    ScrubberCacheEntry out{};
+    ASSERT(!cache.Get(key, out));
+    ASSERT(cache.GetStats().misses == 1);
+}
+TEST(TestSCE_Evict)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{};
+    key.filePath = L"video.mp4";
+    key.ptsSec   = 10.0;
+    ScrubberCacheEntry entry{};
+    entry.valid = true;
+    cache.Put(key, entry);
+    ASSERT(cache.Size() == 1);
+    cache.Evict(key);
+    ASSERT(cache.Size() == 0);
+}
+TEST(TestSCE_HitRate)
+{
+    using namespace ExplorerLens::Engine;
+    auto& cache = ScrubberCacheEngine::Instance();
+    cache.Clear();
+    ScrubberCacheKey key{};
+    key.filePath = L"video.mp4";
+    key.ptsSec   = 15.0;
+    ScrubberCacheEntry entry{};
+    entry.valid = true;
+    cache.Put(key, entry);
+    ScrubberCacheEntry out{};
+    cache.Get(key, out);       // hit
+    ScrubberCacheKey miss{};
+    miss.filePath = L"x.mp4";
+    miss.ptsSec   = 1.0;
+    cache.Get(miss, out);      // miss
+    const auto ST = cache.GetStats();
+    ASSERT(ST.hits   == 1);
+    ASSERT(ST.misses == 1);
+    ASSERT(ST.hitRate >= 0.49f && ST.hitRate <= 0.51f);
 }

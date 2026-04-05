@@ -2,7 +2,7 @@
      Upload to: GitHub → Settings → Social preview → Upload an image
      Convert to PNG first: open in browser, right-click → Save image as (use Edge/Chrome)
      Or: inkscape -export-type=png -export-width=1280 social-preview.svg
-     Last updated: v32.7.0 "Fomalhaut-X" — 2026-04-05
+     Last updated: v33.0.0 "Spica" — 2026-04-05
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
 <defs>
@@ -211,7 +211,7 @@
 <text x="594" y="242"
       font-family="'Segoe UI', Arial, sans-serif"
       font-size="25" fill="#8b949e" letter-spacing="0.2">
-  GPU-Accelerated Windows Shell Extension  ·  C++20  ·  MSVC v145  ·  100 Sprints to v17.0
+  GPU-Accelerated Thumbnails  ·  Windows + macOS + Linux  ·  C++20  ·  MSVC v145  ·  v33.0.0 Spica
 </text>
 
 <!-- Horizontal rule -->
@@ -255,7 +255,7 @@
 <text x="594" y="404"
       font-family="'Segoe UI', Arial, sans-serif"
       font-size="20" fill="#c9d1d9">
-  DirectX 11 / 12  ·  Vulkan  ·  COM IThumbnailProvider  ·  ARM64
+  DirectX 11 / 12  ·  Vulkan  ·  COM IThumbnailProvider  ·  macOS Quick Look  ·  Linux Nautilus
 </text>
 
 <!-- Format sample row -->
@@ -277,7 +277,7 @@
       fill="#0c1e10" stroke="#2ea043" stroke-width="1.5"/>
 <text x="610" y="511"
       font-family="'Segoe UI', Arial, sans-serif"
-      font-size="15" fill="#3fb950" font-weight="600">&#x2713;  4558 Tests</text>
+      font-size="15" fill="#3fb950" font-weight="600">&#x2713;  4583 Tests</text>
 
 <!-- Zero warnings -->
 <rect x="746" y="487" width="144" height="36" rx="7"
@@ -291,7 +291,7 @@
       fill="#14101f" stroke="#8957e5" stroke-width="1.5"/>
 <text x="922" y="511"
       font-family="'Segoe UI', Arial, sans-serif"
-      font-size="15" fill="#c9d1d9">v32.7.0  "Fomalhaut-X"</text>
+      font-size="15" fill="#c9d1d9">v33.0.0  "Spica"</text>
 
 <!-- GitHub URL (right-aligned) -->
 <text x="1248" y="511"

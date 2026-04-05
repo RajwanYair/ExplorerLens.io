@@ -1708,6 +1708,12 @@ set(ENGINE_HEADERS
     Media/LivePreviewSession.h
     Media/ThumbnailStripGenerator.h
     Media/ScrubberCacheEngine.h
+    # Sprint 1141-1150 — Cross-Platform Shell PAL (v33.0.0 "Spica")
+    Platform/PlatformShellProvider.h
+    Platform/Win32ShellProvider.h
+    Platform/MacOSQLProvider.h
+    Platform/LinuxNautilusProvider.h
+    Platform/PlatformDetector.h
 )
 
 set(ENGINE_SOURCES
@@ -1955,6 +1961,11 @@ set(ENGINE_SOURCES
     Media/VideoScrubberTimeline.cpp
     Media/ThumbnailStripGenerator.cpp
     Media/ScrubberCacheEngine.cpp
+    # Sprint 1141-1150 — Cross-Platform Shell PAL (v33.0.0 "Spica")
+    Platform/Win32ShellProvider.cpp
+    Platform/MacOSQLProvider.cpp
+    Platform/LinuxNautilusProvider.cpp
+    Platform/PlatformDetector.cpp
 )
 
 #==============================================================================

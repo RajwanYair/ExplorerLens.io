@@ -5,11 +5,12 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 32.7.0 (Codename: Fomalhaut-X)
+- **Version:** 33.0.0 (Codename: Spica)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
 - **GPU:** DirectX 11 + DirectX 12 + Vulkan Compute with CPU fallback
+- **Platforms:** Windows (IThumbnailProvider), macOS Quick Look (stub), Linux Nautilus (stub)
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
 - **Build Status:** 0 errors, 0 warnings
 
@@ -38,6 +39,8 @@ ExplorerLensEngine.lib — Core decode + render pipeline
 | `Engine/Tests/` | Unit tests + Google Benchmark |
 | `Engine/AI/` | AI/ML modules (scene understanding, smart crop, IQA, search) |
 | `Engine/GPU/` | GPU decode acceleration (NVDEC/QuickSync/AMF vendor routing) |
+| `Engine/Media/` | Live preview scrubber (video frame extraction, timeline, cache) |
+| `Engine/Platform/` | Platform Abstraction Layer — Win32, macOS QL, Linux Nautilus |
 | `build-scripts/` | PowerShell build automation |
 | `build-scripts/core/` | Build-Library-Core.ps1 — unified build module |
 | `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.) |
@@ -211,7 +214,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~4558 unit tests, 5 benchmarks (v32.7.0 baseline)
+- **Test count:** ~4583 unit tests, 5 benchmarks (v33.0.0 baseline)
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -262,14 +265,18 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v32.7.0 "Fomalhaut-X"
+- **Current version:** v33.0.0 "Spica"
 - **Source of truth:** `CHANGELOG.md`
 - **Gen-6 Roadmap:** `docs/ROADMAP_V30.md` — v30.x "Deneb" Platform Unification + v31.x "Achernar" Generative AI
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas
+- **Every revision bump MUST:** include full binaries (LENSShell.dll, LENSManager.exe, lens.exe, Manager.WinUI.exe, MSI, ZIP, SBOM) in the GitHub Release AND publish to all 5 package registries (NuGet, npm, Container, Maven, RubyGems) — **this is non-negotiable, no exceptions**
+- **Graphics must be updated on every bump:** `docs/assets/social-preview.svg` and `docs/assets/architecture-build.svg` must reflect the current version, test count, and platform support — `Bump-Version.ps1` handles this automatically
 - **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
 - **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
 - **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# `, Utils sources before closing `)`
 - **EngineTests.cpp insertion points:** New includes after last feature include, TEST() functions before `//== ` section, RUN_TEST() calls before `// Isolation & Stability Tests`
+- **Test bodies go to EngineTests_Mid.cpp:** extern void declarations + RUN_TEST() calls in EngineTests.cpp; TEST() function bodies in EngineTests_Mid.cpp
+- **Sprint 1131-1140 backfill note:** In v33.0.0 the Sprint 1131-1140 test bodies (VideoFrameExtractor/ScrubberTimeline/etc.) were backfilled to EngineTests_Mid.cpp — they were missing despite the RUN_TEST calls existing (stale .obj build artifact).
 
 ## Release Procedure (EVERY version bump)
 
@@ -363,13 +370,15 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - **Namespace:** All engine classes use `namespace ExplorerLens { namespace Engine { } }` — use `using namespace ExplorerLens::Engine;` in tests
 - **Test framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with `g_testsRun/g_testsPassed/g_testsFailed` counters — NOT GTest
 - **Test file split:** EngineTests.cpp (28,866 lines, ~2296 tests) + EngineTests_Mid.cpp (22,199 lines, ~2187 tests) share EngineTestsMacros.h
-- **Release gates:** Unified `Utils/ReleaseGate.h` — single header covering all gate versions (V2–V32)
+- **Release gates:** Unified `Utils/ReleaseGate.h` — single header covering all gate versions (V2–V33)
 - **Plugin architecture:** Plugin files go in `Engine/Plugin/`; use `ICADDecoderPlugin` / `IThumbnailPlugin` patterns
 - **Memory pressure ladder:** 5-tier (None/Low/Medium/High/Critical) with bitmask `PressureAction` flags
 - **Sub-ms cache:** `SubMillisecondCacheEngine` uses robin-hood open-addressing with `CacheHashAlgo::XXH3` default
 - **AI/ML modules:** Classes in `Engine/AI/` use `SceneMLBackend` / `EmbeddingModel` enum for backend selection (DirectML/ONNX/OpenVINO/CPU)
 - **GPU decode routing:** `GPUDecodeAccelerationV2` in `Engine/GPU/` routes by `GPUDecodeVendor` at runtime
 - **Enterprise pattern:** Policy source hierarchy: `EnterprisePolicyEngineV2` (GPO → Intune → ConfigMgr → Manual)
+- **Platform PAL (v33+):** `PlatformShellProvider` abstract base in `Engine/Platform/` — `Win32ShellProvider`, `MacOSQLProvider`, `LinuxNautilusProvider` concrete stubs; `PlatformDetector` factory. All stubs compile on Windows MSVC via `#ifdef _WIN32 / __APPLE__ / __linux__` guards — no platform SDK required.
+- **Live Preview (v32.7+):** `VideoFrameExtractor`, `VideoScrubberTimeline`, `ScrubberCacheEngine`, `ThumbnailStripGenerator`, `LivePreviewSession` all in `Engine/Media/`
 
 ## Shell & Build Integration Rules
 
