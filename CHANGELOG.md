@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.7.0] — 2026-04-05 — Fomalhaut-X
+
+Live Preview Scrubber — video seek + frame extraction + sprite strip generation
+
+---
+
 ## [32.6.1] — 2026-04-05 — Fomalhaut-W
 
 ### Fixed

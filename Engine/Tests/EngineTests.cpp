@@ -235,6 +235,12 @@
 #include "../AI/SemanticSearchOrchestrator.h"
 #include "../AI/EmbeddingPersistenceEngine.h"
 #include "../AI/VisualQueryOptimizer.h"
+// Sprint 1131-1140: Live Preview Scrubber (v32.7.0 "Fomalhaut-X")
+#include "../Media/VideoFrameExtractor.h"
+#include "../Media/VideoScrubberTimeline.h"
+#include "../Media/LivePreviewSession.h"
+#include "../Media/ThumbnailStripGenerator.h"
+#include "../Media/ScrubberCacheEngine.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
