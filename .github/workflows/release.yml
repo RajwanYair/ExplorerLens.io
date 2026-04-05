@@ -47,15 +47,15 @@ jobs:
       zip-name: ${{ steps.version.outputs.zip-name }}
 
     steps:
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global safe.directory '*'
+
       - name: Checkout (full history for changelog)
         uses: actions/checkout@v4
         with:
           submodules: false
           fetch-depth: 0
-
-      - name: Configure git safe.directory
-        shell: pwsh
-        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
 
       # ── Resolve version from tag or input ──────────────────────────────────
       - name: Resolve version
@@ -504,16 +504,13 @@ jobs:
       contents: write
 
     steps:
+      - name: Configure git safe.directory
+        run: git config --global safe.directory '*'
+
       - name: Checkout (for CHANGELOG)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      # Fix git "dubious ownership" error on GitHub-hosted Ubuntu runners.
-      # softprops/action-gh-release calls git internally; without this it fails
-      # with git exit code 128 on containerized runner environments.
-      - name: Configure git safe.directory
-        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
       - name: Download release artifacts
         uses: actions/download-artifact@v4

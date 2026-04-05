@@ -34,14 +34,14 @@ jobs:
       THRESHOLD_THROUGHPUT_PCT: '10'  # block if -10% under baseline (tightened from 15%)
 
     steps:
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global safe.directory '*'
+
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Configure git safe.directory
-        shell: pwsh
-        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1

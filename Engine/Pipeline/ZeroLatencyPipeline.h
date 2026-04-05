@@ -10,7 +10,6 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,13 +17,13 @@ namespace ExplorerLens {
 namespace Engine {
 
 enum class ZLPState : uint8_t {
-    Idle,
-    Streaming,      // DirectStorage read in flight
-    Decompressing,  // GPU decompression kernel active
-    Rendering,      // GPU/CPU decoder producing BGRA bitmap
-    Complete,
-    Error,
-    Cancelled
+    IDLE,
+    STREAMING,      // DirectStorage read in flight
+    DECOMPRESSING,  // GPU decompression kernel active
+    RENDERING,      // GPU/CPU decoder producing BGRA bitmap
+    COMPLETE,
+    PIPELINE_ERROR,
+    CANCELLED
 };
 
 enum class ZLPOutputFormat : uint8_t {
@@ -102,10 +101,11 @@ class ZeroLatencyPipeline
         ZLPResult result;
         result.requestId = req.requestId;
 
-        if (!m_initialized)
+        if (!m_initialized) {
             Initialize();
+        }
 
-        m_state.store(static_cast<uint8_t>(ZLPState::Streaming));
+        m_state.store(static_cast<uint8_t>(ZLPState::STREAMING));
 
         if (m_gpuAvailable && req.enableGPUPath) {
             result = ExecuteGPUPath(req);
@@ -113,27 +113,30 @@ class ZeroLatencyPipeline
             result = ExecuteCPUPath(req);
         }
 
-        m_state.store(static_cast<uint8_t>(ZLPState::Idle));
+        m_state.store(static_cast<uint8_t>(ZLPState::IDLE));
 
         m_metrics.requestsSubmitted++;
-        if (result.success)
+        if (result.success) {
             m_metrics.requestsCompleted++;
-        else
+        } else {
             m_metrics.requestsFailed++;
-        if (result.usedGPUPath)
+        }
+        if (result.usedGPUPath) {
             m_metrics.gpuPathHits++;
-        else
+        } else {
             m_metrics.cpuFallbackHits++;
+        }
 
         return result;
     }
 
-    void ProcessAsync(const ZLPRequest& req, ZLPCompletionCallback cb)
+    void ProcessAsync(const ZLPRequest& req, const ZLPCompletionCallback& cb)
     {
         // Asynchronous path — caller receives result via callback on thread pool.
-        ZLPResult r = Process(req);
-        if (cb)
+        const ZLPResult r = Process(req);
+        if (cb) {
             cb(r);
+        }
     }
 
     ZLPState GetState() const
@@ -176,7 +179,7 @@ class ZeroLatencyPipeline
   private:
     ZeroLatencyPipeline() = default;
 
-    ZLPResult ExecuteGPUPath(const ZLPRequest& req)
+    static ZLPResult ExecuteGPUPath(const ZLPRequest& req)
     {
         ZLPResult r;
         r.requestId = req.requestId;
@@ -193,7 +196,7 @@ class ZeroLatencyPipeline
         return r;
     }
 
-    ZLPResult ExecuteCPUPath(const ZLPRequest& req)
+    static ZLPResult ExecuteCPUPath(const ZLPRequest& req)
     {
         ZLPResult r;
         r.requestId = req.requestId;
@@ -212,7 +215,7 @@ class ZeroLatencyPipeline
 
     bool m_initialized = false;
     bool m_gpuAvailable = false;
-    std::atomic<uint8_t> m_state{static_cast<uint8_t>(ZLPState::Idle)};
+    std::atomic<uint8_t> m_state{static_cast<uint8_t>(ZLPState::IDLE)};
     ZLPMetrics m_metrics;
 };
 

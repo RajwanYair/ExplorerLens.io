@@ -45,14 +45,14 @@ jobs:
             build_preset: ci-debug
 
     steps:
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global safe.directory '*'
+
       - uses: actions/checkout@v4
         with:
           submodules: false
           fetch-depth: 1
-
-      - name: Configure git safe.directory
-        shell: pwsh
-        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
 
       - name: Setup MSVC (latest available on runner)
         # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)
@@ -136,13 +136,13 @@ jobs:
     continue-on-error: true
 
     steps:
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global safe.directory '*'
+
       - uses: actions/checkout@v4
         with:
           submodules: false
-
-      - name: Configure git safe.directory
-        shell: pwsh
-        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
 
       - name: Setup MSVC (latest available on runner)
         # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)

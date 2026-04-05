@@ -31,14 +31,14 @@ jobs:
       security-events: write   # Required to upload SARIF results
 
     steps:
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global safe.directory '*'
+
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Configure git safe.directory
-        shell: pwsh
-        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4

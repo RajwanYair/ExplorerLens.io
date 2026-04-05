@@ -41,11 +41,11 @@
 | Archive extraction (50 CBZ) | 100 | 140 | 130+ | Parallel I/O |
 | Network drive (100 files) | 65 | 90 | 85+ | Prefetch + cache |
 | CLIP embedding (batch 32) | 15 | 32 | 25+ | NPU INT8 |
-| Cache hit latency | < 5 ms | < 1 ms |
-| Cache hit rate (browsing) | 85-95% | > 90% |
-| Cache miss penalty | 50-500 ms | — |
-| Cache warm-up (1000 files) | 2-5 s | < 2 s |
-| USN journal invalidation | < 100 ms | < 50 ms |
+| Cache hit latency | < 5 ms | < 1 ms | < 1 ms | Cache lookup |
+| Cache hit rate (browsing) | 85-95% | > 90% | > 90% | Cache stats |
+| Cache miss penalty | 50-500 ms | — | < 50 ms | Cache policy |
+| Cache warm-up (1000 files) | 2-5 s | < 2 s | < 2 s | Prefetch |
+| USN journal invalidation | < 100 ms | < 50 ms | < 50 ms | File watcher |
 
 ---
 

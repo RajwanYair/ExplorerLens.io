@@ -8,27 +8,25 @@
 #pragma once
 
 #include <cstdint>
-#include <functional>
 #include <string>
-#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
 
 enum class GDKVendor : uint8_t {
-    Auto,  // Detect at runtime — prefer highest-throughput available
-    NvidiaGDeflate,
-    IntelDSB,  // DirectStorage Buffer decompressor (Xe HPC / Arc)
-    AmdComputeShader,
-    CPUFallback  // Portable SIMD-optimised path (ISA: SSE4.2 / AVX2 / AVX-512)
+    AUTO,              // Detect at runtime — prefer highest-throughput available
+    NVIDIA_GDEFLATE,
+    INTEL_DSB,         // DirectStorage Buffer decompressor (Xe HPC / Arc)
+    AMD_COMPUTE_SHADER,
+    CPU_FALLBACK       // Portable SIMD-optimised path (ISA: SSE4.2 / AVX2 / AVX-512)
 };
 
 enum class GPUCompressedFormat : uint8_t {
-    GDeflate,     // NVIDIA GPU-native deflate variant
-    ZStandard,    // RFC 8878 Zstandard frame
-    LZ4Frame,     // LZ4 frame format (magic 0x184D2204)
-    Deflate,      // Raw DEFLATE (zlib/gzip inner stream)
-    Uncompressed  // No decompression — direct copy
+    GDEFLATE,     // NVIDIA GPU-native deflate variant
+    ZSTANDARD,    // RFC 8878 Zstandard frame
+    LZ4_FRAME,    // LZ4 frame format (magic 0x184D2204)
+    DEFLATE,      // Raw DEFLATE (zlib/gzip inner stream)
+    UNCOMPRESSED  // No decompression — direct copy
 };
 
 struct GPUDecompressInput
@@ -37,8 +35,8 @@ struct GPUDecompressInput
     uint32_t compressedSize = 0;
     uint8_t* outputBuffer = nullptr;  // Pre-allocated by caller
     uint32_t outputCapacity = 0;
-    GPUCompressedFormat format = GPUCompressedFormat::ZStandard;
-    GDKVendor preferredVendor = GDKVendor::Auto;
+    GPUCompressedFormat format = GPUCompressedFormat::ZSTANDARD;
+    GDKVendor preferredVendor = GDKVendor::AUTO;
 };
 
 struct GPUDecompressOutput
@@ -46,7 +44,7 @@ struct GPUDecompressOutput
     bool success = false;
     uint32_t decompressedBytes = 0;
     double kernelLatencyUs = 0.0;  // Microseconds for kernel invocation
-    GDKVendor vendorUsed = GDKVendor::CPUFallback;
+    GDKVendor vendorUsed = GDKVendor::CPU_FALLBACK;
     std::string errorMessage;
 };
 
@@ -71,7 +69,7 @@ class GPUDecompressKernel
         return s_instance;
     }
 
-    bool Initialize(GDKVendor preferredVendor = GDKVendor::Auto)
+    bool Initialize(GDKVendor preferredVendor = GDKVendor::AUTO)
     {
         m_caps = ProbeCapabilities();
         m_activeVendor = SelectBestVendor(preferredVendor, m_caps);
@@ -81,15 +79,16 @@ class GPUDecompressKernel
 
     GPUDecompressOutput Decompress(const GPUDecompressInput& input)
     {
-        if (!m_initialized)
+        if (!m_initialized) {
             Initialize();
+        }
 
         switch (m_activeVendor) {
-            case GDKVendor::NvidiaGDeflate:
+            case GDKVendor::NVIDIA_GDEFLATE:
                 return DecompressGDeflate(input);
-            case GDKVendor::IntelDSB:
+            case GDKVendor::INTEL_DSB:
                 return DecompressDSB(input);
-            case GDKVendor::AmdComputeShader:
+            case GDKVendor::AMD_COMPUTE_SHADER:
                 return DecompressAMDCS(input);
             default:
                 return DecompressCPU(input);
@@ -125,13 +124,13 @@ class GPUDecompressKernel
     static const char* VendorName(GDKVendor v)
     {
         switch (v) {
-            case GDKVendor::NvidiaGDeflate:
+            case GDKVendor::NVIDIA_GDEFLATE:
                 return "NVIDIA-GDeflate";
-            case GDKVendor::IntelDSB:
+            case GDKVendor::INTEL_DSB:
                 return "Intel-DSB";
-            case GDKVendor::AmdComputeShader:
+            case GDKVendor::AMD_COMPUTE_SHADER:
                 return "AMD-ComputeShader";
-            case GDKVendor::CPUFallback:
+            case GDKVendor::CPU_FALLBACK:
                 return "CPU-Fallback";
             default:
                 return "Auto";
@@ -140,23 +139,23 @@ class GPUDecompressKernel
 
     static bool IsFormatSupported(GPUCompressedFormat fmt)
     {
-        return fmt == GPUCompressedFormat::ZStandard || fmt == GPUCompressedFormat::GDeflate
-               || fmt == GPUCompressedFormat::LZ4Frame || fmt == GPUCompressedFormat::Deflate
-               || fmt == GPUCompressedFormat::Uncompressed;
+        return fmt == GPUCompressedFormat::ZSTANDARD || fmt == GPUCompressedFormat::GDEFLATE
+               || fmt == GPUCompressedFormat::LZ4_FRAME || fmt == GPUCompressedFormat::DEFLATE
+               || fmt == GPUCompressedFormat::UNCOMPRESSED;
     }
 
     static uint32_t EstimateOutputSize(uint32_t compressedSize, GPUCompressedFormat fmt)
     {
         switch (fmt) {
-            case GPUCompressedFormat::Uncompressed:
+            case GPUCompressedFormat::UNCOMPRESSED:
                 return compressedSize;
-            case GPUCompressedFormat::GDeflate:
+            case GPUCompressedFormat::GDEFLATE:
                 return compressedSize * 5;  // ~5:1 typical
-            case GPUCompressedFormat::ZStandard:
+            case GPUCompressedFormat::ZSTANDARD:
                 return compressedSize * 8;  // up to 8:1
-            case GPUCompressedFormat::LZ4Frame:
+            case GPUCompressedFormat::LZ4_FRAME:
                 return compressedSize * 4;
-            case GPUCompressedFormat::Deflate:
+            case GPUCompressedFormat::DEFLATE:
                 return compressedSize * 6;
             default:
                 return compressedSize * 4;
@@ -168,61 +167,65 @@ class GPUDecompressKernel
 
     static GDKVendor SelectBestVendor(GDKVendor pref, const GPUDecompressCapability& caps)
     {
-        if (pref != GDKVendor::Auto)
+        if (pref != GDKVendor::AUTO) {
             return pref;
-        if (caps.gdeflateSupported)
-            return GDKVendor::NvidiaGDeflate;
-        if (caps.dsbSupported)
-            return GDKVendor::IntelDSB;
-        if (caps.amdCSSupported)
-            return GDKVendor::AmdComputeShader;
-        return GDKVendor::CPUFallback;
+        }
+        if (caps.gdeflateSupported) {
+            return GDKVendor::NVIDIA_GDEFLATE;
+        }
+        if (caps.dsbSupported) {
+            return GDKVendor::INTEL_DSB;
+        }
+        if (caps.amdCSSupported) {
+            return GDKVendor::AMD_COMPUTE_SHADER;
+        }
+        return GDKVendor::CPU_FALLBACK;
     }
 
-    GPUDecompressOutput DecompressGDeflate(const GPUDecompressInput& in)
+    static GPUDecompressOutput DecompressGDeflate(const GPUDecompressInput& in)
     {
         GPUDecompressOutput out;
         // Invoke IDStorageCustomDecompressionQueue / NvGDeflate SDK
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 45.0;
-        out.vendorUsed = GDKVendor::NvidiaGDeflate;
+        out.vendorUsed = GDKVendor::NVIDIA_GDEFLATE;
         return out;
     }
 
-    GPUDecompressOutput DecompressDSB(const GPUDecompressInput& in)
+    static GPUDecompressOutput DecompressDSB(const GPUDecompressInput& in)
     {
         GPUDecompressOutput out;
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 55.0;
-        out.vendorUsed = GDKVendor::IntelDSB;
+        out.vendorUsed = GDKVendor::INTEL_DSB;
         return out;
     }
 
-    GPUDecompressOutput DecompressAMDCS(const GPUDecompressInput& in)
+    static GPUDecompressOutput DecompressAMDCS(const GPUDecompressInput& in)
     {
         GPUDecompressOutput out;
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 60.0;
-        out.vendorUsed = GDKVendor::AmdComputeShader;
+        out.vendorUsed = GDKVendor::AMD_COMPUTE_SHADER;
         return out;
     }
 
-    GPUDecompressOutput DecompressCPU(const GPUDecompressInput& in)
+    static GPUDecompressOutput DecompressCPU(const GPUDecompressInput& in)
     {
         GPUDecompressOutput out;
         // SIMD-optimised CPU decompression (zstd / lz4 / zlib with AVX2 acceleration)
         out.success = true;
         out.decompressedBytes = in.outputCapacity;
         out.kernelLatencyUs = 850.0;  // ~850 µs for 1 MB on AVX2 CPU
-        out.vendorUsed = GDKVendor::CPUFallback;
+        out.vendorUsed = GDKVendor::CPU_FALLBACK;
         return out;
     }
 
     bool m_initialized = false;
-    GDKVendor m_activeVendor = GDKVendor::CPUFallback;
+    GDKVendor m_activeVendor = GDKVendor::CPU_FALLBACK;
     GPUDecompressCapability m_caps;
 };
 

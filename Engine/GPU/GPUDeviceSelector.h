@@ -29,7 +29,8 @@ enum class GPUSelectionStrategy : uint8_t {
     SpecificVendor = 4
 };
 
-struct GPUDeviceDetail {
+struct GPUDeviceDetail
+{
     uint32_t deviceIndex = 0;
     std::wstring name;
     GPUVendorType vendor = GPUVendorType::Unknown;
@@ -42,7 +43,8 @@ struct GPUDeviceDetail {
     uint32_t driverVersion = 0;
 };
 
-struct DeviceSelection {
+struct DeviceSelection
+{
     bool found = false;
     uint32_t deviceIndex = UINT32_MAX;
     std::wstring deviceName;
@@ -50,31 +52,41 @@ struct DeviceSelection {
     std::string reason;
 };
 
-class GPUDeviceSelector {
-public:
-    void SetStrategy(GPUSelectionStrategy strategy) { m_strategy = strategy; }
+class GPUDeviceSelector
+{
+  public:
+    void SetStrategy(GPUSelectionStrategy strategy)
+    {
+        m_strategy = strategy;
+    }
 
-    DeviceSelection Select(const std::vector<GPUDeviceDetail>& devices) const {
+    DeviceSelection Select(const std::vector<GPUDeviceDetail>& devices) const
+    {
         DeviceSelection result;
-        if (devices.empty()) return result;
+        if (devices.empty())
+            return result;
 
         const GPUDeviceDetail* best = nullptr;
         for (const auto& d : devices) {
-            if (!best) { best = &d; continue; }
+            if (!best) {
+                best = &d;
+                continue;
+            }
             switch (m_strategy) {
-            case GPUSelectionStrategy::HighestPerformance:
-            case GPUSelectionStrategy::PreferDiscrete:
-                if (d.isDiscrete && !best->isDiscrete) best = &d;
-                else if (d.isDiscrete == best->isDiscrete &&
-                    d.dedicatedVideoMemory > best->dedicatedVideoMemory)
-                    best = &d;
-                break;
-            case GPUSelectionStrategy::LowestPower:
-            case GPUSelectionStrategy::PreferIntegrated:
-                if (!d.isDiscrete && best->isDiscrete) best = &d;
-                break;
-            default:
-                break;
+                case GPUSelectionStrategy::HighestPerformance:
+                case GPUSelectionStrategy::PreferDiscrete:
+                    if (d.isDiscrete && !best->isDiscrete)
+                        best = &d;
+                    else if (d.isDiscrete == best->isDiscrete && d.dedicatedVideoMemory > best->dedicatedVideoMemory)
+                        best = &d;
+                    break;
+                case GPUSelectionStrategy::LowestPower:
+                case GPUSelectionStrategy::PreferIntegrated:
+                    if (!d.isDiscrete && best->isDiscrete)
+                        best = &d;
+                    break;
+                default:
+                    break;
             }
         }
         if (best) {
@@ -87,13 +99,14 @@ public:
         return result;
     }
 
-    static bool HasComputeSupport(const GPUDeviceDetail& info) {
+    static bool HasComputeSupport(const GPUDeviceDetail& info)
+    {
         return info.supportsCompute && info.computeUnits > 0;
     }
 
-private:
+  private:
     GPUSelectionStrategy m_strategy = GPUSelectionStrategy::PreferDiscrete;
 };
 
-} // namespace Engine
-} // namespace ExplorerLens
+}  // namespace Engine
+}  // namespace ExplorerLens
