@@ -186,7 +186,7 @@ struct OverlayRenderParams
 
 struct WatermarkConfig
 {
-    WatermarkType type = WatermarkType::FormatBadge;
+    WatermarkType type = WatermarkType::Non
     WatermarkPosition position = WatermarkPosition::BottomRight;
     std::string text;
     float opacity = 0.8f;

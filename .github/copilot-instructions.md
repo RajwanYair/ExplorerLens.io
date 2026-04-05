@@ -275,7 +275,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
 - **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# `, Utils sources before closing `)`
 - **EngineTests.cpp insertion points:** New includes after last feature include, TEST() functions before `//== ` section, RUN_TEST() calls before `// Isolation & Stability Tests`
-- **Test bodies go to EngineTests_Mid.cpp:** extern void declarations + RUN_TEST() calls in EngineTests.cpp; TEST() function bodies in EngineTests_Mid.cpp
+- **Test bodies go to EngineTests_Late.cpp:** extern void declarations + RUN_TEST() calls in EngineTests.cpp; TEST() function bodies in EngineTests_Late.cpp (or EngineTests_Mid.cpp for earlier sprints)
 - **Sprint 1131-1140 backfill note:** In v33.0.0 the Sprint 1131-1140 test bodies (VideoFrameExtractor/ScrubberTimeline/etc.) were backfilled to EngineTests_Mid.cpp — they were missing despite the RUN_TEST calls existing (stale .obj build artifact).
 
 ## Release Procedure (EVERY version bump)
@@ -369,7 +369,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 - **Namespace:** All engine classes use `namespace ExplorerLens { namespace Engine { } }` — use `using namespace ExplorerLens::Engine;` in tests
 - **Test framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with `g_testsRun/g_testsPassed/g_testsFailed` counters — NOT GTest
-- **Test file split:** EngineTests.cpp (28,866 lines, ~2296 tests) + EngineTests_Mid.cpp (22,199 lines, ~2187 tests) share EngineTestsMacros.h
+- **Test file split:** EngineTests.cpp (harness + main, ~8.7K lines) + EngineTests_Core.cpp (~9.7K lines) + EngineTests_Features.cpp (~9.5K lines) + EngineTests_Mid.cpp (~9.4K lines) + EngineTests_Late.cpp (~12.8K lines) — all share EngineTestsIncludes.h + EngineTestsMacros.h
 - **Release gates:** Unified `Utils/ReleaseGate.h` — single header covering all gate versions (V2–V33)
 - **Plugin architecture:** Plugin files go in `Engine/Plugin/`; use `ICADDecoderPlugin` / `IThumbnailPlugin` patterns
 - **Memory pressure ladder:** 5-tier (None/Low/Medium/High/Critical) with bitmask `PressureAction` flags

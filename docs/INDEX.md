@@ -1,8 +1,8 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens
-**Current Version:** v32.1.0 "Fomalhaut-R"
-**Last Updated:** April 2026
+**Current Version:** v33.0.0 "Spica"
+**Last Updated:** July 2026
 
 ---
 

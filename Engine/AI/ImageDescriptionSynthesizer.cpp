@@ -9,14 +9,17 @@ SynthesisResult ImageDescriptionSynthesizer::Synthesize(const void*, uint32_t, u
 {
     return {};
 }
-void ImageDescriptionSynthesizer::SetLanguage(DescriptionLanguage) {}
+void ImageDescriptionSynthesizer::SetLanguage(DescriptionLanguage language)
+{
+    m_language = language;
+}
 bool ImageDescriptionSynthesizer::LoadModel(const std::string&)
 {
     return false;
 }
 DescriptionLanguage ImageDescriptionSynthesizer::GetLanguage() const
 {
-    return {};
+    return m_language;
 }
 bool ImageDescriptionSynthesizer::IsModelLoaded() const
 {

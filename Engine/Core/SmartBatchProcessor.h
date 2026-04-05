@@ -91,6 +91,10 @@ class SmartBatchProcessor
         m_maxConcurrency = maxConcurrency;
         m_state = BatchState::Idle;
         m_initialized = true;
+        m_pendingCount = 0;
+        m_stats = {};
+        m_pendingCount = 0;
+        m_stats = {};
         return true;
     }
 

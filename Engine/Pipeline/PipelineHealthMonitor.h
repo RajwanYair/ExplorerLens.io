@@ -91,6 +91,10 @@ class PipelineHealthMonitor
         m_snapshot = {};
         m_stats = {};
         m_stats.initialized = true;
+        m_totalCount = 0;
+        m_errorCount = 0;
+        m_totalCount = 0;
+        m_errorCount = 0;
     }
 
     void RecordSample(float latencyMs, bool success)

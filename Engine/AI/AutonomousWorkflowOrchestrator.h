@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -43,16 +44,20 @@ public:
     explicit AutonomousWorkflowOrchestrator(OrchestrationPolicy policy = OrchestrationPolicy::Adaptive)
         : m_policy(policy)
     {}
-
-    void Enqueue(uint64_t /*jobId*/, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/)
+jobId, WorkflowPriority /*priority*/, std::size_t /*estimatedBytes*/)
     {
+        m_queue.push_back(jobId);
         ++m_stats.jobsQueued;
     }
     bool Dispatch(uint64_t& outJobId)
     {
-        if (m_stats.jobsQueued == 0)
+        if (m_queue.empty())
             return false;
-        outJobId = 0;
+        outJobId = m_queue.front();
+        m_queue.erase(m_queue.begin())empty())
+            return false;
+        outJobId = m_queue.front();
+        m_queue.erase(m_queue.begin());
         return true;
     }
     void Complete(uint64_t /*jobId*/, float latencyMs)
@@ -62,15 +67,17 @@ public:
         ++m_stats.jobsCompleted;
         m_stats.avgLatencyMs = latencyMs;
     }
-    void SetPolicy(OrchestrationPolicy policy) { m_policy = policy; }
-    void SetConcurrencyLimit(uint32_t limit) { m_concurrencyLimit = limit; }
-    WorkflowJobStats GetStats() const { return m_stats; }
-    void Reset() { m_stats = {}; }
+    void SetPolicy(OrchestrationPm_queue.clear(); }
 
 private:
     OrchestrationPolicy m_policy;
     uint32_t m_concurrencyLimit = 4;
     WorkflowJobStats m_stats;
+    std::vector<uint64_t> m_queue
+    OrchestrationPolicy m_policy;
+    uint32_t m_concurrencyLimit = 4;
+    WorkflowJobStats m_stats;
+    std::vector<uint64_t> m_queue;
 };
 
 }  // namespace Engine

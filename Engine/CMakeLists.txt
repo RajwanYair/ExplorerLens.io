@@ -1732,7 +1732,6 @@ set(ENGINE_SOURCES
     Core/RegistryManager.cpp
     Core/ResourcePoolEngine.cpp
     Core/SecurityHardeningV2.cpp
-    Core/ShellContextMenuV2.cpp
     Core/SIMDAccelerator.cpp
     Core/TelemetryEngine.cpp
     Core/ETWTraceProvider.cpp
@@ -1742,16 +1741,9 @@ set(ENGINE_SOURCES
 
     # Pipeline implementations
     # v31.6.0 — Streaming decode & profiling
-    Pipeline/StreamingDecodeCoordinator.cpp
-    Pipeline/RenderPipelineProfiler.cpp
     # v31.7.0 — Retry & health monitoring
-    Pipeline/SmartRetryOrchestrator.cpp
-    Pipeline/PipelineHealthMonitor.cpp
     # v31.8.0 — Adaptive optimization & prefetch
-    Pipeline/AdaptivePipelineOptimizer.cpp
-    Pipeline/IntelligentPrefetchScheduler.cpp
     # v31.9.0 — Autotuning pipeline
-    Pipeline/AutotuningPipelineEngine.cpp
     Pipeline/AsyncThumbnailProvider.cpp
     Pipeline/DecoderRegistry.cpp
     Pipeline/FormatDetector.cpp
@@ -1809,20 +1801,9 @@ set(ENGINE_SOURCES
     AI/StyleTransferRenderer.cpp
     AI/ThumbnailPersonalisationEngine.cpp
     # v31.6.0 — Format Routing & Enhanced Accessibility
-    AI/AdaptiveColorProfileManager.cpp
-    AI/ThumbnailAccessibilityEngine.cpp
     # v31.7.0 — Contextual Intelligence & Self-Healing
-    AI/ContextualRenderingEngine.cpp
-    AI/SmartThumbnailCompositor.cpp
-    AI/FormatComplexityAnalyzer.cpp
     # v31.8.0 — Intelligent Workflow Automation
-    AI/PredictivePregenEngine.cpp
-    AI/ContentCategorizationEngine.cpp
-    AI/ThumbnailQualityPredictor.cpp
     # v31.9.0 — Autonomous workflow & shell intelligence
-    AI/AutonomousWorkflowOrchestrator.cpp
-    AI/ShellIntelligenceAdapter.cpp
-    AI/ThumbnailRelevanceRanker.cpp
 
     # Enterprise implementations
     Enterprise/EnterpriseAuditExporter.cpp
@@ -1830,34 +1811,10 @@ set(ENGINE_SOURCES
     Enterprise/EnterpriseMetricsDashboard.cpp
     Enterprise/UsageAnomalyDetector.cpp
     # v31.9.0 backlog — v30.7.0 Deneb-X enterprise TUs
-    Enterprise/FleetDeploymentManager.cpp
-    Enterprise/ComplianceReportGenerator.cpp
-    Enterprise/PolicyVersionControl.cpp
-    Enterprise/RemoteDecoderControl.cpp
     # v31.6.0 — Core routing implementations
-    Core/SmartFileTypeRouter.cpp
-    Core/DecoderVersionManager.cpp
-    Core/CrossFormatMetadataEngine.cpp
     # v31.7.0 — Fault tolerance & diagnostics
-    Core/FaultTolerantDecodeOrchestrator.cpp
-    Core/DiagnosticTelemetryCollector.cpp
-    Core/DecoderFaultIsolator.cpp
     # v31.8.0 — Workflow automation
-    Core/SmartBatchProcessor.cpp
-    Core/WorkflowAutomationEngine.cpp
-    Core/UserBehaviorAnalytics.cpp
     # v31.9.0 — Cross-platform shell integration & backlog TUs
-    Core/CrossPlatformCapabilityBroker.cpp
-    Core/AdaptiveShellIntegrationEngine.cpp
-    Core/ShellExtensionLifecycleManager.cpp
-    Core/LinuxNautilusExtension.cpp
-    Core/KDEDolphinExtension.cpp
-    Core/ThunarThumbnailExtension.cpp
-    Core/macOSQuickLookV3.cpp
-    Core/LinuxThumbnailerDaemon.cpp
-    Core/WaylandShellExtension.cpp
-    Core/XPlatformTestHarness.cpp
-    Core/macOSLaunchServicesAdapter.cpp
 
     # GPU rendering implementations
     GPU/D3D11Renderer.cpp
@@ -1916,37 +1873,10 @@ set(ENGINE_SOURCES
     # Release gate implementation
     Utils/ReleaseGateUnified.cpp
     # v31.9.0 — Cross-platform build validator
-    Utils/CrossPlatformBuildValidator.cpp
     # Sprint 1071-1080 — Post-Quantum Security & Zero-Trust (v32.0.0 "Fomalhaut")
-    Core/PostQuantumCryptoProvider.cpp
-    Core/ZeroTrustAccessBroker.cpp
-    Core/QuantumResistantHashEngine.cpp
-    Plugin/PluginZeroTrustSandbox.cpp
-    Core/BinaryTrustVerifier.cpp
-    Core/SecureConfigurationManager.cpp
-    Core/ThreatModelingEngine.cpp
-    Utils/SecurityPostureAnalyzer.cpp
     # Sprint 1081-1090 — Edge AI & Hardware-Accelerated Inference (v32.1.0 "Fomalhaut-R")
-    GPU/NPUAccelerationEngine.cpp
-    GPU/EdgeAIInferenceEngine.cpp
-    AI/HardwareCapabilityNegotiator.cpp
-    GPU/AMDXDNABackend.cpp
-    GPU/QualcommAIEBackend.cpp
-    GPU/IntelAMXBackend.cpp
-    Pipeline/HardwareAcceleratedPipeline.cpp
-    Core/ComputeDeviceRegistry.cpp
     # Sprint 1091-1100 — DirectStorage & Zero-Latency Pipeline (v32.2.0 "Fomalhaut-S")
-    Core/DirectStorageManager.cpp
-    Core/GPUDecompressKernel.cpp
-    Pipeline/ZeroLatencyPipeline.cpp
-    Core/ThumbnailPipelineMetrics.cpp
-    Core/StreamingDecodeOrchestrator.cpp
     # Sprint 1101-1110 — Annotation, HDR Tone Mapping & Format Detection (v32.3.0 "Fomalhaut-T")
-    Core/ThumbnailAnnotationOverlay.cpp
-    Core/AdaptiveBitDepthConverter.cpp
-    Pipeline/BatchThumbnailExporter.cpp
-    Core/FormatSignatureDetector.cpp
-    Core/MemoryMappedDecoder.cpp
     # Sprint 1111-1120 — DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
     GPU/GPUDecompressOrchestrator.cpp
     Pipeline/DirectStorageBatchScheduler.cpp

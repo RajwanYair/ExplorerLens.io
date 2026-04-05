@@ -9,15 +9,22 @@ ModerationResult ContentModerationFilter::Evaluate(const void*, uint32_t, uint32
 {
     return {};
 }
-void ContentModerationFilter::SetTier(ModerationTier) {}
-void ContentModerationFilter::AddCustomBlocklist(const std::string&, float) {}
+void ContentModerationFilter::SetTier(ModerationTier tier) { m_tier = tier; }
+void ContentModerationFilter::AddCustomBlocklist(const std::string& category, float threshold)
+{
+    m_blocklist[category] = threshold;
+}
 ModerationTier ContentModerationFilter::GetTier() const
 {
-    return {};
+    return m_tier;
 }
 std::vector<std::string> ContentModerationFilter::GetBlocklistCategories() const
 {
-    return {};
+    std::vector<std::string> cats;
+    cats.reserve(m_blocklist.size());
+    for (const auto& [k, v] : m_blocklist)
+        cats.push_back(k);
+    return cats;
 }
 
 }  // namespace ExplorerLens::Engine

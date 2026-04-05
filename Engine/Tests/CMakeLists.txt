@@ -12,7 +12,10 @@ project(EngineTests LANGUAGES CXX)
 
 add_executable(EngineTests
     EngineTests.cpp
+    EngineTests_Core.cpp
+    EngineTests_Features.cpp
     EngineTests_Mid.cpp
+    EngineTests_Late.cpp
     test_gpu.cpp
     PluginCompatKitTests.cpp
     PluginReferencePackTests.cpp
@@ -174,7 +177,7 @@ if(MSVC)
         /wd4189     # C4189: local variable initialized but not referenced
                     # Expected in tests: assert() is no-op in Release, so
                     # variables used only in EXPECT_* macros appear unused
-        /bigobj                     # C1128: EngineTests.cpp (28K+ lines) and EngineTests_Mid.cpp (22K+ lines) exceed
+        /bigobj                     # C1128: split test files (5 .cpp files totalling ~50K lines) may exceed
                                     # COFF section limit without /bigobj
     )
     target_compile_options(EngineBenchmark PRIVATE
