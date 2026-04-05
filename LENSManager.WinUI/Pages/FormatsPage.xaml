@@ -12,19 +12,23 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Search + filter bar -->
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <AutoSuggestBox Grid.Column="0" PlaceholderText="Search formats (e.g. webp, pdf, raw…)"
+            <AutoSuggestBox Grid.Column="0"
+                            PlaceholderText="Search by name, extension, decoder, or MIME type (e.g. webp, PDFDecoder, image/avif)"
                             QueryIcon="Find" x:Name="FormatSearch"
-                            TextChanged="FormatSearch_TextChanged"/>
-            <ComboBox Grid.Column="1" x:Name="CategoryFilter" Margin="8,0,0,0"
+                            TextChanged="FormatSearch_TextChanged"
+                            ToolTipService.ToolTip="Type a format name (.webp), description (WebP), decoder class (WebPDecoder), or MIME type (image/webp) to filter the list"/>
+            <ComboBox Grid.Column="1" x:Name="CategoryFilter"
                       PlaceholderText="All categories"
                       SelectionChanged="CategoryFilter_SelectionChanged">
                 <ComboBoxItem Content="All"/>
@@ -32,22 +36,50 @@
                 <ComboBoxItem Content="Archives"/>
                 <ComboBoxItem Content="Documents"/>
                 <ComboBoxItem Content="RAW Camera"/>
-                <ComboBoxItem Content="3D/CAD"/>
+                <ComboBoxItem Content="Video"/>
+                <ComboBoxItem Content="Audio"/>
+                <ComboBoxItem Content="3D Models"/>
+                <ComboBoxItem Content="CAD/BIM"/>
                 <ComboBoxItem Content="Scientific"/>
+                <ComboBoxItem Content="Fonts"/>
+                <ComboBoxItem Content="Source Code"/>
             </ComboBox>
-            <ToggleButton Grid.Column="2" x:Name="ShowRegisteredOnly" Margin="8,0,0,0"
+            <ComboBox Grid.Column="2" x:Name="GpuFilter"
+                      PlaceholderText="Any GPU status"
+                      SelectionChanged="GpuFilter_SelectionChanged"
+                      ToolTipService.ToolTip="Filter formats by GPU acceleration support">
+                <ComboBoxItem Content="Any"/>
+                <ComboBoxItem Content="GPU Accelerated"/>
+                <ComboBoxItem Content="CPU Only"/>
+            </ComboBox>
+            <ToggleButton Grid.Column="3" x:Name="ShowRegisteredOnly"
                           Content="Registered only" IsChecked="False"
                           ToolTipService.ToolTip="Show only formats currently registered with Windows Explorer. Registered formats generate thumbnails when you browse."
                           Checked="ShowRegisteredOnly_Changed"
                           Unchecked="ShowRegisteredOnly_Changed"/>
         </Grid>
 
-        <!-- Format count summary -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16">
-            <TextBlock x:Name="FormatCountLabel" Opacity="0.6" FontSize="12"/>
-            <HyperlinkButton Content="Register all" Click="RegisterAll_Click" FontSize="12"/>
-            <HyperlinkButton Content="Unregister all" Click="UnregisterAll_Click" FontSize="12"/>
-        </StackPanel>
+        <!-- Format count + batch action bar -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock x:Name="FormatCountLabel" Opacity="0.6" FontSize="12" VerticalAlignment="Center"/>
+                <HyperlinkButton Content="Register all" Click="RegisterAll_Click" FontSize="12"/>
+                <HyperlinkButton Content="Register category" Click="RegisterCategory_Click" FontSize="12"
+                                 ToolTipService.ToolTip="Register all formats in the currently selected category"/>
+                <HyperlinkButton Content="Unregister all" Click="UnregisterAll_Click" FontSize="12"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Button Content="Apply Changes" Style="{StaticResource AccentButtonStyle}"
+                        Click="ApplyChanges_Click"
+                        ToolTipService.ToolTip="Write all format registration changes to the Windows registry and restart Explorer"/>
+                <Button Content="Discard" Click="DiscardChanges_Click"
+                        ToolTipService.ToolTip="Revert all unsaved toggle changes"/>
+            </StackPanel>
+        </Grid>
 
         <!-- Format list -->
         <ListView Grid.Row="2" x:Name="FormatList" SelectionMode="Single"
@@ -85,6 +117,42 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <!-- Format Detail Panel (shown when a format is selected) -->
+        <Border Grid.Row="3" x:Name="DetailPanel" Visibility="Collapsed"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                CornerRadius="8" Padding="16" MaxHeight="140">
+            <Grid ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="Format Details" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="DetailExtension" FontFamily="{StaticResource LensMonoFont}" FontSize="18"
+                               Foreground="{StaticResource LensAccentBrush}"/>
+                    <TextBlock x:Name="DetailDescription" Opacity="0.7" TextWrapping="Wrap"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="Decoder" FontWeight="SemiBold" FontSize="12"/>
+                    <TextBlock x:Name="DetailDecoder" FontFamily="{StaticResource LensMonoFont}" FontSize="11"/>
+                    <TextBlock Text="MIME Type" FontWeight="SemiBold" FontSize="12" Margin="0,8,0,0"/>
+                    <TextBlock x:Name="DetailMime" FontFamily="{StaticResource LensMonoFont}" FontSize="11" Opacity="0.7"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="4">
+                    <TextBlock Text="Performance" FontWeight="SemiBold" FontSize="12"/>
+                    <TextBlock x:Name="DetailLatency" FontSize="11"/>
+                    <TextBlock Text="GPU" FontWeight="SemiBold" FontSize="12" Margin="0,8,0,0"/>
+                    <TextBlock x:Name="DetailGpu" FontSize="11"/>
+                </StackPanel>
+                <Button Grid.Column="3" Content="Test Decode" VerticalAlignment="Center"
+                        Click="TestDecode_Click"
+                        ToolTipService.ToolTip="Generate a test thumbnail for this format with a sample file to verify the decoder is working"/>
+            </Grid>
+        </Border>
 
     </Grid>
 </Page>

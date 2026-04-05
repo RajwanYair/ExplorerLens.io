@@ -81,6 +81,55 @@
                 </Border>
             </Grid>
 
+            <!-- Cache Profile Presets -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Quick Profiles" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <TextBlock Text="Choose a preset that matches your workload. You can fine-tune individual sliders below."
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"/>
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" HorizontalAlignment="Stretch" Padding="16,12"
+                                Click="ProfileLightweight_Click"
+                                ToolTipService.ToolTip="128 MB budget, 10K entries. Best for low-RAM systems or laptops on battery.">
+                            <StackPanel HorizontalAlignment="Center" Spacing="4">
+                                <FontIcon Glyph="&#xEC48;" FontSize="24" HorizontalAlignment="Center"
+                                          Foreground="{StaticResource LensSuccessBrush}"/>
+                                <TextBlock Text="Lightweight" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="128 MB · 10K entries" FontSize="11" Opacity="0.6" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1" HorizontalAlignment="Stretch" Padding="16,12"
+                                Style="{StaticResource AccentButtonStyle}"
+                                Click="ProfileBalanced_Click"
+                                ToolTipService.ToolTip="512 MB budget, 50K entries. Recommended for most desktops with 8+ GB RAM.">
+                            <StackPanel HorizontalAlignment="Center" Spacing="4">
+                                <FontIcon Glyph="&#xE81E;" FontSize="24" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Balanced" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="512 MB · 50K entries" FontSize="11" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2" HorizontalAlignment="Stretch" Padding="16,12"
+                                Click="ProfilePerformance_Click"
+                                ToolTipService.ToolTip="2048 MB budget, 100K entries, ARC eviction. For power users with 16+ GB RAM and large photo libraries.">
+                            <StackPanel HorizontalAlignment="Center" Spacing="4">
+                                <FontIcon Glyph="&#xE945;" FontSize="24" HorizontalAlignment="Center"
+                                          Foreground="{StaticResource LensAccentBrush}"/>
+                                <TextBlock Text="Performance" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="2 GB · 100K entries" FontSize="11" Opacity="0.6" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Budget Allocation -->
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"

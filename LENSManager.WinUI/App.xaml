@@ -27,6 +27,9 @@
 
             <SolidColorBrush x:Key="LensAccentBrush" Color="{StaticResource LensAccentColor}"/>
             <SolidColorBrush x:Key="LensSecondaryBrush" Color="{StaticResource LensSecondaryColor}"/>
+            <SolidColorBrush x:Key="LensSuccessBrush" Color="{StaticResource LensSuccessColor}"/>
+            <SolidColorBrush x:Key="LensWarningBrush" Color="{StaticResource LensWarningColor}"/>
+            <SolidColorBrush x:Key="LensErrorBrush" Color="{StaticResource LensErrorColor}"/>
 
             <!-- NavigationView overrides for Fluent dark sidebar -->
             <Style TargetType="NavigationView">

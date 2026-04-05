@@ -1,10 +1,12 @@
 # ExplorerLens User Guide
-**Version:** 24.1.0 "Altair-R"
-**Last Updated:** May 2026
+**Version:** 33.0.0 "Spica"
+**Last Updated:** July 2026
 
 ## Table of Contents
 - [Installation](#installation)
 - [Getting Started](#getting-started)
+- [Manager (WinUI)](#manager-winui)
+- [Command-Line Interface](#command-line-interface)
 - [Supported Formats](#supported-formats)
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
@@ -22,12 +24,12 @@
 
 ### Installation Steps
 
-1. **Download** the latest installer from the [Releases](https://github.com/yourusername/ExplorerLens/releases) page
+1. **Download** the latest installer from the [Releases](https://github.com/RajwanYair/ExplorerLens.io/releases) page
 
 2. **Run the installer** as Administrator:
  ```powershell
  # Right-click installer → "Run as Administrator"
- .\ExplorerLens-Setup-15.2.1.msi
+ .\ExplorerLens-33.0.0-x64.msi
  ```
 
 3. **Follow the wizard**:
@@ -76,7 +78,106 @@ Stop-Process -Name explorer -Force
 
 ### Using LENSManager
 
-**LENSManager** is the configuration utility for ExplorerLens.
+**LENSManager** is the configuration utility for ExplorerLens. It ships in two flavors:
+
+- **Manager.WinUI.exe** — Modern WinUI 3 interface (recommended)
+- **LENSManager.exe** — Classic WTL/Win32 interface (lightweight fallback)
+
+---
+
+## Manager (WinUI)
+
+The modern Manager provides a full-featured GUI organized into pages:
+
+### Dashboard
+- **Status cards** — Registration status, GPU backend, cache hit rate, thumbnails/session
+- **Throughput sparkline** — Real-time graph of thumbnails generated per second (last 60s)
+- **Format breakdown** — Visual bar chart showing which formats are decoded most
+- **Quick Actions** — One-click buttons for Clear Cache, Restart Explorer, Export Logs, Manage Formats
+
+### Formats
+- **Search** by extension, decoder name, MIME type, or description
+- **Category filter** — Images, Archives, Documents, RAW Camera, Video, Audio, 3D Models, CAD/BIM, Scientific, Fonts, Source Code
+- **GPU filter** — Show only GPU-accelerated or CPU-only formats
+- **Batch actions** — Register All, Register Category, Unregister All, Apply & Restart
+- **Format detail panel** — Select any format to see decoder, MIME type, latency, GPU support, and a Test Decode button
+
+### Cache
+- **Live statistics** — Hit rate, entry count, budget used, average lookup time
+- **Quick Profiles** — One-click presets:
+  - **Lightweight** (128 MB, 10K entries) for low-RAM systems
+  - **Balanced** (512 MB, 50K entries) for most desktops
+  - **Performance** (2 GB, 100K entries, ARC) for power users
+- **Fine-tune** budget, max entries, hash algorithm (XXH3/SHA-256), eviction policy (LRU/LFU/ARC/CLOCK)
+- **Manage** cache location, clear/rebuild cache, memory-pressure-aware mode
+
+### Settings
+- **Thumbnail rendering** — Default size (128-1024 px), GPU backend (Auto/DX12/DX11/Vulkan/CPU), quality mode (Speed/Balanced/Quality)
+- **Cache** — Budget, hot-mode toggle
+- **Appearance** — Theme (System/Dark/Light)
+- **Action bar** — Reset to Defaults, Import Config, Save & Restart Explorer, Save
+
+### GPU
+- **GPU identity** — Name, vendor, VRAM, DirectX feature level, active backend
+- **Backend waterfall** — Visual chain showing which GPU backends were tried and which succeeded
+- **Hardware video decode** — NVDEC, Intel QuickSync, AMD AMF availability
+
+### Plugins
+- **Browse Marketplace** — Discover third-party decoders and thumbnail providers
+- **Install from file** — Load `.lenspkg` plugin files
+- **Check for updates** — Update all installed plugins
+- **Trust & enable** — Per-plugin toggle with trust level display
+
+### Diagnostics
+- **Log viewer** — Engine log with level filter (All/Info/Warning/Error), auto-scroll, monospaced font
+- **ETW trace** — Start/stop Event Tracing for Windows sessions
+- **Live counters** — TPS, decode latency, active threads, GPU memory, memory pressure
+- **Export** — Diagnostic bundle (.zip), copy system info, open log folder
+
+### About
+- **Version** — v33.0.0 (Spica) with build info
+- **Quick stats** — 200+ formats, 25+ decoders, <17ms per thumbnail
+- **System info** — GPU, Windows version, COM CLSID, test pass rate
+- **Links** — GitHub, docs, bug reports, changelog
+- **Copy System Info** — One-click copy for bug reports
+
+### First-Run Onboarding
+New installations show a 3-step guided setup:
+1. **Welcome** — Feature highlights and version info
+2. **Setup** — Shell registration, GPU backend selection, telemetry preference
+3. **Completion** — Summary of configured settings, quick tip, and links to Manager
+
+---
+
+## Command-Line Interface
+
+The `lens` CLI provides headless thumbnail generation for scripting and automation:
+
+```powershell
+# Generate a single thumbnail
+lens generate photo.cr2 --size 512 --quality
+
+# Batch-generate for an entire folder
+lens batch ./photos --recursive --threads 8
+
+# Show file metadata and decoder info
+lens info document.pdf
+
+# List supported formats (optionally by category)
+lens formats --category raw
+
+# Cache management
+lens cache stats
+lens cache clear
+
+# Version info
+lens version
+
+# Detailed help for any command
+lens help generate
+```
+
+**Exit codes:** 0 (success), 1 (error), 2 (invalid args), 3 (unknown format), 4 (license), 5 (I/O error), 6 (partial batch failure).
 
 1. **Launch LENSManager**:
  - Search for "LENSManager" in Start Menu
@@ -274,10 +375,12 @@ A: Thumbnail appearance is controlled by Windows Explorer. ExplorerLens only pro
 
 ## Additional Resources
 
-- **GitHub Repository:** https://github.com/yourusername/ExplorerLens
-- **Issue Tracker:** https://github.com/yourusername/ExplorerLens/issues
+- **GitHub Repository:** https://github.com/RajwanYair/ExplorerLens.io
+- **Issue Tracker:** https://github.com/RajwanYair/ExplorerLens.io/issues
 - **Developer Guide:** [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
-- **Build Instructions:** [.github/standards/build-method.md](.github/standards/build-method.md)
+- **Build Instructions:** [.github/standards/build-method.md](../.github/standards/build-method.md)
+- **Plugin Development:** [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md)
+- **Roadmap v34 (Arcturus):** [ROADMAP_V34.md](ROADMAP_V34.md)
 
 **Support:** For issues, please open a GitHub issue with detailed information.
 

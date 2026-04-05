@@ -137,7 +137,7 @@
                 BorderThickness="0,1,0,0" Padding="16,8">
             <StackPanel Orientation="Horizontal" Spacing="16">
                 <TextBlock x:Name="StatusText"
-                           Text="Ready — engine v32.1.0"
+                           Text="Ready — engine v33.0.0"
                            Style="{StaticResource CaptionTextBlockStyle}"
                            VerticalAlignment="Center"/>
                 <TextBlock x:Name="SessionText"

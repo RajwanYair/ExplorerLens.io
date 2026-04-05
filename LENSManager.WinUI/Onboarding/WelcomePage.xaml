@@ -17,7 +17,7 @@
                 <TextBlock Text="ExplorerLens"
                            Style="{StaticResource DisplayTextBlockStyle}"
                            HorizontalAlignment="Center"/>
-                <TextBlock x:Name="VersionChip" Text="v15.7.0 &quot;Zenith-X&quot;"
+                <TextBlock x:Name="VersionChip" Text="v33.0.0 &quot;Spica&quot;"
                            Style="{StaticResource CaptionTextBlockStyle}"
                            HorizontalAlignment="Center"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>

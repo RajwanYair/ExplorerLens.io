@@ -127,9 +127,26 @@
                 </StackPanel>
             </Border>
 
-            <!-- Save button -->
-            <Button Style="{StaticResource AccentButtonStyle}" Content="Save Settings"
-                    Click="SaveSettings_Click" Margin="0,8,0,0" HorizontalAlignment="Right"/>
+            <!-- Action bar -->
+            <Grid Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="Reset to Defaults" Click="ResetDefaults_Click"
+                        ToolTipService.ToolTip="Restore all settings to factory defaults (256px, Auto GPU, Balanced quality, 512 MB cache)"/>
+                <Button Grid.Column="1" Content="Import Config..." Click="ImportConfig_Click" Margin="8,0,0,0"
+                        ToolTipService.ToolTip="Load settings from a previously exported .yaml configuration file"/>
+                <Button Grid.Column="3" Content="Save &amp; Restart Explorer"
+                        Click="SaveAndRestart_Click"
+                        ToolTipService.ToolTip="Save settings and immediately restart Windows Explorer so changes take effect for thumbnails"
+                        Style="{StaticResource AccentButtonStyle}"/>
+                <Button Grid.Column="4" Content="Save" Click="SaveSettings_Click" Margin="8,0,0,0"
+                        ToolTipService.ToolTip="Save settings without restarting Explorer. Changes apply on next Explorer restart."/>
+            </Grid>
 
         </StackPanel>
     </ScrollViewer>

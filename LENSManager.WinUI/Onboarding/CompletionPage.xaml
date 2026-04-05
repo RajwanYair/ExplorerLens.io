@@ -1,0 +1,108 @@
+<!-- CompletionPage.xaml — Onboarding Step 3/3: Setup Complete
+     Confirms successful setup, shows quick summary, and opens the main Manager window. -->
+<Page
+    x:Class="ExplorerLens.Manager.Onboarding.CompletionPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid RowDefinitions="*,Auto" Padding="48,32">
+
+        <!-- Content area -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Spacing="24" MaxWidth="520">
+
+            <!-- Success animation/icon -->
+            <FontIcon Glyph="&#xE73E;" FontSize="72"
+                      Foreground="{StaticResource LensSuccessBrush}"
+                      HorizontalAlignment="Center"/>
+
+            <TextBlock Text="You're All Set!"
+                       Style="{StaticResource DisplayTextBlockStyle}"
+                       HorizontalAlignment="Center"/>
+
+            <TextBlock Text="ExplorerLens is now registered with Windows Explorer. Thumbnails will appear automatically when you browse folders containing supported files."
+                       Style="{StaticResource BodyTextBlockStyle}"
+                       HorizontalAlignment="Center" TextAlignment="Center"
+                       TextWrapping="Wrap" Opacity="0.7"/>
+
+            <!-- Setup summary -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="20">
+                <Grid RowSpacing="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <FontIcon Grid.Row="0" Grid.Column="0" Glyph="&#xE73E;" FontSize="14"
+                              Foreground="{StaticResource LensSuccessBrush}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Shell extension registered" Margin="8,0"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" x:Name="FormatCountText" Text="200+ formats"
+                               Foreground="{StaticResource LensAccentBrush}" FontWeight="SemiBold"/>
+
+                    <FontIcon Grid.Row="1" Grid.Column="0" Glyph="&#xE73E;" FontSize="14"
+                              Foreground="{StaticResource LensSuccessBrush}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="GPU backend" Margin="8,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" x:Name="GpuBackendText" Text="Auto-detected"
+                               Foreground="{StaticResource LensAccentBrush}" FontWeight="SemiBold"/>
+
+                    <FontIcon Grid.Row="2" Grid.Column="0" Glyph="&#xE73E;" FontSize="14"
+                              Foreground="{StaticResource LensSuccessBrush}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="Cache budget" Margin="8,0"/>
+                    <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CacheBudgetText" Text="512 MB"
+                               Foreground="{StaticResource LensAccentBrush}" FontWeight="SemiBold"/>
+
+                    <FontIcon Grid.Row="3" Grid.Column="0" Glyph="&#xE73E;" FontSize="14"
+                              Foreground="{StaticResource LensSuccessBrush}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="Telemetry" Margin="8,0"/>
+                    <TextBlock Grid.Row="3" Grid.Column="2" x:Name="TelemetryText" Text="Anonymous"
+                               Foreground="{StaticResource LensAccentBrush}" FontWeight="SemiBold"/>
+                </Grid>
+            </Border>
+
+            <!-- Quick tip -->
+            <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                    CornerRadius="6" Padding="16">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <FontIcon Glyph="&#xE82F;" FontSize="18"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                    <TextBlock Text="Tip: Open a folder with images in Windows Explorer to see thumbnails right away. You can customize formats and settings anytime from the Manager."
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Navigation bar -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Step indicators -->
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Ellipse Width="8"  Height="8"  Fill="{ThemeResource ControlStrongStrokeColorDefaultBrush}"/>
+                <Ellipse Width="8"  Height="8"  Fill="{ThemeResource ControlStrongStrokeColorDefaultBrush}"/>
+                <Ellipse Width="10" Height="10" Fill="{ThemeResource AccentFillColorDefaultBrush}"/>
+            </StackPanel>
+
+            <Button Grid.Column="1" Content="Open Manager"
+                    Click="OpenManager_Click" Margin="0,0,8,0"
+                    ToolTipService.ToolTip="Open the full ExplorerLens Manager to customize formats, GPU settings, and cache"/>
+            <Button Grid.Column="2" Content="Done"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="Done_Click"
+                    ToolTipService.ToolTip="Close setup and start using ExplorerLens immediately"/>
+        </Grid>
+
+    </Grid>
+</Page>

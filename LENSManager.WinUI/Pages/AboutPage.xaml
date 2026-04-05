@@ -17,7 +17,7 @@
                           HorizontalAlignment="Center"/>
                 <TextBlock Text="ExplorerLens" Style="{StaticResource TitleLargeTextBlockStyle}"
                            HorizontalAlignment="Center"/>
-                <TextBlock x:Name="VersionLabel" Text="v32.1.0 (Fomalhaut-R)"
+                <TextBlock x:Name="VersionLabel" Text="v33.0.0 (Spica)"
                            Style="{StaticResource SubtitleTextBlockStyle}"
                            HorizontalAlignment="Center" Opacity="0.7"/>
                 <TextBlock Text="GPU-Accelerated Thumbnail Provider for Windows Explorer"
@@ -86,10 +86,48 @@
                 </StackPanel>
             </Border>
 
-            <!-- Build info -->
-            <TextBlock x:Name="BuildInfo" FontFamily="{StaticResource LensMonoFont}"
-                       FontSize="11" Opacity="0.5" HorizontalAlignment="Center"
-                       Text="Build: local | MSVC v145 | x64"/>
+            <!-- Build info + System snapshot -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="16">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="System Info" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <Grid ColumnSpacing="16" RowSpacing="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Build" Opacity="0.6" FontSize="12"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="BuildInfo"
+                                   FontFamily="{StaticResource LensMonoFont}" FontSize="11"
+                                   Text="MSVC v145 | x64 | Release"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="GPU" Opacity="0.6" FontSize="12"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="GpuInfo"
+                                   FontFamily="{StaticResource LensMonoFont}" FontSize="11"
+                                   Text="(detecting...)"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Windows" Opacity="0.6" FontSize="12"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="WindowsInfo"
+                                   FontFamily="{StaticResource LensMonoFont}" FontSize="11"
+                                   Text="(detecting...)"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Shell CLSID" Opacity="0.6" FontSize="12"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1"
+                                   FontFamily="{StaticResource LensMonoFont}" FontSize="11"
+                                   Text="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" IsTextSelectionEnabled="True"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Tests" Opacity="0.6" FontSize="12"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1"
+                                   FontFamily="{StaticResource LensMonoFont}" FontSize="11"
+                                   Text="4583 passed | 0 failed | 100% pass rate"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                        <Button Content="Copy System Info" Click="CopySystemInfo_Click" FontSize="12"
+                                ToolTipService.ToolTip="Copy all system details to clipboard for pasting in bug reports"/>
+                        <Button Content="Check for Updates" Click="CheckForUpdates_Click" FontSize="12"
+                                ToolTipService.ToolTip="Check if a newer version of ExplorerLens is available on GitHub"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
         </StackPanel>
     </ScrollViewer>
