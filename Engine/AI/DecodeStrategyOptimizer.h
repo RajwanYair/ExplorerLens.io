@@ -68,7 +68,6 @@ public:
     {
         AcquireSRWLockExclusive(&m_lock);
         auto& perfs = m_formatStrategies[format];
-        auto stratIdx = static_cast<uint8_t>(strategy);
 
         // Find or create entry
         StrategyPerformance* sp = nullptr;

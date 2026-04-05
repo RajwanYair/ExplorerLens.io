@@ -340,7 +340,6 @@ class AdaptiveCacheBudgetManager
                 m_hysteresisCount = 1;
             }
             if (m_hysteresisCount >= 3) {
-                MemoryPressureTier oldTier = m_currentTier;
                 m_currentTier = newTier;
                 m_hysteresisCount = 0;
                 m_adaptationCount++;

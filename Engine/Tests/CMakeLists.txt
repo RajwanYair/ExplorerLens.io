@@ -174,15 +174,11 @@ endif()
 if(MSVC)
     target_compile_options(EngineTests PRIVATE
         /W4
-        /wd4189     # C4189: local variable initialized but not referenced
-                    # Expected in tests: assert() is no-op in Release, so
-                    # variables used only in EXPECT_* macros appear unused
         /bigobj                     # C1128: split test files (5 .cpp files totalling ~50K lines) may exceed
                                     # COFF section limit without /bigobj
     )
     target_compile_options(EngineBenchmark PRIVATE
         /W4
-        /wd4189     # Same rationale as above
     )
 
     # libwebp rebuilt with /MD — suppress LIBCMT conflict from static runtime libs

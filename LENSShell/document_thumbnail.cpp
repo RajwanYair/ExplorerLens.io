@@ -333,16 +333,20 @@ DocumentThumbnail::DocumentType DocumentThumbnail::GetDocumentType(const std::ws
 // Check if Windows.Storage API is available (Windows 8+)
 bool DocumentThumbnail::IsStorageThumbnailAvailable()
 {
-    // Check Windows version
-    OSVERSIONINFOEX osvi;
-    ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-    osvi.dwMajorVersion = 6;
-    osvi.dwMinorVersion = 2;  // Windows 8 is 6.2
+    // Use RtlGetVersion (ntdll) — avoids the deprecated GetVersionEx API
+    using RtlGetVersionFn = LONG(WINAPI*)(PRTL_OSVERSIONINFOW);
+    HMODULE ntdll = ::GetModuleHandleW(L"ntdll.dll");
+    auto rtlGetVersion = ntdll ? reinterpret_cast<RtlGetVersionFn>(
+                                     ::GetProcAddress(ntdll, "RtlGetVersion")) : nullptr;
 
-#pragma warning(suppress : 4996)  // GetVersionEx deprecated
-    return GetVersionEx((OSVERSIONINFO*)&osvi)
-           && (osvi.dwMajorVersion > 6 || (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion >= 2));
+    RTL_OSVERSIONINFOW vi{};
+    vi.dwOSVersionInfoSize = sizeof(vi);
+    if (rtlGetVersion && rtlGetVersion(&vi) == 0) {
+        // Windows 8 is version 6.2; require 6.2 or later
+        return vi.dwMajorVersion > 6 || (vi.dwMajorVersion == 6 && vi.dwMinorVersion >= 2);
+    }
+
+    return false;
 }
 
 }  // namespace ExplorerLens

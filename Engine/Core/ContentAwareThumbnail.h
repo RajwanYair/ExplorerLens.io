@@ -217,7 +217,6 @@ class ContentAwareThumbnail
         float energy = 0.0f;
         for (uint32_t y = 1; y + 1 < h; y++) {
             for (uint32_t x = 1; x + 1 < w; x++) {
-                uint32_t idx = (y * w + x) * 4;
                 uint32_t left = (y * w + x - 1) * 4;
                 uint32_t right = (y * w + x + 1) * 4;
                 uint32_t up = ((y - 1) * w + x) * 4;

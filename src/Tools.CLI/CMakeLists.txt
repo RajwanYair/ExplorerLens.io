@@ -49,7 +49,6 @@ if(MSVC)
         /W4
         /permissive-
         /utf-8
-        /wd4100   # unreferenced formal parameter (DoctorCommand output helpers)
     )
     target_compile_definitions(LensCLILib PRIVATE
         WIN32_LEAN_AND_MEAN

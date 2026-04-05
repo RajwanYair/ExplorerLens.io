@@ -190,10 +190,7 @@ class ENGINE_API HardwareCapabilities
     uint64_t XGETBV(uint32_t xcr);
 
     CPUCapabilities m_cpu;
-#pragma warning(push)
-#pragma warning(disable : 4251)  // STL members in DLL-exported class
     std::vector<GPUInfo> m_gpus;
-#pragma warning(pop)
     uint64_t m_totalMemoryMB;
 };
 

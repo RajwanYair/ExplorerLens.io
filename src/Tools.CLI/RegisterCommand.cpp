@@ -176,13 +176,6 @@ int RegisterCommand::DoUnregister(const std::wstring& dllPath, bool verbose)
 
 int UnregisterCommand::Execute(const ParsedArgs& args)
 {
-    // Delegate to RegisterCommand::DoUnregister via a temporary instance
-    RegisterCommand reg;
-    // We need the same FindDll and DoUnregister logic — reuse via composition
-    ParsedArgs modArgs = args;
-    // Redirect to register command with unregister intent via internal call
-    (void)reg;   // suppress unused warning — DoUnregister called directly below
-
     if (args.HasFlag(L"--help") || args.HasFlag(L"-h")) {
         std::wcout << L"Usage: " << Usage() << L"\n\n"
                    << L"  --dll <path>  Explicit path to LENSShell.dll\n";

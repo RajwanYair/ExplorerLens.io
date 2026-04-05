@@ -93,7 +93,6 @@ class SemanticFileClassifier
         }
 
         double entropy = 0.0;
-        double logSize = std::log2(static_cast<double>(size));
         for (auto count : freq) {
             if (count > 0) {
                 double p = static_cast<double>(count) / static_cast<double>(size);

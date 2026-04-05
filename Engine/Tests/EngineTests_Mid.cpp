@@ -26,7 +26,6 @@ TEST(Test_Settings_ValidateJSON)
 {
     using namespace ExplorerLens::Engine;
     // Validate export produces non-empty result struct
-    auto& inst = SettingsExportImport::Instance();
     ASSERT(SettingsExportImport::FormatCount() >= 2);
 }
 
@@ -3506,7 +3505,7 @@ TEST(TestCacheCoherencyProtocol_Init)
 {
     CacheCoherencyProtocol cache;
     CoherencyConfig config;
-    bool ok = cache.Initialize(config);
+    cache.Initialize(config);
     // May succeed or fail depending on OS permissions, but shouldn't crash
     auto stats = cache.GetStats();
     ASSERT(stats.hits == 0);
@@ -3549,7 +3548,7 @@ TEST(TestDecoderRegistryV2_Unregister)
 TEST(TestProductionPipelineV2_Init)
 {
     auto& pipeline = ProductionPipelineIntegration::Instance();
-    bool ok = pipeline.Initialize();
+    pipeline.Initialize();
     // May fail without GPU/cache but should not crash
     auto stats = pipeline.GetStatistics();
     ASSERT(stats.totalRequests == 0);
@@ -7476,7 +7475,6 @@ TEST(Test_BZ_PCBLayout_Format)
 
 TEST(Test_BZ_GPUTensor_Init)
 {
-    auto& gpu = GPUTensorAccelerator::Instance();
     GPUTensorShape shape{1, 3, 64, 64};
     ASSERT(shape.ElementCount() == 1 * 3 * 64 * 64);
 }

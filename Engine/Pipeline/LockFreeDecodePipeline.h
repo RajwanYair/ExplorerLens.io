@@ -3,10 +3,6 @@
 // LockFreeDecodePipeline.h — Lock-Free MPMC Decode Queue
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Suppress C4324 — intentional cache-line alignment padding
-#pragma warning(push)
-#pragma warning(disable : 4324)
-//
 // PURPOSE:
 //   Lock-free multi-producer multi-consumer decode queue using Compare-And-Swap
 //   (CAS) operations on a power-of-2 sized ring buffer. Provides zero-mutex
@@ -103,6 +99,8 @@ struct DecodeTask
 /// slot, write the task, then advance the slot's sequence. Consumers CAS the
 /// tail index, read the task, then advance the sequence by the buffer capacity
 /// to mark it free for reuse. No mutexes are required.
+#pragma warning(push)
+#pragma warning(disable : 4324)  // C4324: intentional cache-line alignment padding via alignas(64)
 class LockFreeDecodePipeline
 {
   public:
@@ -375,8 +373,7 @@ class LockFreeDecodePipeline
     std::function<void(DecodeTask&)> m_decodeFn;
     std::vector<std::thread> m_workers;
 };
+#pragma warning(pop)
 
 }  // namespace Engine
 }  // namespace ExplorerLens
-
-#pragma warning(pop)

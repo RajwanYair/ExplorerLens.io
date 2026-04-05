@@ -12,34 +12,34 @@ TEST(CADFormatPlugin, SupportedExtensionsNotEmpty)
 
 TEST(CADFormatPlugin, DWGDetection)
 {
-    EXPECT_EQ(DetectCADFormat(".dwg"), CADFormat::DWG);
+    EXPECT_EQ(DetectCADFormat(".dwg"), PluginCADFormat::DWG);
 }
 
 TEST(CADFormatPlugin, DXFDetection)
 {
-    EXPECT_EQ(DetectCADFormat(".dxf"), CADFormat::DXF);
+    EXPECT_EQ(DetectCADFormat(".dxf"), PluginCADFormat::DXF);
 }
 
 TEST(CADFormatPlugin, STEPDetection)
 {
-    EXPECT_EQ(DetectCADFormat(".step"), CADFormat::STEP);
-    EXPECT_EQ(DetectCADFormat(".stp"), CADFormat::STEP);
+    EXPECT_EQ(DetectCADFormat(".step"), PluginCADFormat::STEP);
+    EXPECT_EQ(DetectCADFormat(".stp"), PluginCADFormat::STEP);
 }
 
 TEST(CADFormatPlugin, IGESDetection)
 {
-    EXPECT_EQ(DetectCADFormat(".iges"), CADFormat::IGES);
-    EXPECT_EQ(DetectCADFormat(".igs"), CADFormat::IGES);
+    EXPECT_EQ(DetectCADFormat(".iges"), PluginCADFormat::IGES);
+    EXPECT_EQ(DetectCADFormat(".igs"), PluginCADFormat::IGES);
 }
 
 TEST(CADFormatPlugin, UnknownExtensionReturnsUnknown)
 {
-    EXPECT_EQ(DetectCADFormat(".xyz"), CADFormat::Unknown);
+    EXPECT_EQ(DetectCADFormat(".xyz"), PluginCADFormat::Unknown);
 }
 
 TEST(CADFormatPlugin, CADToStringDWG)
 {
-    EXPECT_EQ(ToString(CADFormat::DWG), std::string("DWG"));
+    EXPECT_EQ(ToString(PluginCADFormat::DWG), std::string("DWG"));
 }
 
 TEST(CADFormatPlugin, BoundingBoxValid)

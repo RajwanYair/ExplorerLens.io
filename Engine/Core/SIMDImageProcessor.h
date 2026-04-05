@@ -127,7 +127,6 @@ class SIMDImageProcessor
     static void PremulAlpha_AVX2(uint8_t* PRGBA, uint32_t pixelCount)
     {
 #ifdef __AVX2__
-        uint32_t* px = reinterpret_cast<uint32_t*>(PRGBA);
         uint32_t i = 0;
         for (; i + 4 <= pixelCount; i += 4) {
             // Process 4 pixels using 128-bit SSE

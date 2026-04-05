@@ -975,7 +975,6 @@ class ARM64FeatureDetector
         features.hasNEON = true;
 
         // Check if we're running as emulated x64
-        BOOL isWow64 = FALSE;
         using IsWow64Process2Fn = BOOL(WINAPI*)(HANDLE, USHORT*, USHORT*);
         auto kernel32 = GetModuleHandleW(L"kernel32.dll");
         if (kernel32) {

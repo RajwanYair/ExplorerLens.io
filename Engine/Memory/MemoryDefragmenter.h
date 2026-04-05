@@ -168,7 +168,6 @@ class MemoryDefragmenter
 
         // Phase 1: Compact — slide live regions down into free gaps
         // We identify contiguous runs and move live blocks to fill free gaps.
-        size_t writeIdx = 0;
         for (size_t readIdx = 0; readIdx < m_regions.size(); ++readIdx) {
             if (!m_regions[readIdx].inUse)
                 continue;
