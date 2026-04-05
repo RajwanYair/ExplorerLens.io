@@ -2,6 +2,7 @@
 // Copyright (c) 2026 ExplorerLens Project
 //
 #include "VideoFrameExtractor.h"
+#include <string_view>
 
 namespace ExplorerLens { namespace Engine {
 

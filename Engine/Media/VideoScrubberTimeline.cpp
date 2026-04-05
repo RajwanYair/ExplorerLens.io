@@ -3,6 +3,9 @@
 //
 #include "VideoScrubberTimeline.h"
 #include <algorithm>
+#include <cstdint>
+#include <iterator>
+#include <string>
 
 namespace ExplorerLens { namespace Engine {
 
@@ -50,7 +53,7 @@ KeyframeEntry VideoScrubberTimeline::KeyframeAt(uint32_t index) const noexcept
     {
         return KeyframeEntry{};
     }
-    return m_keyframes[index];
+    return m_keyframes.at(index);
 }
 
 ChapterMarker VideoScrubberTimeline::ChapterAt(uint32_t index) const noexcept
@@ -59,7 +62,7 @@ ChapterMarker VideoScrubberTimeline::ChapterAt(uint32_t index) const noexcept
     {
         return ChapterMarker{};
     }
-    return m_chapters[index];
+    return m_chapters.at(index);
 }
 
 double VideoScrubberTimeline::NearestKeyframePts(double target) const noexcept
@@ -68,8 +71,8 @@ double VideoScrubberTimeline::NearestKeyframePts(double target) const noexcept
     {
         return 0.0;
     }
-    const auto IT = std::lower_bound(
-        m_keyframes.begin(), m_keyframes.end(), target,
+    const auto IT = std::ranges::lower_bound(
+        m_keyframes, target,
         [](const KeyframeEntry& kf, double ts) noexcept { return kf.ptsSec < ts; });
     if (IT == m_keyframes.end())
     {

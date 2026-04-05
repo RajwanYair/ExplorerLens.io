@@ -7,6 +7,7 @@
 //
 #pragma once
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
 
@@ -57,9 +58,9 @@ private:
     {
         std::size_t operator()(const ScrubberCacheKey& k) const noexcept
         {
-            const std::hash<std::wstring> wh;
-            const std::hash<double>       dh;
-            return wh(k.filePath) ^ (dh(k.ptsSec) << 1U);
+            const std::hash<std::wstring> WH;
+            const std::hash<double>       DH;
+            return WH(k.filePath) ^ (DH(k.ptsSec) << 1U);
         }
     };
 

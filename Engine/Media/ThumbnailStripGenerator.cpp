@@ -4,6 +4,7 @@
 #include "ThumbnailStripGenerator.h"
 #include "VideoFrameExtractor.h"
 #include "VideoScrubberTimeline.h"
+#include <cstdint>
 
 namespace ExplorerLens { namespace Engine {
 

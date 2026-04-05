@@ -2,6 +2,7 @@
 // Copyright (c) 2026 ExplorerLens Project
 //
 #include "ScrubberCacheEngine.h"
+#include <cstdint>
 
 namespace ExplorerLens { namespace Engine {
 
