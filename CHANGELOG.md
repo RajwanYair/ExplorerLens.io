@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [33.1.0] — 2026-04-05 — Spica-R
+
+### Added
+- Sprint 1151-1160: Platform GPU backends — MetalGPUBackend, VulkanEGLBackend, PlatformGPURouter, PlatformDisplayBridge, CrossPlatformSyncFence
+- Cross-platform GPU routing with runtime backend selection and zero-copy display attachment
+- SyncFenceState enum with Create/Destroy/Signal/Wait lifecycle
+
+---
+
 ## [33.0.0] — 2026-04-05 — Spica
 
 v33.0.0 Spica: Cross-platform PAL (macOS Quick Look + Linux Nautilus stubs), Generative AI thumbnails (diffusion model, NPU synthesizer), Enterprise Console v4 (GPO templates, Intune compliance, ConfigMgr bridge), all 36 test failures resolved, 0 errors 0 warnings, 4583 tests passing
