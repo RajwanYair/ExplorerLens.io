@@ -14,7 +14,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class AuditEventType : uint8_t
+enum class EnterpriseAuditEventType : uint8_t
 {
     PolicyChange    = 0,
     ThumbnailAccess = 1,
@@ -24,9 +24,9 @@ enum class AuditEventType : uint8_t
     UserAction      = 5,
 };
 
-struct AuditLogEntry
+struct EnterpriseAuditLogEntry
 {
-    AuditEventType type        = AuditEventType::UserAction;
+    EnterpriseAuditEventType type        = EnterpriseAuditEventType::UserAction;
     std::string    description;
     std::string    actor;
     uint64_t       timestampMs = 0;
@@ -52,7 +52,7 @@ public:
 
     bool             Initialize(const std::string& logPath);
     void             Shutdown();
-    bool             Log(const AuditLogEntry& event);
+    bool             Log(const EnterpriseAuditLogEntry& event);
     AuditLogStats    GetStats()     const noexcept { return m_stats; }
     uint64_t         EventCount()   const noexcept { return m_stats.totalEvents; }
     bool             IsOpen()       const noexcept { return m_open; }

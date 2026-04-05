@@ -29,29 +29,29 @@ void AIThumbnailBatchProcessor::Shutdown()
     m_initialized = false;
 }
 
-uint32_t AIThumbnailBatchProcessor::Enqueue(const BatchRequest& req)
+uint32_t AIThumbnailBatchProcessor::Enqueue(const AIBatchRequest& req)
 {
     if (!m_initialized || req.filePath.empty())
         return 0;
-    BatchRequest r = req;
+    AIBatchRequest r = req;
     r.requestId = m_nextId++;
     m_queue.push_back(r);
     return r.requestId;
 }
 
-bool AIThumbnailBatchProcessor::ProcessBatch(std::vector<BatchResult>& outResults)
+bool AIThumbnailBatchProcessor::ProcessBatch(std::vector<AIBatchResult>& outResults)
 {
     if (!m_initialized || m_queue.empty())
         return false;
     std::sort(m_queue.begin(), m_queue.end(),
-              [](const BatchRequest& a, const BatchRequest& b){
+              [](const AIBatchRequest& a, const AIBatchRequest& b){
                   return a.priority > b.priority;
               });
     outResults.clear();
     outResults.reserve(m_queue.size());
     for (const auto& req : m_queue)
     {
-        BatchResult res;
+        AIBatchResult res;
         res.requestId   = req.requestId;
         res.success     = true;
         res.inferenceMs = 4.5f;

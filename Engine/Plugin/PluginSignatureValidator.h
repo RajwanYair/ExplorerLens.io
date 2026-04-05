@@ -21,7 +21,7 @@ enum class SignatureAlgorithm : uint8_t
     None         = 255,
 };
 
-enum class ValidationResult : uint8_t
+enum class PluginValidationResult : uint8_t
 {
     Valid        = 0,
     Invalid      = 1,
@@ -34,7 +34,7 @@ enum class ValidationResult : uint8_t
 struct SignatureInfo
 {
     SignatureAlgorithm algorithm  = SignatureAlgorithm::None;
-    ValidationResult  result     = ValidationResult::NotSigned;
+    PluginValidationResult  result     = PluginValidationResult::NotSigned;
     std::string       signer;
     std::string       thumbprint;
     bool              trusted    = false;

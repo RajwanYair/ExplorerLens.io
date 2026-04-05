@@ -28,14 +28,14 @@ void EnterpriseAuditLogger::Shutdown()
     m_open = false;
 }
 
-bool EnterpriseAuditLogger::Log(const AuditLogEntry& event)
+bool EnterpriseAuditLogger::Log(const EnterpriseAuditLogEntry& event)
 {
     if (!m_open)
         return false;
     ++m_stats.totalEvents;
-    if (event.type == AuditEventType::SecurityViolation)
+    if (event.type == EnterpriseAuditEventType::SecurityViolation)
         ++m_stats.securityEvents;
-    if (event.type == AuditEventType::PolicyChange)
+    if (event.type == EnterpriseAuditEventType::PolicyChange)
         ++m_stats.policyEvents;
     return true;
 }

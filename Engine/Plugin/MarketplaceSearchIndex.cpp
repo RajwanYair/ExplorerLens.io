@@ -45,10 +45,10 @@ bool MarketplaceSearchIndex::IndexPlugin(const std::string& pluginId,
     return true;
 }
 
-std::vector<SearchIndexEntry> MarketplaceSearchIndex::Query(const std::string& terms,
+std::vector<MarketplaceIndexEntry> MarketplaceSearchIndex::Query(const std::string& terms,
                                                               uint32_t maxResults) const
 {
-    std::vector<SearchIndexEntry> results;
+    std::vector<MarketplaceIndexEntry> results;
     if (terms.empty())
         return results;
     std::unordered_map<std::string, float> scores;
@@ -68,7 +68,7 @@ std::vector<SearchIndexEntry> MarketplaceSearchIndex::Query(const std::string& t
     for (const auto& kv : scores)
         results.push_back({kv.first, kv.second});
     std::sort(results.begin(), results.end(),
-              [](const SearchIndexEntry& a, const SearchIndexEntry& b){
+              [](const MarketplaceIndexEntry& a, const MarketplaceIndexEntry& b){
                   return a.relevanceScore > b.relevanceScore;
               });
     if (results.size() > maxResults)
@@ -76,9 +76,9 @@ std::vector<SearchIndexEntry> MarketplaceSearchIndex::Query(const std::string& t
     return results;
 }
 
-SearchIndexStats MarketplaceSearchIndex::GetStats() const noexcept
+MarketplaceIndexStats MarketplaceSearchIndex::GetStats() const noexcept
 {
-    SearchIndexStats stats;
+    MarketplaceIndexStats stats;
     stats.totalDocuments = m_documentCount;
     stats.totalTokens    = static_cast<uint32_t>(m_index.size());
     return stats;

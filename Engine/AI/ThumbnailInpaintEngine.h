@@ -13,7 +13,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-struct InpaintRegion
+struct ThumbnailInpaintRegion
 {
     uint32_t x      = 0;
     uint32_t y      = 0;
@@ -26,7 +26,7 @@ struct InpaintRequest
     std::vector<uint8_t> pixels;
     uint32_t             imageWidth  = 0;
     uint32_t             imageHeight = 0;
-    InpaintRegion        region;
+    ThumbnailInpaintRegion        region;
     uint32_t             steps       = 4;
 };
 

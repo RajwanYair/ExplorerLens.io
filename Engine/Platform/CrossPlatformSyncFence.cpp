@@ -13,7 +13,7 @@ bool CrossPlatformSyncFence::Create()
     if (m_created)
         return true;
     m_completedValue = 0;
-    m_state          = FenceState::Idle;
+    m_state          = SyncFenceState::Idle;
     m_created        = true;
     return true;
 }
@@ -22,7 +22,7 @@ void CrossPlatformSyncFence::Destroy()
 {
     m_created        = false;
     m_completedValue = 0;
-    m_state          = FenceState::Idle;
+    m_state          = SyncFenceState::Idle;
 }
 
 bool CrossPlatformSyncFence::Signal(uint64_t value)
@@ -30,23 +30,23 @@ bool CrossPlatformSyncFence::Signal(uint64_t value)
     if (!m_created)
         return false;
     m_completedValue = value;
-    m_state          = FenceState::Signaled;
+    m_state          = SyncFenceState::Signaled;
     return true;
 }
 
-FenceState CrossPlatformSyncFence::Wait(uint64_t value, uint32_t /*timeoutMs*/)
+SyncFenceState CrossPlatformSyncFence::Wait(uint64_t value, uint32_t /*timeoutMs*/)
 {
     if (!m_created)
-        return FenceState::Error;
+        return SyncFenceState::Error;
     if (m_completedValue >= value)
-        return FenceState::Signaled;
-    return FenceState::WaitTimeout;
+        return SyncFenceState::Signaled;
+    return SyncFenceState::WaitTimeout;
 }
 
 void CrossPlatformSyncFence::Reset() noexcept
 {
     m_completedValue = 0;
-    m_state          = FenceState::Idle;
+    m_state          = SyncFenceState::Idle;
 }
 
 }} // namespace ExplorerLens::Engine

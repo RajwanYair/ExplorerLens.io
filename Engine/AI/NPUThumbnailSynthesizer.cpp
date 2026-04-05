@@ -25,9 +25,9 @@ void NPUThumbnailSynthesizer::Shutdown()
     m_initialized = false;
 }
 
-SynthesisResult NPUThumbnailSynthesizer::Synthesize(const SynthesisRequest& req)
+NPUSynthesisResult NPUThumbnailSynthesizer::Synthesize(const SynthesisRequest& req)
 {
-    SynthesisResult result;
+    NPUSynthesisResult result;
     if (!m_initialized || req.prompt.empty())
     {
         result.errorMsg = m_initialized ? "Empty prompt" : "Not initialized";

@@ -29,7 +29,7 @@ struct SynthesisRequest
     float        guidance = 3.0f;
 };
 
-struct SynthesisResult
+struct NPUSynthesisResult
 {
     bool                 success   = false;
     std::vector<uint8_t> pixels;
@@ -50,7 +50,7 @@ public:
 
     bool              Initialize(SynthesisBackend backend = SynthesisBackend::DirectML);
     void              Shutdown();
-    SynthesisResult   Synthesize(const SynthesisRequest& req);
+    NPUSynthesisResult   Synthesize(const SynthesisRequest& req);
     SynthesisBackend  GetBackend()    const noexcept { return m_backend; }
     const char*       BackendName()   const noexcept;
     uint64_t          SynthesisCount() const noexcept { return m_count; }

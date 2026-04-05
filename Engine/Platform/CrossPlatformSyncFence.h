@@ -11,7 +11,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class FenceState : uint8_t
+enum class SyncFenceState : uint8_t
 {
     Idle        = 0,
     Signaled    = 1,
@@ -31,16 +31,16 @@ public:
     bool       Create();
     void       Destroy();
     bool       Signal(uint64_t value = 1);
-    FenceState Wait(uint64_t value = 1, uint32_t timeoutMs = 1000);
+    SyncFenceState Wait(uint64_t value = 1, uint32_t timeoutMs = 1000);
     uint64_t   GetCompletedValue() const noexcept { return m_completedValue; }
     bool       IsCreated()         const noexcept { return m_created; }
     void       Reset()             noexcept;
-    FenceState GetState()          const noexcept { return m_state; }
+    SyncFenceState GetState()          const noexcept { return m_state; }
 
 private:
     bool       m_created        = false;
     uint64_t   m_completedValue = 0;
-    FenceState m_state          = FenceState::Idle;
+    SyncFenceState m_state          = SyncFenceState::Idle;
 };
 
 }} // namespace ExplorerLens::Engine

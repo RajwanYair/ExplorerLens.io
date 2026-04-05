@@ -14,7 +14,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class BatchPriority : uint8_t
+enum class AIBatchPriority : uint8_t
 {
     Low      = 0,
     Normal   = 1,
@@ -22,14 +22,14 @@ enum class BatchPriority : uint8_t
     Realtime = 3,
 };
 
-struct BatchRequest
+struct AIBatchRequest
 {
     std::string   filePath;
     uint32_t      requestId   = 0;
-    BatchPriority priority    = BatchPriority::Normal;
+    AIBatchPriority priority    = AIBatchPriority::Normal;
 };
 
-struct BatchResult
+struct AIBatchResult
 {
     uint32_t              requestId      = 0;
     bool                  success        = false;
@@ -37,7 +37,7 @@ struct BatchResult
     std::vector<uint8_t>  pixels;
 };
 
-struct BatchProcessorStats
+struct AIBatchProcessorStats
 {
     uint64_t  totalProcessed    = 0;
     uint64_t  totalFailed       = 0;
@@ -56,17 +56,17 @@ public:
 
     bool                       Initialize(uint32_t maxConcurrency = 4);
     void                       Shutdown();
-    uint32_t                   Enqueue(const BatchRequest& req);
-    bool                       ProcessBatch(std::vector<BatchResult>& outResults);
+    uint32_t                   Enqueue(const AIBatchRequest& req);
+    bool                       ProcessBatch(std::vector<AIBatchResult>& outResults);
     void                       ClearQueue();
-    BatchProcessorStats        GetStats()   const noexcept { return m_stats; }
+    AIBatchProcessorStats        GetStats()   const noexcept { return m_stats; }
     uint32_t                   QueueDepth() const noexcept { return static_cast<uint32_t>(m_queue.size()); }
 
     static AIThumbnailBatchProcessor& Instance() noexcept;
 
 private:
-    std::vector<BatchRequest>  m_queue;
-    BatchProcessorStats        m_stats;
+    std::vector<AIBatchRequest>  m_queue;
+    AIBatchProcessorStats        m_stats;
     uint32_t                   m_maxConcurrency = 4;
     uint32_t                   m_nextId         = 1;
     bool                       m_initialized    = false;

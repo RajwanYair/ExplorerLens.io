@@ -13,7 +13,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class PolicySource : uint8_t
+enum class PolicySourceV4 : uint8_t
 {
     None     = 0,
     GPO      = 1,
@@ -30,11 +30,11 @@ enum class PolicyEnforcementLevel : uint8_t
     Locked    = 3,
 };
 
-struct EnterprisePolicyEntry
+struct EnterprisePolicyV4Entry
 {
     std::string            key;
     std::string            value;
-    PolicySource           source           = PolicySource::None;
+    PolicySourceV4           source           = PolicySourceV4::None;
     PolicyEnforcementLevel enforcementLevel = PolicyEnforcementLevel::Advisory;
 };
 
@@ -59,7 +59,7 @@ public:
     void         Shutdown();
     bool         LoadFromGPO();
     bool         LoadFromIntune();
-    bool         ApplyPolicy(const EnterprisePolicyEntry& entry);
+    bool         ApplyPolicy(const EnterprisePolicyV4Entry& entry);
     std::string  GetPolicy(const std::string& key) const;
     PolicyReport GenerateReport() const;
     uint32_t     PolicyCount()  const noexcept { return static_cast<uint32_t>(m_policies.size()); }
@@ -68,7 +68,7 @@ public:
     static EnterprisePolicyV4& Instance() noexcept;
 
 private:
-    std::vector<EnterprisePolicyEntry>  m_policies;
+    std::vector<EnterprisePolicyV4Entry>  m_policies;
     bool                      m_initialized = false;
     static EnterprisePolicyV4 s_instance;
 };

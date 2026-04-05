@@ -31,17 +31,17 @@ SignatureInfo PluginSignatureValidator::Validate(const std::string& pluginPath) 
     SignatureInfo info;
     if (!m_initialized || pluginPath.empty())
     {
-        info.result = m_initialized ? ValidationResult::NotSigned : ValidationResult::Error;
+        info.result = m_initialized ? PluginValidationResult::NotSigned : PluginValidationResult::Error;
         return info;
     }
 #if defined(_WIN32)
     info.algorithm = SignatureAlgorithm::Authenticode;
-    info.result    = ValidationResult::Valid;
+    info.result    = PluginValidationResult::Valid;
     info.signer    = "ExplorerLens-Publisher";
     info.trusted   = true;
 #else
     info.algorithm = SignatureAlgorithm::SHA256Manifest;
-    info.result    = ValidationResult::Valid;
+    info.result    = PluginValidationResult::Valid;
     info.trusted   = true;
 #endif
     return info;

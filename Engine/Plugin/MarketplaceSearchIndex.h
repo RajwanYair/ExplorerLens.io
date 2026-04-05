@@ -14,13 +14,13 @@
 
 namespace ExplorerLens { namespace Engine {
 
-struct SearchIndexEntry
+struct MarketplaceIndexEntry
 {
     std::string pluginId;
     float       relevanceScore = 0.0f;
 };
 
-struct SearchIndexStats
+struct MarketplaceIndexStats
 {
     uint32_t  totalDocuments = 0;
     uint32_t  totalTokens    = 0;
@@ -41,8 +41,8 @@ public:
     bool                       IndexPlugin(const std::string& pluginId,
                                             const std::string& name,
                                             const std::string& tags);
-    std::vector<SearchIndexEntry> Query(const std::string& terms, uint32_t maxResults = 20) const;
-    SearchIndexStats              GetStats() const noexcept;
+    std::vector<MarketplaceIndexEntry> Query(const std::string& terms, uint32_t maxResults = 20) const;
+    MarketplaceIndexStats              GetStats() const noexcept;
     uint32_t                      DocumentCount() const noexcept { return m_documentCount; }
 
     static MarketplaceSearchIndex& Instance() noexcept;

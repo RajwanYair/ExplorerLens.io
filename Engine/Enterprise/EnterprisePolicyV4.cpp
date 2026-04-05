@@ -38,7 +38,7 @@ bool EnterprisePolicyV4::LoadFromIntune()
     return m_initialized;
 }
 
-bool EnterprisePolicyV4::ApplyPolicy(const EnterprisePolicyEntry& entry)
+bool EnterprisePolicyV4::ApplyPolicy(const EnterprisePolicyV4Entry& entry)
 {
     if (!m_initialized || entry.key.empty())
         return false;
