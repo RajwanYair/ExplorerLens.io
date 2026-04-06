@@ -1,7 +1,7 @@
 // RegisterCommand.h — lens register / unregister: COM Shell Extension Management
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 21 (v15.4.0 "Zenith-U"): Implements 'lens register' and 'lens unregister'
+// Implements 'lens register' and 'lens unregister'
 // subcommands. Detects whether the DLL is registered, requires admin elevation for
 // actual registration, and allows status queries without admin privileges.
 //

@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 5 April 2026 (v33.5.0 Spica-V release)
-**Version:** 33.5.0 "Spica-V"
+**Last Updated:** 6 April 2026 (v34.0.0 Arcturus release)
+**Version:** 34.0.0 "Arcturus"
 
 ---
 

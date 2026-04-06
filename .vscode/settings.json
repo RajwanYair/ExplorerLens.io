@@ -142,7 +142,7 @@
                 "-NoLogo",
                 "-NoExit",
                 "-File",
-                "${env:USERPROFILE}\\OneDrive - Intel Corporation\\Documents\\MyScripts\\ExplorerLens.io\\.env.ps1"
+                "${workspaceFolder}\\.env.ps1"
             ]
         },
         "PowerShell 7": {

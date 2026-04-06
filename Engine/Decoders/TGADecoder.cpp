@@ -31,7 +31,7 @@ bool TGADecoder::CanDecode(const wchar_t* filePath)
 
     for (uint32_t i = 0; i < m_extensionCount; ++i) {
         if (_wcsicmp(ext, m_extensions[i]) == 0) {
-            return IsTGAFormat(filePath);
+            return true;
         }
     }
 

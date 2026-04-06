@@ -1,6 +1,6 @@
 # ExplorerLens v7.0.0 - PowerShell Profile Configuration
 # Auto-configures VCPKG_ROOT for optimal build performance
-# 
+#
 # Installation:
 #   1. Copy this file to: $PROFILE (e.g., C:\Users\YourName\Documents\PowerShell\Microsoft.PowerShell_profile.ps1)
 #   2. Or append content to existing profile
@@ -20,7 +20,7 @@ $vcpkgPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\vc
 if (Test-Path "$vcpkgPath\vcpkg.exe") {
     $env:VCPKG_ROOT = $vcpkgPath
     Write-Host "✓ VCPKG_ROOT set to: $env:VCPKG_ROOT" -ForegroundColor Green
-    
+
     # Add to PATH if not already there
     if ($env:PATH -notlike "*$vcpkgPath*") {
         $env:PATH = "$vcpkgPath;$env:PATH"
@@ -54,7 +54,7 @@ Write-Host ""
 # ============================================================================
 
 # Quick navigation to ExplorerLens project (customize this path)
-$ExplorerLensPath = "$env:USERPROFILE\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens"
+$ExplorerLensPath = "$PSScriptRoot\.."  # Resolved from script location
 if (Test-Path $ExplorerLensPath) {
     function dt { Set-Location $ExplorerLensPath }
     Write-Host "Alias 'dt' created for ExplorerLens directory" -ForegroundColor Gray
@@ -101,4 +101,3 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
 Write-Host "Profile loaded successfully!" -ForegroundColor Cyan
 Write-Host "Type 'dt' to navigate to ExplorerLens" -ForegroundColor Gray
 Write-Host ""
-

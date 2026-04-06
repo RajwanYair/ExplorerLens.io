@@ -1,7 +1,7 @@
 // DoctorCommand.h — lens doctor: System Health Check & Diagnostic Report
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 22 (v15.4.0 "Zenith-U"): Runs a comprehensive health check that
+// Runs a comprehensive health check that
 // validates GPU availability, COM registration status, decoder DLL presence,
 // cache directory accessibility, and required Windows features.
 // Outputs a pass/fail table with remediation hints for any failures.

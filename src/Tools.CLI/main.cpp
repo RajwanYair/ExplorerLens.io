@@ -1,7 +1,7 @@
 // main.cpp — lens.exe Entry Point (wmain)
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 23 (v15.4.0 "Zenith-U"): Wide-character entry point that wires up
+// Wide-character entry point that wires up
 // signal handling, initialises COM (STA), and dispatches to CommandRouter.
 // Prints usage and exits 127 for unknown subcommands; exits 0 on --help.
 //

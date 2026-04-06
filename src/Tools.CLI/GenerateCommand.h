@@ -1,7 +1,7 @@
 // GenerateCommand.h — lens generate: Single-File & Recursive Thumbnail Generation
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 18 (v15.4.0 "Zenith-U"): Implements the 'lens generate' subcommand.
+// Implements the 'lens generate' subcommand.
 // Decodes the input file via ExplorerLensEngine and saves the output thumbnail.
 // Supports --size, --quality, --output, --format, and --recursive options.
 //

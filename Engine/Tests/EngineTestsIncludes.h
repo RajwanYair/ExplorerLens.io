@@ -272,6 +272,12 @@
 #include "../Utils/VulnerabilityFingerprintDB.h"
 #include "../Utils/LTSCertificationGate.h"
 #include "../Utils/SecureKeyStore.h"
+// Sprint 1201-1210: Format Coverage Blitz (v34.0.0 "Arcturus")
+#include "../Decoders/BasisUniversalDecoder.h"
+#include "../Decoders/UltraHDRDecoder.h"
+#include "../Decoders/IfcBimDecoder.h"
+#include "../Decoders/LasPointCloudDecoder.h"
+#include "../Decoders/JupyterNotebookDecoder.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"

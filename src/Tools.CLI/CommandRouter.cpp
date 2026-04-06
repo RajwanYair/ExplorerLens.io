@@ -13,9 +13,16 @@
 #include "RegisterCommand.h"
 #include "BenchmarkCommand.h"
 #include "DoctorCommand.h"
+#include "../../Engine/Core/BuildValidation.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+
+// Helper: narrow ASCII version string -> wide string (version is digits/dots only)
+static std::wstring GetVersionWide() {
+    const std::string_view v = ExplorerLens::BuildValidation::BuildInfo::VersionString;
+    return std::wstring(v.begin(), v.end());
+}
 
 namespace ExplorerLens {
 namespace CLI {
@@ -73,7 +80,7 @@ ParsedArgs CommandRouter::Parse(int argc, wchar_t* argv[])
 
 void CommandRouter::PrintHelp() const
 {
-    std::wcout << L"\nlens.exe v" << VERSION << L" — ExplorerLens CLI Tool\n"
+    std::wcout << L"\nlens.exe v" << GetVersionWide() << L" — ExplorerLens CLI Tool\n"
                << L"CLSID: " << CLSID << L"\n\n"
                << L"Usage: lens <subcommand> [options]\n\n"
                << L"Subcommands:\n";
@@ -102,7 +109,7 @@ int CommandRouter::Dispatch(int argc, wchar_t* argv[])
     }
 
     if (args.HasFlag(L"--version")) {
-        std::wcout << L"lens.exe " << VERSION << L"\n";
+        std::wcout << L"lens.exe " << GetVersionWide() << L"\n";
         return static_cast<int>(ExitCode::Success);
     }
 

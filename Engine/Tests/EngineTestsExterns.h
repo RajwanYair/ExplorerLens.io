@@ -2349,6 +2349,17 @@ extern void TestLCG_RunGate_Runner();
 extern void TestLCG_IsCertified_Runner();
 extern void TestSKS_StoreRetrieve_Runner();
 extern void TestSKS_DeleteKey_Runner();
+// Sprint 1201-1210: Format Coverage Blitz (v34.0.0 "Arcturus")
+extern void TestBasisUniversalDecoder_Extensions_Runner();
+extern void TestBasisUniversalDecoder_CanDecode_Runner();
+extern void TestUltraHDRDecoder_Extensions_Runner();
+extern void TestUltraHDRDecoder_CanDecode_Runner();
+extern void TestIfcBimDecoder_Extensions_Runner();
+extern void TestIfcBimDecoder_CanDecode_Runner();
+extern void TestLasPointCloudDecoder_Extensions_Runner();
+extern void TestLasPointCloudDecoder_CanDecode_Runner();
+extern void TestJupyterNotebookDecoder_Extensions_Runner();
+extern void TestJupyterNotebookDecoder_CanDecode_Runner();
 
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────

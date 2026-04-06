@@ -31,7 +31,7 @@ bool QOIDecoder::CanDecode(const wchar_t* filePath)
     }
 
     if (_wcsicmp(ext, L".qoi") == 0) {
-        return IsQOIFormat(filePath);
+        return true;
     }
 
     return false;

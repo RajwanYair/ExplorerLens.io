@@ -1,7 +1,7 @@
 // BenchmarkCommand.h — lens benchmark: Throughput & Latency Benchmarking
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 22 (v15.4.0 "Zenith-U"): Reports decode throughput (img/sec) and
+// Reports decode throughput (img/sec) and
 // latency percentiles (p50, p95, p99) for each supported format category.
 // Reads from a configurable file corpus or uses built-in synthetic workload.
 //

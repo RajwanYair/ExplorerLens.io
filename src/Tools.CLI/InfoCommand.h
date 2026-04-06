@@ -1,7 +1,7 @@
 // InfoCommand.h — lens info: File Format Detection & Metadata Display
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 19 (v15.4.0 "Zenith-U"): Implements the 'lens info' subcommand.
+// Implements the 'lens info' subcommand.
 // Reports format name, detected decoder, MIME type, and file metadata.
 // Supports --json output for scripting and pipeline integration.
 //

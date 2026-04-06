@@ -307,6 +307,12 @@ if(WIN32)
         TIMEOUT 60
     )
 
+    set_tests_properties(SubsystemTest.Integration PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "integration;subsystem"
+        TIMEOUT 60
+    )
+
     if(BUILD_BENCHMARKS)
         set_tests_properties(EngineBenchmarks PROPERTIES
             ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"

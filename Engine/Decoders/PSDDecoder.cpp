@@ -33,7 +33,7 @@ bool PSDDecoder::CanDecode(const wchar_t* filePath)
         return false;
     for (uint32_t i = 0; i < m_extensionCount; ++i) {
         if (_wcsicmp(ext, m_extensions[i]) == 0)
-            return IsPSDFormat(filePath);
+            return true;
     }
     return false;
 }

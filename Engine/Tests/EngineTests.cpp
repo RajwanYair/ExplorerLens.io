@@ -4783,6 +4783,17 @@ int main()
     RUN_TEST(TestLCG_IsCertified);
     RUN_TEST(TestSKS_StoreRetrieve);
     RUN_TEST(TestSKS_DeleteKey);
+    // Sprint 1201-1210: Format Coverage Blitz (v34.0.0 "Arcturus")
+    RUN_TEST(TestBasisUniversalDecoder_Extensions);
+    RUN_TEST(TestBasisUniversalDecoder_CanDecode);
+    RUN_TEST(TestUltraHDRDecoder_Extensions);
+    RUN_TEST(TestUltraHDRDecoder_CanDecode);
+    RUN_TEST(TestIfcBimDecoder_Extensions);
+    RUN_TEST(TestIfcBimDecoder_CanDecode);
+    RUN_TEST(TestLasPointCloudDecoder_Extensions);
+    RUN_TEST(TestLasPointCloudDecoder_CanDecode);
+    RUN_TEST(TestJupyterNotebookDecoder_Extensions);
+    RUN_TEST(TestJupyterNotebookDecoder_CanDecode);
 
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;

@@ -207,31 +207,33 @@ try {
         $buildOutput | Out-File -FilePath $buildLogPath -Encoding UTF8
 
         # --- Post-Build Error/Warning Summary ---
-        $errors   = $buildOutput | Where-Object { $_ -match '\berror\s*C\d{4}\b|\s+error:' }
-        $warnings = $buildOutput | Where-Object { $_ -match '\bwarning\s*C\d{4}\b|\s+warning:' }
-        $notes    = $buildOutput | Where-Object { $_ -match '\bnote:' }
+        # NOTE: Avoid $errors/$warnings as names — they shadow PowerShell's built-in $Error.
+        #       Wrap in @() to force array type even when 0 or 1 result is returned.
+        $buildErrors   = @($buildOutput | Where-Object { $_ -match '\berror\s*C\d{4}\b|\s+error:' })
+        $buildWarnings = @($buildOutput | Where-Object { $_ -match '\bwarning\s*C\d{4}\b|\s+warning:' })
+        $buildNotes    = @($buildOutput | Where-Object { $_ -match '\bnote:' })
 
         Write-Host "`n========================================" -ForegroundColor Cyan
         Write-Host " Build Analysis" -ForegroundColor Cyan
         Write-Host "========================================" -ForegroundColor Cyan
-        Write-Host "  Errors   : $($errors.Count)"   -ForegroundColor $(if ($errors.Count   -gt 0) {'Red'}    else {'Green'})
-        Write-Host "  Warnings : $($warnings.Count)" -ForegroundColor $(if ($warnings.Count -gt 0) {'Yellow'} else {'Green'})
-        Write-Host "  Notes    : $($notes.Count)"    -ForegroundColor $(if ($notes.Count    -gt 0) {'Cyan'}   else {'Gray'})
+        Write-Host "  Errors   : $($buildErrors.Count)"   -ForegroundColor $(if ($buildErrors.Count   -gt 0) {'Red'}    else {'Green'})
+        Write-Host "  Warnings : $($buildWarnings.Count)" -ForegroundColor $(if ($buildWarnings.Count -gt 0) {'Yellow'} else {'Green'})
+        Write-Host "  Notes    : $($buildNotes.Count)"    -ForegroundColor $(if ($buildNotes.Count    -gt 0) {'Cyan'}   else {'Gray'})
         Write-Host "  Log      : $buildLogPath"      -ForegroundColor DarkGray
 
-        if ($errors.Count -gt 0) {
+        if ($buildErrors.Count -gt 0) {
             Write-Host "`n--- Errors ---" -ForegroundColor Red
-            $errors | Select-Object -First 50 | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
-            if ($errors.Count -gt 50) { Write-Host "  ... and $($errors.Count - 50) more (see log)" -ForegroundColor DarkRed }
+            $buildErrors | Select-Object -First 50 | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+            if ($buildErrors.Count -gt 50) { Write-Host "  ... and $($buildErrors.Count - 50) more (see log)" -ForegroundColor DarkRed }
         }
-        if ($warnings.Count -gt 0) {
+        if ($buildWarnings.Count -gt 0) {
             Write-Host "`n--- Warnings ---" -ForegroundColor Yellow
-            $warnings | Select-Object -First 30 | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
-            if ($warnings.Count -gt 30) { Write-Host "  ... and $($warnings.Count - 30) more (see log)" -ForegroundColor DarkYellow }
+            $buildWarnings | Select-Object -First 30 | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+            if ($buildWarnings.Count -gt 30) { Write-Host "  ... and $($buildWarnings.Count - 30) more (see log)" -ForegroundColor DarkYellow }
         }
 
         if ($buildExitCode -ne 0) {
-            Write-Error "Build failed (exit code $buildExitCode) — $($errors.Count) errors, $($warnings.Count) warnings. Full log: $buildLogPath"
+            Write-Error "Build failed (exit code $buildExitCode) — $($buildErrors.Count) errors, $($buildWarnings.Count) warnings. Full log: $buildLogPath"
         } else {
             Write-Host "`n  Build: OK" -ForegroundColor Green
         }

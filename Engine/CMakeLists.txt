@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 33.5.0
+# Version: 34.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 33.5.0
+    VERSION 34.0.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1737,6 +1737,12 @@ set(ENGINE_HEADERS
     Utils/VulnerabilityFingerprintDB.h
     Utils/LTSCertificationGate.h
     Utils/SecureKeyStore.h
+    # Sprint 1201-1210 — Format Coverage Blitz (v34.0.0 "Arcturus")
+    Decoders/BasisUniversalDecoder.h
+    Decoders/UltraHDRDecoder.h
+    Decoders/IfcBimDecoder.h
+    Decoders/LasPointCloudDecoder.h
+    Decoders/JupyterNotebookDecoder.h
 )
 
 set(ENGINE_SOURCES
@@ -1942,6 +1948,12 @@ set(ENGINE_SOURCES
     Utils/VulnerabilityFingerprintDB.cpp
     Utils/LTSCertificationGate.cpp
     Utils/SecureKeyStore.cpp
+    # Sprint 1201-1210 — Format Coverage Blitz (v34.0.0 "Arcturus")
+    Decoders/BasisUniversalDecoder.cpp
+    Decoders/UltraHDRDecoder.cpp
+    Decoders/IfcBimDecoder.cpp
+    Decoders/LasPointCloudDecoder.cpp
+    Decoders/JupyterNotebookDecoder.cpp
 )
 
 #==============================================================================

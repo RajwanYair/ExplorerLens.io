@@ -29,10 +29,12 @@ bool DDSDecoder::CanDecode(const wchar_t* filePath)
 {
     if (!filePath || filePath[0] == L'\0')
         return false;
+    // Extension-only check (consistent with other decoders).
+    // Content validation (IsDDSFormat) is performed during Decode().
     const wchar_t* ext = wcsrchr(filePath, L'.');
     if (!ext)
         return false;
-    return _wcsicmp(ext, L".dds") == 0 && IsDDSFormat(filePath);
+    return _wcsicmp(ext, L".dds") == 0;
 }
 
 bool DDSDecoder::IsDDSFormat(const wchar_t* path)

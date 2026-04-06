@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [34.0.0] — 2026-04-06 — Arcturus
+
+### Added
+- Sprint 1201-1210: Format Coverage Blitz (v34.0.0 Arcturus) — 5 new decoders
+- BasisUniversalDecoder: Basis Universal / KTX2 GPU texture transcoding (.basis, .ktx2)
+- UltraHDRDecoder: Google Ultra HDR gainmap JPEG thumbnails (.uhdr)
+- IfcBimDecoder: IFC 2x3/IFC4 BIM building model floor-plan thumbnails (.ifc, .ifczip)
+- LasPointCloudDecoder: LAS/LAZ LiDAR point-cloud density maps (.las, .laz)
+- JupyterNotebookDecoder: Jupyter notebook first-cell preview (.ipynb)
+
+### Fixed
+- Security hardening: 7 decoders (ICO, DDS, TGA, QOI, PSD, HDR, EXR) CanDecode() now extension-only; content validation moved exclusively to Decode() — eliminates unintended file I/O during decoder dispatch
+- AVIFDecoder: removed HEIF/HEIC extension overlap (extensionCount 3 to 1); .heic/.heif exclusively handled by HEIFDecoder
+- SubsystemTest.Integration: all 18 internal pipeline tests now pass (was 16/18)
+
+### Changed
+- Decoder architecture: CanDecode() MUST be extension-only across all decoders — enforced codebase-wide
+- Test count: 4594 (Sprint 1201-1210 adds 10 new decoder tests)
+
+---
+
 ## [33.5.0] — 2026-04-05 — Spica-V
 
 ### Added

@@ -26,7 +26,7 @@ bool HDRDecoder::CanDecode(const wchar_t* filePath)
     const wchar_t* ext = wcsrchr(filePath, L'.');
     if (!ext)
         return false;
-    return _wcsicmp(ext, L".hdr") == 0 && IsHDRFormat(filePath);
+    return _wcsicmp(ext, L".hdr") == 0;
 }
 
 bool HDRDecoder::IsHDRFormat(const wchar_t* path)

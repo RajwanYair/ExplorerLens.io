@@ -1,7 +1,7 @@
 /******************************************************************************
  * ExplorerLens Per-Decoder Throughput Benchmarks
  * Copyright (c) 2026 - ExplorerLens Project
- * 
+ *
  * Google Benchmark-compatible decoder throughput tests for CI regression gates.
  * Measures: decode throughput, memory usage, p50/p95/p99 latency
  *****************************************************************************/
@@ -27,8 +27,12 @@ using namespace ExplorerLens::Engine;
 // Test Data Paths (configure per environment)
 //============================================================================
 
-const wchar_t* TEST_DATA_DIR =
-    L"C:\\Users\\ryair\\OneDrive - Intel Corporation\\Documents\\MyScripts\\ExplorerLens\\data\\corpus\\";
+// Set EL_TEST_DATA_DIR env var to point at your local corpus directory.
+const wchar_t* TEST_DATA_DIR = []() -> const wchar_t* {
+    static wchar_t dir[MAX_PATH];
+    if (GetEnvironmentVariableW(L"EL_TEST_DATA_DIR", dir, MAX_PATH) > 0) return dir;
+    return L".\\data\\corpus\\";
+}();
 
 struct TestImage
 {

@@ -46,16 +46,16 @@ bool ICODecoder::CanDecode(const wchar_t* filePath)
         return false;
     }
 
-    // Check extension
+    // Extension-only check (consistent with other decoders).
+    // Content validation (IsICOFormat) is performed during Decode().
     const wchar_t* ext = wcsrchr(filePath, L'.');
     if (!ext) {
         return false;
     }
 
-    // Case-insensitive extension check
     for (uint32_t i = 0; i < m_extensionCount; ++i) {
         if (_wcsicmp(ext, m_extensions[i]) == 0) {
-            return IsICOFormat(filePath);
+            return true;
         }
     }
 

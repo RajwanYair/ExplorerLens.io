@@ -1,7 +1,7 @@
 # src/Tools.CLI/CMakeLists.txt — lens.exe CLI Tool Target
 # Copyright (c) 2026 ExplorerLens Project
 #
-# Sprint 24 (v15.4.0 "Zenith-U"): Builds lens.exe linking ExplorerLensEngine.lib.
+# Builds lens.exe linking ExplorerLensEngine.lib.
 # Requires C++20 and WIN32 (DXGI for doctor, filesystem, COM for register).
 #
 # Split architecture: LensCLILib (static library) + LensCLI (thin executable).

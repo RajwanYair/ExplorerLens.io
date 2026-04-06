@@ -21,15 +21,15 @@ std::mutex AVIFDecoder::s_factoryMutex;
 ComPtr<IWICImagingFactory> AVIFDecoder::s_wicFactory;
 
 // Extension list (null-terminated)
-// Fixed overlap — AVIFDecoder handles only AVIF (AV1 codec via libavif+dav1d)
+// AVIFDecoder handles only AVIF (AV1 codec via libavif+dav1d).
 // HEIF/HEIC formats are handled by HEIFDecoder (HEVC codec via
-// libheif+libde265)
+// libheif+libde265) — do not overlap.
 const wchar_t* AVIFDecoder::m_extensions[] = {
-    L".avif", L".heif", L".heic",
+    L".avif",
     nullptr  // Null terminator
 };
 
-const uint32_t AVIFDecoder::m_extensionCount = 3;
+const uint32_t AVIFDecoder::m_extensionCount = 1;
 
 //=============================================================================
 // Constructor

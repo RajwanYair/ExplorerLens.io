@@ -369,23 +369,16 @@ TEST(TestAVIFDecoder_Extensions)
     const wchar_t** extensions = decoder.GetSupportedExtensions();
     uint32_t count = decoder.GetExtensionCount();
 
-    ASSERT_EQ(count, 3);  // .avif, .heif, .heic
+    ASSERT_EQ(count, 1);  // .avif only (HEIF/HEIC handled by HEIFDecoder)
     ASSERT_NOT_NULL(extensions);
 
-    // Check for specific extensions
-    bool hasAVIF = false, hasHEIF = false, hasHEIC = false;
+    bool hasAVIF = false;
     for (uint32_t i = 0; i < count; i++) {
         if (wcscmp(extensions[i], L".avif") == 0)
             hasAVIF = true;
-        if (wcscmp(extensions[i], L".heif") == 0)
-            hasHEIF = true;
-        if (wcscmp(extensions[i], L".heic") == 0)
-            hasHEIC = true;
     }
 
     ASSERT(hasAVIF);
-    ASSERT(hasHEIF);
-    ASSERT(hasHEIC);
 }
 
 TEST(TestAVIFDecoder_CanDecode)
@@ -393,8 +386,9 @@ TEST(TestAVIFDecoder_CanDecode)
     AVIFDecoder decoder;
 
     ASSERT(decoder.CanDecode(L"image.avif"));
-    ASSERT(decoder.CanDecode(L"photo.HEIF"));  // Case insensitive
-    ASSERT(decoder.CanDecode(L"iphone.heic"));
+    ASSERT(decoder.CanDecode(L"IMAGE.AVIF"));  // Case insensitive
+    ASSERT(!decoder.CanDecode(L"photo.heif"));  // HEIF handled by HEIFDecoder
+    ASSERT(!decoder.CanDecode(L"iphone.heic"));  // HEIC handled by HEIFDecoder
     ASSERT(!decoder.CanDecode(L"image.jpg"));
     ASSERT(!decoder.CanDecode(L"archive.zip"));
     ASSERT(!decoder.CanDecode(nullptr));
@@ -407,7 +401,7 @@ TEST(TestAVIFDecoder_GetInfo)
 
     ASSERT_EQ(wcscmp(info.name, L"AVIFDecoder"), 0);
     ASSERT_EQ(wcscmp(info.version, L"1.0.0"), 0);
-    ASSERT_EQ(info.extensionCount, 3);
+    ASSERT_EQ(info.extensionCount, 1);
     ASSERT(info.supportsGPU);
     ASSERT(!info.isArchiveDecoder);
 }
@@ -9702,4 +9696,3 @@ TEST(TestGateV32_v14Approved)
     auto res = ReleaseGateV32::Evaluate(r);
     ASSERT(res.v14ShipApproved);
 }
-

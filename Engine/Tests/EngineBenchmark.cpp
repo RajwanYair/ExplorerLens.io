@@ -40,17 +40,19 @@ std::vector<std::wstring> FindTestImages()
 {
     std::vector<std::wstring> images;
 
-    // Try to find actual test images
-    std::vector<std::wstring> testPaths = {L"C:\\Users\\ryair\\OneDrive - Intel "
-                                           L"Corporation\\Documents\\MyScripts\\ExplorerLens\\test-archives\\test-"
-                                           L"image-1.png",
-                                           L"C:\\Users\\ryair\\OneDrive - Intel "
-                                           L"Corporation\\Documents\\MyScripts\\ExplorerLens\\test-archives\\test-"
-                                           L"image-2.jpg",
-                                           L"C:\\Users\\ryair\\OneDrive - Intel "
-                                           L"Corporation\\Documents\\MyScripts\\ExplorerLens\\test-archives\\sample."
-                                           L"png",
-                                           L"C:\\Windows\\Web\\Wallpaper\\Windows\\img0.jpg"};
+    // Resolve test-data directory from environment (EL_TEST_DATA_DIR) or the
+    // well-known Windows wallpaper as a portable fallback.
+    wchar_t envBuf[MAX_PATH]{};
+    DWORD envLen = GetEnvironmentVariableW(L"EL_TEST_DATA_DIR", envBuf, MAX_PATH);
+    std::wstring testDataDir = (envLen > 0 && envLen < MAX_PATH) ? std::wstring(envBuf) : L"";
+
+    std::vector<std::wstring> testPaths;
+    if (!testDataDir.empty()) {
+        testPaths.push_back(testDataDir + L"\\test-image-1.png");
+        testPaths.push_back(testDataDir + L"\\test-image-2.jpg");
+        testPaths.push_back(testDataDir + L"\\sample.png");
+    }
+    testPaths.push_back(L"C:\\Windows\\Web\\Wallpaper\\Windows\\img0.jpg");
 
     for (const auto& path : testPaths) {
         DWORD attr = GetFileAttributesW(path.c_str());

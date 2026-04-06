@@ -139,7 +139,7 @@ cd "C:\Program Files\ExplorerLens"
 **Tools:**
 - **NVIDIA Nsight Graphics**: https://developer.nvidia.com/nsight-graphics
 - **AMD Radeon GPU Profiler**: https://gpuopen.com/rgp/
-- **Intel GPA**: https://www.intel.com/content/www/us/en/developer/tools/graphics-performance-analyzers/overview.html
+- **Intel GPA**: https://www.intel.com/content/www/us/en/developer/tools/graphics-performance-analyzers/overview.html (third-party tool, reference only)
 - **PIX (Microsoft)**: https://devblogs.microsoft.com/pix/
 
 **Example with PIX:**

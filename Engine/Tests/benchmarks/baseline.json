@@ -1,9 +1,9 @@
 {
-  "_comment": "ExplorerLens Engine Performance Baselines — v33.5.0 Spica-V",
+  "_comment": "ExplorerLens Engine Performance Baselines — v34.0.0 Arcturus",
   "_description": "Reference values measured on i7-12700K + RTX 3080 @ 64GB DDR5. Used by performance-regression-gate.yml to block PRs that regress beyond the configured thresholds.",
-  "_updated": "2026-04-05",
+  "_updated": "2026-04-06",
   "_toolchain": "MSVC 19.50.35720 (v145), /O2 /GL /arch:AVX2",
-  "version": "33.5.0",
+  "version": "34.0.0",
   "thresholds": {
     "latency_block_pct": 20,
     "latency_warn_pct": 10,

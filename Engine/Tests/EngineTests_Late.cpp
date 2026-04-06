@@ -5341,8 +5341,9 @@ TEST(IntegrationRunnerSmoke)
 
 TEST(IntegrationRunnerSingleFile)
 {
-    // Create a minimal temp PNG file (1-byte valid enough for smoke test)
-    // and verify the runner processes it without crashing.
+    // Create a minimal temp PNG file and verify the runner processes it.
+    // Uses a dedicated subdirectory to avoid recursively scanning all of
+    // %TEMP% (which can have thousands of files and cause a slow path walk).
     namespace fs = std::filesystem;
 
     // Build a tiny 1x1 PNG in memory (valid PNG header + IHDR + IDAT + IEND)
@@ -5356,7 +5357,14 @@ TEST(IntegrationRunnerSingleFile)
         0x33, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E,                                                  // IEND
         0x44, 0xAE, 0x42, 0x60, 0x82                                                                     // crc
     };
-    auto tmpPath = fs::temp_directory_path() / "el_test_smoke.png";
+
+    // Use an isolated subdirectory so the runner only scans 1 file — not all of %TEMP%.
+    auto tmpDir = fs::temp_directory_path() / ("el_corpus_" + std::to_string(::GetCurrentProcessId()));
+    std::error_code mkdirEc;
+    fs::create_directories(tmpDir, mkdirEc);
+    ASSERT(!mkdirEc);
+
+    auto tmpPath = tmpDir / "el_test_smoke.png";
     {
         std::ofstream f(tmpPath, std::ios::binary);
         ASSERT(f.is_open());
@@ -5364,10 +5372,9 @@ TEST(IntegrationRunnerSingleFile)
     }
 
     CorpusTestRunner runner;
-    runner.AddCorpusDirectory(tmpPath.parent_path());
+    runner.AddCorpusDirectory(tmpDir);  // Isolated dir: only our one file
     runner.SetMaxFiles(1);
-    // Only include our one file
-    runner.SetFileFilter([&tmpPath](const fs::path& p) { return p == tmpPath; });
+    // No custom filter needed — the directory contains exactly one file.
 
     auto report = runner.Run();
     ASSERT(report.totalFiles >= 1);
@@ -5376,8 +5383,8 @@ TEST(IntegrationRunnerSingleFile)
     ASSERT(report.passed + report.failed >= 1 || report.skipped >= 1);
 
     // Cleanup
-    std::error_code ec;
-    fs::remove(tmpPath, ec);
+    std::error_code rmEc;
+    fs::remove_all(tmpDir, rmEc);
 }
 
 TEST(IntegrationRunnerHtmlReport)
@@ -12664,4 +12671,111 @@ TEST(TestSCE_HitRate)
     ASSERT(ST.hits   == 1);
     ASSERT(ST.misses == 1);
     ASSERT(ST.hitRate >= 0.49f && ST.hitRate <= 0.51f);
+}
+
+//==============================================================================
+// Sprint 1201-1210: Format Coverage Blitz (v34.0.0 "Arcturus")
+//==============================================================================
+
+TEST(TestBasisUniversalDecoder_Extensions)
+{
+    BasisUniversalDecoder decoder;
+    const auto info = decoder.GetInfo();
+    ASSERT(info.extensionCount == 2);
+    bool hasBasis = false, hasKtx2 = false;
+    for (uint32_t i = 0; i < info.extensionCount; ++i) {
+        if (_wcsicmp(info.supportedExtensions[i], L".basis") == 0) hasBasis = true;
+        if (_wcsicmp(info.supportedExtensions[i], L".ktx2")  == 0) hasKtx2  = true;
+    }
+    ASSERT(hasBasis);
+    ASSERT(hasKtx2);
+}
+
+TEST(TestBasisUniversalDecoder_CanDecode)
+{
+    BasisUniversalDecoder decoder;
+    ASSERT( decoder.CanDecode(L"texture.basis"));
+    ASSERT( decoder.CanDecode(L"asset.KTX2"));
+    ASSERT(!decoder.CanDecode(L"image.dds"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+TEST(TestUltraHDRDecoder_Extensions)
+{
+    UltraHDRDecoder decoder;
+    const auto info = decoder.GetInfo();
+    ASSERT(info.extensionCount == 1);
+    ASSERT(_wcsicmp(info.supportedExtensions[0], L".uhdr") == 0);
+}
+
+TEST(TestUltraHDRDecoder_CanDecode)
+{
+    UltraHDRDecoder decoder;
+    ASSERT( decoder.CanDecode(L"photo.uhdr"));
+    ASSERT( decoder.CanDecode(L"gain.UHDR"));
+    ASSERT(!decoder.CanDecode(L"photo.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+TEST(TestIfcBimDecoder_Extensions)
+{
+    IfcBimDecoder decoder;
+    const auto info = decoder.GetInfo();
+    ASSERT(info.extensionCount == 2);
+    bool hasIfc = false, hasIfczip = false;
+    for (uint32_t i = 0; i < info.extensionCount; ++i) {
+        if (_wcsicmp(info.supportedExtensions[i], L".ifc")    == 0) hasIfc    = true;
+        if (_wcsicmp(info.supportedExtensions[i], L".ifczip") == 0) hasIfczip = true;
+    }
+    ASSERT(hasIfc);
+    ASSERT(hasIfczip);
+}
+
+TEST(TestIfcBimDecoder_CanDecode)
+{
+    IfcBimDecoder decoder;
+    ASSERT( decoder.CanDecode(L"building.ifc"));
+    ASSERT( decoder.CanDecode(L"project.IFCZIP"));
+    ASSERT(!decoder.CanDecode(L"drawing.dwg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+TEST(TestLasPointCloudDecoder_Extensions)
+{
+    LasPointCloudDecoder decoder;
+    const auto info = decoder.GetInfo();
+    ASSERT(info.extensionCount == 2);
+    bool hasLas = false, hasLaz = false;
+    for (uint32_t i = 0; i < info.extensionCount; ++i) {
+        if (_wcsicmp(info.supportedExtensions[i], L".las") == 0) hasLas = true;
+        if (_wcsicmp(info.supportedExtensions[i], L".laz") == 0) hasLaz = true;
+    }
+    ASSERT(hasLas);
+    ASSERT(hasLaz);
+}
+
+TEST(TestLasPointCloudDecoder_CanDecode)
+{
+    LasPointCloudDecoder decoder;
+    ASSERT( decoder.CanDecode(L"scan.las"));
+    ASSERT( decoder.CanDecode(L"lidar.LAZ"));
+    ASSERT(!decoder.CanDecode(L"cloud.ply"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+TEST(TestJupyterNotebookDecoder_Extensions)
+{
+    JupyterNotebookDecoder decoder;
+    const auto info = decoder.GetInfo();
+    ASSERT(info.extensionCount == 1);
+    ASSERT(_wcsicmp(info.supportedExtensions[0], L".ipynb") == 0);
+}
+
+TEST(TestJupyterNotebookDecoder_CanDecode)
+{
+    JupyterNotebookDecoder decoder;
+    ASSERT( decoder.CanDecode(L"notebook.ipynb"));
+    ASSERT( decoder.CanDecode(L"analysis.IPYNB"));
+    ASSERT(!decoder.CanDecode(L"script.py"));
+    ASSERT(!decoder.CanDecode(nullptr));
 }

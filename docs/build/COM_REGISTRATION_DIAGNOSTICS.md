@@ -41,12 +41,13 @@ To test COM registration manually (as Administrator):
 
 ### Silent Registration (production)
 ```powershell
-regsvr32.exe /s "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens.io\x64\Release\LENSShell.dll"
+# Replace <install-path> with your actual installation directory
+regsvr32.exe /s "<install-path>\x64\Release\LENSShell.dll"
 ```
 
 ### Verbose Registration (diagnostics)
 ```powershell
-regsvr32.exe "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens.io\x64\Release\LENSShell.dll"
+regsvr32.exe "<install-path>\x64\Release\LENSShell.dll"
 ```
 This shows a message box with success/failure details.
 
@@ -98,8 +99,8 @@ procmon.exe
 
 1. **Try Manual Registration**
  ```powershell
- # Open PowerShell as Administrator
- cd "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens.io"
+ # Open PowerShell as Administrator, navigate to project root
+ cd "<install-path>"
  regsvr32.exe "x64\Release\LENSShell.dll"
  ```
 

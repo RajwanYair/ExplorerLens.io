@@ -27,15 +27,7 @@ bool EXRDecoder::CanDecode(const wchar_t* filePath)
     const wchar_t* ext = wcsrchr(filePath, L'.');
     if (!ext)
         return false;
-    if (_wcsicmp(ext, L".exr") != 0)
-        return false;
-
-    // Verify magic bytes: 0x76, 0x2F, 0x31, 0x01
-    size_t fileSize = 0;
-    auto data = ReadFileData(filePath, fileSize);
-    if (!data || fileSize < 4)
-        return false;
-    return data[0] == 0x76 && data[1] == 0x2F && data[2] == 0x31 && data[3] == 0x01;
+    return _wcsicmp(ext, L".exr") == 0;
 }
 
 HRESULT EXRDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result)

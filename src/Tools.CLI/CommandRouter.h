@@ -1,7 +1,7 @@
 // CommandRouter.h — lens.exe CLI Entry Point & Subcommand Router
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 17 (v15.4.0 "Zenith-U"): Provides the main entry point for lens.exe.
+// Provides the main entry point for lens.exe.
 // Parses argv, dispatches to typed command handlers, and manages exit codes.
 // Subcommands: generate, info, cache, register, unregister, benchmark, doctor.
 //
@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include "../../Engine/Core/BuildValidation.h"
 
 namespace ExplorerLens {
 namespace CLI {
@@ -100,8 +101,7 @@ public:
 private:
     std::map<std::wstring, std::unique_ptr<ISubCommand>> m_commands;
 
-    static constexpr std::wstring_view VERSION = L"15.4.0";
-    static constexpr std::wstring_view CLSID   = L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}";
+    static constexpr std::wstring_view CLSID = L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}";
 };
 
 //==============================================================================
