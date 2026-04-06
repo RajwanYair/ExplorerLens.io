@@ -1,6 +1,7 @@
 // CrashDumpCapture.cpp — Unhandled Exception → MiniDump Writer
 // Copyright (c) 2026 ExplorerLens Project
 //
+#include "StdAfx.h"
 #include "CrashDumpCapture.h"
 
 #include <dbghelp.h>

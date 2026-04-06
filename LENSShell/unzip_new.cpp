@@ -2,10 +2,10 @@
 // Replaces 4339 lines of 1998 zlib code with modern, secure implementation
 // Copyright (c) 2025 - Modernized for Windows 11 and Visual Studio 2026
 
+#include "stdafx.h"
 #include <string.h>
 #include <tchar.h>
 
-#include "stdafx.h"
 #include "unzip.h"
 
 // minizip-ng headers - C library so need extern "C"

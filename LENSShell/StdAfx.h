@@ -12,8 +12,8 @@
 
 #define _ATL_APARTMENT_THREADED
 
-#include <atlapp.h>  // WTL project
 #include <atlbase.h>
+#include <atlapp.h>  // WTL project
 
 extern CComModule _Module;
 

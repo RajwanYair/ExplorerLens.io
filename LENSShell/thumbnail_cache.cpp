@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include "thumbnail_cache.h"
 
 #include <gdiplus.h>
@@ -9,8 +10,6 @@
 #include <sstream>
 
 #include "GdiplusRAII.h"
-#include "StdAfx.h"
-
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "gdiplus.lib")
 

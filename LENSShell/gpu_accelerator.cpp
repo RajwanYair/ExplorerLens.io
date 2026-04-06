@@ -2,14 +2,13 @@
 // ExplorerLens v15.0.0 - Implementation
 // Copyright (c) 2025 ExplorerLens Project
 
+#include "StdAfx.h"
 #include "gpu_accelerator.h"
 
 #include <algorithm>
 #include <chrono>
 #include <sstream>
 #include <string>
-
-#include "StdAfx.h"  // Must be first — provides ATL/COM/Windows headers (PCH anchor)
 
 namespace ExplorerLens {
 

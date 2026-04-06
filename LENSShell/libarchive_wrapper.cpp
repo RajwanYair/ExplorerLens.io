@@ -3,11 +3,10 @@
  * LibArchive Integration for ExplorerLens
  ******************************************************************************/
 
+#include "StdAfx.h"
 #include "libarchive_wrapper.h"
 
 #include "LENSArchive.h"
-#include "StdAfx.h"
-
 #ifdef ENABLE_LIBARCHIVE_SUPPORT
 
     #include <archive.h>

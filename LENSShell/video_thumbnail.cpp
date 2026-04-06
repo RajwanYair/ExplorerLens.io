@@ -4,12 +4,12 @@
  * Extracts thumbnails from video files using DirectShow
  ******************************************************************************/
 
+#include "StdAfx.h"
 #include "video_thumbnail.h"
 
 #include <atlbase.h>
 #include <dshow.h>
 
-#include "StdAfx.h"
 // qedit.h was removed from Windows SDK 7.0+. The ISampleGrabber interfaces
 // are defined inline below as a replacement. Do not attempt to re-add qedit.h.
 

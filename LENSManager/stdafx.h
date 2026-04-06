@@ -38,27 +38,24 @@ inline void __stdcall __FreeStdCallThunk(void* p)
 extern CAppModule _Module;
 
 #include <Windowsx.h>
+// Undefine macros from Windowsx.h that conflict with WTL method names under MSVC v145
+#ifdef SubclassWindow
+#    undef SubclassWindow
+#endif
+#ifdef SelectFont
+#    undef SelectFont
+#endif
 #include <atlctrls.h>
 #include <atldlgs.h>
 #include <atlframe.h>
+#include <atlstr.h>
 #include <atlwin.h>
 
-#if defined _M_IX86
-    #pragma comment( \
-        linker,      \
-        "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_IA64
-    #pragma comment( \
-        linker,      \
-        "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_X64
-    #pragma comment( \
-        linker,      \
-        "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#else
-    #pragma comment( \
-        linker,      \
-        "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
+using namespace ATL;
+
+// Common Controls v6 dependency is declared in LENSManager.manifest — do not
+// duplicate with #pragma comment(linker, "/manifestdependency:...") here as
+// that would generate a second manifest snippet with a conflicting execution
+// level and cause mt.exe to fail with c1010001.
 
 #endif  //_STDAFX_2AA16305_D8E3_4296_9A26_5407C9BF9DEC_

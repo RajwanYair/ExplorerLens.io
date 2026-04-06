@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include "font_preview.h"
 
 #include <atlbase.h>
@@ -11,8 +12,6 @@
 #include <wincodec.h>
 
 #include <algorithm>
-
-#include "StdAfx.h"
 
 #include <d2d1.h>
 

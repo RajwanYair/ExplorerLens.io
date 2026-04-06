@@ -1,12 +1,12 @@
 // LENSShellClass.cpp : Implementation of CLENSShellApp and DLL registration.
 
+#include "StdAfx.h"
 #include "LENSShellClass.h"
 
 #include <string>
 
 #include "../Engine/Core/Config.h"
 #include "LENSShell.h"
-#include "StdAfx.h"
 #include "metrics_collector.h"
 
 HRESULT CLENSShell::FinalConstruct(void)

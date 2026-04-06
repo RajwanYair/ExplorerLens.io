@@ -2,13 +2,13 @@
 // EngineAdapter.cpp - Implementation of Engine adapter
 //==============================================================================
 
+#include "StdAfx.h"
 #include "EngineAdapter.h"
 
 #include "../Engine/Decoders/AVIFDecoder.h"
 #include "../Engine/Decoders/ArchiveDecoder.h"
 #include "../Engine/Decoders/ImageDecoder.h"
 #include "../Engine/Decoders/WebPDecoder.h"
-#include "StdAfx.h"  // Must be first — provides ATL/COM/Windows headers (PCH anchor)
 // Note: JXL/HEIF decoders are registered by ThumbnailPipeline automatically.
 // No direct includes needed here - the pipeline handles all decoder registration.
 #include "error_logger.h"

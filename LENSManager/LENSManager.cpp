@@ -1,7 +1,7 @@
+#include "stdafx.h"
 #include "DarkModeHelper.h"
 #include "MainDlg.h"
 #include "resource.h"
-#include "stdafx.h"
 #include "tools.h"
 
 CAppModule _Module;

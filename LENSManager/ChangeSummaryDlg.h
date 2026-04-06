@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "DarkModeController.h"
+#include "resource.h"
 
 // Structure to hold configuration change information
 struct ConfigChange

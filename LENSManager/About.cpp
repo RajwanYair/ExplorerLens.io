@@ -3,6 +3,8 @@
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
+#include "stdafx.h"
+
 #include "About.h"
 
 #include <dxgi.h>
@@ -10,8 +12,6 @@
 
 #include <iomanip>
 #include <sstream>
-
-#include "stdafx.h"
 
 #pragma comment(lib, "dxgi.lib")
 

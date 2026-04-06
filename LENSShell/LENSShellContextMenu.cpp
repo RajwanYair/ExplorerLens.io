@@ -3,13 +3,12 @@
 // Provides ExplorerLens context menu in the modern Win11 Explorer right-click.
 //==============================================================================
 
+#include "StdAfx.h"
 #include "LENSShellContextMenu.h"
 
 #include <shellapi.h>
 #include <shlwapi.h>
 #include <strsafe.h>
-
-#include "StdAfx.h"
 
 #pragma comment(lib, "shlwapi.lib")
 

@@ -4,6 +4,7 @@
  * Extracts album art from audio files and generates waveform visualizations
  ******************************************************************************/
 
+#include "StdAfx.h"
 #include "audio_thumbnail.h"
 
 #include <atlbase.h>
@@ -17,8 +18,6 @@
 #include <vector>
 
 #include "GdiplusRAII.h"
-#include "StdAfx.h"
-
 #pragma comment(lib, "propsys.lib")
 #pragma comment(lib, "gdiplus.lib")
 

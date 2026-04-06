@@ -4,6 +4,7 @@
  * Uses Windows.Data.Pdf API (Windows 10 1803+)
  ******************************************************************************/
 
+#include "StdAfx.h"
 #include "pdf_decoder.h"
 
 #include <Shlwapi.h>
@@ -11,8 +12,6 @@
 #include <wincodec.h>
 
 #include <string>
-
-#include "StdAfx.h"
 
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "shlwapi.lib")

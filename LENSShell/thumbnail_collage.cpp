@@ -4,11 +4,10 @@
  * Renders multiple pages in a grid layout (2x2, 3x3, 4x4)
  ******************************************************************************/
 
+#include "StdAfx.h"
 #include "thumbnail_collage.h"
 
 #include <atlbase.h>
-
-#include "StdAfx.h"
 
 #define LENS_APP_KEY _T("Software\\T800 Productions\\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}")
 

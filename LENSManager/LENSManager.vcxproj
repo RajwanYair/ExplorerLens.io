@@ -93,10 +93,12 @@
       <TargetMachine>MachineX64</TargetMachine>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <Manifest>
       <EmbedManifest>true</EmbedManifest>
       <AdditionalManifestFiles>LENSManager.manifest</AdditionalManifestFiles>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,10 +147,12 @@
       <TargetMachine>MachineX64</TargetMachine>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
     <Manifest>
       <EmbedManifest>true</EmbedManifest>
       <AdditionalManifestFiles>LENSManager.manifest</AdditionalManifestFiles>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>

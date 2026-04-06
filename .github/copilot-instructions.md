@@ -270,6 +270,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - **Gen-6 Roadmap:** `docs/ROADMAP_V30.md` — v30.x "Deneb" Platform Unification + v31.x "Achernar" Generative AI
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas
 - **Every revision bump MUST:** include full binaries (LENSShell.dll, LENSManager.exe, lens.exe, Manager.WinUI.exe, MSI, ZIP, SBOM) in the GitHub Release AND publish to all 5 package registries (NuGet, npm, Container, Maven, RubyGems) — **this is non-negotiable, no exceptions**
+- **Version-bearing file registry:** See `.github/instructions/version-bump.instructions.md` for the complete 21-file checklist and release artifact procedure
 - **Graphics must be updated on every bump:** `docs/assets/social-preview.svg` and `docs/assets/architecture-build.svg` must reflect the current version, test count, and platform support — `Bump-Version.ps1` handles this automatically
 - **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
 - **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
@@ -283,7 +284,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 > **Non-negotiable:** Every version bump MUST trigger a GitHub Release with all binaries AND
 > publish to all 5 package registries. This applies to EVERY version (X.Y.Z) without exception.
 > `Bump-Version.ps1 -TagAndPush` is the ONE command to rule them all:
-> - Updates all 18 version-bearing files (including npm/ruby/Dockerfile packaging manifests)
+> - Updates all 21 version-bearing files (including npm/ruby/Dockerfile packaging manifests when present)
 > - Commits with a descriptive message
 > - Creates the `vX.Y.Z` git tag
 > - Pushes tag → fires `release.yml` → builds LENSShell.dll + LENSManager.exe + lens.exe + MSI + ZIP + SBOM
@@ -297,14 +298,17 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
     -ChangelogEntry "Short release summary" -TagAndPush
 
 # What -TagAndPush does automatically:
-#  1. Updates ALL 18 version-bearing files:
+#  1. Updates ALL 21 version-bearing files:
 #       VERSION, CHANGELOG.md, Engine/Core/BuildValidation.h, Engine/Core/SBOMGenerator.h
 #       .github/copilot-instructions.md, .github/standards/tool-versions.md
 #       .github/standards/build-method.md, docs/assets/social-preview.svg
 #       docs/assets/architecture-build.svg, README.md, vcpkg.json
 #       docs/SBOM.json, Engine/Tests/benchmarks/baseline.json
-#       CMakeLists.txt, Engine/CMakeLists.txt, LENSManager/LENSManager.rc
-#       packaging/npm/package.json, packaging/ruby/lib/explorerlens/version.rb, Dockerfile
+#       CMakeLists.txt, Engine/CMakeLists.txt
+#       LENSManager/LENSManager.rc, LENSShell/LENSShell.rc
+#       docs/USER_GUIDE.md
+#       packaging/npm/package.json (if present), packaging/ruby/lib/explorerlens/version.rb (if present)
+#       Dockerfile (if present)
 #  2. git add -A && git commit -m "chore: bump version to X.Y.Z (Codename)"
 #  3. git tag vX.Y.Z
 #  4. git push origin main --tags

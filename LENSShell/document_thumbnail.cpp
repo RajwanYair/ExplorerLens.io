@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include "document_thumbnail.h"
 
 #include <atlbase.h>
@@ -8,8 +9,6 @@
 #include <wincodec.h>
 
 #include <algorithm>
-
-#include "StdAfx.h"
 
 // Link required libraries
 #pragma comment(lib, "propsys.lib")

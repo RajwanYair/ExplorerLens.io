@@ -104,6 +104,18 @@ $rc = $rc -replace '(VALUE "ProductVersion",\s*")[^"]*(")', "`${1}$rcVerStr\0`${
 Set-Content $rcPath -Value $rc -NoNewline
 Write-Host "[bump] LENSManager.rc updated"
 
+# 5d. LENSShell/LENSShell.rc — VERSIONINFO
+$shellRcPath = "$rootDir\LENSShell\LENSShell.rc"
+if (Test-Path $shellRcPath) {
+    $shellRc = Get-Content $shellRcPath -Raw
+    $shellRc = $shellRc -replace 'FILEVERSION\s+[\d, ]+', "FILEVERSION     $rcVer"
+    $shellRc = $shellRc -replace 'PRODUCTVERSION\s+[\d, ]+', "PRODUCTVERSION  $rcVer"
+    $shellRc = $shellRc -replace '(VALUE "FileVersion",\s*")[^"]*(")' , "`${1}$rcVerStr\0`${2}"
+    $shellRc = $shellRc -replace '(VALUE "ProductVersion",\s*")[^"]*(")' , "`${1}$rcVerStr\0`${2}"
+    Set-Content $shellRcPath -Value $shellRc -NoNewline
+    Write-Host "[bump] LENSShell.rc updated"
+}
+
 # 6. SBOMGenerator.h — two hardcoded version strings
 $sbomGenPath = "$rootDir\Engine\Core\SBOMGenerator.h"
 if (Test-Path $sbomGenPath) {
@@ -227,6 +239,16 @@ if (Test-Path $dockerPath) {
     Write-Host "[bump] Dockerfile ARG EXPLORERLENS_VERSION updated"
 }
 
+# 14d. docs/USER_GUIDE.md — Version header line
+$ugPath = "$rootDir\docs\USER_GUIDE.md"
+if (Test-Path $ugPath) {
+    $ug = Get-Content $ugPath -Raw
+    $ug = $ug -replace '(\*\*Version:\*\*\s*)[\.\d]+\s*"[^"]+"', "`${1}$Version \"$Codename\""
+    $ug = $ug -replace '(v)[\.\d]+\s*(\([^)]+\)\s*with build info)', "`${1}$Version ($Codename) with build info"
+    Set-Content $ugPath -Value $ug -NoNewline
+    Write-Host "[bump] docs/USER_GUIDE.md updated"
+}
+
 # 15. CHANGELOG.md — prepend new versioned section (proper Keep-a-Changelog format)
 $clPath = "$rootDir\CHANGELOG.md"
 $cl = Get-Content $clPath -Raw
@@ -253,7 +275,7 @@ if ($cl.Contains($sectionGuard)) {
 
 # 6. Commit
 $commitMsg = "chore: bump version to $Version ($Codename)"
-$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md, packaging/npm/package.json, packaging/ruby/lib/explorerlens/version.rb, Dockerfile"
+$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, LENSShell.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md, USER_GUIDE.md, packaging/npm/package.json, packaging/ruby/lib/explorerlens/version.rb, Dockerfile"
 $fullMsg = "$commitMsg`n`n$details"
 [IO.File]::WriteAllText("$rootDir\.git\BUMP_MSG.txt", $fullMsg)
 git add -A

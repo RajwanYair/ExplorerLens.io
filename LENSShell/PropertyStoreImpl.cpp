@@ -1,6 +1,7 @@
 // PropertyStoreImpl.cpp — IPropertyStore implementation for Explorer Details
 // Pane Copyright (c) 2026 ExplorerLens Project
 
+#include "StdAfx.h"
 #include "PropertyStoreImpl.h"
 
 #include <shlwapi.h>
@@ -8,8 +9,6 @@
 #include <algorithm>
 
 #include "LENSTypes.h"
-#include "StdAfx.h"
-
 #pragma comment(lib, "shlwapi.lib")
 
 namespace ExplorerLens {
