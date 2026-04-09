@@ -13406,3 +13406,179 @@ TEST(TestAnimatedThumbnailCache_Eviction)
     ASSERT(stats.entryCount <= 2);
 }
 
+//==============================================================================
+// Sprint 1251-1260: Industrial & Scientific Formats v2 (v34.5.0 "Arcturus-V")
+//==============================================================================
+
+TEST(TestDICOMWindowingPresets_GetPreset)
+{
+    using namespace ExplorerLens::Engine;
+    const auto lung = DICOMWindowingPresets::GetPreset(DICOMWindowPreset::CTLung);
+    ASSERT(lung.windowWidth  == 1500);
+    ASSERT(lung.windowCentre == -500);
+
+    const auto brain = DICOMWindowingPresets::GetPreset(DICOMWindowPreset::Brain);
+    ASSERT(brain.windowWidth  == 80);
+    ASSERT(brain.windowCentre == 40);
+
+    const auto bone = DICOMWindowingPresets::GetPreset(DICOMWindowPreset::CTBone);
+    ASSERT(bone.windowWidth  == 2500);
+    ASSERT(bone.windowCentre == 500);
+}
+
+TEST(TestDICOMWindowingPresets_BuildLUT)
+{
+    using namespace ExplorerLens::Engine;
+    // Standard window W=400 C=40: HU=40 should map to ~128 (midpoint)
+    const auto lut = DICOMWindowingPresets::BuildLinearLUT(400, 40, false);
+    ASSERT(lut.size() == 65536);
+    // HU at window centre (40) → index 40+32768=32808 → grey ~128
+    const uint8_t mid = lut[32808];
+    ASSERT(mid >= 120 && mid <= 136);
+    // HU well below lo (40 - 200 = -160) → 0
+    ASSERT(lut[static_cast<uint32_t>(-2000 + 32768)] == 0);
+    // HU well above hi (40 + 200 = 240) → 255
+    ASSERT(lut[static_cast<uint32_t>(5000 + 32768)] == 255);
+    // Inverted: centre → ~127 still but black/white swapped
+    const auto lutInv = DICOMWindowingPresets::BuildLinearLUT(400, 40, true);
+    ASSERT(lutInv[32808] >= 120 && lutInv[32808] <= 136);
+    ASSERT(lutInv[static_cast<uint32_t>(-2000 + 32768)] == 255);
+}
+
+TEST(TestFITSZScaleStretch_HeatMap)
+{
+    using namespace ExplorerLens::Engine;
+    // Black point: t=0 → BGRA where alpha=0xFF
+    const uint32_t black = FITSZScaleStretch::HeatMapBGRA(0.0f);
+    ASSERT((black & 0xFF000000u) == 0xFF000000u);
+    ASSERT((black & 0x00FFFFFFu) == 0x00000000u);  // B=G=R=0
+
+    // White point: t=1 → B=G=R=255, A=255
+    const uint32_t white = FITSZScaleStretch::HeatMapBGRA(1.0f);
+    ASSERT((white & 0xFF000000u) == 0xFF000000u);
+    ASSERT((white & 0x00FFFFFFu) != 0x00000000u);  // Not black
+
+    // Clamp: t>1 same as t=1, t<0 same as t=0
+    ASSERT(FITSZScaleStretch::HeatMapBGRA(2.0f) == FITSZScaleStretch::HeatMapBGRA(1.0f));
+    ASSERT(FITSZScaleStretch::HeatMapBGRA(-1.0f) == FITSZScaleStretch::HeatMapBGRA(0.0f));
+}
+
+TEST(TestFITSZScaleStretch_Stretch)
+{
+    using namespace ExplorerLens::Engine;
+    // Uniform image: all pixels = 0.5 → ZScale z1~z2 → graceful fallback
+    const uint32_t W = 8, H = 8;
+    std::vector<float> uniform(W * H, 0.5f);
+    FITSZScaleStretch zs;
+    const auto result = zs.Stretch(uniform.data(), W, H);
+    ASSERT(result.success);
+    ASSERT(result.width  == W);
+    ASSERT(result.height == H);
+    ASSERT(result.pixelsBGRA.size() == W * H * 4u);
+
+    // Gradient image: values 0.0..1.0
+    std::vector<float> grad(W * H);
+    for (uint32_t i = 0; i < W * H; ++i)
+        grad[i] = static_cast<float>(i) / static_cast<float>(W * H - 1u);
+    const auto r2 = zs.Stretch(grad.data(), W, H);
+    ASSERT(r2.success);
+    ASSERT(r2.limits.z2 > r2.limits.z1);
+
+    // Null: returns failure
+    ASSERT(!zs.Stretch(nullptr, W, H).success);
+}
+
+TEST(TestLASPointCloudRenderer_IsLAS)
+{
+    using namespace ExplorerLens::Engine;
+    const uint8_t lasf[] = {'L','A','S','F',0,0,0,0};
+    ASSERT(LASPointCloudRenderer::IsLAS(lasf, sizeof(lasf)));
+
+    const uint8_t bad[] = {'L','Z','I','P',0,0,0,0};
+    ASSERT(!LASPointCloudRenderer::IsLAS(bad, sizeof(bad)));
+
+    ASSERT(!LASPointCloudRenderer::IsLAS(nullptr, 16));
+    ASSERT(!LASPointCloudRenderer::IsLAS(lasf, 3));  // too short
+}
+
+TEST(TestLASPointCloudRenderer_ProbePointCount)
+{
+    using namespace ExplorerLens::Engine;
+    // Not a LAS file → 0
+    const uint8_t bad[] = {0,1,2,3,4,5,6,7};
+    ASSERT(LASPointCloudRenderer::ProbePointCount(bad, sizeof(bad)) == 0);
+
+    // Null → 0
+    ASSERT(LASPointCloudRenderer::ProbePointCount(nullptr, 0) == 0);
+}
+
+TEST(TestOMETIFFCompositor_WavelengthToBGR)
+{
+    using namespace ExplorerLens::Engine;
+    // DAPI ~461 nm → blue range: B channel should be high
+    const uint32_t dapi = OMETIFFCompositor::WavelengthToBGR(461);
+    ASSERT((dapi & 0xFF) > 128);  // Blue component high
+
+    // GFP ~509 nm → green range
+    const uint32_t gfp = OMETIFFCompositor::WavelengthToBGR(509);
+    ASSERT(((gfp >> 8) & 0xFF) > 128);  // Green component high
+
+    // Unknown (0) → white
+    const uint32_t unk = OMETIFFCompositor::WavelengthToBGR(0);
+    ASSERT((unk & 0xFF)         == 0xFF);
+    ASSERT(((unk >> 8)  & 0xFF) == 0xFF);
+    ASSERT(((unk >> 16) & 0xFF) == 0xFF);
+}
+
+TEST(TestOMETIFFCompositor_IsOMETIFF)
+{
+    using namespace ExplorerLens::Engine;
+    // Not TIFF → false
+    const uint8_t notTiff[] = {0x89,0x50,0x4E,0x47,0,0,0,0};
+    ASSERT(!OMETIFFCompositor::IsOMETIFF(notTiff, sizeof(notTiff)));
+
+    // TIFF LE magic but no OME-XML → false
+    const uint8_t tiffNoOME[] = {0x49,0x49,0x2A,0x00,0,0,0,0,0,0,0,0};
+    ASSERT(!OMETIFFCompositor::IsOMETIFF(tiffNoOME, sizeof(tiffNoOME)));
+
+    // Null → false
+    ASSERT(!OMETIFFCompositor::IsOMETIFF(nullptr, 16));
+}
+
+TEST(TestMHAVolumeDecoder_IsMHA)
+{
+    using namespace ExplorerLens::Engine;
+    const uint8_t mha[] = {'N','D','i','m','s',' ','=',' ','3','\n'};
+    ASSERT(MHAVolumeDecoder::IsMHA(mha, sizeof(mha)));
+
+    const uint8_t notMHA[] = {'G','I','F','8','9','a',0,0,0,0};
+    ASSERT(!MHAVolumeDecoder::IsMHA(notMHA, sizeof(notMHA)));
+
+    ASSERT(!MHAVolumeDecoder::IsMHA(nullptr, 64));
+}
+
+TEST(TestMHAVolumeDecoder_ParseHeader)
+{
+    using namespace ExplorerLens::Engine;
+    // Minimal valid MHA header string
+    const char mhaText[] =
+        "ObjectType = Image\n"
+        "NDims = 3\n"
+        "DimSize = 64 64 32\n"
+        "ElementType = MET_SHORT\n"
+        "ElementSpacing = 1.0 1.0 2.5\n"
+        "BinaryDataByteOrderMSB = False\n"
+        "ElementDataFile = LOCAL\n";  // triggers dataOffset + valid = true
+
+    const auto hdr = MHAVolumeDecoder::ParseHeader(
+        reinterpret_cast<const uint8_t*>(mhaText), sizeof(mhaText) - 1);
+
+    ASSERT(hdr.valid);
+    ASSERT(hdr.dimX == 64);
+    ASSERT(hdr.dimY == 64);
+    ASSERT(hdr.dimZ == 32);
+    ASSERT(hdr.elemType == MHAElementType::Short);
+    ASSERT(!hdr.bigEndian);
+    ASSERT(!hdr.compressed);
+}
+

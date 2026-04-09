@@ -4,6 +4,80 @@ applyTo: "**/*.yml,**/*.yaml,.github/**"
 
 # CI/CD and GitHub Actions Instructions
 
+## ExplorerLens C++/MSVC — Lessons Learned (v31.x–v34.x)
+
+### CRITICAL: Never pin the MSVC toolset in CI workflows
+
+**Root cause of issues #145, #148–#156, #158–#160 (v31.2.0–v32.1.3):**
+GitHub-hosted `windows-latest` runner ships VS2022 (MSVC v143). Local dev uses VS 18 2026
+BuildTools (MSVC v145). Pinning `toolset: "14.50"` (or any specific toolset) in
+`ilammy/msvc-dev-cmd@v1` causes ALL CI builds to fail because v145 does not exist on runners.
+
+```yaml
+# ❌ WRONG — fails on GitHub-hosted runners (toolset 14.50 not installed)
+- uses: ilammy/msvc-dev-cmd@v1
+  with:
+    toolset: "14.50"
+
+# ✅ CORRECT — lets the runner use whatever VS version is available
+- uses: ilammy/msvc-dev-cmd@v1
+  with:
+    arch: x64
+```
+
+**Fix committed:** `c9e241d2` (v34.4.0 "Arcturus-U") — all toolset pins removed from `release.yml`.
+
+### MSVC Portability Rules for C++ Code
+
+- **`memmem()` is POSIX-only** — GNU extension, not available on MSVC. Use manual `memcmp` loop:
+  ```cpp
+  // ❌ MSVC error: memmem not declared
+  auto p = (const char*)memmem(data, size, "</OME>", 6);
+  // ✅ Works on all platforms
+  for (const char* q = p; q + 6 <= end; ++q)
+      if (memcmp(q, "</OME>", 6) == 0) { p = q; break; }
+  ```
+- **`#pragma pack(push,1)`** — valid and required for exact-size binary structs (e.g. LAS headers)
+- **`WIN32_LEAN_AND_MEAN`** is globally defined — never include `<versionhelpers.h>` or headers that require it
+- **`/MD` CRT** — all targets and all external libs use dynamic CRT; no `/NODEFAULTLIB` needed
+
+### Sprint Test Infrastructure (per-sprint checklist)
+
+Each sprint (10 tests, 5 headers, 5 sources) must update ALL of these:
+1. `Engine/CMakeLists.txt` — add 5 headers to ENGINE_HEADERS, 5 sources to ENGINE_SOURCES
+2. `Engine/Tests/EngineTestsIncludes.h` — 5 `#include` directives
+3. `Engine/Tests/EngineTestsExterns.h` — 10 `extern void TestXxx_Runner();` declarations
+4. `Engine/Tests/EngineTests.cpp` — 10 `RUN_TEST(TestXxx);` calls
+5. `Engine/Tests/EngineTests_Late.cpp` — 10 `TEST(TestXxx) { ... }` bodies
+Test count formula: `previous_count + 10`
+
+### Bump-Version.ps1 Operational Notes
+
+- **SBOMGenerator.h file lock:** VS sometimes holds the file open. Retry `Bump-Version.ps1` immediately — succeeds on second run.
+- **Backtick-quote not backslash-quote:** `Bump-Version.ps1` uses PowerShell backtick for embedded quotes in strings (line 246). If `-ChangelogEntry` contains quotes, escape them properly.
+- **Run with:** `.\build-scripts\Bump-Version.ps1 -Version "X.Y.Z" -Codename "Name" -TestCount N -ChangelogEntry "..." -TagAndPush`
+
+### GitHub API from Corporate Network
+
+`gh api` calls (which use Go's `net/http` directly) may fail with connection timeout on corporate
+networks when the proxy isn't inherited. Use PowerShell's `Invoke-RestMethod` with `-UseDefaultCredentials`
+which respects the Windows system proxy (WinINet) settings:
+
+```powershell
+$h = @{ Authorization = "Bearer $token"; "Content-Type" = "application/json"; "User-Agent" = "MyApp" }
+$result = Invoke-RestMethod -Uri "https://api.github.com/repos/owner/repo/issues/1" `
+    -Method Patch -Headers $h -Body '{"state":"closed"}' -UseDefaultCredentials
+```
+
+### Auto-Created CI Failure Issues
+
+GitHub Actions creates issues automatically when a workflow fails with certain conditions.
+To bulk-close stale CI-failure issues after a fix, use `Invoke-RestMethod` (see above).
+All 13 issues from v31.2.0–v32.1.3 were closed by commit `c9e241d2` on 2026-04-09.
+
+---
+
+
 ## Workflow Design Principles
 
 - Pin action versions to a full SHA or semver tag (`@v4`, not `@main`)

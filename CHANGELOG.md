@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [34.5.0] — 2026-04-09 — Arcturus-V
+
+### Added
+- Sprint 1251-1260: Industrial & Scientific Formats v2 — 5 new scientific decoder modules
+- DICOMWindowingPresets: 7 clinical windowing presets (CT Lung W=1500/C=-500, CT Bone W=2500/C=500, Brain W=80/C=40, Abdomen W=400/C=50, Angio W=600/C=300, Spine W=250/C=50, SoftTissue W=350/C=40); 65536-entry HU→[0,255] LUT; linear and inverted modes; Apply() renders BGRA32 grayscale
+- FITSZScaleStretch: IRAF ZScale automatic contrast (sub-sample + linear fit with contrast parameter σ=0.25); 7-stop heat-map pseudocolor (black→blue→cyan→green→yellow→orange→red→white); StretchInt16 with BSCALE/BZERO conversion; HeatMapBGRA() reused by LASPointCloudRenderer
+- LASPointCloudRenderer: LAS 1.x top-down density map renderer; `#pragma pack(push,1)` LASPublicHeader struct; stride sub-sampling for >5M point clouds; heat-map palette via FITSZScaleStretch; color modes: density, intensity, elevation
+- OMETIFFCompositor: OME-XML emission wavelength → BGR pseudo-colour (DAPI 361nm→deep-blue, 461nm→blue, GFP 488nm→cyan, 509nm→green, RFP 552nm→orange, 594nm→red, mCherry 610nm→deep-red); MSVC-safe ExtractOMEXML using manual `memcmp` loop (no POSIX `memmem`); IsOMETIFF probes TIFF magic + OME-XML marker
+- MHAVolumeDecoder: ASCII key=value MHA/MHD header parser; ElementType dispatch (SHORT/UCHAR/USHORT/FLOAT/DOUBLE); axial middle-slice extraction; DICOMWindowingPresets::Brain windowing applied to MET_SHORT data; `ElementDataFile = LOCAL` inline data stop
+
+### Changed
+- Test count: 4634 → 4644 (+10 from Sprint 1251-1260)
+
+---
+
 ## [34.4.0] — 2026-04-09 — Arcturus-U
 
 ### Added

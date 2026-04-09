@@ -2408,6 +2408,18 @@ extern void TestAnimatedSequenceSampler_SampleGIF_Runner();
 extern void TestAnimatedThumbnailCache_PutGet_Runner();
 extern void TestAnimatedThumbnailCache_Eviction_Runner();
 
+// Sprint 1251-1260: Industrial & Scientific Formats v2 (v34.5.0 "Arcturus-V")
+extern void TestDICOMWindowingPresets_GetPreset_Runner();
+extern void TestDICOMWindowingPresets_BuildLUT_Runner();
+extern void TestFITSZScaleStretch_HeatMap_Runner();
+extern void TestFITSZScaleStretch_Stretch_Runner();
+extern void TestLASPointCloudRenderer_IsLAS_Runner();
+extern void TestLASPointCloudRenderer_ProbePointCount_Runner();
+extern void TestOMETIFFCompositor_WavelengthToBGR_Runner();
+extern void TestOMETIFFCompositor_IsOMETIFF_Runner();
+extern void TestMHAVolumeDecoder_IsMHA_Runner();
+extern void TestMHAVolumeDecoder_ParseHeader_Runner();
+
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
 extern void TestDecoderRegistry_Create_Runner();

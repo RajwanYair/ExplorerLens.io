@@ -293,6 +293,27 @@
 #include "../Core/ICCv5ProfileEngine.h"
 #include "../Core/ACESODTProcessor.h"
 
+// Sprint 1231-1240: Predictive Pre-Generation Engine (v34.3.0 "Arcturus-T")
+#include "../Pipeline/DirectoryPreScanQueue.h"
+#include "../Pipeline/AdjacencyPredictor.h"
+#include "../Pipeline/ScrollVelocityTracker.h"
+#include "../Pipeline/IdleTimePreGenerator.h"
+#include "../Pipeline/PredictivePreGenEngine.h"
+
+// Sprint 1241-1250: Animated & Sequence Format Suite (v34.4.0 "Arcturus-U")
+#include "../Core/HoverScrubController.h"
+#include "../Core/APNGFrameCombiner.h"
+#include "../Decoders/GIFAnimationDecoder.h"
+#include "../Decoders/AnimatedSequenceSampler.h"
+#include "../Cache/AnimatedThumbnailCache.h"
+
+// Sprint 1251-1260: Industrial & Scientific Formats v2 (v34.5.0 "Arcturus-V")
+#include "../Decoders/DICOMWindowingPresets.h"
+#include "../Decoders/FITSZScaleStretch.h"
+#include "../Decoders/LASPointCloudRenderer.h"
+#include "../Decoders/OMETIFFCompositor.h"
+#include "../Decoders/MHAVolumeDecoder.h"
+
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
 #include "../Utils/CITestReporter.h"

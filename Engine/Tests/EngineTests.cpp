@@ -4794,6 +4794,65 @@ int main()
     RUN_TEST(TestLasPointCloudDecoder_CanDecode);
     RUN_TEST(TestJupyterNotebookDecoder_Extensions);
     RUN_TEST(TestJupyterNotebookDecoder_CanDecode);
+    // Sprint 1211-1220: GPU-First Decode Pipeline (v34.1.0 "Arcturus-R")
+    RUN_TEST(TestGPUDecodeFormatRouter_RouteJPEG);
+    RUN_TEST(TestGPUDecodeFormatRouter_FallbackCPU);
+    RUN_TEST(TestGPUJPEGDecodeAccelerator_Init);
+    RUN_TEST(TestGPUJPEGDecodeAccelerator_Caps);
+    RUN_TEST(TestGPURawDemosaicKernel_Identity);
+    RUN_TEST(TestGPURawDemosaicKernel_BayerMasks);
+    RUN_TEST(TestGPUDecodePerformanceGate_Pass);
+    RUN_TEST(TestGPUDecodePerformanceGate_Block);
+    RUN_TEST(TestZeroCopyGPUSurface_Alloc);
+    RUN_TEST(TestZeroCopyGPUSurface_MapUnmap);
+
+    // Sprint 1221-1230: HDR & Wide Color Gamut Mastery (v34.2.0 "Arcturus-S")
+    RUN_TEST(TestGainmapJPEGToneMapper_UltraHDRDetect);
+    RUN_TEST(TestGainmapJPEGToneMapper_ParseMetadata);
+    RUN_TEST(TestPQToSDRToneMapper_LUTBuild);
+    RUN_TEST(TestPQToSDRToneMapper_SinglePixel);
+    RUN_TEST(TestHLGToSDRConverter_Identity);
+    RUN_TEST(TestHLGToSDRConverter_OOTFGamma);
+    RUN_TEST(TestICCv5ProfileEngine_LoadBuiltIn);
+    RUN_TEST(TestICCv5ProfileEngine_DetectColorspace);
+    RUN_TEST(TestACESODTProcessor_DetectFromString);
+    RUN_TEST(TestACESODTProcessor_ACEScgToSRGB);
+
+    // Sprint 1231-1240: Predictive Pre-Generation Engine (v34.3.0 "Arcturus-T")
+    RUN_TEST(TestDirectoryPreScanQueue_NetworkDetect);
+    RUN_TEST(TestDirectoryPreScanQueue_StartStop);
+    RUN_TEST(TestAdjacencyPredictor_Record);
+    RUN_TEST(TestAdjacencyPredictor_PredictEmpty);
+    RUN_TEST(TestScrollVelocityTracker_ZeroVelocity);
+    RUN_TEST(TestScrollVelocityTracker_EMASmoothing);
+    RUN_TEST(TestIdleTimePreGenerator_Stats);
+    RUN_TEST(TestIdleTimePreGenerator_BatteryCheck);
+    RUN_TEST(TestPredictivePreGenEngine_InitStats);
+    RUN_TEST(TestPredictivePreGenEngine_CacheHitCount);
+
+    // Sprint 1241-1250: Animated & Sequence Format Suite (v34.4.0 "Arcturus-U")
+    RUN_TEST(TestHoverScrubController_PosToFrame);
+    RUN_TEST(TestHoverScrubController_MouseLeave);
+    RUN_TEST(TestAPNGFrameCombiner_SelectKeyFrames);
+    RUN_TEST(TestAPNGFrameCombiner_ProbeFrameCount);
+    RUN_TEST(TestGIFAnimationDecoder_IsGIF);
+    RUN_TEST(TestGIFAnimationDecoder_ProbeFrameCount);
+    RUN_TEST(TestAnimatedSequenceSampler_DetectGIF);
+    RUN_TEST(TestAnimatedSequenceSampler_SampleGIF);
+    RUN_TEST(TestAnimatedThumbnailCache_PutGet);
+    RUN_TEST(TestAnimatedThumbnailCache_Eviction);
+
+    // Sprint 1251-1260: Industrial & Scientific Formats v2 (v34.5.0 "Arcturus-V")
+    RUN_TEST(TestDICOMWindowingPresets_GetPreset);
+    RUN_TEST(TestDICOMWindowingPresets_BuildLUT);
+    RUN_TEST(TestFITSZScaleStretch_HeatMap);
+    RUN_TEST(TestFITSZScaleStretch_Stretch);
+    RUN_TEST(TestLASPointCloudRenderer_IsLAS);
+    RUN_TEST(TestLASPointCloudRenderer_ProbePointCount);
+    RUN_TEST(TestOMETIFFCompositor_WavelengthToBGR);
+    RUN_TEST(TestOMETIFFCompositor_IsOMETIFF);
+    RUN_TEST(TestMHAVolumeDecoder_IsMHA);
+    RUN_TEST(TestMHAVolumeDecoder_ParseHeader);
 
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;

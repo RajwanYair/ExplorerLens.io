@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 34.4.0
+# Version: 34.5.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 34.4.0
+    VERSION 34.5.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -540,6 +540,13 @@ set(ENGINE_HEADERS
     Decoders/GIFAnimationDecoder.h
     Decoders/AnimatedSequenceSampler.h
     Cache/AnimatedThumbnailCache.h
+
+    # Sprint 1251-1260 — Industrial & Scientific Formats v2 (v34.5.0 "Arcturus-V")
+    Decoders/DICOMWindowingPresets.h
+    Decoders/FITSZScaleStretch.h
+    Decoders/LASPointCloudRenderer.h
+    Decoders/OMETIFFCompositor.h
+    Decoders/MHAVolumeDecoder.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -2008,6 +2015,13 @@ set(ENGINE_SOURCES
     Decoders/GIFAnimationDecoder.cpp
     Decoders/AnimatedSequenceSampler.cpp
     Cache/AnimatedThumbnailCache.cpp
+
+    # Sprint 1251-1260 — Industrial & Scientific Formats v2 (v34.5.0 "Arcturus-V")
+    Decoders/DICOMWindowingPresets.cpp
+    Decoders/FITSZScaleStretch.cpp
+    Decoders/LASPointCloudRenderer.cpp
+    Decoders/OMETIFFCompositor.cpp
+    Decoders/MHAVolumeDecoder.cpp
 )
 
 #==============================================================================
