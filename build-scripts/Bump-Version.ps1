@@ -243,7 +243,7 @@ if (Test-Path $dockerPath) {
 $ugPath = "$rootDir\docs\USER_GUIDE.md"
 if (Test-Path $ugPath) {
     $ug = Get-Content $ugPath -Raw
-    $ug = $ug -replace '(\*\*Version:\*\*\s*)[\.\d]+\s*"[^"]+"', "`${1}$Version \"$Codename\""
+    $ug = $ug -replace '(\*\*Version:\*\*\s*)[\.\d]+\s*"[^"]+"', "`${1}$Version `"$Codename`""
     $ug = $ug -replace '(v)[\.\d]+\s*(\([^)]+\)\s*with build info)', "`${1}$Version ($Codename) with build info"
     Set-Content $ugPath -Value $ug -NoNewline
     Write-Host "[bump] docs/USER_GUIDE.md updated"

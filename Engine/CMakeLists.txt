@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 34.0.0
+# Version: 34.1.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 34.0.0
+    VERSION 34.1.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -513,6 +513,12 @@ set(ENGINE_HEADERS
     GPU/GPUDecodeAccelerationV2.h
     GPU/GPUFallbackChain.h
     GPU/GPUMemoryTracker.h
+    # Sprint 1211-1220 — GPU-First Decode Pipeline (v34.1.0 "Arcturus-R")
+    GPU/GPUDecodeFormatRouter.h
+    GPU/GPUJPEGDecodeAccelerator.h
+    GPU/GPURawDemosaicKernel.h
+    GPU/GPUDecodePerformanceGate.h
+    GPU/ZeroCopyGPUSurface.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -1954,6 +1960,12 @@ set(ENGINE_SOURCES
     Decoders/IfcBimDecoder.cpp
     Decoders/LasPointCloudDecoder.cpp
     Decoders/JupyterNotebookDecoder.cpp
+    # Sprint 1211-1220 — GPU-First Decode Pipeline (v34.1.0 "Arcturus-R")
+    GPU/GPUDecodeFormatRouter.cpp
+    GPU/GPUJPEGDecodeAccelerator.cpp
+    GPU/GPURawDemosaicKernel.cpp
+    GPU/GPUDecodePerformanceGate.cpp
+    GPU/ZeroCopyGPUSurface.cpp
 )
 
 #==============================================================================

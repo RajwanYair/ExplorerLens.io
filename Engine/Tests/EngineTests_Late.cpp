@@ -12779,3 +12779,139 @@ TEST(TestJupyterNotebookDecoder_CanDecode)
     ASSERT(!decoder.CanDecode(L"script.py"));
     ASSERT(!decoder.CanDecode(nullptr));
 }
+
+//==============================================================================
+// Sprint 1211-1220: GPU-First Decode Pipeline (v34.1.0 "Arcturus-R")
+//==============================================================================
+
+TEST(TestGPUDecodeFormatRouter_RouteJPEG)
+{
+    using namespace ExplorerLens::Engine;
+    GPUDecodeFormatRouter router;
+    const auto route = router.RouteByExtension(L".jpg");
+    ASSERT(route.primaryPath == GPUDecodePathId::NVJPEG ||
+           route.primaryPath == GPUDecodePathId::QSV_JPEG ||
+           route.primaryPath == GPUDecodePathId::CPUFallback);
+    ASSERT(route.targetMs > 0.0f);
+}
+
+TEST(TestGPUDecodeFormatRouter_FallbackCPU)
+{
+    using namespace ExplorerLens::Engine;
+    GPUDecodeFormatRouter router;
+    const auto route = router.RouteByExtension(L".xyz_unknown");
+    ASSERT(route.primaryPath == GPUDecodePathId::CPUFallback);
+    const auto nullRoute = router.RouteByExtension(nullptr);
+    ASSERT(nullRoute.primaryPath == GPUDecodePathId::CPUFallback);
+}
+
+TEST(TestGPUJPEGDecodeAccelerator_Init)
+{
+    using namespace ExplorerLens::Engine;
+    GPUJPEGDecodeAccelerator accel;
+    const bool ok = accel.Initialize();
+    ASSERT(ok);
+    ASSERT(accel.IsAvailable());
+}
+
+TEST(TestGPUJPEGDecodeAccelerator_Caps)
+{
+    using namespace ExplorerLens::Engine;
+    GPUJPEGDecodeAccelerator accel;
+    accel.Initialize();
+    JPEGDecodeRequest req{};
+    req.targetWidth  = 256;
+    req.targetHeight = 256;
+    // srcData is null → should return unsuccessful result, not crash.
+    const auto result = accel.Decode(req);
+    ASSERT(!result.success);
+    ASSERT(result.pixelsBGRA == nullptr);
+}
+
+TEST(TestGPURawDemosaicKernel_Identity)
+{
+    using namespace ExplorerLens::Engine;
+    GPURawDemosaicKernel kernel;
+    const bool ok = kernel.Initialize();
+    ASSERT(ok);
+    ASSERT(kernel.IsAvailable());
+}
+
+TEST(TestGPURawDemosaicKernel_BayerMasks)
+{
+    using namespace ExplorerLens::Engine;
+    GPURawDemosaicKernel kernel;
+    kernel.Initialize();
+    // 4×4 synthetic Bayer grid (RGGB, uniform grey 1000)
+    const uint32_t W = 4, H = 4;
+    uint16_t raw[W * H];
+    for (auto& v : raw) v = 1000;
+    RAWDemosaicParams params{};
+    params.blackLevel = 0;
+    params.whiteLevel = 4095;
+    auto res = kernel.Demosaic(raw, W, H, params, 2, 2);
+    ASSERT(res.success);
+    ASSERT(res.width  == 2);
+    ASSERT(res.height == 2);
+    ASSERT(res.pixelsBGRA != nullptr);
+    delete[] res.pixelsBGRA;
+}
+
+TEST(TestGPUDecodePerformanceGate_Pass)
+{
+    using namespace ExplorerLens::Engine;
+    GPUDecodePerformanceGate gate;
+    gate.LoadBaseline(nullptr);
+    PerformanceSample s{};
+    s.formatName       = "JPEG";
+    s.p50Ms            = 4.0f;   // better than baseline 4.2 ms
+    s.p95Ms            = 5.5f;   // better than baseline 6.0 ms
+    s.batchImgPerSec   = 240.0f; // better than baseline 235 img/s
+    const bool ok = gate.AllPass({ s });
+    ASSERT(ok);
+}
+
+TEST(TestGPUDecodePerformanceGate_Block)
+{
+    using namespace ExplorerLens::Engine;
+    GPUDecodePerformanceGate gate;
+    gate.LoadBaseline(nullptr);
+    PerformanceSample s{};
+    s.formatName       = "JPEG";
+    s.p50Ms            = 10.0f;  // 2.4× worse
+    s.p95Ms            = 30.0f;  // 5× worse — must block
+    s.batchImgPerSec   = 100.0f; // 57% drop — must block
+    const bool ok = gate.AllPass({ s });
+    ASSERT(!ok);  // gate should block
+}
+
+TEST(TestZeroCopyGPUSurface_Alloc)
+{
+    using namespace ExplorerLens::Engine;
+    ZeroCopyGPUSurface surf;
+    const bool ok = surf.Allocate(128, 128, SurfaceAllocMode::SystemMemory);
+    ASSERT(ok);
+    ASSERT(surf.GetDesc().width  == 128);
+    ASSERT(surf.GetDesc().height == 128);
+    surf.Release();
+    ASSERT(surf.GetDesc().pData == nullptr);
+}
+
+TEST(TestZeroCopyGPUSurface_MapUnmap)
+{
+    using namespace ExplorerLens::Engine;
+    ZeroCopyGPUSurface surf;
+    surf.Allocate(64, 64, SurfaceAllocMode::SystemMemory);
+    uint8_t* ptr = surf.Map();
+    ASSERT(ptr != nullptr);
+    // Write a known pattern and verify it survives through Unmap.
+    ptr[0] = 0xBE;
+    ptr[1] = 0xEF;
+    surf.Unmap();
+    uint8_t* ptr2 = surf.Map();
+    ASSERT(ptr2 != nullptr);
+    ASSERT(ptr2[0] == 0xBE);
+    ASSERT(ptr2[1] == 0xEF);
+    surf.Unmap();
+    surf.Release();
+}

@@ -2360,6 +2360,17 @@ extern void TestLasPointCloudDecoder_Extensions_Runner();
 extern void TestLasPointCloudDecoder_CanDecode_Runner();
 extern void TestJupyterNotebookDecoder_Extensions_Runner();
 extern void TestJupyterNotebookDecoder_CanDecode_Runner();
+// Sprint 1211-1220: GPU-First Decode Pipeline (v34.1.0 "Arcturus-R")
+extern void TestGPUDecodeFormatRouter_RouteJPEG_Runner();
+extern void TestGPUDecodeFormatRouter_FallbackCPU_Runner();
+extern void TestGPUJPEGDecodeAccelerator_Init_Runner();
+extern void TestGPUJPEGDecodeAccelerator_Caps_Runner();
+extern void TestGPURawDemosaicKernel_Identity_Runner();
+extern void TestGPURawDemosaicKernel_BayerMasks_Runner();
+extern void TestGPUDecodePerformanceGate_Pass_Runner();
+extern void TestGPUDecodePerformanceGate_Block_Runner();
+extern void TestZeroCopyGPUSurface_Alloc_Runner();
+extern void TestZeroCopyGPUSurface_MapUnmap_Runner();
 
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────

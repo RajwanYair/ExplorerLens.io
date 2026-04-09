@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [34.1.0] — 2026-04-09 — Arcturus-R
+
+### Added
+- Sprint 1211-1220: GPU-First Decode Pipeline (v34.1.0 Arcturus-R) — 5 new GPU pipeline modules
+- GPUDecodeFormatRouter: Format-to-GPU-path routing table dispatching JPEG/PNG/AVIF/HEIC/RAW/PDF to hardware decode paths (NVJPEG/QSV/NVDEC/D2D/GPU Demosaic)
+- GPUJPEGDecodeAccelerator: NVJPEG + Intel QSV JPEG hardware decode with WIC GPU fallback; P50 target 1.5 ms
+- GPURawDemosaicKernel: GPU compute Bayer-pattern demosaic (RGGB/BGGR/GRBG/GBRG) + white balance; P50 target 9 ms for 24 MP
+- GPUDecodePerformanceGate: Per-PR automated P95 latency regression gate (blocks >5% P95 regression, >10% throughput drop)
+- ZeroCopyGPUSurface: Zero-copy write-combined CPU→GPU BGRA32 surface for IThumbnailProvider handoff (D3D12 UPLOAD heap + system fallback)
+
+### Fixed
+- MSBuild compatibility: PCH order, WTL/ATL include fixes, library path corrections (carried from post-v34.0.0 fix commit)
+
+### Changed
+- Test count: 4604 (Sprint 1211-1220 adds 10 GPU pipeline tests)
+- GPU-first decode architecture: all format dispatch now routes through GPUDecodeFormatRouter before falling back to CPU
+
+---
+
 ## [34.0.0] — 2026-04-06 — Arcturus
 
 ### Added
