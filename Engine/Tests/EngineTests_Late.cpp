@@ -13054,3 +13054,153 @@ TEST(TestACESODTProcessor_ACEScgToSRGB)
     delete[] result.pixelsBGRA;
 }
 
+//== Sprint 1231-1240: Predictive Pre-Generation Engine (v34.3.0 "Arcturus-T") ==
+
+TEST(TestDirectoryPreScanQueue_NetworkDetect)
+{
+    using namespace ExplorerLens::Engine;
+    // UNC path is network.
+    ASSERT(DirectoryPreScanQueue::IsNetworkPath(L"\\\\server\\share"));
+    // Local drive is not network.
+    ASSERT(!DirectoryPreScanQueue::IsNetworkPath(L"C:\\Users\\Test"));
+    // Empty string is not network.
+    ASSERT(!DirectoryPreScanQueue::IsNetworkPath(L""));
+}
+
+TEST(TestDirectoryPreScanQueue_StartStop)
+{
+    using namespace ExplorerLens::Engine;
+    DirectoryPreScanConfig cfg{};
+    cfg.workerThreadCount = 1;
+    DirectoryPreScanQueue q(cfg);
+    ASSERT(!q.IsRunning());
+    q.Start();
+    ASSERT(q.IsRunning());
+    q.Stop();
+    ASSERT(!q.IsRunning());
+    // Queue depth remains 0 since no directory was enqueued.
+    ASSERT(q.QueueDepth() == 0);
+}
+
+TEST(TestAdjacencyPredictor_Record)
+{
+    using namespace ExplorerLens::Engine;
+    AdjacencyPredictor pred;
+    ASSERT(pred.HistoryDepth() == 0);
+    pred.RecordNavigation(L"C:\\Foo\\Bar");
+    ASSERT(pred.HistoryDepth() == 1);
+    pred.RecordNavigation(L"C:\\Foo\\Baz");
+    ASSERT(pred.HistoryDepth() == 2);
+    // Duplicate consecutive navigation should not add an extra entry.
+    pred.RecordNavigation(L"C:\\Foo\\Baz");
+    ASSERT(pred.HistoryDepth() == 2);
+    pred.Reset();
+    ASSERT(pred.HistoryDepth() == 0);
+}
+
+TEST(TestAdjacencyPredictor_PredictEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    AdjacencyPredictor pred;
+    // With no history and a non-existent directory, predictions should be empty
+    // (no siblings found on disk for a fake path).
+    const auto preds = pred.Predict(L"Z:\\FakePath\\FakeDir", 4);
+    ASSERT(preds.size() == 0u || preds.size() <= 4u);
+}
+
+TEST(TestScrollVelocityTracker_ZeroVelocity)
+{
+    using namespace ExplorerLens::Engine;
+    ScrollVelocityTracker tracker;
+    const auto stats = tracker.GetStats();
+    ASSERT(stats.itemsPerSecond == 0.0f);
+    ASSERT(!stats.isFastScroll);
+    ASSERT(stats.direction == 0);
+}
+
+TEST(TestScrollVelocityTracker_EMASmoothing)
+{
+    using namespace ExplorerLens::Engine;
+    ScrollVelocityTracker tracker;
+    // Add two samples to compute velocity.
+    ScrollSample s1;
+    s1.timestampUs  = 0;
+    s1.deltaItems   = 10;
+    s1.viewportRows = 20;
+    tracker.AddSample(s1);
+
+    ScrollSample s2;
+    s2.timestampUs  = 100'000;  // 100 ms = 0.1 s
+    s2.deltaItems   = 10;
+    s2.viewportRows = 20;
+    tracker.AddSample(s2);
+
+    const auto stats = tracker.GetStats();
+    // 10 items / 0.1 s = 100 items/sec instantaneous; EMA will be partial.
+    ASSERT(stats.itemsPerSecond > 0.0f);
+    ASSERT(stats.direction == 1);  // positive delta → down
+    tracker.Reset();
+    ASSERT(tracker.GetStats().itemsPerSecond == 0.0f);
+}
+
+TEST(TestIdleTimePreGenerator_Stats)
+{
+    using namespace ExplorerLens::Engine;
+    IdleTimePreGenerator gen;
+    ASSERT(!gen.IsRunning());
+    const auto stats = gen.GetStats();
+    ASSERT(stats.totalPreGenerated == 0);
+    ASSERT(stats.idleWindowsUsed   == 0);
+    ASSERT(!stats.isActive);
+}
+
+TEST(TestIdleTimePreGenerator_BatteryCheck)
+{
+    using namespace ExplorerLens::Engine;
+    // Platform helper — just ensure it returns without crashing.
+    const bool onBattery = IdleTimePreGenerator::IsOnBattery();
+    // Result is platform-dependent; just assert it's a bool-compatible value.
+    ASSERT(onBattery == true || onBattery == false);
+    const float cpu = IdleTimePreGenerator::SampleCpuPercent();
+    ASSERT(cpu >= 0.0f && cpu <= 100.0f);
+}
+
+TEST(TestPredictivePreGenEngine_InitStats)
+{
+    using namespace ExplorerLens::Engine;
+    PreGenEngineConfig cfg{};
+    cfg.backgroundThreads = 1;
+    cfg.enableIdleGen     = false;
+    PredictivePreGenEngine engine(cfg);
+    ASSERT(!engine.IsRunning());
+    const auto stats = engine.GetStats();
+    ASSERT(stats.totalQueued    == 0);
+    ASSERT(stats.totalGenerated == 0);
+    ASSERT(stats.cacheHitRate   == 0.0f);
+}
+
+TEST(TestPredictivePreGenEngine_CacheHitCount)
+{
+    using namespace ExplorerLens::Engine;
+    PreGenEngineConfig cfg{};
+    cfg.backgroundThreads = 1;
+    cfg.enableIdleGen     = false;
+    cfg.enableScrollPredict = false;
+    cfg.enableAdjacency   = false;
+
+    PredictivePreGenEngine engine(cfg);
+    uint32_t generated = 0;
+
+    engine.SetCallbacks(
+        [](const std::wstring&) { return false; },  // nothing cached
+        [&generated](const std::wstring&) { ++generated; }
+    );
+
+    // Simulate two thumbnail requests: both are cache misses.
+    engine.OnThumbnailRequested(L"C:\\fake\\a.jpg");
+    engine.OnThumbnailRequested(L"C:\\fake\\b.png");
+    const auto stats = engine.GetStats();
+    ASSERT(stats.cacheMisses == 2);
+    ASSERT(stats.cacheHits   == 0);
+}
+

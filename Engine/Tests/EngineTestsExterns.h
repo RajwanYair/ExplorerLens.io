@@ -2384,6 +2384,18 @@ extern void TestICCv5ProfileEngine_DetectColorspace_Runner();
 extern void TestACESODTProcessor_DetectFromString_Runner();
 extern void TestACESODTProcessor_ACEScgToSRGB_Runner();
 
+// Sprint 1231-1240: Predictive Pre-Generation Engine (v34.3.0 "Arcturus-T")
+extern void TestDirectoryPreScanQueue_NetworkDetect_Runner();
+extern void TestDirectoryPreScanQueue_StartStop_Runner();
+extern void TestAdjacencyPredictor_Record_Runner();
+extern void TestAdjacencyPredictor_PredictEmpty_Runner();
+extern void TestScrollVelocityTracker_ZeroVelocity_Runner();
+extern void TestScrollVelocityTracker_EMASmoothing_Runner();
+extern void TestIdleTimePreGenerator_Stats_Runner();
+extern void TestIdleTimePreGenerator_BatteryCheck_Runner();
+extern void TestPredictivePreGenEngine_InitStats_Runner();
+extern void TestPredictivePreGenEngine_CacheHitCount_Runner();
+
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
 extern void TestDecoderRegistry_Create_Runner();

@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 34.2.0
+# Version: 34.3.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 34.2.0
+    VERSION 34.3.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -526,6 +526,13 @@ set(ENGINE_HEADERS
     Core/HLGToSDRConverter.h
     Core/ICCv5ProfileEngine.h
     Core/ACESODTProcessor.h
+
+    # Sprint 1231-1240 — Predictive Pre-Generation Engine (v34.3.0 "Arcturus-T")
+    Pipeline/DirectoryPreScanQueue.h
+    Pipeline/AdjacencyPredictor.h
+    Pipeline/ScrollVelocityTracker.h
+    Pipeline/IdleTimePreGenerator.h
+    Pipeline/PredictivePreGenEngine.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -1980,6 +1987,13 @@ set(ENGINE_SOURCES
     Core/HLGToSDRConverter.cpp
     Core/ICCv5ProfileEngine.cpp
     Core/ACESODTProcessor.cpp
+
+    # Sprint 1231-1240 — Predictive Pre-Generation Engine (v34.3.0 "Arcturus-T")
+    Pipeline/DirectoryPreScanQueue.cpp
+    Pipeline/AdjacencyPredictor.cpp
+    Pipeline/ScrollVelocityTracker.cpp
+    Pipeline/IdleTimePreGenerator.cpp
+    Pipeline/PredictivePreGenEngine.cpp
 )
 
 #==============================================================================
