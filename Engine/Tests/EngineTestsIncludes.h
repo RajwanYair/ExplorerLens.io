@@ -314,6 +314,13 @@
 #include "../Decoders/OMETIFFCompositor.h"
 #include "../Decoders/MHAVolumeDecoder.h"
 
+// Sprint 1261-1270: CAD/BIM/EDA Formats (v34.6.0 "Arcturus-W")
+#include "../Decoders/DWGHeaderParser.h"
+#include "../Decoders/STEPBoundingBoxExtractor.h"
+#include "../Decoders/IFCEntityCounter.h"
+#include "../Decoders/GerberLayerCompositor.h"
+#include "../Decoders/KiCadNetlistParser.h"
+
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
 #include "../Utils/CITestReporter.h"

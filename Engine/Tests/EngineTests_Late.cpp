@@ -13582,3 +13582,263 @@ TEST(TestMHAVolumeDecoder_ParseHeader)
     ASSERT(!hdr.compressed);
 }
 
+//==============================================================================
+// Sprint 1261-1270: CAD/BIM/EDA Formats (v34.6.0 "Arcturus-W")
+//==============================================================================
+
+TEST(TestDWGHeaderParser_IsDWG)
+{
+    using namespace ExplorerLens::Engine;
+    // Valid DWG R2018 magic
+    const uint8_t dwg2018[] = {'A','C','1','0','3','2',0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    ASSERT(DWGHeaderParser::IsDWG(dwg2018, sizeof(dwg2018)));
+
+    // Valid R14 magic
+    const uint8_t dwgR14[] = {'A','C','1','0','1','4',0x00};
+    ASSERT(DWGHeaderParser::IsDWG(dwgR14, sizeof(dwgR14)));
+
+    // DXF detection
+    const uint8_t dxf[] = " \xA0" " \xA0" "0\r\nSECTION";
+    const uint8_t dxfAscii[] = {' ',' ','0','\r','\n'};
+    ASSERT(DWGHeaderParser::IsDXF(dxfAscii, sizeof(dxfAscii)));
+
+    // Not DWG
+    const uint8_t notDwg[] = {'P','K',0x03,0x04,0x00,0x00,0x00};
+    ASSERT(!DWGHeaderParser::IsDWG(notDwg, sizeof(notDwg)));
+
+    // Null/short
+    ASSERT(!DWGHeaderParser::IsDWG(nullptr, 0));
+    ASSERT(!DWGHeaderParser::IsDWG(dwg2018, 1));
+}
+
+TEST(TestDWGHeaderParser_Parse)
+{
+    using namespace ExplorerLens::Engine;
+    // AC1032 = R2018
+    const uint8_t ac1032[] = {'A','C','1','0','3','2',0,0,0,0,0,0,0,0,0,0,0x78,0x08,0x00,0x00};
+    const auto info = DWGHeaderParser::Parse(ac1032, sizeof(ac1032));
+    ASSERT(info.isValid);
+    ASSERT(info.version == DWGVersion::R2018);
+    ASSERT(memcmp(info.versionString, "AC1032", 6) == 0);
+
+    // AC1015 = R2000
+    const uint8_t ac1015[] = {'A','C','1','0','1','5',0,0,0,0,0,0,0};
+    const auto info2 = DWGHeaderParser::Parse(ac1015, sizeof(ac1015));
+    ASSERT(info2.isValid);
+    ASSERT(info2.version == DWGVersion::R2000);
+
+    // Unknown version
+    const uint8_t acUnk[] = {'A','C','9','9','9','9',0,0};
+    const auto info3 = DWGHeaderParser::Parse(acUnk, sizeof(acUnk));
+    ASSERT(!info3.isValid);
+    ASSERT(info3.version == DWGVersion::Unknown);
+
+    // Version label
+    const std::string lbl = DWGHeaderParser::VersionLabel(DWGVersion::R2018);
+    ASSERT(!lbl.empty());
+    ASSERT(lbl.find("2018") != std::string::npos);
+}
+
+TEST(TestSTEPBoundingBoxExtractor_DetectFormat)
+{
+    using namespace ExplorerLens::Engine;
+    const char* stepHdr = "ISO-10303-21;\nHEADER;\n";
+    ASSERT(STEPBoundingBoxExtractor::DetectFormat(
+        reinterpret_cast<const uint8_t*>(stepHdr), strlen(stepHdr)) == CADFileFormat::STEP);
+
+    // IGES: 73rd byte is 'S' (section marker)
+    std::string igesLine(80, ' ');
+    igesLine[72] = 'S';
+    igesLine += '\n';
+    ASSERT(STEPBoundingBoxExtractor::DetectFormat(
+        reinterpret_cast<const uint8_t*>(igesLine.c_str()), igesLine.size()) == CADFileFormat::IGES);
+
+    const char* garbage = "GARBAGE DATA";
+    ASSERT(STEPBoundingBoxExtractor::DetectFormat(
+        reinterpret_cast<const uint8_t*>(garbage), strlen(garbage)) == CADFileFormat::Unknown);
+
+    ASSERT(STEPBoundingBoxExtractor::DetectFormat(nullptr, 0) == CADFileFormat::Unknown);
+}
+
+TEST(TestSTEPBoundingBoxExtractor_ExtractSTEP)
+{
+    using namespace ExplorerLens::Engine;
+    // Minimal STEP with two CARTESIAN_POINTs
+    const char* step =
+        "ISO-10303-21;\n"
+        "DATA;\n"
+        "#1=CARTESIAN_POINT('',(0.0,0.0,0.0));\n"
+        "#2=CARTESIAN_POINT('',(10.0,20.0,30.0));\n"
+        "#3=CARTESIAN_POINT('',(-5.0,5.0,15.0));\n"
+        "ENDSEC;\n";
+    const BoundingBox3D bb = STEPBoundingBoxExtractor::ExtractSTEP(
+        reinterpret_cast<const uint8_t*>(step), strlen(step));
+
+    ASSERT(bb.valid);
+    ASSERT(bb.minX <= -5.0 && bb.maxX >= 10.0);
+    ASSERT(bb.minY <=  0.0 && bb.maxY >= 20.0);
+    ASSERT(bb.minZ <=  0.0 && bb.maxZ >= 30.0);
+
+    // RenderBBoxPreview should return non-empty BGRA
+    const auto img = STEPBoundingBoxExtractor::RenderBBoxPreview(bb, 64, 64);
+    ASSERT(img.size() == 64u * 64u * 4u);
+
+    // Invalid bbox — render still returns data
+    BoundingBox3D invalid{};
+    const auto img2 = STEPBoundingBoxExtractor::RenderBBoxPreview(invalid, 32, 32);
+    ASSERT(img2.size() == 32u * 32u * 4u);
+}
+
+TEST(TestIFCEntityCounter_IsIFC)
+{
+    using namespace ExplorerLens::Engine;
+    const char* ifc =
+        "ISO-10303-21;\nHEADER;\n"
+        "FILE_SCHEMA(('IFC4'));\n"
+        "ENDSEC;\nDATA;\n";
+    ASSERT(IFCEntityCounter::IsIFC(
+        reinterpret_cast<const uint8_t*>(ifc), strlen(ifc)));
+
+    const char* notIfc = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP214'));\n";
+    ASSERT(!IFCEntityCounter::IsIFC(
+        reinterpret_cast<const uint8_t*>(notIfc), strlen(notIfc)));
+
+    ASSERT(!IFCEntityCounter::IsIFC(nullptr, 0));
+
+    // Version detection
+    const std::string ver = IFCEntityCounter::DetectVersion(
+        reinterpret_cast<const uint8_t*>(ifc), strlen(ifc));
+    ASSERT(!ver.empty());
+    ASSERT(ver.find("IFC") != std::string::npos);
+}
+
+TEST(TestIFCEntityCounter_Count)
+{
+    using namespace ExplorerLens::Engine;
+    const char* ifc =
+        "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\n"
+        "#1=IFCWALL('X',#2,'Wall A',$,$,#3,#4,'Ext');\n"
+        "#2=IFCWALL('X',#2,'Wall B',$,$,#3,#4,'Int');\n"
+        "#3=IFCDOOR('X',#2,'Door1',$,$,#3,#4,'Ent');\n"
+        "#4=IFCWINDOW('X',#2,'Win1',$,$,#3,#4,'');\n"
+        "ENDSEC;\n";
+    const auto s = IFCEntityCounter::Count(
+        reinterpret_cast<const uint8_t*>(ifc), strlen(ifc), 5);
+    ASSERT(s.valid);
+    ASSERT(s.totalEntities >= 4);
+    ASSERT(!s.topEntities.empty());
+    // IFCWALL should be most common (appears twice)
+    ASSERT(s.topEntities.front().entityType == "IFCWALL");
+    ASSERT(s.topEntities.front().count == 2);
+}
+
+TEST(TestGerberLayerCompositor_IsGerber)
+{
+    using namespace ExplorerLens::Engine;
+    const char* gerber = "G04 Copper Top Layer*\n%FSLAX46Y46*%\n";
+    ASSERT(GerberLayerCompositor::IsGerber(
+        reinterpret_cast<const uint8_t*>(gerber), strlen(gerber)));
+
+    const char* fsGerber = "%FSLAX46Y46*%\nG75*\n";
+    ASSERT(GerberLayerCompositor::IsGerber(
+        reinterpret_cast<const uint8_t*>(fsGerber), strlen(fsGerber)));
+
+    const char* notGerber = "NOTGERBER";
+    ASSERT(!GerberLayerCompositor::IsGerber(
+        reinterpret_cast<const uint8_t*>(notGerber), strlen(notGerber)));
+
+    ASSERT(!GerberLayerCompositor::IsGerber(nullptr, 0));
+
+    // Layer type detection from extension
+    ASSERT(GerberLayerCompositor::DetectLayerType(".gtl") == GerberLayerType::CopperTop);
+    ASSERT(GerberLayerCompositor::DetectLayerType(".gbl") == GerberLayerType::CopperBottom);
+    ASSERT(GerberLayerCompositor::DetectLayerType(".gto") == GerberLayerType::SilkscreenTop);
+    ASSERT(GerberLayerCompositor::DetectLayerType(".drl") == GerberLayerType::DrillThrough);
+    ASSERT(GerberLayerCompositor::DetectLayerType(".xyz") == GerberLayerType::Unknown);
+}
+
+TEST(TestGerberLayerCompositor_ProbeLayer)
+{
+    using namespace ExplorerLens::Engine;
+    // Gerber with a few flash operations
+    const char* gerbData =
+        "G04 Test Layer*\n"
+        "%FSLAX36Y36*%\n"
+        "%MOIN*%\n"
+        "%ADD10C,0.100*%\n"
+        "D10*\n"
+        "X002000Y003000D03*\n"   // flash
+        "X004000Y005000D03*\n"   // flash
+        "X001000Y001000D01*\n";  // draw
+    const auto info = GerberLayerCompositor::ProbeLayer(
+        reinterpret_cast<const uint8_t*>(gerbData), strlen(gerbData), ".gtl");
+
+    ASSERT(info.valid);
+    ASSERT(info.flashCount >= 2);
+    ASSERT(info.drawCount  >= 1);
+    ASSERT(info.type == GerberLayerType::CopperTop);
+
+    // Not-Gerber
+    const char* bad = "NOTHING";
+    const auto bad_info = GerberLayerCompositor::ProbeLayer(
+        reinterpret_cast<const uint8_t*>(bad), strlen(bad));
+    ASSERT(!bad_info.valid);
+}
+
+TEST(TestKiCadNetlistParser_IsKiCad)
+{
+    using namespace ExplorerLens::Engine;
+    const char* sch = "(kicad_sch (version 20230121) (generator eeschema))\n";
+    ASSERT(KiCadNetlistParser::IsKiCad(
+        reinterpret_cast<const uint8_t*>(sch), strlen(sch)));
+    ASSERT(KiCadNetlistParser::DetectFileType(
+        reinterpret_cast<const uint8_t*>(sch), strlen(sch)) == KiCadFileType::Schematic);
+
+    const char* pcb = "(kicad_pcb (version 20221018))\n";
+    ASSERT(KiCadNetlistParser::IsKiCad(
+        reinterpret_cast<const uint8_t*>(pcb), strlen(pcb)));
+    ASSERT(KiCadNetlistParser::DetectFileType(
+        reinterpret_cast<const uint8_t*>(pcb), strlen(pcb)) == KiCadFileType::PCBLayout);
+
+    const char* notKicad = "(spice netlist)";
+    ASSERT(!KiCadNetlistParser::IsKiCad(
+        reinterpret_cast<const uint8_t*>(notKicad), strlen(notKicad)));
+
+    ASSERT(!KiCadNetlistParser::IsKiCad(nullptr, 0));
+}
+
+TEST(TestKiCadNetlistParser_Parse)
+{
+    using namespace ExplorerLens::Engine;
+    const char* sch =
+        "(kicad_sch (version 20230121) (generator eeschema)\n"
+        "  (symbol (lib_id \"Device:R\") (at 50 50 0)\n"
+        "    (property \"Reference\" \"R1\")\n"
+        "    (property \"Value\" \"10k\")\n"
+        "    (property \"Footprint\" \"Resistor_SMD:R_0402\")\n"
+        "  )\n"
+        "  (symbol (lib_id \"Device:C\") (at 60 60 0)\n"
+        "    (property \"Reference\" \"C1\")\n"
+        "    (property \"Value\" \"100n\")\n"
+        "  )\n"
+        "  (symbol (lib_id \"Device:R\") (at 70 70 0)\n"
+        "    (property \"Reference\" \"R2\")\n"
+        "    (property \"Value\" \"10k\")\n"
+        "  )\n"
+        ")\n";
+    const auto s = KiCadNetlistParser::Parse(
+        reinterpret_cast<const uint8_t*>(sch), strlen(sch));
+
+    ASSERT(s.valid);
+    ASSERT(s.fileType == KiCadFileType::Schematic);
+    ASSERT(s.components.size() >= 3);
+    // R1 should be first
+    ASSERT(s.components[0].reference == "R1");
+    ASSERT(s.components[0].value     == "10k");
+    // uniqueValues: "10k" and "100n" = 2
+    ASSERT(s.uniqueValues >= 2);
+
+    // RenderPieChart should return 256*256*4 bytes
+    const auto img = KiCadNetlistParser::RenderPieChart(s, 64, 64);
+    ASSERT(img.size() == 64u * 64u * 4u);
+}

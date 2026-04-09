@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [34.6.0] — 2026-04-09 — Arcturus-W
+
+### Added
+- Sprint 1261-1270: CAD/BIM/EDA Formats — 5 new industrial format decoder modules
+- DWGHeaderParser: DWG binary magic parser (AC1002–AC1032); maps version string to DWGVersion enum (R1.2→R2018); IsDWG/IsDXF probes; preview chip renderer; VersionLabel human-readable string
+- STEPBoundingBoxExtractor: STEP (ISO-10303-21) and IGES bounding-box extractor via CARTESIAN_POINT and VERTEX_POINT scan; stride sub-sampling for large files; isometric wireframe RenderBBoxPreview
+- IFCEntityCounter: IFC2X3/IFC4/IFC4X3 entity-type frequency counter (IFCWALL/IFCDOOR/IFCWINDOW/IFCSLAB/etc.); FILE_SCHEMA version probe; top-N sorted entity list; horizontal RenderBarChart with colour-coded categories
+- GerberLayerCompositor: RS-274X Gerber IsGerber probe; DetectLayerType from file extension (.gtl/.gbl/.gts/.gto/.drl etc.); ParseApertures from %ADD blocks; flash/draw ProbeLayer; RasteriseLayer with layer-type colour coding (copper=gold, solder=green, silk=white)
+- KiCadNetlistParser: KiCad 8 S-expression IsKiCad/DetectFileType probe; component reference/value/footprint extractor; board dimensions from gr_rect; unique value count; RenderPieChart with component-category pie slices
+
+### Changed
+- Test count: 4644 → 4654 (+10 from Sprint 1261-1270)
+
+---
+
 ## [34.5.0] — 2026-04-09 — Arcturus-V
 
 ### Added

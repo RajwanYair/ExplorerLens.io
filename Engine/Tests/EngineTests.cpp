@@ -4854,6 +4854,18 @@ int main()
     RUN_TEST(TestMHAVolumeDecoder_IsMHA);
     RUN_TEST(TestMHAVolumeDecoder_ParseHeader);
 
+    // Sprint 1261-1270: CAD/BIM/EDA Formats (v34.6.0 "Arcturus-W")
+    RUN_TEST(TestDWGHeaderParser_IsDWG);
+    RUN_TEST(TestDWGHeaderParser_Parse);
+    RUN_TEST(TestSTEPBoundingBoxExtractor_DetectFormat);
+    RUN_TEST(TestSTEPBoundingBoxExtractor_ExtractSTEP);
+    RUN_TEST(TestIFCEntityCounter_IsIFC);
+    RUN_TEST(TestIFCEntityCounter_Count);
+    RUN_TEST(TestGerberLayerCompositor_IsGerber);
+    RUN_TEST(TestGerberLayerCompositor_ProbeLayer);
+    RUN_TEST(TestKiCadNetlistParser_IsKiCad);
+    RUN_TEST(TestKiCadNetlistParser_Parse);
+
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;
     RUN_TEST(TestMalformedArchive_TruncatedZIP);

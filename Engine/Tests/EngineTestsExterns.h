@@ -2420,6 +2420,18 @@ extern void TestOMETIFFCompositor_IsOMETIFF_Runner();
 extern void TestMHAVolumeDecoder_IsMHA_Runner();
 extern void TestMHAVolumeDecoder_ParseHeader_Runner();
 
+// Sprint 1261-1270: CAD/BIM/EDA Formats (v34.6.0 "Arcturus-W")
+extern void TestDWGHeaderParser_IsDWG_Runner();
+extern void TestDWGHeaderParser_Parse_Runner();
+extern void TestSTEPBoundingBoxExtractor_DetectFormat_Runner();
+extern void TestSTEPBoundingBoxExtractor_ExtractSTEP_Runner();
+extern void TestIFCEntityCounter_IsIFC_Runner();
+extern void TestIFCEntityCounter_Count_Runner();
+extern void TestGerberLayerCompositor_IsGerber_Runner();
+extern void TestGerberLayerCompositor_ProbeLayer_Runner();
+extern void TestKiCadNetlistParser_IsKiCad_Runner();
+extern void TestKiCadNetlistParser_Parse_Runner();
+
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
 extern void TestDecoderRegistry_Create_Runner();
