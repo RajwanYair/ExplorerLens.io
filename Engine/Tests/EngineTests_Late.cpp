@@ -12915,3 +12915,142 @@ TEST(TestZeroCopyGPUSurface_MapUnmap)
     surf.Unmap();
     surf.Release();
 }
+
+//== Sprint 1221-1230: HDR & Wide Color Gamut Mastery (v34.2.0 "Arcturus-S") ==
+
+TEST(TestGainmapJPEGToneMapper_UltraHDRDetect)
+{
+    using namespace ExplorerLens::Engine;
+    // A bare JPEG SOI with no XMP = not Ultra HDR.
+    const uint8_t fakeJpeg[] = { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46 };
+    ASSERT(!GainmapJPEGToneMapper::IsUltraHDR(fakeJpeg, sizeof(fakeJpeg)));
+    // Null input.
+    ASSERT(!GainmapJPEGToneMapper::IsUltraHDR(nullptr, 0));
+}
+
+TEST(TestGainmapJPEGToneMapper_ParseMetadata)
+{
+    using namespace ExplorerLens::Engine;
+    // ParseGainmapMetadata returns false for non-Ultra HDR data.
+    GainmapJPEGToneMapper mapper;
+    GainmapMetadata meta{};
+    const uint8_t notJpeg[] = { 0x00, 0x01, 0x02 };
+    ASSERT(!mapper.ParseGainmapMetadata(notJpeg, sizeof(notJpeg), meta));
+    ASSERT(!meta.isValid);
+}
+
+TEST(TestPQToSDRToneMapper_LUTBuild)
+{
+    using namespace ExplorerLens::Engine;
+    PQToneMapParams params{};
+    params.op         = ToneMapOperator::ACES;
+    params.peakNits   = 1000.0f;
+    auto lut = PQToSDRToneMapper::BuildPQToSRGBLUT(params);
+    // LUT has 1024 entries; first entry (0 PQ) should map to 0.
+    ASSERT(lut[0] == 0);
+    // Mid and high entries should be non-zero for non-zero PQ values.
+    ASSERT(lut[512] > 0);
+    ASSERT(lut[1023] > 0);
+}
+
+TEST(TestPQToSDRToneMapper_SinglePixel)
+{
+    using namespace ExplorerLens::Engine;
+    // Single black pixel (PQ = 0) → output should be fully black.
+    const uint16_t zeroPx[4] = { 0, 0, 0, 0x3C00 };  // R=0, G=0, B=0, A=1.0 (fp16)
+    PQToSDRToneMapper mapper;
+    PQToneMapParams params{};
+    params.op = ToneMapOperator::Hable;
+    auto result = mapper.ToneMap(zeroPx, 1, 1, params);
+    ASSERT(result.success);
+    ASSERT(result.pixelsBGRA != nullptr);
+    ASSERT(result.pixelsBGRA[0] == 0);  // B
+    ASSERT(result.pixelsBGRA[1] == 0);  // G
+    ASSERT(result.pixelsBGRA[2] == 0);  // R
+    delete[] result.pixelsBGRA;
+}
+
+TEST(TestHLGToSDRConverter_Identity)
+{
+    using namespace ExplorerLens::Engine;
+    // HLGtoLinear(0.0) == 0.0 (black → black).
+    ASSERT(HLGToSDRConverter::HLGtoLinear(0.0f) == 0.0f);
+    // HLGtoLinear(0.5) should be in valid range.
+    const float mid = HLGToSDRConverter::HLGtoLinear(0.5f);
+    ASSERT(mid > 0.0f && mid <= 1.0f);
+}
+
+TEST(TestHLGToSDRConverter_OOTFGamma)
+{
+    using namespace ExplorerLens::Engine;
+    // OOTF at 0.0 scene linear should give 0.0.
+    const float ootfZero = HLGToSDRConverter::HLGOOTF(0.0f, 1.2f, 1000.0f);
+    ASSERT(ootfZero == 0.0f);
+    // OOTF at positive scene linear should give positive value.
+    const float ootfVal = HLGToSDRConverter::HLGOOTF(0.5f, 1.2f, 1000.0f);
+    ASSERT(ootfVal > 0.0f);
+    // BT2020→BT.709 matrix: all-zero input stays zero.
+    float r = 0.0f, g = 0.0f, b = 0.0f;
+    HLGToSDRConverter::BT2020ToBT709(r, g, b);
+    ASSERT(r == 0.0f && g == 0.0f && b == 0.0f);
+}
+
+TEST(TestICCv5ProfileEngine_LoadBuiltIn)
+{
+    using namespace ExplorerLens::Engine;
+    ICCv5ProfileEngine engine;
+    ASSERT(!engine.IsLoaded());
+    ASSERT(engine.LoadBuiltIn(ICCColorSpace::sRGB));
+    ASSERT(engine.IsLoaded());
+    const ICCProfileInfo info = engine.GetInfo();
+    ASSERT(info.colorSpace == ICCColorSpace::sRGB);
+    // sRGB → sRGB transform should be identity.
+    const uint8_t src[4] = { 0x10, 0x20, 0x30, 0xFF };
+    auto result = engine.TransformToSRGB(src, 1, 1);
+    ASSERT(result.success);
+    ASSERT(result.pixelsBGRA != nullptr);
+    ASSERT(result.pixelsBGRA[0] == 0x10);
+    ASSERT(result.pixelsBGRA[2] == 0x30);
+    delete[] result.pixelsBGRA;
+}
+
+TEST(TestICCv5ProfileEngine_DetectColorspace)
+{
+    using namespace ExplorerLens::Engine;
+    // Non-JPEG data should return Unknown.
+    const uint8_t garbage[] = { 0xAA, 0xBB, 0xCC };
+    const ICCColorSpace cs = ICCv5ProfileEngine::DetectEmbeddedColorSpace(
+        garbage, sizeof(garbage));
+    ASSERT(cs == ICCColorSpace::Unknown);
+    // Null input.
+    const ICCColorSpace csNull = ICCv5ProfileEngine::DetectEmbeddedColorSpace(nullptr, 0);
+    ASSERT(csNull == ICCColorSpace::Unknown);
+}
+
+TEST(TestACESODTProcessor_DetectFromString)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(ACESODTProcessor::DetectFromString("ACES2065-1") == ACESColorspace::AP0);
+    ASSERT(ACESODTProcessor::DetectFromString("ACEScg")     == ACESColorspace::AP1);
+    ASSERT(ACESODTProcessor::DetectFromString("ACEScc")     == ACESColorspace::ACEScc);
+    ASSERT(ACESODTProcessor::DetectFromString("ACEScct")    == ACESColorspace::ACEScct);
+    ASSERT(ACESODTProcessor::DetectFromString("unknown")    == ACESColorspace::Unknown);
+    ASSERT(ACESODTProcessor::DetectFromString(nullptr)      == ACESColorspace::Unknown);
+}
+
+TEST(TestACESODTProcessor_ACEScgToSRGB)
+{
+    using namespace ExplorerLens::Engine;
+    // All-zero ACEScg pixels (black) → black sRGB output.
+    const uint16_t zeroPx[4] = { 0, 0, 0, 0x3C00 };  // fp16: R=0, G=0, B=0, A=1.0
+    ACESODTProcessor proc;
+    auto result = proc.ACEScgToSRGB(zeroPx, 1, 1);
+    ASSERT(result.success);
+    ASSERT(result.pixelsBGRA != nullptr);
+    ASSERT(result.pixelsBGRA[0] == 0);  // B
+    ASSERT(result.pixelsBGRA[1] == 0);  // G
+    ASSERT(result.pixelsBGRA[2] == 0);  // R
+    ASSERT(result.pixelsBGRA[3] == 0xFF);
+    delete[] result.pixelsBGRA;
+}
+

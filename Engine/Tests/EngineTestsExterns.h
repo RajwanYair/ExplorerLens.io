@@ -2372,6 +2372,18 @@ extern void TestGPUDecodePerformanceGate_Block_Runner();
 extern void TestZeroCopyGPUSurface_Alloc_Runner();
 extern void TestZeroCopyGPUSurface_MapUnmap_Runner();
 
+// Sprint 1221-1230: HDR & Wide Color Gamut Mastery (v34.2.0 "Arcturus-S")
+extern void TestGainmapJPEGToneMapper_UltraHDRDetect_Runner();
+extern void TestGainmapJPEGToneMapper_ParseMetadata_Runner();
+extern void TestPQToSDRToneMapper_LUTBuild_Runner();
+extern void TestPQToSDRToneMapper_SinglePixel_Runner();
+extern void TestHLGToSDRConverter_Identity_Runner();
+extern void TestHLGToSDRConverter_OOTFGamma_Runner();
+extern void TestICCv5ProfileEngine_LoadBuiltIn_Runner();
+extern void TestICCv5ProfileEngine_DetectColorspace_Runner();
+extern void TestACESODTProcessor_DetectFromString_Runner();
+extern void TestACESODTProcessor_ACEScgToSRGB_Runner();
+
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
 extern void TestDecoderRegistry_Create_Runner();

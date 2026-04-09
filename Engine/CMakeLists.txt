@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 34.1.0
+# Version: 34.2.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 34.1.0
+    VERSION 34.2.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -519,6 +519,13 @@ set(ENGINE_HEADERS
     GPU/GPURawDemosaicKernel.h
     GPU/GPUDecodePerformanceGate.h
     GPU/ZeroCopyGPUSurface.h
+
+    # Sprint 1221-1230 — HDR & Wide Color Gamut Mastery (v34.2.0 "Arcturus-S")
+    Core/GainmapJPEGToneMapper.h
+    Core/PQToSDRToneMapper.h
+    Core/HLGToSDRConverter.h
+    Core/ICCv5ProfileEngine.h
+    Core/ACESODTProcessor.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -1966,6 +1973,13 @@ set(ENGINE_SOURCES
     GPU/GPURawDemosaicKernel.cpp
     GPU/GPUDecodePerformanceGate.cpp
     GPU/ZeroCopyGPUSurface.cpp
+
+    # Sprint 1221-1230 — HDR & Wide Color Gamut Mastery (v34.2.0 "Arcturus-S")
+    Core/GainmapJPEGToneMapper.cpp
+    Core/PQToSDRToneMapper.cpp
+    Core/HLGToSDRConverter.cpp
+    Core/ICCv5ProfileEngine.cpp
+    Core/ACESODTProcessor.cpp
 )
 
 #==============================================================================

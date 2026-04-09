@@ -279,6 +279,20 @@
 #include "../Decoders/LasPointCloudDecoder.h"
 #include "../Decoders/JupyterNotebookDecoder.h"
 
+// Sprint 1211-1220: GPU-First Decode Pipeline (v34.1.0 "Arcturus-R")
+#include "../GPU/GPUDecodeFormatRouter.h"
+#include "../GPU/GPUJPEGDecodeAccelerator.h"
+#include "../GPU/GPURawDemosaicKernel.h"
+#include "../GPU/GPUDecodePerformanceGate.h"
+#include "../GPU/ZeroCopyGPUSurface.h"
+
+// Sprint 1221-1230: HDR & Wide Color Gamut Mastery (v34.2.0 "Arcturus-S")
+#include "../Core/GainmapJPEGToneMapper.h"
+#include "../Core/PQToSDRToneMapper.h"
+#include "../Core/HLGToSDRConverter.h"
+#include "../Core/ICCv5ProfileEngine.h"
+#include "../Core/ACESODTProcessor.h"
+
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
 #include "../Utils/CITestReporter.h"

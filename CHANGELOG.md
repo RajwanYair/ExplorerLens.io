@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [34.2.0] — 2026-04-09 — Arcturus-S
+
+### Added
+- Sprint 1221-1230: HDR & Wide Color Gamut Mastery — 5 new HDR color pipeline modules
+- GainmapJPEGToneMapper: Google Ultra HDR (ISO 21496-1 draft) gainmap JPEG detector and SDR tone-mapper; applies gainmap boost to preserve local contrast on sRGB displays; P50 target < 1 ms
+- PQToSDRToneMapper: SMPTE ST.2084 (PQ) half-float and BGRA10 HDR10 to sRGB converter; Hable filmic, ACES RRT, Reinhard, and AgX tone-map operators; 1024-entry coarse LUT builder; P50 target < 0.5 ms
+- HLGToSDRConverter: ITU-R BT.2100 HLG inverse OETF + OOTF scene-adaptive path + BT.2020→BT.709 matrix; supports 16-bit float and 10-bit packed input; P50 target < 0.5 ms
+- ICCv5ProfileEngine: ICC v4/v5 (iccMAX) profile loader and sRGB transform engine; built-in profiles for sRGB, AdobeRGB, DisplayP3, Rec.2020; embedded JPEG ICC color space detector; P50 target < 2 ms
+- ACESODTProcessor: ACES AP0/AP1/ACEScc/ACEScct colorspace detection from EXR header and string identifier; full RRT (Narkowicz approximation) + sRGB ODT; AP0→AP1→sRGB matrix chain; P50 target < 3 ms
+
+### Changed
+- Test count: 4604 → 4614 (+10 from Sprint 1221-1230)
+
+---
+
 ## [34.1.0] — 2026-04-09 — Arcturus-R
 
 ### Added
