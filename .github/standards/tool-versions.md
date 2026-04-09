@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 9 April 2026 (v34.3.0 Arcturus-T release)
-**Version:** 34.3.0 "Arcturus-T"
+**Last Updated:** 9 April 2026 (v34.4.0 Arcturus-U release)
+**Version:** 34.4.0 "Arcturus-U"
 
 ---
 

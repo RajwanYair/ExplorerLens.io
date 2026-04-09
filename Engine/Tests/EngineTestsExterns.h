@@ -2396,6 +2396,18 @@ extern void TestIdleTimePreGenerator_BatteryCheck_Runner();
 extern void TestPredictivePreGenEngine_InitStats_Runner();
 extern void TestPredictivePreGenEngine_CacheHitCount_Runner();
 
+// Sprint 1241-1250: Animated & Sequence Format Suite (v34.4.0 "Arcturus-U")
+extern void TestHoverScrubController_PosToFrame_Runner();
+extern void TestHoverScrubController_MouseLeave_Runner();
+extern void TestAPNGFrameCombiner_SelectKeyFrames_Runner();
+extern void TestAPNGFrameCombiner_ProbeFrameCount_Runner();
+extern void TestGIFAnimationDecoder_IsGIF_Runner();
+extern void TestGIFAnimationDecoder_ProbeFrameCount_Runner();
+extern void TestAnimatedSequenceSampler_DetectGIF_Runner();
+extern void TestAnimatedSequenceSampler_SampleGIF_Runner();
+extern void TestAnimatedThumbnailCache_PutGet_Runner();
+extern void TestAnimatedThumbnailCache_Eviction_Runner();
+
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
 extern void TestDecoderRegistry_Create_Runner();

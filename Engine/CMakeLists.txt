@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 34.3.0
+# Version: 34.4.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 34.3.0
+    VERSION 34.4.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -533,6 +533,13 @@ set(ENGINE_HEADERS
     Pipeline/ScrollVelocityTracker.h
     Pipeline/IdleTimePreGenerator.h
     Pipeline/PredictivePreGenEngine.h
+
+    # Sprint 1241-1250 — Animated & Sequence Format Suite (v34.4.0 "Arcturus-U")
+    Core/HoverScrubController.h
+    Core/APNGFrameCombiner.h
+    Decoders/GIFAnimationDecoder.h
+    Decoders/AnimatedSequenceSampler.h
+    Cache/AnimatedThumbnailCache.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -1994,6 +2001,13 @@ set(ENGINE_SOURCES
     Pipeline/ScrollVelocityTracker.cpp
     Pipeline/IdleTimePreGenerator.cpp
     Pipeline/PredictivePreGenEngine.cpp
+
+    # Sprint 1241-1250 — Animated & Sequence Format Suite (v34.4.0 "Arcturus-U")
+    Core/HoverScrubController.cpp
+    Core/APNGFrameCombiner.cpp
+    Decoders/GIFAnimationDecoder.cpp
+    Decoders/AnimatedSequenceSampler.cpp
+    Cache/AnimatedThumbnailCache.cpp
 )
 
 #==============================================================================

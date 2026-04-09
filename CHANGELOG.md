@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [34.4.0] — 2026-04-09 — Arcturus-U
+
+### Added
+- Sprint 1241-1250: Animated & Sequence Format Suite — 5 new animation pipeline modules
+- HoverScrubController: Mouse-position-to-frame mapping (linear scrub, EMA-smooth); OnMouseEnter/Move/Leave → frame-changed callback; thread-safe; frame 0 on leave
+- APNGFrameCombiner: Full APNG Dispose + Blend compositor (Source/Over blend, None/Background/Previous disposal); ProbeFrameCount via acTL chunk; SelectKeyFrameIndices for even sampling
+- GIFAnimationDecoder: GIF87a/GIF89a animated frame extractor; LZW decode dispatch; ProbeFrameCount via Image Descriptor walk; IsGIF magic probe; disposal support
+- AnimatedSequenceSampler: Unified key-frame sampler for GIF/APNG/WebP/AVIF/JXL/HEIC; Detect() by magic bytes; ProbeFrameCount dispatch; < 8 ms for 5 frames target
+- AnimatedThumbnailCache: LRU BGRA32 per-frame cache keyed by (path, frameIndex); 64 MB/512-entry default; SWMR mutex; Invalidate() by path; hit/miss/eviction stats
+
+### Changed
+- Test count: 4624 → 4634 (+10 from Sprint 1241-1250)
+
+---
+
+## [34.3.0] — 2026-04-09 — Arcturus-T
+
+### Added
+- Sprint 1231-1240: Predictive Pre-Generation Engine — 5 new pipeline modules for T4
+- DirectoryPreScanQueue: Priority-ordered background pre-gen queue (Immediate/Adjacent/Background/Deferred); multi-threaded worker pool; UNC/network path detection and skip; THREAD_PRIORITY_LOWEST workers
+- AdjacencyPredictor: MRU navigation history + sibling directory enumeration; scores predictions with confidence [0.0–1.0]; triggers pre-scan for likely-next-visited directories
+- ScrollVelocityTracker: EMA-smoothed scroll velocity from Explorer events; fires speculative pre-gen callback when velocity exceeds threshold; direction-aware (scroll up/down)
+- IdleTimePreGenerator: CPU/GPU idle-time opportunistic pre-gen (CPU < 5%, GPU < 10%); THREAD_PRIORITY_IDLE; battery detection; thermal guard
+- PredictivePreGenEngine: Top-level coordinator integrating all 4 subsystems; cache-hit/miss rate tracking; > 95% cache hit target; 800 img/s background throughput
+
+### Changed
+- Test count: 4614 → 4624 (+10 from Sprint 1231-1240)
+
+---
+
 ## [34.3.0] — 2026-04-09 — Arcturus-T
 
 ### Added

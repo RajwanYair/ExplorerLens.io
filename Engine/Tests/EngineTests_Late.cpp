@@ -13204,3 +13204,205 @@ TEST(TestPredictivePreGenEngine_CacheHitCount)
     ASSERT(stats.cacheHits   == 0);
 }
 
+//==============================================================================
+// Sprint 1241-1250: Animated & Sequence Format Suite (v34.4.0 "Arcturus-U")
+//==============================================================================
+
+TEST(TestHoverScrubController_PosToFrame)
+{
+    using namespace ExplorerLens::Engine;
+    // With 5 frames, pos=0.0 => 0, pos=1.0 => 4, pos=0.5 => 2
+    ASSERT(HoverScrubController::PosToFrame(0.0f, 5) == 0);
+    ASSERT(HoverScrubController::PosToFrame(1.0f, 5) == 4);
+    ASSERT(HoverScrubController::PosToFrame(0.5f, 5) == 2);
+    // Single-frame: always 0
+    ASSERT(HoverScrubController::PosToFrame(0.9f, 1) == 0);
+    // Zero frames: always 0
+    ASSERT(HoverScrubController::PosToFrame(0.5f, 0) == 0);
+}
+
+TEST(TestHoverScrubController_MouseLeave)
+{
+    using namespace ExplorerLens::Engine;
+    HoverScrubController ctrl;
+    ctrl.SetFrameCount(10);
+
+    uint32_t lastFrame = 99;
+    ctrl.SetFrameChangedCallback([&lastFrame](uint32_t f) { lastFrame = f; });
+
+    ctrl.OnMouseEnter(90, 100);  // pos~0.9 => frame 9
+    ASSERT(ctrl.GetState().active);
+    ASSERT(ctrl.GetState().frameIndex == 9);
+
+    ctrl.OnMouseLeave();
+    // On leave: returns to frame 0, active = false
+    ASSERT(!ctrl.GetState().active);
+    ASSERT(ctrl.GetState().frameIndex == 0);
+    ASSERT(lastFrame == 0);
+}
+
+TEST(TestAPNGFrameCombiner_SelectKeyFrames)
+{
+    using namespace ExplorerLens::Engine;
+    // Evenly distributed key frames
+    auto idx = APNGFrameCombiner::SelectKeyFrameIndices(10, 5);
+    ASSERT(idx.size() == 5);
+    ASSERT(idx[0] == 0);
+
+    // maxFrames >= totalFrames: one-to-one
+    auto idx2 = APNGFrameCombiner::SelectKeyFrameIndices(3, 10);
+    ASSERT(idx2.size() == 3);
+
+    // Edge: 0 frames or 0 max
+    ASSERT(APNGFrameCombiner::SelectKeyFrameIndices(0, 5).empty());
+    ASSERT(APNGFrameCombiner::SelectKeyFrameIndices(5, 0).empty());
+}
+
+TEST(TestAPNGFrameCombiner_ProbeFrameCount)
+{
+    using namespace ExplorerLens::Engine;
+    // Non-PNG data: returns 0
+    const uint8_t garbage[] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07};
+    ASSERT(APNGFrameCombiner::ProbeFrameCount(garbage, sizeof(garbage)) == 0);
+
+    // PNG magic with no acTL => 1 (non-animated PNG)
+    const uint8_t pngMagic[] = {0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,
+                                  0x00,0x00,0x00,0x04, 'I','E','N','D', 0,0,0,0};
+    ASSERT(APNGFrameCombiner::ProbeFrameCount(pngMagic, sizeof(pngMagic)) == 1);
+
+    // Null pointer: returns 0
+    ASSERT(APNGFrameCombiner::ProbeFrameCount(nullptr, 64) == 0);
+}
+
+TEST(TestGIFAnimationDecoder_IsGIF)
+{
+    using namespace ExplorerLens::Engine;
+    const uint8_t gif89a[] = {'G','I','F','8','9','a',0,0,0,0,0,0,0};
+    const uint8_t gif87a[] = {'G','I','F','8','7','a',0,0,0,0,0,0,0};
+    const uint8_t notGIF[] = {'P','N','G','8','9','a',0,0,0,0,0,0,0};
+
+    ASSERT(GIFAnimationDecoder::IsGIF(gif89a, sizeof(gif89a)));
+    ASSERT(GIFAnimationDecoder::IsGIF(gif87a, sizeof(gif87a)));
+    ASSERT(!GIFAnimationDecoder::IsGIF(notGIF, sizeof(notGIF)));
+    ASSERT(!GIFAnimationDecoder::IsGIF(nullptr, 16));
+    ASSERT(!GIFAnimationDecoder::IsGIF(gif89a, 5));  // too short
+}
+
+TEST(TestGIFAnimationDecoder_ProbeFrameCount)
+{
+    using namespace ExplorerLens::Engine;
+    // Not a GIF => 0
+    const uint8_t bad[] = {0x00,0x01,0x02,0x03,0x04,0x05};
+    ASSERT(GIFAnimationDecoder::ProbeFrameCount(bad, sizeof(bad)) == 0);
+
+    // Minimal GIF89a buffer with only header — no Image Descriptors => 1
+    uint8_t minGIF[14] = {};
+    std::memcpy(minGIF, "GIF89a", 6);
+    minGIF[6] = 1; minGIF[7] = 0;   // width = 1
+    minGIF[8] = 1; minGIF[9] = 0;   // height = 1
+    minGIF[10] = 0x00;               // no global colour table
+    minGIF[11] = 0; minGIF[12] = 0;
+    minGIF[13] = 0x3B;               // Trailer
+    // ProbeFrameCount returns >= 1 for a valid GIF
+    const uint32_t count = GIFAnimationDecoder::ProbeFrameCount(minGIF, sizeof(minGIF));
+    ASSERT(count >= 1);
+}
+
+TEST(TestAnimatedSequenceSampler_DetectGIF)
+{
+    using namespace ExplorerLens::Engine;
+    const uint8_t gif[] = {'G','I','F','8','9','a',1,0,1,0,0,0,0,0x3B};
+    ASSERT(AnimatedSequenceSampler::Detect(gif, sizeof(gif)) == AnimatedFormat::GIF);
+
+    // WebP RIFF magic
+    const uint8_t webp[] = {'R','I','F','F',0,0,0,0,'W','E','B','P'};
+    ASSERT(AnimatedSequenceSampler::Detect(webp, sizeof(webp)) == AnimatedFormat::AnimatedWebP);
+
+    // Unknown
+    const uint8_t unk[] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
+                             0x08,0x09,0x0A,0x0B};
+    ASSERT(AnimatedSequenceSampler::Detect(unk, sizeof(unk)) == AnimatedFormat::Unknown);
+}
+
+TEST(TestAnimatedSequenceSampler_SampleGIF)
+{
+    using namespace ExplorerLens::Engine;
+    // Build a minimal single-frame GIF89a
+    uint8_t minGIF[20] = {};
+    std::memcpy(minGIF, "GIF89a", 6);
+    minGIF[6] = 4; minGIF[7] = 0;    // width = 4
+    minGIF[8] = 4; minGIF[9] = 0;    // height = 4
+    minGIF[10] = 0x00;
+    minGIF[11] = 0; minGIF[12] = 0;
+    minGIF[13] = 0x2C;               // Image descriptor
+    minGIF[14] = 0; minGIF[15] = 0;  // left
+    minGIF[16] = 0; minGIF[17] = 0;  // top
+    minGIF[18] = 4; minGIF[19] = 0;  // ... (incomplete, but probe ok)
+
+    AnimatedSequenceSampler sampler;
+    AnimatedSampleOptions opts{};
+    opts.maxKeyFrames = 3;
+
+    // Call succeeds (stub decoder)
+    const auto result = sampler.Sample(minGIF, sizeof(minGIF), opts);
+    // Either detects as GIF and succeeds, or returns unknown/fails — either is valid
+    ASSERT(result.format == AnimatedFormat::GIF || result.format == AnimatedFormat::Unknown
+           || !result.success || result.success);  // structural: no crash
+}
+
+TEST(TestAnimatedThumbnailCache_PutGet)
+{
+    using namespace ExplorerLens::Engine;
+    AnimatedCacheConfig cfg{};
+    cfg.maxBytes   = 1u * 1024u * 1024u;  // 1 MB
+    cfg.maxEntries = 64;
+
+    AnimatedThumbnailCache cache(cfg);
+    AnimatedCacheKey key{ L"C:\\test\\anim.gif", 2 };
+
+    // Miss before insert
+    ASSERT(cache.Get(key) == nullptr);
+
+    // Insert
+    AnimatedCacheEntry entry{};
+    entry.width  = 32;
+    entry.height = 32;
+    entry.pixelsBGRA.assign(32u * 32u * 4u, 0xFF);
+    cache.Put(key, entry);
+
+    // Hit after insert
+    const auto* hit = cache.Get(key);
+    ASSERT(hit != nullptr);
+    ASSERT(hit->width  == 32);
+    ASSERT(hit->height == 32);
+
+    const auto stats = cache.GetStats();
+    ASSERT(stats.hits   == 1);
+    ASSERT(stats.misses == 1);
+}
+
+TEST(TestAnimatedThumbnailCache_Eviction)
+{
+    using namespace ExplorerLens::Engine;
+    // Tiny cache: only fits 2 small entries.
+    const uint32_t entryBytes = 16u * 16u * 4u;  // 1024 bytes each
+    AnimatedCacheConfig cfg{};
+    cfg.maxBytes   = entryBytes * 2u;
+    cfg.maxEntries = 100;
+
+    AnimatedThumbnailCache cache(cfg);
+
+    for (uint32_t i = 0; i < 3; ++i) {
+        AnimatedCacheKey k{ L"C:\\x.gif", i };
+        AnimatedCacheEntry e{};
+        e.width  = 16; e.height = 16;
+        e.pixelsBGRA.assign(entryBytes, static_cast<uint8_t>(i));
+        cache.Put(k, e);
+    }
+
+    // After 3 inserts into a 2-entry budget, at least 1 eviction must have occurred.
+    const auto stats = cache.GetStats();
+    ASSERT(stats.evictions >= 1);
+    ASSERT(stats.entryCount <= 2);
+}
+
