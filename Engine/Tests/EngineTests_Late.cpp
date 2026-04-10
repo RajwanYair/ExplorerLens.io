@@ -14557,4 +14557,277 @@ TEST(TestRealTimePreviewPipeline_Backpressure)
     ASSERT(pipeline.TotalEventsEnqueued() == 2u);
 }
 
+//==============================================================================
+// Sprint 1301-1310: Network-Aware Streaming Cache (v35.2.0 "Vega-S")
+//==============================================================================
+
+TEST(TestNetworkTopologyProbe_Probe)
+{
+    using namespace ExplorerLens::Engine;
+
+    NetworkTopologyProbe::Config cfg;
+    cfg.probeIntervalMs = 100;
+    NetworkTopologyProbe probe(cfg);
+
+    ASSERT(probe.ProbeCount() == 0u);
+
+    const auto result = probe.Probe();
+    ASSERT(probe.ProbeCount() == 1u);
+    // Stubbed probe always returns LAN
+    ASSERT(result.topology == NetworkTopology::LAN);
+    ASSERT(result.estimatedKbps == 1000u);
+    ASSERT(!result.isMetered);
+
+    // LastResult should match the most recent probe
+    ASSERT(probe.LastResult().topology == probe.GetTopology());
+    ASSERT(probe.GetConfig().probeIntervalMs == 100u);
+}
+
+TEST(TestNetworkTopologyProbe_ForceTopology)
+{
+    using namespace ExplorerLens::Engine;
+
+    NetworkTopologyProbe probe;
+    probe.ForceTopology(NetworkTopology::CELL);
+    ASSERT(probe.GetTopology() == NetworkTopology::CELL);
+
+    probe.ForceTopology(NetworkTopology::OFFLINE);
+    ASSERT(probe.GetTopology()  == NetworkTopology::OFFLINE);
+    ASSERT(!probe.IsMetered());  // Forced topology doesn't set metered flag
+
+    probe.Probe();  // Real probe overrides forced topology
+    ASSERT(probe.ProbeCount() == 1u);
+    ASSERT(probe.GetTopology() == NetworkTopology::LAN); // Stub returns LAN
+}
+
+TEST(TestStreamingCacheTierPolicy_Derive)
+{
+    using namespace ExplorerLens::Engine;
+
+    StreamingCacheTierPolicy policy;
+
+    const auto lan    = policy.Derive(NetworkTopology::LAN);
+    const auto cell   = policy.Derive(NetworkTopology::CELL);
+    const auto offline= policy.Derive(NetworkTopology::OFFLINE);
+
+    // LAN should be most generous
+    ASSERT(lan.maxBudgetMb > cell.maxBudgetMb);
+    ASSERT(lan.prefetchDepth >= cell.prefetchDepth);
+    ASSERT(lan.allowRemoteFetch);
+
+    // Cell should use placeholders
+    ASSERT(cell.usePlaceholders);
+    ASSERT(cell.maxBandwidthKbps > 0u);  // Capped on metered
+
+    // Offline: no remote fetch
+    ASSERT(!offline.allowRemoteFetch);
+    ASSERT(offline.usePlaceholders);
+
+    ASSERT(policy.OverrideCount() == 0u);
+}
+
+TEST(TestStreamingCacheTierPolicy_Override)
+{
+    using namespace ExplorerLens::Engine;
+
+    StreamingCacheTierPolicy policy;
+
+    CacheTierParameters custom;
+    custom.maxBudgetMb     = 9999;
+    custom.prefetchDepth   = 99;
+    custom.allowRemoteFetch = false;
+    policy.OverrideParams(NetworkTopology::WIFI, custom);
+    ASSERT(policy.OverrideCount() == 1u);
+
+    const auto wifi = policy.Derive(NetworkTopology::WIFI);
+    ASSERT(wifi.maxBudgetMb == 9999u);
+    ASSERT(!wifi.allowRemoteFetch);
+
+    policy.ResetOverrides();
+    ASSERT(policy.OverrideCount() == 0u);
+
+    // After reset, default values should be back
+    const auto wifi2 = policy.Derive(NetworkTopology::WIFI);
+    ASSERT(wifi2.maxBudgetMb != 9999u);
+
+    // DeriveFromProbe on metered result should enforce bandwidth cap
+    NetworkProbeResult metered;
+    metered.topology    = NetworkTopology::LAN;
+    metered.isMetered   = true;
+    metered.estimatedKbps = 500;
+    const auto params = policy.DeriveFromProbe(metered);
+    ASSERT(params.maxBandwidthKbps > 0u);
+}
+
+TEST(TestBandwidthThrottleGuard_Allow)
+{
+    using namespace ExplorerLens::Engine;
+
+    BandwidthThrottleGuard::Config cfg;
+    cfg.maxKbps     = 0;  // Unlimited
+    cfg.bucketCapKb = 256;
+    BandwidthThrottleGuard guard(cfg);
+
+    // Unlimited mode — always permits
+    ASSERT(guard.TryConsume(1'000'000, 1000ULL));
+    ASSERT(guard.TryConsume(1'000'000, 2000ULL));
+    ASSERT(guard.TotalBytesAllowed() == 2'000'000ULL);
+    ASSERT(guard.TotalBytesRejected() == 0ULL);
+
+    // AvailableTokensKb on unlimited guard returns bucket cap
+    guard.Reset();
+    ASSERT(guard.AvailableTokensKb() == cfg.bucketCapKb);
+}
+
+TEST(TestBandwidthThrottleGuard_Throttle)
+{
+    using namespace ExplorerLens::Engine;
+
+    BandwidthThrottleGuard::Config cfg;
+    cfg.maxKbps     = 100;   // 100 KB/s
+    cfg.bucketCapKb = 10;
+    cfg.burstKb     = 0;
+    BandwidthThrottleGuard guard(cfg);
+
+    // Drain the initial bucket
+    while (guard.AvailableTokensKb() > 0)
+        guard.TryConsume(1024, 0ULL);  // consume 1 KB chunks at t=0
+
+    // No tokens left — large request rejected
+    ASSERT(!guard.TryConsume(512 * 1024, 0ULL));
+    ASSERT(guard.TotalBytesRejected() > 0ULL);
+
+    // After 1 second, 100 KB refill
+    guard.Tick(1000ULL);
+    ASSERT(guard.AvailableTokensKb() >= 10u);  // Capped at bucketCap
+
+    guard.SetMaxKbps(0);  // Switch to unlimited
+    ASSERT(guard.TryConsume(9999999, 2000ULL));
+
+    guard.Reset();
+    ASSERT(guard.TotalBytesAllowed() == 0ULL);
+    ASSERT(guard.TotalBytesRejected() == 0ULL);
+}
+
+TEST(TestRemoteFileManifestCache_Store)
+{
+    using namespace ExplorerLens::Engine;
+
+    RemoteFileManifestCache cache;
+
+    DirectoryManifest manifest;
+    manifest.directoryPath = L"\\\\server\\share\\photos";
+    manifest.fetchedAtMs   = 1000ULL;
+    manifest.ttlMs         = 60'000ULL;
+    manifest.entries.push_back({ L"\\\\server\\share\\photos\\a.jpg", 1000ULL, 2048ULL, "etag-a" });
+    manifest.entries.push_back({ L"\\\\server\\share\\photos\\b.png", 1100ULL, 1024ULL, "etag-b" });
+
+    cache.Store(manifest);
+    ASSERT(cache.EntryCount() == 1u);
+
+    DirectoryManifest out;
+    ASSERT(cache.Lookup(L"\\\\server\\share\\photos", 5000ULL, out));
+    ASSERT(out.entries.size() == 2u);
+    ASSERT(cache.HitCount() == 1u);
+    ASSERT(cache.MissCount() == 0u);
+
+    // Miss for unknown path
+    ASSERT(!cache.Lookup(L"\\\\server\\other", 5000ULL, out));
+    ASSERT(cache.MissCount() == 1u);
+}
+
+TEST(TestRemoteFileManifestCache_Stale)
+{
+    using namespace ExplorerLens::Engine;
+
+    RemoteFileManifestCache cache;
+
+    DirectoryManifest manifest;
+    manifest.directoryPath = L"C:\\OneDrive\\Reports";
+    manifest.fetchedAtMs   = 0ULL;
+    manifest.ttlMs         = 1000ULL;  // 1 second TTL
+
+    cache.Store(manifest);
+
+    DirectoryManifest out;
+    // At t=500 — still fresh
+    ASSERT(cache.Lookup(L"C:\\OneDrive\\Reports", 500ULL, out));
+
+    // At t=1001 — stale
+    ASSERT(!cache.Lookup(L"C:\\OneDrive\\Reports", 1001ULL, out));
+
+    // Invalidate explicit
+    cache.Store(manifest);
+    ASSERT(cache.EntryCount() == 1u);
+    cache.Invalidate(L"C:\\OneDrive\\Reports");
+    ASSERT(cache.EntryCount() == 0u);
+
+    // Clear resets counters
+    cache.Store(manifest);
+    cache.Clear();
+    ASSERT(cache.EntryCount() == 0u);
+    ASSERT(cache.HitCount() == 0u);
+}
+
+TEST(TestCachePrefetchScheduler_Enqueue)
+{
+    using namespace ExplorerLens::Engine;
+
+    CachePrefetchScheduler::Config cfg;
+    cfg.maxQueueDepth = 32;
+    cfg.maxDepth      = 4;
+    CachePrefetchScheduler sched(cfg);
+
+    sched.Enqueue({ L"C:\\Photos\\a.jpg", 10, 0ULL });
+    sched.Enqueue({ L"C:\\Photos\\b.jpg", 50, 0ULL });
+    sched.Enqueue({ L"C:\\Photos\\c.jpg", 30, 0ULL });
+
+    ASSERT(sched.QueueDepth()    == 3u);
+    ASSERT(sched.TotalEnqueued() == 3u);
+
+    PrefetchRequest top;
+    ASSERT(sched.Dequeue(0ULL, top));
+    ASSERT(top.priority == 50u);  // Highest priority first
+    ASSERT(sched.TotalDequeued() == 1u);
+
+    sched.Cancel(L"C:\\Photos\\a.jpg");
+    ASSERT(sched.QueueDepth() == 1u);  // Only c.jpg remains
+
+    sched.Flush();
+    ASSERT(sched.QueueDepth() == 0u);
+    ASSERT(sched.TotalEnqueued() == 0u);
+}
+
+TEST(TestCachePrefetchScheduler_Backpressure)
+{
+    using namespace ExplorerLens::Engine;
+
+    CachePrefetchScheduler::Config cfg;
+    cfg.maxQueueDepth = 5;
+    CachePrefetchScheduler sched(cfg);
+
+    // Flood with 10 items — only 5 survive
+    for (uint32_t i = 0; i < 10; ++i)
+        sched.Enqueue({ L"C:\\file" + std::to_wstring(i) + L".jpg",
+                        i,  // priority 0..9
+                        0ULL });
+
+    ASSERT(sched.QueueDepth() <= cfg.maxQueueDepth);
+    ASSERT(sched.TotalDropped() >= 5u);
+
+    // Drain all
+    PrefetchRequest item;
+    uint32_t drained = 0;
+    while (sched.Dequeue(0ULL, item)) ++drained;
+    ASSERT(drained == (std::min)(sched.TotalEnqueued() - sched.TotalDropped(),
+                                  cfg.maxQueueDepth));
+    ASSERT(sched.QueueDepth() == 0u);
+
+    sched.SetMaxDepth(16);
+    sched.SetMaxBandwidthKbps(512);
+    ASSERT(sched.GetConfig().maxDepth == 16u);
+    ASSERT(sched.GetConfig().maxBandwidthKbps == 512u);
+}
+
+
 

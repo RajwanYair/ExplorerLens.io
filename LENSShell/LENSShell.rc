@@ -45,8 +45,8 @@ STRINGTABLE
 // Version Information resources
 //
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     35, 1, 0, 0
- PRODUCTVERSION  35, 1, 0, 0
+FILEVERSION     35, 2, 0, 0
+ PRODUCTVERSION  35, 2, 0, 0
 FILEOS          VOS__WINDOWS32
 FILETYPE        VFT_DLL
 {
@@ -61,10 +61,10 @@ FILETYPE        VFT_DLL
 #else
             VALUE "FileDescription", "ExplorerLens Universal File Preview Shell Extension 32-bit\0"
 #endif
-            VALUE "FileVersion", "35.1.0.0\0"
+            VALUE "FileVersion", "35.2.0.0\0"
             VALUE "LegalCopyright", "ExplorerLens.io (c) 2011-2026\0"
             VALUE "ProductName", "ExplorerLens\0"
-            VALUE "ProductVersion", "35.1.0.0\0"
+            VALUE "ProductVersion", "35.2.0.0\0"
         }
     }
     BLOCK "VarFileInfo"

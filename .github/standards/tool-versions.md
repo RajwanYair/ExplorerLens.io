@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 10 April 2026 (v35.1.0 Vega-R release)
-**Version:** 35.1.0 "Vega-R"
+**Last Updated:** 10 April 2026 (v35.2.0 Vega-S release)
+**Version:** 35.2.0 "Vega-S"
 
 ---
 

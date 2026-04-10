@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [35.2.0] — 2026-04-10 — Vega-S
+
+Sprint 1301-1310: Network-Aware Streaming Cache — NetworkTopologyProbe, StreamingCacheTierPolicy, BandwidthThrottleGuard, RemoteFileManifestCache, CachePrefetchScheduler
+
+---
+
 ## [35.1.0] — 2026-04-10 — Vega-R
 
 Sprint 1291-1300: Real-Time Collaboration & Live Edit Sync — LiveSyncTokenManager, CollaborativeCacheCoordinator, ThumbnailDeltaEncoder, ConflictResolutionEngine, RealTimePreviewPipeline

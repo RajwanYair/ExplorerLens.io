@@ -341,6 +341,12 @@
 #include "../Pipeline/ThumbnailDeltaEncoder.h"
 #include "../Core/ConflictResolutionEngine.h"
 #include "../Pipeline/RealTimePreviewPipeline.h"
+// Sprint 1301-1310: Network-Aware Streaming Cache
+#include "../Core/NetworkTopologyProbe.h"
+#include "../Cache/StreamingCacheTierPolicy.h"
+#include "../Pipeline/BandwidthThrottleGuard.h"
+#include "../Cache/RemoteFileManifestCache.h"
+#include "../Cache/CachePrefetchScheduler.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"

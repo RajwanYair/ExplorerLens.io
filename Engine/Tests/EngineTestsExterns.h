@@ -2467,6 +2467,17 @@ extern void TestConflictResolutionEngine_Merge_Runner();
 extern void TestConflictResolutionEngine_PickLatest_Runner();
 extern void TestRealTimePreviewPipeline_Subscribe_Runner();
 extern void TestRealTimePreviewPipeline_Backpressure_Runner();
+// Sprint 1301-1310: Network-Aware Streaming Cache
+extern void TestNetworkTopologyProbe_Probe_Runner();
+extern void TestNetworkTopologyProbe_ForceTopology_Runner();
+extern void TestStreamingCacheTierPolicy_Derive_Runner();
+extern void TestStreamingCacheTierPolicy_Override_Runner();
+extern void TestBandwidthThrottleGuard_Allow_Runner();
+extern void TestBandwidthThrottleGuard_Throttle_Runner();
+extern void TestRemoteFileManifestCache_Store_Runner();
+extern void TestRemoteFileManifestCache_Stale_Runner();
+extern void TestCachePrefetchScheduler_Enqueue_Runner();
+extern void TestCachePrefetchScheduler_Backpressure_Runner();
 
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────

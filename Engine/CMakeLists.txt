@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 35.1.0
+# Version: 35.2.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 35.1.0
+    VERSION 35.2.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -575,6 +575,12 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailDeltaEncoder.h
     Core/ConflictResolutionEngine.h
     Pipeline/RealTimePreviewPipeline.h
+    # Sprint 1301-1310: Network-Aware Streaming Cache
+    Core/NetworkTopologyProbe.h
+    Cache/StreamingCacheTierPolicy.h
+    Pipeline/BandwidthThrottleGuard.h
+    Cache/RemoteFileManifestCache.h
+    Cache/CachePrefetchScheduler.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -2078,6 +2084,12 @@ set(ENGINE_SOURCES
     Pipeline/ThumbnailDeltaEncoder.cpp
     Core/ConflictResolutionEngine.cpp
     Pipeline/RealTimePreviewPipeline.cpp
+    # Sprint 1301-1310: Network-Aware Streaming Cache
+    Core/NetworkTopologyProbe.cpp
+    Cache/StreamingCacheTierPolicy.cpp
+    Pipeline/BandwidthThrottleGuard.cpp
+    Cache/RemoteFileManifestCache.cpp
+    Cache/CachePrefetchScheduler.cpp
 )
 
 #==============================================================================
