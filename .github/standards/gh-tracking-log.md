@@ -149,14 +149,37 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 
 ---
 
-## Known Open Items (as of v35.3.0)
+### v35.4.0 "Vega-U" — Sprint 1321-1330 — WebAssembly / Browser Extension Pipeline
+
+| Item | Status | Commit |
+|------|--------|--------|
+| `WasmDecoderShim.h/.cpp` | ✅ Delivered | `2cafb37e` |
+| `BrowserThumbnailBridge.h/.cpp` | ✅ Delivered | `2cafb37e` |
+| `OffscreenCanvasRenderer.h/.cpp` | ✅ Delivered | `2cafb37e` |
+| `WasmCacheAdapter.h/.cpp` | ✅ Delivered | `2cafb37e` |
+| `ProgressiveThumbnailStream.h/.cpp` | ✅ Delivered | `2cafb37e` |
+| 10 new tests → 4,714 total | ✅ | `2cafb37e` |
+| EngineTestsExterns.h externs | ✅ Fixed | `d976860f` |
+| v35.4.0 tag pushed | ✅ | `2cafb37e` |
+| CI release.yml triggered | ✅ | tag `v35.4.0` |
+| 5-registry publish triggered | ✅ | tag `v35.4.0` |
+| social-preview.svg tagline fixed (was v33.0.0 Spica) | ✅ | — |
+
+**GH close commands:**
+```
+# No open issues — sprint was a clean delivery
+```
+
+---
+
+## Known Open Items (as of v35.4.0)
 
 | Item | Kind | Priority | Notes |
 |------|------|----------|-------|
-| Next sprint: v35.4.0 "Vega-U" | Feature | High | Sprint 1321-1330: WASM/Browser Extension Pipeline |
-| `EngineTestsExterns.h` approaching 500 KB | Monitor | Low | Currently ~233 KB; split when > 400 KB |
-| v35.3.0 build-fix hash | Done | ✅ | Commit `e2c9d7b1` pushed; hash backfilled in gh-tracking-log.md + lessons-learned.md §11.8 |
-| v35.3.0 GH Release artifacts | Verify | Medium | Confirm all .dll/.msi/.zip/.sbom attached (CI runs async) |
+| Next sprint: v35.5.0 "Vega-V" | Feature | High | Sprint 1331-1340: Cross-Device Preview Sync |
+| `EngineTestsExterns.h` monitor | Monitor | Low | ~233 KB; split when > 400 KB |
+| v35.4.0 GH Release artifacts | Verify | Medium | Confirm all .dll/.msi/.zip/.sbom attached once CI completes |
+| v35.3.0 build-fix hash | Done | ✅ | Commit `e2c9d7b1` pushed; hash backfilled in tracking log + lessons-learned §11.8 |
 
 ---
 

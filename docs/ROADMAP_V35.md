@@ -36,10 +36,10 @@ NVMe drive.
 
 ```
 v35.0.0  Vega         Streaming & Cloud-Native Thumbnails ★★        (2026-04-10) ✅
-v35.1.0  Vega-R       Real-Time Collaboration & Live Edit Sync       (planned)
-v35.2.0  Vega-S       Network-Aware Streaming Cache                  (planned)
-v35.3.0  Vega-T       Zero-Trust Thumbnail Security                  (planned)
-v35.4.0  Vega-U       WebAssembly / Browser Extension Pipeline       (planned)
+v35.1.0  Vega-R       Real-Time Collaboration & Live Edit Sync       (2026-04-10) ✅
+v35.2.0  Vega-S       Network-Aware Streaming Cache                  (2026-04-10) ✅
+v35.3.0  Vega-T       Zero-Trust Thumbnail Security                  (2026-04-10) ✅
+v35.4.0  Vega-U       WebAssembly / Browser Extension Pipeline       (2026-04-10) ✅
 v35.5.0  Vega-V       Cross-Device Preview Sync                      (planned)
 v35.6.0  Vega-W       REST API + Remote Decode Service               (planned)
 v35.7.0  Vega-X       LTS Hardening + Cloud Perf Gate               (planned)
@@ -183,13 +183,9 @@ no network access.
 
 ## T5 — WebAssembly / Browser Extension Pipeline (v35.4.0 "Vega-U")
 
-**Theme:** Run ExplorerLens decoder stubs in-browser via WebAssembly so web clients
-(SharePoint Online, OneDrive web, Google Drive) can show rich thumbnails without
-hitting the server.
+**Status: DELIVERED**
 
-### Modules (Sprint 1321-1330)
-
-| Header | Directory | Purpose |
+| Module | Directory | Purpose |
 |--------|-----------|---------|
 | `WasmDecoderShim.h` | `Engine/Core/` | Thin C ABI shim for WASM-compilable decoder entry points |
 | `BrowserThumbnailBridge.h` | `Engine/Pipeline/` | JS↔native message bridge for async thumbnail delivery |
