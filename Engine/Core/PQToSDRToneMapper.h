@@ -12,7 +12,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class ToneMapOperator : uint8_t {
+enum class PQToneMapOp : uint8_t {
     Hable       = 0,   // Filmic Hable "Uncharted 2" curve — warm, filmic
     ACES        = 1,   // ACES RRT + sRGB ODT — standard for film/VFX
     Reinhard    = 2,   // Classic Reinhard; low contrast but artifact-free
@@ -20,7 +20,7 @@ enum class ToneMapOperator : uint8_t {
 };
 
 struct PQToneMapParams {
-    ToneMapOperator op          = ToneMapOperator::ACES;
+    PQToneMapOp op          = PQToneMapOp::ACES;
     float           peakNits    = 1000.0f;  // Peak luminance of source content (nits)
     float           displayNits = 100.0f;   // Display peak luminance for mapping
     float           exposure    = 0.0f;     // EV offset applied before tonemapping

@@ -26,6 +26,7 @@ struct IFCFileSummary
     std::string                    ifcVersion;  // "IFC2X3", "IFC4", "IFC4X3"
     std::vector<IFCEntityCount>    topEntities; // sorted descending by count
     uint32_t                       totalEntities;
+    uint32_t                       uniqueValues;  // distinct entity types found
     bool                           valid;
 };
 

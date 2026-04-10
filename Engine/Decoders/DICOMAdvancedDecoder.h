@@ -16,7 +16,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class DICOMWindowPreset : uint8_t {
+enum class AdvancedWindowPreset : uint8_t {
     Lung,
     Bone,
     Brain,
@@ -51,18 +51,18 @@ struct DICOMSeriesInfo
     bool isSigned = true;
 };
 
-inline std::pair<float, float> GetWindowPresetValues(DICOMWindowPreset preset)
+inline std::pair<float, float> GetWindowPresetValues(AdvancedWindowPreset preset)
 {
     switch (preset) {
-        case DICOMWindowPreset::Lung:
+        case AdvancedWindowPreset::Lung:
             return {-600.0f, 1500.0f};
-        case DICOMWindowPreset::Bone:
+        case AdvancedWindowPreset::Bone:
             return {300.0f, 1500.0f};
-        case DICOMWindowPreset::Brain:
+        case AdvancedWindowPreset::Brain:
             return {40.0f, 80.0f};
-        case DICOMWindowPreset::Abdomen:
+        case AdvancedWindowPreset::Abdomen:
             return {60.0f, 400.0f};
-        case DICOMWindowPreset::Mediastinum:
+        case AdvancedWindowPreset::Mediastinum:
             return {50.0f, 350.0f};
         default:
             return {40.0f, 400.0f};
@@ -131,7 +131,7 @@ class DICOMAdvancedDecoder
         return true;
     }
 
-    void SetWindowPreset(DICOMWindowPreset preset)
+    void SetWindowPreset(AdvancedWindowPreset preset)
     {
         m_preset = preset;
         auto [center, width] = GetWindowPresetValues(preset);
@@ -141,7 +141,7 @@ class DICOMAdvancedDecoder
 
     void SetCustomWindow(float center, float width)
     {
-        m_preset = DICOMWindowPreset::Custom;
+        m_preset = AdvancedWindowPreset::Custom;
         m_customCenter = center;
         m_customWidth = width;
     }
@@ -162,7 +162,7 @@ class DICOMAdvancedDecoder
     bool m_decoded = false;
     DICOMSeriesInfo m_series;
     std::vector<DICOMFrameInfo> m_frames;
-    DICOMWindowPreset m_preset = DICOMWindowPreset::Abdomen;
+    AdvancedWindowPreset m_preset = AdvancedWindowPreset::Abdomen;
     float m_customCenter = 40.0f;
     float m_customWidth = 400.0f;
 };

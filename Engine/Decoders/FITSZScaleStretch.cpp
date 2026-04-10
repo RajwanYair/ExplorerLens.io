@@ -43,7 +43,7 @@ ZScaleLimits FITSZScaleStretch::ComputeLimits(
     const float slope = (n > 1) ? (vmax - vmin) / static_cast<float>(n - 1u) : 1.0f;
 
     const float halfRange = (opts.contrast > 0.0f)
-        ? slope * static_cast<float>(n) * 0.5f / opts.contrast
+        ? slope * static_cast<float>(n) * 0.5f / static_cast<float>(opts.contrast)
         : (vmax - vmin) * 0.5f;
 
     lim.z1    = std::max(static_cast<double>(vmin),

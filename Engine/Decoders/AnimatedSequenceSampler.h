@@ -14,7 +14,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class AnimatedFormat : uint8_t {
+enum class SampledAnimFormat : uint8_t {
     Unknown      = 0,
     GIF          = 1,
     APNG         = 2,
@@ -36,7 +36,7 @@ struct AnimatedKeyFrame {
 struct AnimatedSampleResult {
     std::vector<AnimatedKeyFrame> keyFrames;
     uint32_t        totalFrames     = 0;
-    AnimatedFormat  format          = AnimatedFormat::Unknown;
+    SampledAnimFormat  format          = SampledAnimFormat::Unknown;
     bool            success         = false;
     float           processMs       = 0.0f;
 };
@@ -54,7 +54,7 @@ public:
     ~AnimatedSequenceSampler() = default;
 
     // Detect animated format from raw bytes.
-    static AnimatedFormat Detect(
+    static SampledAnimFormat Detect(
         const uint8_t* data, size_t size) noexcept;
 
     // Extract key frames from raw animated format bytes.
@@ -65,7 +65,7 @@ public:
 
     // Quick probe: return total frame count without full decode.
     static uint32_t ProbeFrameCount(
-        const uint8_t* data, size_t size, AnimatedFormat hint = AnimatedFormat::Unknown) noexcept;
+        const uint8_t* data, size_t size, SampledAnimFormat hint = SampledAnimFormat::Unknown) noexcept;
 };
 
 }} // namespace ExplorerLens::Engine

@@ -1362,7 +1362,7 @@ TEST(TestDICM_Init)
 TEST(TestDICM_Window)
 {
     using namespace ExplorerLens::Engine;
-    ASSERT(static_cast<int>(DICOMWindowPreset::Lung) == 0);
+    ASSERT(static_cast<int>(AdvancedWindowPreset::Lung) == 0);
     ASSERT(static_cast<int>(DICOMWindowPreset::Custom) == 5);
 }
 TEST(TestDICM_Frame)
@@ -1387,12 +1387,12 @@ TEST(TestDICM_Series)
 TEST(TestDICM_Bone)
 {
     using namespace ExplorerLens::Engine;
-    ASSERT(static_cast<int>(DICOMWindowPreset::Bone) == 1);
+    ASSERT(static_cast<int>(AdvancedWindowPreset::Bone) == 1);
 }
 TEST(TestDICM_Brain)
 {
     using namespace ExplorerLens::Engine;
-    ASSERT(static_cast<int>(DICOMWindowPreset::Brain) == 2);
+    ASSERT(static_cast<int>(AdvancedWindowPreset::Brain) == 2);
 }
 TEST(TestDICM_Slice)
 {
@@ -3073,7 +3073,7 @@ TEST(TestEAE_Fmt)
 TEST(TestEAE_Ev)
 {
     using namespace ExplorerLens::Engine;
-    AuditEvent ae{};
+    EnterpriseAuditEvent ae{};
     ae.eventId = "EVT-001";
     ae.category = "Security";
     ae.severity = "High";
@@ -3098,14 +3098,14 @@ TEST(TestEAE_LEEF)
 TEST(TestEAE_Actor)
 {
     using namespace ExplorerLens::Engine;
-    AuditEvent ae{};
+    EnterpriseAuditEvent ae{};
     ae.actor = "admin@corp.com";
     ASSERT(!ae.actor.empty());
 }
 TEST(TestEAE_Res)
 {
     using namespace ExplorerLens::Engine;
-    AuditEvent ae{};
+    EnterpriseAuditEvent ae{};
     ae.resource = "WebPDecoder";
     ASSERT(!ae.resource.empty());
 }

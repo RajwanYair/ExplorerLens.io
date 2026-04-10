@@ -59,7 +59,7 @@ public:
 
 private:
     Config            m_config;
-    FidelityHint      m_lastHint    = FidelityHint::BALANCED;
+    mutable FidelityHint m_lastHint = FidelityHint::BALANCED;
     NetworkBandwidthEstimate m_rollingBw;
 };
 

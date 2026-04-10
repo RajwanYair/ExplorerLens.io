@@ -15,7 +15,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct BoundingBox3D
+struct STEPBoundingBox
 {
     double minX, minY, minZ;
     double maxX, maxY, maxZ;
@@ -41,17 +41,17 @@ public:
 
     // Extract bounding box by scanning CARTESIAN_POINT / VERTEX_POINT records.
     // Large files are sub-sampled (every Nth line, N = file/65536 + 1).
-    static BoundingBox3D ExtractSTEP(const uint8_t* data, size_t size) noexcept;
+    static STEPBoundingBox ExtractSTEP(const uint8_t* data, size_t size) noexcept;
 
     // Extract bounding box from IGES entity type 116 (POINT) and 110 (LINE) records.
-    static BoundingBox3D ExtractIGES(const uint8_t* data, size_t size) noexcept;
+    static STEPBoundingBox ExtractIGES(const uint8_t* data, size_t size) noexcept;
 
     // Dispatch to the correct extractor based on format.
-    static BoundingBox3D Extract(const uint8_t* data, size_t size) noexcept;
+    static STEPBoundingBox Extract(const uint8_t* data, size_t size) noexcept;
 
     // Render a 256×256 BGRA32 isometric wireframe box from the bounding box.
     // Returns an 80% grey gradient background with white axis lines.
-    static std::vector<uint8_t> RenderBBoxPreview(const BoundingBox3D& bbox,
+    static std::vector<uint8_t> RenderBBoxPreview(const STEPBoundingBox& bbox,
                                                    uint32_t width  = 256,
                                                    uint32_t height = 256);
 };

@@ -116,7 +116,7 @@ void PredictivePreGenEngine::Start() noexcept
 
     if (m_config.enableScrollPredict) {
         m_impl->scrollTracker.SetTriggerCallback(
-            [this](int32_t startIdx, uint32_t count, int32_t /*dir*/) {
+            [this](int32_t /*startIdx*/, uint32_t count, int32_t /*dir*/) {
                 m_impl->totalQueued.fetch_add(count);
                 // Scroll prediction just bumps the queuing counter; actual files
                 // are queued by OnFolderOpened so we just log here.

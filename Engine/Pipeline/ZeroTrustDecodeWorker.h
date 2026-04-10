@@ -12,14 +12,14 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class WorkerState : uint8_t {
+enum class ZTWorkerState : uint8_t {
     IDLE       = 0,
     RUNNING    = 1,
     FAILED     = 2,
     TERMINATED = 3,
 };
 
-struct DecodeRequest {
+struct WorkerDecodeRequest {
     std::wstring           filePath;
     std::string            formatHint;   // e.g. "pdf", "psd"
     uint32_t               maxWidthPx   = 256;
@@ -46,18 +46,18 @@ public:
 
     bool         Spawn();
     void         Terminate();
-    DecodeResponse Decode(const DecodeRequest& req);
+    DecodeResponse Decode(const WorkerDecodeRequest& req);
 
-    WorkerState  GetState()           const { return m_state; }
+    ZTWorkerState  GetState()           const { return m_state; }
     uint32_t     DecodeCount()        const { return m_decodeCount; }
     uint32_t     TimeoutCount()       const { return m_timeoutCount; }
-    bool         IsAlive()            const { return m_state == WorkerState::RUNNING; }
+    bool         IsAlive()            const { return m_state == ZTWorkerState::RUNNING; }
 
     const Config& GetConfig()         const { return m_cfg; }
 
 private:
     Config      m_cfg;
-    WorkerState m_state        = WorkerState::IDLE;
+    ZTWorkerState m_state        = ZTWorkerState::IDLE;
     uint32_t    m_decodeCount  = 0;
     uint32_t    m_timeoutCount = 0;
 };

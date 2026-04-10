@@ -14,7 +14,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class LTSGateStatus : uint8_t
+enum class LTSValidatorStatus : uint8_t
 {
     Pass = 0,
     Fail = 1,
@@ -23,10 +23,10 @@ enum class LTSGateStatus : uint8_t
 struct LTSGateCheck
 {
     std::string  name;
-    LTSGateStatus status;
+    LTSValidatorStatus status;
     std::string  detail;
 
-    bool Passed() const noexcept { return status == LTSGateStatus::Pass; }
+    bool Passed() const noexcept { return status == LTSValidatorStatus::Pass; }
 };
 
 struct LTSValidationReport

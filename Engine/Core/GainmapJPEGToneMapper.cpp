@@ -73,8 +73,8 @@ GainmapToneMapResult GainmapJPEGToneMapper::ToneMap(
     const auto t0 = std::chrono::high_resolution_clock::now();
 
     const size_t bufSize = static_cast<size_t>(req.width) * req.height * 4u;
-    result.pixelsBGRA = new (std::nothrow) uint8_t[bufSize];
-    if (!result.pixelsBGRA) return result;
+    result.outputBGRA = new (std::nothrow) uint8_t[bufSize];
+    if (!result.outputBGRA) return result;
 
     const float boost = std::max(1.0f, req.displayBoost);
     const GainmapMetadata& meta = req.metadata;
@@ -99,14 +99,12 @@ GainmapToneMapResult GainmapJPEGToneMapper::ToneMap(
             return static_cast<uint8_t>(v * 255.0f + 0.5f);
         };
 
-        result.pixelsBGRA[i * 4 + 0] = apply(b);
-        result.pixelsBGRA[i * 4 + 1] = apply(g);
-        result.pixelsBGRA[i * 4 + 2] = apply(r);
-        result.pixelsBGRA[i * 4 + 3] = a;
+        result.outputBGRA[i * 4 + 0] = apply(b);
+        result.outputBGRA[i * 4 + 1] = apply(g);
+        result.outputBGRA[i * 4 + 2] = apply(r);
+        result.outputBGRA[i * 4 + 3] = a;
     }
 
-    result.width   = req.width;
-    result.height  = req.height;
     result.success = true;
     const auto t1 = std::chrono::high_resolution_clock::now();
     result.processMs = std::chrono::duration<float, std::milli>(t1 - t0).count();

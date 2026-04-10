@@ -125,13 +125,43 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 
 ---
 
+### v35.3.0 Build-Fix Session (2026-04-10) — Post-Sprint Collision Resolution
+
+| Item | Status | Commit |
+|------|--------|--------|
+| 13 type name collisions from Sprint 1311-1320 resolved | ✅ Fixed | (see hash below) |
+| 18 header/source files renamed + updated | ✅ | — |
+| 3 test split files updated | ✅ | — |
+| C4189 unused variable warning fixed (EngineTests_Late.cpp) | ✅ | — |
+| lessons-learned.md §11.8 added | ✅ | — |
+| copilot-instructions.md rule #24 added | ✅ | — |
+| BUILD_SUCCESS: 0 errors, 0 warnings, 20/20 steps | ✅ 14:02:42 | — |
+
+**Collisions fixed:** `AnimatedFormat`→`SampledAnimFormat`, `ToneMapOperator`→`PQToneMapOp`,
+`LTSGateStatus`→`LTSValidatorStatus`, `ScrubState`→`HoverScrubState`,
+`LatencyPercentiles`→`HistogramPercentiles`, `DecodeRequest`→`WorkerDecodeRequest`,
+`WorkerState`→`ZTWorkerState`, `AuditEvent`→`EnterpriseAuditEvent`,
+`PrefetchRequest`→`AsyncPrefetchItem`, `BoundingBox3D`→`STEPBoundingBox`,
+`DICOMWindowPreset`→`AdvancedWindowPreset`, `PressureLevel`→`ResponderPressureLevel`,
+`GateResult`/`GateVerdict`→`GPUGateResult`/`GPUGateVerdict`
+
+**Fix commit hash:** `(to be filled after push — see step below)`
+
+```powershell
+# After push, record the commit hash here:
+# git log --oneline -1
+```
+
+---
+
 ## Known Open Items (as of v35.3.0)
 
 | Item | Kind | Priority | Notes |
 |------|------|----------|-------|
 | Next sprint: v35.4.0 "Vega-U" | Feature | High | Sprint 1321-1330: WASM/Browser Extension Pipeline |
 | `EngineTestsExterns.h` approaching 500 KB | Monitor | Low | Currently ~233 KB; split when > 400 KB |
-| v35.3.0 GH Release artifacts | Verify | High | Confirm all .dll/.msi/.zip/.sbom attached once CI completes |
+| v35.3.0 build-fix hash | Action | High | Push commit; backfill hash in gh-tracking-log.md + lessons-learned.md §11.8 |
+| v35.3.0 GH Release artifacts | Verify | Medium | Confirm all .dll/.msi/.zip/.sbom attached (CI runs async) |
 
 ---
 

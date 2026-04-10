@@ -10,51 +10,51 @@
 
 namespace ExplorerLens { namespace Engine {
 
-AnimatedFormat AnimatedSequenceSampler::Detect(
+SampledAnimFormat AnimatedSequenceSampler::Detect(
     const uint8_t* data, size_t size) noexcept
 {
-    if (!data || size < 12) return AnimatedFormat::Unknown;
+    if (!data || size < 12) return SampledAnimFormat::Unknown;
 
     // GIF (GIF87a / GIF89a)
     if (GIFAnimationDecoder::IsGIF(data, size))
-        return AnimatedFormat::GIF;
+        return SampledAnimFormat::GIF;
 
     // PNG/APNG magic
     static const uint8_t pngMagic[] = {0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A};
     if (size >= 8 && std::memcmp(data, pngMagic, 8) == 0) {
         const uint32_t frames = APNGFrameCombiner::ProbeFrameCount(data, size);
-        return (frames > 1) ? AnimatedFormat::APNG : AnimatedFormat::Unknown;
+        return (frames > 1) ? SampledAnimFormat::APNG : SampledAnimFormat::Unknown;
     }
 
     // WebP container (RIFF????WEBP)
     if (size >= 12 && std::memcmp(data, "RIFF", 4) == 0
         && std::memcmp(data + 8, "WEBP", 4) == 0)
-        return AnimatedFormat::AnimatedWebP;
+        return SampledAnimFormat::AnimatedWebP;
 
     // AVIF / HEIF ISO base media (ftyp box)
     if (size >= 12 && std::memcmp(data + 4, "ftyp", 4) == 0) {
         const uint8_t* brand = data + 8;
         if (std::memcmp(brand, "avif", 4) == 0 || std::memcmp(brand, "avis", 4) == 0)
-            return AnimatedFormat::AnimatedAVIF;
+            return SampledAnimFormat::AnimatedAVIF;
         if (std::memcmp(brand, "heic", 4) == 0 || std::memcmp(brand, "heix", 4) == 0)
-            return AnimatedFormat::HEICLivePhoto;
+            return SampledAnimFormat::HEICLivePhoto;
     }
 
     // JXL container (0xFF0A bare codestream or JXL ISO BMFF box 0000000C4A584C20)
     if (size >= 2 && data[0] == 0xFF && data[1] == 0x0A)
-        return AnimatedFormat::AnimatedJXL;
+        return SampledAnimFormat::AnimatedJXL;
 
-    return AnimatedFormat::Unknown;
+    return SampledAnimFormat::Unknown;
 }
 
 uint32_t AnimatedSequenceSampler::ProbeFrameCount(
-    const uint8_t* data, size_t size, AnimatedFormat hint) noexcept
+    const uint8_t* data, size_t size, SampledAnimFormat hint) noexcept
 {
-    const AnimatedFormat fmt = (hint != AnimatedFormat::Unknown) ? hint : Detect(data, size);
+    const SampledAnimFormat fmt = (hint != SampledAnimFormat::Unknown) ? hint : Detect(data, size);
     switch (fmt) {
-    case AnimatedFormat::GIF:
+    case SampledAnimFormat::GIF:
         return GIFAnimationDecoder::ProbeFrameCount(data, size);
-    case AnimatedFormat::APNG:
+    case SampledAnimFormat::APNG:
         return APNGFrameCombiner::ProbeFrameCount(data, size);
     default:
         return 1;
@@ -79,7 +79,7 @@ AnimatedSampleResult AnimatedSequenceSampler::Sample(
         return result;
     }
 
-    if (result.format == AnimatedFormat::GIF) {
+    if (result.format == SampledAnimFormat::GIF) {
         GIFAnimationDecoder gifDec;
         GIFDecodeOptions gOpts{};
         gOpts.maxFrames = wantFrames;

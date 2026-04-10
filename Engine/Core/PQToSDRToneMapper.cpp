@@ -4,6 +4,7 @@
 #include "Core/PQToSDRToneMapper.h"
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <algorithm>
 
 namespace ExplorerLens { namespace Engine {
@@ -29,7 +30,7 @@ static float FP16ToFloat(uint16_t h) noexcept
         f = (sign << 31u) | ((exp + 112u) << 23u) | (mantissa << 13u);
     }
     float result;
-    __builtin_memcpy(&result, &f, sizeof(result));
+    memcpy(&result, &f, sizeof(result));
     return result;
 }
 
@@ -81,8 +82,8 @@ std::array<uint8_t, 1024> PQToSDRToneMapper::BuildPQToSRGBLUT(
         float pq      = static_cast<float>(i) / 1023.0f;
         float nits    = PQToLinear(pq);
         float linear  = nits / params.peakNits;
-        float exposed = linear * std::pow(2.0f, params.exposureAdjust);
-        float mapped  = (params.op == ToneMapOperator::Hable)
+        float exposed = linear * std::powf(2.0f, params.exposure);
+        float mapped  = (params.op == PQToneMapOp::Hable)
                         ? HableCurve(exposed) / HableCurve(11.2f)
                         : ACESCurve(exposed);
         float srgb    = LinearToSRGB(std::clamp(mapped, 0.0f, 1.0f));
@@ -103,7 +104,7 @@ PQToneMapResult PQToSDRToneMapper::ToneMap(
     result.pixelsBGRA = new (std::nothrow) uint8_t[bufSize];
     if (!result.pixelsBGRA) return result;
 
-    const float exposeMult = std::pow(2.0f, params.exposureAdjust);
+    const float exposeMult = std::powf(2.0f, params.exposure);
     const float peakNorm   = params.peakNits;
 
     for (uint32_t i = 0; i < width * height; ++i) {
@@ -114,7 +115,7 @@ PQToneMapResult PQToSDRToneMapper::ToneMap(
         auto mapChannel = [&](float pq) -> uint8_t {
             float nits    = PQToLinear(pq);
             float lin     = nits / peakNorm * exposeMult;
-            float mapped  = (params.op == ToneMapOperator::Hable)
+            float mapped  = (params.op == PQToneMapOp::Hable)
                             ? HableCurve(lin) / HableCurve(11.2f)
                             : ACESCurve(lin);
             float srgb = LinearToSRGB(std::clamp(mapped, 0.0f, 1.0f));
@@ -147,7 +148,7 @@ PQToneMapResult PQToSDRToneMapper::ToneMapBGRA10(
     result.pixelsBGRA = new (std::nothrow) uint8_t[bufSize];
     if (!result.pixelsBGRA) return result;
 
-    const float exposeMult = std::pow(2.0f, params.exposureAdjust);
+    const float exposeMult = std::powf(2.0f, params.exposure);
     const float peakNorm   = params.peakNits;
 
     for (uint32_t i = 0; i < width * height; ++i) {
@@ -159,7 +160,7 @@ PQToneMapResult PQToSDRToneMapper::ToneMapBGRA10(
         auto mapCh = [&](float pq) -> uint8_t {
             float nits   = PQToLinear(pq);
             float lin    = nits / peakNorm * exposeMult;
-            float mapped = (params.op == ToneMapOperator::Hable)
+            float mapped = (params.op == PQToneMapOp::Hable)
                            ? HableCurve(lin) / HableCurve(11.2f)
                            : ACESCurve(lin);
             float srgb   = LinearToSRGB(std::clamp(mapped, 0.0f, 1.0f));

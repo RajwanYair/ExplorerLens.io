@@ -9,19 +9,19 @@ bool ZeroTrustDecodeWorker::Spawn()
 {
     // Stubbed: real implementation creates a restricted child process via
     // CreateRestrictedToken + CreateProcess with a Job Object.
-    m_state = WorkerState::RUNNING;
+    m_state = ZTWorkerState::RUNNING;
     return true;
 }
 
 void ZeroTrustDecodeWorker::Terminate()
 {
-    m_state = WorkerState::TERMINATED;
+    m_state = ZTWorkerState::TERMINATED;
 }
 
-DecodeResponse ZeroTrustDecodeWorker::Decode(const DecodeRequest& req)
+DecodeResponse ZeroTrustDecodeWorker::Decode(const WorkerDecodeRequest& req)
 {
     ++m_decodeCount;
-    if (m_state != WorkerState::RUNNING) {
+    if (m_state != ZTWorkerState::RUNNING) {
         return { {}, 0, 0, false, "Worker not running" };
     }
     if (req.filePath.empty()) {

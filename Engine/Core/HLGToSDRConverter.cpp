@@ -4,6 +4,7 @@
 #include "Core/HLGToSDRConverter.h"
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <algorithm>
 
 namespace ExplorerLens { namespace Engine {
@@ -25,7 +26,7 @@ static float H2F(uint16_t h) noexcept
     else if (exp == 31u) { f = (sign << 31u) | 0x7F800000u | (mantissa << 13u); }
     else { f = (sign << 31u) | ((exp + 112u) << 23u) | (mantissa << 13u); }
     float r;
-    __builtin_memcpy(&r, &f, sizeof(r));
+    memcpy(&r, &f, sizeof(r));
     return r;
 }
 

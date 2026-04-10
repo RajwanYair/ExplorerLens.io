@@ -6,7 +6,7 @@
 //
 #pragma once
 #include <cstdint>
-#include "NetworkTopologyProbe.h"
+#include "Core/NetworkTopologyProbe.h"
 
 namespace ExplorerLens { namespace Engine {
 

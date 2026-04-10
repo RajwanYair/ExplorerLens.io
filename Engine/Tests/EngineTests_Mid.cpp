@@ -2931,11 +2931,11 @@ TEST(TestMemoization_Stats)
 TEST(TestPrefetch_EnqueueDequeue)
 {
     AsyncPrefetchQueue q;
-    PrefetchRequest req;
+    AsyncPrefetchItem req;
     req.filePath = L"test.jpg";
     req.priority = PrefetchPriority::High;
     ASSERT(q.Enqueue(req));
-    PrefetchRequest out;
+    AsyncPrefetchItem out;
     ASSERT(q.Dequeue(out));
     ASSERT(out.filePath == L"test.jpg");
 }
@@ -4061,14 +4061,14 @@ TEST(Test_MultiTenantCache_Isolation)
 TEST(Test_AsyncPrefetchQueue_Enqueue)
 {
     AsyncPrefetchQueue queue;
-    PrefetchRequest req;
+    AsyncPrefetchItem req;
     req.filePath = L"C:\\test\\img.jpg";
     req.priority = PrefetchPriority::High;
     ASSERT(queue.Enqueue(req));
     auto stats = queue.GetStats();
     ASSERT(stats.enqueued == 1);
     ASSERT(stats.queueDepth == 1);
-    PrefetchRequest out;
+    AsyncPrefetchItem out;
     ASSERT(queue.Dequeue(out));
     ASSERT(out.filePath == L"C:\\test\\img.jpg");
 }
@@ -6469,13 +6469,13 @@ TEST(Test_S37_BufferPool_Reset)
 TEST(Test_S37_PrefetchQueue_EnqueueDequeue)
 {
     AsyncPrefetchQueue queue;
-    PrefetchRequest req;
+    AsyncPrefetchItem req;
     req.filePath = L"C:\\images\\photo.jpg";
     req.priority = PrefetchPriority::High;
     req.thumbSize = 256;
     bool ok = queue.Enqueue(req);
     ASSERT(ok);
-    PrefetchRequest out;
+    AsyncPrefetchItem out;
     bool dequeued = queue.Dequeue(out);
     ASSERT(dequeued);
     ASSERT(out.filePath == L"C:\\images\\photo.jpg");
@@ -6485,7 +6485,7 @@ TEST(Test_S37_PrefetchQueue_Full)
 {
     AsyncPrefetchQueue queue;
     queue.SetMaxQueueSize(2);
-    PrefetchRequest r1, r2, r3;
+    AsyncPrefetchItem r1, r2, r3;
     r1.filePath = L"a";
     r2.filePath = L"b";
     r3.filePath = L"c";
@@ -6497,7 +6497,7 @@ TEST(Test_S37_PrefetchQueue_Full)
 TEST(Test_S37_PrefetchQueue_Stats)
 {
     AsyncPrefetchQueue queue;
-    PrefetchRequest req;
+    AsyncPrefetchItem req;
     req.filePath = L"test";
     queue.Enqueue(req);
     auto stats = queue.GetStats();

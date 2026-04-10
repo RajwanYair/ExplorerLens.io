@@ -20,7 +20,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct LatencyPercentiles
+struct HistogramPercentiles
 {
     double p50 = 0.0;
     double p90 = 0.0;
@@ -37,7 +37,7 @@ struct HistogramStats
 {
     uint64_t totalSamples = 0;
     double totalMs = 0.0;
-    LatencyPercentiles percentiles;
+    HistogramPercentiles percentiles;
 };
 
 class DecodeLatencyHistogram
@@ -92,9 +92,9 @@ class DecodeLatencyHistogram
     }
 
     /// Compute percentiles from histogram.
-    LatencyPercentiles ComputePercentiles() const
+    HistogramPercentiles ComputePercentiles() const
     {
-        LatencyPercentiles p;
+        HistogramPercentiles p;
         if (m_stats.totalSamples == 0)
             return p;
 

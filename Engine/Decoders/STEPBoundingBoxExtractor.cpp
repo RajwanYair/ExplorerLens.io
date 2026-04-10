@@ -21,7 +21,7 @@ CADFileFormat STEPBoundingBoxExtractor::DetectFormat(const uint8_t* data, size_t
     return CADFileFormat::Unknown;
 }
 
-static void UpdateBBox(BoundingBox3D& bb, double x, double y, double z) noexcept
+static void UpdateBBox(STEPBoundingBox& bb, double x, double y, double z) noexcept
 {
     if (!bb.valid)
     {
@@ -36,9 +36,9 @@ static void UpdateBBox(BoundingBox3D& bb, double x, double y, double z) noexcept
     if (z < bb.minZ) bb.minZ = z; if (z > bb.maxZ) bb.maxZ = z;
 }
 
-BoundingBox3D STEPBoundingBoxExtractor::ExtractSTEP(const uint8_t* data, size_t size) noexcept
+STEPBoundingBox STEPBoundingBoxExtractor::ExtractSTEP(const uint8_t* data, size_t size) noexcept
 {
-    BoundingBox3D bb{};
+    STEPBoundingBox bb{};
     bb.valid = false;
     if (!data || size < 16) return bb;
 
@@ -104,9 +104,9 @@ BoundingBox3D STEPBoundingBoxExtractor::ExtractSTEP(const uint8_t* data, size_t 
     return bb;
 }
 
-BoundingBox3D STEPBoundingBoxExtractor::ExtractIGES(const uint8_t* data, size_t size) noexcept
+STEPBoundingBox STEPBoundingBoxExtractor::ExtractIGES(const uint8_t* data, size_t size) noexcept
 {
-    BoundingBox3D bb{};
+    STEPBoundingBox bb{};
     bb.valid = false;
     if (!data || size < 80) return bb;
 
@@ -144,7 +144,7 @@ BoundingBox3D STEPBoundingBoxExtractor::ExtractIGES(const uint8_t* data, size_t 
     return bb;
 }
 
-BoundingBox3D STEPBoundingBoxExtractor::Extract(const uint8_t* data, size_t size) noexcept
+STEPBoundingBox STEPBoundingBoxExtractor::Extract(const uint8_t* data, size_t size) noexcept
 {
     switch (DetectFormat(data, size))
     {
@@ -155,7 +155,7 @@ BoundingBox3D STEPBoundingBoxExtractor::Extract(const uint8_t* data, size_t size
 }
 
 std::vector<uint8_t> STEPBoundingBoxExtractor::RenderBBoxPreview(
-    const BoundingBox3D& bbox, uint32_t width, uint32_t height)
+    const STEPBoundingBox& bbox, uint32_t width, uint32_t height)
 {
     const uint32_t pixCount = width * height;
     std::vector<uint8_t> bgra(static_cast<size_t>(pixCount) * 4, 0);

@@ -42,7 +42,7 @@ class MemoryPressureResponder
         return m_config.label;
     }
 
-    enum class PressureLevel : uint8_t {
+    enum class ResponderPressureLevel : uint8_t {
         None,
         Low,
         Medium,
@@ -50,17 +50,17 @@ class MemoryPressureResponder
         Critical
     };
 
-    PressureLevel Evaluate(uint32_t memoryUsagePercent) const
+    ResponderPressureLevel Evaluate(uint32_t memoryUsagePercent) const
     {
         if (memoryUsagePercent >= 95)
-            return PressureLevel::Critical;
+            return ResponderPressureLevel::Critical;
         if (memoryUsagePercent >= m_config.highThresholdPercent)
-            return PressureLevel::High;
+            return ResponderPressureLevel::High;
         if (memoryUsagePercent >= m_config.lowThresholdPercent)
-            return PressureLevel::Medium;
+            return ResponderPressureLevel::Medium;
         if (memoryUsagePercent >= 50)
-            return PressureLevel::Low;
-        return PressureLevel::None;
+            return ResponderPressureLevel::Low;
+        return ResponderPressureLevel::None;
     }
 
     struct ResponseAction
@@ -71,16 +71,16 @@ class MemoryPressureResponder
         bool haltNewDecodes = false;
     };
 
-    ResponseAction GetAction(PressureLevel level) const
+    ResponseAction GetAction(ResponderPressureLevel level) const
     {
         switch (level) {
-            case PressureLevel::Critical:
+            case ResponderPressureLevel::Critical:
                 return {true, true, true, true};
-            case PressureLevel::High:
+            case ResponderPressureLevel::High:
                 return {true, true, true, false};
-            case PressureLevel::Medium:
+            case ResponderPressureLevel::Medium:
                 return {true, false, false, false};
-            case PressureLevel::Low:
+            case ResponderPressureLevel::Low:
                 return {false, false, false, false};
             default:
                 return {};

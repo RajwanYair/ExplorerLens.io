@@ -26,7 +26,7 @@ enum class PrefetchPriority : uint8_t {
     Low = 3
 };
 
-struct PrefetchRequest
+struct AsyncPrefetchItem
 {
     std::wstring filePath;
     uint32_t thumbSize = 256;
@@ -34,7 +34,7 @@ struct PrefetchRequest
     uint64_t requestTick = 0;
     double estimatedDecodeMs = 10.0;
 
-    bool operator>(const PrefetchRequest& rhs) const
+    bool operator>(const AsyncPrefetchItem& rhs) const
     {
         return static_cast<uint8_t>(priority) > static_cast<uint8_t>(rhs.priority);
     }
@@ -70,7 +70,7 @@ class AsyncPrefetchQueue
     }
 
     /// Enqueue a prefetch request.
-    bool Enqueue(const PrefetchRequest& req)
+    bool Enqueue(const AsyncPrefetchItem& req)
     {
         AcquireSRWLockExclusive(&m_lock);
         if (m_queue.size() >= m_maxQueueSize) {
@@ -81,7 +81,7 @@ class AsyncPrefetchQueue
             ReleaseSRWLockExclusive(&m_lock);
             return false;
         }
-        PrefetchRequest r = req;
+        AsyncPrefetchItem r = req;
         r.requestTick = GetTickCount64();
         m_queue.push(r);
         m_stats.enqueued++;
@@ -91,7 +91,7 @@ class AsyncPrefetchQueue
     }
 
     /// Dequeue the highest-priority request.
-    bool Dequeue(PrefetchRequest& out)
+    bool Dequeue(AsyncPrefetchItem& out)
     {
         AcquireSRWLockExclusive(&m_lock);
         if (m_queue.empty()) {
@@ -132,7 +132,7 @@ class AsyncPrefetchQueue
     }
 
   private:
-    using PQ = std::priority_queue<PrefetchRequest, std::vector<PrefetchRequest>, std::greater<PrefetchRequest>>;
+    using PQ = std::priority_queue<AsyncPrefetchItem, std::vector<AsyncPrefetchItem>, std::greater<AsyncPrefetchItem>>;
 
     SRWLOCK m_lock{};
     PQ m_queue;

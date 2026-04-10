@@ -37,7 +37,7 @@ enum class AuditSeverity : uint8_t {
     Critical = 3
 };
 
-struct AuditEvent
+struct EnterpriseAuditEvent
 {
     std::string eventId;
     std::string category;
@@ -79,8 +79,8 @@ class EnterpriseAuditExporter
     EnterpriseAuditExporter& operator=(const EnterpriseAuditExporter&) = delete;
 
     // Event export
-    bool ExportEvent(AuditEvent event);
-    bool ExportBatch(std::vector<AuditEvent> events);
+    bool ExportEvent(EnterpriseAuditEvent event);
+    bool ExportBatch(std::vector<EnterpriseAuditEvent> events);
 
     // Target configuration
     bool SetTarget(SIEMConfig config);
@@ -100,18 +100,18 @@ class EnterpriseAuditExporter
     void ResetStats();
 
     // Error callback
-    using ErrorCallback = std::function<void(const std::string&, const AuditEvent&)>;
+    using ErrorCallback = std::function<void(const std::string&, const EnterpriseAuditEvent&)>;
     void SetErrorCallback(ErrorCallback cb);
 
   private:
     SIEMConfig m_config;
     bool m_connected{false};
     ExportStats m_stats;
-    std::vector<AuditEvent> m_queue;
+    std::vector<EnterpriseAuditEvent> m_queue;
     ErrorCallback m_errorCallback;
 
-    std::string FormatEvent(const AuditEvent& event) const;
-    bool TransmitBatch(const std::vector<AuditEvent>& batch) const;
+    std::string FormatEvent(const EnterpriseAuditEvent& event) const;
+    bool TransmitBatch(const std::vector<EnterpriseAuditEvent>& batch) const;
     bool AuthenticateTarget() const;
     std::string GenerateEventId() const;
 };

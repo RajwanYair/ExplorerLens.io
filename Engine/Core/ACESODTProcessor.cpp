@@ -19,7 +19,7 @@ static float H2F(uint16_t h) noexcept
     if (e == 0 && m == 0) { f = s << 31u; }
     else if (e == 31u) { f = (s << 31u) | 0x7F800000u | (m << 13u); }
     else               { f = (s << 31u) | ((e + 112u) << 23u) | (m << 13u); }
-    float r; __builtin_memcpy(&r, &f, sizeof(r)); return r;
+    float r; memcpy(&r, &f, sizeof(r)); return r;
 }
 
 // ACES RRT segmented-spline C5 approximation.

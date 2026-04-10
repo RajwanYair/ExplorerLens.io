@@ -8,6 +8,7 @@
 #pragma once
 #include <cstdint>
 #include <array>
+#include <memory>
 
 namespace ExplorerLens { namespace Engine {
 

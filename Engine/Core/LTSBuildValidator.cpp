@@ -15,7 +15,7 @@ LTSValidationReport LTSBuildValidator::Validate() const
     auto add = [&](const char* name, bool pass, const char* detail) {
         LTSGateCheck c;
         c.name   = name;
-        c.status = pass ? LTSGateStatus::Pass : LTSGateStatus::Fail;
+        c.status = pass ? LTSValidatorStatus::Pass : LTSValidatorStatus::Fail;
         c.detail = detail;
         report.checks.push_back(c);
         if (pass) ++report.passed; else ++report.failed;

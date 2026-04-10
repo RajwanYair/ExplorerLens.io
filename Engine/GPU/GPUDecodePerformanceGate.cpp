@@ -27,10 +27,10 @@ bool GPUDecodePerformanceGate::LoadBaseline(const wchar_t* /*baselinePath*/) noe
     return true;
 }
 
-std::vector<GateResult> GPUDecodePerformanceGate::Evaluate(
+std::vector<GPUGateResult> GPUDecodePerformanceGate::Evaluate(
     const std::vector<PerformanceSample>& current) const noexcept
 {
-    std::vector<GateResult> results;
+    std::vector<GPUGateResult> results;
     if (!m_baselineLoaded) return results;
 
     for (const auto& s : current) {
@@ -40,7 +40,7 @@ std::vector<GateResult> GPUDecodePerformanceGate::Evaluate(
 
         // Check P95
         if (base.p95Ms > 0.0f) {
-            GateResult r{};
+            GPUGateResult r{};
             r.formatName    = s.formatName;
             r.metric        = "P95";
             r.baselineValue = base.p95Ms;
@@ -48,11 +48,11 @@ std::vector<GateResult> GPUDecodePerformanceGate::Evaluate(
             r.deltaPct      = (s.p95Ms - base.p95Ms) / base.p95Ms * 100.0f;
 
             if (r.deltaPct > m_thresholds.maxP95RegressionPct)
-                r.verdict = GateVerdict::Block;
+                r.verdict = GPUGateVerdict::Block;
             else if (r.deltaPct > m_thresholds.warnP50RegressionPct)
-                r.verdict = GateVerdict::Warn;
+                r.verdict = GPUGateVerdict::Warn;
             else
-                r.verdict = GateVerdict::Pass;
+                r.verdict = GPUGateVerdict::Pass;
 
             std::ostringstream oss;
             oss << s.formatName << " P95: " << s.p95Ms << " ms (baseline "
@@ -63,7 +63,7 @@ std::vector<GateResult> GPUDecodePerformanceGate::Evaluate(
 
         // Check batch throughput
         if (base.batchImgPerSec > 0.0f && s.batchImgPerSec > 0.0f) {
-            GateResult r{};
+            GPUGateResult r{};
             r.formatName    = s.formatName;
             r.metric        = "BatchThroughput";
             r.baselineValue = base.batchImgPerSec;
@@ -71,9 +71,9 @@ std::vector<GateResult> GPUDecodePerformanceGate::Evaluate(
             r.deltaPct      = (base.batchImgPerSec - s.batchImgPerSec) / base.batchImgPerSec * 100.0f;
 
             if (r.deltaPct > m_thresholds.maxThroughputDropPct)
-                r.verdict = GateVerdict::Block;
+                r.verdict = GPUGateVerdict::Block;
             else
-                r.verdict = GateVerdict::Pass;
+                r.verdict = GPUGateVerdict::Pass;
 
             std::ostringstream oss;
             oss << s.formatName << " batch: " << s.batchImgPerSec
@@ -86,13 +86,13 @@ std::vector<GateResult> GPUDecodePerformanceGate::Evaluate(
     return results;
 }
 
-GateVerdict GPUDecodePerformanceGate::OverallVerdict(
-    const std::vector<GateResult>& results) const noexcept
+GPUGateVerdict GPUDecodePerformanceGate::OverallVerdict(
+    const std::vector<GPUGateResult>& results) const noexcept
 {
-    GateVerdict worst = GateVerdict::Pass;
+    GPUGateVerdict worst = GPUGateVerdict::Pass;
     for (const auto& r : results) {
-        if (r.verdict == GateVerdict::Block) return GateVerdict::Block;
-        if (r.verdict == GateVerdict::Warn)  worst = GateVerdict::Warn;
+        if (r.verdict == GPUGateVerdict::Block) return GPUGateVerdict::Block;
+        if (r.verdict == GPUGateVerdict::Warn)  worst = GPUGateVerdict::Warn;
     }
     return worst;
 }
@@ -110,7 +110,7 @@ bool GPUDecodePerformanceGate::AllPass(
     const std::vector<PerformanceSample>& current) const noexcept
 {
     auto results = Evaluate(current);
-    return OverallVerdict(results) != GateVerdict::Block;
+    return OverallVerdict(results) != GPUGateVerdict::Block;
 }
 
 }} // namespace ExplorerLens::Engine

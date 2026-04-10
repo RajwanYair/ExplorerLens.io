@@ -4912,6 +4912,17 @@ int main()
     RUN_TEST(TestRemoteFileManifestCache_Stale);
     RUN_TEST(TestCachePrefetchScheduler_Enqueue);
     RUN_TEST(TestCachePrefetchScheduler_Backpressure);
+    // Sprint 1311-1320: Zero-Trust Thumbnail Security
+    RUN_TEST(TestThumbnailManifestSigner_Sign);
+    RUN_TEST(TestThumbnailManifestSigner_Verify);
+    RUN_TEST(TestZeroTrustDecodeWorker_Spawn);
+    RUN_TEST(TestZeroTrustDecodeWorker_Decode);
+    RUN_TEST(TestTokenBoundCacheEntry_Store);
+    RUN_TEST(TestTokenBoundCacheEntry_CrossTenant);
+    RUN_TEST(TestThumbnailAuditLog_Record);
+    RUN_TEST(TestThumbnailAuditLog_Query);
+    RUN_TEST(TestFIPSCryptoAdapter_Hash);
+    RUN_TEST(TestFIPSCryptoAdapter_Hmac);
 
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;

@@ -243,6 +243,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 21. **`PerfRegressionGate.h` uses `namespace ExplorerLens`** (not `ExplorerLens::Engine`) — tests must use `using namespace ExplorerLens` for this header
 22. **Bump-Version.ps1 has an idempotency guard** — running it twice on the same version is safe; it will skip if the version is already present
 23. **Each `.rc` file has 4 version strings** — `FILEVERSION X,Y,Z,0`, `PRODUCTVERSION X,Y,Z,0`, `"FileVersion"`, and `"ProductVersion"` — all 4 must match
+24. **Pre-sprint type collision check (MANDATORY)** — before committing any new sprint header batch, `grep_search` every new `struct`, `enum class`, and `class` name across `Engine/**/*.h`. Zero matches required (excluding the file being created). Sprint 1311-1320 collision crisis required 9 build rounds to resolve 13 collisions across 18 files — see §11.8 in lessons-learned.md.
 
 ## Lessons Learned Reference
 

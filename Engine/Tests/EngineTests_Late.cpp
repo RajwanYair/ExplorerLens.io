@@ -12943,7 +12943,7 @@ TEST(TestPQToSDRToneMapper_LUTBuild)
 {
     using namespace ExplorerLens::Engine;
     PQToneMapParams params{};
-    params.op         = ToneMapOperator::ACES;
+    params.op         = PQToneMapOp::ACES;
     params.peakNits   = 1000.0f;
     auto lut = PQToSDRToneMapper::BuildPQToSRGBLUT(params);
     // LUT has 1024 entries; first entry (0 PQ) should map to 0.
@@ -12960,7 +12960,7 @@ TEST(TestPQToSDRToneMapper_SinglePixel)
     const uint16_t zeroPx[4] = { 0, 0, 0, 0x3C00 };  // R=0, G=0, B=0, A=1.0 (fp16)
     PQToSDRToneMapper mapper;
     PQToneMapParams params{};
-    params.op = ToneMapOperator::Hable;
+    params.op = PQToneMapOp::Hable;
     auto result = mapper.ToneMap(zeroPx, 1, 1, params);
     ASSERT(result.success);
     ASSERT(result.pixelsBGRA != nullptr);
@@ -13312,16 +13312,16 @@ TEST(TestAnimatedSequenceSampler_DetectGIF)
 {
     using namespace ExplorerLens::Engine;
     const uint8_t gif[] = {'G','I','F','8','9','a',1,0,1,0,0,0,0,0x3B};
-    ASSERT(AnimatedSequenceSampler::Detect(gif, sizeof(gif)) == AnimatedFormat::GIF);
+    ASSERT(AnimatedSequenceSampler::Detect(gif, sizeof(gif)) == SampledAnimFormat::GIF);
 
     // WebP RIFF magic
     const uint8_t webp[] = {'R','I','F','F',0,0,0,0,'W','E','B','P'};
-    ASSERT(AnimatedSequenceSampler::Detect(webp, sizeof(webp)) == AnimatedFormat::AnimatedWebP);
+    ASSERT(AnimatedSequenceSampler::Detect(webp, sizeof(webp)) == SampledAnimFormat::AnimatedWebP);
 
     // Unknown
     const uint8_t unk[] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
                              0x08,0x09,0x0A,0x0B};
-    ASSERT(AnimatedSequenceSampler::Detect(unk, sizeof(unk)) == AnimatedFormat::Unknown);
+    ASSERT(AnimatedSequenceSampler::Detect(unk, sizeof(unk)) == SampledAnimFormat::Unknown);
 }
 
 TEST(TestAnimatedSequenceSampler_SampleGIF)
@@ -13346,7 +13346,7 @@ TEST(TestAnimatedSequenceSampler_SampleGIF)
     // Call succeeds (stub decoder)
     const auto result = sampler.Sample(minGIF, sizeof(minGIF), opts);
     // Either detects as GIF and succeeds, or returns unknown/fails — either is valid
-    ASSERT(result.format == AnimatedFormat::GIF || result.format == AnimatedFormat::Unknown
+    ASSERT(result.format == SampledAnimFormat::GIF || result.format == SampledAnimFormat::Unknown
            || !result.success || result.success);  // structural: no crash
 }
 
@@ -13598,7 +13598,6 @@ TEST(TestDWGHeaderParser_IsDWG)
     ASSERT(DWGHeaderParser::IsDWG(dwgR14, sizeof(dwgR14)));
 
     // DXF detection
-    const uint8_t dxf[] = " \xA0" " \xA0" "0\r\nSECTION";
     const uint8_t dxfAscii[] = {' ',' ','0','\r','\n'};
     ASSERT(DWGHeaderParser::IsDXF(dxfAscii, sizeof(dxfAscii)));
 
@@ -13671,7 +13670,7 @@ TEST(TestSTEPBoundingBoxExtractor_ExtractSTEP)
         "#2=CARTESIAN_POINT('',(10.0,20.0,30.0));\n"
         "#3=CARTESIAN_POINT('',(-5.0,5.0,15.0));\n"
         "ENDSEC;\n";
-    const BoundingBox3D bb = STEPBoundingBoxExtractor::ExtractSTEP(
+    const STEPBoundingBox bb = STEPBoundingBoxExtractor::ExtractSTEP(
         reinterpret_cast<const uint8_t*>(step), strlen(step));
 
     ASSERT(bb.valid);
@@ -13684,7 +13683,7 @@ TEST(TestSTEPBoundingBoxExtractor_ExtractSTEP)
     ASSERT(img.size() == 64u * 64u * 4u);
 
     // Invalid bbox — render still returns data
-    BoundingBox3D invalid{};
+    STEPBoundingBox invalid{};
     const auto img2 = STEPBoundingBoxExtractor::RenderBBoxPreview(invalid, 32, 32);
     ASSERT(img2.size() == 32u * 32u * 4u);
 }
@@ -14898,19 +14897,19 @@ TEST(TestZeroTrustDecodeWorker_Spawn)
     cfg.allowFileWrite     = false;
     ZeroTrustDecodeWorker worker(cfg);
 
-    ASSERT(worker.GetState()   == WorkerState::IDLE);
+    ASSERT(worker.GetState()   == ZTWorkerState::IDLE);
     ASSERT(!worker.IsAlive());
 
     const bool spawned = worker.Spawn();
     ASSERT(spawned);
-    ASSERT(worker.GetState()   == WorkerState::RUNNING);
+    ASSERT(worker.GetState()   == ZTWorkerState::RUNNING);
     ASSERT(worker.IsAlive());
 
     ASSERT(worker.GetConfig().allowNetworkAccess == false);
     ASSERT(worker.GetConfig().allowFileWrite     == false);
 
     worker.Terminate();
-    ASSERT(worker.GetState() == WorkerState::TERMINATED);
+    ASSERT(worker.GetState() == ZTWorkerState::TERMINATED);
     ASSERT(!worker.IsAlive());
 }
 
@@ -14922,7 +14921,7 @@ TEST(TestZeroTrustDecodeWorker_Decode)
     worker.Spawn();
 
     // Valid request → stub returns 4×4 green surface
-    DecodeRequest req;
+    WorkerDecodeRequest req;
     req.filePath    = L"C:\\TestFiles\\img.psd";
     req.formatHint  = "psd";
     req.maxWidthPx  = 4;
@@ -14942,7 +14941,7 @@ TEST(TestZeroTrustDecodeWorker_Decode)
     ASSERT(!resp2.error.empty());
 
     // Empty path fails
-    DecodeRequest emptyReq;
+    WorkerDecodeRequest emptyReq;
     const auto resp3 = worker.Decode(emptyReq);
     ASSERT(!resp3.success);
 }
@@ -15137,4 +15136,3 @@ TEST(TestFIPSCryptoAdapter_Hmac)
         FIPSHmacAlgo::HMAC_SHA256);
     ASSERT(!crypto.ConstantTimeEqual(mac1, macOther));
 }
-

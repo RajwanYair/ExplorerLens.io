@@ -12,7 +12,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-struct ScrubState {
+struct HoverScrubState {
     uint32_t frameIndex    = 0;     // Current frame to display [0, frameCount)
     float    normalizedPos = 0.0f;  // Mouse X normalised [0.0, 1.0]
     uint32_t frameCount    = 0;
@@ -42,13 +42,13 @@ public:
     // Register frame-changed callback.
     void SetFrameChangedCallback(FrameChangedCallback cb) noexcept;
 
-    ScrubState GetState() const noexcept { return m_state; }
+    HoverScrubState GetState() const noexcept { return m_state; }
 
     // Map normalised position [0,1] and frame count to a frame index.
     static uint32_t PosToFrame(float normalizedPos, uint32_t frameCount) noexcept;
 
 private:
-    ScrubState            m_state;
+    HoverScrubState            m_state;
     FrameChangedCallback  m_callback;
 };
 

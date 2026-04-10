@@ -27,14 +27,14 @@ struct GateThresholds {
     float warnP50RegressionPct   = 3.0f;   // Warn if P50 increases > 3%
 };
 
-enum class GateVerdict : uint8_t {
+enum class GPUGateVerdict : uint8_t {
     Pass    = 0,
     Warn    = 1,
     Block   = 2,
 };
 
-struct GateResult {
-    GateVerdict verdict       = GateVerdict::Pass;
+struct GPUGateResult {
+    GPUGateVerdict verdict       = GPUGateVerdict::Pass;
     std::string formatName;
     std::string metric;
     float       baselineValue = 0.0f;
@@ -51,12 +51,12 @@ public:
     bool LoadBaseline(const wchar_t* baselinePath) noexcept;
 
     // Evaluate current samples against baseline.
-    // Returns one GateResult per metric that was checked.
-    std::vector<GateResult> Evaluate(
+    // Returns one GPUGateResult per metric that was checked.
+    std::vector<GPUGateResult> Evaluate(
         const std::vector<PerformanceSample>& current) const noexcept;
 
     // Overall verdict: worst across all results.
-    GateVerdict OverallVerdict(const std::vector<GateResult>& results) const noexcept;
+    GPUGateVerdict OverallVerdict(const std::vector<GPUGateResult>& results) const noexcept;
 
     // Save current samples as the new baseline.
     bool SaveBaseline(
