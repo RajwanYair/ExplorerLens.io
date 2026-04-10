@@ -129,13 +129,13 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 
 | Item | Status | Commit |
 |------|--------|--------|
-| 13 type name collisions from Sprint 1311-1320 resolved | ✅ Fixed | (see hash below) |
-| 18 header/source files renamed + updated | ✅ | — |
-| 3 test split files updated | ✅ | — |
-| C4189 unused variable warning fixed (EngineTests_Late.cpp) | ✅ | — |
-| lessons-learned.md §11.8 added | ✅ | — |
-| copilot-instructions.md rule #24 added | ✅ | — |
-| BUILD_SUCCESS: 0 errors, 0 warnings, 20/20 steps | ✅ 14:02:42 | — |
+| 13 type name collisions from Sprint 1311-1320 resolved | ✅ Fixed | `e2c9d7b1` |
+| 18 header/source files renamed + updated | ✅ | `e2c9d7b1` |
+| 3 test split files updated | ✅ | `e2c9d7b1` |
+| C4189 unused variable warning fixed (EngineTests_Late.cpp) | ✅ | `e2c9d7b1` |
+| lessons-learned.md §11.8 added | ✅ | `e2c9d7b1` |
+| copilot-instructions.md rule #24 added | ✅ | `e2c9d7b1` |
+| BUILD_SUCCESS: 0 errors, 0 warnings, 20/20 steps | ✅ 14:02:42 | `e2c9d7b1` |
 
 **Collisions fixed:** `AnimatedFormat`→`SampledAnimFormat`, `ToneMapOperator`→`PQToneMapOp`,
 `LTSGateStatus`→`LTSValidatorStatus`, `ScrubState`→`HoverScrubState`,
@@ -145,12 +145,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 `DICOMWindowPreset`→`AdvancedWindowPreset`, `PressureLevel`→`ResponderPressureLevel`,
 `GateResult`/`GateVerdict`→`GPUGateResult`/`GPUGateVerdict`
 
-**Fix commit hash:** `(to be filled after push — see step below)`
-
-```powershell
-# After push, record the commit hash here:
-# git log --oneline -1
-```
+**Fix commit hash:** `e2c9d7b1`
 
 ---
 
@@ -160,7 +155,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 |------|------|----------|-------|
 | Next sprint: v35.4.0 "Vega-U" | Feature | High | Sprint 1321-1330: WASM/Browser Extension Pipeline |
 | `EngineTestsExterns.h` approaching 500 KB | Monitor | Low | Currently ~233 KB; split when > 400 KB |
-| v35.3.0 build-fix hash | Action | High | Push commit; backfill hash in gh-tracking-log.md + lessons-learned.md §11.8 |
+| v35.3.0 build-fix hash | Done | ✅ | Commit `e2c9d7b1` pushed; hash backfilled in gh-tracking-log.md + lessons-learned.md §11.8 |
 | v35.3.0 GH Release artifacts | Verify | Medium | Confirm all .dll/.msi/.zip/.sbom attached (CI runs async) |
 
 ---

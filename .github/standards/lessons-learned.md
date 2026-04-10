@@ -510,4 +510,4 @@ and `class` name across ALL `Engine/**/*.h` files. Zero matches required (exclud
 **Files modified:** 18 header/source files + 3 test split files  
 **Rounds to resolution:** 9  
 **Build result:** BUILD_SUCCESS — 0 errors, 0 warnings  
-**Fix commit:** (see gh-tracking-log.md for hash after push)
+**Fix commit:** `e2c9d7b1`
