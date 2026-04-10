@@ -1,8 +1,8 @@
 # ExplorerLens — Engineering Lessons Learned
 
-> Retrospective captured from git history (v15.1.0 through v34.7.0, 300+ commits).  
+> Retrospective captured from git history (v15.1.0 through v35.3.0, 330+ commits).  
 > Maintained by Copilot — update after every major sprint block.  
-> Last updated: 2026-04-10 (v34.7.0 Arcturus-X, commit `314f29a0`)
+> Last updated: 2026-04-10 (v35.3.0 Vega-T, commit `b2965d69`)
 
 ---
 
@@ -332,7 +332,7 @@ For each sprint batch (5 headers + 5 sources + tests):
 2. **Register headers** — add to `Engine/CMakeLists.txt` ENGINE_HEADERS list
 3. **Register sources** — add to `Engine/CMakeLists.txt` ENGINE_SOURCES list
 4. **Add includes** — add `#include` for each new header to `Engine/Tests/EngineTestsIncludes.h`
-5. **Add extern decls** — add `extern void TestFeature();` to `Engine/Tests/EngineTests.cpp`
+5. **Add extern Runner decls** — add `extern void TestFeature_Runner();` to `Engine/Tests/EngineTestsExterns.h` (NOT EngineTests.cpp — that file `#include`s `EngineTestsExterns.h`)
 6. **Add RUN_TEST calls** — add `RUN_TEST(TestFeature);` to `Engine/Tests/EngineTests.cpp`
 7. **Add test bodies** — add `TEST(TestFeature) { ... }` to `Engine/Tests/EngineTests_Late.cpp`
 8. **Verify clean build** — `.\build-scripts\Build-MSVC.ps1 -Clean -Test`
@@ -340,8 +340,8 @@ For each sprint batch (5 headers + 5 sources + tests):
 
 **Verify before commit:**
 - `grep_search` for any new type names to catch collisions
-- Confirm all `extern void` declarations have matching bodies in `_Late.cpp`
-- Confirm `EngineTests.cpp` is under 500 KB (if over, split to `_Late.cpp`)
+- Confirm all `extern void` Runner declarations have matching bodies in `_Late.cpp`
+- Confirm `EngineTestsExterns.h` is under 500 KB (currently ~233 KB as of v35.3.0)
 
 ---
 
@@ -364,3 +364,191 @@ For each sprint batch (5 headers + 5 sources + tests):
 | Type redefinition from co-inclusion | Rename conflicting type, add prefix | `da3e482f` |
 | PCH order in MSBuild | Ensure stdafx.h is first in vcxproj | `753bf8a1` |
 | MARKDOWNLINT MD009/MD024/MD036 | Fix trailing spaces, dup headings | `4d997143` |
+| SBOMGenerator.h locked by IntelliSense | Retry Bump-Version.ps1 after 2–5 seconds | `58e12150` |
+| extern Runner decls in wrong file | Put in EngineTestsExterns.h, not EngineTests.cpp | `f41436c0` |
+| Token budget exceeded mid-sprint | Session summary captures exact oldString; resume with last-lines read | — |
+| ROADMAP_VXX.md missing for new major ver | Create docs/ROADMAP_VXX.md at first sprint of new X.0.0 | `f41436c0` |
+
+---
+
+## 11. Vega Series (v35.x) — New Patterns and Lessons (Sprint 1281-1320)
+
+> Commits: `f41436c0` (v35.0.0) through `b2965d69` (v35.3.0)
+
+### 11.1 SBOMGenerator.h File Lock (Idempotency / Retry Pattern)
+**Symptom:** `Bump-Version.ps1` fails with:
+```
+Set-Content: The process cannot access the file 'Engine/Core/SBOMGenerator.h'
+because it is being used by another process.
+```
+**Root cause:** Copilot/IntelliSense (or VS Code itself) holds the file open briefly after it parses it during a sprint delivery.  
+**Fix:** Simply re-run `Bump-Version.ps1` with the same parameters immediately. The idempotency guard (Section 4.2) ensures CHANGELOG.md is not double-prepended, and all other files are safely overwritten.  
+**Pattern seen in:** v35.0.0 (`f41436c0`), v35.1.0 (`58e12150`), v35.2.0 (`0813a5e8`), v35.3.0 (`b2965d69`)  
+**Note:** The second invocation completes successfully ~100% of the time. No manual intervention needed.
+
+### 11.2 EngineTestsExterns.h Architecture
+**Discovery:** A dedicated `Engine/Tests/EngineTestsExterns.h` file holds all `extern void TestFoo_Runner()` declarations. It is `#include`d at line 16 of `EngineTests.cpp`.  
+**Correct wiring for a new sprint:**
+```
+EngineTestsIncludes.h  — #include "../Path/NewFeature.h"
+EngineTestsExterns.h   — extern void TestNewFeature_Foo_Runner();
+EngineTests.cpp        — RUN_TEST(TestNewFeature_Foo);
+EngineTests_Late.cpp   — TEST(TestNewFeature_Foo) { ... }
+```
+**Common mistake:** Putting `extern void` declarations directly in `EngineTests.cpp` (above main) instead of in `EngineTestsExterns.h`. The linker will still find them, but the file organization scheme is violated.  
+**File size as of v35.3.0:** ~233 KB — monitor; split when it approaches 500 KB.
+
+### 11.3 ROADMAP_VXX.md Creation Pattern
+**Rule:** When starting a new major-version series (X.0.0), create `docs/ROADMAP_VXX.md` in the same commit/sprint.  
+**Content:** Full sprint timeline (T1–T8+), baseline table (test count, versions), per-sprint module tables, next major-version preview.  
+**Created:** `docs/ROADMAP_V35.md` at commit `f41436c0` (v35.0.0 Vega).  
+**Templates:** Use ROADMAP_V34.md as the template; update codename series and baseline values.
+
+### 11.4 Token Budget / Session Continuation Pattern
+**Issue:** Long sprint deliveries (5 headers + 5 CPPs + test wiring + test bodies) may exceed the AI assistant token budget mid-sprint.  
+**Recovery:** The conversation summary system captures:
+- Exact file names and last lines confirmed in each file
+- Precise `oldString` for the pending `replace_string_in_file` call
+- Complete newString content of all 10 TEST bodies
+**On new session:** Read the summary, verify the `oldString` still matches with `read_file`, then execute the single pending replace.  
+**Prevention:** Complete test bodies (`_Late.cpp` append) **before** any other file changes in a sprint to front-load the largest write.
+
+### 11.5 Vega Series Codename Sequence
+The v35.x release series uses the "Vega" constellation codenames with suffixes:
+
+| Version | Codename | Sprint | Theme |
+|---------|----------|--------|-------|
+| v35.0.0 | Vega | 1281-1290 | Adaptive Fidelity + Roadmap bootstrap |
+| v35.1.0 | Vega-R | 1291-1300 | Real-Time Collaboration & Live Edit Sync |
+| v35.2.0 | Vega-S | 1301-1310 | Network-Aware Streaming Cache |
+| v35.3.0 | Vega-T | 1311-1320 | Zero-Trust Thumbnail Security |
+| v35.4.0 | Vega-U | 1321-1330 | WebAssembly / Browser Extension Pipeline |
+| v35.5.0 | Vega-V | 1331-1340 | Cross-Device Preview Sync |
+| v35.6.0 | Vega-W | 1341-1350 | REST API & Remote Decode Service |
+| v35.7.0 | Vega-X | 1351-1360 | LTS Gate + Hardening |
+
+Next series: v36.0.0 "Altair" — AI-Powered Semantic Thumbnails.
+
+### 11.6 New Module Scaffolding Patterns (Verified in Vega Series)
+
+**Token-bucket rate limiter** (`BandwidthThrottleGuard` pattern):
+- Always take `uint64_t nowMs` as the time parameter — never use `clock()` or wall time in a library
+- Provide `Tick(nowMs)` for the caller to drive time; `TryConsume(bytes, nowMs)` calls `Tick` internally
+- Config: `maxKbps=0` means unlimited; never apply the cap when it's 0
+
+**Topology-aware policy** (`StreamingCacheTierPolicy` pattern):
+- Use indexed array `Override[N]` not a map for small enum-keyed tables
+- `DeriveFromProbe(result)` is a convenience that calls `Derive(topology)` then applies metered override
+
+**Audit ring-buffer** (`ThumbnailAuditLog` pattern):
+- Single `maxEvents` bound; `dropOldOnFull=true` → evict-front; `false` → reject-new
+- Separate `TotalRecorded` (all ever recorded) vs `EventCount` (currently in buffer)
+- `Flush()` clears buffer without resetting `TotalRecorded`/`TotalDropped`
+
+**Token-bound cache** (`TokenBoundCacheEntry` pattern):
+- Lookup checks `TenantToken::Matches()` before returning; increments `UnauthorizedMissCount` on denial
+- `Clear()` resets all counters including hit/miss counts
+
+### 11.7 GitHub API Offline — Fallback Procedure
+**Symptom:** `gh issue list`, `gh pr list`, `gh release list` all fail with TCP connection timeout.  
+**Root cause:** GitHub API unreachable from current network (corporate firewall, offline, etc.).  
+**Fallback for tracking tasks:**
+1. Use `git log --oneline` to identify commit hashes for completed work
+2. Update `lessons-learned.md` and `gh-tracking-log.md` locally with git hashes
+3. Push via `git push` (uses git protocol, not REST API) — this works even when gh CLI fails
+4. When API is restored, close issues with: `gh issue close <N> --comment "Fixed in <hash>"`
+5. Never block a sprint delivery on GH API availability
+| SBOMGenerator.h locked by IntelliSense | Retry Bump-Version.ps1 after 2–5 seconds | `58e12150` |
+| extern Runner decls in wrong file | Put in EngineTestsExterns.h, not EngineTests.cpp | `f41436c0` |
+| Token budget exceeded mid-sprint | Session summary captures exact oldString; resume with last-lines read | — |
+| ROADMAP_VXX.md missing for new major ver | Create docs/ROADMAP_VXX.md at first sprint of new X.0.0 | `f41436c0` |
+
+---
+
+## 11. Vega Series (v35.x) — New Patterns and Lessons (Sprint 1281-1320)
+
+> Commits: `f41436c0` (v35.0.0) through `b2965d69` (v35.3.0)
+
+### 11.1 SBOMGenerator.h File Lock (Idempotency / Retry Pattern)
+**Symptom:** `Bump-Version.ps1` fails with:
+```
+Set-Content: The process cannot access the file 'Engine/Core/SBOMGenerator.h'
+because it is being used by another process.
+```
+**Root cause:** Copilot/IntelliSense (or VS Code itself) holds the file open briefly after it parses it during a sprint delivery.  
+**Fix:** Simply re-run `Bump-Version.ps1` with the same parameters immediately. The idempotency guard (Section 4.2) ensures CHANGELOG.md is not double-prepended, and all other files are safely overwritten.  
+**Pattern seen in:** v35.0.0 (`f41436c0`), v35.1.0 (`58e12150`), v35.2.0 (`0813a5e8`), v35.3.0 (`b2965d69`)  
+**Note:** The second invocation completes successfully ~100% of the time. No manual intervention needed.
+
+### 11.2 EngineTestsExterns.h Architecture
+**Discovery:** A dedicated `Engine/Tests/EngineTestsExterns.h` file holds all `extern void TestFoo_Runner()` declarations. It is `#include`d at line 16 of `EngineTests.cpp`.  
+**Correct wiring for a new sprint:**
+```
+EngineTestsIncludes.h  — #include "../Path/NewFeature.h"
+EngineTestsExterns.h   — extern void TestNewFeature_Foo_Runner();
+EngineTests.cpp        — RUN_TEST(TestNewFeature_Foo);
+EngineTests_Late.cpp   — TEST(TestNewFeature_Foo) { ... }
+```
+**Common mistake:** Putting `extern void` declarations directly in `EngineTests.cpp` (above main) instead of in `EngineTestsExterns.h`. The linker will still find them, but the file organization scheme is violated.  
+**File size as of v35.3.0:** ~233 KB — monitor; split when it approaches 500 KB.
+
+### 11.3 ROADMAP_VXX.md Creation Pattern
+**Rule:** When starting a new major-version series (X.0.0), create `docs/ROADMAP_VXX.md` in the same commit/sprint.  
+**Content:** Full sprint timeline (T1–T8+), baseline table (test count, versions), per-sprint module tables, next major-version preview.  
+**Created:** `docs/ROADMAP_V35.md` at commit `f41436c0` (v35.0.0 Vega).  
+**Templates:** Use ROADMAP_V34.md as the template; update codename series and baseline values.
+
+### 11.4 Token Budget / Session Continuation Pattern
+**Issue:** Long sprint deliveries (5 headers + 5 CPPs + test wiring + test bodies) may exceed the AI assistant token budget mid-sprint.  
+**Recovery:** The conversation summary system captures:
+- Exact file names and last lines confirmed in each file
+- Precise `oldString` for the pending `replace_string_in_file` call
+- Complete newString content of all 10 TEST bodies
+**On new session:** Read the summary, verify the `oldString` still matches with `read_file`, then execute the single pending replace.  
+**Prevention:** Complete test bodies (`_Late.cpp` append) **before** any other file changes in a sprint to front-load the largest write.
+
+### 11.5 Vega Series Codename Sequence
+The v35.x release series uses the "Vega" constellation codenames with suffixes:
+
+| Version | Codename | Sprint | Theme |
+|---------|----------|--------|-------|
+| v35.0.0 | Vega | 1281-1290 | Adaptive Fidelity + Roadmap bootstrap |
+| v35.1.0 | Vega-R | 1291-1300 | Real-Time Collaboration & Live Edit Sync |
+| v35.2.0 | Vega-S | 1301-1310 | Network-Aware Streaming Cache |
+| v35.3.0 | Vega-T | 1311-1320 | Zero-Trust Thumbnail Security |
+| v35.4.0 | Vega-U | 1321-1330 | WebAssembly / Browser Extension Pipeline |
+| v35.5.0 | Vega-V | 1331-1340 | Cross-Device Preview Sync |
+| v35.6.0 | Vega-W | 1341-1350 | REST API & Remote Decode Service |
+| v35.7.0 | Vega-X | 1351-1360 | LTS Gate + Hardening |
+
+Next series: v36.0.0 "Altair" — AI-Powered Semantic Thumbnails.
+
+### 11.6 New Module Scaffolding Patterns (Verified in Vega Series)
+
+**Token-bucket rate limiter** (`BandwidthThrottleGuard` pattern):
+- Always take `uint64_t nowMs` as the time parameter — never use `clock()` or wall time in a library
+- Provide `Tick(nowMs)` for the caller to drive time; `TryConsume(bytes, nowMs)` calls `Tick` internally
+- Config: `maxKbps=0` means unlimited; never apply the cap when it's 0
+
+**Topology-aware policy** (`StreamingCacheTierPolicy` pattern):
+- Use indexed array `Override[N]` not a map for small enum-keyed tables
+- `DeriveFromProbe(result)` is a convenience that calls `Derive(topology)` then applies metered override
+
+**Audit ring-buffer** (`ThumbnailAuditLog` pattern):
+- Single `maxEvents` bound; `dropOldOnFull=true` → evict-front; `false` → reject-new
+- Separate `TotalRecorded` (all ever recorded) vs `EventCount` (currently in buffer)
+- `Flush()` clears buffer without resetting `TotalRecorded`/`TotalDropped`
+
+**Token-bound cache** (`TokenBoundCacheEntry` pattern):
+- Lookup checks `TenantToken::Matches()` before returning; increments `UnauthorizedMissCount` on denial
+- `Clear()` resets all counters including hit/miss counts
+
+### 11.7 GitHub API Offline — Fallback Procedure
+**Symptom:** `gh issue list`, `gh pr list`, `gh release list` all fail with TCP connection timeout.  
+**Root cause:** GitHub API unreachable from current network (corporate firewall, offline, etc.).  
+**Fallback for tracking tasks:**
+1. Use `git log --oneline` to identify commit hashes for completed work
+2. Update `lessons-learned.md` and `gh-tracking-log.md` locally with git hashes
+3. Push via `git push` (uses git protocol, not REST API) — this works even when gh CLI fails
+4. When API is restored, close issues with: `gh issue close <N> --comment "Fixed in <hash>"`
+5. Never block a sprint delivery on GH API availability

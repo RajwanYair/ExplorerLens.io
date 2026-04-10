@@ -24,6 +24,7 @@ These are known large files that cannot be easily split:
 | `Engine/Utils/ReleaseGate.h` | 94 KB | Gate evaluators V2–V33 — append-only |
 | `Engine/CMakeLists.txt` | 83 KB | Single build definition — cannot split |
 | `CHANGELOG-archive.md` | 113 KB | Historical archive — rarely changed |
+| `Engine/Tests/EngineTestsExterns.h` | ~233 KB | Extern Runner declarations — append-only; split when >400 KB |
 
 ## Test File Split Convention
 

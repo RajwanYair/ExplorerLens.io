@@ -237,7 +237,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 15. **Never use `/wdXXXX` warning suppressions** — fix the root cause; zero-warnings by fixing code, not hiding it
 16. **Enum values must be UPPER_CASE** — enforced by `.clang-tidy`; rename before committing
 17. **Always `grep_search` for new type names before committing** — prevent naming collisions in 500+ header codebase
-18. **New TEST() bodies go to `EngineTests_Late.cpp`** — `extern void` + `RUN_TEST()` go to `EngineTests.cpp`; includes go to `EngineTestsIncludes.h`
+18. **New TEST() bodies go to `EngineTests_Late.cpp`** — `extern void Runner()` decls go to `EngineTestsExterns.h`; `RUN_TEST()` calls go to `EngineTests.cpp`; `#include` goes to `EngineTestsIncludes.h`
 19. **After adding `RUN_TEST()` calls, always do a clean build** — stale `.obj` files can hide missing test bodies (Sprint 1131-1140 incident)
 20. **`std::min`/`std::max` must be parenthesized** — use `(std::min)(a, b)` to avoid Windows macro expansion
 21. **`PerfRegressionGate.h` uses `namespace ExplorerLens`** (not `ExplorerLens::Engine`) — tests must use `using namespace ExplorerLens` for this header
@@ -292,10 +292,11 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - **Version-bearing file registry:** See `.github/instructions/version-bump.instructions.md` for the complete 21-file checklist and release artifact procedure
 - **Graphics must be updated on every bump:** `docs/assets/social-preview.svg` and `docs/assets/architecture-build.svg` must reflect the current version, test count, and platform support — `Bump-Version.ps1` handles this automatically
 - **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
-- **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
+- **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add `#include` to EngineTestsIncludes.h → add `extern void Runner()` to EngineTestsExterns.h → add `RUN_TEST()` to EngineTests.cpp → add TEST bodies to EngineTests_Late.cpp → git commit
 - **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# `, Utils sources before closing `)`
 - **EngineTests.cpp insertion points:** New includes after last feature include, TEST() functions before `//== ` section, RUN_TEST() calls before `// Isolation & Stability Tests`
-- **Test bodies go to EngineTests_Late.cpp:** extern void declarations + RUN_TEST() calls in EngineTests.cpp; TEST() function bodies in EngineTests_Late.cpp (or EngineTests_Mid.cpp for earlier sprints)
+- **Test bodies go to EngineTests_Late.cpp:** `extern void` Runner declarations go to `EngineTestsExterns.h` (NOT EngineTests.cpp directly); `RUN_TEST()` calls go to `EngineTests.cpp`; TEST() function bodies go to `EngineTests_Late.cpp` (or EngineTests_Mid.cpp for earlier sprints)
+- **SBOMGenerator.h file lock:** If Bump-Version.ps1 fails writing SBOMGenerator.h with "used by another process", simply re-run with identical parameters — the idempotency guard prevents duplicate CHANGELOG entries
 - **Sprint 1131-1140 backfill note:** In v33.0.0 the Sprint 1131-1140 test bodies (VideoFrameExtractor/ScrubberTimeline/etc.) were backfilled to EngineTests_Mid.cpp — they were missing despite the RUN_TEST calls existing (stale .obj build artifact).
 
 ## Release Procedure (EVERY version bump)
@@ -392,7 +393,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 - **Namespace:** All engine classes use `namespace ExplorerLens { namespace Engine { } }` — use `using namespace ExplorerLens::Engine;` in tests
 - **Test framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with `g_testsRun/g_testsPassed/g_testsFailed` counters — NOT GTest
-- **Test file split:** EngineTests.cpp (harness + main, ~8.7K lines) + EngineTests_Core.cpp (~9.7K lines) + EngineTests_Features.cpp (~9.5K lines) + EngineTests_Mid.cpp (~9.4K lines) + EngineTests_Late.cpp (~12.8K lines) — all share EngineTestsIncludes.h + EngineTestsMacros.h
+- **Test file split:** EngineTests.cpp (harness + main, ~8.7K lines) + EngineTests_Core.cpp (~9.7K lines) + EngineTests_Features.cpp (~9.5K lines) + EngineTests_Mid.cpp (~9.4K lines) + EngineTests_Late.cpp (~12.8K lines) — all share EngineTestsIncludes.h + EngineTestsExterns.h + EngineTestsMacros.h
 - **Release gates:** Unified `Utils/ReleaseGate.h` — single header covering all gate versions (V2–V33)
 - **Plugin architecture:** Plugin files go in `Engine/Plugin/`; use `ICADDecoderPlugin` / `IThumbnailPlugin` patterns
 - **Memory pressure ladder:** 5-tier (None/Low/Medium/High/Critical) with bitmask `PressureAction` flags
