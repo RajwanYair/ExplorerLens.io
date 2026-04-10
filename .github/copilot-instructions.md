@@ -233,6 +233,25 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 11. **Build with:** `.\build-scripts\Build-MSVC.ps1` (or `cmake --preset default-release` after vcvars)
 12. **Test with:** `ctest --test-dir build -C Release --output-on-failure`
 13. **Linker flags** (`/NODEFAULTLIB`, `/IGNORE`) are MSVC link.exe only — guard with `if(MSVC)` in CMake
+14. **Never use `__builtin_memcpy` or any `__builtin_*`** — GCC-only intrinsics; use `memcpy()` in MSVC
+15. **Never use `/wdXXXX` warning suppressions** — fix the root cause; zero-warnings by fixing code, not hiding it
+16. **Enum values must be UPPER_CASE** — enforced by `.clang-tidy`; rename before committing
+17. **Always `grep_search` for new type names before committing** — prevent naming collisions in 500+ header codebase
+18. **New TEST() bodies go to `EngineTests_Late.cpp`** — `extern void` + `RUN_TEST()` go to `EngineTests.cpp`; includes go to `EngineTestsIncludes.h`
+19. **After adding `RUN_TEST()` calls, always do a clean build** — stale `.obj` files can hide missing test bodies (Sprint 1131-1140 incident)
+20. **`std::min`/`std::max` must be parenthesized** — use `(std::min)(a, b)` to avoid Windows macro expansion
+21. **`PerfRegressionGate.h` uses `namespace ExplorerLens`** (not `ExplorerLens::Engine`) — tests must use `using namespace ExplorerLens` for this header
+22. **Bump-Version.ps1 has an idempotency guard** — running it twice on the same version is safe; it will skip if the version is already present
+23. **Each `.rc` file has 4 version strings** — `FILEVERSION X,Y,Z,0`, `PRODUCTVERSION X,Y,Z,0`, `"FileVersion"`, and `"ProductVersion"` — all 4 must match
+
+## Lessons Learned Reference
+
+See `.github/standards/lessons-learned.md` for the full engineering retrospective covering:
+- CI/CD Windows runner pitfalls (git exit-128, GIT_CONFIG_COUNT, toolset pinning)
+- Build system patterns (stale CMakeCache, PCH order, WIN32_LEAN_AND_MEAN exclusions)
+- Code quality (IWYU, enum casing, type collision prevention)
+- Test infrastructure (split file rules, stale .obj hazard, test count accuracy)
+- Sprint delivery checklist
 
 ## External Libraries Directory Structure (Post-Cleanup)
 
