@@ -353,6 +353,12 @@
 #include "../Cache/TokenBoundCacheEntry.h"
 #include "../Core/ThumbnailAuditLog.h"
 #include "../Core/FIPSCryptoAdapter.h"
+// Sprint 1321-1330: WebAssembly / Browser Extension Pipeline
+#include "../Core/WasmDecoderShim.h"
+#include "../Pipeline/BrowserThumbnailBridge.h"
+#include "../Pipeline/OffscreenCanvasRenderer.h"
+#include "../Cache/WasmCacheAdapter.h"
+#include "../Pipeline/ProgressiveThumbnailStream.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"

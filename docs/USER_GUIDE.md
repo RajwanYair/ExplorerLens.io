@@ -1,5 +1,5 @@
 # ExplorerLens User Guide
-**Version:** 35.3.0 "Vega-T"
+**Version:** 35.4.0 "Vega-U"
 **Last Updated:** July 2026
 
 ## Table of Contents
@@ -135,7 +135,7 @@ The modern Manager provides a full-featured GUI organized into pages:
 - **Export** — Diagnostic bundle (.zip), copy system info, open log folder
 
 ### About
-- **Version** — v35.3.0 (Vega-T) with build info
+- **Version** — v35.4.0 (Vega-U) with build info
 - **Quick stats** — 200+ formats, 25+ decoders, <17ms per thumbnail
 - **System info** — GPU, Windows version, COM CLSID, test pass rate
 - **Links** — GitHub, docs, bug reports, changelog

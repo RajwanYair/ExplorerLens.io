@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 35.3.0 (Codename: Vega-T)
+- **Version:** 35.4.0 (Codename: Vega-U)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -214,7 +214,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~4704 unit tests, 5 benchmarks (v35.3.0 baseline)
+- **Test count:** ~4714 unit tests, 5 benchmarks (v35.4.0 baseline)
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -285,7 +285,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v35.3.0 "Vega-T"
+- **Current version:** v35.4.0 "Vega-U"
 - **Source of truth:** `CHANGELOG.md`
 - **Gen-6 Roadmap:** `docs/ROADMAP_V30.md` — v30.x "Deneb" Platform Unification + v31.x "Achernar" Generative AI
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas

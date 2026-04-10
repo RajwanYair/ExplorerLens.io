@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [35.4.0] — 2026-04-10 — Vega-U
+
+Sprint 1321-1330: WebAssembly / Browser Extension Pipeline — WasmDecoderShim, BrowserThumbnailBridge, OffscreenCanvasRenderer, WasmCacheAdapter, ProgressiveThumbnailStream; 10 new tests (4714 total)
+
+---
+
 ## [35.3.0] — 2026-04-10 — Vega-T
 
 Sprint 1311-1320: Zero-Trust Thumbnail Security — ThumbnailManifestSigner, ZeroTrustDecodeWorker, TokenBoundCacheEntry, ThumbnailAuditLog, FIPSCryptoAdapter

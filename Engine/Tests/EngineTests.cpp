@@ -4923,6 +4923,17 @@ int main()
     RUN_TEST(TestThumbnailAuditLog_Query);
     RUN_TEST(TestFIPSCryptoAdapter_Hash);
     RUN_TEST(TestFIPSCryptoAdapter_Hmac);
+    // Sprint 1321-1330: WebAssembly / Browser Extension Pipeline
+    RUN_TEST(TestWasmDecoderShim_Register);
+    RUN_TEST(TestWasmDecoderShim_Decode);
+    RUN_TEST(TestBrowserThumbnailBridge_PostMessage);
+    RUN_TEST(TestBrowserThumbnailBridge_AsyncReply);
+    RUN_TEST(TestOffscreenCanvasRenderer_FrameSize);
+    RUN_TEST(TestOffscreenCanvasRenderer_ErrorOnNull);
+    RUN_TEST(TestWasmCacheAdapter_Store);
+    RUN_TEST(TestWasmCacheAdapter_Evict);
+    RUN_TEST(TestProgressiveThumbnailStream_Emit);
+    RUN_TEST(TestProgressiveThumbnailStream_Complete);
 
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;

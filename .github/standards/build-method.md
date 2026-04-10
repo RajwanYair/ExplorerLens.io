@@ -1,7 +1,7 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** March 2026
-**Version:** 35.3.0 (Codename: Vega-T)
+**Version:** 35.4.0 (Codename: Vega-U)
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---

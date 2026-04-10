@@ -15136,3 +15136,219 @@ TEST(TestFIPSCryptoAdapter_Hmac)
         FIPSHmacAlgo::HMAC_SHA256);
     ASSERT(!crypto.ConstantTimeEqual(mac1, macOther));
 }
+
+//== Sprint 1321-1330: WebAssembly / Browser Extension Pipeline ===============
+
+TEST(TestWasmDecoderShim_Register)
+{
+    using namespace ExplorerLens::Engine;
+
+    WasmDecoderShim shim;
+    ASSERT(shim.DecoderCount() == 0u);
+
+    WasmDecoderConfig cfg;
+    cfg.format          = "jpeg";
+    cfg.maxWidthPx      = 320u;
+    cfg.maxHeightPx     = 320u;
+    cfg.targetPlatform  = WasmTargetPlatform::WASM32;
+
+    const uint32_t handle = shim.RegisterDecoder(cfg);
+    ASSERT(handle != 0u);
+    ASSERT(shim.DecoderCount() == 1u);
+
+    shim.UnregisterDecoder(handle);
+    ASSERT(shim.DecoderCount() == 0u);
+}
+
+TEST(TestWasmDecoderShim_Decode)
+{
+    using namespace ExplorerLens::Engine;
+
+    WasmDecoderShim shim;
+    WasmDecoderConfig cfg;
+    cfg.format         = "png";
+    cfg.maxWidthPx     = 128u;
+    cfg.maxHeightPx    = 128u;
+    cfg.targetPlatform = WasmTargetPlatform::WASM64;
+
+    const uint32_t handle = shim.RegisterDecoder(cfg);
+    ASSERT(handle != 0u);
+
+    const uint8_t fakeBytes[16] = {};
+    const auto result = shim.Decode(handle, fakeBytes, sizeof(fakeBytes));
+    ASSERT(result.success);
+    ASSERT(result.width  == 128u);
+    ASSERT(result.height == 128u);
+    ASSERT(!result.pixelBuffer.empty());
+    ASSERT(result.pixelBuffer.size() == 128u * 128u * 4u);
+}
+
+TEST(TestBrowserThumbnailBridge_PostMessage)
+{
+    using namespace ExplorerLens::Engine;
+
+    BrowserThumbnailBridge bridge;
+    ASSERT(bridge.PendingCount()    == 0u);
+    ASSERT(bridge.DispatchedCount() == 0u);
+
+    BrowserMessage msg;
+    msg.kind      = BrowserMessageKind::REQUEST_THUMBNAIL;
+    msg.requestId = 42u;
+    msg.filePath  = L"C:\\thumbnails\\test.jpg";
+
+    bridge.PostMessage(msg);
+    ASSERT(bridge.PendingCount() == 1u);
+
+    bridge.DispatchAll();
+    ASSERT(bridge.PendingCount()    == 0u);
+    ASSERT(bridge.DispatchedCount() == 1u);
+}
+
+TEST(TestBrowserThumbnailBridge_AsyncReply)
+{
+    using namespace ExplorerLens::Engine;
+
+    BrowserThumbnailBridge bridge;
+    uint32_t capturedId = 0u;
+    size_t   payloadSize = 0u;
+
+    bridge.SetReplyHandler([&](uint32_t id, const std::vector<uint8_t>& payload) {
+        capturedId   = id;
+        payloadSize  = payload.size();
+    });
+
+    BrowserMessage msg;
+    msg.kind      = BrowserMessageKind::REQUEST_THUMBNAIL;
+    msg.requestId = 99u;
+    msg.filePath  = L"C:\\thumbnails\\test.png";
+
+    bridge.PostMessage(msg);
+    bridge.DispatchAll();
+
+    ASSERT(capturedId  == 99u);
+    ASSERT(payloadSize > 0u);
+}
+
+TEST(TestOffscreenCanvasRenderer_FrameSize)
+{
+    using namespace ExplorerLens::Engine;
+
+    OffscreenCanvasRenderer renderer;
+    CanvasRenderOptions opts;
+    opts.width  = 256u;
+    opts.height = 256u;
+    opts.format = "rgba8";
+
+    const auto result = renderer.RenderFrame(nullptr, 0, opts);
+    ASSERT(result.error  == RenderError::NONE);
+    ASSERT(result.width  == 256u);
+    ASSERT(result.height == 256u);
+    ASSERT(result.frameBuffer.size() == 256u * 256u * 4u);
+    ASSERT(renderer.RenderCount() == 1u);
+}
+
+TEST(TestOffscreenCanvasRenderer_ErrorOnNull)
+{
+    using namespace ExplorerLens::Engine;
+
+    OffscreenCanvasRenderer renderer;
+    CanvasRenderOptions opts;
+    opts.width  = 0u;
+    opts.height = 0u;
+    opts.format = "rgba8";
+
+    const auto result = renderer.RenderFrame(nullptr, 0, opts);
+    ASSERT(result.error  == RenderError::INVALID_DIMS);
+    ASSERT(result.frameBuffer.empty());
+    ASSERT(renderer.ErrorCount() == 1u);
+    ASSERT(renderer.RenderCount() == 0u);
+}
+
+TEST(TestWasmCacheAdapter_Store)
+{
+    using namespace ExplorerLens::Engine;
+
+    WasmCacheAdapter cache;
+    ASSERT(cache.EntryCount()     == 0u);
+    ASSERT(cache.TotalSizeBytes() == 0u);
+
+    WasmCacheEntry entry;
+    entry.key       = "file::sha256::abc123";
+    entry.data      = {0x01, 0x02, 0x03, 0x04};
+    entry.sizeBytes = entry.data.size();
+
+    const auto status = cache.Store(entry);
+    ASSERT(status == WasmCacheStatus::OK);
+    ASSERT(cache.EntryCount()     == 1u);
+    ASSERT(cache.TotalSizeBytes() == 4u);
+
+    const auto fetched = cache.Get(entry.key);
+    ASSERT(fetched.data == entry.data);
+}
+
+TEST(TestWasmCacheAdapter_Evict)
+{
+    using namespace ExplorerLens::Engine;
+
+    WasmCacheAdapter cache;
+
+    WasmCacheEntry entry;
+    entry.key       = "evict::test::key";
+    entry.data      = {0xFF, 0xFE};
+    entry.sizeBytes = entry.data.size();
+
+    cache.Store(entry);
+    ASSERT(cache.EntryCount()     == 1u);
+    ASSERT(cache.TotalSizeBytes() == 2u);
+
+    cache.Evict(entry.key);
+    ASSERT(cache.EntryCount()     == 0u);
+    ASSERT(cache.TotalSizeBytes() == 0u);
+
+    const auto empty = cache.Get(entry.key);
+    ASSERT(empty.data.empty());
+}
+
+TEST(TestProgressiveThumbnailStream_Emit)
+{
+    using namespace ExplorerLens::Engine;
+
+    ProgressiveThumbnailStream stream;
+    ASSERT(!stream.IsComplete());
+    ASSERT(stream.EmittedCount() == 0u);
+
+    SSEFrame frame;
+    frame.eventType = StreamEventType::THUMBNAIL_READY;
+    frame.requestId = 77u;
+    frame.payload   = {0xAA, 0xBB};
+
+    stream.Emit(frame);
+    ASSERT(stream.EmittedCount()  == 1u);
+    ASSERT(stream.LastEventType() == StreamEventType::THUMBNAIL_READY);
+    ASSERT(!stream.IsComplete());
+}
+
+TEST(TestProgressiveThumbnailStream_Complete)
+{
+    using namespace ExplorerLens::Engine;
+
+    ProgressiveThumbnailStream stream;
+
+    SSEFrame low;
+    low.eventType = StreamEventType::THUMBNAIL_LOW_RES;
+    low.requestId = 1u;
+    stream.Emit(low);
+    ASSERT(!stream.IsComplete());
+    ASSERT(stream.EmittedCount() == 1u);
+
+    SSEFrame done;
+    done.eventType = StreamEventType::STREAM_COMPLETE;
+    done.requestId = 1u;
+    stream.Emit(done);
+    ASSERT(stream.IsComplete());
+    ASSERT(stream.EmittedCount() == 2u);
+
+    // Further emits after completion are silently discarded
+    stream.Emit(done);
+    ASSERT(stream.EmittedCount() == 2u);
+}
