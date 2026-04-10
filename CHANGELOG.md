@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [35.0.0] — 2026-04-10 — Vega
+
+Sprint 1281-1290: Streaming & Cloud-Native Thumbnails — MultiStageThumbnailEmitter, CloudHydrationMonitor, PartialDecodeStateCache, ThumbnailETagValidator, AdaptiveFidelitySelector
+
+---
+
 ## [34.7.0] — 2026-04-10 — Arcturus-X
 
 ### Added

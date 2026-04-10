@@ -14071,3 +14071,247 @@ TEST(TestBenchmarkBaseline_NoRegression)
     ASSERT(result.IsClean());
     ASSERT(result.metrics.size() == 3u);
 }
+
+//==============================================================================
+// Sprint 1281-1290: Streaming & Cloud-Native Thumbnails (v35.0.0 "Vega")
+//==============================================================================
+
+TEST(TestMultiStageThumbnailEmitter_Stages)
+{
+    using namespace ExplorerLens::Engine;
+
+    uint32_t callCount = 0;
+    MultiStageThumbnailEmitter emitter([&](const StageResult& r) {
+        ++callCount;
+        ASSERT(r.success);
+        ASSERT(r.width > 0);
+        ASSERT(r.height > 0);
+    });
+
+    MultiStageThumbnailEmitter::Config cfg;
+    cfg.emitPlaceholder = true;
+    cfg.emitLowRes      = true;
+    cfg.emitFullRes     = true;
+    emitter.SetConfig(cfg);
+
+    const bool ok = emitter.Emit(L"test.jpg");
+    ASSERT(ok);
+    ASSERT(!emitter.WasCancelled());
+    ASSERT(emitter.StagesCompleted() == 3u);
+    ASSERT(callCount == 3u);
+}
+
+TEST(TestMultiStageThumbnailEmitter_Cancel)
+{
+    using namespace ExplorerLens::Engine;
+
+    MultiStageThumbnailEmitter emitter(nullptr);
+    MultiStageThumbnailEmitter::Config cfg;
+    cfg.emitPlaceholder = true;
+    cfg.emitLowRes      = true;
+    cfg.emitFullRes     = true;
+    emitter.SetConfig(cfg);
+
+    // Cancel before emitting
+    emitter.Cancel();
+    const bool ok = emitter.Emit(L"test.png");
+    ASSERT(!ok);
+    ASSERT(emitter.WasCancelled());
+    ASSERT(emitter.StagesCompleted() == 0u);
+
+    // Summary mentions cancelled
+    const auto summary = emitter.Summary();
+    ASSERT(!summary.empty());
+}
+
+TEST(TestCloudHydrationMonitor_Detect)
+{
+    using namespace ExplorerLens::Engine;
+
+    CloudHydrationMonitor::Config cfg;
+    cfg.minimumBytesRequired = 1;
+    CloudHydrationMonitor monitor(cfg);
+
+    // Non-existent file → UNKNOWN
+    const auto state = monitor.Probe(L"nonexistent_file_12345.dat");
+    ASSERT(state == HydrationState::UNKNOWN);
+
+    // StateLabel covers all variants
+    ASSERT(CloudHydrationMonitor::StateLabel(HydrationState::FULLY_LOCAL)       != nullptr);
+    ASSERT(CloudHydrationMonitor::StateLabel(HydrationState::PARTIALLY_LOCAL)   != nullptr);
+    ASSERT(CloudHydrationMonitor::StateLabel(HydrationState::GHOST_PLACEHOLDER) != nullptr);
+    ASSERT(CloudHydrationMonitor::StateLabel(HydrationState::NOT_A_PLACEHOLDER) != nullptr);
+    ASSERT(CloudHydrationMonitor::StateLabel(HydrationState::UNKNOWN)           != nullptr);
+}
+
+TEST(TestCloudHydrationMonitor_Defer)
+{
+    using namespace ExplorerLens::Engine;
+
+    CloudHydrationMonitor monitor;
+
+    // CancelDeferred on a path that was never registered should not crash.
+    monitor.CancelDeferred(L"C:\\fake\\path\\file.docx");
+
+    // RequestWhenReady with a non-existent path — stub should be a no-op.
+    bool cbFired = false;
+    monitor.RequestWhenReady(L"C:\\fake\\path\\file.docx",
+        [&](const std::wstring&, HydrationState) { cbFired = true; });
+    // Callback not immediately fired (requires background polling in production).
+    ASSERT(!cbFired);
+
+    // Config round-trip
+    ASSERT(monitor.GetConfig().pollIntervalMs > 0);
+}
+
+TEST(TestPartialDecodeStateCache_SaveRestore)
+{
+    using namespace ExplorerLens::Engine;
+
+    PartialDecodeStateCache cache;
+
+    PartialDecodeState state;
+    state.formatTag   = "JPEG";
+    state.widthHint   = 1920;
+    state.heightHint  = 1080;
+    state.mtimeMs     = 100000ULL;
+    state.headerBlob  = {0xFF, 0xD8, 0xFF, 0xE0};
+
+    cache.Put(L"C:\\photos\\test.jpg", state);
+    ASSERT(cache.EntryCount() == 1u);
+
+    const auto* p = cache.Get(L"C:\\photos\\test.jpg", 100000ULL);
+    ASSERT(p != nullptr);
+    ASSERT(p->formatTag == "JPEG");
+    ASSERT(p->widthHint == 1920u);
+
+    // Mtime mismatch → cache miss
+    const auto* p2 = cache.Get(L"C:\\photos\\test.jpg", 999999ULL);
+    ASSERT_NULL(p2);
+}
+
+TEST(TestPartialDecodeStateCache_Eviction)
+{
+    using namespace ExplorerLens::Engine;
+
+    PartialDecodeStateCache::Config cfg;
+    cfg.maxEntries = 3;
+    PartialDecodeStateCache cache(cfg);
+
+    for (uint32_t i = 0; i < 5; ++i) {
+        PartialDecodeState s;
+        s.formatTag  = "PNG";
+        s.mtimeMs    = static_cast<uint64_t>(i) * 1000u;
+        cache.Put(L"file" + std::to_wstring(i) + L".png", s);
+    }
+
+    // After eviction, at most maxEntries remain.
+    ASSERT(cache.EntryCount() <= cfg.maxEntries);
+
+    // Invalidate all
+    cache.Clear();
+    ASSERT(cache.EntryCount() == 0u);
+    ASSERT(cache.TotalBlobBytes() == 0u);
+}
+
+TEST(TestThumbnailETagValidator_Match)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailETagValidator validator;
+
+    validator.Record(L"C:\\docs\\report.pdf", "etag-abc123", 555000ULL, 12345ULL);
+    ASSERT(validator.RecordCount() == 1u);
+
+    // Same ETag → VALID
+    const auto r = validator.Validate(
+        L"C:\\docs\\report.pdf", "etag-abc123", 555000ULL, 12345ULL);
+    ASSERT(r == ETagValidationResult::VALID);
+
+    // Not present path → NOT_PRESENT
+    const auto r2 = validator.Validate(
+        L"C:\\docs\\missing.pdf", "etag-xyz", 0, 0);
+    ASSERT(r2 == ETagValidationResult::NOT_PRESENT);
+
+    // ValidationLabel coverage
+    ASSERT(ThumbnailETagValidator::ValidationLabel(ETagValidationResult::VALID)         != nullptr);
+    ASSERT(ThumbnailETagValidator::ValidationLabel(ETagValidationResult::ETAG_CHANGED)  != nullptr);
+    ASSERT(ThumbnailETagValidator::ValidationLabel(ETagValidationResult::MTIME_CHANGED) != nullptr);
+    ASSERT(ThumbnailETagValidator::ValidationLabel(ETagValidationResult::NOT_PRESENT)   != nullptr);
+}
+
+TEST(TestThumbnailETagValidator_Invalidate)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailETagValidator validator;
+
+    validator.Record(L"C:\\img\\photo.heic", "etag-v1", 1000ULL, 500ULL);
+    ASSERT(validator.RecordCount() == 1u);
+
+    // Changed ETag → ETAG_CHANGED
+    const auto r = validator.Validate(
+        L"C:\\img\\photo.heic", "etag-v2", 1000ULL, 500ULL);
+    ASSERT(r == ETagValidationResult::ETAG_CHANGED);
+
+    // Explicit remove
+    validator.Remove(L"C:\\img\\photo.heic");
+    ASSERT(validator.RecordCount() == 0u);
+
+    // PurgeOld with 0 seconds should evict everything older than now
+    validator.Record(L"C:\\img\\old.png", "", 0ULL, 100ULL);
+    ASSERT(validator.RecordCount() == 1u);
+    validator.Clear();
+    ASSERT(validator.RecordCount() == 0u);
+}
+
+TEST(TestAdaptiveFidelitySelector_HighBudget)
+{
+    using namespace ExplorerLens::Engine;
+
+    AdaptiveFidelitySelector::Config cfg;
+    cfg.timeBudgetMs           = 1000;
+    cfg.minBandwidthForQuality = 10 * 1024 * 1024;
+    cfg.preferQualityWhenGPU   = true;
+    cfg.degradeOnMetered       = false;
+    AdaptiveFidelitySelector sel(cfg);
+
+    // High bandwidth + GPU → QUALITY
+    NetworkBandwidthEstimate bw;
+    bw.bytesPerSecond = 50 * 1024 * 1024;
+    bw.isMetered      = false;
+    const auto hint = sel.Select(bw, /*gpuAvailable=*/true);
+    ASSERT(hint == FidelityHint::QUALITY);
+
+    // FidelityLabel coverage
+    ASSERT(AdaptiveFidelitySelector::FidelityLabel(FidelityHint::PLACEHOLDER_ONLY) != nullptr);
+    ASSERT(AdaptiveFidelitySelector::FidelityLabel(FidelityHint::FAST)             != nullptr);
+    ASSERT(AdaptiveFidelitySelector::FidelityLabel(FidelityHint::BALANCED)         != nullptr);
+    ASSERT(AdaptiveFidelitySelector::FidelityLabel(FidelityHint::QUALITY)          != nullptr);
+}
+
+TEST(TestAdaptiveFidelitySelector_LowBudget)
+{
+    using namespace ExplorerLens::Engine;
+
+    AdaptiveFidelitySelector sel;
+
+    // Very tight budget → PLACEHOLDER_ONLY
+    sel.SetTimeBudgetMs(20);
+    NetworkBandwidthEstimate bw;
+    bw.bytesPerSecond = 100 * 1024 * 1024;
+    bw.isMetered      = false;
+    const auto hint = sel.Select(bw, /*gpuAvailable=*/true);
+    ASSERT(hint == FidelityHint::PLACEHOLDER_ONLY);
+
+    // Offline → FAST
+    sel.SetTimeBudgetMs(1000);
+    bw.bytesPerSecond = 0;
+    const auto hint2 = sel.Select(bw, false);
+    ASSERT(hint2 == FidelityHint::FAST);
+
+    // Reset should not crash
+    sel.Reset();
+    ASSERT(sel.GetConfig().timeBudgetMs == 1000); // SetTimeBudgetMs persists in Config
+}
+

@@ -2432,6 +2432,30 @@ extern void TestGerberLayerCompositor_ProbeLayer_Runner();
 extern void TestKiCadNetlistParser_IsKiCad_Runner();
 extern void TestKiCadNetlistParser_Parse_Runner();
 
+// Sprint 1271-1280: Performance Hardening + LTS Gate (v34.7.0 "Arcturus-X")
+extern void TestPerfRegressionGate_Thresholds_Runner();
+extern void TestPerfRegressionGate_BlockOnFail_Runner();
+extern void TestLTSBuildValidator_AllGatesPass_Runner();
+extern void TestLTSBuildValidator_FailOnCoverage_Runner();
+extern void TestCacheWarmupPreloader_StartStop_Runner();
+extern void TestCacheWarmupPreloader_Stats_Runner();
+extern void TestDecodeLatencyProfiler_RecordAndQuery_Runner();
+extern void TestDecodeLatencyProfiler_Reset_Runner();
+extern void TestBenchmarkBaseline_LoadCompare_Runner();
+extern void TestBenchmarkBaseline_NoRegression_Runner();
+
+// Sprint 1281-1290: Streaming & Cloud-Native Thumbnails (v35.0.0 "Vega")
+extern void TestMultiStageThumbnailEmitter_Stages_Runner();
+extern void TestMultiStageThumbnailEmitter_Cancel_Runner();
+extern void TestCloudHydrationMonitor_Detect_Runner();
+extern void TestCloudHydrationMonitor_Defer_Runner();
+extern void TestPartialDecodeStateCache_SaveRestore_Runner();
+extern void TestPartialDecodeStateCache_Eviction_Runner();
+extern void TestThumbnailETagValidator_Match_Runner();
+extern void TestThumbnailETagValidator_Invalidate_Runner();
+extern void TestAdaptiveFidelitySelector_HighBudget_Runner();
+extern void TestAdaptiveFidelitySelector_LowBudget_Runner();
+
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
 extern void TestDecoderRegistry_Create_Runner();

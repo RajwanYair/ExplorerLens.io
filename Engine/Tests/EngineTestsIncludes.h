@@ -328,6 +328,13 @@
 #include "../Pipeline/DecodeLatencyProfiler.h"
 #include "../Utils/BenchmarkBaseline.h"
 
+// Sprint 1281-1290: Streaming & Cloud-Native Thumbnails (v35.0.0 "Vega")
+#include "../Pipeline/MultiStageThumbnailEmitter.h"
+#include "../Core/CloudHydrationMonitor.h"
+#include "../Cache/PartialDecodeStateCache.h"
+#include "../Core/ThumbnailETagValidator.h"
+#include "../Pipeline/AdaptiveFidelitySelector.h"
+
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
 #include "../Utils/CITestReporter.h"

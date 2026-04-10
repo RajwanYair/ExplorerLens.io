@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 34.6.0
+# Version: 35.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 34.7.0
+    VERSION 35.0.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -561,6 +561,13 @@ set(ENGINE_HEADERS
     Cache/CacheWarmupPreloader.h
     Pipeline/DecodeLatencyProfiler.h
     Utils/BenchmarkBaseline.h
+
+    # Sprint 1281-1290 — Streaming & Cloud-Native Thumbnails (v35.0.0 "Vega")
+    Pipeline/MultiStageThumbnailEmitter.h
+    Core/CloudHydrationMonitor.h
+    Cache/PartialDecodeStateCache.h
+    Core/ThumbnailETagValidator.h
+    Pipeline/AdaptiveFidelitySelector.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -2050,6 +2057,13 @@ set(ENGINE_SOURCES
     Cache/CacheWarmupPreloader.cpp
     Pipeline/DecodeLatencyProfiler.cpp
     Utils/BenchmarkBaseline.cpp
+
+    # Sprint 1281-1290 — Streaming & Cloud-Native Thumbnails (v35.0.0 "Vega")
+    Pipeline/MultiStageThumbnailEmitter.cpp
+    Core/CloudHydrationMonitor.cpp
+    Cache/PartialDecodeStateCache.cpp
+    Core/ThumbnailETagValidator.cpp
+    Pipeline/AdaptiveFidelitySelector.cpp
 )
 
 #==============================================================================
