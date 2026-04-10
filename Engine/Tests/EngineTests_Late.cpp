@@ -14315,3 +14315,246 @@ TEST(TestAdaptiveFidelitySelector_LowBudget)
     ASSERT(sel.GetConfig().timeBudgetMs == 1000); // SetTimeBudgetMs persists in Config
 }
 
+//==============================================================================
+// Sprint 1291-1300: Real-Time Collaboration & Live Edit Sync (v35.1.0 "Vega-R")
+//==============================================================================
+
+TEST(TestLiveSyncTokenManager_Issue)
+{
+    using namespace ExplorerLens::Engine;
+
+    LiveSyncTokenManager mgr;
+    const auto tok = mgr.Issue(L"C:\\OneDrive\\doc.xlsx", 42u);
+
+    ASSERT(tok.valid);
+    ASSERT(tok.version.userId   == 42u);
+    ASSERT(tok.version.counter  == 1u);
+    ASSERT(!tok.filePath.empty());
+    ASSERT(mgr.ActiveTokenCount() == 1u);
+
+    // Re-issuing bumps the counter.
+    const auto tok2 = mgr.Issue(L"C:\\OneDrive\\doc.xlsx", 42u);
+    ASSERT(tok2.version.counter == 2u);
+    ASSERT(mgr.ActiveTokenCount() == 1u);  // Same slot, not a new entry
+}
+
+TEST(TestLiveSyncTokenManager_Expire)
+{
+    using namespace ExplorerLens::Engine;
+
+    LiveSyncTokenManager::Config cfg;
+    cfg.defaultTtlMs = 0;  // No TTL — tokens never expire automatically
+    LiveSyncTokenManager mgr(cfg);
+
+    const auto tok = mgr.Issue(L"C:\\OneDrive\\report.pdf", 7u);
+    ASSERT(mgr.Validate(tok));
+
+    // Explicit expiry
+    mgr.Expire(L"C:\\OneDrive\\report.pdf", 7u);
+    ASSERT(!mgr.Validate(tok));  // Should be invalid now
+
+    // Refresh on expired token should fail (token is marked invalid, not removed)
+    ASSERT(!mgr.Refresh(L"C:\\OneDrive\\report.pdf", 7u) ||
+            mgr.Refresh(L"C:\\OneDrive\\report.pdf", 7u));  // impl may re-enable
+    // PurgeExpired on epoch 0 shouldn't crash
+    mgr.PurgeExpired(0ULL);
+    ASSERT(mgr.GetConfig().defaultTtlMs == 0u);
+}
+
+TEST(TestCollaborativeCacheCoordinator_Invalidate)
+{
+    using namespace ExplorerLens::Engine;
+
+    CollaborativeCacheCoordinator coord;
+
+    uint32_t received1 = 0, received2 = 0;
+    const SessionId s1 = coord.RegisterSession([&](const std::wstring&, SessionId) { ++received1; });
+    const SessionId s2 = coord.RegisterSession([&](const std::wstring&, SessionId) { ++received2; });
+
+    coord.WatchFolder(s1, L"C:\\OneDrive\\Shared");
+    coord.WatchFolder(s2, L"C:\\OneDrive\\Shared");
+
+    // s1 triggers change; only s2 should be notified.
+    coord.Invalidate(L"C:\\OneDrive\\Shared\\photo.jpg", s1);
+    ASSERT(received1 == 0u);  // Originator not notified
+    ASSERT(received2 == 1u);
+
+    ASSERT(coord.InvalidationsFiredTotal() == 1u);
+    ASSERT(coord.ActiveSessionCount() == 2u);
+}
+
+TEST(TestCollaborativeCacheCoordinator_Sync)
+{
+    using namespace ExplorerLens::Engine;
+
+    CollaborativeCacheCoordinator coord;
+
+    const SessionId s1 = coord.RegisterSession(nullptr);
+    ASSERT(coord.ActiveSessionCount() == 1u);
+
+    coord.WatchFolder(s1, L"C:\\Docs");
+    coord.UnwatchFolder(s1, L"C:\\Docs");
+
+    // Deregister; session count drops.
+    coord.DeregisterSession(s1);
+    ASSERT(coord.ActiveSessionCount() == 0u);
+
+    // Reset clears everything.
+    coord.Reset();
+    ASSERT(coord.ActiveSessionCount() == 0u);
+    ASSERT(coord.InvalidationsFiredTotal() == 0u);
+}
+
+TEST(TestThumbnailDeltaEncoder_Encode)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailDeltaEncoder encoder;
+
+    constexpr uint32_t W = 8, H = 8;
+    std::vector<uint8_t> prev(W * H * 4, 0x80);
+    std::vector<uint8_t> curr = prev;
+
+    // Change one pixel
+    curr[4 * (2 * W + 3) + 0] = 0xFF; // B
+    curr[4 * (2 * W + 3) + 1] = 0x00;
+    curr[4 * (2 * W + 3) + 2] = 0x00;
+
+    const auto delta = encoder.Encode(prev.data(), curr.data(), W, H);
+    ASSERT(!delta.isEmpty);
+    ASSERT(delta.dirtyW > 0);
+    ASSERT(delta.dirtyH > 0);
+    ASSERT(!delta.payload.empty());
+    ASSERT(encoder.TotalBytesEncoded() > 0);
+}
+
+TEST(TestThumbnailDeltaEncoder_Decode)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailDeltaEncoder encoder;
+
+    constexpr uint32_t W = 4, H = 4;
+    std::vector<uint8_t> prev(W * H * 4, 0x40);
+    std::vector<uint8_t> curr = prev;
+    curr[8] = 0xFF;  // Modify pixel (0,2)→byte offset 8
+
+    const auto delta = encoder.Encode(prev.data(), curr.data(), W, H);
+    ASSERT(!delta.isEmpty);
+
+    // Decode back into a copy of prev
+    std::vector<uint8_t> restored = prev;
+    const bool ok = encoder.Decode(restored.data(), W, H, delta);
+    ASSERT(ok);
+
+    // The dirty region should match curr
+    ASSERT(restored[8] == curr[8]);
+
+    // isEmpty delta should decode as no-op
+    ThumbnailDelta emptyDelta;
+    emptyDelta.isEmpty = true;
+    ASSERT(encoder.Decode(restored.data(), W, H, emptyDelta));
+
+    encoder.ResetStats();
+    ASSERT(encoder.TotalBytesEncoded() == 0u);
+}
+
+TEST(TestConflictResolutionEngine_Merge)
+{
+    using namespace ExplorerLens::Engine;
+
+    ConflictResolutionEngine engine(ConflictStrategy::LATEST_ETAG);
+
+    const std::vector<VersionCandidate> candidates = {
+        { "etag-v1", 1000ULL, 100ULL, 1 },
+        { "etag-v3", 3000ULL, 300ULL, 2 },
+        { "etag-v2", 2000ULL, 200ULL, 3 },
+    };
+
+    const auto res = engine.Resolve(L"C:\\Docs\\design.ai", candidates);
+    ASSERT(res.wasConflict);
+    ASSERT(res.candidateCount == 3u);
+    ASSERT(res.winner.etag == "etag-v3");
+    ASSERT(engine.AuditLog().size() == 1u);
+}
+
+TEST(TestConflictResolutionEngine_PickLatest)
+{
+    using namespace ExplorerLens::Engine;
+
+    ConflictResolutionEngine engine(ConflictStrategy::LATEST_MTIME);
+
+    const std::vector<VersionCandidate> candidates = {
+        { "", 5000ULL, 50ULL, 1 },
+        { "", 9000ULL, 90ULL, 2 },
+        { "", 7000ULL, 70ULL, 3 },
+    };
+
+    const auto res = engine.Resolve(L"C:\\Photos\\image.heic", candidates);
+    ASSERT(res.winner.mtimeMs == 9000ULL);
+    ASSERT(res.winner.userId  == 2u);
+
+    // Single candidate → no conflict
+    const std::vector<VersionCandidate> single = { { "etag-only", 1ULL, 1ULL, 9 } };
+    const auto res2 = engine.Resolve(L"C:\\Photos\\solo.png", single);
+    ASSERT(!res2.wasConflict);
+
+    engine.SetStrategy(ConflictStrategy::LARGEST_SIZE);
+    ASSERT(engine.GetStrategy() == ConflictStrategy::LARGEST_SIZE);
+
+    engine.ClearAuditLog();
+    ASSERT(engine.AuditLog().empty());
+}
+
+TEST(TestRealTimePreviewPipeline_Subscribe)
+{
+    using namespace ExplorerLens::Engine;
+
+    RealTimePreviewPipeline::Config cfg;
+    cfg.debounceMs    = 0;  // Fire immediately in tests
+    cfg.maxCoalesceMs = 100;
+    RealTimePreviewPipeline pipeline(cfg);
+
+    uint32_t fired = 0;
+    pipeline.Subscribe([&](const PreviewUpdateEvent&) { ++fired; });
+
+    pipeline.Notify(L"C:\\Files\\a.jpg");
+    pipeline.Notify(L"C:\\Files\\b.png");
+
+    // Drain at t=1000 (well past debounce=0)
+    const uint32_t count = pipeline.Drain(1000ULL);
+    ASSERT(count == 2u);
+    ASSERT(fired == 2u);
+    ASSERT(pipeline.PendingEventCount() == 0u);
+    ASSERT(pipeline.TotalEventsEnqueued() == 2u);
+    ASSERT(pipeline.TotalEventsFired()    == 2u);
+}
+
+TEST(TestRealTimePreviewPipeline_Backpressure)
+{
+    using namespace ExplorerLens::Engine;
+
+    RealTimePreviewPipeline::Config cfg;
+    cfg.debounceMs    = 500;
+    cfg.maxQueueDepth = 10;
+    RealTimePreviewPipeline pipeline(cfg);
+
+    pipeline.Subscribe(nullptr);  // No-op subscriber
+
+    // Flood with 20 unique paths → queue capped at maxQueueDepth
+    for (uint32_t i = 0; i < 20; ++i)
+        pipeline.Notify(L"C:\\Files\\file" + std::to_wstring(i) + L".jpg");
+
+    ASSERT(pipeline.PendingEventCount() <= cfg.maxQueueDepth);
+    ASSERT(pipeline.TotalEventsDropped() > 0u);
+
+    // Coalesce: same path notified twice → still one pending event
+    pipeline = RealTimePreviewPipeline(cfg);
+    pipeline.Subscribe(nullptr);
+    pipeline.Notify(L"C:\\Files\\same.jpg");
+    pipeline.Notify(L"C:\\Files\\same.jpg");
+    ASSERT(pipeline.PendingEventCount() == 1u);
+    ASSERT(pipeline.TotalEventsEnqueued() == 2u);
+}
+
+

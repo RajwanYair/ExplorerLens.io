@@ -2456,6 +2456,18 @@ extern void TestThumbnailETagValidator_Invalidate_Runner();
 extern void TestAdaptiveFidelitySelector_HighBudget_Runner();
 extern void TestAdaptiveFidelitySelector_LowBudget_Runner();
 
+// Sprint 1291-1300: Real-Time Collaboration & Live Edit Sync (v35.1.0 "Vega-R")
+extern void TestLiveSyncTokenManager_Issue_Runner();
+extern void TestLiveSyncTokenManager_Expire_Runner();
+extern void TestCollaborativeCacheCoordinator_Invalidate_Runner();
+extern void TestCollaborativeCacheCoordinator_Sync_Runner();
+extern void TestThumbnailDeltaEncoder_Encode_Runner();
+extern void TestThumbnailDeltaEncoder_Decode_Runner();
+extern void TestConflictResolutionEngine_Merge_Runner();
+extern void TestConflictResolutionEngine_PickLatest_Runner();
+extern void TestRealTimePreviewPipeline_Subscribe_Runner();
+extern void TestRealTimePreviewPipeline_Backpressure_Runner();
+
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
 extern void TestDecoderRegistry_Create_Runner();

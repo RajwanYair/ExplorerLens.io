@@ -335,6 +335,13 @@
 #include "../Core/ThumbnailETagValidator.h"
 #include "../Pipeline/AdaptiveFidelitySelector.h"
 
+// Sprint 1291-1300: Real-Time Collaboration & Live Edit Sync (v35.1.0 "Vega-R")
+#include "../Core/LiveSyncTokenManager.h"
+#include "../Cache/CollaborativeCacheCoordinator.h"
+#include "../Pipeline/ThumbnailDeltaEncoder.h"
+#include "../Core/ConflictResolutionEngine.h"
+#include "../Pipeline/RealTimePreviewPipeline.h"
+
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
 #include "../Utils/CITestReporter.h"
