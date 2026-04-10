@@ -2489,6 +2489,17 @@ extern void TestThumbnailAuditLog_Record_Runner();
 extern void TestThumbnailAuditLog_Query_Runner();
 extern void TestFIPSCryptoAdapter_Hash_Runner();
 extern void TestFIPSCryptoAdapter_Hmac_Runner();
+// Sprint 1321-1330: WebAssembly / Browser Extension Pipeline
+extern void TestWasmDecoderShim_Register_Runner();
+extern void TestWasmDecoderShim_Decode_Runner();
+extern void TestBrowserThumbnailBridge_PostMessage_Runner();
+extern void TestBrowserThumbnailBridge_AsyncReply_Runner();
+extern void TestOffscreenCanvasRenderer_FrameSize_Runner();
+extern void TestOffscreenCanvasRenderer_ErrorOnNull_Runner();
+extern void TestWasmCacheAdapter_Store_Runner();
+extern void TestWasmCacheAdapter_Evict_Runner();
+extern void TestProgressiveThumbnailStream_Emit_Runner();
+extern void TestProgressiveThumbnailStream_Complete_Runner();
 
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────
