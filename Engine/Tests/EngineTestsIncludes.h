@@ -359,6 +359,12 @@
 #include "../Pipeline/OffscreenCanvasRenderer.h"
 #include "../Cache/WasmCacheAdapter.h"
 #include "../Pipeline/ProgressiveThumbnailStream.h"
+// Sprint 1331-1340: Cross-Device Preview Sync
+#include "../Core/DeviceSyncManifest.h"
+#include "../Cache/CrossDeviceCacheSync.h"
+#include "../Pipeline/ThumbnailPackFile.h"
+#include "../Core/SyncConflictResolver.h"
+#include "../Core/DeviceCapabilityAdvertiser.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"

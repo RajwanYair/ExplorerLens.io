@@ -179,7 +179,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 | Next sprint: v35.5.0 "Vega-V" | Feature | High | Sprint 1331-1340: Cross-Device Preview Sync |
 | `EngineTestsExterns.h` monitor | Monitor | Low | ~233 KB; split when > 400 KB |
 | v35.4.0 GH Release artifacts | Verify | Medium | Confirm all .dll/.msi/.zip/.sbom attached once CI completes |
-| v35.3.0 build-fix hash | Done | ✅ | Commit `e2c9d7b1` pushed; hash backfilled in tracking log + lessons-learned §11.8 |
+| v35.3.0 build-fix hash | Done | ✅ | Commit `e2c9d7b1` pushed; hash backfilled in tracking log + lessons-learned §11.8 |ned §11.8 |
 
 ---
 

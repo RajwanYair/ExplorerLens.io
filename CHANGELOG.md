@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [35.5.0] — 2026-04-10 — Vega-V
+
+Sprint 1331-1340: Cross-Device Preview Sync — DeviceSyncManifest, CrossDeviceCacheSync, ThumbnailPackFile (.tlpk), SyncConflictResolver, DeviceCapabilityAdvertiser; fix Win32 PostMessage macro collision in BrowserThumbnailBridge
+
+---
+
 ## [35.4.0] — 2026-04-10 — Vega-U
 
 Sprint 1321-1330: WebAssembly / Browser Extension Pipeline — WasmDecoderShim, BrowserThumbnailBridge, OffscreenCanvasRenderer, WasmCacheAdapter, ProgressiveThumbnailStream; 10 new tests (4714 total)

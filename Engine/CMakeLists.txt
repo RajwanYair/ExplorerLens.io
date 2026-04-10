@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 35.4.0
+# Version: 35.5.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 35.4.0
+    VERSION 35.5.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -593,6 +593,12 @@ set(ENGINE_HEADERS
     Pipeline/OffscreenCanvasRenderer.h
     Cache/WasmCacheAdapter.h
     Pipeline/ProgressiveThumbnailStream.h
+    # Sprint 1331-1340: Cross-Device Preview Sync
+    Core/DeviceSyncManifest.h
+    Cache/CrossDeviceCacheSync.h
+    Pipeline/ThumbnailPackFile.h
+    Core/SyncConflictResolver.h
+    Core/DeviceCapabilityAdvertiser.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -2114,6 +2120,12 @@ set(ENGINE_SOURCES
     Pipeline/OffscreenCanvasRenderer.cpp
     Cache/WasmCacheAdapter.cpp
     Pipeline/ProgressiveThumbnailStream.cpp
+    # Sprint 1331-1340: Cross-Device Preview Sync
+    Core/DeviceSyncManifest.cpp
+    Cache/CrossDeviceCacheSync.cpp
+    Pipeline/ThumbnailPackFile.cpp
+    Core/SyncConflictResolver.cpp
+    Core/DeviceCapabilityAdvertiser.cpp
 )
 
 #==============================================================================

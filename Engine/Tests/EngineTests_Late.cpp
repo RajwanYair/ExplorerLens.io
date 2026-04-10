@@ -15352,3 +15352,245 @@ TEST(TestProgressiveThumbnailStream_Complete)
     stream.Emit(done);
     ASSERT(stream.EmittedCount() == 2u);
 }
+
+// ===========================================================================
+// Sprint 1331-1340: Cross-Device Preview Sync
+// ===========================================================================
+
+TEST(TestDeviceSyncManifest_Upsert)
+{
+    using namespace ExplorerLens::Engine;
+
+    DeviceSyncManifest manifest("device-A");
+
+    SyncManifestEntry e1;
+    e1.pathHash    = 0xABCD1234u;
+    e1.etag        = "etag-v1";
+    e1.width       = 256;
+    e1.height      = 256;
+    e1.sizeBytes   = 4096;
+    e1.generatedAt = 1000u;
+
+    bool isNew = manifest.Upsert(e1);
+    ASSERT(isNew);
+    ASSERT(manifest.EntryCount() == 1u);
+    ASSERT(manifest.DeviceId() == "device-A");
+
+    // Upsert same hash again — should overwrite, not add
+    e1.etag = "etag-v2";
+    bool isNew2 = manifest.Upsert(e1);
+    ASSERT(!isNew2);
+    ASSERT(manifest.EntryCount() == 1u);
+
+    auto found = manifest.Find(0xABCD1234u);
+    ASSERT(found.has_value());
+    ASSERT(found->etag == "etag-v2");
+}
+
+TEST(TestDeviceSyncManifest_Serialize)
+{
+    using namespace ExplorerLens::Engine;
+
+    DeviceSyncManifest original("dev-serial");
+    SyncManifestEntry e;
+    e.pathHash    = 0xDEADBEEFu;
+    e.etag        = "abc123";
+    e.width       = 128;
+    e.height      = 128;
+    e.sizeBytes   = 2048;
+    e.generatedAt = 9999u;
+    original.Upsert(e);
+
+    auto blob = original.Serialize();
+    ASSERT(!blob.empty());
+
+    DeviceSyncManifest restored;
+    bool ok = restored.Deserialize(blob);
+    ASSERT(ok);
+    ASSERT(restored.EntryCount() == 1u);
+    ASSERT(restored.DeviceId() == "dev-serial");
+
+    auto found = restored.Find(0xDEADBEEFu);
+    ASSERT(found.has_value());
+    ASSERT(found->etag == "abc123");
+    ASSERT(found->width == 128u);
+}
+
+TEST(TestCrossDeviceCacheSync_Upload)
+{
+    using namespace ExplorerLens::Engine;
+
+    CrossDeviceCacheSync sync;
+    sync.Configure("https://cloud.example.com/sync", "device-A");
+    ASSERT(sync.IsConfigured());
+
+    std::vector<uint8_t> blob = { 0x01, 0x02, 0x03 };
+    auto res = sync.UploadManifest(blob);
+    ASSERT(res == SyncOpResult::OK);
+    ASSERT(sync.LastStats().bytesTransferred >= blob.size());
+
+    auto res2 = sync.UploadManifest({});
+    ASSERT(res2 == SyncOpResult::UPLOAD_FAILED);
+}
+
+TEST(TestCrossDeviceCacheSync_Bidirectional)
+{
+    using namespace ExplorerLens::Engine;
+
+    CrossDeviceCacheSync sync;
+    sync.Configure("https://cloud.example.com/sync", "device-B");
+
+    size_t progressCalls = 0;
+    auto res = sync.Sync(DeviceSyncDirection::Bidirectional,
+        [&](size_t, size_t){ ++progressCalls; });
+
+    ASSERT(res == SyncOpResult::OK);
+    ASSERT(sync.LastStats().entriesUploaded   == 1u);
+    ASSERT(sync.LastStats().entriesDownloaded == 1u);
+    ASSERT(progressCalls >= 2u);
+    ASSERT(sync.SyncCount() == 1u);
+}
+
+TEST(TestThumbnailPackFile_PackExtract)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailPackFile pack;
+    std::vector<uint8_t> thumb1 = { 0xFF, 0xD8, 0xFF, 0xE0, 0x01, 0x02 };
+    std::vector<uint8_t> thumb2 = { 0x89, 0x50, 0x4E, 0x47, 0x03, 0x04 };
+
+    pack.AddEntry(0x1111u, thumb1);
+    pack.AddEntry(0x2222u, thumb2);
+    ASSERT(pack.EntryCount() == 2u);
+
+    auto packed = pack.Pack();
+    ASSERT(!packed.empty());
+
+    ThumbnailPackFile reader;
+    auto err = reader.Load(packed);
+    ASSERT(err == PackFileError::OK);
+    ASSERT(reader.EntryCount() == 2u);
+
+    auto extracted = reader.Extract(0x1111u);
+    ASSERT(extracted == thumb1);
+    auto extracted2 = reader.Extract(0x2222u);
+    ASSERT(extracted2 == thumb2);
+}
+
+TEST(TestThumbnailPackFile_InvalidMagic)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailPackFile reader;
+    std::vector<uint8_t> garbage = { 0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x00, 0x00, 0x00, 0x00 };
+    auto err = reader.Load(garbage);
+    ASSERT(err == PackFileError::INVALID_MAGIC);
+
+    auto notFound = reader.Extract(0xABCDu);
+    ASSERT(notFound.empty());
+}
+
+TEST(TestSyncConflictResolver_LatestEtag)
+{
+    using namespace ExplorerLens::Engine;
+
+    SyncConflictResolver resolver(ConflictResolutionMode::LATEST_ETAG);
+
+    SyncManifestEntry local;
+    local.pathHash = 0x1u;
+    local.etag     = "etag-old";
+
+    SyncManifestEntry remote;
+    remote.pathHash = 0x1u;
+    remote.etag     = "etag-new"; // lexicographically greater
+
+    std::vector<SyncManifestEntry> localList  = { local };
+    std::vector<SyncManifestEntry> remoteList = { remote };
+
+    auto result = resolver.Merge(localList, remoteList);
+    ASSERT(result.conflictsFound == 1u);
+    // Remote etag is greater, so remote should win
+    ASSERT(localList[0].etag == "etag-new");
+    ASSERT(resolver.TotalConflictsResolved() == 1u);
+}
+
+TEST(TestSyncConflictResolver_RemoteWins)
+{
+    using namespace ExplorerLens::Engine;
+
+    SyncConflictResolver resolver(ConflictResolutionMode::REMOTE_WINS);
+
+    SyncManifestEntry local;
+    local.pathHash    = 0x2u;
+    local.etag        = "etag-zzz"; // "winning" by alpha but mode is REMOTE_WINS
+
+    SyncManifestEntry remote;
+    remote.pathHash = 0x2u;
+    remote.etag     = "etag-aaa";
+
+    // New entry (no conflict)
+    SyncManifestEntry remoteNew;
+    remoteNew.pathHash = 0x3u;
+    remoteNew.etag     = "etag-new";
+
+    std::vector<SyncManifestEntry> localList  = { local };
+    std::vector<SyncManifestEntry> remoteList = { remote, remoteNew };
+
+    auto result = resolver.Merge(localList, remoteList);
+    ASSERT(result.conflictsFound == 1u);
+    ASSERT(result.entriesMerged  == 2u);
+    ASSERT(localList.size()      == 2u);
+    // remote wins: local etag overwritten
+    ASSERT(localList[0].etag == "etag-aaa");
+}
+
+TEST(TestDeviceCapabilityAdvertiser_Probe)
+{
+    using namespace ExplorerLens::Engine;
+
+    DeviceCapabilityAdvertiser adv;
+    ASSERT(!adv.IsProbed());
+
+    adv.Probe();
+    ASSERT(adv.IsProbed());
+
+    const auto& prof = adv.Profile();
+    ASSERT(prof.logicalCores   > 0u);
+    ASSERT(prof.availableMemMB > 0u);
+    ASSERT(prof.gpuTier        != DeviceGPUTier::NONE);
+
+    auto json = adv.Serialize();
+    ASSERT(!json.empty());
+    ASSERT(json.front() == '{');
+}
+
+TEST(TestDeviceCapabilityAdvertiser_FindBest)
+{
+    using namespace ExplorerLens::Engine;
+
+    DeviceCapabilityAdvertiser adv;
+
+    DeviceCapabilityProfile p1;
+    p1.deviceId      = "peer-1";
+    p1.gpuTier       = DeviceGPUTier::DX11;
+    p1.canDecode4K   = true;
+    p1.logicalCores  = 4;
+
+    DeviceCapabilityProfile p2;
+    p2.deviceId      = "peer-2";
+    p2.gpuTier       = DeviceGPUTier::NVDEC; // better than DX11
+    p2.canDecode4K   = true;
+    p2.logicalCores  = 8;
+
+    DeviceCapabilityProfile p3;
+    p3.deviceId      = "peer-3";
+    p3.gpuTier       = DeviceGPUTier::DX12;
+    p3.canDecode4K   = false; // excluded
+
+    adv.LoadPeerProfiles({ p1, p2, p3 });
+    ASSERT(adv.PeerProfiles().size() == 3u);
+
+    const auto* best = adv.FindBestDecoder();
+    ASSERT(best != nullptr);
+    ASSERT(best->deviceId == "peer-2"); // NVDEC > DX12 > DX11
+}
