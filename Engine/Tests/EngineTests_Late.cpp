@@ -15196,7 +15196,7 @@ TEST(TestBrowserThumbnailBridge_PostMessage)
     msg.requestId = 42u;
     msg.filePath  = L"C:\\thumbnails\\test.jpg";
 
-    bridge.PostMessage(msg);
+    bridge.EnqueueMessage(msg);
     ASSERT(bridge.PendingCount() == 1u);
 
     bridge.DispatchAll();
@@ -15222,7 +15222,7 @@ TEST(TestBrowserThumbnailBridge_AsyncReply)
     msg.requestId = 99u;
     msg.filePath  = L"C:\\thumbnails\\test.png";
 
-    bridge.PostMessage(msg);
+    bridge.EnqueueMessage(msg);
     bridge.DispatchAll();
 
     ASSERT(capturedId  == 99u);

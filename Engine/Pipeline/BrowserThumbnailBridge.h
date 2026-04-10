@@ -45,7 +45,7 @@ public:
 
     void SetReplyHandler(ThumbnailReplyHandler handler);
 
-    void PostMessage(const BrowserMessage& msg);
+    void EnqueueMessage(const BrowserMessage& msg);
     void DispatchAll();
 
     size_t PendingCount()    const;

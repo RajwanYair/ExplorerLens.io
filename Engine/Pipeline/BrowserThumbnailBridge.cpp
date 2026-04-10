@@ -10,7 +10,7 @@ void BrowserThumbnailBridge::SetReplyHandler(ThumbnailReplyHandler handler)
     m_handler = std::move(handler);
 }
 
-void BrowserThumbnailBridge::PostMessage(const BrowserMessage& msg)
+void BrowserThumbnailBridge::EnqueueMessage(const BrowserMessage& msg)
 {
     m_pending.push_back(msg);
 }
