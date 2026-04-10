@@ -13842,3 +13842,232 @@ TEST(TestKiCadNetlistParser_Parse)
     const auto img = KiCadNetlistParser::RenderPieChart(s, 64, 64);
     ASSERT(img.size() == 64u * 64u * 4u);
 }
+
+//==============================================================================
+// Sprint 1271-1280: Performance Hardening + LTS Gate (v34.7.0 "Arcturus-X")
+//==============================================================================
+
+TEST(TestPerfRegressionGate_Thresholds)
+{
+    using namespace ExplorerLens;
+
+    PerfRegressionGate gate;
+    gate.SetDefaultThresholds();
+
+    // Verify a few default thresholds are set.
+    const auto& thresholds = gate.Thresholds();
+    ASSERT(!thresholds.empty());
+    ASSERT(thresholds.count(PerfKPI::SingleThumbnailMs) == 1);
+    ASSERT(thresholds.count(PerfKPI::BatchThroughputImgSec) == 1);
+
+    // Verify threshold values match documented defaults.
+    const auto& tSingle = thresholds.at(PerfKPI::SingleThumbnailMs);
+    ASSERT(tSingle.warnThreshold > 0.0);
+    ASSERT(tSingle.failThreshold > tSingle.warnThreshold);
+}
+
+TEST(TestPerfRegressionGate_BlockOnFail)
+{
+    using namespace ExplorerLens;
+
+    PerfRegressionGate gate;
+    gate.SetDefaultThresholds();
+
+    // Inject a measurement that exceeds the fail threshold for SingleThumbnailMs.
+    // Default failThreshold = 25.0 ms.
+    std::map<PerfKPI, double> measurements;
+    measurements[PerfKPI::SingleThumbnailMs] = 50.0;  // well above fail threshold
+
+    const GateResult result = gate.Evaluate(measurements);
+    ASSERT(result.failCount >= 1);
+    ASSERT(result.overall == GateVerdict::Fail);
+    ASSERT(!result.Passed());
+
+    // FormatReport should produce non-empty text.
+    const std::string report = PerfRegressionGate::FormatReport(result);
+    ASSERT(!report.empty());
+}
+
+TEST(TestLTSBuildValidator_AllGatesPass)
+{
+    using namespace ExplorerLens::Engine;
+
+    LTSBuildValidator v;
+    v.SetTestCount(4664);
+    v.SetDecoderCount(200);
+    v.SetPeakMemoryMB(110.0);
+    v.SetCoveragePct(96.5);
+    v.SetBuildWarnings(0);
+    v.SetSoakTestPassed(true);
+
+    const LTSValidationReport report = v.Validate();
+    ASSERT(report.AllGatesPassed());
+    ASSERT(report.ltsStampIssued);
+    ASSERT(report.failed == 0);
+
+    const std::string summary = report.Summary();
+    ASSERT(!summary.empty());
+}
+
+TEST(TestLTSBuildValidator_FailOnCoverage)
+{
+    using namespace ExplorerLens::Engine;
+
+    LTSBuildValidator v;
+    v.SetTestCount(4664);
+    v.SetDecoderCount(200);
+    v.SetPeakMemoryMB(110.0);
+    v.SetCoveragePct(80.0);   // Below MIN_COVERAGE_PCT (95%)
+    v.SetBuildWarnings(0);
+    v.SetSoakTestPassed(true);
+
+    const LTSValidationReport report = v.Validate();
+    ASSERT(!report.AllGatesPassed());
+    ASSERT(!report.ltsStampIssued);
+    ASSERT(report.failed >= 1);
+}
+
+TEST(TestCacheWarmupPreloader_StartStop)
+{
+    using namespace ExplorerLens::Engine;
+
+    CacheWarmupPreloader preloader;
+
+    // Start with a non-existent path → returns false but does not crash.
+    const bool started = preloader.Start(L"non_existent_mru.log");
+    ASSERT(!started);
+    ASSERT(preloader.IsComplete());
+}
+
+TEST(TestCacheWarmupPreloader_Stats)
+{
+    using namespace ExplorerLens::Engine;
+
+    CacheWarmupPreloader preloader;
+
+    // Inject a decoder that always succeeds.
+    uint32_t callCount = 0;
+    preloader.SetDecoder([&](const std::wstring&) -> bool {
+        ++callCount;
+        return true;
+    });
+
+    // Create a temporary MRU log with 3 paths.
+    const std::string tmpPath = "test_mru_warmup.tmp";
+    {
+        std::ofstream f(tmpPath);
+        f << "C:\\fake\\a.jpg\n";
+        f << "C:\\fake\\b.png\n";
+        f << "C:\\fake\\c.webp\n";
+    }
+
+    const bool started = preloader.Start(
+        std::wstring(tmpPath.begin(), tmpPath.end()));
+    ASSERT(started);
+    ASSERT(preloader.IsComplete());
+    ASSERT(callCount == 3);
+
+    const WarmupStats stats = preloader.GetStats();
+    ASSERT(stats.attempted == 3u);
+    ASSERT(stats.fulfilled == 3u);
+    ASSERT(stats.failed == 0u);
+    ASSERT(stats.elapsedMs >= 0.0);
+
+    // Cleanup.
+    std::remove(tmpPath.c_str());
+}
+
+TEST(TestDecodeLatencyProfiler_RecordAndQuery)
+{
+    using namespace ExplorerLens::Engine;
+
+    DecodeLatencyProfiler profiler;
+
+    // Record several JPEG latencies.
+    profiler.RecordSample("jpeg", 2.1);
+    profiler.RecordSample("jpeg", 3.0);
+    profiler.RecordSample("jpeg", 2.8);
+    profiler.RecordSample("jpeg", 1.9);
+    profiler.RecordSample("jpeg", 4.2);
+
+    ASSERT(profiler.SampleCount("jpeg") == 5u);
+    ASSERT(profiler.FormatCount() == 1u);
+
+    const double p50 = profiler.GetP50("jpeg");
+    const double p95 = profiler.GetP95("jpeg");
+    ASSERT(p50 > 0.0);
+    ASSERT(p95 >= p50);
+
+    const LatencyPercentiles perc = profiler.GetPercentiles("jpeg");
+    ASSERT(perc.sampleCount == 5u);
+    ASSERT(perc.p99Ms >= perc.p95Ms);
+    ASSERT(perc.maxMs >= perc.minMs);
+
+    // JSON export should be non-empty.
+    const std::string json = profiler.ToJSON();
+    ASSERT(!json.empty());
+}
+
+TEST(TestDecodeLatencyProfiler_Reset)
+{
+    using namespace ExplorerLens::Engine;
+
+    DecodeLatencyProfiler profiler;
+    profiler.RecordSample("png", 1.5);
+    profiler.RecordSample("png", 2.0);
+    ASSERT(profiler.FormatCount() == 1u);
+
+    profiler.Reset();
+    ASSERT(profiler.FormatCount() == 0u);
+    ASSERT(profiler.SampleCount("png") == 0u);
+
+    // After reset, query returns zero.
+    const double p50 = profiler.GetP50("png");
+    ASSERT(p50 == 0.0);
+}
+
+TEST(TestBenchmarkBaseline_LoadCompare)
+{
+    using namespace ExplorerLens::Engine;
+
+    BenchmarkBaseline baseline;
+    // Inject baseline values directly (no file I/O).
+    baseline.SetBaselineValue("jpeg_decode_ms", 2.5);             // lower is better
+    baseline.SetBaselineValue("batch_throughput_img_sec", 550.0,  // higher is better
+                              true);
+
+    ASSERT(baseline.MetricCount() == 2u);
+
+    // Compare with measurements showing a large latency regression.
+    std::unordered_map<std::string, double> current;
+    current["jpeg_decode_ms"]          = 3.5;  // +40% regression
+    current["batch_throughput_img_sec"] = 560.0;  // slightly improved
+
+    const BaselineCompareResult result = baseline.Compare(current);
+    ASSERT(result.regressionDetected);
+
+    // JSON output should be non-empty.
+    const std::string json = BenchmarkBaseline::ResultToJSON(result);
+    ASSERT(!json.empty());
+}
+
+TEST(TestBenchmarkBaseline_NoRegression)
+{
+    using namespace ExplorerLens::Engine;
+
+    BenchmarkBaseline baseline;
+    baseline.SetBaselineValue("single_thumb_ms", 17.0);              // lower is better
+    baseline.SetBaselineValue("cache_hit_ms",    0.8);               // lower is better
+    baseline.SetBaselineValue("throughput",      235.0, true);       // higher is better
+
+    // Measurements within tolerance (< 10% delta).
+    std::unordered_map<std::string, double> current;
+    current["single_thumb_ms"] = 17.5;   // +2.9% — within tolerance
+    current["cache_hit_ms"]    = 0.82;   // +2.5% — within tolerance
+    current["throughput"]      = 240.0;  // +2.1% improvement
+
+    const BaselineCompareResult result = baseline.Compare(current);
+    ASSERT(!result.regressionDetected);
+    ASSERT(result.IsClean());
+    ASSERT(result.metrics.size() == 3u);
+}

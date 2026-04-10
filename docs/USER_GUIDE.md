@@ -1,5 +1,5 @@
 # ExplorerLens User Guide
-**Version:** 34.6.0 "Arcturus-W"
+**Version:** 34.7.0 "Arcturus-X"
 **Last Updated:** July 2026
 
 ## Table of Contents
@@ -135,7 +135,7 @@ The modern Manager provides a full-featured GUI organized into pages:
 - **Export** — Diagnostic bundle (.zip), copy system info, open log folder
 
 ### About
-- **Version** — v34.6.0 (Arcturus-W) with build info
+- **Version** — v34.7.0 (Arcturus-X) with build info
 - **Quick stats** — 200+ formats, 25+ decoders, <17ms per thumbnail
 - **System info** — GPU, Windows version, COM CLSID, test pass rate
 - **Links** — GitHub, docs, bug reports, changelog

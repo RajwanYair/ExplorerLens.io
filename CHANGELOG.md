@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [34.7.0] — 2026-04-10 — Arcturus-X
+
+### Added
+- Sprint 1271-1280: Performance Hardening + LTS Gate — 5 new perf-hardening modules
+- PerfRegressionGate: CI-enforceable KPI gate with 8 perf metrics (SingleThumbnailMs, P95, BatchThroughputImgSec, CacheHitMs, ColdStartMs, MemoryPeakMB, GpuFrameMs, DecoderInitMs); warn/fail threshold ladder; trend slope analysis via ring-buffer history; FormatReport text output; default thresholds tuned to v34 targets
+- LTSBuildValidator: LTS freeze validator with 6 gate checks (TestCount ≥ 4500, DecoderCount ≥ 200, ZeroWarnings, PeakMemory ≤ 120 MB, CodeCoverage ≥ 95%, SoakTest passed); ltsStampIssued flag; Summary() report; all thresholds overridable for CI
+- CacheWarmupPreloader: Structured startup cache warm-up; reads top-256 MRU paths from on-disk log; asynchronous (synchronous implementation for v1); decoder injection for unit tests; WarmupStats with hit rate, elapsed time, and per-path counts
+- DecodeLatencyProfiler: Per-format P50/P95/P99 histogram profiler; 256-sample ring buffer per format tag; correct percentile interpolation; Reset() for between-test isolation; ToJSON() for CI ingestion
+- BenchmarkBaseline: JSON baseline comparison utility; metric-level delta % computation; signed regression direction (lower-is-better vs higher-is-better); configurable 10% threshold; ResultToJSON() for CI consumption
+
+### Changed
+- Test count: 4654 → 4664 (+10 from Sprint 1271-1280)
+
+---
+
 ## [34.6.0] — 2026-04-09 — Arcturus-W
 
 ### Added

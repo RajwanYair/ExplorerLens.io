@@ -4866,6 +4866,18 @@ int main()
     RUN_TEST(TestKiCadNetlistParser_IsKiCad);
     RUN_TEST(TestKiCadNetlistParser_Parse);
 
+    // Sprint 1271-1280: Performance Hardening + LTS Gate (v34.7.0 "Arcturus-X")
+    RUN_TEST(TestPerfRegressionGate_Thresholds);
+    RUN_TEST(TestPerfRegressionGate_BlockOnFail);
+    RUN_TEST(TestLTSBuildValidator_AllGatesPass);
+    RUN_TEST(TestLTSBuildValidator_FailOnCoverage);
+    RUN_TEST(TestCacheWarmupPreloader_StartStop);
+    RUN_TEST(TestCacheWarmupPreloader_Stats);
+    RUN_TEST(TestDecodeLatencyProfiler_RecordAndQuery);
+    RUN_TEST(TestDecodeLatencyProfiler_Reset);
+    RUN_TEST(TestBenchmarkBaseline_LoadCompare);
+    RUN_TEST(TestBenchmarkBaseline_NoRegression);
+
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;
     RUN_TEST(TestMalformedArchive_TruncatedZIP);

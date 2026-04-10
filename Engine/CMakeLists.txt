@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 34.6.0
+    VERSION 34.7.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -554,6 +554,13 @@ set(ENGINE_HEADERS
     Decoders/IFCEntityCounter.h
     Decoders/GerberLayerCompositor.h
     Decoders/KiCadNetlistParser.h
+
+    # Sprint 1271-1280 — Performance Hardening + LTS Gate (v34.7.0 "Arcturus-X")
+    Core/PerfRegressionGate.h
+    Core/LTSBuildValidator.h
+    Cache/CacheWarmupPreloader.h
+    Pipeline/DecodeLatencyProfiler.h
+    Utils/BenchmarkBaseline.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -2036,6 +2043,13 @@ set(ENGINE_SOURCES
     Decoders/IFCEntityCounter.cpp
     Decoders/GerberLayerCompositor.cpp
     Decoders/KiCadNetlistParser.cpp
+
+    # Sprint 1271-1280 — Performance Hardening + LTS Gate (v34.7.0 "Arcturus-X")
+    Core/PerfRegressionGate.cpp
+    Core/LTSBuildValidator.cpp
+    Cache/CacheWarmupPreloader.cpp
+    Pipeline/DecodeLatencyProfiler.cpp
+    Utils/BenchmarkBaseline.cpp
 )
 
 #==============================================================================

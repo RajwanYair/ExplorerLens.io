@@ -321,6 +321,13 @@
 #include "../Decoders/GerberLayerCompositor.h"
 #include "../Decoders/KiCadNetlistParser.h"
 
+// Sprint 1271-1280: Performance Hardening + LTS Gate (v34.7.0 "Arcturus-X")
+#include "../Core/PerfRegressionGate.h"
+#include "../Core/LTSBuildValidator.h"
+#include "../Cache/CacheWarmupPreloader.h"
+#include "../Pipeline/DecodeLatencyProfiler.h"
+#include "../Utils/BenchmarkBaseline.h"
+
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
 #include "../Utils/CITestReporter.h"

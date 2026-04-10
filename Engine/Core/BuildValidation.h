@@ -22,10 +22,10 @@ namespace BuildValidation {
 struct BuildInfo
 {
     static constexpr int MajorVersion = 34;
-    static constexpr int MinorVersion = 6;
+    static constexpr int MinorVersion = 7;
     static constexpr int PatchVersion = 0;
-    static constexpr const char* VersionString = "34.6.0";
-    static constexpr const char* Codename = "Arcturus-W";
+    static constexpr const char* VersionString = "34.7.0";
+    static constexpr const char* Codename = "Arcturus-X";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;
 
@@ -44,13 +44,13 @@ struct BuildInfo
 #endif
 
     // Feature flags
-    static constexpr int TotalMilestones = 506;
-    static constexpr int CompletedMilestones = 506;
+    static constexpr int TotalMilestones = 516;
+    static constexpr int CompletedMilestones = 516;
 
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 4483;
+    static constexpr int UnitTestCount = 4664;
     static constexpr int BenchmarkSuites = 5;
 };
 
