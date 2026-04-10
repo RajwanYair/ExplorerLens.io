@@ -2478,6 +2478,17 @@ extern void TestRemoteFileManifestCache_Store_Runner();
 extern void TestRemoteFileManifestCache_Stale_Runner();
 extern void TestCachePrefetchScheduler_Enqueue_Runner();
 extern void TestCachePrefetchScheduler_Backpressure_Runner();
+// Sprint 1311-1320: Zero-Trust Thumbnail Security
+extern void TestThumbnailManifestSigner_Sign_Runner();
+extern void TestThumbnailManifestSigner_Verify_Runner();
+extern void TestZeroTrustDecodeWorker_Spawn_Runner();
+extern void TestZeroTrustDecodeWorker_Decode_Runner();
+extern void TestTokenBoundCacheEntry_Store_Runner();
+extern void TestTokenBoundCacheEntry_CrossTenant_Runner();
+extern void TestThumbnailAuditLog_Record_Runner();
+extern void TestThumbnailAuditLog_Query_Runner();
+extern void TestFIPSCryptoAdapter_Hash_Runner();
+extern void TestFIPSCryptoAdapter_Hmac_Runner();
 
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────

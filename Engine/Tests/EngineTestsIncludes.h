@@ -347,6 +347,12 @@
 #include "../Pipeline/BandwidthThrottleGuard.h"
 #include "../Cache/RemoteFileManifestCache.h"
 #include "../Cache/CachePrefetchScheduler.h"
+// Sprint 1311-1320: Zero-Trust Thumbnail Security
+#include "../Core/ThumbnailManifestSigner.h"
+#include "../Pipeline/ZeroTrustDecodeWorker.h"
+#include "../Cache/TokenBoundCacheEntry.h"
+#include "../Core/ThumbnailAuditLog.h"
+#include "../Core/FIPSCryptoAdapter.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"

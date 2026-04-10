@@ -14829,5 +14829,312 @@ TEST(TestCachePrefetchScheduler_Backpressure)
     ASSERT(sched.GetConfig().maxBandwidthKbps == 512u);
 }
 
+//==============================================================================
+// Sprint 1311-1320: Zero-Trust Thumbnail Security (v35.3.0 "Vega-T")
+//==============================================================================
 
+TEST(TestThumbnailManifestSigner_Sign)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailManifestSigner::Config cfg;
+    cfg.keyId = "test-key-1";
+    ThumbnailManifestSigner signer(cfg);
+
+    const std::vector<ThumbnailManifestEntry> entries = {
+        { L"C:\\Photos\\img.jpg",  "abc123hash", 1000ULL, 2048ULL },
+        { L"C:\\Photos\\img2.png", "def456hash", 2000ULL, 4096ULL },
+    };
+
+    const auto sig = signer.Sign(entries, 9999ULL);
+    ASSERT(sig.valid);
+    ASSERT(!sig.sig.empty());
+    ASSERT(sig.keyId == "test-key-1");
+    ASSERT(sig.signedAtMs == 9999ULL);
+    ASSERT(signer.SignCount() == 1u);
+
+    // Empty manifest produces invalid signature
+    const auto emptySig = signer.Sign({}, 1000ULL);
+    ASSERT(!emptySig.valid);
+    ASSERT(signer.SignCount() == 2u);
+}
+
+TEST(TestThumbnailManifestSigner_Verify)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailManifestSigner signer;
+
+    const std::vector<ThumbnailManifestEntry> entries = {
+        { L"C:\\Docs\\report.pdf", "sha256-xyz", 5000ULL, 512000ULL },
+    };
+
+    const auto sig = signer.Sign(entries, 1ULL);
+    ASSERT(sig.valid);
+
+    // Correct entries verify OK
+    ASSERT(signer.Verify(entries, sig));
+    ASSERT(signer.VerifyCount() == 1u);
+
+    // Tampered entry fails verification
+    std::vector<ThumbnailManifestEntry> tampered = entries;
+    tampered[0].contentHash = "TAMPERED";
+    ASSERT(!signer.Verify(tampered, sig));
+    ASSERT(signer.VerifyCount() == 2u);
+
+    // Invalid sig always fails
+    ManifestSignature badSig;
+    badSig.valid = false;
+    ASSERT(!signer.Verify(entries, badSig));
+}
+
+TEST(TestZeroTrustDecodeWorker_Spawn)
+{
+    using namespace ExplorerLens::Engine;
+
+    ZeroTrustDecodeWorker::Config cfg;
+    cfg.timeoutMs         = 1000;
+    cfg.allowNetworkAccess = false;
+    cfg.allowFileWrite     = false;
+    ZeroTrustDecodeWorker worker(cfg);
+
+    ASSERT(worker.GetState()   == WorkerState::IDLE);
+    ASSERT(!worker.IsAlive());
+
+    const bool spawned = worker.Spawn();
+    ASSERT(spawned);
+    ASSERT(worker.GetState()   == WorkerState::RUNNING);
+    ASSERT(worker.IsAlive());
+
+    ASSERT(worker.GetConfig().allowNetworkAccess == false);
+    ASSERT(worker.GetConfig().allowFileWrite     == false);
+
+    worker.Terminate();
+    ASSERT(worker.GetState() == WorkerState::TERMINATED);
+    ASSERT(!worker.IsAlive());
+}
+
+TEST(TestZeroTrustDecodeWorker_Decode)
+{
+    using namespace ExplorerLens::Engine;
+
+    ZeroTrustDecodeWorker worker;
+    worker.Spawn();
+
+    // Valid request → stub returns 4×4 green surface
+    DecodeRequest req;
+    req.filePath    = L"C:\\TestFiles\\img.psd";
+    req.formatHint  = "psd";
+    req.maxWidthPx  = 4;
+    req.maxHeightPx = 4;
+
+    const auto resp = worker.Decode(req);
+    ASSERT(resp.success);
+    ASSERT(resp.width  == 4u);
+    ASSERT(resp.height == 4u);
+    ASSERT(resp.bgraSurface.size() == 4u * 4u * 4u);
+    ASSERT(worker.DecodeCount() == 1u);
+
+    // Decode without spawn fails
+    ZeroTrustDecodeWorker dead;
+    const auto resp2 = dead.Decode(req);
+    ASSERT(!resp2.success);
+    ASSERT(!resp2.error.empty());
+
+    // Empty path fails
+    DecodeRequest emptyReq;
+    const auto resp3 = worker.Decode(emptyReq);
+    ASSERT(!resp3.success);
+}
+
+TEST(TestTokenBoundCacheEntry_Store)
+{
+    using namespace ExplorerLens::Engine;
+
+    TokenBoundCacheEntry cache;
+
+    TenantToken tok{42u, 100u, "read"};
+    TokenBoundEntry entry;
+    entry.thumbnailBGRA = std::vector<uint8_t>(4 * 4 * 4, 0xAA);
+    entry.width  = 4; entry.height = 4;
+    entry.storedAtMs = 1000ULL;
+
+    cache.Store(L"C:\\Files\\a.jpg", tok, entry);
+    ASSERT(cache.EntryCount() == 1u);
+
+    TokenBoundEntry out;
+    ASSERT(cache.Lookup(L"C:\\Files\\a.jpg", tok, out));
+    ASSERT(out.width == 4u);
+    ASSERT(cache.AuthorizedHitCount() == 1u);
+
+    // Evict and miss
+    cache.Evict(L"C:\\Files\\a.jpg");
+    ASSERT(!cache.Lookup(L"C:\\Files\\a.jpg", tok, out));
+    ASSERT(cache.EntryCount() == 0u);
+}
+
+TEST(TestTokenBoundCacheEntry_CrossTenant)
+{
+    using namespace ExplorerLens::Engine;
+
+    TokenBoundCacheEntry cache;
+
+    TenantToken owner{10u, 200u, "read"};
+    TenantToken other{11u, 200u, "read"};  // Different userId — cross-tenant
+
+    TokenBoundEntry entry;
+    entry.thumbnailBGRA = std::vector<uint8_t>(16, 0xFF);
+    entry.width = 2; entry.height = 2;
+    cache.Store(L"C:\\Shared\\secret.pdf", owner, entry);
+
+    TokenBoundEntry out;
+    // Owner can read
+    ASSERT(cache.Lookup(L"C:\\Shared\\secret.pdf", owner, out));
+
+    // Cross-tenant lookup denied
+    ASSERT(!cache.Lookup(L"C:\\Shared\\secret.pdf", other, out));
+    ASSERT(cache.UnauthorizedMissCount() == 1u);
+
+    cache.Clear();
+    ASSERT(cache.EntryCount() == 0u);
+    ASSERT(cache.AuthorizedHitCount() == 0u);
+    ASSERT(cache.UnauthorizedMissCount() == 0u);
+}
+
+TEST(TestThumbnailAuditLog_Record)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailAuditLog::Config cfg;
+    cfg.maxEvents     = 10;
+    cfg.dropOldOnFull = true;
+    ThumbnailAuditLog log(cfg);
+
+    ASSERT(log.EventCount()   == 0u);
+    ASSERT(log.TotalRecorded() == 0u);
+
+    AuditEvent ev;
+    ev.kind        = AuditEventKind::DECODE_SUCCESS;
+    ev.filePath    = L"C:\\Photos\\img.heic";
+    ev.userId      = 1u;
+    ev.tenantId    = 5u;
+    ev.timestampMs = 1000ULL;
+    ev.detail      = "format=heic sz=4096";
+
+    log.Record(ev);
+    ASSERT(log.EventCount()    == 1u);
+    ASSERT(log.TotalRecorded() == 1u);
+    ASSERT(log.TotalDropped()  == 0u);
+
+    // Flood past capacity → oldest dropped
+    for (uint32_t i = 0; i < 15; ++i) {
+        AuditEvent e2;
+        e2.kind = AuditEventKind::CACHE_HIT;
+        log.Record(e2);
+    }
+    ASSERT(log.EventCount()    <= cfg.maxEvents);
+    ASSERT(log.TotalDropped()  >= 1u);
+
+    log.Flush();
+    ASSERT(log.EventCount() == 0u);
+}
+
+TEST(TestThumbnailAuditLog_Query)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailAuditLog log;
+
+    auto addEvent = [&](AuditEventKind k, const std::wstring& path) {
+        AuditEvent ev;
+        ev.kind     = k;
+        ev.filePath = path;
+        log.Record(ev);
+    };
+
+    addEvent(AuditEventKind::DECODE_SUCCESS, L"C:\\a.jpg");
+    addEvent(AuditEventKind::DECODE_FAILURE, L"C:\\b.psd");
+    addEvent(AuditEventKind::CACHE_HIT,      L"C:\\c.png");
+    addEvent(AuditEventKind::CACHE_HIT,      L"C:\\d.bmp");
+    addEvent(AuditEventKind::POLICY_DENY,    L"C:\\e.exe");
+
+    ASSERT(log.EventCount() == 5u);
+
+    const auto hits   = log.Query(AuditEventKind::CACHE_HIT);
+    const auto denies = log.Query(AuditEventKind::POLICY_DENY);
+    ASSERT(hits.size()   == 2u);
+    ASSERT(denies.size() == 1u);
+    ASSERT(denies[0].filePath == L"C:\\e.exe");
+
+    const auto notPresent = log.Query(AuditEventKind::CACHE_EVICT);
+    ASSERT(notPresent.empty());
+}
+
+TEST(TestFIPSCryptoAdapter_Hash)
+{
+    using namespace ExplorerLens::Engine;
+
+    FIPSCryptoAdapter::Config cfg;
+    cfg.enforceFIPSMode = true;
+    FIPSCryptoAdapter crypto(cfg);
+
+    const std::string input = "ExplorerLens secure hash test";
+    const auto h256 = crypto.Hash(reinterpret_cast<const uint8_t*>(input.data()),
+                                   input.size(), FIPSHashAlgo::SHA256);
+    ASSERT(h256.size() == 32u);
+    ASSERT(crypto.HashCallCount() == 1u);
+
+    const auto h512 = crypto.Hash(reinterpret_cast<const uint8_t*>(input.data()),
+                                   input.size(), FIPSHashAlgo::SHA512);
+    ASSERT(h512.size() == 64u);
+
+    // Same input → same hash (deterministic stub)
+    const auto h256b = crypto.Hash(reinterpret_cast<const uint8_t*>(input.data()),
+                                    input.size(), FIPSHashAlgo::SHA256);
+    ASSERT(crypto.ConstantTimeEqual(h256, h256b));
+
+    // Different input → different hash
+    const std::string other = "different";
+    const auto hOther = crypto.Hash(reinterpret_cast<const uint8_t*>(other.data()),
+                                     other.size(), FIPSHashAlgo::SHA256);
+    ASSERT(!crypto.ConstantTimeEqual(h256, hOther));
+}
+
+TEST(TestFIPSCryptoAdapter_Hmac)
+{
+    using namespace ExplorerLens::Engine;
+
+    FIPSCryptoAdapter crypto;
+
+    const std::string msg = "thumbnail-manifest-payload";
+    const std::string key = "32-byte-secret-key-for-hmac-test";
+
+    const auto mac1 = crypto.Hmac(
+        reinterpret_cast<const uint8_t*>(msg.data()), msg.size(),
+        reinterpret_cast<const uint8_t*>(key.data()), key.size(),
+        FIPSHmacAlgo::HMAC_SHA256);
+    ASSERT(mac1.size() == 32u);
+    ASSERT(crypto.HmacCallCount() == 1u);
+
+    // Same inputs → same MAC (deterministic stub)
+    const auto mac2 = crypto.Hmac(
+        reinterpret_cast<const uint8_t*>(msg.data()), msg.size(),
+        reinterpret_cast<const uint8_t*>(key.data()), key.size(),
+        FIPSHmacAlgo::HMAC_SHA256);
+    ASSERT(crypto.ConstantTimeEqual(mac1, mac2));
+
+    const auto mac512 = crypto.Hmac(
+        reinterpret_cast<const uint8_t*>(msg.data()), msg.size(),
+        reinterpret_cast<const uint8_t*>(key.data()), key.size(),
+        FIPSHmacAlgo::HMAC_SHA512);
+    ASSERT(mac512.size() == 64u);
+
+    // Different key → different MAC
+    const std::string otherKey = "completely-different-key";
+    const auto macOther = crypto.Hmac(
+        reinterpret_cast<const uint8_t*>(msg.data()), msg.size(),
+        reinterpret_cast<const uint8_t*>(otherKey.data()), otherKey.size(),
+        FIPSHmacAlgo::HMAC_SHA256);
+    ASSERT(!crypto.ConstantTimeEqual(mac1, macOther));
+}
 

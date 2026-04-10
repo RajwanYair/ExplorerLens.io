@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [35.3.0] — 2026-04-10 — Vega-T
+
+Sprint 1311-1320: Zero-Trust Thumbnail Security — ThumbnailManifestSigner, ZeroTrustDecodeWorker, TokenBoundCacheEntry, ThumbnailAuditLog, FIPSCryptoAdapter
+
+---
+
 ## [35.2.0] — 2026-04-10 — Vega-S
 
 Sprint 1301-1310: Network-Aware Streaming Cache — NetworkTopologyProbe, StreamingCacheTierPolicy, BandwidthThrottleGuard, RemoteFileManifestCache, CachePrefetchScheduler

@@ -4878,6 +4878,41 @@ int main()
     RUN_TEST(TestBenchmarkBaseline_LoadCompare);
     RUN_TEST(TestBenchmarkBaseline_NoRegression);
 
+    // Sprint 1281-1290: Streaming & Cloud-Native Thumbnails (v35.0.0 "Vega")
+    RUN_TEST(TestMultiStageThumbnailEmitter_Stages);
+    RUN_TEST(TestMultiStageThumbnailEmitter_Cancel);
+    RUN_TEST(TestCloudHydrationMonitor_Detect);
+    RUN_TEST(TestCloudHydrationMonitor_Defer);
+    RUN_TEST(TestPartialDecodeStateCache_SaveRestore);
+    RUN_TEST(TestPartialDecodeStateCache_Eviction);
+    RUN_TEST(TestThumbnailETagValidator_Match);
+    RUN_TEST(TestThumbnailETagValidator_Invalidate);
+    RUN_TEST(TestAdaptiveFidelitySelector_HighBudget);
+    RUN_TEST(TestAdaptiveFidelitySelector_LowBudget);
+
+    // Sprint 1291-1300: Real-Time Collaboration & Live Edit Sync (v35.1.0 "Vega-R")
+    RUN_TEST(TestLiveSyncTokenManager_Issue);
+    RUN_TEST(TestLiveSyncTokenManager_Expire);
+    RUN_TEST(TestCollaborativeCacheCoordinator_Invalidate);
+    RUN_TEST(TestCollaborativeCacheCoordinator_Sync);
+    RUN_TEST(TestThumbnailDeltaEncoder_Encode);
+    RUN_TEST(TestThumbnailDeltaEncoder_Decode);
+    RUN_TEST(TestConflictResolutionEngine_Merge);
+    RUN_TEST(TestConflictResolutionEngine_PickLatest);
+    RUN_TEST(TestRealTimePreviewPipeline_Subscribe);
+    RUN_TEST(TestRealTimePreviewPipeline_Backpressure);
+    // Sprint 1301-1310: Network-Aware Streaming Cache
+    RUN_TEST(TestNetworkTopologyProbe_Probe);
+    RUN_TEST(TestNetworkTopologyProbe_ForceTopology);
+    RUN_TEST(TestStreamingCacheTierPolicy_Derive);
+    RUN_TEST(TestStreamingCacheTierPolicy_Override);
+    RUN_TEST(TestBandwidthThrottleGuard_Allow);
+    RUN_TEST(TestBandwidthThrottleGuard_Throttle);
+    RUN_TEST(TestRemoteFileManifestCache_Store);
+    RUN_TEST(TestRemoteFileManifestCache_Stale);
+    RUN_TEST(TestCachePrefetchScheduler_Enqueue);
+    RUN_TEST(TestCachePrefetchScheduler_Backpressure);
+
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;
     RUN_TEST(TestMalformedArchive_TruncatedZIP);

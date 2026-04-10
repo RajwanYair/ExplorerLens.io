@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 35.2.0
+# Version: 35.3.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 35.2.0
+    VERSION 35.3.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -581,6 +581,12 @@ set(ENGINE_HEADERS
     Pipeline/BandwidthThrottleGuard.h
     Cache/RemoteFileManifestCache.h
     Cache/CachePrefetchScheduler.h
+    # Sprint 1311-1320: Zero-Trust Thumbnail Security
+    Core/ThumbnailManifestSigner.h
+    Pipeline/ZeroTrustDecodeWorker.h
+    Cache/TokenBoundCacheEntry.h
+    Core/ThumbnailAuditLog.h
+    Core/FIPSCryptoAdapter.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -2090,6 +2096,12 @@ set(ENGINE_SOURCES
     Pipeline/BandwidthThrottleGuard.cpp
     Cache/RemoteFileManifestCache.cpp
     Cache/CachePrefetchScheduler.cpp
+    # Sprint 1311-1320: Zero-Trust Thumbnail Security
+    Core/ThumbnailManifestSigner.cpp
+    Pipeline/ZeroTrustDecodeWorker.cpp
+    Cache/TokenBoundCacheEntry.cpp
+    Core/ThumbnailAuditLog.cpp
+    Core/FIPSCryptoAdapter.cpp
 )
 
 #==============================================================================
