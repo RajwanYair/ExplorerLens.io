@@ -1,9 +1,14 @@
-# ExplorerLens Performance Tuning Guide
+# ExplorerLens Performance Reference
 
-> Version 24.1.0 "Altair-R" | v2 Performance Architecture
+> **Version:** 36.0.0 "Altair" | Consolidated from `docs/PERFORMANCE.md` + `.github/standards/performance-benchmarks.md`
+> **Hardware:** Intel Core Ultra 9 285K · 64 GB DDR5-6400 · NVIDIA RTX 4090 · NVMe 7 GB/s
+> **OS:** Windows 11 24H2 (Build 26100) | **Compiler:** MSVC 19.50.35720 (/O2 /GL /arch:AVX2)
+>
+> ⚠ **Single source of truth for performance.** The file `.github/standards/performance-benchmarks.md`
+> has been merged into this document. See §1 for current baselines and §2 for Phase 2 targets.
 
-**Targets:** 14ms single thumbnail (↓18%), 270 img/sec batch (↑15%), <3ms cache hit
-**New:** ThumbnailPriorityQueue, PredictivePrefetcher, VulkanComputeDecoder, ZeroCopyTextureUploader, SIMDImageProcessor (AVX2), PersistentDiskCache (SQLite WAL), BatchDecodeScheduler (work-stealing), DirectStorageLoader
+**Current v35.5.0 Baselines:** 4.2 ms JPEG P50 · 235 img/s batch · 0.8 ms cache hit P50 · ~24 MB idle
+**Phase 2 Targets (v36.x):** < 1.5 ms JPEG P50 · > 600 img/s batch · < 0.3 ms cache hit · Full GPU pipeline
 
 ---
 

@@ -1,11 +1,11 @@
 # ExplorerLens — Performance Benchmarks Baseline
 
-**Version:** 32.3.1 "Fomalhaut-T"  
+> ⚠️ **DEPRECATED** — This file has been merged into [`docs/PERFORMANCE.md`](../../docs/PERFORMANCE.md).
+> `docs/PERFORMANCE.md` is the **single source of truth** for all performance baselines and targets.
+> This file is retained for CI workflow compatibility; do not edit it directly.
+
+**Version:** 35.5.0 "Vega-V" (superseded — see docs/PERFORMANCE.md for v36.0.0 baselines)
 **Last Updated:** April 2026  
-**Hardware:** Intel Core Ultra 9 285K, 64 GB DDR5-6400, NVIDIA RTX 4090, NVMe SSD (7 GB/s)  
-**NPU Target:** Intel AI Boost NPU (Meteor Lake / Arrow Lake, 48 TOPS)  
-**OS:** Windows 11 24H2 (Build 26100)  
-**Compiler:** MSVC 19.50.35720 (v145), /O2 /GL /arch:AVX512  
 
 ---
 
