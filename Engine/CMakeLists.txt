@@ -1086,6 +1086,8 @@ set(ENGINE_HEADERS
     Core/EventLogProvider.h
     Core/CacheMetricsCollector.h
     Core/PredictivePrefetchEngine.h
+    Core/IStreamingDecoder.h
+    Core/MagicBytesDatabase.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1905,6 +1907,7 @@ set(ENGINE_SOURCES
     Core/EventLogProvider.cpp
     Core/CacheMetricsCollector.cpp
     Core/PredictivePrefetchEngine.cpp
+    Core/MagicBytesDatabase.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations

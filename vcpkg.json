@@ -72,6 +72,31 @@
     {
       "name": "catch2",
       "platform": "windows"
+    },
+    {
+      "name": "freetype",
+      "platform": "windows"
+    },
+    {
+      "name": "stb",
+      "platform": "windows"
+    },
+    {
+      "name": "directxtex",
+      "platform": "windows"
+    },
+    {
+      "name": "benchmark",
+      "platform": "windows",
+      "features": ["tools"]
+    },
+    {
+      "name": "xxhash",
+      "platform": "windows"
+    },
+    {
+      "name": "nlohmann-json",
+      "platform": "windows"
     }
   ],
   "builtin-baseline": "ef4b4b970dcef43ef9adb7f24c4f00ed41abfe38",
