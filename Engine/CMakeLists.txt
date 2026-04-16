@@ -1088,6 +1088,8 @@ set(ENGINE_HEADERS
     Core/PredictivePrefetchEngine.h
     Core/IStreamingDecoder.h
     Core/MagicBytesDatabase.h
+    Core/PerceptualHashUtility.h
+    Core/SSIMComparator.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1908,6 +1910,8 @@ set(ENGINE_SOURCES
     Core/CacheMetricsCollector.cpp
     Core/PredictivePrefetchEngine.cpp
     Core/MagicBytesDatabase.cpp
+    Core/PerceptualHashUtility.cpp
+    Core/SSIMComparator.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
