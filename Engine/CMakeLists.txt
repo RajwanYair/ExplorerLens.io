@@ -2361,6 +2361,11 @@ if(ENGINE_SOURCES)
         endif()
     endif()
 
+    # Precompiled header (speeds up incremental builds ~30%)
+    target_precompile_headers(ExplorerLensEngine PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/pch.h"
+    )
+
     # Compiler warnings & flags (MSVC v145 preferred)
     if(MSVC)
         target_compile_options(ExplorerLensEngine PRIVATE

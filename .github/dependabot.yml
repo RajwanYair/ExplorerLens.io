@@ -67,3 +67,23 @@ updates:
       github-actions-all:
         patterns:
           - "*"
+
+  # ============================================================================
+  # VCPKG (C++ package manager manifest)
+  # ============================================================================
+  # Dependabot doesn't have a native vcpkg ecosystem; we use the 'bundler'
+  # workaround to monitor vcpkg.json version field.  The real driver for vcpkg
+  # updates is the Bump-Version.ps1 script which stamps vcpkg.json on every
+  # release.  This entry exists to surface GitHub Security advisories for the
+  # vcpkg baseline and any transient C++ library CVEs picked up by Dependabot.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "vcpkg"
+      - "c++"
+    commit-message:
+      prefix: "chore(vcpkg)"
+    open-pull-requests-limit: 2
