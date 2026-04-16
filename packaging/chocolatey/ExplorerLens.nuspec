@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ExplorerLens.nuspec — Chocolatey package specification -->
+<!-- Update version before publishing: choco pack packaging/chocolatey/ExplorerLens.nuspec -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>explorerlens</id>
+    <version>35.5.0</version>
+    <title>ExplorerLens — GPU Thumbnail Provider</title>
+    <authors>ExplorerLens Project Contributors</authors>
+    <owners>ExplorerLens Project</owners>
+    <projectUrl>https://github.com/RajwanYair/ExplorerLens</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/RajwanYair/ExplorerLens/main/docs/assets/icon-128.png</iconUrl>
+    <licenseUrl>https://github.com/RajwanYair/ExplorerLens/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/RajwanYair/ExplorerLens</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/RajwanYair/ExplorerLens/issues</bugTrackerUrl>
+    <tags>thumbnail explorer shell-extension gpu image raw comics pdf windows</tags>
+    <summary>GPU-accelerated thumbnail provider for Windows Explorer (200+ file formats)</summary>
+    <description><![CDATA[
+ExplorerLens is a Windows Shell Extension (IThumbnailProvider COM DLL) that generates
+GPU-accelerated thumbnails for 200+ file formats.
+
+**Supported formats include:**
+- Images: JPEG, PNG, WebP, AVIF, HEIC, JPEG XL, GIF, BMP, TIFF, EXR, QOI
+- Camera RAW: CR2, CR3, NEF, ARW, DNG, RAF, ORF
+- Archives: ZIP, CBZ, RAR, CBR, 7z (cover image extraction)
+- Documents: PDF, PSD, SVG
+- 3D/CAD: glTF, STL, OBJ
+
+**Key features:**
+- DirectX 11 GPU-accelerated decode pipeline
+- Sub-1ms L1 LRU cache + persistent L2 disk cache
+- ETW structured telemetry
+- LENSManager configuration GUI
+    ]]></description>
+    <releaseNotes>https://github.com/RajwanYair/ExplorerLens/releases/tag/v35.5.0</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

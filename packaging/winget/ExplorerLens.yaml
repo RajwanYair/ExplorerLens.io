@@ -1,0 +1,66 @@
+# ExplorerLens.yaml — winget package manifest (v1.4.0)
+# Submit via: winget validate --manifest packaging/winget/
+# PR target: https://github.com/microsoft/winget-pkgs
+PackageIdentifier: ExplorerLens.ExplorerLens
+PackageVersion: 35.5.0
+PackageLocale: en-US
+Publisher: ExplorerLens Project
+PublisherUrl: https://github.com/RajwanYair/ExplorerLens
+PublisherSupportUrl: https://github.com/RajwanYair/ExplorerLens/issues
+PrivacyUrl: https://github.com/RajwanYair/ExplorerLens/blob/main/docs/PRIVACY.md
+Author: ExplorerLens Project Contributors
+PackageName: ExplorerLens
+PackageUrl: https://github.com/RajwanYair/ExplorerLens
+License: MIT
+LicenseUrl: https://github.com/RajwanYair/ExplorerLens/blob/main/LICENSE
+CopyrightUrl: https://github.com/RajwanYair/ExplorerLens/blob/main/LICENSE
+ShortDescription: GPU-accelerated thumbnail provider for Windows Explorer (200+ file formats)
+Description: |-
+  ExplorerLens is a Windows Shell Extension (IThumbnailProvider COM DLL) that generates
+  GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
+
+  Supported formats include:
+  • Images: JPEG, PNG, WebP, AVIF, HEIC, JPEG XL, GIF, BMP, TIFF, EXR, QOI
+  • Camera RAW: CR2, CR3, NEF, ARW, DNG, RAF, ORF (via LibRaw embedded preview)
+  • Archives: ZIP, CBZ, RAR, CBR, 7z (cover image extraction)
+  • Documents: PDF (MuPDF), PSD, SVG
+  • 3D/CAD: glTF, STL, OBJ
+
+  Features:
+  • DirectX 11 GPU-accelerated decode pipeline
+  • Sub-1ms L1 cache with persistent L2 disk cache (configurable budget)
+  • Zero-copy upload path for large images
+  • ETW structured telemetry + per-format performance counters
+  • LENSManager configuration GUI
+
+Moniker: explorerlens
+Tags:
+  - thumbnail
+  - explorer
+  - shell-extension
+  - gpu
+  - image-viewer
+  - raw
+  - comics
+  - pdf
+  - windows
+ReleaseNotes: |-
+  See https://github.com/RajwanYair/ExplorerLens/releases/tag/v35.5.0
+ReleaseNotesUrl: https://github.com/RajwanYair/ExplorerLens/releases/tag/v35.5.0
+InstallationNotes: |-
+  After installation, open Windows Explorer and browse to an image folder to verify thumbnails appear.
+  If thumbnails do not appear, run: regsvr32 "%ProgramFiles%\ExplorerLens\LENSShell.dll"
+
+Installers:
+  - Architecture: x64
+    InstallerType: msi
+    InstallerUrl: https://github.com/RajwanYair/ExplorerLens/releases/download/v35.5.0/ExplorerLens-35.5.0-x64.msi
+    InstallerSha256: PLACEHOLDER_SHA256_REPLACE_ON_RELEASE
+    InstallerSwitches:
+      Silent: /quiet
+      SilentWithProgress: /passive
+    UpgradeBehavior: install
+    ReleaseDate: "2026-01-01"
+
+ManifestType: singleton
+ManifestVersion: 1.4.0

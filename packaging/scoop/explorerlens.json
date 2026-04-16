@@ -1,0 +1,43 @@
+{
+  "version": "35.5.0",
+  "description": "GPU-accelerated thumbnail provider for Windows Explorer (200+ file formats)",
+  "homepage": "https://github.com/RajwanYair/ExplorerLens",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/RajwanYair/ExplorerLens/releases/download/v35.5.0/ExplorerLens-35.5.0-Portable.zip",
+      "hash": "PLACEHOLDER_SHA256_REPLACE_ON_RELEASE",
+      "extract_dir": "ExplorerLens-35.5.0"
+    }
+  },
+  "bin": [
+    "lens.exe"
+  ],
+  "shortcuts": [
+    ["LENSManager.exe", "ExplorerLens Manager"]
+  ],
+  "post_install": [
+    "Write-Host 'Registering LENSShell.dll...' -ForegroundColor Cyan",
+    "$dll = \"$dir\\LENSShell.dll\"",
+    "if (Test-Path $dll) { Start-Process regsvr32.exe -ArgumentList '/s', $dll -Wait }"
+  ],
+  "pre_uninstall": [
+    "$dll = \"$dir\\LENSShell.dll\"",
+    "if (Test-Path $dll) { Start-Process regsvr32.exe -ArgumentList '/s', '/u', $dll -Wait }"
+  ],
+  "checkver": {
+    "github": "https://github.com/RajwanYair/ExplorerLens",
+    "regex": "v([\\d.]+)"
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/RajwanYair/ExplorerLens/releases/download/v$version/ExplorerLens-$version-Portable.zip",
+        "hash": {
+          "url": "https://github.com/RajwanYair/ExplorerLens/releases/download/v$version/SHA256SUMS.txt",
+          "regex": "([A-Fa-f0-9]+)\\s+ExplorerLens-$version-Portable.zip"
+        }
+      }
+    }
+  }
+}
