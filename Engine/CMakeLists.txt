@@ -37,6 +37,37 @@ option(BUILD_SHARED_LIBS "Build as shared library" ON)
 option(ENABLE_GPU "Enable GPU acceleration" ON)
 option(ENABLE_CACHE "Enable thumbnail caching" ON)
 
+# ---------------------------------------------------------------------------
+# sccache — compiler cache for faster incremental CI builds
+# Enable automatically when sccache is on PATH, or force via -DUSE_SCCACHE=ON
+# ---------------------------------------------------------------------------
+option(USE_SCCACHE "Use sccache compiler launcher if available" ON)
+if(USE_SCCACHE)
+    find_program(SCCACHE_PROGRAM sccache)
+    if(SCCACHE_PROGRAM)
+        message(STATUS "sccache found: ${SCCACHE_PROGRAM} — enabling compiler cache")
+        set(CMAKE_C_COMPILER_LAUNCHER   "${SCCACHE_PROGRAM}" CACHE STRING "" FORCE)
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${SCCACHE_PROGRAM}" CACHE STRING "" FORCE)
+        # MSVC: sccache requires /Z7 (embedded debug info) instead of /Zi (PDB)
+        # so debug info is cached along with .obj files.
+        if(MSVC)
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+            string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}")
+            # Disable MSVC's own incremental linker when using sccache
+            add_link_options($<$<CONFIG:Debug>:/INCREMENTAL:NO>)
+        endif()
+    else()
+        message(STATUS "sccache not found — building without compiler cache (install via: scoop install sccache)")
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
+# Unity build — batch multiple TUs per batch to reduce overall compile time
+# Especially effective for the large EngineTests split files.
+# Enable via -DENABLE_UNITY_BUILD=ON  (off by default — affects error output)
+# ---------------------------------------------------------------------------
+option(ENABLE_UNITY_BUILD "Enable CMake unity (jumbo) builds" OFF)
+
 # Media Foundation decoders (Windows built-in — always available)
 option(ENABLE_VIDEO_DECODER "Enable video thumbnail decoder" ON)
 option(ENABLE_AUDIO_DECODER "Enable audio thumbnail decoder" ON)
@@ -2365,6 +2396,15 @@ if(ENGINE_SOURCES)
     target_precompile_headers(ExplorerLensEngine PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/pch.h"
     )
+
+    # Unity build (jumbo mode) — batches TUs to reduce compile time in CI
+    if(ENABLE_UNITY_BUILD)
+        set_target_properties(ExplorerLensEngine PROPERTIES
+            UNITY_BUILD ON
+            UNITY_BUILD_BATCH_SIZE 16
+        )
+        message(STATUS "Unity build enabled (batch size 16)")
+    endif()
 
     # Compiler warnings & flags (MSVC v145 preferred)
     if(MSVC)
