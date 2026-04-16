@@ -1048,6 +1048,9 @@ set(ENGINE_HEADERS
     Core/ArchiveSecurityValidator.h
     Core/ErrorCategorizationEngine.h
     Core/DecoderPerformanceCounters.h
+    Core/EmbeddedPreviewExtractor.h
+    Core/ArchiveCoverExtractor.h
+    Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
     Pipeline/LazyDecodeInitializer.h
@@ -1860,6 +1863,9 @@ set(ENGINE_SOURCES
     Core/WatchFolderEngine.cpp
     Core/ErrorCategorizationEngine.cpp
     Core/DecoderPerformanceCounters.cpp
+    Core/EmbeddedPreviewExtractor.cpp
+    Core/ArchiveCoverExtractor.cpp
+    Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
     # v31.6.0 — Streaming decode & profiling
