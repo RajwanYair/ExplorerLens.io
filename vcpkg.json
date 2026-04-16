@@ -63,15 +63,19 @@
     {
       "name": "libraw",
       "platform": "windows"
-    }
-  ],
-  "builtin-baseline": "3af1d1e60af2b2abf55760538cd607829029b07a",
-  "overrides": [
+    },
     {
-      "name": "zlib",
-      "version": "35.5.0"
+      "name": "libarchive",
+      "platform": "windows",
+      "features": ["bzip2", "lz4", "lzma", "zstd"]
+    },
+    {
+      "name": "catch2",
+      "platform": "windows"
     }
   ],
+  "builtin-baseline": "ef4b4b970dcef43ef9adb7f24c4f00ed41abfe38",
+  "overrides": [],
   "features": {
     "all": {
       "description": "Build all image format decoders",

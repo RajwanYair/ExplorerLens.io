@@ -1,0 +1,129 @@
+name: Binary Size Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Engine/**'
+      - 'LENSShell/**'
+      - 'LENSManager/**'
+      - 'CMakeLists.txt'
+      - 'Engine/CMakeLists.txt'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  size-check:
+    name: Binary Size Check
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Need full history for base comparison
+
+      # ── Build the PR head ────────────────────────────────────────────────
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure (Engine only)
+        run: cmake --preset default-release -DBUILD_CATCH2_TESTS=OFF
+        working-directory: ${{ github.workspace }}
+
+      - name: Build Engine lib
+        run: cmake --build --preset default-release --target ExplorerLensEngine -j 4
+        working-directory: ${{ github.workspace }}
+
+      # ── Measure artifact sizes ───────────────────────────────────────────
+      - name: Collect sizes (head)
+        id: head_sizes
+        shell: pwsh
+        run: |
+          $lib = "build\lib\ExplorerLensEngine.lib"
+          if (Test-Path $lib) {
+            $sz = (Get-Item $lib).Length
+            Write-Output "lib_bytes=$sz" >> $env:GITHUB_OUTPUT
+            Write-Host "ExplorerLensEngine.lib: $([math]::Round($sz/1KB, 1)) KB"
+          } else {
+            Write-Output "lib_bytes=0" >> $env:GITHUB_OUTPUT
+            Write-Warning "ExplorerLensEngine.lib not found"
+          }
+
+      # ── Build the base (main) for comparison ─────────────────────────────
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: base-ref
+          fetch-depth: 1
+
+      - name: Configure base
+        run: cmake --preset default-release -DBUILD_CATCH2_TESTS=OFF
+        working-directory: ${{ github.workspace }}/base-ref
+
+      - name: Build base Engine lib
+        run: cmake --build --preset default-release --target ExplorerLensEngine -j 4
+        working-directory: ${{ github.workspace }}/base-ref
+
+      - name: Collect sizes (base)
+        id: base_sizes
+        shell: pwsh
+        run: |
+          $lib = "base-ref\build\lib\ExplorerLensEngine.lib"
+          if (Test-Path $lib) {
+            $sz = (Get-Item $lib).Length
+            Write-Output "lib_bytes=$sz" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Output "lib_bytes=0" >> $env:GITHUB_OUTPUT
+          }
+
+      # ── Compare and post comment ─────────────────────────────────────────
+      - name: Size delta report
+        shell: pwsh
+        env:
+          HEAD_BYTES: ${{ steps.head_sizes.outputs.lib_bytes }}
+          BASE_BYTES: ${{ steps.base_sizes.outputs.lib_bytes }}
+          PR_NUMBER:  ${{ github.event.pull_request.number }}
+          GH_TOKEN:   ${{ secrets.GITHUB_TOKEN }}
+          REPO:       ${{ github.repository }}
+        run: |
+          $head = [long]$env:HEAD_BYTES
+          $base = [long]$env:BASE_BYTES
+          $delta = $head - $base
+          $pct = if ($base -gt 0) { [math]::Round($delta / $base * 100, 2) } else { 0 }
+          $sign = if ($delta -ge 0) { "+" } else { "" }
+
+          $warn = ""
+          # Gate: block if engine lib grows > 5 MB vs base
+          if ($delta -gt 5MB) {
+            $warn = "⚠️ **Size regression > 5 MB — please investigate**"
+            Write-Error "Engine lib grew by $delta bytes (> 5 MB threshold)"
+          }
+
+          $body = @"
+          ### Binary Size Report
+
+          | Artifact | Base | Head | Delta |
+          |----------|------|------|-------|
+          | ExplorerLensEngine.lib | $([math]::Round($base/1KB,1)) KB | $([math]::Round($head/1KB,1)) KB | ${sign}$([math]::Round($delta/1KB,1)) KB (${sign}${pct}%) |
+
+          $warn
+          "@
+
+          # Post comment on PR
+          $headers = @{
+            Authorization = "Bearer $env:GH_TOKEN"
+            Accept        = "application/vnd.github+json"
+          }
+          $body2 = @{ body = $body } | ConvertTo-Json
+          Invoke-RestMethod `
+            -Uri "https://api.github.com/repos/$env:REPO/issues/$env:PR_NUMBER/comments" `
+            -Method Post `
+            -Headers $headers `
+            -Body $body2 `
+            -ContentType "application/json" | Out-Null
+
+          Write-Host "Delta: ${sign}$([math]::Round($delta/1KB,1)) KB (${sign}${pct}%)"
