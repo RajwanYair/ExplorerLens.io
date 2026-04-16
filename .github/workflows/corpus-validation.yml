@@ -36,7 +36,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore corpus cache
+        id: corpus-cache
+        uses: actions/cache@v4
+        with:
+          path: data/corpus
+          key: corpus-v2-${{ hashFiles('tools/Generate-Corpus.ps1', 'scripts/Setup-TestCorpus.ps1') }}
+          restore-keys: corpus-v2-
+
       - name: Generate synthetic test files
+        if: steps.corpus-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           pwsh -NoProfile -File tools/Generate-Corpus.ps1 -Verbose

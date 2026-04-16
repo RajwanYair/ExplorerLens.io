@@ -346,6 +346,8 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/DecoderUnitTests.cpp
         Catch2Tests/MagicBytesDatabaseTests.cpp
         Catch2Tests/PerceptualHashTests.cpp
+        Catch2Tests/StreamingDecoderTests.cpp
+        Catch2Tests/FormatStatusTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
