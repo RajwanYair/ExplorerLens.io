@@ -1094,6 +1094,7 @@ set(ENGINE_HEADERS
     Core/FormatValidator.h
     Core/DecoderValidationRunner.h
     Core/FormatStatusProvider.h
+    Core/ShellNotificationProvider.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1920,6 +1921,7 @@ set(ENGINE_SOURCES
     Core/FormatValidator.cpp
     Core/DecoderValidationRunner.cpp
     Core/FormatStatusProvider.cpp
+    Core/ShellNotificationProvider.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
