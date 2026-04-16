@@ -65,21 +65,28 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 
 **Getting Started:**
 
-- [Build Quick Reference](docs/development/BUILD_QUICK_REFERENCE.md) - Complete build instructions
-- [Installation Guide](docs/build/INSTALLATION_GUIDE.md) - Installation and setup
-- [Testing Guide](docs/testing/TESTING_GUIDE.md) - Validation and test procedures
+- [Quick Start Guide](docs/QUICK_START.md) — Developer onboarding: clone → build → register → test
+- [Build Quick Reference](docs/development/BUILD_QUICK_REFERENCE.md) — Complete build instructions
+- [Installation Guide](docs/build/INSTALLATION_GUIDE.md) — Installation and setup
+- [Testing Guide](docs/testing/TESTING_GUIDE.md) — Validation and test procedures
 
 **Project Organization:**
 
-- [Project Structure](docs/architecture/PROJECT_STRUCTURE.md) - Complete directory organization
-- [Documentation Index](docs/INDEX.md) - Complete documentation index
+- [Project Structure](docs/architecture/PROJECT_STRUCTURE.md) — Complete directory organization
+- [System Overview](docs/architecture/system-overview.md) — Architecture diagrams + cache layers
+- [Documentation Index](docs/INDEX.md) — Complete documentation index
 
 **Development:**
 
-- [Development Guide](docs/development/README.md) - Developer documentation
-- [Contributing](.github/CONTRIBUTING.md) - How to contribute
-- [Coding Standards](.github/standards/coding-standards.md) - Code style and conventions
-- [Build Scripts](build-scripts/README.md) - Build automation reference
+- [Development Guide](docs/development/README.md) — Developer documentation
+- [Contributing](.github/CONTRIBUTING.md) — How to contribute
+- [Coding Standards](.github/standards/coding-standards.md) — Code style and conventions
+- [Build Scripts](build-scripts/README.md) — Build automation reference
+
+**Server & Ops:**
+
+- [LensServer](src/LensServer/) — Lightweight REST thumbnail server (port 8765)
+- [Dockerfile](Dockerfile) — Windows Container 2-stage build image
 
 ---
 

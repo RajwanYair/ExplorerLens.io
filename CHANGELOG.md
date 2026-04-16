@@ -5,7 +5,94 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [36.0.0] — 2026-04-16 — Altair
+
+50-sprint Phase-1 Foundation refresh. All items delivered as individual commits.
+
+### Added
+
+**Build & Toolchain**
+- `Engine/CMakeLists.txt`: `USE_SCCACHE` option — auto-detects sccache, wires
+  CMAKE_CXX/C_COMPILER_LAUNCHER, flips `/Zi`→`/Z7` for MSVC, adds
+  `/INCREMENTAL:NO` (Sprint 29)
+- `Engine/CMakeLists.txt`: `ENABLE_UNITY_BUILD` option (off by default) with
+  `UNITY_BUILD_BATCH_SIZE 16` (Sprint 30)
+
+**Documentation**
+- `docs/architecture/system-overview.md`: Two-Tier Cache Architecture mermaid
+  diagram, GPU Shader Pipeline table (6 shaders), New Components table (v35.5)
+  (Sprint 31)
+- `docs/QUICK_START.md`: 12-section developer guide — prerequisites, clone,
+  external libs, CMake build, COM registration, test execution, presets, flags,
+  project layout, common issues, contributing (Sprint 32)
+- `docs/USER_GUIDE.md`: minor cross-reference links to QUICK_START.md (Sprint 48)
+
+**Release & Validation Tooling**
+- `tools/Check-Release-Readiness.ps1`: 12-gate release validator — VERSION file,
+  CHANGELOG entry, CMakeLists version, stale version strings, Engine lib &
+  LENSShell.dll presence, test binaries, corpus validation, winget/Chocolatey
+  placeholder checksums, corporate artefact scrub, git workspace clean + tag
+  uniqueness (Sprint 33)
+- `data/baselines/PerFormatBaselines.json`: per-format P50/P95/P99 baselines for
+  22 formats at 256×256 and 512×512; regression thresholds warn=20% / fail=50%
+  (Sprint 38)
+- `packaging/package-manifests.json`: 8-registry unified distribution manifest
+  (winget, Chocolatey, Scoop, NuGet, npm, RubyGems, Docker/ghcr.io, Maven)
+  (Sprint 43)
+
+**Engine Core**
+- `Engine/Core/EventLogProvider.h/.cpp`: Windows Event Log singleton with 12
+  EventIds (1001–1502); Register/Deregister; Error/Warning/Info wrappers;
+  best-effort HKLM registry key creation (Sprint 35)
+- `Engine/Core/CacheMetricsCollector.h/.cpp`: background polling thread (30s),
+  lightweight JSON field extractor, rolling 1MB log with `.1` rotation,
+  MetricsCallback sink, thread-safe `LastSnapshot()` (Sprint 36)
+- `Engine/Core/PredictivePrefetchEngine.h/.cpp`: lexicographic neighbour
+  prefetch, directory listing cache (60s TTL), configurable radius, CancelDirectory,
+  SetRadius, max queue 32 with backpressure drop (Sprint 37)
+
+**CLI Enhancements**
+- `src/Tools.CLI/GenerateCommand`: `--format-filter`, `--max-size`, `--gpu-off`
+  flags; updated GenerateSingle/GenerateRecursive signatures; help text refresh
+  (Sprint 39)
+- `src/Tools.CLI/DoctorCommand`: `CheckDiskCacheHealth()` (scans .tlc blobs,
+  reports MB), `CheckCacheWatcherSupport()` (probes ReadDirectoryChangesW via
+  GetProcAddress); RunChecks() extended to 8 checks (Sprint 40)
+
+**LensServer REST Skeleton**
+- `src/LensServer/LensServer.h/.cpp`: raw Winsock2 HTTP/1.1 server; routes
+  `GET /health`, `GET /metrics`, `GET /thumbnail?path=…&size=…`; AcceptLoop
+  with detached per-connection threads; UrlDecode, ParseRequest helpers
+  (Sprint 41)
+- `src/LensServer/main.cpp`: CLI entry point with SIGINT/SIGTERM graceful stop;
+  `--port/--bind/--gpu-off/--verbose/--max-size` flags (Sprint 41)
+- `Dockerfile`: 2-stage Windows Container build (builder: VS BuildTools 2022 +
+  Scoop + cmake/ninja; runtime: servercore:ltsc2022); HEALTHCHECK + EXPOSE 8765
+  (Sprint 42)
+
+**Fuzz Harnesses**
+- `Engine/Tests/Fuzz/FuzzFormatDetection.cpp`: libFuzzer harness for
+  `Pipeline::DetectFormat()`; MSVC-safe stub compiles under MSVC (Sprint 45)
+- `Engine/Tests/Fuzz/FuzzArchiveCoverExtractor.cpp`: fuzzes
+  `ArchiveCoverExtractor::ExtractFromBuffer()` with varying minWidth/minHeight
+  derived from the first two input bytes (Sprint 45)
+- `Engine/Tests/Fuzz/FuzzExifOrientationNormalizer.cpp`: feeds arbitrary JPEG
+  bytes to `ExtractExifOrientation()` (Sprint 45)
+- `Engine/Tests/Fuzz/CMakeLists.txt`: `ENABLE_FUZZING` option; real targets
+  built only with Clang+libFuzzer; FuzzStubs OBJECT library for MSVC builds
+  (Sprint 45)
+
+**Catch2 Tests**
+- `Engine/Tests/Catch2Tests/DecoderUnitTests.cpp`: 20+ Catch2 REQUIRE tests for
+  ExifOrientationNormalizer (identity / involution / dimension-swap),
+  ThumbnailSizeGrid (NearestPreset / ComputeGrid / preset-sorted invariant),
+  PredictivePrefetchEngine (start-stop / EnqueuePath callback / CancelDirectory /
+  SetRadius), CacheMetricsCollector (zero-snapshot / JSON field parsing /
+  callback firing), EventLogProvider (smoke / idempotent double-register)
+  (Sprint 46)
+- `Engine/Tests/CMakeLists.txt`: `BUILD_CATCH2_TESTS` option (off by default);
+  FetchContent Catch2 v3.7.1; `EngineCatch2Tests` executable with
+  `catch_discover_tests()` + junit reporter → `catch2-results.xml` (Sprint 46)
 
 ---
 
