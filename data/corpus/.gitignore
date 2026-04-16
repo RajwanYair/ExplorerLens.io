@@ -1,0 +1,24 @@
+# data/corpus/ — large test file exclusions
+# ==========================================
+# Synthetic (generated) files are < 100 KB and ARE committed.
+# Real-world sample files that are too large should NOT be committed.
+
+# Exclude files > 10 MB in any subdirectory
+**/raw/*.cr2
+**/raw/*.nef
+**/raw/*.arw
+**/raw/*.crw
+**/raw/*.raf
+**/raw/*.rw2
+**/raw/*.orf
+**/raw/*.pef
+**/raw/*.x3f
+**/documents/*.pdf
+**/video/*.mp4
+**/video/*.mkv
+**/video/*.avi
+**/video/*.mov
+**/audio/*.flac
+**/audio/*.wav
+# Allow small synthetic ones
+!**/synthetic_*
