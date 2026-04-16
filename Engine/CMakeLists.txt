@@ -1044,6 +1044,8 @@ set(ENGINE_HEADERS
     Core/DecodeErrorCategory.h
     Core/GracefulDegradation.h
     Core/ArchiveSecurityValidator.h
+    Core/ErrorCategorizationEngine.h
+    Core/DecoderPerformanceCounters.h
 
     # Pipeline enhancements
     Pipeline/LazyDecodeInitializer.h
@@ -1854,6 +1856,8 @@ set(ENGINE_SOURCES
     Core/ThemeEngine.cpp
     Core/UpdateEngine.cpp
     Core/WatchFolderEngine.cpp
+    Core/ErrorCategorizationEngine.cpp
+    Core/DecoderPerformanceCounters.cpp
 
     # Pipeline implementations
     # v31.6.0 — Streaming decode & profiling
