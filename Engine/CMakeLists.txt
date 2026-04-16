@@ -1050,6 +1050,8 @@ set(ENGINE_HEADERS
     Core/DecoderPerformanceCounters.h
     Core/EmbeddedPreviewExtractor.h
     Core/ArchiveCoverExtractor.h
+    Core/ExifOrientationNormalizer.h
+    Core/ThumbnailSizeGrid.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1865,6 +1867,7 @@ set(ENGINE_SOURCES
     Core/DecoderPerformanceCounters.cpp
     Core/EmbeddedPreviewExtractor.cpp
     Core/ArchiveCoverExtractor.cpp
+    Core/ExifOrientationNormalizer.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
