@@ -1,0 +1,86 @@
+{
+  "_comment": "Unified index of all ExplorerLens package distribution manifests",
+  "_schema": "https://explorerlens.io/schemas/package-manifests/v1",
+  "version": "35.5.0",
+  "updated": "2026-04-16",
+  "manifests": {
+    "winget": {
+      "path": "packaging/winget/ExplorerLens.yaml",
+      "format": "winget-manifest/1.4.0",
+      "publisher": "ExplorerLens Project",
+      "packageId": "ExplorerLens.ExplorerLens",
+      "installer": "MSI",
+      "silentSwitch": "/quiet",
+      "registry": "https://github.com/microsoft/winget-pkgs",
+      "submitUrl": "https://github.com/microsoft/winget-pkgs/compare",
+      "docs": "https://learn.microsoft.com/en-us/windows/package-manager/package/manifest"
+    },
+    "chocolatey": {
+      "path": "packaging/chocolatey/ExplorerLens.nuspec",
+      "installScript": "packaging/chocolatey/tools/chocolateyInstall.ps1",
+      "format": "nuspec/Chocolatey",
+      "packageId": "explorerlens",
+      "installer": "MSI via Install-ChocolateyPackage",
+      "registry": "https://community.chocolatey.org",
+      "submitUrl": "https://push.chocolatey.org/",
+      "docs": "https://docs.chocolatey.org/en-us/create/create-packages"
+    },
+    "scoop": {
+      "path": "packaging/scoop/explorerlens.json",
+      "format": "scoop-manifest",
+      "bucket": "extras",
+      "installer": "ZIP portable extraction",
+      "postInstall": "regsvr32 LENSShell.dll",
+      "preUninstall": "regsvr32 /u LENSShell.dll",
+      "registry": "https://github.com/ScoopInstaller/Extras",
+      "submitUrl": "https://github.com/ScoopInstaller/Extras/pulls",
+      "docs": "https://github.com/ScoopInstaller/Scoop/wiki/App-Manifests"
+    },
+    "nuget": {
+      "path": "packaging/nuget/ExplorerLens.SDK.nuspec",
+      "format": "nuspec/NuGet",
+      "packageId": "ExplorerLens.SDK",
+      "registry": "nuget.pkg.github.com",
+      "owner": "RajwanYair",
+      "docs": "https://learn.microsoft.com/en-us/nuget/create-packages/overview-and-workflow"
+    },
+    "npm": {
+      "path": "packaging/npm/package.json",
+      "format": "npm",
+      "packageId": "@rajwanyair/explorerlens",
+      "registry": "npm.pkg.github.com",
+      "docs": "https://docs.npmjs.com/creating-a-package-json-file"
+    },
+    "rubygems": {
+      "path": "packaging/ruby/explorerlens.gemspec",
+      "versionFile": "packaging/ruby/lib/explorerlens/version.rb",
+      "format": "gemspec",
+      "gemName": "explorerlens",
+      "registry": "rubygems.pkg.github.com",
+      "owner": "RajwanYair",
+      "docs": "https://guides.rubygems.org/make-your-own-gem/"
+    },
+    "docker": {
+      "path": "Dockerfile",
+      "format": "Dockerfile",
+      "image": "ghcr.io/rajwanyair/explorerlens",
+      "baseImage": "mcr.microsoft.com/windows/servercore:ltsc2022",
+      "registry": "ghcr.io",
+      "exposedPort": 8765,
+      "docs": "https://docs.docker.com/engine/reference/builder/"
+    },
+    "maven": {
+      "path": "packaging/maven/pom.xml",
+      "format": "Maven POM",
+      "groupId": "io.github.rajwanyair",
+      "artifactId": "explorerlens",
+      "registry": "maven.pkg.github.com",
+      "docs": "https://maven.apache.org/guides/mini/guide-creating-archetypes.html"
+    }
+  },
+  "checksums_file": "packaging/output/SHA256SUMS.txt",
+  "release_workflow": ".github/workflows/release.yml",
+  "publish_workflow": ".github/workflows/publish-packages.yml",
+  "bump_script": "build-scripts/Bump-Version.ps1",
+  "readiness_script": "tools/Check-Release-Readiness.ps1"
+}
