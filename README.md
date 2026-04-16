@@ -13,23 +13,25 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 [![CodeQL](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/codeql.yml)
 [![Latest Release](https://img.shields.io/github/v/release/RajwanYair/ExplorerLens.io?label=release&color=brightgreen)](https://github.com/RajwanYair/ExplorerLens.io/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/RajwanYair/ExplorerLens.io/total?color=blue)](https://github.com/RajwanYair/ExplorerLens.io/releases)
-![Platform](https://img.shields.io/badge/Platform-Windows%20x64%20Intel-blue)
+![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11%20x64-blue)
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
-![Windows 11](https://img.shields.io/badge/Windows-10%2F11-blue)
+![MSVC](https://img.shields.io/badge/MSVC-v145%20%2819.50%29-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Tests](https://img.shields.io/badge/Tests-4724%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
+![Roadmap](https://img.shields.io/badge/Roadmap-Phase%201%20Foundation-informational)
 
 | | |
 |---|---|
 | **Type** | Windows Shell Extension (`IThumbnailProvider` COM in-process DLL) |
-| **GPU** | DirectX 11, DirectX 12, Vulkan Compute — with CPU GDI+ fallback |
+| **GPU** | DirectX 11 device + compute shaders · GPU resize · HDR tone-map · CPU GDI+ fallback |
+| **Platform** | **Windows 10 1809+ / Windows 11 (x64)** · macOS/Linux: planned Phase 5 |
 | **Formats** | 200+ extensions — HEIC, AVIF, JXL, WebP, RAW, PDF, CBZ, CBR, EPUB, glTF, DDS, EXR, MP4, MP3, TTF … |
 | **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
 | **Language** | C++20 · MSVC v145 · Visual Studio 18 2026 BuildTools |
 | **Build** | CMake 4.3 · Ninja · vcpkg / local external libs |
 | **Tests** | 4,724 unit tests · 5 benchmarks · 100% pass rate |
-| **Install** | `regsvr32 LENSShell.dll` — no reboot required |
+| **Install** | One-click MSI **or** `winget install ExplorerLens.ExplorerLens` **or** `regsvr32 LENSShell.dll` |
 
 <!--
   GitHub Search Metadata
