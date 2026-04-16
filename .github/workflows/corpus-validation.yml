@@ -1,0 +1,138 @@
+name: Corpus Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Engine/Decoders/**'
+      - 'Engine/Core/**'
+      - 'data/corpus/**'
+      - 'tools/Generate-Corpus.ps1'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Engine/Decoders/**'
+      - 'Engine/Core/**'
+      - 'data/corpus/**'
+
+  # Allow manual trigger with a specific format group filter
+  workflow_dispatch:
+    inputs:
+      format_group:
+        description: 'Format group to validate (e.g. "images", or "all")'
+        required: false
+        default: 'all'
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  generate-corpus:
+    name: Generate Test Corpus
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate synthetic test files
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File tools/Generate-Corpus.ps1 -Verbose
+          # List what was generated
+          Get-ChildItem data/corpus -Recurse -File |
+            Select-Object FullName, @{n='KB';e={[math]::Round($_.Length/1KB,1)}} |
+            Format-Table -AutoSize
+
+      - name: Upload corpus as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-corpus
+          path: data/corpus/
+          retention-days: 7
+
+  build-and-validate:
+    name: Build engine + validate corpus (${{ matrix.config }})
+    runs-on: windows-latest
+    needs: generate-corpus
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download corpus
+        uses: actions/download-artifact@v4
+        with:
+          name: test-corpus
+          path: data/corpus/
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        run: cmake --preset default-release -DBUILD_CATCH2_TESTS=ON
+        working-directory: ${{ github.workspace }}
+
+      - name: Build engine + tests
+        run: cmake --build --preset default-release -j 4
+        working-directory: ${{ github.workspace }}
+
+      - name: Run unit tests (CTest)
+        run: ctest --test-dir build -C ${{ matrix.config }} --output-on-failure -j 4
+        working-directory: ${{ github.workspace }}
+
+      - name: Run Catch2 tests
+        shell: pwsh
+        run: |
+          $exe = "build\bin\EngineCatch2Tests.exe"
+          if (Test-Path $exe) {
+            & $exe --reporter junit --out build\catch2-results.xml
+          } else {
+            Write-Warning "EngineCatch2Tests.exe not found — skipping"
+          }
+
+      - name: Publish Catch2 test results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Catch2 Tests (${{ matrix.config }})
+          path: build/catch2-results.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Validate corpus files (format detection)
+        shell: pwsh
+        run: |
+          $manifest = Get-Content data\corpus\MANIFEST.json | ConvertFrom-Json
+          $passed = 0; $failed = 0
+          foreach ($entry in $manifest.entries) {
+            $path = "data\corpus\$($entry.path)"
+            if (-not (Test-Path $path)) {
+              Write-Warning "MISSING: $path"
+              $failed++
+              continue
+            }
+            $sz = (Get-Item $path).Length
+            if ($sz -lt 4) {
+              Write-Warning "EMPTY/STUB: $path ($sz bytes) — skipped"
+              continue
+            }
+            Write-Host "  OK: $path ($sz bytes)"
+            $passed++
+          }
+          Write-Host "Corpus validation: $passed passed, $failed failed"
+          if ($failed -gt 0) { exit 1 }
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.config }}
+          path: build/*.xml
+          retention-days: 30
