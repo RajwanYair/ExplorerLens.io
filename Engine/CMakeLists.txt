@@ -1090,6 +1090,9 @@ set(ENGINE_HEADERS
     Core/MagicBytesDatabase.h
     Core/PerceptualHashUtility.h
     Core/SSIMComparator.h
+    Core/ThumbnailHashRegistry.h
+    Core/FormatValidator.h
+    Core/DecoderValidationRunner.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1912,6 +1915,9 @@ set(ENGINE_SOURCES
     Core/MagicBytesDatabase.cpp
     Core/PerceptualHashUtility.cpp
     Core/SSIMComparator.cpp
+    Core/ThumbnailHashRegistry.cpp
+    Core/FormatValidator.cpp
+    Core/DecoderValidationRunner.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
