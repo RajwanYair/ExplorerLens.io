@@ -321,3 +321,66 @@ if(WIN32)
         )
     endif()
 endif()
+
+# =============================================================================
+# Catch2 Tests (Sprint 46 — DecoderUnit + FormatDetection + CacheSubsystem)
+# =============================================================================
+# Enable with: cmake -DBUILD_CATCH2_TESTS=ON (default OFF to keep CI fast)
+# The Catch2 executable is named EngineCatch2Tests and runs via ctest -L catch2
+
+option(BUILD_CATCH2_TESTS "Build Catch2-based unit tests (requires Catch2 v3)" OFF)
+
+if(BUILD_CATCH2_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG        v3.7.1
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(Catch2)
+
+    add_executable(EngineCatch2Tests
+        Catch2Tests/FormatDetectionTests.cpp
+        Catch2Tests/CacheSubsystemTests.cpp
+        Catch2Tests/DecoderUnitTests.cpp
+    )
+
+    target_include_directories(EngineCatch2Tests
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/..
+    )
+
+    target_link_libraries(EngineCatch2Tests
+        PRIVATE
+            ExplorerLensEngine
+            Catch2::Catch2WithMain
+    )
+
+    if(WIN32)
+        target_compile_definitions(EngineCatch2Tests PRIVATE
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+            _WIN32_WINNT=0x0A00
+        )
+        target_link_libraries(EngineCatch2Tests PRIVATE shlwapi)
+    endif()
+
+    if(MSVC)
+        target_compile_options(EngineCatch2Tests PRIVATE /W4 /bigobj)
+        target_link_options(EngineCatch2Tests PRIVATE
+            /IGNORE:4099
+            /NODEFAULTLIB:LIBCMT
+        )
+    endif()
+
+    include(CTest)
+    include(Catch)
+    catch_discover_tests(EngineCatch2Tests
+        TEST_PREFIX "Catch2."
+        REPORTER junit
+        OUTPUT_DIR  "${CMAKE_BINARY_DIR}"
+        OUTPUT_FILE catch2-results.xml
+        PROPERTIES  LABELS "catch2;unit"
+    )
+endif() # BUILD_CATCH2_TESTS
