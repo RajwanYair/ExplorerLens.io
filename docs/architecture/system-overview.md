@@ -129,3 +129,55 @@ sequenceDiagram
     Pipeline-->>Shell: HBITMAP
     Shell-->>Explorer: S_OK + HBITMAP
 ```
+
+---
+
+## Two-Tier Cache Architecture (v35.5+)
+
+```mermaid
+graph LR
+    Request["Thumbnail Request"] --> L1{"L1 LRU\n&lt;1ms\n64 MB"}
+    L1 -->|Hit| Out["Return HBITMAP"]
+    L1 -->|Miss| L2{"L2 Disk\n&lt;5ms\n512 MB"}
+    L2 -->|Hit + Promote| L1
+    L2 -->|Miss| Decode["Decode Pipeline"]
+    Decode --> L1
+    Decode --> L2async["L2 async write"]
+    L2async -.->|"worker thread"| L2
+```
+
+`TwoTierCacheManager` coordinates the two tiers:
+- **L1** — `SubMillisecondCacheEngine` (XXH3-keyed robin-hood LRU, in-process)
+- **L2** — `DiskCacheStore` (FNV-1a keyed flat-file blobs under `%LOCALAPPDATA%\ExplorerLens\Cache`)
+- **Invalidation** — `CacheInvalidationWatcher` (ReadDirectoryChangesW) fires prefix invalidation on file changes
+
+---
+
+## GPU Shader Pipeline (v35.5+)
+
+New HLSL compute shaders in `Engine/GPU/shaders/`:
+
+| Shader | Purpose |
+|--------|---------|
+| `resize_bilinear.hlsl` | Fast bilinear downscale for thumbnail generation |
+| `resize_lanczos.hlsl` | High-quality Lanczos-3 resize for preview pane |
+| `tonemap_pq_to_srgb.hlsl` | HDR10 PQ → sRGB for HEIF/AVIF HDR content |
+| `tonemap_hlg_to_srgb.hlsl` | HLG → sRGB for BT.2100 video stills |
+| `demosaic_bayer.hlsl` | RAW camera Bayer pattern → RGB |
+| `colorspace_yuv_to_rgb.hlsl` | YCbCr BT.601/709/2020 → RGB |
+
+---
+
+## New Components (v35.5)
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `EmbeddedPreviewExtractor` | `Engine/Core/` | LibRaw `unpack_thumb()` fast path for RAW thumbnails |
+| `ArchiveCoverExtractor` | `Engine/Core/` | First-image extraction from ZIP/CBZ/RAR via libarchive |
+| `ExifOrientationNormalizer` | `Engine/Core/` | In-place BGRA pixel rotation for EXIF tags 1–8 |
+| `ThumbnailSizeGrid` | `Engine/Core/` | Canonical size presets + grid layout for thumbnail strips |
+| `ErrorCategorizationEngine` | `Engine/Core/` | HRESULT/errno → `DecodeErrorCategory` mapping |
+| `DecoderPerformanceCounters` | `Engine/Core/` | Lock-free per-format latency histograms (P50/P95/P99) |
+| `TwoTierCacheManager` | `Engine/Cache/` | L1 LRU + L2 persistent disk cache coordination |
+| `DiskCacheStore` | `Engine/Cache/` | SHA-keyed flat-file thumbnail blob store |
+| `CacheInvalidationWatcher` | `Engine/Cache/` | ReadDirectoryChangesW → cache invalidation |
