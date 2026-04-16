@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 10 April 2026 (v35.5.0 Vega-V release)
-**Version:** 35.5.0 "Vega-V"
+**Last Updated:** 16 April 2026 (v36.0.0 Altair release)
+**Version:** 36.0.0 "Altair"
 
 ---
 

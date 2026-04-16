@@ -14,7 +14,7 @@
 #   LENS_MAX_SIZE    Maximum thumbnail size in px (default 1024)
 #   LENS_VERBOSE     Set to "1" for request logging
 #
-ARG EXPLORERLENS_VERSION=35.5.0
+ARG EXPLORERLENS_VERSION=36.0.0
 
 # ── Stage 1: Build ─────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS builder
@@ -49,7 +49,7 @@ RUN cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\A
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS runtime
 
-ARG EXPLORERLENS_VERSION=35.5.0
+ARG EXPLORERLENS_VERSION=36.0.0
 LABEL org.opencontainers.image.title="ExplorerLens LensServer"
 LABEL org.opencontainers.image.description="REST thumbnail server for ExplorerLens"
 LABEL org.opencontainers.image.version="${EXPLORERLENS_VERSION}"
