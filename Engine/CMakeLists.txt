@@ -1085,6 +1085,7 @@ set(ENGINE_HEADERS
     Core/ThumbnailSizeGrid.h
     Core/EventLogProvider.h
     Core/CacheMetricsCollector.h
+    Core/PredictivePrefetchEngine.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1903,6 +1904,7 @@ set(ENGINE_SOURCES
     Core/ExifOrientationNormalizer.cpp
     Core/EventLogProvider.cpp
     Core/CacheMetricsCollector.cpp
+    Core/PredictivePrefetchEngine.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
