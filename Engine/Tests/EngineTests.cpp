@@ -4935,6 +4935,18 @@ int main()
     RUN_TEST(TestProgressiveThumbnailStream_Emit);
     RUN_TEST(TestProgressiveThumbnailStream_Complete);
 
+    // Sprint 1331-1340: Cross-Device Preview Sync
+    RUN_TEST(TestDeviceSyncManifest_Upsert);
+    RUN_TEST(TestDeviceSyncManifest_Serialize);
+    RUN_TEST(TestCrossDeviceCacheSync_Upload);
+    RUN_TEST(TestCrossDeviceCacheSync_Bidirectional);
+    RUN_TEST(TestThumbnailPackFile_PackExtract);
+    RUN_TEST(TestThumbnailPackFile_InvalidMagic);
+    RUN_TEST(TestSyncConflictResolver_LatestEtag);
+    RUN_TEST(TestSyncConflictResolver_RemoteWins);
+    RUN_TEST(TestDeviceCapabilityAdvertiser_Probe);
+    RUN_TEST(TestDeviceCapabilityAdvertiser_FindBest);
+
     std::wcout << std::endl;
     std::wcout << L"Isolation & Stability Tests..." << std::endl;
     RUN_TEST(TestMalformedArchive_TruncatedZIP);

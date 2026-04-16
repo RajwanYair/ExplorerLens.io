@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading…</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0d1a; --bg2: #12122a;
+      --glass: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.1);
+      --accent: #a78bfa; --accent2: #7c3aed;
+      --text: #e2e8f0; --muted: #94a3b8;
+      --radius: 1rem;
+    }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; overflow-x: hidden;
+    }
+    body::before { content: ""; position: fixed; width: 600px; height: 600px;
+      background: var(--accent2); top: -150px; left: -150px;
+      border-radius: 50%; filter: blur(120px); opacity: 0.12; pointer-events: none; }
+
+    /* ── Top bar ── */
+    nav {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.8rem 2rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    nav a { color: var(--muted); text-decoration: none; font-size: 0.85rem;
+            transition: color 0.2s; }
+    nav a:hover { color: var(--text); }
+    nav .sep { color: var(--border); }
+    nav .repo-name { color: var(--accent); font-weight: 600; }
+    nav .spacer { flex: 1; }
+    nav .btn { display: inline-flex; align-items: center; gap: 0.3rem;
+               padding: 0.35rem 0.8rem; border-radius: 0.5rem; font-size: 0.8rem;
+               font-weight: 600; text-decoration: none;
+               border: 1px solid var(--border); color: var(--muted);
+               background: var(--glass); transition: all 0.2s; }
+    nav .btn:hover { color: var(--text); border-color: var(--accent); }
+
+    /* ── Content area ── */
+    .content {
+      max-width: 860px; margin: 2rem auto; padding: 0 1.5rem 4rem;
+    }
+    .loading { text-align: center; padding: 4rem; color: var(--muted); }
+    .error { text-align: center; padding: 4rem; }
+    .error h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    .error p { color: var(--muted); }
+
+    /* ── Markdown rendered styles ── */
+    .markdown-body {
+      color: var(--text); line-height: 1.7; font-size: 0.95rem;
+    }
+    .markdown-body h1 { font-size: 2rem; font-weight: 700; margin: 2rem 0 1rem;
+      padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #fff 40%, var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; }
+    .markdown-body h2 { font-size: 1.5rem; font-weight: 600; margin: 1.8rem 0 0.8rem;
+      padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); color: var(--text); }
+    .markdown-body h3 { font-size: 1.2rem; font-weight: 600; margin: 1.5rem 0 0.6rem; }
+    .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+      font-size: 1rem; font-weight: 600; margin: 1.2rem 0 0.5rem; }
+    .markdown-body p { margin: 0.8rem 0; }
+    .markdown-body a { color: var(--accent); text-decoration: none; }
+    .markdown-body a:hover { text-decoration: underline; }
+    .markdown-body strong { font-weight: 700; color: #fff; }
+    .markdown-body em { font-style: italic; color: var(--muted); }
+    .markdown-body ul, .markdown-body ol { padding-left: 1.8rem; margin: 0.8rem 0; }
+    .markdown-body li { margin: 0.3rem 0; }
+    .markdown-body li::marker { color: var(--accent); }
+    .markdown-body blockquote {
+      border-left: 3px solid var(--accent); padding: 0.5rem 1rem;
+      margin: 1rem 0; background: var(--glass); border-radius: 0 0.5rem 0.5rem 0;
+      color: var(--muted); }
+    .markdown-body code {
+      background: rgba(255,255,255,0.08); padding: 0.15rem 0.4rem;
+      border-radius: 0.3rem; font-size: 0.88rem;
+      font-family: "Cascadia Code", "Fira Code", monospace; }
+    .markdown-body pre {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+      border-radius: 0.6rem; padding: 1rem 1.2rem; overflow-x: auto;
+      margin: 1rem 0; }
+    .markdown-body pre code {
+      background: none; padding: 0; font-size: 0.85rem; line-height: 1.6; }
+    .markdown-body img { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+    .markdown-body table {
+      width: 100%; border-collapse: collapse; margin: 1rem 0;
+      font-size: 0.9rem; }
+    .markdown-body th, .markdown-body td {
+      padding: 0.5rem 0.8rem; border: 1px solid var(--border); text-align: left; }
+    .markdown-body th { background: var(--glass); font-weight: 600; }
+    .markdown-body hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    .markdown-body input[type="checkbox"] { margin-right: 0.4rem; accent-color: var(--accent); }
+
+    /* ── Badges (common in READMEs) ── */
+    .markdown-body img[src*="shields.io"],
+    .markdown-body img[src*="badge"],
+    .markdown-body img[src*="img.shields"] {
+      display: inline-block; margin: 0.2rem 0.2rem; border-radius: 0.2rem;
+      vertical-align: middle; }
+
+    /* ── Footer ── */
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem;
+             border-top: 1px solid var(--border); }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="https://rajwanyair.github.io/">rajwanyair.github.io</a>
+    <span class="sep">/</span>
+    <span class="repo-name" id="repoName">…</span>
+    <span class="spacer"></span>
+    <a class="btn" id="ghLink" href="#" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </nav>
+
+  <div class="content">
+    <div class="loading" id="loading">Loading README…</div>
+    <div class="error" id="error" hidden>
+      <h2>No README found</h2>
+      <p>This project doesn't have a README.md in its root.</p>
+    </div>
+    <article class="markdown-body" id="readme" hidden></article>
+  </div>
+
+  <footer>
+    <a href="https://rajwanyair.github.io/">← All Projects</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script>
+    (function () {
+      // Derive repo name from URL path: /RepoName/ → RepoName
+      const parts = location.pathname.replace(/\/+$/, "").split("/");
+      const repo = parts[parts.length - 1] || parts[parts.length - 2] || "project";
+
+      document.title = repo;
+      document.getElementById("repoName").textContent = repo;
+      document.getElementById("ghLink").href = "https://github.com/RajwanYair/" + repo;
+
+      // Configure marked for GFM + syntax highlighting
+      marked.setOptions({
+        gfm: true,
+        breaks: false,
+        highlight: function (code, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            return hljs.highlight(code, { language: lang }).value;
+          }
+          return hljs.highlightAuto(code).value;
+        },
+      });
+
+      // Fetch README.md (relative path — works under /<repo>/ subpath)
+      fetch("./README.md")
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.text();
+        })
+        .then(function (md) {
+          // Fix relative image paths that point to repo assets
+          // e.g., ![screenshot](docs/img.png) → works as-is (relative)
+          var html = marked.parse(md);
+          document.getElementById("loading").hidden = true;
+          var el = document.getElementById("readme");
+          el.innerHTML = html;
+          el.hidden = false;
+
+          // Apply highlight.js to any code blocks marked missed
+          el.querySelectorAll("pre code").forEach(function (block) {
+            hljs.highlightElement(block);
+          });
+        })
+        .catch(function () {
+          document.getElementById("loading").hidden = true;
+          document.getElementById("error").hidden = false;
+        });
+    })();
+  </script>
+</body>
+</html>
