@@ -1083,6 +1083,8 @@ set(ENGINE_HEADERS
     Core/ArchiveCoverExtractor.h
     Core/ExifOrientationNormalizer.h
     Core/ThumbnailSizeGrid.h
+    Core/EventLogProvider.h
+    Core/CacheMetricsCollector.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1899,6 +1901,8 @@ set(ENGINE_SOURCES
     Core/EmbeddedPreviewExtractor.cpp
     Core/ArchiveCoverExtractor.cpp
     Core/ExifOrientationNormalizer.cpp
+    Core/EventLogProvider.cpp
+    Core/CacheMetricsCollector.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
