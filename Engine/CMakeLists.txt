@@ -624,6 +624,8 @@ set(ENGINE_HEADERS
     Cache/CachePrewarmScheduler.h
     Cache/CacheDiagnostics.h
     Cache/CacheLinePadding.h
+    Cache/TwoTierCacheManager.h
+    Cache/DiskCacheStore.h
 
     # Plugin system
     Plugin/IPC/PluginIPCProtocol.h
@@ -1945,6 +1947,8 @@ set(ENGINE_SOURCES
     # Cache implementations
     Cache/PersistentDiskCache.cpp
     Cache/ThumbnailCache.cpp
+    Cache/TwoTierCacheManager.cpp
+    Cache/DiskCacheStore.cpp
 
     # Plugin system implementations
     Plugin/IPC/SharedMemoryManager.cpp
