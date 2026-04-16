@@ -88,6 +88,8 @@ std::vector<DiagnosticCheck> DoctorCommand::RunChecks()
         CheckDllPresence(),
         CheckGPUAvailability(),
         CheckCacheDirectory(),
+        CheckDiskCacheHealth(),
+        CheckCacheWatcherSupport(),
         CheckThumbnailServiceEnabled(),
     };
 }
@@ -260,8 +262,73 @@ DiagnosticCheck DoctorCommand::CheckCacheDirectory()
     return c;
 }
 
-DiagnosticCheck DoctorCommand::CheckThumbnailServiceEnabled()
+DiagnosticCheck DoctorCommand::CheckDiskCacheHealth()
 {
+    DiagnosticCheck c;
+    c.name = L"Disk Cache (L2)";
+
+    wchar_t localAppData[MAX_PATH] = {};
+    if (::GetEnvironmentVariableW(L"LOCALAPPDATA", localAppData, MAX_PATH) == 0) {
+        c.status = CheckStatus::Fail;
+        c.detail = L"%%LOCALAPPDATA%% not set";
+        return c;
+    }
+
+    fs::path cacheDir  = fs::path(localAppData) / L"ExplorerLens" / L"Cache";
+    fs::path storeDir  = cacheDir;
+    std::error_code ec;
+
+    if (!fs::exists(storeDir)) {
+        c.status = CheckStatus::Warn;
+        c.detail = L"L2 cache dir not yet created (first run)";
+        c.fix    = L"Generate at least one thumbnail to initialise the disk cache";
+        return c;
+    }
+
+    // Count .tlc blob files and measure total size
+    uintmax_t totalBytes = 0;
+    uint32_t blobCount = 0;
+    for (const auto& entry : fs::directory_iterator(storeDir, ec)) {
+        if (entry.path().extension() == L".tlc") {
+            totalBytes += entry.file_size(ec);
+            ++blobCount;
+        }
+    }
+
+    double totalMB = static_cast<double>(totalBytes) / (1024.0 * 1024.0);
+    c.status = CheckStatus::Pass;
+    c.detail = std::to_wstring(blobCount) + L" blobs, "
+             + std::to_wstring(static_cast<int>(totalMB + 0.5)) + L" MB — "
+             + storeDir.wstring();
+    return c;
+}
+
+DiagnosticCheck DoctorCommand::CheckCacheWatcherSupport()
+{
+    DiagnosticCheck c;
+    c.name = L"Cache Watcher (ReadDirChanges)";
+
+    // Probe ReadDirectoryChangesW availability by checking kernel32 export
+    HMODULE kernel32 = ::GetModuleHandleW(L"kernel32.dll");
+    if (!kernel32) {
+        c.status = CheckStatus::Fail;
+        c.detail = L"kernel32.dll not loaded";
+        return c;
+    }
+
+    auto fn = ::GetProcAddress(kernel32, "ReadDirectoryChangesW");
+    if (fn) {
+        c.status = CheckStatus::Pass;
+        c.detail = L"ReadDirectoryChangesW available (kernel32.dll)";
+    } else {
+        c.status = CheckStatus::Fail;
+        c.detail = L"ReadDirectoryChangesW not found — cache invalidation disabled";
+        c.fix    = L"Run on Windows Vista+ (all supported OS versions have this API)";
+    }
+    return c;
+}
+
+DiagnosticCheck DoctorCommand::CheckThumbnailServiceEnabled(){
     DiagnosticCheck c;
     c.name = L"Thumbnail Service";
 

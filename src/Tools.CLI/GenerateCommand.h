@@ -3,10 +3,13 @@
 //
 // Implements the 'lens generate' subcommand.
 // Decodes the input file via ExplorerLensEngine and saves the output thumbnail.
-// Supports --size, --quality, --output, --format, and --recursive options.
+// Supports --size, --quality, --output, --format, --format-filter, --max-size,
+// --gpu-off, and --recursive options.
 //
 #pragma once
 #include "CommandRouter.h"
+#include <vector>
+#include <string>
 
 namespace ExplorerLens {
 namespace CLI {
@@ -19,7 +22,8 @@ public:
         return L"Generate thumbnail(s) for one or more files";
     }
     std::wstring_view Usage() const noexcept override {
-        return L"lens generate <input> [--output <path>] [--size <px>] [--quality <0-100>] [--recursive]";
+        return L"lens generate <input> [--output <path>] [--size <px>] [--quality <0-100>]"
+               L" [--max-size <px>] [--format-filter <ext,...>] [--gpu-off] [--recursive]";
     }
 
 private:
@@ -27,12 +31,17 @@ private:
                        const std::wstring& outputPath,
                        uint32_t sizePx,
                        uint32_t quality,
+                       uint32_t maxSize,
+                       bool gpuOff,
                        bool verbose);
 
     int GenerateRecursive(const std::wstring& directory,
                           const std::wstring& outputDir,
                           uint32_t sizePx,
                           uint32_t quality,
+                          uint32_t maxSize,
+                          const std::vector<std::wstring>& allowedExts,
+                          bool gpuOff,
                           bool verbose);
 };
 

@@ -45,6 +45,8 @@ private:
     DiagnosticCheck CheckRegistration();
     DiagnosticCheck CheckGPUAvailability();
     DiagnosticCheck CheckCacheDirectory();
+    DiagnosticCheck CheckDiskCacheHealth();
+    DiagnosticCheck CheckCacheWatcherSupport();
     DiagnosticCheck CheckWindowsVersion();
     DiagnosticCheck CheckDllPresence();
     DiagnosticCheck CheckThumbnailServiceEnabled();
