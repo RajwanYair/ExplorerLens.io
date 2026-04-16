@@ -20,6 +20,8 @@ add_library(LensCLILib STATIC
     RegisterCommand.cpp
     BenchmarkCommand.cpp
     DoctorCommand.cpp
+    CleanCommand.cpp
+    ExportCommand.cpp
 )
 
 # --------------------------------------------------------------------------

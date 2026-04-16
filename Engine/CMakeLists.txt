@@ -1093,6 +1093,7 @@ set(ENGINE_HEADERS
     Core/ThumbnailHashRegistry.h
     Core/FormatValidator.h
     Core/DecoderValidationRunner.h
+    Core/FormatStatusProvider.h
     Cache/CacheInvalidationWatcher.h
 
     # Pipeline enhancements
@@ -1918,6 +1919,7 @@ set(ENGINE_SOURCES
     Core/ThumbnailHashRegistry.cpp
     Core/FormatValidator.cpp
     Core/DecoderValidationRunner.cpp
+    Core/FormatStatusProvider.cpp
     Cache/CacheInvalidationWatcher.cpp
 
     # Pipeline implementations
