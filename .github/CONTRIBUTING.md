@@ -10,33 +10,42 @@ Thank you for your interest in contributing to ExplorerLens!
  - [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) - Build instructions
 
 2. **Set up your development environment:**
- - Visual Studio 2026 BuildTools with MSVC v19.50+
- - CMake 3.20+
+ - Visual Studio 18 2026 BuildTools with MSVC v145 (cl.exe 19.50)
+ - CMake 3.25+ and Ninja 1.13+ (install via Scoop: `scoop install cmake ninja`)
+ - Windows SDK 10.0.26100.0
  - See [BUILD_QUICK_REFERENCE.md](../docs/development/BUILD_QUICK_REFERENCE.md) for detailed setup
 
 ## Development Workflow
 
 ### Building the Project
 
-```cmd
-# Open "x64 Native Tools Command Prompt for VS 2026"
-cd path\to\ExplorerLens
+```powershell
+# Preferred: repository build script (sources vcvars automatically)
+.\build-scripts\Build-MSVC.ps1
 
-# Build external libraries first (see docs/BUILD_GUIDE.md)
-# Then build the main project:
-msbuild LENSShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
+# Clean build
+.\build-scripts\Build-MSVC.ps1 -Clean
+
+# Clean build + tests
+.\build-scripts\Build-MSVC.ps1 -Clean -Test
+
+# Shell + manager only (MSBuild)
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 ```
+
+Use the shared MyScripts terminal bootstrap plus the workspace `.env.ps1` helpers when working in VS Code. The default ExplorerLens terminal profile is expected to load the common toolchain layer first, then project-local helpers.
 
 ### Testing Your Changes
 
-```cmd
-# Register the DLL
+```powershell
+# Canonical CTest invocation
+ctest --test-dir build -C Release --output-on-failure
+
+# Direct engine test runner
+& '.\build\bin\EngineTests.exe'
+
+# Register and test shell extension manually when needed
 regsvr32 /s x64\Release\LENSShell.dll
-
-# Test in Windows Explorer
-# Navigate to a folder with supported file types
-
-# Unregister when done
 regsvr32 /u /s x64\Release\LENSShell.dll
 ```
 
@@ -87,11 +96,25 @@ Get-ChildItem docs -Recurse -Filter "*.md" | Select-String "Installation"
 
 | Purpose | Canonical Path | Notes |
 |---------|---------------|-------|
-| **Main build** | `scripts/build.ps1` | Use this, not build-scripts/build.ps1 |
-| **Installation** | `scripts/install.ps1` | Consolidates all install logic |
+| **Main build** | `build-scripts/Build-MSVC.ps1` | Canonical Engine build entry point |
+| **All-in-one packaging** | `build-scripts/Build-All-And-Package.ps1` | Production packaging entry point |
+| **Version bump / release prep** | `build-scripts/Bump-Version.ps1` | Only supported version sync path |
 | **Verification** | `scripts/verify-tools.ps1` | Tool detection |
-| **Library builds** | `build-scripts/*.ps1` | Library-specific builds OK |
-| **Updates** | `build-scripts/update-all-libraries.ps1` | Version updates |
+| **Library builds** | `build-scripts/external-libs/*.ps1` | One script per external library |
+| **Updates** | `build-scripts/Update-All-Libraries.ps1` | Dependency refresh workflow |
+
+### AI-Assisted Development Assets
+
+ExplorerLens keeps its AI-facing repository assets under `.github/`:
+
+- `.github/copilot-instructions.md` — primary repository rules
+- `.github/instructions/*.instructions.md` — scoped path-based instructions
+- `.github/agents/*.agent.md` — custom agent definitions
+- `.github/prompts/*.prompt.md` — reusable prompt templates
+- `.github/skills/*/SKILL.md` — repository-local skills
+- `.github/standards/ai-tooling-capabilities.md` — canonical AI tooling inventory
+
+MCP servers are configured in `.vscode/mcp.json`. If you change the MCP server inventory or scope, update the capability reference above in the same pull request.
 
 ### Naming Conventions
 
@@ -169,6 +192,7 @@ Open an issue with:
 - Check [docs/BUILD_GUIDE.md](../docs/BUILD_GUIDE.md) for build issues
 - Check [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) for build issues
 - Review [CHANGELOG.md](../CHANGELOG.md) for project direction
+- Review [.github/standards/ai-tooling-capabilities.md](../.github/standards/ai-tooling-capabilities.md) for current instructions, agents, prompts, skills, MCP servers, and workflow coverage
 - Open a GitHub Discussion for general questions
 
 Thank you for contributing!

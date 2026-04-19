@@ -6,13 +6,12 @@ We provide security patches and updates for the following release lines:
 
 | Version | Supported |
 | ------- | --------- |
-| 24.1.x  | :white_check_mark: **Current** |
-| 24.0.x  | :white_check_mark: Security fixes |
-| 23.7.x  | :white_check_mark: Security fixes only |
-| 23.6.x  | :x: End of Life |
-| < 23.6  | :x: End of Life |
+| 36.x    | :white_check_mark: **Current** |
+| 35.x    | :white_check_mark: Security fixes |
+| 34.x    | :white_check_mark: Security fixes only |
+| < 34.0  | :x: End of Life |
 
-> We strongly recommend running the latest release (v24.1.0 "Altair-R").
+> We strongly recommend running the latest release (v36.0.0 "Altair").
 > Patch releases are issued within 7 days for critical/high CVEs.
 
 ## Reporting a Vulnerability
@@ -58,6 +57,21 @@ For a detailed description of security architecture, see
 - **Trust Chain Verification:** Publisher certificates validated against trust store
 - **Process Isolation:** Plugins cannot access host process memory
 - **Capability Limits:** No network, restricted filesystem (read-only whitelisted paths)
+
+### Build Security
+
+- **Zero warnings policy:** `/W4 /WX` on MSVC v145 — warnings are treated as errors
+- **CodeQL scanning:** Automated via `.github/workflows/codeql.yml` on every push and PR
+- **Dependency review:** Dependabot monitors all ecosystems (pip, npm, GitHub Actions, NuGet)
+- **Binary reproducibility:** Release artifacts include SHA256SUMS.txt and CycloneDX SBOM
+- **Supply chain:** SLSA Level 2 compliance through GitHub-hosted build runners
+
+### Runtime Security
+
+- **COM isolation:** Shell extension runs in Explorer's process with minimal privilege
+- **Memory safety:** RAII patterns, smart pointers, no manual `new`/`delete` in hot paths
+- **Input validation:** All file format parsers validate headers before buffer allocation
+- **GPU resource limits:** DirectX fence timeouts prevent runaway compute shaders
 - **ZeroTrustPolicyEngine:** Per-plugin capability negotiation at load time
 
 ### Shell Extension Security

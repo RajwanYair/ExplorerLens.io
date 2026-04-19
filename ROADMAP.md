@@ -1,951 +1,950 @@
-# ExplorerLens — Strategic Roadmap & Architecture Reset
+# ExplorerLens — Strategic Roadmap v2.0
 
-**Version:** 1.0 — Written April 16, 2026
-**Scope:** Complete review of all project decisions, from v1 inception through v35.5.0 "Vega-V"
-**Purpose:** Redirect the project toward best-in-class quality with substance over velocity
+**Version:** 2.0 — Consolidated April 2026
+**Current Release:** v36.0.0 "Altair"
+**Purpose:** Complete decision rethink, competitive analysis, and consolidated execution plan
 
 ---
 
 ## Table of Contents
 
 1. [Executive Summary](#1-executive-summary)
-2. [Strategic Review — What Worked, What Didn't](#2-strategic-review)
-3. [Architecture Decisions — Rethought](#3-architecture-decisions)
-4. [Code Quality Reset](#4-code-quality-reset)
-5. [Build System & Toolchain](#5-build-system--toolchain)
-6. [Testing Strategy Overhaul](#6-testing-strategy-overhaul)
-7. [External Libraries & Dependencies](#7-external-libraries--dependencies)
-8. [Documentation Right-Sizing](#8-documentation-right-sizing)
-9. [CI/CD & Infrastructure](#9-cicd--infrastructure)
-10. [Frontend — Shell Extension & GUI](#10-frontend--shell-extension--gui)
-11. [Backend — Engine & Decode Pipeline](#11-backend--engine--decode-pipeline)
-12. [GPU Pipeline — Reality Check](#12-gpu-pipeline--reality-check)
-13. [Cross-Platform Strategy](#13-cross-platform-strategy)
-14. [Cloud, AI & Advanced Features](#14-cloud-ai--advanced-features)
-15. [Packaging & Distribution](#15-packaging--distribution)
-16. [Phase Plan — 6 Phases to Best-in-Class](#16-phase-plan)
-17. [Consolidated Backlog from Previous Roadmaps](#17-consolidated-backlog)
-18. [Success Metrics](#18-success-metrics)
-19. [Appendix — Decision Log](#19-appendix--decision-log)
+2. [Competitive Landscape & Analysis](#2-competitive-landscape--analysis)
+3. [Strategic Decision Rethink](#3-strategic-decision-rethink)
+4. [Architecture — Current vs. Target](#4-architecture--current-vs-target)
+5. [Code Language, Libraries & APIs](#5-code-language-libraries--apis)
+6. [Build System & Toolchain](#6-build-system--toolchain)
+7. [Testing & Quality Strategy](#7-testing--quality-strategy)
+8. [Documentation & Configuration Standards](#8-documentation--configuration-standards)
+9. [CI/CD, Packaging & Distribution](#9-cicd-packaging--distribution)
+10. [GitHub AI & Automation Surface](#10-github-ai--automation-surface)
+11. [Shared Tooling Architecture](#11-shared-tooling-architecture)
+12. [Frontend — Shell, GUI & CLI](#12-frontend--shell-gui--cli)
+13. [Backend — Engine & Decode Pipeline](#13-backend--engine--decode-pipeline)
+14. [GPU, Cross-Platform & Advanced Features](#14-gpu-cross-platform--advanced-features)
+15. [Phase Plan — 6 Phases to Best-in-Class](#15-phase-plan)
+16. [Success Metrics](#16-success-metrics)
+17. [Decision Log](#17-decision-log)
 
 ---
 
 ## 1. Executive Summary
 
-ExplorerLens has an **exceptional architectural vision** — the roadmap documents, CI/CD
-infrastructure, and code organization demonstrate serious engineering ambition. The project
-aims to be the premier thumbnail provider on Windows with GPU acceleration, 200+ format
-support, and cross-platform reach.
+ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
+thumbnails for 200+ file formats using 18 statically linked decoder libraries, with a
+professional-grade CMake/Ninja build system, 20 CI/CD workflows, and a WiX MSI installer.
 
-**However, a candid audit reveals a substance gap.** The project has:
+### What We Have (Strengths)
 
-- **1,386 header files** but only **269 source files** (5.1:1 ratio)
-- **545 headers in Engine/Core/ alone** — many appear to be stubs or thin declarations
-- **~27 minor versions shipped in ~11 days** (v30.0 → v35.5), each adding exactly 5 headers + 10 tests
-- A custom test framework with ~4,724 tests that may not exercise real I/O or GPU paths
-- No visible `.hlsl`, `.comp`, or `.metal` shader files despite claiming D3D11/D3D12/Vulkan/Metal
-- Empty packaging directories (Inno Setup, NSIS, MSIX, vdproj) and dead code paths
-- 3 separate roadmap files + 130 total markdown files — documentation outpaces working code
+- Correct architecture: COM shell → engine library → external decoders
+- Professional build system: CMake 3.25+ / Ninja / MSVC v145 / vcpkg / sccache
+- 18 high-quality external libraries (all current, all `/MD`, all statically linked)
+- 20 real CI/CD workflows (~3K lines, 29 jobs)
+- Zero-warnings build discipline
+- Comprehensive AI tooling surface (agents, instructions, prompts, skills, MCP servers)
 
-**This roadmap proposes a strategic reset:** consolidate, validate, and harden
-the functional core before expanding. The goal is to make ExplorerLens genuinely
-best-in-class — where "best" means *actually working, measurably fast, and reliably
-deployed* rather than *architecturally envisioned*.
+### What Needs Work (Honest Gaps)
+
+- **1,386 headers, 269 sources** (5.1:1 ratio — target < 2:1)
+- **~4,744 tests** in a custom framework — many test only construction/defaults
+- **No real test corpus** — decoders cannot be validated against real files
+- **No GPU shader code** despite architecture headers for D3D11/D3D12/Vulkan
+- **130+ markdown files** — documentation outpaces working code
+- **Version inflation** to v36 in < 6 months of active development
+- **Cross-platform is stubs only** — macOS/Linux `#ifdef` guards, no real implementations
+
+### Strategic Direction
+
+**Phase 1 goal:** Make the top 20 format decoders produce *correct, fast thumbnails*
+from *real files*, validated by a *real test corpus*, with a *one-click MSI install*
+that works on any clean Windows 10/11 machine. Everything else waits.
+
+**Competitive differentiator:** No existing tool combines native Explorer integration
+(IThumbnailProvider), modern format support (AVIF/JXL/HEIC), GPU acceleration, and
+cross-platform reach. We fill this gap by executing on substance over vision.
 
 ---
 
-## 2. Strategic Review
+## 2. Competitive Landscape & Analysis
 
-### 2.1 Decisions That Worked Well
+### 2.1 Competitor Comparison Table
 
-| Decision | Verdict | Rationale |
-|----------|---------|-----------|
-| **C++20 for the engine** | ✅ Correct | COM interop requires native code; C++20 is the right choice for a Windows shell extension |
-| **CMake + Ninja build** | ✅ Correct | Industry standard for C++ projects; presets provide good developer experience |
-| **Static linking of external libs** | ✅ Correct | Shell extensions must be self-contained DLLs; no runtime dependency issues |
-| **COM IThumbnailProvider** | ✅ Correct | The only way to provide native Explorer thumbnails on Windows |
-| **Separation of Shell/Engine/Manager** | ✅ Correct | Clean layering: COM shell → engine library → config GUI |
-| **Zero-warnings policy** | ✅ Correct | Professional-grade discipline; prevents warning rot |
-| **vcpkg integration (optional)** | ✅ Correct | Provides fallback when local libs aren't built |
-| **`/MD` CRT linkage** | ✅ Correct | Avoids the `/MT` vs `/MD` hell with external libraries |
-| **Security flags (ASLR/DEP/HIGHENTROPYVA)** | ✅ Correct | Essential for a COM DLL loaded by Explorer |
-| **16 CI workflows** | ✅ Good ambition | CodeQL, coverage, performance gates, release automation — comprehensive |
+| Dimension | **ExplorerLens** (target) | **QuickLook (QL-Win)** | **SageThumbs** | **Windows Built-in** | **XnView MP** | **macOS Quick Look** | **IrfanView** |
+|-----------|--------------------------|------------------------|----------------|----------------------|---------------|----------------------|---------------|
+| **Type** | Shell extension (IThumbnailProvider) | Space-bar preview app | Shell extension (context menu + thumbnails) | WIC-based thumbnail handlers | Standalone viewer + shell integration | OS-native preview framework | Viewer + shell association |
+| **Language** | C++20 | C# (.NET WPF) | C++ (GFL library) | C++ (OS kernel) | C++/Qt | Objective-C (OS kernel) | C++ (custom) |
+| **Formats** | 200+ (target validated) | 100+ via plugins | 162 (224 extensions) | ~30 (JPEG/PNG/BMP/GIF/TIFF/WIC codecs) | 500+ | ~30 OS-native + plugins | 100+ |
+| **Modern formats (AVIF/JXL/HEIC)** | ✅ All three (linked libs) | Partial (via plugins) | ❌ None (abandoned 2017) | ❌ HEIC only via MS codec | ✅ All three | ✅ HEIC native; JXL/AVIF via 3rd party | Partial (plugins) |
+| **GPU acceleration** | Planned (D3D11 compute) | Hardware-accelerated WPF rendering | ❌ None | WIC + DXGI surface sharing | ❌ None | Metal-backed (OS) | ❌ None |
+| **Explorer integration** | Native thumbnails (IThumbnailProvider) | Separate preview window | Native thumbnails + context menu | Native thumbnails | Separate app | Native Finder previews + thumbnails | Separate app |
+| **Plugin system** | SDK planned (C ABI) | ✅ `.qlplugin` packages, 20+ community plugins | XnView plugins (if installed) | WIC codec packs | XnView plugins | `.qlgenerator` / `.appex` | Plugin DLLs |
+| **Cross-platform** | Windows (macOS/Linux planned) | Windows only | Windows only | Windows only | Windows / macOS / Linux | macOS only | Windows only |
+| **Distribution** | MSI + ZIP + winget (planned) | MS Store + installer + Scoop + nightly | SourceForge MSI | OS built-in | Website download | OS built-in | Website download |
+| **License** | MIT | GPL-3.0 | GPL-2.0 | Proprietary | Freeware (closed source) | Proprietary | Freeware (closed source) |
+| **Stars/Downloads** | New project | 23.1K GitHub stars | 4.3K downloads/week (SourceForge) | N/A (universal) | Millions | N/A (universal) | 180M+ downloads |
+| **Active development** | ✅ Active | ✅ Active (79 contributors) | ❌ Abandoned (last update 2017) | ✅ (Microsoft) | ✅ Active | ✅ (Apple) | ✅ Active |
+| **Open source** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
+| **DLL size** | < 5 MB target | ~15 MB (managed) | ~5 MB | N/A | ~80 MB | N/A | ~3 MB |
+| **Archive thumbnails** | ✅ ZIP/RAR/7Z/CBZ/CBR | ✅ Via plugins | ❌ Images only | ❌ No | Limited | ❌ No | ❌ No |
+| **Document thumbnails** | ✅ PDF/EPUB | ✅ PDF/Office/EPUB | ❌ Images only | ❌ Minimal | ❌ Minimal | ✅ PDF/Office | ❌ No |
+| **RAW photos** | ✅ LibRaw (100+ cameras) | Partial (via plugins) | Partial (GFL) | ❌ Limited (Microsoft codecs) | ✅ All major RAW | ✅ (Apple RAW) | ✅ Via plugins |
+| **Enterprise/GPO** | Planned (ADMX) | ❌ No | ❌ No | ✅ Via Group Policy | ❌ No | ✅ MDM profiles | ❌ No |
 
-### 2.2 Decisions That Need Rethinking
+### 2.2 Key Lessons from Competitors
 
-| Decision | Issue | Recommendation |
-|----------|-------|----------------|
-| **Header-only architecture (5.1:1 ratio)** | Most classes are declared but not meaningfully implemented in `.cpp` files. Compile times balloon; actual code coverage is murky. | Move implementations to `.cpp` files. A header should declare; a source should implement. Target < 2:1 ratio. |
-| **Custom test framework** | `TEST()/ASSERT()` macros lack: fixtures, parameterized tests, death tests, output capture, XML reporting for CI, IDE integration. | Migrate to **Catch2** (header-only, MIT, excellent MSVC support) or **doctest** (fastest compile). Keep the macro bridge for transition. |
-| **Sprint-mechanical development pattern** | Every version adds exactly 5 headers + 10 tests. This suggests auto-generation rather than feature-driven development. Each "module" appears to be a thin stub. | Stop counting headers. Count *working format decoders that produce correct thumbnails from real files*. |
-| **Version inflation (v35.5.0)** | Semver should reflect API maturity. v35 implies 35 breaking changes — unlikely for a project that's < 6 months active. | Consider resetting to v1.0.0 at the next actual stable release, or v2.0.0 if the COM ABI is frozen. Use calver (2026.4) if semver milestones are hard to define. |
-| **3 separate roadmap files** | ROADMAP_V30.md, ROADMAP_V34.md, ROADMAP_V35.md create version-specific silos. Hard to track what's actually completed vs. planned. | Consolidate to single ROADMAP.md (this file). Archive old ones. |
-| **Documentation volume (130 .md files)** | More words than working code. docs/ has architecture specs for features that don't exist yet. | Right-size: document what works today. Move aspirational docs to this roadmap. |
-| **Claiming 200+ formats** | The 200+ count includes stubs, planned formats, and formats where "support" means a header file exists. | Audit and report only *verified working* formats with test corpus validation. |
-| **Cross-platform stubs** | macOS/Linux "stubs" that compile via `#ifdef` are not cross-platform support. | Be honest in README: "Windows native, cross-platform planned." Remove false claims. |
-| **Cloud/Collaboration/WebAssembly** | v35.x headers for streaming, collaboration, WASM, zero-trust are aspirational stubs, not working features. | Archive these as future vision. Focus Phase 1 on making the core Windows product excellent. |
-| **Empty packaging dirs** | `packaging/inno/`, `nsis/`, `msix/`, `vdproj/` are dead code | Delete immediately. WiX is the only active installer. |
-| **Duplicate external libs** | Two `unrar/` dirs, two `libwebp/` dirs | Clean up to single copies. |
+| Competitor | Best Practice to Harvest | How We Apply It |
+|------------|--------------------------|-----------------|
+| **QuickLook** | Plugin ecosystem with `.qlplugin` package format enables community contributions | Prioritize Plugin SDK with C ABI and simple package format; community extends format support |
+| **QuickLook** | Microsoft Store distribution achieves massive reach | Target winget + MS Store (MSIX) as primary channels |
+| **QuickLook** | Fluent Design integration looks native on Windows 11 | LENSManager v2 should use WinUI 3 for modern Windows look |
+| **SageThumbs** | Context menu preview is immediately discoverable | Add IContextMenu alongside IThumbnailProvider for preview-on-right-click |
+| **SageThumbs** | GFL library handles 162 formats through a single dependency | Consider whether fewer, higher-quality decoders beats many thin integrations |
+| **XnView MP** | 500+ format support via mature decode pipeline with real I/O | Validate every format against real files; "supported" means "produces correct output" |
+| **XnView MP** | Cross-platform via Qt abstraction layer | Keep our PAL approach (Platform Abstraction Layer) but defer implementation |
+| **macOS Quick Look** | Deep OS integration (Finder, Spotlight, Time Machine) | Pursue IExtractImage2, IPreviewHandler, IFilter for deeper Windows integration |
+| **macOS Quick Look** | Thumbnail caching with SQLite index | Implement robust L1/L2 cache with SQLite metadata |
+| **IrfanView** | Tiny binary (< 3 MB) with 100+ formats | Aggressive binary size management; < 5 MB DLL target |
+| **IrfanView** | 180M+ downloads through simplicity and reliability | Priority: make it work perfectly for common formats before chasing rare ones |
+| **Windows Built-in** | WIC + DXGI surface sharing for zero-copy GPU thumbnails | Use WIC with D3D11 device hints as Phase 2 GPU strategy |
 
-### 2.3 Critical Honest Assessment
+### 2.3 Competitive Gaps We Fill
 
-**What ExplorerLens actually is today:**
-- A Windows COM shell extension that registers for file types
-- An engine library with ~18 external decoder libraries linked
-- A configuration GUI (WTL-based `LENSManager.exe`)
+No existing tool provides ALL of these simultaneously:
+
+1. **Native Explorer thumbnails** (not a separate viewer window)
+2. **Modern image formats** (AVIF + JXL + HEIC) without codec packs
+3. **Archive cover images** (CBZ/CBR/EPUB) as thumbnails in Explorer
+4. **Open source** with MIT license (QuickLook is GPL-3.0)
+5. **GPU-accelerated** decode/resize pipeline
+6. **Cross-platform** architecture (Windows → macOS → Linux)
+7. **Enterprise-ready** (GPO, ETW, Event Log, silent MSI install)
+8. **Plugin SDK** with C ABI for third-party format decoders
+
+This is our moat. Execute on items 1-4 first (Phase 1), then 5-8 (Phases 2-4).
+
+---
+
+## 3. Strategic Decision Rethink
+
+### 3.1 Decisions That Were Right — Keep Them
+
+| # | Decision | Why It's Right |
+|---|----------|----------------|
+| 1 | **C++20 for the engine** | COM interop requires native code; no managed alternative for IThumbnailProvider |
+| 2 | **CMake + Ninja build** | Industry standard; presets provide excellent DX; sccache-compatible |
+| 3 | **Static linking of all externals** | Shell extensions MUST be self-contained DLLs; runtime dependencies break Explorer |
+| 4 | **COM IThumbnailProvider** | Only way to provide native Explorer thumbnails on Windows |
+| 5 | **Shell / Engine / Manager separation** | Clean layering: thin COM adapter → engine library → config GUI |
+| 6 | **Zero-warnings policy** | Professional-grade; prevents warning rot; compile-time quality gate |
+| 7 | **`/MD` CRT for all targets** | Eliminates `/MT` vs `/MD` conflicts with external libraries |
+| 8 | **Security flags (ASLR/DEP/CFG)** | Essential for a COM DLL loaded into `explorer.exe` address space |
+| 9 | **vcpkg as optional dependency path** | Fallback for CI and air-gapped builds; Dependabot integration |
+| 10 | **WiX for MSI installer** | Only professional MSI toolchain; silent install, GPO deploy |
+
+### 3.2 Decisions to Rethink or Reverse
+
+| # | Decision | Problem | New Decision | Rationale |
+|---|----------|---------|-------------|-----------|
+| R1 | **Header-only architecture** | 5.1:1 header-to-source ratio; most are stubs | **Implement-before-declare:** no header in CMakeLists without `.cpp` with >50 LOC | Headers declare, sources implement. Reduces compile time, enables real coverage |
+| R2 | **Custom test framework** | No fixtures, parameterized tests, XML reporting, IDE integration | **Migrate to Catch2 v3** as primary; keep macro bridge for transition | Industry standard; MSVC integration; CI-friendly JUnit output |
+| R3 | **Sprint-mechanical development** | Every version adds exactly N headers + 2N tests | **Feature-driven development:** count working decoders, not header files | One correct decoder with test corpus > 50 stub headers |
+| R4 | **16 Engine subdirectories** | Premature subdivision for features without implementations | **Consolidate to 7 directories:** Core, Decoders, GPU, Cache, Platform, Tests, Utils | Merge AI, Enterprise, Media, Memory, Pipeline, Plugin, PluginHost, CLI, Codec into parents |
+| R5 | **5 package registries** | NuGet/npm/Maven/RubyGems/Container — no Java or Ruby consumers exist | **NuGet only** (SDK); defer Container until lens-server ships; drop Maven/RubyGems | Publish to registries with actual consumers |
+| R6 | **Cross-platform stubs** | `#ifdef` guards ≠ cross-platform support | **Honest README:** "Windows native. macOS/Linux planned for Phase 5." | Don't claim what doesn't work |
+| R7 | **3 separate roadmaps** | ROADMAP_V30, V34, V35 create confusion | **Single ROADMAP.md** (this file); archive old ones | One source of truth |
+| R8 | **130+ markdown files** | More docs than working code | **Right-size:** document what works; move aspirational content here | Docs should lag code, not lead it |
+| R9 | **Claiming GPU acceleration** | No shader files, no D3D device creation in hot path | **WIC-with-D3D11 first** (Phase 2); real compute shaders in Phase 3 | Prove measurable speedup before claiming GPU support |
+| R10 | **Version at v36.0.0** | Semver v36 implies 36 breaking API changes in < 6 months | **Keep v36+ going forward** but adopt calver (2026.X) for next major reset if desired | History has value; don't reset, but slow version velocity to feature-gated bumps |
+| R11 | **Cloud/WASM/AI/Collaboration headers** | Aspirational stubs with no runtime integration | **Archive to `docs/archive/vision/`; delete from Engine/** | Focus Phase 1-3 on core thumbnail pipeline |
+| R12 | **Empty packaging dirs** | inno, nsis, msix, vdproj are dead code | **Delete immediately** | Dead code is a maintenance burden |
+| R13 | **Monolithic copilot-instructions.md** | 450 lines mixing build rules, code conventions, release procedure | **Refactor to ~150 lines** + 13 scoped instruction files | Scoped instructions apply only to relevant files |
+| R14 | **No test corpus** | Cannot validate decoders without real files | **Build corpus of 100+ CC0/public-domain files** covering all 20 priority formats | Single most important gap to close |
+
+### 3.3 Honest Assessment — What ExplorerLens Is Today
+
+**What it is:**
+- A Windows COM shell extension that registers for file types via IThumbnailProvider
+- An engine library with 18 external decoder libraries statically linked
+- A WTL configuration GUI (`LENSManager.exe`)
 - A CLI tool (`lens.exe`) in early development
-- A comprehensive build and CI/CD system
+- A LensServer REST skeleton (Winsock2-based)
+- A professional build/CI/CD/packaging pipeline
+- A comprehensive AI-assisted development surface
 
-**What it isn't yet (despite headers existing):**
-- GPU-accelerated (no shader code, no actual D3D device creation in hot path)
+**What it isn't yet:**
+- GPU-accelerated (no shader code or D3D device creation in hot path)
 - Cloud-native or collaboration-ready
-- Cross-platform
-- AI-powered (no model files, no inference runtime integration)
-- Serving 200+ verified working formats (needs corpus testing)
+- Cross-platform (macOS/Linux stubs only)
+- AI-powered (no model files or inference runtime)
+- Validated for 200+ formats (needs corpus testing)
 
-**This is not a failure** — it's a foundation with enormous potential. The architecture
-is sound, the infrastructure is professional, and the vision is compelling. The gap is
-between vision and validated implementation.
+**This is not a failure.** The architecture is sound, the infrastructure is professional,
+and the external library stack is excellent. The gap is between vision and validated
+implementation. Phase 1 closes that gap.
 
 ---
 
-## 3. Architecture Decisions — Rethought
+## 4. Architecture — Current vs. Target
 
-### 3.1 Current Architecture (Good Foundation)
+### 4.1 System Architecture (Keep — It's Correct)
 
 ```
 Windows Explorer
     │
     ▼
-LENSShell.dll (COM IThumbnailProvider)  ← Thin adapter layer
+LENSShell.dll (COM IThumbnailProvider)  ← Thin adapter (~100 KB)
     │
     ▼
-ExplorerLensEngine.lib                  ← Core decode pipeline
-    ├── FormatDetector (magic + extension)
-    ├── DecoderRegistry (200+ format routing)
+ExplorerLensEngine.lib                  ← Core decode pipeline (~3 MB)
+    ├── FormatDetector (magic-byte + extension matching)
+    ├── DecoderRegistry (format → decoder routing)
     ├── DecodePipeline (detect → route → decode → transform → output)
-    ├── CacheProvider (LRU + disk)
-    └── GPURenderer (D3D11 with GDI+ fallback)
+    ├── CacheProvider (L1 memory LRU + L2 disk)
+    └── GPURenderer (D3D11 compute + GDI+ fallback)
     │
     ▼
-External libraries (libraw, libjxl, libheif, mupdf, ...)
+External libraries (libraw, libjxl, libheif, mupdf, libwebp, ...)
 ```
 
-**Verdict:** This is a solid architecture. Keep it.
+### 4.2 Engine Directory Consolidation
 
-### 3.2 Proposed Architecture Changes
-
-#### A. Flatten Engine/Core/ (545 → ~80 Headers)
-
-**Problem:** `Engine/Core/` has 545 headers. Many are single-class files for features that
-could be 50-line sections of a broader module.
-
-**Action:**
-- Audit every header in `Core/`. Merge related classes into cohesive modules.
-- Target: ~80 headers in Core (one per logical subsystem, not one per class).
-- Example: `LiveSyncTokenManager.h`, `CollaborativeCacheCoordinator.h`,
-  `ConflictResolutionEngine.h` → single `Collaboration.h` (when the feature is real).
-
-#### B. Implement Before Declaring
-
-**New Rule:** No header file may be registered in CMakeLists.txt unless it has:
-1. A corresponding `.cpp` with non-trivial implementation (>50 LOC of logic)
-2. At least 3 tests that exercise real behavior (not just construction/defaults)
-3. Integration with at least one other module
-
-#### C. Reduce Engine Subdirectories
-
-Current: 16 subdirectories under `Engine/`
-```
-AI/ Cache/ CLI/ Codec/ Core/ Decoders/ Enterprise/ GPU/
-Media/ Memory/ Pipeline/ Platform/ Plugin/ PluginHost/ Tests/ Utils/
-```
-
-Proposed consolidation:
+**Current (16 subdirectories):**
 ```
 Engine/
-├── Core/           ← Detection, routing, pipeline orchestration, types
-├── Decoders/       ← All format decoders (image, archive, document, 3D, scientific)
-├── GPU/            ← GPU acceleration (when real shaders exist)
-├── Cache/          ← Caching subsystem
-├── Platform/       ← OS abstraction (Windows today, macOS/Linux later)
-├── Tests/          ← Test harness
-└── Utils/          ← Shared utilities
+├── AI/  Cache/  CLI/  Codec/  Core/  Decoders/  Enterprise/  GPU/
+├── Media/  Memory/  Pipeline/  Platform/  Plugin/  PluginHost/  Tests/  Utils/
 ```
 
-Merge `AI/`, `Enterprise/`, `Media/`, `Memory/`, `Pipeline/`, `Plugin/`,
-`PluginHost/`, `CLI/`, `Codec/` into the appropriate parent. These are
-premature subdivisions for features that don't have substantial implementations.
+**Target (7 subdirectories):**
+```
+Engine/
+├── Core/           ← Detection, routing, pipeline, types, observability, enterprise
+├── Decoders/       ← All format decoders (image, archive, document, 3D, scientific, media)
+├── GPU/            ← GPU acceleration (D3D11 compute, DXVA2 video decode)
+├── Cache/          ← Caching subsystem (L1 memory + L2 disk + invalidation)
+├── Platform/       ← OS abstraction (Win32 today, macOS/Linux later)
+├── Tests/          ← Catch2 unit tests, benchmarks, fuzz harnesses, corpus runner
+└── Utils/          ← Shared utilities, release gates, installer lifecycle
+```
 
-#### D. Module Ownership Map
+**Merge map:**
+- `AI/` → `Core/` (defer ML to Phase 5; tiny footprint)
+- `CLI/` → `src/Tools.CLI/` (already lives there; remove Engine/CLI if empty)
+- `Codec/` → `Decoders/`
+- `Enterprise/` → `Core/`
+- `Media/` → `Decoders/` (video frame extraction IS a decoder)
+- `Memory/` → `Cache/` (memory management is cache-adjacent)
+- `Pipeline/` → `Core/` (pipeline orchestration IS core)
+- `Plugin/` + `PluginHost/` → `Core/` (plugin infrastructure is core; < 10 files)
 
-| Module | Owner Responsibility | Quality Bar |
-|--------|---------------------|-------------|
-| **Core** | Decode pipeline, format detection, type system | Every format detector must pass magic-byte validation against 10+ real files |
-| **Decoders** | Format-specific decode logic | Every decoder must produce a correct thumbnail from a real test file |
-| **GPU** | Hardware acceleration | Must demonstrate measurable speedup vs. CPU path on at least one format |
-| **Cache** | Thumbnail caching | Must pass stress test: 10K entries, LRU eviction, concurrent access |
-| **Platform** | OS abstraction | COM registration must work on clean Windows 10/11 install |
-| **Tests** | Validation | Every test must exercise real I/O or real computation |
-| **Utils** | Shared helpers | Zero dependency on Engine internals; usable standalone |
+### 4.3 Header-to-Source Rebalancing
 
----
-
-## 4. Code Quality Reset
-
-### 4.1 Language & Standards
-
-| Aspect | Current | Proposed | Rationale |
-|--------|---------|----------|-----------|
-| **Language** | C++20 | **C++20** (keep) | MSVC v145 supports it well; `std::span`, concepts, ranges are useful |
-| **Standard library** | STL + Win32 | **STL + Win32 + abseil-lite** | Consider `absl::flat_hash_map` for cache; `absl::InlinedVector` for small buffers |
-| **Error handling** | Mixed (HRESULT + exceptions) | **`std::expected<T,E>`** (C++23) or **result type** | C++23 `expected` is available in MSVC 19.50; use it for all new APIs |
-| **String handling** | `std::wstring` + `WCHAR*` | **`std::wstring`** for Windows paths, **`std::string` (UTF-8)** internally | Windows shell requires UTF-16; engine internals should use UTF-8 |
-| **Smart pointers** | `std::unique_ptr` | **Keep `std::unique_ptr`**; add `std::shared_ptr` only for COM prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent prevent preventinterop refs | Good — `unique_ptr` is correct for ownership |
-| **Naming** | PascalCase classes, camelBack vars | **Keep** | Consistent with Windows SDK conventions |
-
-### 4.2 Header-to-Source Rebalancing Plan
-
-**Current state:** 1,386 `.h` files, 269 `.cpp` files (5.1:1)
-**Target state:** ~300 `.h` files, ~250 `.cpp` files (1.2:1)
+| Metric | Current | Phase 1 Target | Phase 3 Target |
+|--------|---------|----------------|----------------|
+| Header files | 1,386 | ~400 | ~300 |
+| Source files | 269 | ~250 | ~280 |
+| Ratio | 5.1:1 | ~1.6:1 | ~1.1:1 |
 
 **How to get there:**
-1. **Phase 1 — Audit**: Classify every header as: Real (has implementation), Stub (declarations only), Dead (unreferenced)
-2. **Phase 2 — Merge**: Combine related stub headers into cohesive module headers
-3. **Phase 3 — Implement**: For each kept header, write the corresponding `.cpp`
-4. **Phase 4 — Delete**: Remove all dead headers; update CMakeLists.txt
+1. **Audit:** Classify every header as Real / Stub / Dead
+2. **Delete:** Remove dead headers (unreferenced, no implementation)
+3. **Merge:** Combine related stubs into cohesive module headers
+4. **Implement:** For each kept header, ensure corresponding `.cpp` with real logic
+5. **Enforce:** No new header registered in CMakeLists.txt without `.cpp` > 50 LOC
 
-**Estimated reduction:** ~1,086 headers removed or merged (78% reduction)
-
-### 4.3 Code Patterns to Adopt
+### 4.4 New Architecture Rule: Implement Before Declaring
 
 ```cpp
-// BEFORE: Header-only stub (current pattern)
-// CloudHydrationMonitor.h
+// ❌ BEFORE: Header-only stub (current pattern in many files)
 class CloudHydrationMonitor {
-    enum class HydrationState { UNKNOWN, PARTIAL, FULL, PLACEHOLDER };
-    HydrationState state_ = HydrationState::UNKNOWN;
+    enum class State { UNKNOWN, PARTIAL, FULL };
+    State state_ = State::UNKNOWN;
 public:
-    HydrationState GetState() const { return state_; }
-    bool IsFullyHydrated() const { return state_ == HydrationState::FULL; }
-    void Probe(const std::wstring& path) { state_ = HydrationState::FULL; } // STUB
+    State GetState() const { return state_; }
+    void Probe(const std::wstring& path) { state_ = State::FULL; } // STUB
 };
 
-// AFTER: Real implementation (target pattern)
+// ✅ AFTER: Real implementation backed by Windows API
 // CloudHydrationMonitor.h — declaration only
 class CloudHydrationMonitor {
 public:
     enum class State { UNKNOWN, PLACEHOLDER, PARTIAL, FULL };
     State Probe(const std::filesystem::path& path);
-    bool IsFullyHydrated(const std::filesystem::path& path);
 private:
-    // Windows Cloud Files API integration
-    bool QueryCloudState(const std::filesystem::path& path, CF_PLACEHOLDER_STATE& state);
+    bool QueryCloudState(const std::filesystem::path& path, CF_PLACEHOLDER_STATE& out);
 };
 
 // CloudHydrationMonitor.cpp — real implementation
 #include "CloudHydrationMonitor.h"
-#include <cfapi.h>  // Windows Cloud Files API
+#include <cfapi.h>
 #pragma comment(lib, "cldapi.lib")
-
-CloudHydrationMonitor::State CloudHydrationMonitor::Probe(const std::filesystem::path& path) {
-    CF_PLACEHOLDER_STATE cfState{};
-    if (!QueryCloudState(path, cfState)) return State::UNKNOWN;
-    if (cfState & CF_PLACEHOLDER_STATE_IN_SYNC) return State::FULL;
-    if (cfState & CF_PLACEHOLDER_STATE_PARTIAL) return State::PARTIAL;
-    return State::PLACEHOLDER;
-}
+// ... actual CF API calls ...
 ```
-
-### 4.4 Naming Conventions Cleanup
-
-| Entity | Current Convention | Issue | Proposed |
-|--------|--------------------|-------|----------|
-| Headers | `VeryLongDescriptiveClassName.h` | Some names are 40+ chars | Keep PascalCase but prefer shorter, verb-less names |
-| Enums | `UPPER_CASE` values | ✅ Correct per clang-tidy | Keep |
-| Test names | `TestClassName_MethodName` | Verbose | `ClassName_Method_Scenario` (when adopting Catch2) |
 
 ---
 
-## 5. Build System & Toolchain
+## 5. Code Language, Libraries & APIs
 
-### 5.1 Current Build Stack Assessment
+### 5.1 Language Decision: Keep C++20
+
+| Option | Verdict | Rationale |
+|--------|---------|-----------|
+| **C++20 (MSVC v145)** | ✅ **Keep** | COM interop requires native code; C++20 gives concepts, ranges, `std::span`, `std::jthread` |
+| C++23 features | ✅ Adopt selectively | `std::expected<T,E>` for error handling (MSVC 19.50 supports it); `std::print` when stable |
+| Rust (for engine) | ❌ Rejected | COM interop from Rust is painful; no MSVC ABI guarantee; learning curve for contributors |
+| C# (.NET) | ❌ Rejected | QuickLook proves it works but adds 15+ MB runtime; COM interop overhead; GC pauses |
+
+### 5.2 External Library Audit (18 Libraries — All Current)
+
+| Library | Version | Purpose | Status | Action |
+|---------|---------|---------|--------|--------|
+| zlib | 1.3.1 | ZIP/deflate | ✅ Current | None |
+| LZ4 | 1.10.0 | Fast compression | ✅ Current | None |
+| zstd | 1.5.7 | Zstandard compression | ✅ Current | None |
+| LZMA SDK | 26.00 | 7z archives | ✅ Current | None |
+| minizip-ng | 4.0.10 | ZIP archive handling | ✅ Current | None |
+| UnRAR | 7.2.2 | RAR extraction | ✅ Current | Delete duplicate `unrar/` dir |
+| libwebp | 1.5.0 | WebP images | ✅ Current | Delete `libwebp-1.5.0-original/` |
+| libavif | 1.3.0 | AVIF images | ✅ Current | None |
+| libjxl | 0.11.1 | JPEG XL images | ✅ Current | None |
+| libheif | 1.19.5 | HEIF/HEIC images | ✅ Current | None |
+| libde265 | 1.0.15 | HEVC decoding (for libheif) | ✅ Current | None |
+| dav1d | 1.5.1 | AV1 decoding (for libavif) | ✅ Current | None |
+| LibRaw | 0.21.3 | RAW camera (100+ models) | ✅ Current | None |
+| MuPDF | 1.24.11 | PDF rendering | ✅ Current | None |
+| openjpeg | 2.5.3 | JPEG 2000 | ✅ Current | None |
+| bzip2 | 1.0.8 | BZIP2 compression | ✅ Current | None |
+| xz/liblzma | 5.6.3 | XZ compression | ✅ Current | None |
+| libarchive | 3.7.6 | Multi-format archive | ✅ Current | None |
+
+### 5.3 Libraries to Add
+
+| Library | Purpose | Priority | License | Rationale |
+|---------|---------|----------|---------|-----------|
+| **Catch2 v3** | Test framework | P0 | BSL-1.0 | Industry standard; XML output; parameterized tests; IDE integration |
+| **libjpeg-turbo** | SIMD JPEG decode | P0 | BSD/IJG | 2-4× faster than WIC for JPEG thumbnails |
+| **Google Benchmark** | Perf benchmarks | P1 | Apache-2.0 | CI regression tracking; JSON output |
+| **DirectXTex** | DDS/WIC texture loading | P1 | MIT | Microsoft-maintained; DDS block-compressed textures |
+| **stb_image** | Fallback for simple formats | P2 | Public domain | BMP, TGA, PNM, QOI single-file decoder |
+
+### 5.4 Libraries NOT Needed (Remove References from Headers)
+
+| Library | Claimed For | Action |
+|---------|-------------|--------|
+| NVJPEG / CUDA | GPU JPEG decode | No CUDA SDK in build; remove references |
+| Intel oneVPL | QSV decode | No oneVPL in vcpkg.json; remove references |
+| AMD AMF | GPU video decode | No AMD SDK in build; remove references |
+| nghttp2 | REST API server | No HTTP server exists yet; remove references |
+| OpenCASCADE | STEP/IGES CAD | Heavy dependency (200+ MB); defer to plugin |
+| IfcOpenShell | IFC/BIM | Heavy dependency; defer to plugin |
+
+### 5.5 API Strategy
+
+| API Surface | Current | Target |
+|-------------|---------|--------|
+| **COM (IThumbnailProvider)** | Implemented | Add IExtractImage2 (legacy Explorer), IPreviewHandler (preview pane) |
+| **CLI (`lens.exe`)** | 17 source files, early | Make `generate`, `info`, `register`, `doctor`, `benchmark`, `cache` commands work |
+| **REST (`lens-server`)** | Winsock2 skeleton | Defer to Phase 4; replace Winsock2 with cpp-httplib when ready |
+| **Plugin SDK** | Header stubs | Implement C ABI `plugin_api.h` with decode/probe/metadata functions in Phase 3 |
+| **Database** | None needed | SQLite for L2 cache metadata index (like macOS Quick Look) |
+
+### 5.6 Error Handling Evolution
+
+| Pattern | Current | Target |
+|---------|---------|--------|
+| COM layer | HRESULT ✅ | Keep — COM requires HRESULT |
+| Engine internal | Mixed (HRESULT + exceptions) | `std::expected<T, EngineError>` (C++23, available in MSVC 19.50) |
+| Decoder results | Ad hoc | `DecodeResult` struct: success/error/partial + diagnostic message |
+
+---
+
+## 6. Build System & Toolchain
+
+### 6.1 Toolchain (No Changes Needed)
 
 | Tool | Version | Verdict |
 |------|---------|---------|
 | CMake | 4.3.1 | ✅ Latest — keep |
 | Ninja | 1.13.2 | ✅ Latest — keep |
-| MSVC v145 (cl 19.50) | VS 18 2026 | ✅ Latest — keep (but pin explicitly in CI when available) |
+| MSVC v145 (cl 19.50) | VS 18 2026 | ✅ Latest — keep |
 | vcpkg | 2026-02-21 | ✅ Good — keep as optional |
 | Windows SDK | 10.0.26100.0 | ✅ Latest — keep |
 | WiX 6.0.2 | .NET tool | ✅ Good for MSI — keep |
 
-**No changes needed to the toolchain.** The build system is professional-grade.
+### 6.2 Build Improvements
 
-### 5.2 Build System Improvements
+| Improvement | Priority | Impact |
+|-------------|----------|--------|
+| **PCH for Windows/STL/COM headers** | P0 | 30-50% rebuild time reduction |
+| **sccache** (already added v36) | ✅ Done | Build caching for developer iteration |
+| **Unity builds** (already added v36) | ✅ Done | Optional batch compilation for CI |
+| **Compile-time profiling (`/d1reportTime`)** | P1 | Identify slow-to-compile headers |
+| **vcpkg manifest as primary** | P1 | Eliminates 13 custom `Build-*.ps1` scripts over time |
+| **C++20 modules** | P3 | Experimental; when MSVC modules are production-stable |
 
-| Improvement | Priority | Description |
-|-------------|----------|-------------|
-| **Precompiled headers** | P0 | PCH for `<windows.h>`, STL headers, COM headers. Will cut rebuild time 30-50%. |
-| **Unity builds** (CMake `UNITY_BUILD`) | P1 | Combine small `.cpp` files into larger translation units for faster builds. |
-| **ccache / sccache** | P1 | Build caching for developer iteration. Even on Windows, sccache works with MSVC. |
-| **Compile-time profiling** | P2 | `-ftime-trace` equivalent for MSVC (`/d1reportTime`); identify slow headers. |
-| **Module support (C++20 modules)** | P3 | When MSVC modules are stable, migrate `Engine.h` to `import Engine;`. Future investment. |
+### 6.3 External Library Build Strategy
 
-### 5.3 External Library Build Improvements
-
-Current: 13 separate `Build-*.ps1` scripts in `build-scripts/external-libs/`.
-
-**Proposal:** Migrate to **vcpkg manifest mode** as the primary path:
-- `vcpkg.json` already exists with most dependencies
-- Eliminates 13 custom build scripts
-- Automated dependency updates via Dependabot
-- Keep local external/ as fallback for air-gapped / offline builds
+**Current:** 13 separate PowerShell build scripts in `build-scripts/external-libs/`.
+**Target:** vcpkg manifest mode as primary; keep local `external/` as fallback.
 
 ```json
-// vcpkg.json (enhanced)
+// vcpkg.json — enhanced manifest
 {
   "name": "explorerlens",
-  "version": "35.5.0",
+  "version": "36.0.0",
   "dependencies": [
-    "zlib", "lz4", "zstd", "liblzma",
-    "minizip-ng", "bzip2", "libarchive",
-    "libwebp", "libjxl", "libavif", "libheif",
-    "libraw", "mupdf", "openjpeg",
-    "dav1d", "libde265", "freetype"
-  ],
-  "overrides": [],
-  "builtin-baseline": "2026.02.21"
+    "zlib", "lz4", "zstd", "liblzma", "minizip-ng", "bzip2", "libarchive",
+    "libwebp", "libjxl", "libavif", "libheif", "libraw", "mupdf", "openjpeg",
+    "dav1d", "libde265", "libjpeg-turbo", "catch2"
+  ]
 }
 ```
 
 ---
 
-## 6. Testing Strategy Overhaul
+## 7. Testing & Quality Strategy
 
-### 6.1 Current State Assessment
+### 7.1 Current State (Critical Gap: No Test Corpus)
 
 | Metric | Value | Issue |
 |--------|-------|-------|
-| Test count | ~4,724 | Inflated — many test "construction + default check" only |
-| Framework | Custom macros | No fixtures, parameterization, or CI reporting |
-| Test files | 5 split files (~50K lines total) | Hard to navigate; mechanical 2-tests-per-header pattern |
-| Test corpus | Empty `data/corpus/` | No real files to validate decoders against |
-| GPU tests | 0 | No GPU path is tested |
-| Integration tests | ~18 internal pipeline tests | Minimal |
-| Coverage | claimed 95%+ | Likely inflated by header-only code (constructors count as covered) |
+| Test count | ~4,744 | Many test only construction/defaults — not real I/O |
+| Framework | Custom TEST()/ASSERT() | No fixtures, parameterization, CI XML output |
+| Test files | 5 split files (~50K lines) | Mechanical 2-tests-per-header pattern |
+| Test corpus | Empty `data/corpus/` | **Cannot validate decoders without real files** |
+| GPU tests | 0 | No GPU path tested |
+| Integration tests | ~18 | Minimal |
 
-### 6.2 Proposed Testing Stack
+### 7.2 Target Testing Stack
 
 | Layer | Framework | What It Tests | Target Count |
 |-------|-----------|---------------|--------------|
-| **Unit tests** | **Catch2 v3** | Individual classes, pure functions | ~500 meaningful tests |
-| **Decoder validation** | **Custom corpus runner** | Each decoder produces correct output from real files | 1 test per format × 3 files = ~600 |
-| **Integration tests** | **Catch2 + COM** | Full pipeline from shell request to thumbnail | ~50 |
-| **GPU tests** | **Catch2 + D3D11** | GPU decode vs CPU decode SSIM comparison | ~20 |
-| **Performance benchmarks** | **Google Benchmark** | P50/P95/P99 regression tracking | ~30 |
-| **Fuzz tests** | **libFuzzer or WinAFL** | Crash/hang resistance on malformed files | Continuous |
+| **Unit tests** | Catch2 v3 | Individual classes, pure functions | ~500 meaningful tests |
+| **Decoder validation** | Custom corpus runner | Each decoder produces correct output from real files | ~600 (1 format × 3 files × 3 sizes) |
+| **Integration tests** | Catch2 + COM | Full pipeline: shell request → thumbnail output | ~50 |
+| **GPU tests** | Catch2 + D3D11 | GPU decode vs CPU decode SSIM comparison | ~20 |
+| **Performance benchmarks** | Google Benchmark | P50/P95/P99 regression tracking | ~30 |
+| **Fuzz tests** | libFuzzer / WinAFL | Crash/hang resistance on malformed files | Continuous |
 
-**Total target: ~1,200 high-quality tests** (replacing ~4,724 low-quality ones)
+**Total target: ~1,200 high-quality tests** replacing ~4,744 low-quality ones.
 
-### 6.3 Test Corpus Strategy
-
-**Critical gap:** No real test files exist. Decoders cannot be validated without them.
+### 7.3 Test Corpus (HIGHEST PRIORITY)
 
 ```
 data/corpus/
 ├── images/
-│   ├── jpeg/          (5 files: basic, EXIF rotation, progressive, CMYK, large)
-│   ├── png/           (5 files: 8-bit, 16-bit, alpha, interlaced, animated APNG)
-│   ├── webp/          (5 files: lossy, lossless, alpha, animated, large)
-│   ├── avif/          (3 files: 8-bit, 10-bit HDR, animated)
-│   ├── heic/          (3 files: single, burst, live photo)
-│   ├── jxl/           (3 files: lossy, lossless, HDR)
-│   ├── raw/           (5 files: CR2, NEF, ARW, DNG, RAF)
-│   ├── exr/           (3 files: half-float, ACES, multi-layer)
-│   ├── hdr/           (2 files: Radiance, Lightprobe)
-│   ├── psd/           (2 files: layers, large canvas)
-│   └── ...
-├── archives/          (zip, rar, 7z, cbz, cbr, tar.gz)
-├── documents/         (pdf, epub, docx)
-├── models/            (glTF, STL, OBJ, FBX)
-├── fonts/             (TTF, OTF, WOFF2)
-├── video/             (mp4 H.264, mkv H.265, webm VP9)
-├── audio/             (mp3 with cover, flac, wav)
-├── scientific/        (DICOM, FITS, HDF5, NIfTI)
-└── MANIFEST.json      (checksums, expected thumbnail hashes, metadata)
+│   ├── jpeg/     (5 files: basic, EXIF rotation, progressive, CMYK, large 6MP)
+│   ├── png/      (5 files: 8-bit, 16-bit, alpha, interlaced, animated APNG)
+│   ├── webp/     (5 files: lossy, lossless, alpha, animated, large)
+│   ├── avif/     (3 files: 8-bit, 10-bit HDR, animated)
+│   ├── heic/     (3 files: single, burst, live photo key frame)
+│   ├── jxl/      (3 files: lossy, lossless, HDR)
+│   ├── raw/      (5 files: CR2, NEF, ARW, DNG, RAF)
+│   └── ...       (EXR, HDR, PSD, TIFF, BMP, GIF, TGA)
+├── archives/     (ZIP, RAR, 7Z, CBZ, CBR, TAR.GZ)
+├── documents/    (PDF, EPUB)
+├── fonts/        (TTF, OTF)
+├── video/        (MP4 H.264, MKV H.265 — for keyframe extraction)
+└── MANIFEST.json (checksums, expected thumbnail hashes, metadata)
 ```
 
-**Source for test files:**
-- CC0 / public domain sample files from format specification repos
-- Synthetically generated using ImageMagick, FFmpeg, FreeCAD
-- Captured from actual cameras for RAW format coverage
+**Sourcing:** CC0/public-domain sample files from format specification repos,
+synthetically generated with ImageMagick/FFmpeg, real camera RAWs.
 
-### 6.4 Migration Path from Custom to Catch2
+### 7.4 Migration from Custom Framework to Catch2
 
-1. Add Catch2 via vcpkg or `FetchContent`
-2. Write new tests in Catch2 format alongside existing
-3. Create a thin `LEGACY_TEST()` macro bridge
-4. Gradually migrate existing tests that exercise real behavior
-5. Delete mechanical stub tests that only check construction
-6. Remove `EngineTestsMacros.h` when migration complete
+1. Catch2 already added via `FetchContent` in v36.0.0 (Sprint 46)
+2. Write all new tests in Catch2 format
+3. Create `LEGACY_TEST()` macro bridge for gradual migration
+4. Migrate tests that exercise real behavior; delete mechanical stubs
+5. Remove `EngineTestsMacros.h` when migration complete
+6. Target: Catch2 is primary by end of Phase 1
 
 ---
 
-## 7. External Libraries & Dependencies
+## 8. Documentation & Configuration Standards
 
-### 7.1 Current Library Audit
+### 8.1 Documentation Right-Sizing
 
-| Library | Version | Latest | Status | Action |
-|---------|---------|--------|--------|--------|
-| zlib | 1.3.1 | 1.3.1 | ✅ Current | None |
-| LZ4 | 1.10.0 | 1.10.0 | ✅ Current | None |
-| zstd | 1.5.7 | 1.5.7 | ✅ Current | None |
-| LZMA SDK | 26.00 | 26.00 | ✅ Current | None |
-| minizip-ng | 4.0.10 | 4.0.10 | ✅ Current | None |
-| UnRAR | 7.2.2 | 7.2.2 | ✅ Current | **Delete duplicate `unrar/` dir** |
-| libwebp | 1.5.0 | 1.5.0 | ✅ Current | **Delete `libwebp-1.5.0-original/`** |
-| libavif | 1.3.0 | 1.3.0 | ✅ Current | None |
-| libjxl | 0.11.1 | 0.11.1 | ✅ Current | None |
-| libheif | 1.19.5 | 1.19.5 | ✅ Current | None |
-| libde265 | 1.0.15 | 1.0.15 | ✅ Current | None |
-| dav1d | 1.5.1 | 1.5.1 | ✅ Current | None |
-| LibRaw | 0.21.3 | 0.21.3 | ✅ Current | None |
-| MuPDF | 1.24.11 | 1.24.11 | ✅ Current | None |
-| openjpeg | 2.5.3 | 2.5.3 | ✅ Current | None |
-| bzip2 | 1.0.8 | 1.0.8 | ✅ Current | None |
-| xz/liblzma | 5.6.3 | 5.6.3 | ✅ Current | None |
-| libarchive | 3.7.6 | 3.7.6 | ✅ Current | None |
-| FreeType | 2.13.3 | 2.13.3 | ✅ Current | None |
-| WTL | NuGet | — | ✅ Current | **Delete `wtl-nuget.zip` + `wtl.zip` if extracted** |
-
-### 7.2 Libraries to Add (for Real Feature Implementation)
-
-| Library | Purpose | Priority | License |
-|---------|---------|----------|---------|
-| **libjpeg-turbo** | SIMD-accelerated JPEG decode (faster than WIC for thumbnails) | P0 | BSD / IJG |
-| **libpng** | PNG decode with SIMD (currently relying on WIC?) | P0 | libpng-2.0 |
-| **libtiff** | TIFF/GeoTIFF/OME-TIFF decode | P1 | MIT-like |
-| **Catch2 v3** | Test framework | P0 | BSL-1.0 |
-| **Google Benchmark** | Performance benchmarks | P1 | Apache-2.0 |
-| **stb_image** | Fallback for simple formats (BMP, TGA, PNM) | P2 | Public domain |
-| **DirectXTex** | DDS/WIC/HDR texture loading (Microsoft, MIT) | P1 | MIT |
-
-### 7.3 Libraries NOT Needed Yet (Remove from Headers)
-
-These are referenced in roadmap headers but have no real integration:
-
-| Library | Claimed For | Status |
-|---------|-------------|--------|
-| NVJPEG / CUDA | GPU JPEG decode | No CUDA SDK in build; remove references |
-| Intel oneVPL | QSV decode | No oneVPL in vcpkg.json; remove references |
-| AMD AMF | GPU video decode | No AMD SDK in build; remove references |
-| nghttp2 | REST API server | No HTTP server exists; remove references |
-| OpenCASCADE | STEP/IGES CAD | Heavy dependency; defer until real need |
-| IfcOpenShell | IFC/BIM | Heavy dependency; defer until real need |
-
----
-
-## 8. Documentation Right-Sizing
-
-### 8.1 Current Documentation Problem
-
-**130 markdown files** across the project. Much of it documents features that
-don't exist, or duplicates information across multiple files.
-
-### 8.2 Documentation Tiers
+**Problem:** 130+ markdown files — documentation outpaces working code.
 
 | Tier | Audience | Files | Rule |
 |------|----------|-------|------|
-| **Tier 1 — User-Facing** | End users & evaluators | `README.md`, `docs/USER_GUIDE.md`, `CHANGELOG.md`, `LICENSE` | Must reflect only *working, released* features |
-| **Tier 2 — Developer** | Contributors | `docs/development/`, `.github/CONTRIBUTING.md`, `.github/standards/` | Accurate build instructions, coding standards, architecture |
-| **Tier 3 — Architecture** | Deep contributors | `docs/architecture/`, `ROADMAP.md` | Vision + current state, clearly labeled |
-| **Tier 4 — Format Specs** | Decoder authors | `docs/formats/` | Per-format validation status, test coverage |
-| **Tier 5 — Historical** | Reference only | `CHANGELOG-archive.md`, old roadmaps | Move to `docs/archive/`, gitignore from docs site |
+| **Tier 1 — User** | End users | `README.md`, `docs/USER_GUIDE.md`, `CHANGELOG.md`, `LICENSE` | Must reflect ONLY working features |
+| **Tier 2 — Developer** | Contributors | `docs/development/`, `.github/CONTRIBUTING.md`, `.github/standards/` | Accurate build instructions |
+| **Tier 3 — Architecture** | Deep contributors | `ROADMAP.md`, `docs/architecture/` | Vision + current state, clearly labeled |
+| **Tier 4 — Historical** | Reference | `CHANGELOG-archive.md`, `docs/archive/` | Rarely accessed |
 
-### 8.3 Files to Consolidate or Delete
+**Actions:**
+- Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` → `docs/archive/`
+- Delete empty `packaging/inno/`, `nsis/`, `msix/`, `vdproj/`
+- Merge `docs/PERFORMANCE.md` ← `.github/standards/performance-benchmarks.md`
+- Update README.md to reflect actual validated capabilities (not aspirational)
 
-| Action | Files | Rationale |
-|--------|-------|-----------|
-| **Archive** | `docs/ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` | Replaced by this unified ROADMAP.md |
-| **Merge** | `docs/PERFORMANCE.md` ← `.github/standards/performance-benchmarks.md` | Single source of truth for perf targets |
-| **Merge** | `docs/RELEASE_PROCESS.md` ← version-bump instructions | Copilot instructions have more detail |
-| **Delete** | Empty `packaging/inno/`, `nsis/`, `msix/`, `vdproj/` | Dead code; only WiX is used |
-| **Delete** | `external/compression-libs/unrar/` (old) | Superseded by `unrar-7.2.2/` |
-| **Delete** | `external/image-libs/libwebp-1.5.0-original/` | Build copy is sufficient |
-| **Right-size** | `README.md` SEO metadata section | 2KB of hidden HTML comments; move to separate file or reduce |
+### 8.2 GitHub Community Files (Fix Casing)
 
-### 8.4 README.md Rewrite Principles
+| Current | Required | Impact |
+|---------|----------|--------|
+| `.github/contributing.md` | `.github/CONTRIBUTING.md` | GitHub auto-detection for community health |
+| `.github/security.md` | `.github/SECURITY.md` | Security tab "Policy" link |
+| `.github/codeowners` | `.github/CODEOWNERS` | Auto-assign reviewers on PRs |
 
-The current README is **excellent for SEO** but oversells capabilities. Proposed changes:
+### 8.3 MkDocs Navigation (Fix Broken Links)
 
-1. **"200+ file extensions"** → State actual *tested and validated* count
-2. **"GPU-accelerated"** → Clarify which formats actually use GPU decode today
-3. **"macOS Quick Look + Linux Nautilus"** → Remove until real implementations exist
-4. **Test count badge** → Show Catch2 results, not inflated custom framework count
-5. Add a **"Getting Started in 60 seconds"** section (build + `regsvr32`)
-6. Add **screenshots** of actual thumbnails generated (this is a visual product!)
+Run `mkdocs build --strict` — fix or remove 15+ phantom nav entries pointing to
+nonexistent files. Add `mkdocs build --strict` as a CI check.
+
+### 8.4 SVG Diagram Expansion
+
+**Existing:** 5 high-quality SVGs in `docs/assets/`
+**Target:** 13+ SVGs covering all major architecture flows
+
+| New SVG | Purpose |
+|---------|---------|
+| `decode-pipeline.svg` | File → detect → route → decode → transform → thumbnail |
+| `ci-cd-pipeline.svg` | 20 workflows mapped end-to-end |
+| `release-flow.svg` | Bump-Version → 21 files → tag → release → 5 registries |
+| `format-matrix.svg` | Visual grid of supported formats with status |
+| `cache-architecture.svg` | L1 memory → L2 disk → invalidation |
+| `plugin-lifecycle.svg` | Discovery → trust → sandbox → execute |
+| `test-architecture.svg` | Corpus → Catch2 → CI → coverage → benchmark |
+| `gpu-pipeline.svg` | CPU decode → D3D11 → compute → output |
+
+### 8.5 Documentation Naming Convention
+
+All docs use `UPPER_SNAKE_CASE.md` (except `README.md` and tool configs like `mkdocs.yml`).
+
+### 8.6 Environment Reproducibility
+
+| Item | Current | Target |
+|------|---------|--------|
+| Dev container | None | `.devcontainer/devcontainer.json` for Codespaces |
+| Setup script | `Test-Build-Environment.ps1` | Extended `setup-dev-env.ps1` that installs all tools |
+| Scoop manifest | Individual installs | `scoopfile.json` for one-command tool install |
+| First-build time | Manual (30-60 min) | < 15 minutes from clone to passing tests |
 
 ---
 
-## 9. CI/CD & Infrastructure
+## 9. CI/CD, Packaging & Distribution
 
-### 9.1 Current CI Workflows Assessment
+### 9.1 CI Workflows (20 — All Real)
 
-| Workflow | Status | Value | Action |
-|----------|--------|-------|--------|
-| `ci-matrix.yml` | ✅ Active | **Critical** — canonical CI | Keep; ensure it tests real decoder output |
-| `build.yml` | ✅ Active | Manual verification | Keep |
-| `codeql.yml` | ✅ Active | Security scanning | Keep |
-| `code-quality.yml` | ✅ Active | Static analysis | Keep; add clang-tidy checks |
-| `coverage.yml` | ✅ Active | Coverage tracking | **Recalibrate** — 60% floor is meaningless with header-only code |
-| `performance-regression-gate.yml` | ✅ Active | Perf regression | Keep; wire to actual benchmark suite |
-| `release.yml` | ✅ Active | Release automation | Keep; verify all artifacts are real |
-| `publish-packages.yml` | ✅ Active | 5-registry publish | **Evaluate** — are all 5 registries needed? |
-| `pr-checks.yml` | ✅ Active | PR quality gates | Keep |
-| `auto-label.yml` | ✅ Active | Automation | Keep |
-| `release-drafter.yml` | ✅ Active | Release notes | Keep |
-| `stale.yml` | ✅ Active | Issue hygiene | Keep |
-| `notify-failure.yml` | ✅ Active | Alerting | Keep |
-| `pages.yml` | ✅ Active | Docs site | Keep |
-| `sync-labels.yml` | ✅ Active | Label management | Keep |
-| `toolchain-verify.yml` | ✅ Active | Env validation | Keep |
-
-### 9.2 CI Improvements
+All 20 workflows are real implementations (~3K lines, 29 jobs). Key improvements:
 
 | Improvement | Priority | Description |
 |-------------|----------|-------------|
-| **Real decoder tests in CI** | P0 | Upload test corpus to CI cache; run decoder validation on every PR |
-| **Screenshot regression** | P1 | Generate thumbnails in CI; pixel-diff against baseline (perceptual hash) |
-| **Binary size tracking** | P1 | Track `LENSShell.dll` size per commit; alert on >10% growth |
-| **Dependency scanning** | P2 | Dependabot / Renovate for vcpkg dependencies |
-| **5-registry publish review** | P2 | NuGet makes sense for SDK; npm/Maven/RubyGems may be premature |
-
-### 9.3 Package Registry Strategy
-
-| Registry | Justification | Keep? |
-|----------|---------------|-------|
-| NuGet | C++ SDK / COM interop | ✅ Yes — natural for Windows C++ |
-| Container (ghcr.io) | `lens-server` future service | ⏳ Defer until service exists |
-| npm | Browser extension / WASM | ⏳ Defer until WASM exists |
-| Maven | Java interop | ❌ Remove — no Java consumers |
-| RubyGems | Ruby bindings | ❌ Remove — no Ruby consumers |
-
----
-
-## 10. Frontend — Shell Extension & GUI
-
-### 10.1 LENSShell.dll (COM Shell Extension)
-
-**Status:** Core product. Functional COM registration with IThumbnailProvider.
-
-| Aspect | Current | Target |
-|--------|---------|--------|
-| COM interfaces | IThumbnailProvider | Add IExtractImage2 for legacy Explorer, IPreviewHandler for preview pane |
-| Registration | Manual `regsvr32` | MSI auto-registration + `lens.exe register` |
-| Error handling | Basic HRESULT | Structured logging to ETW + Event Log |
-| File type coverage | Registry-based | Also register as fallback for unregistered types |
-| Thumbnail sizes | Standard | Support 16×16 to 1024×1024 (Extra Large) |
-| Threading | STA | Verify MTA safety for Explorer's thread pool |
-
-### 10.2 LENSManager.exe (Configuration GUI)
-
-**Status:** WTL-based admin GUI. Functional but dated appearance.
-
-| Decision | Current (WTL) | Alternative | Recommendation |
-|----------|---------------|-------------|----------------|
-| **UI Framework** | WTL (Win32) | WinUI 3, Qt, Dear ImGui | **Keep WTL** for v1. It works, it's lightweight, and it's the right choice for a system utility. WinUI 3 adds 100MB+ of dependencies. Consider WinUI 3 for v2 *only* if user demand warrants it. |
-| **Dark mode** | Custom `DarkModeController` | Windows 11 dark mode API | **Enhance** — use `SetPreferredAppMode()` from uxtheme.dll |
-| **System tray** | `SystemTrayIcon.h` | Standard NotifyIcon | Keep; add balloon notifications for decode errors |
-
-### 10.3 lens.exe (CLI Tool)
-
-**Status:** 17 source files in `src/Tools.CLI/`. Early development.
-
-**Priority commands to make work first:**
-1. `lens generate <file>` — Generate thumbnail for a file (validate decoder)
-2. `lens info <file>` — Show format detection result + metadata
-3. `lens register` — Register/unregister shell extension
-4. `lens doctor` — System diagnostics (GPU, libraries, registration)
-5. `lens benchmark <directory>` — Batch decode benchmark
-6. `lens cache stats` — Cache hit rate and size
-
-### 10.4 Web Frontend (index.html)
-
-**Status:** Project has an `index.html` at root — likely a landing page.
-
-**Recommendation:** Move to `docs/` for GitHub Pages. Keep it simple:
-a marketing page explaining what ExplorerLens does, with screenshots and download link.
-
----
-
-## 11. Backend — Engine & Decode Pipeline
-
-### 11.1 Priority: Make Core Decoders Work Flawlessly
-
-Instead of adding more format stubs, make the top 20 formats *perfect*:
-
-| Priority | Format | Library | Target P50 | Validation |
-|----------|--------|---------|------------|------------|
-| P0 | JPEG (.jpg) | libjpeg-turbo / WIC | < 5 ms | EXIF rotation, progressive, CMYK |
-| P0 | PNG (.png) | libpng / WIC | < 5 ms | 8/16-bit, alpha, interlaced, APNG first frame |
-| P0 | WebP (.webp) | libwebp | < 8 ms | Lossy, lossless, alpha, animated first frame |
-| P0 | AVIF (.avif) | libavif + dav1d | < 10 ms | 8/10-bit, HDR, animated first frame |
-| P0 | HEIC (.heic) | libheif + libde265 | < 10 ms | Single, burst, live photo key frame |
-| P0 | JPEG XL (.jxl) | libjxl | < 12 ms | Lossy, lossless, HDR |
-| P0 | PDF (.pdf) | MuPDF | < 20 ms | First page render at 256px |
-| P0 | RAW (CR2/NEF/ARW/DNG) | LibRaw | < 25 ms | Embedded preview extraction (fast path) |
-| P1 | ZIP (.zip, .cbz) | minizip-ng | < 15 ms | First image in archive |
-| P1 | RAR (.rar, .cbr) | UnRAR | < 15 ms | First image in archive |
-| P1 | 7Z (.7z, .cb7) | LZMA SDK | < 15 ms | First image in archive |
-| P1 | EPUB (.epub) | minizip-ng + image extract | < 20 ms | Cover image extraction |
-| P1 | GIF (.gif) | WIC / custom | < 5 ms | First frame of animated |
-| P1 | BMP (.bmp) | WIC / stb_image | < 2 ms | Standard |
-| P1 | TIFF (.tiff) | libtiff / WIC | < 8 ms | Multi-page: first page; GeoTIFF |
-| P2 | EXR (.exr) | tinyexr / OpenEXR | < 15 ms | Tone-map to sRGB |
-| P2 | PSD (.psd) | Custom parser | < 15 ms | Compositor first layer |
-| P2 | DDS (.dds) | DirectXTex | < 5 ms | BC1-BC7 decode |
-| P2 | SVG (.svg) | WIC / Direct2D | < 10 ms | Rasterize at target size |
-| P2 | TTF/OTF (.ttf, .otf) | FreeType | < 10 ms | Render sample text "AaBb" |
-
-### 11.2 Decoder Architecture Improvements
-
-**Current DecoderRegistry pattern:**
-```
-Extension → LENSTYPE enum → Decoder class → Decode(stream) → HBITMAP
-```
-
-**Proposed improvements:**
-
-1. **Two-phase decode:** `ProbeHeader(first_16KB)` → `DecodeThumb(stream, targetSize)`
-   - Phase 1 reads only the header to confirm format and extract metadata
-   - Phase 2 does minimal decode at the requested thumbnail size
-   - For RAW photos, Phase 2 extracts embedded JPEG preview (instant)
-
-2. **Streaming decode:** Instead of reading entire file into memory:
-   ```cpp
-   class IStreamingDecoder {
-       virtual DecodeResult ProbeHeader(std::span<const uint8_t> header) = 0;
-       virtual DecodeResult DecodeAtSize(IStream* stream, uint32_t targetSize) = 0;
-       virtual bool SupportsPartialDecode() const { return false; }
-   };
-   ```
-
-3. **Cancellation:** Explorer may cancel thumbnail requests when scrolling fast.
-   Every decoder must check a cancellation token periodically:
-   ```cpp
-   virtual DecodeResult DecodeAtSize(IStream* stream, uint32_t targetSize,
-                                      std::stop_token cancel) = 0;
-   ```
-
-### 11.3 Cache Architecture
-
-**Current:** Robin-hood hash map (`SubMillisecondCacheEngine`), claimed < 1ms hit.
-
-**Proposed improvements:**
-
-| Feature | Description |
-|---------|-------------|
-| **Two-tier cache** | L1: In-memory LRU (64MB default, BGRA bitmaps). L2: Disk cache (`%LOCALAPPDATA%\ExplorerLens\Cache\`) with memory-mapped access. |
-| **Cache key** | `SHA256(canonical_path + file_mtime + file_size + target_dimensions)` |
-| **Eviction** | LRU with size budget. L1 evicts to L2. L2 evicts oldest when disk budget exceeded. |
-| **Invalidation** | `ReadDirectoryChangesW` watcher per opened Explorer folder. File change → invalidate key. |
-| **Persistence** | L2 survives reboots. Cold start reads L2 index (memory-mapped). |
-| **Metrics** | Hit rate, miss rate, eviction count, L1 size, L2 size — exposed via `lens cache stats`. |
-
----
-
-## 12. GPU Pipeline — Reality Check
-
-### 12.1 Honest GPU Status
-
-**Current state:** No shader files (`.hlsl`, `.comp`, `.metal`) exist in the repository.
-No CUDA SDK, oneVPL SDK, or AMD AMF SDK is referenced in the build system. The "GPU
-acceleration" is architected but not implemented.
-
-### 12.2 Realistic GPU Acceleration Plan
-
-| Phase | What | How | Measurable Target |
-|-------|------|-----|-------------------|
-| **Phase 1** — WIC GPU | Use WIC with D3D11 device hints | `IWICImagingFactory2::CreateDecoderFromStream` with D3D device | 1.5-2× speedup on JPEG/PNG |
-| **Phase 2** — D3D11 resize | GPU-accelerated bilinear/Lanczos resize | D3D11 compute shader (one `.hlsl` file) | < 0.5 ms for 4K→256px resize |
-| **Phase 3** — NVDEC/QSV video | Hardware video decode for thumbnail extraction | NVDEC via CUDA or DirectX Video Acceleration (DXVA2) | 10× speedup for video thumbnails |
-| **Phase 4** — GPU tone-map | HDR → SDR on GPU | Compute shader for PQ/HLG/gainmap | < 0.5 ms tone-map |
-
-**Key principle:** GPU acceleration should be *measurably faster* than the CPU path
-on real hardware, with automatic fallback. Do not claim GPU support until benchmarks prove it.
-
-### 12.3 GPU Shaders to Write
-
-| Shader | Purpose | Input | Output |
-|--------|---------|-------|--------|
-| `resize_bilinear.hlsl` | Fast thumbnail resize | SRV (source texture) | UAV (target texture) |
-| `resize_lanczos.hlsl` | High-quality resize | SRV | UAV |
-| `tonemap_pq_to_srgb.hlsl` | HDR10 PQ → sRGB | SRV (HDR10 surface) | UAV (sRGB surface) |
-| `tonemap_hlg_to_srgb.hlsl` | HLG → sRGB | SRV | UAV |
-| `demosaic_bayer.hlsl` | RAW Bayer demosaic | SRV (raw Bayer data) | UAV (RGB surface) |
-
----
-
-## 13. Cross-Platform Strategy
-
-### 13.1 Honest Assessment
-
-Windows is the only platform that matters right now. macOS Quick Look and Linux
-Nautilus are valid expansion targets but should not be pursued until the Windows
-product is excellent.
-
-### 13.2 Platform Priority
-
-| Platform | Timeline | Approach |
-|----------|----------|----------|
-| **Windows 10/11** | Now | COM IThumbnailProvider — the core product |
-| **macOS** | Phase 4+ | Quick Look QLThumbnailProvider — requires Objective-C bridge and Metal backend |
-| **Linux** | Phase 5+ | Nautilus/Dolphin tumbler plugin — requires GLib/D-Bus integration |
-| **Web/WASM** | Phase 6+ | Server-side `lens-server` or client-side WASM module |
-
-### 13.3 What Cross-Platform Means in Practice
-
-The Engine library (format detection, decoders, cache) IS portable C++20. The non-portable parts:
-- COM registration → Platform/Win32ShellProvider
-- D3D11 GPU → Platform/MetalRenderer (macOS), Platform/VulkanRenderer (Linux)
-- File system notifications → Platform/FSWatcher abstraction
-- Installer → platform-specific packaging
-
-The Platform Abstraction Layer (PAL) architecture is correct. The implementation order
-should be: perfect the Windows PAL backend first, then add others.
-
----
-
-## 14. Cloud, AI & Advanced Features
-
-### 14.1 Cloud Features (Defer to Phase 4+)
-
-Features from v35.x roadmap that should be deferred:
-
-| Feature | v35.x Module | Status | Action |
-|---------|-------------|--------|--------|
-| Cloud hydration monitoring | `CloudHydrationMonitor` | Stub | **Implement in Phase 3** — uses real Windows CF API |
-| Streaming cache | `StreamingCacheTierPolicy` | Stub | Defer to Phase 4 |
-| Real-time collaboration | `CollaborativeCacheCoordinator` | Stub | Defer to Phase 5 — needs server component |
-| Zero-trust security | `ThumbnailManifestSigner` | Stub | Defer to Phase 4 — needs crypto integration |
-| WebAssembly pipeline | `WasmDecoderShim` | Stub | Defer to Phase 6 |
-| Cross-device sync | `DeviceSyncManifest` | Stub | Defer to Phase 5 |
-| REST API server | `RemoteDecodeServer` | Stub | Defer to Phase 4 |
-
-### 14.2 AI Features (Defer to Phase 5+)
-
-| Feature | Current State | Realistic Timeline |
-|---------|---------------|-------------------|
-| Smart crop (saliency detection) | Header stubs in `Engine/AI/` | Phase 5 — requires ONNX Runtime or DirectML integration |
-| Scene understanding | Header stubs | Phase 6 — research-grade feature |
-| Semantic search (CLIP) | Header stubs | Phase 6 — requires embedding model deployment |
-| Generative thumbnails | Roadmap only | Phase 7+ — not a core product need |
-
-### 14.3 Features That DO Provide Value Now
-
-| Feature | Why Now | Implementation |
-|---------|---------|----------------|
-| **EXIF-aware rotation** | Users see sideways photos without this | LibRaw/libjpeg-turbo EXIF orientation tag |
-| **Embedded preview extraction (RAW)** | 100× faster than full RAW decode | LibRaw `unpack_thumb()` — extract embedded JPEG |
-| **Archive cover image** | CBZ/EPUB users expect this | Extract first image alphabetically |
-| **PDF first page** | Universal document thumbnail | MuPDF `fz_new_pixmap_from_page()` |
-| **Video keyframe** | Better than generic icon | Media Foundation `IMFSourceReader::ReadSample` at 10% duration |
-| **Font sample text** | Shows font appearance at a glance | FreeType render "AaBb123" |
-
----
-
-## 15. Packaging & Distribution
-
-### 15.1 Current Packaging (Simplify)
-
-| Package | Status | Keep? |
-|---------|--------|-------|
-| WiX MSI | ✅ Active | ✅ Yes — primary installer |
-| Portable ZIP | ✅ Active | ✅ Yes — for power users |
-| Inno Setup | ❌ Empty | Delete |
-| NSIS | ❌ Empty | Delete |
-| MSIX | ❌ Empty | Delete (consider for Microsoft Store later) |
-| vdproj | ❌ Empty | Delete (legacy VS installer) |
-| NuGet (SDK) | ✅ Active | ✅ Keep |
-| npm | ✅ Active | ⏳ Defer |
-| Docker / ghcr.io | ✅ Active | ⏳ Defer |
-| Maven | ✅ Active | ❌ Remove |
-| RubyGems | ✅ Active | ❌ Remove |
-
-### 15.2 Distribution Channels (Realistic)
-
-| Channel | Priority | Action |
+| **Corpus-based decoder tests in CI** | P0 | Upload test corpus to CI cache; validate on every PR |
+| **Screenshot regression** | P1 | Generate thumbnails in CI; perceptual hash diff against baseline |
+| **Binary size tracking** | P1 | Track `LENSShell.dll` size; alert on >10% growth |
+| **Dependency scanning** | P2 | Dependabot for vcpkg + npm dependencies |
+
+### 9.2 Package Registry Strategy (Simplify)
+
+| Registry | Current | New Decision | Rationale |
+|----------|---------|-------------|-----------|
+| **NuGet** | ✅ Active | ✅ Keep | Natural for Windows C++ SDK distribution |
+| **Container (ghcr.io)** | ✅ Active | ⏳ Defer to Phase 4 | Until `lens-server` is a real service |
+| **npm** | ✅ Active | ⏳ Defer to Phase 6 | Until WASM module exists |
+| **Maven** | ✅ Active | ❌ Remove | No Java consumers |
+| **RubyGems** | ✅ Active | ❌ Remove | No Ruby consumers |
+
+### 9.3 Distribution Channels (Realistic Priority)
+
+| Channel | Priority | Status |
 |---------|----------|--------|
-| **GitHub Releases** | P0 | MSI + ZIP + checksums on every release |
-| **winget** | P0 | Submit to Windows Package Manager community repo |
-| **Chocolatey** | P1 | Submit package for `choco install explorerlens` |
+| **GitHub Releases** | P0 | ✅ Active — MSI + ZIP + checksums |
+| **winget** | P0 | Submit to Windows Package Manager |
+| **Chocolatey** | P1 | `choco install explorerlens` |
 | **Scoop** | P1 | Add to Scoop extras bucket |
 | **Microsoft Store** | P2 | MSIX package when matured |
 
-### 15.3 Installer Improvements
+### 9.4 Packaging Cleanup
 
-| Improvement | Description |
-|-------------|-------------|
-| **Silent install** | `msiexec /i ExplorerLens.msi /qn` — must work without GUI |
-| **Per-user install** | Don't require admin for HKCU registration (per-user COM) |
-| **Automatic updates** | Check GitHub Releases API for updates; prompt user |
-| **Uninstall cleanup** | Remove cache, registry entries, event source on uninstall |
-| **Side-by-side** | Allow multiple versions for testing (different CLSIDs) |
+| Action | What |
+|--------|------|
+| ✅ Keep | `packaging/wix/` (active MSI) |
+| ✅ Keep | `packaging/npm/` (if `package.json` exists) |
+| ❌ Delete | `packaging/inno/`, `nsis/`, `msix/`, `vdproj/` (all empty) |
 
 ---
 
-## 16. Phase Plan — 6 Phases to Best-in-Class
+## 10. GitHub AI & Automation Surface
 
-### Phase 1 — Foundation (**4-6 weeks**)
-**Goal:** Working, validated, installable product for the top 20 formats.
+### 10.1 Current State
 
+| Asset | Count | Assessment |
+|-------|-------|------------|
+| Copilot instructions | 1 (450 lines) | Monolithic; refactor to ~150 lines + scoped files |
+| Scoped instructions | 5 | Missing: C++ coding, build, release, docs, security, performance, PR, decoder |
+| Custom agents | 1 | Missing: Docs, TestCorpus, Release agents |
+| Prompt templates | 5 | Missing: release-prep, architecture-review, decoder-scaffold, benchmark, PR-desc |
+| Skills | 2 (~45 lines each) | Expand to ~150 lines; add decoder-dev, test-corpus, performance, docs skills |
+| MCP servers | 3 | Evaluate: GitKraken/GitLens, Pylance |
+
+### 10.2 Enhancement Plan
+
+**A. Refactor `copilot-instructions.md` (P0)**
+- Extract C++ standards → `cpp-coding.instructions.md` (`applyTo: "**/*.h,**/*.cpp"`)
+- Extract build rules → `build.instructions.md` (`applyTo: "**/CMakeLists.txt,**/build-scripts/**"`)
+- Extract release procedure → `release.instructions.md`
+- Slim main file to ~150 lines (project overview + architecture + key constraints)
+
+**B. Add 8 Scoped Instructions (P1)**
+
+| File | Scope |
+|------|-------|
+| `cpp-coding.instructions.md` | `**/*.h,**/*.cpp` |
+| `build.instructions.md` | `**/CMakeLists.txt,**/build-scripts/**` |
+| `release.instructions.md` | `**/Bump-Version.ps1,**/CHANGELOG.md` |
+| `documentation.instructions.md` | `**/*.md,docs/**` |
+| `security.instructions.md` | `**/*.h,**/*.cpp,**/*.ps1,**/*.yml` |
+| `performance.instructions.md` | `**/Engine/**,**/benchmarks/**` |
+| `pr-authoring.instructions.md` | `.github/**` |
+| `decoder-authoring.instructions.md` | `**/Engine/Decoders/**` |
+
+**C. Add 3 Agents (P1)**
+
+| Agent | Purpose |
+|-------|---------|
+| `Docs` | Documentation accuracy checking against actual code |
+| `TestCorpus` | Corpus management, decoder validation, SSIM comparison |
+| `Release` | Version bumps, release verification, artifact validation |
+
+**D. Add 6 Prompts (P1)**
+
+release-prep, architecture-review, decoder-scaffold, benchmark-analysis,
+pr-description, debug-build-failure
+
+**E. Expand Skills to Full Playbooks (P0)**
+
+Both existing skills (~45 lines each) → ~150 lines with step-by-step procedures.
+Add 4 new skills: decoder-development, test-corpus, performance, documentation.
+
+**F. MCP Configuration Hygiene (P0)**
+
+Remove `NO_PROXY`/`no_proxy` corporate artifacts from `.vscode/mcp.json`.
+
+---
+
+## 11. Shared Tooling Architecture
+
+**Problem:** Every project under `MyScripts\` duplicates tool configuration. When rules
+change, they must be manually propagated to each project.
+
+**Principle:** Common tools live at `MyScripts\` (workspace root). Each project carries
+only project-specific overrides.
+
+### 11.1 Target Layout
+
+```
+MyScripts\                              ← SHARED (all projects inherit)
+├── .editorconfig                       ← Universal editor rules
+├── .markdownlint.json                  ← Markdown lint rules
+├── .pre-commit-config.yaml             ← Shared pre-commit hooks
+├── pyproject.toml                      ← Shared Python tool config
+├── pyrightconfig.json                  ← Shared type-checking baseline
+├── tooling/
+│   ├── clang-tidy/.clang-tidy          ← Shared C++ lint baseline
+│   └── cmake/msvc-v145.cmake           ← Shared MSVC toolchain
+│
+├── ExplorerLens.io/                    ← PROJECT-SPECIFIC ONLY
+│   ├── .vscode/ (settings, launch, tasks, mcp)
+│   ├── .clang-tidy                     ← Project-specific overrides
+│   ├── CMakePresets.json               ← Project-specific presets
+│   ├── vcpkg.json                      ← C++ dependency manifest
+│   └── .github/                        ← Repo-specific CI, agents, instructions
+```
+
+### 11.2 Key Rules
+
+1. **Inherit, don't duplicate.** If `MyScripts\` covers it, don't copy to project.
+2. **Override only what differs.** Project config = delta from shared baseline.
+3. **`.editorconfig` cascades natively** (spec-defined upward search).
+4. **VS Code multi-root** cascades settings from outer to inner `.vscode/`.
+5. **Never put secrets or machine-local paths** in shared configs.
+
+### 11.3 Implementation Steps
+
+1. Audit all config files across projects — classify as shared/override/unique
+2. Consolidate shared configs at `MyScripts\`; delete project-level duplicates
+3. Move shared `.clang-tidy` base to `MyScripts\tooling\clang-tidy\`
+4. Create `MyScripts\TOOLING.md` documenting the inheritance architecture
+5. Add CI check flagging duplicate configs
+
+---
+
+## 12. Frontend — Shell, GUI & CLI
+
+### 12.1 LENSShell.dll (Core Product)
+
+| Aspect | Current | Target |
+|--------|---------|--------|
+| COM interfaces | IThumbnailProvider | Add IExtractImage2 (legacy), IPreviewHandler (preview pane), IContextMenu (right-click) |
+| Registration | Manual `regsvr32` | MSI auto-registration + `lens register` CLI |
+| Error handling | Basic HRESULT | Structured logging to ETW + Windows Event Log |
+| Thumbnail sizes | Standard | 16×16 to 1024×1024 (Extra Large Icons) |
+| Threading | STA | Verify MTA safety for Explorer's thread pool |
+
+### 12.2 LENSManager.exe (Configuration GUI)
+
+| Decision | Current | Target |
+|----------|---------|--------|
+| Framework | WTL (Win32) | **Keep WTL for v1** — lightweight, works; consider WinUI 3 for v2 |
+| Dark mode | Custom controller | Use `SetPreferredAppMode()` from uxtheme.dll |
+| System tray | Basic icon | Add balloon notifications for decode errors |
+
+**Why not WinUI 3 now?** It adds 100+ MB of dependencies. WTL is the right choice
+for a system utility that ships as < 1 MB. QuickLook uses WPF (15+ MB managed runtime) —
+we stay leaner with native Win32.
+
+### 12.3 lens.exe (CLI Tool)
+
+**Priority commands to make work:**
+
+| Command | Purpose |
+|---------|---------|
+| `lens generate <file> [-o output.png] [-s 256]` | Generate thumbnail — validates decoder end-to-end |
+| `lens info <file>` | Format detection result + metadata |
+| `lens register [--per-user]` | Register/unregister shell extension |
+| `lens doctor` | System diagnostics: GPU, libraries, registration, cache health |
+| `lens benchmark <directory>` | Batch decode with P50/P95/P99 output |
+| `lens cache stats` | Hit rate, size, eviction count |
+
+### 12.4 Web Frontend (index.html)
+
+Move to `docs/` for GitHub Pages. Keep it simple: a marketing page explaining what
+ExplorerLens does, with screenshots and download link. **Screenshots of actual generated
+thumbnails** are the most important marketing asset for a visual product.
+
+---
+
+## 13. Backend — Engine & Decode Pipeline
+
+### 13.1 Priority: Top 20 Formats Must Work Flawlessly
+
+| Priority | Format | Library | Target P50 | Validation Requirements |
+|----------|--------|---------|------------|-------------------------|
+| P0 | JPEG | libjpeg-turbo / WIC | < 5 ms | EXIF rotation, progressive, CMYK |
+| P0 | PNG | WIC / libpng | < 5 ms | 8/16-bit, alpha, interlaced, APNG first frame |
+| P0 | WebP | libwebp | < 8 ms | Lossy, lossless, alpha, animated first frame |
+| P0 | AVIF | libavif + dav1d | < 10 ms | 8/10-bit, HDR, animated first frame |
+| P0 | HEIC | libheif + libde265 | < 10 ms | Single image, burst, live photo key frame |
+| P0 | JXL | libjxl | < 12 ms | Lossy, lossless, HDR |
+| P0 | PDF | MuPDF | < 20 ms | First page at 256px |
+| P0 | RAW | LibRaw | < 25 ms | Embedded preview extraction (fast path) |
+| P1 | ZIP/CBZ | minizip-ng | < 15 ms | First image in archive |
+| P1 | RAR/CBR | UnRAR | < 15 ms | First image in archive |
+| P1 | 7Z/CB7 | LZMA SDK | < 15 ms | First image in archive |
+| P1 | EPUB | minizip-ng + extract | < 20 ms | Cover image extraction |
+| P1 | GIF | WIC | < 5 ms | First frame of animated |
+| P1 | BMP | WIC / stb_image | < 2 ms | Standard |
+| P1 | TIFF | WIC / libtiff | < 8 ms | Multi-page: first page |
+| P2 | EXR | tinyexr | < 15 ms | Tone-map to sRGB |
+| P2 | PSD | Custom parser | < 15 ms | Composite first layer |
+| P2 | DDS | DirectXTex | < 5 ms | BC1-BC7 block decode |
+| P2 | SVG | WIC / Direct2D | < 10 ms | Rasterize at target size |
+| P2 | TTF/OTF | FreeType | < 10 ms | Render sample "AaBb123" |
+
+### 13.2 Decoder Architecture Improvements
+
+**Two-phase decode (harvested from XnView pattern):**
+```cpp
+class IStreamingDecoder {
+    // Phase 1: Read only header (first 16 KB) to confirm format + extract metadata
+    virtual DecodeResult ProbeHeader(std::span<const uint8_t> header) = 0;
+
+    // Phase 2: Minimal decode at requested thumbnail size
+    virtual DecodeResult DecodeAtSize(IStream* stream, uint32_t targetSize,
+                                      std::stop_token cancel) = 0;
+
+    virtual bool SupportsPartialDecode() const { return false; }
+};
+```
+
+**Key insight from IrfanView:** For RAW photos, Phase 2 extracts the embedded JPEG
+preview via `LibRaw::unpack_thumb()` — this is 100× faster than full RAW decode and
+is what the user actually wants for a thumbnail.
+
+### 13.3 Cache Architecture (Harvested from macOS Quick Look)
+
+macOS Quick Look uses SQLite-indexed thumbnail cache with file watchers for
+invalidation. We adopt the same pattern:
+
+| Feature | Description |
+|---------|-------------|
+| **L1 (memory)** | LRU map, 64 MB budget, BGRA bitmaps |
+| **L2 (disk)** | `%LOCALAPPDATA%\ExplorerLens\Cache\`, SQLite index, memory-mapped blobs |
+| **Cache key** | `SHA256(canonical_path + mtime + size + target_dimensions)` |
+| **Eviction** | LRU with size budget; L1 → L2 on evict; L2 expires oldest at disk budget |
+| **Invalidation** | `ReadDirectoryChangesW` watcher per opened Explorer folder |
+| **Persistence** | L2 survives reboots; cold start reads SQLite index |
+| **Metrics** | Hit rate, miss rate, eviction count — exposed via `lens cache stats` |
+
+---
+
+## 14. GPU, Cross-Platform & Advanced Features
+
+### 14.1 GPU Pipeline — Realistic Plan
+
+**Current:** No shader files exist. Architecture headers but no implementation.
+
+| Phase | What | How | Measurable Target |
+|-------|------|-----|-------------------|
+| **Phase 2** | WIC + D3D11 hints | `IWICImagingFactory2` with D3D device | 1.5-2× JPEG/PNG speedup |
+| **Phase 2** | D3D11 compute resize | `resize_bilinear.hlsl` | < 0.5 ms for 4K→256px |
+| **Phase 3** | DXVA2 video decode | Hardware keyframe extraction | 10× video thumbnail speedup |
+| **Phase 4** | GPU tone-mapping | `tonemap_pq_to_srgb.hlsl` | < 0.5 ms HDR→SDR |
+
+**Shaders to write:**
+- `resize_bilinear.hlsl` — fast thumbnail resize (SRV → UAV)
+- `resize_lanczos.hlsl` — high-quality resize
+- `tonemap_pq_to_srgb.hlsl` — HDR10 PQ → sRGB
+- `demosaic_bayer.hlsl` — RAW Bayer demosaic
+
+### 14.2 Cross-Platform — Honest Timeline
+
+| Platform | Phase | Approach |
+|----------|-------|----------|
+| **Windows 10/11** | Phase 1 (now) | COM IThumbnailProvider — the core product |
+| **macOS** | Phase 5 | Quick Look QLThumbnailProvider; Metal backend; Homebrew |
+| **Linux** | Phase 5 | Nautilus/Dolphin tumbler; Vulkan backend; Flatpak |
+| **Web/WASM** | Phase 6 | Server-side `lens-server` or Emscripten module |
+
+### 14.3 AI/ML Features — Defer to Phase 5+
+
+| Feature | Realistic Timeline | Dependency |
+|---------|-------------------|------------|
+| Smart crop (saliency) | Phase 5 | ONNX Runtime or DirectML |
+| Scene understanding | Phase 6 | Research-grade |
+| Semantic search (CLIP) | Phase 6 | Embedding model |
+| Generative thumbnails | Phase 7+ | Not a core need |
+
+### 14.4 Features That Provide Value NOW
+
+| Feature | Why | Implementation |
+|---------|-----|----------------|
+| EXIF-aware rotation | Users see sideways photos without this | libjpeg-turbo EXIF orientation |
+| Embedded RAW preview | 100× faster than full decode | `LibRaw::unpack_thumb()` |
+| Archive cover image | CBZ/EPUB users expect this | First image alphabetically |
+| PDF first page | Universal document thumbnail | `fz_new_pixmap_from_page()` |
+| Video keyframe | Better than generic icon | `IMFSourceReader` at 10% duration |
+| Font sample text | Shows font appearance | FreeType render "AaBb123" |
+
+### 14.5 Cloud Features (Defer to Phase 4)
+
+| Feature | Action |
+|---------|--------|
+| Windows Cloud Files hydration detection | Implement in Phase 4 (uses real CF API) |
+| Enterprise GPO (ADMX/ADML) | Phase 4 |
+| ETW tracing | Phase 4 |
+| `lens-server` REST API | Phase 4 |
+| Streaming cache, zero-trust, collaboration | Phase 5+ |
+| WebAssembly, cross-device sync | Phase 6+ |
+
+---
+
+## 15. Phase Plan — 6 Phases to Best-in-Class
+
+### Phase 1 — Foundation (4-6 weeks)
+**Goal:** Working, validated, installable product for top 20 formats.
+
+**Infrastructure:**
+- [ ] Shared tooling architecture (§11): audit configs, consolidate at MyScripts\, establish inheritance
+- [ ] GitHub AI surface overhaul (§10): refactor instructions, enhance agents/skills/prompts
+- [ ] Config/docs/env standards (§8): rename GitHub files, fix mkdocs, SVG diagrams, dev container
 - [ ] Audit all 1,386 headers: classify as Real / Stub / Dead
 - [ ] Delete dead headers and empty packaging directories
+- [ ] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`
+
+**Core product:**
 - [ ] Verify all 18 external libraries build and link correctly
-- [ ] Implement or fix the top 20 format decoders (see §11.1) with real `.cpp` files
-- [ ] Create test corpus with 5+ real files per format
-- [ ] Integrate Catch2; write 500+ meaningful tests replacing mechanical stubs
-- [ ] Run all decoders against test corpus; achieve 100% correct output
-- [ ] Fix all warnings; clean build on MSVC v145
-- [ ] `lens generate <file>` CLI works for all 20 formats
+- [ ] Implement or fix top 20 format decoders with real `.cpp` files
+- [ ] Create test corpus: 5+ real CC0 files per format (100+ total)
+- [ ] Integrate Catch2 as primary test framework
+- [ ] Write 500+ meaningful tests replacing mechanical stubs
+- [ ] Run all decoders against corpus → 100% correct output
+- [ ] `lens generate <file>` works for all 20 formats
 - [ ] `regsvr32 LENSShell.dll` works on clean Windows 10 VM
-- [ ] Update README.md to reflect actual, verified capabilities
-- [ ] Delete `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`
+- [ ] Update README.md to reflect actual validated capabilities
 
-**Exit criteria:** A user can install the MSI, and every file in their Photos
-folder gets a correct, fast thumbnail in Explorer.
+**Exit criteria:** A user installs the MSI, and every file in their Photos folder
+gets a correct, fast thumbnail in Explorer.
 
-### Phase 2 — Performance (**3-4 weeks**)
-**Goal:** Measurably fast decode with proper caching.
+### Phase 2 — Performance (3-4 weeks)
+**Goal:** Measurably faster than Windows built-in thumbnails.
 
-- [ ] Implement two-tier cache (L1 memory + L2 disk)
+- [ ] Implement two-tier cache (L1 memory + L2 disk with SQLite index)
 - [ ] Add `ReadDirectoryChangesW` cache invalidation
-- [ ] Implement WIC-with-D3D11 GPU path for JPEG/PNG/WebP
+- [ ] WIC + D3D11 device hints for JPEG/PNG/WebP
 - [ ] Write `resize_bilinear.hlsl` compute shader
-- [ ] Benchmark all format decoders; establish P50/P95/P99 baselines
-- [ ] Integrate Google Benchmark into CI
-- [ ] Performance regression gate blocks >10% P95 regressions
-- [ ] `lens benchmark <dir>` CLI works and produces JSON report
-- [ ] Target: 5ms JPEG P50, 8ms WebP P50, 20ms PDF P50
+- [ ] Benchmark all decoders → P50/P95/P99 baselines
+- [ ] Google Benchmark integration in CI
+- [ ] Performance regression gate: >10% P95 → PR blocked
+- [ ] `lens benchmark <dir>` produces JSON report
+- [ ] Target: 5ms JPEG, 8ms WebP, 20ms PDF
 
-**Exit criteria:** ExplorerLens is measurably faster than Windows built-in
-thumbnails for every supported format.
+**Exit criteria:** ExplorerLens is measurably faster than Windows built-in for every
+supported format.
 
-### Phase 3 — Format Breadth (**4-6 weeks**)
-**Goal:** Expand from 20 → 80+ validated formats.
+### Phase 3 — Format Breadth (4-6 weeks)
+**Goal:** 80+ validated format families (200+ extensions).
 
 - [ ] Add remaining image formats: EXR, PSD, HDR, QOI, TGA, ICO, DDS, SVG
-- [ ] Add archive formats: TAR, GZ, BZ2, XZ, ISO
-- [ ] Add document formats: EPUB, MOBI, CHM, RTF, DOCX (embedded preview)
-- [ ] Add 3D formats: glTF/GLB, STL, OBJ (wireframe preview)
-- [ ] Add font formats: TTF, OTF, WOFF (sample text render)
-- [ ] Add video formats: MP4, MKV, AVI, WebM (keyframe extraction)
-- [ ] Add audio formats: MP3, FLAC, OGG (album art + waveform)
-- [ ] Add RAW formats: all LibRaw-supported cameras (100+ models)
-- [ ] Add scientific: DICOM (basic), FITS (basic)
-- [ ] Expand test corpus to cover all new formats
+- [ ] Add archive: TAR, GZ, BZ2, XZ, ISO
+- [ ] Add document: EPUB, MOBI, CHM, RTF, DOCX (embedded preview)
+- [ ] Add 3D: glTF/GLB, STL, OBJ (wireframe)
+- [ ] Add fonts: TTF, OTF, WOFF (sample text render)
+- [ ] Add video: MP4, MKV, AVI, WebM (keyframe extraction)
+- [ ] Add RAW: all LibRaw-supported cameras (100+ models)
+- [ ] Plugin SDK v1: C ABI with `probe()`, `decode()`, `metadata()` functions
 - [ ] Submit to winget + Chocolatey + Scoop
+- [ ] Expand test corpus to 300+ files
 
-**Exit criteria:** ~80+ format families with 200+ extensions, all validated
-against real test files, all producing correct thumbnails.
+**Exit criteria:** 80+ format families, all validated against real test files.
 
-### Phase 4 — Enterprise & Cloud (**4-6 weeks**)
-**Goal:** Production-ready for enterprise deployment.
+### Phase 4 — Enterprise & Cloud (4-6 weeks)
+**Goal:** Production-ready for enterprise and headless deployment.
 
-- [ ] Implement Windows Cloud Files API hydration detection
-- [ ] Group Policy template (ADMX/ADML) for enterprise configuration
-- [ ] ETW tracing for decode pipeline (Windows Performance Recorder compatible)
-- [ ] Event log entries for decode errors and crashes
-- [ ] `lens-server` REST API for headless thumbnail generation
+- [ ] Windows Cloud Files API hydration detection
+- [ ] GPO template (ADMX/ADML) for enterprise configuration
+- [ ] ETW tracing for decode pipeline
+- [ ] Event Log entries for decode errors
+- [ ] `lens-server` REST API with cpp-httplib (replace Winsock2 skeleton)
 - [ ] Docker container for `lens-server`
-- [ ] SBOM generation with real dependency tracking
-- [ ] Security audit: fuzz all decoders, fix crashes
+- [ ] Security audit: fuzz all decoders, fix all crashes
+- [ ] SBOM with real dependency graph
 
-**Exit criteria:** IT admins can deploy via GPO, monitor via SIEM, and
-run `lens-server` in their CI pipelines.
+**Exit criteria:** IT admins deploy via GPO, monitor via SIEM, run `lens-server`
+in CI pipelines.
 
-### Phase 5 — Cross-Platform (**6-8 weeks**)
+### Phase 5 — Cross-Platform (6-8 weeks)
 **Goal:** macOS Quick Look extension shipping.
 
-- [ ] Implement macOS PAL backend (QLThumbnailProvider)
+- [ ] macOS PAL backend (QLThumbnailProvider)
 - [ ] Metal backend for GPU operations
 - [ ] FSEvents for file change detection
-- [ ] Homebrew formula for macOS distribution
-- [ ] Cross-compile Engine with Clang on macOS
-- [ ] Validate SSIM ≥ 0.99 between Windows and macOS output
-- [ ] Linux Nautilus thumbnailer plugin (basic)
+- [ ] Homebrew formula
+- [ ] SSIM ≥ 0.99 between Windows and macOS output
+- [ ] ONNX Runtime for on-device AI (smart crop)
+- [ ] Linux Nautilus thumbnailer (basic)
 
-**Exit criteria:** macOS users can install via Homebrew and get thumbnails
-for the top 20 formats in Finder.
+**Exit criteria:** macOS users install via Homebrew and get thumbnails for top 20
+formats in Finder.
 
-### Phase 6 — AI & Advanced (**ongoing**)
-**Goal:** Smart thumbnails that understand content.
+### Phase 6 — AI & Advanced (Ongoing)
+**Goal:** Intelligent, content-aware thumbnails.
 
-- [ ] ONNX Runtime integration for on-device inference
-- [ ] Smart crop using saliency detection model
+- [ ] Smart crop using saliency detection
 - [ ] HDR tone-mapping on GPU (PQ/HLG/Gainmap)
 - [ ] CLIP embedding for semantic search
-- [ ] Predictive pre-generation based on folder navigation patterns
-- [ ] WebAssembly build for browser-based thumbnail generation
-
-**Exit criteria:** Thumbnails are not just decoded but intelligently
-cropped and tone-mapped for maximum visual quality.
+- [ ] Predictive pre-generation based on navigation patterns
+- [ ] WebAssembly build for browser use
 
 ---
 
-## 17. Consolidated Backlog from Previous Roadmaps
+## 16. Success Metrics
 
-### From ROADMAP_V34.md (Arcturus) — Incomplete Items
-
-| Item | Original Scope | Status | Carry Forward? |
-|------|---------------|--------|----------------|
-| 350+ file extensions | Format blitz | Stubs created, not validated | **Yes** → Phase 3 |
-| GPU-first decode (sub-10ms) | NVJPEG, QSV, AMD AMF | Stubs only | **Partially** → Phase 2 (WIC GPU first) |
-| HDR tone-mapping | PQ/HLG/Gainmap | Stubs | **Yes** → Phase 6 |
-| Predictive pre-generation | Directory pre-scan | Stubs | **Yes** → Phase 6 |
-| Animated format suite | GIF/APNG/WebP animation | Stubs | **Yes** → Phase 3 (first frame only) |
-| Scientific formats v2 | DICOM/FITS/HDF5 | Stubs | **Yes** → Phase 3 (basic) |
-| CAD/BIM/EDA | DWG/IFC/Gerber | Stubs | **Defer** — heavy dependencies |
-| Performance hardening | LTS gate | Stubs | **Yes** → Phase 2 |
-
-### From ROADMAP_V35.md (Vega) — Incomplete Items
-
-| Item | Original Scope | Status | Carry Forward? |
-|------|---------------|--------|----------------|
-| Cloud-native thumbnails | Stream hydration | Stubs | **Yes** → Phase 4 |
-| Real-time collaboration | Cache coordination | Stubs | **Defer** — needs server |
-| Network-aware caching | Bandwidth throttle | Stubs | **Yes** → Phase 4 |
-| Zero-trust security | FIPS crypto | Stubs | **Defer** → Phase 4 (basic auth only) |
-| WebAssembly pipeline | Browser extension | Stubs | **Defer** → Phase 6 |
-| Cross-device sync | Manifest sync | Stubs | **Defer** — needs cloud service |
-| REST API server | lens-server | Stubs | **Yes** → Phase 4 |
-
-### From consolidation-opportunities.md — Pending Cleanup
-
-| Item | Priority | Action |
-|------|----------|--------|
-| ~~Delete src/Engine/~~ | ✅ Done (directory no longer exists) | None |
-| Delete packaging/inno, nsis, vdproj | **P0** | Delete in Phase 1 |
-| Merge performance docs | **P1** | Single source of truth |
-| Consolidate plugin docs | **P2** | Restructure docs/plugins/ |
-| Review SDK/include/{jxl,libraw}/ | **P2** | Confirm they're API stubs |
-
-### From missing-types-analysis.md — Unresolved
-
-| Type | Status | Action |
-|------|--------|--------|
-| ErrorCategorizationEngine | ❌ Missing | Create in Phase 1 if needed; otherwise delete test references |
-| ShellNotificationProvider | ❌ Missing | Create in Phase 1 (toast notifications for errors) |
-| DeploymentPreflightCheck | ❌ Missing | Create as `lens doctor` CLI command in Phase 1 |
-| DecoderPerformanceCounters | ❌ Missing | Create in Phase 2 (perf tracking) |
-| FormatStatusProvider location | In LENSManager/ not Engine/ | Move to Engine/ or add thin wrapper |
-
----
-
-## 18. Success Metrics
-
-### Phase 1 Success (Foundation)
+### Phase 1 (Foundation)
 
 | Metric | Target |
 |--------|--------|
@@ -954,9 +953,9 @@ cropped and tone-mapped for maximum visual quality.
 | Catch2 tests passing | ≥ 500 |
 | Header-to-source ratio | < 3:1 |
 | Clean install on Windows 10 VM | Yes |
-| Zero build warnings | Yes |
+| Build: 0 errors, 0 warnings | Yes |
 
-### Phase 2 Success (Performance)
+### Phase 2 (Performance)
 
 | Metric | Target |
 |--------|--------|
@@ -967,56 +966,60 @@ cropped and tone-mapped for maximum visual quality.
 | Cache hit P50 | < 1 ms |
 | LENSShell.dll size | < 5 MB |
 | Idle memory | < 30 MB |
-| Benchmark regression gate in CI | Active |
 
-### Phase 3 Success (Breadth)
+### Phase 3 (Breadth)
 
 | Metric | Target |
 |--------|--------|
 | Validated format families | ≥ 80 |
-| File extensions supported | ≥ 200 (validated) |
+| File extensions supported | ≥ 200 (all validated) |
 | Test corpus files | ≥ 300 |
-| winget / Chocolatey / Scoop listings | Published |
+| winget / Chocolatey / Scoop | Published |
 | GitHub stars | ≥ 100 |
 
-### Long-Term Best-in-Class Criteria
+### Best-in-Class Criteria
 
-| Dimension | Best-in-Class Means |
-|-----------|---------------------|
-| **Speed** | Faster than OS built-in thumbnails for every format |
-| **Coverage** | More formats than any other thumbnail provider |
+| Dimension | Definition |
+|-----------|-----------|
+| **Speed** | Faster than OS built-in for every format |
+| **Coverage** | More validated formats than any competitor |
 | **Correctness** | EXIF rotation, color management, HDR tone-mapping — all correct |
 | **Reliability** | Zero crashes on malformed files (fuzz-tested) |
-| **Size** | < 5 MB DLL + < 15 MB with all libraries |
-| **Memory** | < 50 MB working set under load; < 10 MB idle |
-| **Install** | One-click MSI or `winget install ExplorerLens` |
-| **Cross-platform** | Windows native + macOS Quick Look + Linux thumbnailer |
-| **Extensible** | Plugin SDK for third-party format decoders |
-| **Observable** | ETW tracing, Event Log, CLI diagnostics |
+| **Size** | < 5 MB DLL |
+| **Memory** | < 50 MB under load; < 10 MB idle |
+| **Install** | `winget install ExplorerLens` — one command |
+| **Cross-platform** | Windows + macOS + Linux |
+| **Extensible** | Plugin SDK for third-party decoders |
+| **Observable** | ETW, Event Log, CLI diagnostics |
 
 ---
 
-## 19. Appendix — Decision Log
-
-### Key Decisions Made in This Roadmap
+## 17. Decision Log
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D1 | Keep C++20 + MSVC v145 | Right tool for COM shell extensions; no alternative |
-| D2 | Keep CMake + Ninja | Industry standard; presets are excellent DX |
-| D3 | Migrate to Catch2 | Industry standard; IDE integration, parameterized tests, XML export |
-| D4 | Migrate to vcpkg-primary | Eliminates 13 custom build scripts; Dependabot support |
-| D5 | Flatten Engine/Core/ from 545 to ~80 headers | 5.1:1 ratio is unsustainable; most are stubs |
+| D1 | Keep C++20 + MSVC v145 | COM requires native code; no managed alternative |
+| D2 | Keep CMake + Ninja | Industry standard; presets; sccache-compatible |
+| D3 | Migrate to Catch2 v3 | Industry standard; XML output; parameterized tests |
+| D4 | vcpkg as primary dependency path | Eliminates 13 custom build scripts; Dependabot |
+| D5 | Flatten Engine/ from 16 → 7 subdirectories | Remove premature subdivisions |
 | D6 | Create real test corpus | Cannot validate decoders without real files |
-| D7 | Defer cross-platform to Phase 5 | Windows must be excellent before expanding |
-| D8 | Defer AI/ML to Phase 6 | Core product value is fast, correct thumbnails |
-| D9 | Defer cloud/collaboration to Phase 4 | Enterprise feature; needs working core first |
-| D10 | Remove Maven + RubyGems registries | No Java or Ruby consumers exist |
-| D11 | Add winget/Chocolatey/Scoop | Primary Windows distribution channels |
-| D12 | Don't reset version number | Version history has value; v36.0 starts Phase 1 |
-| D13 | Single ROADMAP.md | 3 roadmap files creates confusion; consolidate |
-| D14 | Right-size documentation | 130 .md files for a product with 269 .cpp files is backwards |
-| D15 | Implement before declaring | No header in CMakeLists without real .cpp implementation |
+| D7 | Defer cross-platform to Phase 5 | Windows must be excellent first |
+| D8 | Defer AI/ML to Phase 5+ | Core value is fast, correct thumbnails |
+| D9 | Remove Maven + RubyGems registries | No consumers exist |
+| D10 | Add winget / Chocolatey / Scoop | Primary Windows distribution channels |
+| D11 | Keep version at v36+ | History has value; slow velocity to feature-gated bumps |
+| D12 | Single ROADMAP.md | 3 files creates confusion |
+| D13 | Right-size docs (130 → ~60 files) | Docs should lag code, not lead it |
+| D14 | Implement-before-declare rule | No header without .cpp > 50 LOC |
+| D15 | Shared tooling at workspace root | Common tools at MyScripts\; projects carry overrides |
+| D16 | Full AI tooling surface | 13 instructions, 4 agents, 11 prompts, 6 skills, 5 MCP |
+| D17 | Config/docs/env to latest standards | GitHub casing, mkdocs nav, SVG diagrams, dev container |
+| D18 | Add libjpeg-turbo | 2-4× faster JPEG decode than WIC |
+| D19 | SQLite for L2 cache index | Proven pattern (macOS Quick Look); atomic, crashproof |
+| D20 | IContextMenu for right-click preview | Harvested from SageThumbs; immediate discoverability |
+| D21 | Plugin SDK with C ABI | Harvested from QuickLook's `.qlplugin`; enables community |
+| D22 | `std::expected<T,E>` for new APIs | C++23 error handling; available in MSVC 19.50 |
 
 ### Decisions Preserved from Original Architecture
 
@@ -1033,12 +1036,9 @@ cropped and tone-mapped for maximum visual quality.
 ## How to Use This Roadmap
 
 1. **Phase 1 is the priority.** Everything else waits until the foundation is solid.
-2. **Check off items as completed.** This is a living document.
-3. **Old roadmap files** (`ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`) should
-   be moved to `docs/archive/` for historical reference.
-4. **Measure progress** by the success metrics in §18, not by header count or version number.
-5. **This document supersedes** all previous roadmap documents.
+2. **Measure progress** by success metrics in §16, not by header count or version number.
+3. **This document supersedes** `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`.
+4. **Archive old roadmaps** to `docs/archive/` for historical reference.
+5. **Check off items** as completed. This is a living document.
 
 ---
-
-*"Make it work, make it right, make it fast — in that order."* — Kent Beck
