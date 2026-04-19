@@ -1,0 +1,65 @@
+{
+  "_comment": "ExplorerLens Scoop manifest — install all required build tools with one command: scoop import scoopfile.json",
+  "_updated": "2025-07-18",
+  "apps": [
+    {
+      "Source": "main",
+      "Name": "cmake",
+      "Version": "4.3.1",
+      "_purpose": "CMake build system generator (CMakePresets.json, Engine/CMakeLists.txt)"
+    },
+    {
+      "Source": "main",
+      "Name": "ninja",
+      "Version": "1.13.2",
+      "_purpose": "Ninja build runner — default generator for all ExplorerLens CMake presets"
+    },
+    {
+      "Source": "main",
+      "Name": "git",
+      "Version": "2.53.0",
+      "_purpose": "Git version control"
+    },
+    {
+      "Source": "main",
+      "Name": "nasm",
+      "Version": "2.16.03",
+      "_purpose": "NASM assembler — required for dav1d and libjxl SIMD assembly"
+    },
+    {
+      "Source": "main",
+      "Name": "meson",
+      "Version": "1.10.2",
+      "_purpose": "Meson build system — required by dav1d (AV1 decoder)"
+    },
+    {
+      "Source": "main",
+      "Name": "nuget",
+      "Version": "6.12.1",
+      "_purpose": "NuGet package manager — WTL package for LENSManager"
+    },
+    {
+      "Source": "main",
+      "Name": "7zip",
+      "Version": "26.00",
+      "_purpose": "7-Zip archive tool — used by build scripts for library extraction"
+    },
+    {
+      "Source": "extras",
+      "Name": "wix",
+      "Version": "3.14.1",
+      "_purpose": "WiX Toolset v3 — alternative MSI build path (WiX v6 preferred via dotnet tool)"
+    }
+  ],
+  "usage": {
+    "install_all": "scoop import scoopfile.json",
+    "install_missing": "scoop import scoopfile.json --skip-installed",
+    "add_extras_bucket": "scoop bucket add extras",
+    "notes": [
+      "Visual Studio 2022 BuildTools (MSVC v143) or VS 2026 BuildTools (MSVC v145) must be installed separately via winget or the Visual Studio Installer.",
+      "Preferred local toolset: VS 18 2026 BuildTools (MSVC v145, cl.exe 19.50) — see .github/instructions/build.instructions.md",
+      "WiX v6 (preferred): dotnet tool install --global wix",
+      "Windows SDK 10.0.26100 is installed with VS BuildTools."
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "ExplorerLens Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/base:windows",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/powershell:1": {
+      "version": "latest"
+    }
+  },
+  "runArgs": ["--isolation=process"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.powershell",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "mhutchie.git-graph",
+        "streetsidesoftware.code-spell-checker"
+      ],
+      "settings": {
+        "cmake.configureOnOpen": false,
+        "cmake.buildDirectory": "${workspaceFolder}/build",
+        "terminal.integrated.defaultProfile.windows": "PowerShell"
+      }
+    }
+  },
+  "onCreateCommand": "pwsh -NoProfile -File .devcontainer/setup.ps1",
+  "postCreateCommand": "pwsh -NoProfile -Command \"Write-Host 'ExplorerLens dev container ready. Run: .\\build-scripts\\Build-MSVC.ps1' -ForegroundColor Green\"",
+  "remoteUser": "ContainerUser",
+  "_comment": [
+    "ExplorerLens requires Windows containers (COM, WinRT, DirectX).",
+    "Codespaces: Select 'Windows' machine type.",
+    "Local: Docker Desktop must be in Windows container mode.",
+    "Prerequisites installed by setup.ps1:",
+    "  - Visual Studio 2022 BuildTools (MSVC v143) via winget",
+    "  - CMake, Ninja, NASM, 7zip via Scoop",
+    "  - Windows SDK 10.0.26100",
+    "Note: MSVC v145 (VS 2026) is NOT available in containers yet — v143 is used for CI."
+  ]
+}
