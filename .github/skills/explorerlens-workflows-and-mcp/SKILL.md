@@ -117,13 +117,54 @@ Verify with: `gh auth status` (check "Token scopes:" line).
 
 ---
 
+## Node.js 24 Migration Playbook
+
+GitHub Actions is migrating from Node.js 20 to Node.js 24. Actions still using Node 16 or 20
+will emit deprecation warnings and eventually fail.
+
+### How to Opt In
+
+Add this env variable to every workflow's top-level `env:` block:
+
+```yaml
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+```
+
+### Audit Procedure
+
+1. Search all workflows for actions that may use old Node.js:
+   ```powershell
+   Get-ChildItem .github/workflows/*.yml | ForEach-Object {
+       Select-String -Path $_.FullName -Pattern 'uses:\s+\S+@' | ForEach-Object { $_.Line.Trim() }
+   } | Sort-Object -Unique
+   ```
+2. Check each action's `action.yml` for `runs.using:` — should be `node20` or `node24`.
+3. Upgrade any action still at `@v3` to `@v4` (which targets Node 20+).
+4. Set `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` in every workflow.
+
+### ExplorerLens Status
+
+All 22 workflows now set `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` (verified S101).
+All actions are at `@v4` or later. No Node 16 actions remain.
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `Node.js 16 actions are deprecated` warning | Upgrade action to `@v4` |
+| `This request was rejected` on `upload-artifact` | Upgrade from `@v3` to `@v4` (breaking API change) |
+| Custom action fails with Node 24 | Check `engines.node` in action's `package.json`; file issue with action author |
+
+---
+
 ## AI Tooling Inventory (Current State)
 
 | Asset Type | Count | Location |
 |------------|-------|----------|
 | Instructions (scoped) | 15 | `.github/instructions/` |
 | Agents | 5 | `.github/agents/` |
-| Prompts | 13 | `.github/prompts/` |
+| Prompts | 14 | `.github/prompts/` |
 | Skills | 7 | `.github/skills/` |
 | MCP servers | 3 | `.vscode/mcp.json` |
 
