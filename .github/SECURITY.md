@@ -6,12 +6,12 @@ We provide security patches and updates for the following release lines:
 
 | Version | Supported |
 | ------- | --------- |
-| 37.x    | :white_check_mark: **Current** |
-| 36.x    | :white_check_mark: Security fixes |
-| 35.x    | :white_check_mark: Security fixes only |
-| < 35.0  | :x: End of Life |
+| 38.x    | :white_check_mark: **Current** |
+| 37.x    | :white_check_mark: Security fixes |
+| 36.x    | :white_check_mark: Security fixes only |
+| < 36.0  | :x: End of Life |
 
-> We strongly recommend running the latest release (v37.2.0 "Antares").
+> We strongly recommend running the latest release (v38.2.0 "Betelgeuse").
 > Patch releases are issued within 7 days for critical/high CVEs.
 
 ## Reporting a Vulnerability
@@ -47,8 +47,8 @@ We provide security patches and updates for the following release lines:
 
 ## Security Features
 
-For a detailed description of security architecture, see
-[docs/SECURITY_HARDENING.md](../docs/SECURITY_HARDENING.md).
+For a detailed description of security architecture, see the security sections
+in the [User Guide](../docs/USER_GUIDE.md) and [README](../README.md).
 
 ### Plugin Security (v24.0+)
 

@@ -36,7 +36,7 @@ body:
     attributes:
       label: Visual Studio Version
       description: Which Visual Studio or BuildTools version?
-      placeholder: VS 2022 17.8.0
+      placeholder: VS 2026 18.3 (MSVC v145)
     validations:
       required: true
 

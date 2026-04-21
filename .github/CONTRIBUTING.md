@@ -7,7 +7,7 @@ Thank you for your interest in contributing to ExplorerLens!
 1. **Review the documentation:**
  - [README.md](../README.md) - Project overview
  - [CHANGELOG.md](../CHANGELOG.md) - Development history
- - [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) - Build instructions
+- [docs/build/INSTALLATION_GUIDE.md](../docs/build/INSTALLATION_GUIDE.md) - Build & installation instructions
 
 2. **Set up your development environment:**
  - Visual Studio 18 2026 BuildTools with MSVC v145 (cl.exe 19.50)

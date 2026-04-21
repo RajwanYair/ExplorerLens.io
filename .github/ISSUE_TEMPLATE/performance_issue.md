@@ -12,14 +12,14 @@ Brief description of the performance issue.
 
 ## Project / Component
 
-Which project and operation is slow? (e.g., `Scripts.DupDetector / file scan`)
+Which component is slow? (e.g., `LENSShell.dll / HEIC decode`, `LENSManager / startup`)
 
 ## Observed Performance
 
-- **Operation:** (e.g., scanning 10,000 files)
-- **Time taken:** (e.g., 45 seconds)
-- **Expected time:** (e.g., ~5 seconds)
-- **Memory used:** (e.g., 2 GB peak)
+- **Operation:** (e.g., decoding 100 HEIC files)
+- **Time taken:** (e.g., 4500 ms total)
+- **Expected time:** (e.g., ~1000 ms, per benchmark baseline)
+- **Memory used:** (e.g., 150 MB peak)
 
 ## Profiling Data
 
@@ -27,18 +27,19 @@ Which project and operation is slow? (e.g., `Scripts.DupDetector / file scan`)
 <summary>Profile output (optional)</summary>
 
 ```
-Paste cProfile / line_profiler / memory_profiler output here
+Paste ETW trace / EngineTests benchmark / lens benchmark output here
 ```
 
 </details>
 
 ## Environment
 
-- **OS:** (e.g., Windows 11 / Ubuntu 24.04)
+- **OS:** (e.g., Windows 11 24H2)
 - **CPU:** (e.g., Intel Core i7-12700K)
 - **RAM:** (e.g., 32 GB)
+- **GPU:** (e.g., Intel Arc A770 / NVIDIA RTX 4090 / CPU fallback)
 - **Storage:** (e.g., NVMe SSD / HDD)
-- **Python:** (e.g., 3.12.3)
+- **ExplorerLens Version:** (e.g., v38.2.0)
 
 ## Additional Context
 
