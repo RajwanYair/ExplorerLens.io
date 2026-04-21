@@ -71,6 +71,7 @@ nav:
   - Developer Guide:
       - Developer Guide: development/DEVELOPER_GUIDE.md
       - Build Quick Reference: development/BUILD_QUICK_REFERENCE.md
+      - Compile-Time Profiling: development/COMPILE_TIME_PROFILING.md
       - Third Party: development/THIRD_PARTY.md
       - Installation Guide: build/INSTALLATION_GUIDE.md
       - COM Registration: build/COM_REGISTRATION_DIAGNOSTICS.md
