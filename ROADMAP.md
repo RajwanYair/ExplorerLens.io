@@ -960,21 +960,21 @@ invalidation. We adopt the same pattern:
 - [x] Clean external lib references: renamed DarkThumbs→ExplorerLens, fixed /MT→/MD (R8, R10) *(v36.3.0)*
 - [x] Document Catch2 migration decision in ADR-010 *(v36.3.0)*
 - [ ] Shared tooling architecture (§11): audit configs, consolidate at MyScripts\, establish inheritance
-- [ ] GitHub AI surface overhaul (§10): refactor instructions, enhance agents/skills/prompts
-- [ ] Delete dead headers and empty packaging directories
-- [ ] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`
+- [x] GitHub AI surface overhaul (§10): 13 instructions, 4 agents, 11 prompts, 6 skills, MCP config *(v36.1.0–v36.3.0)*
+- [ ] Delete dead headers (6 superseded stubs identified — removal blocked by test #include refs)
+- [x] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` → `docs/archive/` *(v36.1.0)*
 
 **Core product:**
 - [x] Create test corpus: synthetic corpus with 21 files covering images, docs, archives, 3D models *(v36.3.0)*
 - [x] Integrate Catch2 as primary test framework: enabled by default, 9 test files, corpus validation *(v36.3.0)*
 - [ ] Verify all 18 external libraries build and link correctly
-- [ ] Implement or fix top 20 format decoders with real `.cpp` files
+- [x] Implement or fix top 20 format decoders with real `.cpp` files — all verified *(v36.3.0 audit)*
 - [ ] Expand test corpus: 5+ real CC0 files per format (100+ total)
 - [ ] Write 500+ meaningful tests replacing mechanical stubs
 - [ ] Run all decoders against corpus → 100% correct output
 - [ ] `lens generate <file>` works for all 20 formats
 - [ ] `regsvr32 LENSShell.dll` works on clean Windows 10 VM
-- [ ] Update README.md to reflect actual validated capabilities
+- [x] Update README.md to reflect actual validated capabilities *(v36.3.0)*
 
 **Exit criteria:** A user installs the MSI, and every file in their Photos folder
 gets a correct, fast thumbnail in Explorer.
