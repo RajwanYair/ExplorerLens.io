@@ -180,6 +180,159 @@ Examples:
 
 ---
 
+## Node.js 24 Runtime Migration
+
+GitHub Actions runners are migrating from Node.js 20 to Node.js 24.
+All ExplorerLens workflows opt into Node.js 24 early to avoid deprecation warnings.
+
+```yaml
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+```
+
+**Rules:**
+- Set `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` at the workflow `env:` level (not per-job)
+- When a JavaScript-based action breaks on Node 24, pin it to the last working version and file an issue
+- Never downgrade to Node 16 or 18 — those are already EOL on GitHub-hosted runners
+
+## Permissions-First Policy
+
+Since GitHub's restricted default permissions (2024), every workflow MUST have an explicit
+`permissions:` block. Missing permissions cause silent failures.
+
+```yaml
+# ✅ CORRECT — explicit least-privilege
+permissions:
+  contents: read
+
+# ❌ WRONG — relies on repo default (may be restricted)
+# (no permissions block)
+```
+
+**Common permission sets by workflow type:**
+
+| Workflow Type | Required Permissions |
+|--------------|---------------------|
+| Build/test | `contents: read` |
+| PR checks | `contents: read`, `pull-requests: read` |
+| Code scanning | `contents: read`, `security-events: write` |
+| Release | `contents: write`, `packages: write` |
+| Pages deploy | `contents: read`, `pages: write`, `id-token: write` |
+| Issue/PR labeling | `contents: read`, `issues: write`, `pull-requests: write` |
+
+**Rules:**
+- Never use `permissions: write-all` — always enumerate specific scopes
+- Job-level `permissions:` overrides workflow-level — use job-level for heterogeneous workflows
+- The `id-token: write` permission is only needed for OIDC token exchange (Pages, cloud deploys)
+
+## Reusable Workflow Patterns
+
+ExplorerLens has `.github/workflows/reusable-build.yml` as a `workflow_call` entry point.
+
+```yaml
+# Caller workflow:
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      build-type: Release
+      run-tests: true
+```
+
+**Rules for reusable workflows:**
+- Define inputs with `type:` (string, boolean, number) and clear `description:`
+- Provide sensible defaults for all optional inputs
+- Reusable workflows inherit the caller's `GITHUB_TOKEN` scope
+- Keep reusable workflows self-contained — they should not depend on caller-side setup steps
+- Test reusable workflows with `workflow_dispatch` before using as `workflow_call`
+
+## Concurrency Groups
+
+All PR-triggered workflows MUST use concurrency groups to avoid duplicate runs:
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+**Rules:**
+- Use `cancel-in-progress: true` for PR workflows (supersede older runs)
+- Use `cancel-in-progress: false` for release and deployment workflows (never cancel mid-deploy)
+- The group key should include `github.workflow` to avoid cross-workflow cancellation
+
+## Workflow Dispatch (Manual Re-run)
+
+All workflows SHOULD support manual re-run via `workflow_dispatch`:
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual verification'
+```
+
+**Exceptions:** `notify-failure.yml` (event-driven only) does not need `workflow_dispatch`.
+
+## Artifact Retention
+
+All `upload-artifact` steps MUST specify `retention-days:`:
+
+| Artifact Type | Retention |
+|--------------|-----------|
+| Test results | 30 days |
+| Build binaries | 14 days |
+| Release artifacts | 90 days |
+| Coverage reports | 30 days |
+| Diagnostics (failure) | 14 days |
+| Test corpus | 7 days |
+
+## Timing Annotations
+
+Build and test steps should emit timing via `::notice::` annotations:
+
+```yaml
+- name: Build
+  shell: pwsh
+  run: |
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    cmake --build --preset ci-release -j $env:NUMBER_OF_PROCESSORS
+    $sw.Stop()
+    Write-Host "::notice::Build took $($sw.Elapsed.TotalSeconds.ToString('F1'))s"
+```
+
+## ExplorerLens Workflow Inventory
+
+| Workflow | Trigger | Role |
+|----------|---------|------|
+| `ci-matrix.yml` | push/PR | Canonical CI build matrix |
+| `build.yml` | dispatch/schedule | Manual verification build |
+| `reusable-build.yml` | workflow_call | DRY build+test callable |
+| `pr-checks.yml` | PR | Title, size, changelog validation |
+| `release.yml` | tags `v*` | Release packaging + artifacts |
+| `docs-validation.yml` | docs/SVG changes | MkDocs + SVG validation |
+| `code-quality.yml` | push/PR | Static analysis |
+| `codeql.yml` | push/PR/schedule | Security scanning |
+| `coverage.yml` | push | Coverage collection |
+| `catch2-tests.yml` | push/PR | Catch2 test surface |
+| `performance-regression-gate.yml` | push/PR | Perf regression gate |
+| `corpus-validation.yml` | push/PR | Test corpus validation |
+| `screenshot-regression.yml` | push/PR | Visual regression |
+| `binary-size.yml` | push/PR | Size regression gate |
+| `toolchain-verify.yml` | dispatch | Tool availability check |
+| `publish-packages.yml` | release | Package registry publish |
+| `release-drafter.yml` | push | Release note drafting |
+| `pages.yml` | push | Documentation site |
+| `auto-label.yml` | issues/PR | Auto-labeling |
+| `sync-labels.yml` | dispatch | Label catalog sync |
+| `stale.yml` | schedule | Issue/PR staleness |
+| `notify-failure.yml` | workflow_run | Failure notifications |
+
+---
+
 ## ExplorerLens Release-on-Tag Procedure (C++ / MSVC)
 
 ### Trigger
