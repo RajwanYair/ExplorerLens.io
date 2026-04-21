@@ -69,7 +69,7 @@ BuildLogs/
 release-packages/
 
 # Duplicate documentation directories (old unorganized archives)
-documentation/
+/documentation/
 # Allow organized archive directories (for consolidation project)
 # docs/archive/ is now tracked for historical reference
 
