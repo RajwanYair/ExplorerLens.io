@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" width="960" height="500">
+  <title>ExplorerLens GPU Pipeline</title>
+  <desc>GPU-accelerated decode pipeline: CPU fallback path, DirectX upload, vendor routing (NVDEC/QuickSync/AMF), and output composition.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#58a6ff">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#3fb950">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#d29922">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="500" fill="url(#bg)" rx="12"/>
+
+  <!-- Title -->
+  <text x="480" y="36" text-anchor="middle" fill="#58a6ff" font-size="18" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">GPU Decode Pipeline</text>
+  <text x="480" y="54" text-anchor="middle" fill="#8b949e" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">CPU Decode → GPU Upload → Vendor Acceleration → Composited Output</text>
+
+  <!-- Phase labels -->
+  <text x="110" y="78" text-anchor="middle" fill="#8b949e" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">INPUT</text>
+  <text x="330" y="78" text-anchor="middle" fill="#8b949e" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">DECODE ROUTING</text>
+  <text x="600" y="78" text-anchor="middle" fill="#8b949e" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">GPU VENDOR DISPATCH</text>
+  <text x="870" y="78" text-anchor="middle" fill="#8b949e" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">OUTPUT</text>
+
+  <!-- ═══ Input: File Stream ═══ -->
+  <rect x="30" y="92" width="160" height="70" rx="10" fill="#21262d" stroke="#58a6ff" stroke-width="2"/>
+  <text x="110" y="118" text-anchor="middle" fill="#58a6ff" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">File Stream</text>
+  <text x="110" y="136" text-anchor="middle" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">IStream / mmap</text>
+  <text x="110" y="150" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Zero-copy I/O</text>
+
+  <!-- Arrow → ProbeHeader -->
+  <line x1="190" y1="127" x2="228" y2="127" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ═══ ProbeHeader Decision ═══ -->
+  <rect x="230" y="92" width="200" height="70" rx="10" fill="#21262d" stroke="#d29922" stroke-width="2"/>
+  <text x="330" y="118" text-anchor="middle" fill="#d29922" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">ProbeHeader()</text>
+  <text x="330" y="136" text-anchor="middle" fill="#c9d1d9" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">Format → Decoder routing</text>
+  <text x="330" y="150" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">GPU capable? → vendor path</text>
+
+  <!-- ═══ CPU Path (fallback) ═══ -->
+  <rect x="230" y="190" width="200" height="60" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="2"/>
+  <text x="330" y="215" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">CPU Decode (Current)</text>
+  <text x="330" y="232" text-anchor="middle" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">GDI+ / LibRaw / custom · ~17ms</text>
+
+  <!-- Arrow ProbeHeader → CPU -->
+  <line x1="330" y1="162" x2="330" y2="188" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="358" y="178" fill="#3fb950" font-size="9" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">fallback</text>
+
+  <!-- Arrow ProbeHeader → GPU route -->
+  <line x1="430" y1="127" x2="468" y2="127" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+  <text x="449" y="120" text-anchor="middle" fill="#d29922" font-size="9" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">GPU</text>
+
+  <!-- ═══ GPU Vendor Router ═══ -->
+  <rect x="470" y="88" width="260" height="166" rx="10" fill="#161b22" stroke="#bc8cff" stroke-width="2"/>
+  <text x="600" y="112" text-anchor="middle" fill="#bc8cff" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">GPU Vendor Router</text>
+
+  <!-- NVDEC -->
+  <rect x="490" y="122" width="100" height="44" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1"/>
+  <text x="540" y="142" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">NVDEC</text>
+  <text x="540" y="158" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">NVIDIA CUDA</text>
+
+  <!-- QuickSync -->
+  <rect x="610" y="122" width="100" height="44" rx="6" fill="#21262d" stroke="#58a6ff" stroke-width="1"/>
+  <text x="660" y="142" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">QuickSync</text>
+  <text x="660" y="158" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Intel iGPU</text>
+
+  <!-- AMF -->
+  <rect x="490" y="178" width="100" height="44" rx="6" fill="#21262d" stroke="#f85149" stroke-width="1"/>
+  <text x="540" y="198" text-anchor="middle" fill="#f85149" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">AMF</text>
+  <text x="540" y="214" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">AMD GPU</text>
+
+  <!-- D3D11 -->
+  <rect x="610" y="178" width="100" height="44" rx="6" fill="#21262d" stroke="#d29922" stroke-width="1"/>
+  <text x="660" y="198" text-anchor="middle" fill="#d29922" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">D3D11/12</text>
+  <text x="660" y="214" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Software FB</text>
+
+  <!-- Phase 2+ badge -->
+  <rect x="490" y="232" width="220" height="18" rx="4" fill="#d29922" opacity="0.15"/>
+  <text x="600" y="245" text-anchor="middle" fill="#d29922" font-size="9" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Phase 2+ (planned)</text>
+
+  <!-- Arrow GPU → Upload -->
+  <line x1="730" y1="170" x2="768" y2="170" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ═══ Output Composition ═══ -->
+  <rect x="770" y="88" width="170" height="166" rx="10" fill="#21262d" stroke="#3fb950" stroke-width="2"/>
+  <text x="855" y="112" text-anchor="middle" fill="#3fb950" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Output</text>
+
+  <rect x="790" y="122" width="130" height="36" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1"/>
+  <text x="855" y="145" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">HBITMAP (GDI)</text>
+
+  <rect x="790" y="166" width="130" height="36" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1"/>
+  <text x="855" y="189" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">D3D11 Texture2D</text>
+
+  <rect x="790" y="210" width="130" height="36" rx="6" fill="#161b22" stroke="#d29922" stroke-width="1"/>
+  <text x="855" y="233" text-anchor="middle" fill="#d29922" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Zero-Copy Upload</text>
+
+  <!-- Arrow CPU → Output -->
+  <line x1="430" y1="220" x2="460" y2="220" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="460" y1="220" x2="460" y2="320" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="460" y1="320" x2="855" y2="320" stroke="#3fb950" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="855" y1="320" x2="855" y2="254" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+  <text x="650" y="314" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">CPU fallback path (current)</text>
+
+  <!-- ═══ Performance Comparison ═══ -->
+  <rect x="30" y="360" width="900" height="120" rx="10" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+  <text x="480" y="386" text-anchor="middle" fill="#c9d1d9" font-size="14" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Projected Performance — GPU vs CPU</text>
+
+  <!-- CPU bar -->
+  <text x="50" y="415" fill="#3fb950" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">CPU (current)</text>
+  <rect x="170" y="403" width="340" height="18" rx="4" fill="#3fb950" opacity="0.3"/>
+  <rect x="170" y="403" width="340" height="18" rx="4" fill="#3fb950" opacity="0.6"/>
+  <text x="520" y="416" fill="#3fb950" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">17ms / thumb · 235 img/s</text>
+
+  <!-- GPU projected bar -->
+  <text x="50" y="445" fill="#58a6ff" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">GPU (projected)</text>
+  <rect x="170" y="433" width="120" height="18" rx="4" fill="#58a6ff" opacity="0.3"/>
+  <rect x="170" y="433" width="120" height="18" rx="4" fill="#58a6ff" opacity="0.6"/>
+  <text x="300" y="446" fill="#58a6ff" font-size="10" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">~5ms / thumb · ~800 img/s (est.)</text>
+
+  <!-- Speedup -->
+  <rect x="700" y="403" width="210" height="54" rx="8" fill="#161b22" stroke="#d29922" stroke-width="1.5"/>
+  <text x="805" y="428" text-anchor="middle" fill="#d29922" font-size="20" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">~3.4x faster</text>
+  <text x="805" y="446" text-anchor="middle" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">Projected GPU speedup</text>
+</svg>
