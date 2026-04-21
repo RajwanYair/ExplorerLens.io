@@ -5,6 +5,46 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [36.3.0] — 2025-07-18 — Antares
+
+Infrastructure hardening: Catch2 enabled by default, mkdocs nav fix (19 broken entries),
+external lib naming cleanup (DarkThumbs→ExplorerLens, /MT→/MD), ADR-010 Catch2 adoption,
+ROADMAP Phase 1 progress update, CI workflow hardening (permissions + pinned actions).
+Decoder implementation status audit, docs-validation CI workflow, expanded build-and-release skill.
+
+### Added
+- `docs/formats/DECODER_IMPLEMENTATION_STATUS.md`: comprehensive audit of all 20 priority format decoders
+- `.github/workflows/docs-validation.yml`: CI workflow for `mkdocs build --strict` on docs changes
+- `docs/adr/ADR-010-catch2-as-primary-test-framework.md`: architecture decision record for Catch2 adoption
+
+### Changed
+- `Engine/CMakeLists.txt`: `ENABLE_CATCH2_TESTS` now defaults to `ON`
+- `docs/mkdocs.yml`: fixed 19 broken navigation entries pointing to non-existent files
+- `.github/skills/explorerlens-build-and-release/SKILL.md`: added external library build matrix (18 libs), troubleshooting table, packaging section
+- `.github/workflows/*.yml`: added `permissions:` blocks, pinned actions to SHA hashes
+
+### Fixed
+- External library build scripts: renamed `DarkThumbs` → `ExplorerLens` references, switched `/MT` → `/MD` runtime linkage
+- `README.md`: fixed 3 broken doc links, corrected GPU capability claim, replaced non-existent `RUN-BUILD.bat` with canonical `Build-MSVC.ps1`
+
+---
+
+## [36.2.0] — 2025-07-18 — Antares
+
+Catch2 v3.7.1 integration with 9 test files, corpus validation framework with real CC0 test files,
+ROADMAP v2.0 strategic planning document, and AI tooling surface expansion.
+
+### Added
+- `Engine/Tests/Catch2Tests/`: 9 Catch2 test files covering decoders, cache, pipeline, GPU, memory, plugin, AI, media, and platform
+- `Engine/Tests/Catch2Tests/CorpusValidationTests.cpp`: real-file corpus validation with SSIM scoring
+- `data/corpus/`: CC0 test files for WebP, QOI, PPM, BMP, ICO, TGA formats
+- `data/corpus/MANIFEST.json`: corpus manifest with SHA-256 checksums and source URLs
+
+### Changed
+- `ROADMAP.md`: updated Phase 1 progress markers (11 infrastructure + 2 core product items checked)
+
+---
+
 ## [36.1.0] — 2025-07-18 — Antares
 
 AI tooling overhaul: 13 scoped instructions, 4 agents, 11 prompts, 6 skills, dev container, scoopfile, and test corpus scaffold. copilot-instructions.md slimmed 440→150 lines.
