@@ -115,7 +115,7 @@
       "name": "PS: Install (Admin)",
       "type": "PowerShell",
       "request": "launch",
-      "script": "${workspaceFolder}/scripts/install.ps1",
+      "script": "${workspaceFolder}/Install-ExplorerLens.ps1",
       "cwd": "${workspaceFolder}",
       "args": [
         "-Configuration",
@@ -127,38 +127,11 @@
       "name": "PS: Uninstall (Admin)",
       "type": "PowerShell",
       "request": "launch",
-      "script": "${workspaceFolder}/scripts/install.ps1",
+      "script": "${workspaceFolder}/Install-ExplorerLens.ps1",
       "cwd": "${workspaceFolder}",
       "args": [
-        "-Unregister"
+        "-Uninstall"
       ],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "PS: Verify Tools",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/scripts/verify-tools.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "PS: Test Format Support",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/tests/Test-FormatSupport.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "PS: Test GPU Acceleration",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/tests/Test-GPUAcceleration.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [],
       "createTemporaryIntegratedConsole": false
     },
     {

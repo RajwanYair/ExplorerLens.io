@@ -377,7 +377,7 @@
 			"args": [
 				"-NoProfile",
 				"-File",
-				"${workspaceFolder}/scripts/verify-tools.ps1"
+				"${workspaceFolder}/build-scripts/Test-Build-Environment.ps1"
 			],
 			"group": "test",
 			"problemMatcher": [],
