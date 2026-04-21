@@ -222,6 +222,61 @@ render at full resolution.
 
 ---
 
+## Streaming and Partial Decode Patterns
+
+Some decoders can produce a valid thumbnail before the full file is read. Implement
+`SupportsPartialDecode()` returning `true` and follow this pattern:
+
+### Progressive JPEG Example
+
+```cpp
+DecodeResult JpegDecoder::DecodeAtSize(IStream* stream, uint32_t targetSize,
+                                        std::stop_token cancel) {
+    // Read first 64 KB — often enough for thumbnail
+    constexpr size_t INITIAL_READ = 64 * 1024;
+    std::vector<uint8_t> buffer(INITIAL_READ);
+    ULONG bytesRead = 0;
+    stream->Read(buffer.data(), INITIAL_READ, &bytesRead);
+    buffer.resize(bytesRead);
+
+    // Attempt progressive decode with partial data
+    auto result = TryProgressiveDecode(buffer, targetSize);
+    if (result == DecodeResult::Success) return result;
+
+    // If not enough data, read the rest (cancel-aware)
+    while (bytesRead > 0 && !cancel.stop_requested()) {
+        std::array<uint8_t, 32768> chunk{};
+        stream->Read(chunk.data(), chunk.size(), &bytesRead);
+        if (bytesRead == 0) break;
+        buffer.insert(buffer.end(), chunk.data(), chunk.data() + bytesRead);
+    }
+    if (cancel.stop_requested()) return DecodeResult::Cancelled;
+    return FullDecode(buffer, targetSize);
+}
+```
+
+### IStream Position Management
+
+```cpp
+// Reset stream to beginning before decode
+LARGE_INTEGER zero{};
+stream->Seek(zero, STREAM_SEEK_SET, nullptr);
+
+// Get total stream size (for progress estimation)
+STATSTG stat{};
+stream->Stat(&stat, STATFLAG_NONAME);
+uint64_t totalBytes = stat.cbSize.QuadPart;
+```
+
+### Cancel Token Best Practice
+
+Check `stop_token` at these points:
+1. Before starting decode (early exit if Explorer cancelled)
+2. Inside per-scanline/per-tile loops
+3. After large I/O reads
+
+---
+
 ## Required Constraints
 
 1. **No header without .cpp** — implement before declaring (ROADMAP §4.4).
