@@ -34,7 +34,7 @@ HRESULT IfcBimDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& 
     result.height  = 0;
     if (!request.filePath)
         return E_INVALIDARG;
-    // Production: parse IFC geometry via IfcOpenShell, extract floor plan, GPU rasterize.
+    // Stub: geometry parsing deferred to plugin architecture.
     return E_NOTIMPL;
 }
 

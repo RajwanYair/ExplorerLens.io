@@ -33,15 +33,13 @@ bool GPUJPEGDecodeAccelerator::Initialize() noexcept
 
 bool GPUJPEGDecodeAccelerator::TryNVJPEG() noexcept
 {
-    // NVJPEG probe: requires CUDA 12.6+ and an NVIDIA GPU.
-    // Not linked in the current build — stub returns false.
+    // NVJPEG probe: stub — no CUDA SDK in the current build.
     return false;
 }
 
 bool GPUJPEGDecodeAccelerator::TryIntelQSV() noexcept
 {
-    // Intel oneVPL probe: requires oneVPL 2024.2+ and Intel GPU.
-    // Not linked in the current build — stub returns false.
+    // Intel QSV probe: stub — no oneVPL SDK in the current build.
     return false;
 }
 

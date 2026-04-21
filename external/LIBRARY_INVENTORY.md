@@ -128,6 +128,22 @@
 | Git | 2.53.0 | Scoop | `~/scoop/shims/git.exe` |
 | NASM | 3.01 | Scoop | `~/scoop/shims/nasm.exe` |
 | Meson | 1.10.2 | Scoop | `~/scoop/shims/meson.exe` |
+
+---
+
+## Libraries NOT Used (Phantom Reference Audit)
+
+These libraries are **not linked or built** but have stub enum values in the GPU dispatch layer
+for future vendor routing. They are safe to leave as stubs — no SDK or dependency is required.
+
+| Library | Stub Location | Status |
+|---------|--------------|--------|
+| NVJPEG / CUDA | `GPUDecodeFormatRouter.h` enum, `CUDATextureDecoder.h` class | Stub — no CUDA SDK |
+| AMD AMF | `GPUDecodeAccelerationV2.h` enum, `FeatureCompatMatrix.h` field | Stub — no AMF SDK |
+| Intel oneVPL | `GPUJPEGDecodeAccelerator.h` enum | Stub — no oneVPL SDK |
+| nghttp2 | Only in vendored MuPDF/curl (OFF) | Not our code |
+| OpenCASCADE | No references | Clean |
+| IfcOpenShell | No references (comments cleaned) | Clean |
 | NuGet | 7.3.0 | Scoop | `~/scoop/shims/nuget.exe` |
 | WiX | 6.0.2 | .NET tool | `~/.dotnet/tools/wix.exe` |
 

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Renders floor-plan thumbnail previews for IFC 2x3/IFC4 BIM files (.ifc, .ifczip).
-// Uses IfcOpenShell geometry extraction + GPU rasterization pipeline.
+// Stub decoder — geometry parsing deferred to plugin architecture.
 //
 #pragma once
 
