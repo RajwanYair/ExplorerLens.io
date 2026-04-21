@@ -117,3 +117,53 @@ ctest --test-dir build -C Release -R CorpusValidation
 - When in doubt, generate synthetic test files using ImageMagick or FFmpeg
 - Never include files from unknown or commercial sources
 - Document source URL for every file in MANIFEST.json
+
+## Corpus Gap Analysis Workflow
+
+When asked to analyze gaps, follow this procedure:
+
+1. **Count decoders** — list all format families from `Engine/Decoders/*.h`
+2. **Count corpus files** — enumerate `data/corpus/` recursively
+3. **Cross-reference** — for each decoder, check if matching corpus files exist
+4. **Report gaps** as a table:
+
+   | Decoder | Expected Files | Actual Files | Status |
+   |---------|---------------|--------------|--------|
+   | JPEG    | ≥5            | 5            | ✅      |
+   | AVIF    | ≥3            | 0            | ❌ GAP  |
+
+5. **Prioritize** gaps by decoder usage frequency (JPEG/PNG/WebP first)
+6. **Source files** from approved CC0 repositories:
+   - [Unsplash](https://unsplash.com/) — high-quality photos (Unsplash License ≈ CC0 for testing)
+   - [Wikimedia Commons](https://commons.wikimedia.org/) — filter by CC0/PD license
+   - Format spec repos (e.g., libavif test vectors, libjxl conformance suite)
+   - Self-generated synthetic files via ImageMagick/FFmpeg
+
+## Auto-MANIFEST.json Update
+
+When adding files to the corpus, auto-generate the MANIFEST entry:
+
+```powershell
+# Generate MANIFEST entry for a new file
+$file = "data/corpus/images/avif/test-8bit.avif"
+$hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
+$size = (Get-Item $file).Length
+Write-Host @"
+{
+  "path": "$($file -replace '\\','/' -replace 'data/corpus/','')",
+  "format": "AVIF",
+  "license": "CC0-1.0",
+  "source_url": "",
+  "sha256": "$hash",
+  "file_size": $size,
+  "notes": ""
+}
+"@
+```
+
+## SSIM Threshold Enforcement
+
+- **Production formats** (JPEG, PNG, WebP, AVIF, HEIC): SSIM ≥ 0.95 vs. reference
+- **Lossy formats** (DDS BC1, low-quality JPEG): SSIM ≥ 0.85
+- **Vector formats** (SVG, fonts): pixel-exact at target resolution
+- If SSIM drops below threshold after a code change, flag as a **decoder regression**

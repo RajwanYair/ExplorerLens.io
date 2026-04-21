@@ -252,3 +252,105 @@ To add corpus files to CI cache (avoiding re-download):
 - [ ] Tests tagged `[corpus][format-name]`
 - [ ] SSIM validation added for formats with color management
 - [ ] Corpus CI job runs on every PR (`corpus-validate.yml`)
+
+---
+
+## Step-by-Step: Corpus Gap Analysis
+
+Use this procedure to identify which decoders lack corpus coverage.
+
+### 1. Enumerate All Decoders
+
+```powershell
+# List all decoder header files
+Get-ChildItem Engine/Decoders/*.h | ForEach-Object { $_.BaseName }
+```
+
+### 2. Enumerate All Corpus Files
+
+```powershell
+# Count files per format category
+Get-ChildItem data/corpus -Recurse -File | Where-Object { $_.Name -ne 'MANIFEST.json' } |
+    Group-Object { $_.Directory.Name } |
+    Select-Object Name, Count |
+    Sort-Object Name
+```
+
+### 3. Cross-Reference and Report
+
+For each decoder, check if a matching `data/corpus/<category>/<format>/` directory exists
+with the required minimum files. Output a gap report:
+
+| Format | Decoder | Min Files | Actual | Status |
+|--------|---------|-----------|--------|--------|
+| JPEG   | JpegDecoder | 5 | 5 | ✅ |
+| AVIF   | AvifDecoder | 3 | 0 | ❌ GAP |
+
+### 4. Prioritize Gaps
+
+Priority order for sourcing files:
+1. **P0 formats** — JPEG, PNG, WebP, PDF, ZIP/CBZ (most common user files)
+2. **P1 formats** — AVIF, HEIC, JXL, RAW, TIFF, EXR, GIF, BMP
+3. **P2 formats** — DDS, PSD, SVG, TTF/OTF, EPUB, video keyframes
+
+---
+
+## Step-by-Step: CC0 File Sourcing Workflow
+
+### Approved Sources
+
+| Source | License | Best For | Notes |
+|--------|---------|----------|-------|
+| [Unsplash](https://unsplash.com/) | Unsplash License | JPEG, PNG photos | Free for all uses; download direct |
+| [Wikimedia Commons](https://commons.wikimedia.org/) | CC0 / PD | All image formats | Filter: `License = CC0` or `PD-self` |
+| [PDFTron test files](https://github.com/nicholasgasior/gofpdf) | MIT | PDF variants | Multi-page, forms, encrypted |
+| [libavif test vectors](https://github.com/AOMediaCodec/libavif) | BSD | AVIF | Conformance test images |
+| [libjxl conformance](https://github.com/libjxl/conformance) | Apache-2.0 | JXL | Official conformance suite |
+| [OpenEXR test images](https://github.com/AcademySoftwareFoundation/openexr-images) | BSD | EXR | HDR test images |
+| ImageMagick `convert` | Self-generated | Any raster | Synthetic, guaranteed clean |
+| FFmpeg | Self-generated | Video keyframes | Create short test clips |
+
+### Synthetic File Generation
+
+When CC0 files aren't available, generate synthetic test data:
+
+```powershell
+# Generate a basic 800x600 JPEG with ImageMagick
+magick convert -size 800x600 gradient:blue-red data/corpus/images/jpeg/synthetic-gradient.jpg
+
+# Generate a 16-bit PNG with alpha
+magick convert -size 400x400 -depth 16 xc:"rgba(128,64,255,0.5)" data/corpus/images/png/synthetic-16bit-alpha.png
+
+# Generate a progressive JPEG
+magick convert -size 1024x768 plasma:fractal -interlace JPEG data/corpus/images/jpeg/synthetic-progressive.jpg
+
+# Generate a multi-page TIFF
+magick convert page1.png page2.png -compress lzw data/corpus/images/tiff/synthetic-multipage.tiff
+```
+
+### File Verification After Download
+
+```powershell
+# 1. Verify format is as claimed
+magick identify data/corpus/images/avif/test-8bit.avif
+
+# 2. Generate SHA-256
+$hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
+
+# 3. Test with ExplorerLens decoder
+.\build\bin\EngineTests.exe --corpus-file=$file
+
+# 4. Add to MANIFEST.json
+```
+
+---
+
+## SSIM Threshold Reference
+
+| Format Category | Min SSIM | Rationale |
+|----------------|----------|-----------|
+| Lossless (PNG, BMP, TIFF 8-bit) | 0.99 | Near-perfect reproduction expected |
+| Lossy high-quality (JPEG q90+, WebP) | 0.95 | Slight decode variation acceptable |
+| Lossy compressed (JPEG q50, DDS BC1) | 0.85 | Compression artifacts expected |
+| HDR tone-mapped (EXR, AVIF 10-bit) | 0.90 | Tone-mapping introduces variation |
+| Vector rendered (SVG, fonts) | 0.98 | Sub-pixel rendering varies by system |
