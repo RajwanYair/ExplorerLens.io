@@ -1,6 +1,6 @@
 {
   "_comment": "ExplorerLens Scoop manifest — install all required build tools with one command: scoop import scoopfile.json",
-  "_updated": "2025-07-18",
+  "_updated": "2026-04-21",
   "apps": [
     {
       "Source": "main",
