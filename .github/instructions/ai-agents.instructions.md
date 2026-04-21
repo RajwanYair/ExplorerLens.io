@@ -19,6 +19,7 @@ to workspace tools, MCP servers, and instruction files.
 | Release | `release.agent.md` | Version bumps, artifact validation, post-release checks |
 | TestCorpus | `test-corpus.agent.md` | Corpus management, decoder validation, SSIM scoring |
 | CI-Ops | `ci-ops.agent.md` | GitHub Actions, workflow debugging, action audits |
+| Performance | `performance.agent.md` | Benchmark analysis, regression gates, ETW traces, latency targets |
 
 ## Agent File Structure
 

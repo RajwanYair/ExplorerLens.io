@@ -79,6 +79,7 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 | `Release` | `.github/agents/release.agent.md` | Release orchestration — version bumps, artifact validation, post-release checks | v38.0 |
 | `TestCorpus` | `.github/agents/test-corpus.agent.md` | Test corpus management — real CC0 files, SSIM scoring, decoder validation | v38.0 |
 | `CI-Ops` | `.github/agents/ci-ops.agent.md` | CI/CD operations — workflow authoring, action auditing, failure debugging | v38.0 |
+| `Performance` | `.github/agents/performance.agent.md` | Benchmark analysis, regression gates, ETW traces, decode latency targets | v38.3 |
 | `Explore` | *(built-in)* | Fast read-only codebase exploration and Q&A subagent | — |
 
 ### Agent Expectations
