@@ -1,6 +1,6 @@
 {
   "_comment": "ExplorerLens Scoop manifest — install all required build tools with one command: scoop import scoopfile.json",
-  "_updated": "2026-04-21",
+  "_updated": "2026-07-07",
   "apps": [
     {
       "Source": "main",
@@ -55,6 +55,18 @@
       "Name": "wix",
       "Version": "3.14.1",
       "_purpose": "WiX Toolset v3 — alternative MSI build path (WiX v6 preferred via dotnet tool)"
+    },
+    {
+      "Source": "main",
+      "Name": "cppcheck",
+      "Version": "2.20.0",
+      "_purpose": "Static analysis for C++ — pre-commit quality check"
+    },
+    {
+      "Source": "main",
+      "Name": "delta",
+      "Version": "0.19.2",
+      "_purpose": "Git diff pager — improved diff readability"
     }
   ],
   "usage": {

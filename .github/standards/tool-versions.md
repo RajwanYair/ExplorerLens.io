@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 21 April 2026 (v38.2.0 Betelgeuse release)
-**Version:** 38.2.0 "Betelgeuse"
+**Last Updated:** 7 July 2026 (v38.3.0 Betelgeuse release)
+**Version:** 38.3.0 "Betelgeuse"
 
 ---
 
@@ -98,6 +98,11 @@
 ## Upgrade Procedure
 
 ### For Scoop-managed tools
+
+> **Scoopfile sync:** `scoopfile.json` lists the core build tools (cmake, ninja,
+> git, nasm, meson, nuget, 7zip, sccache, wix, cppcheck, delta).
+> Optional tools (LLVM, MinGW, graphviz, fd, innounp) are documented here but
+> not in the scoopfile — install them individually when needed.
 
 ```powershell
 # Update all tools at once
