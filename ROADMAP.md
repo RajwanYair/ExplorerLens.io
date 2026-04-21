@@ -59,7 +59,7 @@ professional-grade CMake/Ninja build system, 20 CI/CD workflows, and a WiX MSI i
 - **No GPU shader code in hot path** despite architecture headers for D3D11/D3D12/Vulkan
 - **130+ markdown files** — documentation outpaces working code
 - **Cross-platform is stubs only** — macOS/Linux `#ifdef` guards, no real implementations
-- **LensServer** at thread-per-connection model, hardcoded version string (35.5.0)
+- **LensServer** at thread-per-connection model, hardcoded version string (37.2.0)
 - **MuPDF AGPL license** — potential legal concern for commercial distribution
 - **Engine/Core/** has ~530 files — needs sub-organization
 - **Dead code** in `src/LensServer/`, `src/PluginHost/`, `src/Tools.PSModule/`, `Engine/Tests/FuzzTargets/`

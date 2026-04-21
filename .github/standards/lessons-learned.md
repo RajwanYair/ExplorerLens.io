@@ -1,8 +1,8 @@
 # ExplorerLens — Engineering Lessons Learned
 
-> Retrospective captured from git history (v15.1.0 through v35.3.0, 330+ commits).  
+> Retrospective captured from git history (v15.1.0 through v37.2.0, 380+ commits).  
 > Maintained by Copilot — update after every major sprint block.  
-> Last updated: 2026-04-10 (v35.3.0 Vega-T build-fix session — 11 type collisions resolved)
+> Last updated: 2026-07-18 (v37.2.0 Antares production hardening session)
 
 ---
 
