@@ -1,7 +1,7 @@
 {
     // ExplorerLens.io — Recommended VS Code Extensions
     // These extensions provide the best development experience for this C++20/CMake/PowerShell project.
-    // Last audited: v37.2.0 (all extension IDs verified as published on VS Marketplace)
+    // Last audited: v38.2.0 (all 27 extension IDs verified as published on VS Marketplace)
     "recommendations": [
         // ── C/C++ Development ──
         "ms-vscode.cpptools", // C/C++ IntelliSense, debugging (cppvsdbg)
