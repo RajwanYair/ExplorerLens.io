@@ -308,4 +308,39 @@ The `performance-regression-gate.yml` workflow compares benchmark results agains
 1. **Update `baseline.json`** via `Bump-Version.ps1` on each release.
 2. **Gate thresholds:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit.
 3. **Never disable the gate** — fix the regression instead.
+
+---
+
+## Test Isolation & Environment Rules
+
+### C++ Test Isolation
+
+1. **No global state leakage** — each `TEST()` block must be self-contained.
+   If a test modifies a singleton (e.g., `CacheManager::Instance()`), reset it in cleanup.
+2. **No file system side effects** — use `GetTempPath()` for any files created during tests.
+   Delete temp files in the test body or via RAII.
+3. **No network access** — all decoder tests must work offline. Mock HTTP for API tests.
+4. **Thread safety** — tests that validate concurrent behavior must use `std::latch` or
+   `std::barrier` for synchronization, not `Sleep()`.
+
+### Python Test Isolation
+
+1. **Use `tmp_path`** fixture for all file I/O — never write to the project directory.
+2. **Use `monkeypatch`** to override environment variables — never modify `os.environ` directly.
+3. **Use `freezegun`** or `time_machine` for time-dependent tests — never depend on wall clock.
+
+### CI-Specific Test Rules
+
+1. **Timeout all test jobs** — no job should run longer than `timeout-minutes: 30`.
+2. **Use `continue-on-error: false`** by default — failing tests must block the pipeline.
+3. **Flaky test protocol:** If a test fails intermittently, add `@pytest.mark.flaky` (Python)
+   or move to a separate `[flaky]` Catch2 tag, and file an issue to fix the root cause.
+4. **Test output** — use `--output-on-failure` (CTest) and `-v --tb=short` (pytest) for
+   actionable diagnostics in CI logs.
+
+### Cross-Platform Test Considerations
+
+- Tests using `wchar_t` paths must also handle UTF-8 on Linux/macOS stubs.
+- Windows-only tests must be guarded with `#ifdef _WIN32` or `@pytest.mark.windows`.
+- COM-dependent tests (registry, thumbnail provider) only run on Windows CI runners.
 4. **Benchmark names must be stable** — renaming breaks baseline comparison.
