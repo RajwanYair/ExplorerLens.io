@@ -300,3 +300,158 @@ verify:
 - It must have `needs: [build, publish]` so it only runs after both succeed
 - It must use `actions/github-script@v7` (not `gh` CLI) for issue creation to
   avoid shell-injection risks when constructing the issue body
+
+---
+
+## Action Version Pinning Policy
+
+### Rules
+
+1. **Always pin to a semver tag** (`@v4`, `@v2`) — never use `@main`, `@latest`, or branch refs.
+2. **SHA pinning** is preferred for third-party actions outside `actions/*` org:
+   ```yaml
+   # ✅ SHA-pinned third-party action
+   - uses: softprops/action-gh-release@c062e08bd532815e2082a375ba9127f6a901eb57  # v2.2.1
+   # ✅ Semver-pinned official action
+   - uses: actions/checkout@v4
+   # ❌ Branch reference — supply-chain risk
+   - uses: some-org/action@main
+   ```
+3. **Comment the human-readable version** next to SHA pins for auditability.
+4. **Audit quarterly** — run `grep -rn 'uses:' .github/workflows/ | grep -v '@v'` to find unpinned refs.
+
+### Approved Action Inventory (v36.5.0)
+
+| Action | Pinned Version | Notes |
+|--------|---------------|-------|
+| `actions/checkout` | `@v4` | Official |
+| `actions/upload-artifact` | `@v4` | Official |
+| `actions/download-artifact` | `@v4` | Official |
+| `actions/cache` | `@v4` | Official |
+| `actions/setup-python` | `@v5` | Official |
+| `actions/setup-node` | `@v4` | Official |
+| `actions/github-script` | `@v7` | Official |
+| `github/codeql-action/*` | `@v4` | GitHub Security |
+| `ilammy/msvc-dev-cmd` | `@v1` | MSVC environment setup |
+| `lukka/get-cmake` | `@v4.3.1` | CMake/Ninja provisioning |
+| `softprops/action-gh-release` | `@v2` | Release asset publishing |
+| `dorny/test-reporter` | `@v1` | Test result rendering |
+| `EndBug/label-sync` | `@v2` | Label catalog sync |
+
+---
+
+## Node.js Runtime Migration Policy
+
+GitHub Actions is migrating from Node.js 16 → 20 → 24. Actions using deprecated
+Node.js versions emit warnings and will eventually fail.
+
+### Rules
+
+1. **All new actions must target Node.js 20+** (the current GitHub-supported minimum).
+2. **Set `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`** in the workflow `env:` block when
+   testing Node 24 readiness (opt-in during transition period).
+3. **Monitor CI logs for `Node.js 16 actions are deprecated` warnings** — these indicate
+   actions that need upgrading.
+4. **When upgrading an action version specifically for Node.js compatibility**, note it in
+   the commit message: `ci: upgrade X to vN for Node 24 compat`.
+
+```yaml
+# Opt-in to Node 24 for early detection of incompatibilities
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+```
+
+---
+
+## Permissions-First Workflow Authoring
+
+### Rules
+
+1. **Every workflow file MUST have a top-level `permissions:` block** — never rely on
+   the repository default (which is `write-all` for classic tokens).
+2. **Start with `contents: read`** and add only what the workflow actually needs.
+3. **Document why each permission is needed** with an inline comment:
+   ```yaml
+   permissions:
+     contents: write    # create GitHub Release, push tags
+     actions: read      # download workflow artifacts
+     issues: write      # open issue on failure
+     id-token: write    # OIDC for package publishing
+   ```
+4. **Job-level permissions override workflow-level** — use job-level when different
+   jobs in the same workflow need different scopes.
+5. **Never use `permissions: write-all`** — it's the permissions equivalent of `chmod 777`.
+
+### Common Permission Patterns
+
+| Workflow Type | Minimum Permissions |
+|-------------- |-------------------- |
+| Build + test (read-only) | `contents: read` |
+| Release (create GH Release) | `contents: write`, `actions: read` |
+| Package publish (OIDC) | `contents: read`, `packages: write`, `id-token: write` |
+| Issue/PR automation | `contents: read`, `issues: write` or `pull-requests: write` |
+| CodeQL scanning | `contents: read`, `security-events: write` |
+| Pages deployment | `contents: read`, `pages: write`, `id-token: write` |
+
+---
+
+## Reusable Workflow Patterns
+
+### When to Extract a Reusable Workflow
+
+Extract a called workflow (`.github/workflows/reusable-*.yml`) when:
+1. Two or more workflows share the same job definition with minor parameter differences.
+2. The shared logic is ≥20 lines and changes together.
+3. The extracted workflow has a clear input/output contract.
+
+### Naming Convention
+
+```
+.github/workflows/reusable-<purpose>.yml   # Called workflow
+.github/workflows/<trigger>-<purpose>.yml  # Caller workflow
+```
+
+### Input Contract
+
+```yaml
+on:
+  workflow_call:
+    inputs:
+      configuration:
+        type: string
+        required: true
+        default: Release
+      run-tests:
+        type: boolean
+        required: false
+        default: true
+    secrets:
+      DEPLOY_TOKEN:
+        required: false
+```
+
+### Rules
+
+1. **Reusable workflows must set their own `permissions:`** — caller permissions don't propagate.
+2. **Use `workflow_call` trigger only** — reusable workflows must not also trigger on `push`/`pull_request`.
+3. **Prefer `inputs` over `env` variables** for parameterization — inputs are typed and documented.
+
+---
+
+## Concurrency and Cancellation
+
+### Rules
+
+1. **PR workflows should cancel in-progress runs** when a new commit is pushed:
+   ```yaml
+   concurrency:
+     group: ${{ github.workflow }}-${{ github.ref }}
+     cancel-in-progress: true
+   ```
+2. **Release workflows must NOT cancel** — a partially cancelled release leaves broken artifacts:
+   ```yaml
+   concurrency:
+     group: release-${{ github.ref_name }}
+     cancel-in-progress: false
+   ```
+3. **Scheduled workflows** should use `cancel-in-progress: false` to avoid skipping runs.
