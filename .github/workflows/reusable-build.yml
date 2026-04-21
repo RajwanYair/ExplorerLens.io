@@ -1,0 +1,144 @@
+# reusable-build.yml — Reusable Engine build + test workflow
+# Copyright (c) 2026 ExplorerLens Project
+#
+# Callers use `workflow_call` to invoke this with parameters.
+# Centralizes the MSVC/CMake/CTest pattern so consumers stay DRY.
+#
+# Usage from another workflow:
+#   jobs:
+#     build:
+#       uses: ./.github/workflows/reusable-build.yml
+#       with:
+#         build-type: Release
+#         run-tests: true
+
+name: Reusable Engine Build
+
+on:
+  workflow_call:
+    inputs:
+      build-type:
+        description: 'CMake build type (Release or Debug)'
+        required: false
+        default: 'Release'
+        type: string
+      run-tests:
+        description: 'Run CTest after build'
+        required: false
+        default: true
+        type: boolean
+      cmake-preset:
+        description: 'CMake configure preset name'
+        required: false
+        default: 'ci-release'
+        type: string
+      upload-artifacts:
+        description: 'Upload build artifacts'
+        required: false
+        default: true
+        type: boolean
+      artifact-retention-days:
+        description: 'Days to retain uploaded artifacts'
+        required: false
+        default: 14
+        type: number
+      timeout-minutes:
+        description: 'Job timeout in minutes'
+        required: false
+        default: 90
+        type: number
+
+permissions:
+  contents: read
+
+env:
+  VCPKG_DISABLE_METRICS: 1
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  engine-build:
+    name: Engine ${{ inputs.build-type }}
+    runs-on: windows-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    env:
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: "*"
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      # ── Cache external/ to speed up builds ────────────────────
+      - name: Cache external libraries
+        uses: actions/cache@v4
+        with:
+          path: external/
+          key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
+          restore-keys: |
+            external-libs-
+
+      # ── Setup MSVC developer command prompt ───────────────────
+      # No toolset pin: auto-selects latest VS on runner (currently v143/VS2022).
+      - name: Setup MSVC (latest available)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      # ── Build external libraries from source (cache miss) ─────
+      - name: Build external libraries
+        uses: ./.github/actions/build-external-libs
+
+      # ── Ensure Ninja is on PATH ───────────────────────────────
+      - name: Verify build tools
+        shell: pwsh
+        run: |
+          $ninja = Get-Command ninja -ErrorAction SilentlyContinue
+          if (-not $ninja) {
+            Write-Host "Ninja not on PATH — installing via choco" -ForegroundColor Yellow
+            choco install ninja --no-progress -y 2>$null
+          }
+          cl.exe 2>&1 | Select-Object -First 1
+          cmake --version | Select-Object -First 1
+          ninja --version
+
+      # ── CMake configure + build ───────────────────────────────
+      - name: Configure
+        shell: pwsh
+        run: cmake --preset ${{ inputs.cmake-preset }}
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build --preset ${{ inputs.cmake-preset }} -j $env:NUMBER_OF_PROCESSORS
+
+      # ── Run tests ─────────────────────────────────────────────
+      - name: Run tests (CTest)
+        if: inputs.run-tests
+        shell: pwsh
+        run: ctest --test-dir build -C ${{ inputs.build-type }} --output-on-failure -j 4
+
+      # ── Upload test results ───────────────────────────────────
+      - name: Upload test results
+        if: always() && inputs.run-tests
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ inputs.build-type }}
+          path: |
+            build/Testing/**/*.xml
+            build-logs/test-*.log
+          retention-days: ${{ inputs.artifact-retention-days }}
+
+      # ── Upload build artifacts ────────────────────────────────
+      - name: Upload build artifacts
+        if: success() && inputs.upload-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine-${{ inputs.build-type }}
+          path: |
+            build/bin/*.exe
+            build/lib/*.lib
+          retention-days: ${{ inputs.artifact-retention-days }}
