@@ -214,6 +214,63 @@ All architecture/workflow diagrams live in `docs/assets/` as SVG files.
 5. **Accessibility** — diagrams must not rely solely on color to convey information. Add labels or patterns.
 6. **Size** — keep SVGs under 50 KB; optimize with SVGO if needed.
 
+### SVG Creation Workflow
+
+When creating a new architecture or workflow SVG:
+
+1. **Use the ExplorerLens SVG template** — start from an existing `docs/assets/*.svg` file for consistent styling.
+2. **Viewport** — set `viewBox="0 0 1200 800"` (landscape) or `viewBox="0 0 800 1200"` (portrait). Never use fixed `width`/`height` in pixels.
+3. **Font sizing** — titles: 24px bold, section headers: 18px bold, body text: 14px regular, badges/chips: 12px.
+4. **Rounded rectangles** — use `rx="8"` for container boxes, `rx="12"` for badges/chips.
+5. **Arrow style** — use `stroke-width="2"` with `marker-end` arrowheads, color `#6B7280` for flow lines.
+6. **Background** — transparent or `#FFFFFF`; never use dark backgrounds (dark mode is handled by GitHub/MkDocs CSS).
+7. **Validation** — run `docs-validation.yml` SVG job; it checks for `<script>` tags, non-UTF8 encoding, and size limits.
+8. **Naming** — lowercase-kebab-case: `gpu-pipeline.svg`, `plugin-lifecycle.svg`.
+
+### SVG Version Patching
+
+Two SVGs are patched by `Bump-Version.ps1`:
+
+| SVG | Patched Elements |
+|-----|-----------------|
+| `social-preview.svg` | Version chip, codename label, build/test stats |
+| `architecture-build.svg` | MSI filename chip (`ExplorerLens-X.Y.Z-x64.msi`), version label |
+
+Other SVGs are **not** auto-patched — if they contain version strings, add them to the
+`Bump-Version.ps1` registry (see `version-bump.instructions.md`).
+
+---
+
+## MkDocs Validation & CI
+
+### Local Validation
+
+```powershell
+# Install MkDocs + Material theme
+pip install mkdocs-material
+
+# Build with strict mode — fails on broken links, missing nav entries
+mkdocs build --strict
+
+# Preview locally
+mkdocs serve
+```
+
+### CI Integration
+
+The `docs-validation.yml` workflow runs on every PR that touches `docs/**` or `**/*.md`:
+
+1. **Link validation** — `mkdocs build --strict` catches broken internal links.
+2. **SVG validation** — checks for `<script>` injection, file size limits, UTF-8 encoding.
+3. **Markdownlint** — enforces `.markdownlint.json` rules (heading style, list indent, line length).
+
+### Nav Synchronization Rules
+
+1. **Every new `docs/*.md` file** must be added to `mkdocs.yml` `nav:` within the same PR.
+2. **Deleted files** must be removed from `nav:` — orphan nav entries break `--strict` mode.
+3. **Subdirectory index files** — use `index.md` inside each `docs/` subdirectory for section landing pages.
+4. **nav order** — follow the tier hierarchy: user-facing first, developer second, architecture third.
+
 ---
 
 ## Documentation Review Checklist
