@@ -22,7 +22,6 @@ add_executable(EngineTests
     PluginReferencePackTests.cpp
     JPEG2000DecoderTests.cpp
     CADFormatDecoderTests.cpp
-    GLTFModelDecoderTests.cpp
     ScientificDecoderTests.cpp
     FallbackEngineTests.cpp
     ArchiveMemoryTests.cpp

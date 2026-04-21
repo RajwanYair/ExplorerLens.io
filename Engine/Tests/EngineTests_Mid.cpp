@@ -2782,28 +2782,6 @@ TEST(TestSnappy_CanDecode)
     ASSERT(dec.CanDecode(L".snappy"));
 }
 
-// PLYPointCloudDecoder
-TEST(TestPLY_CanDecode)
-{
-    PLYPointCloudDecoder dec;
-    ASSERT(dec.CanDecode(L".ply"));
-    ASSERT(!dec.CanDecode(L".obj"));
-}
-
-// OBJMeshDecoder
-TEST(TestOBJ_CanDecode)
-{
-    OBJMeshDecoder dec;
-    ASSERT(dec.CanDecode(L".obj"));
-}
-
-// STLMeshDecoder
-TEST(TestSTL_CanDecode)
-{
-    STLMeshDecoder dec;
-    ASSERT(dec.CanDecode(L".stl"));
-}
-
 // COLLADADecoder
 TEST(TestCOLLADA_CanDecode)
 {

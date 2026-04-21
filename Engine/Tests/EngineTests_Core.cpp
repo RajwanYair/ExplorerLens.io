@@ -5965,38 +5965,6 @@ TEST(Test_CADFormat_Detection)
     ASSERT(CADFormatDecoder::FormatName(CADFormat::IGES) != nullptr);
 }
 
-TEST(Test_GLTFModelDecoder_Parse)
-{
-    using namespace ExplorerLens::Decoders;
-    GLTFModelDecoder decoder;
-    auto exts = GLTFModelDecoder::SupportedExtensions();
-    ASSERT(exts.size() == 2);
-    ASSERT(exts[0] == ".gltf");
-    ASSERT(exts[1] == ".glb");
-    ASSERT(GLTFModelDecoder::DetectVariant(".glb") == GLTFVariant::GLB);
-    ASSERT(GLTFModelDecoder::DetectVariant(".gltf") == GLTFVariant::GLTF);
-    // Decode with null data should return error
-    auto result = decoder.Decode(nullptr, 0, 256, 256);
-    ASSERT(!result.success);
-}
-
-TEST(Test_STLMeshDecoder_Binary)
-{
-    STLMeshDecoder decoder;
-    ASSERT(decoder.GetName() != nullptr);
-    ASSERT(decoder.CanDecode(L".stl"));
-    ASSERT(!decoder.CanDecode(L".obj"));
-    // Test ASCII detection
-    const char asciiStl[] = "solid TestCube\nfacet normal 0 0 1\n";
-    ASSERT(decoder.IsASCII(reinterpret_cast<const uint8_t*>(asciiStl), strlen(asciiStl)));
-    // Binary detection (doesn't start with "solid ")
-    uint8_t binData[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
-    ASSERT(!decoder.IsASCII(binData, sizeof(binData)));
-    // Parse binary with insufficient data returns empty info
-    auto info = decoder.ParseBinary(nullptr, 0);
-    ASSERT(info.triangleCount == 0);
-}
-
 //==============================================================================
 // GPU Subsystem Tests (Sprint 27)
 //==============================================================================

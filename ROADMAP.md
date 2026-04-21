@@ -961,7 +961,7 @@ invalidation. We adopt the same pattern:
 - [x] Document Catch2 migration decision in ADR-010 *(v36.3.0)*
 - [ ] Shared tooling architecture (§11): audit configs, consolidate at MyScripts\, establish inheritance
 - [x] GitHub AI surface overhaul (§10): 13 instructions, 4 agents, 11 prompts, 6 skills, MCP config *(v36.1.0–v36.3.0)*
-- [ ] Delete dead headers (6 superseded stubs identified — removal blocked by test #include refs)
+- [x] Delete dead headers: 6 superseded stubs + GLTFModelDecoderTests.cpp removed *(v36.4.0)*
 - [x] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` → `docs/archive/` *(v36.1.0)*
 
 **Core product:**

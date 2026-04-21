@@ -9,7 +9,6 @@
 #include <Psapi.h>
 #include <Windows.h>
 #include "../Decoders/AVIFDecoder.h"
-#include "../Decoders/EPUBDecoder.h"
 #include "../Decoders/HEIFDecoder.h"
 #include "../Decoders/JPEGDecoder.h"
 #include "../Decoders/JXLDecoder.h"
@@ -384,29 +383,6 @@ static void BM_DecodeSVG_Complex(benchmark::State& state)
     }
 }
 BENCHMARK(BM_DecodeSVG_Complex)->Unit(benchmark::kMillisecond)->Repetitions(20)->ReportAggregatesOnly(true);
-
-//============================================================================
-// EPUB Decoder Benchmarks
-//============================================================================
-
-static void BM_DecodeEPUB(benchmark::State& state)
-{
-    std::wstring path = std::wstring(TEST_DATA_DIR) + L"epub\\sample.epub";
-
-    DecoderContext ctx;
-    ctx.targetWidth = 256;
-    ctx.targetHeight = 256;
-    ctx.preserveAspect = true;
-
-    EPUBDecoder decoder;
-
-    for (auto _ : state) {
-        HBITMAP hBitmap = decoder.Decode(path.c_str(), ctx);
-        if (hBitmap)
-            DeleteObject(hBitmap);
-    }
-}
-BENCHMARK(BM_DecodeEPUB)->Unit(benchmark::kMillisecond)->Repetitions(20)->ReportAggregatesOnly(true);
 
 //============================================================================
 // Archive Performance Benchmarks

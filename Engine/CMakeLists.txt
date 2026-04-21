@@ -468,14 +468,12 @@ set(ENGINE_HEADERS
     Decoders/EBookCoverExtractor.h
     Decoders/EBookDecoder.h
     Decoders/EPSDecoder.h
-    Decoders/EPUBDecoder.h
     Decoders/ExtendedVideoDecoder.h
     Decoders/EXRDecoder.h
     Decoders/FarbfeldDecoder.h
     Decoders/FITSDecoderV2.h
     Decoders/FontDecoder.h
     Decoders/GeospatialDecoder.h
-    Decoders/GLTFModelDecoder.h
     Decoders/HDRDecoder.h
     Decoders/HEIFDecoder.h
     Decoders/ICODecoder.h
@@ -869,9 +867,6 @@ set(ENGINE_HEADERS
     Decoders/XZStreamDecoder.h
     Decoders/SnappyFrameDecoder.h
     # Batch 4: 3D & CAD (609-613)
-    Decoders/PLYPointCloudDecoder.h
-    Decoders/OBJMeshDecoder.h
-    Decoders/STLMeshDecoder.h
     Decoders/COLLADADecoder.h
     Decoders/FBXInspector.h
     # Batch 5: Media Enhancement (614-618)
@@ -1330,7 +1325,6 @@ set(ENGINE_HEADERS
     Decoders/JXLAnimationDecoder.h
     Decoders/PSDLayerDecoder.h
     Decoders/SVGRasterizer.h
-    Decoders/TIFFMultiPageDecoder.h
     Decoders/WebPAnimationDecoder.h
     # Sprint 291-300 (v21.1.0 "Rigel-R") — Advanced GPU Compute v2
     GPU/D3D11DPIAdapter.h

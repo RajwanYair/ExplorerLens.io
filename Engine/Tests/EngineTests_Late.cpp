@@ -5565,13 +5565,6 @@ TEST(TestSVGRasterizer_LooksLikeSVG_RejectsEmpty)
     ASSERT(!SVGRasterizer::LooksLikeSVG(garbage, sizeof(garbage)));
 }
 
-TEST(TestTIFFMultiPageDecoder_LooksLikeTIFF_RejectsGarbage)
-{
-    using namespace ExplorerLens::Engine;
-    uint8_t garbage[4] = {0x00, 0x00, 0x00, 0x00};
-    ASSERT(!TIFFMultiPageDecoder::LooksLikeTIFF(garbage, sizeof(garbage)));
-}
-
 TEST(TestWebPAnimationDecoder_LooksLikeAnimatedWebP_RejectsGarbage)
 {
     using namespace ExplorerLens::Engine;
