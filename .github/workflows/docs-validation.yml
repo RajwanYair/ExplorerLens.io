@@ -8,11 +8,13 @@ on:
     paths:
       - "docs/**"
       - "docs/mkdocs.yml"
+      - "**.svg"
   push:
     branches: [main]
     paths:
       - "docs/**"
       - "docs/mkdocs.yml"
+      - "**.svg"
   workflow_dispatch:
 
 permissions:
@@ -42,3 +44,56 @@ jobs:
 
       - name: Build docs (strict mode)
         run: mkdocs build --strict --config-file docs/mkdocs.yml
+
+  svg-validation:
+    name: SVG Well-Formedness
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SVG files are well-formed XML
+        shell: bash
+        run: |
+          echo "Scanning for SVG files..."
+          SVG_FILES=$(find docs/ -name '*.svg' -type f 2>/dev/null)
+          if [ -z "$SVG_FILES" ]; then
+            echo "No SVG files found — skipping"
+            exit 0
+          fi
+          ERRORS=0
+          COUNT=0
+          for svg in $SVG_FILES; do
+            COUNT=$((COUNT + 1))
+            if ! xmllint --noout "$svg" 2>/tmp/svg-err.txt; then
+              echo "::error file=$svg::Malformed SVG — $(cat /tmp/svg-err.txt)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          echo "Checked $COUNT SVG files, $ERRORS errors"
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS SVG file(s) have XML well-formedness errors"
+            exit 1
+          fi
+          echo "✓ All $COUNT SVG files are well-formed"
+
+      - name: Check SVG accessibility (title + desc)
+        shell: bash
+        run: |
+          SVG_FILES=$(find docs/ -name '*.svg' -type f 2>/dev/null)
+          WARNINGS=0
+          for svg in $SVG_FILES; do
+            if ! grep -q '<title>' "$svg"; then
+              echo "::warning file=$svg::Missing <title> element — add for accessibility"
+              WARNINGS=$((WARNINGS + 1))
+            fi
+            if ! grep -q '<desc>' "$svg"; then
+              echo "::warning file=$svg::Missing <desc> element — add for accessibility"
+              WARNINGS=$((WARNINGS + 1))
+            fi
+          done
+          if [ "$WARNINGS" -gt 0 ]; then
+            echo "::notice::$WARNINGS accessibility warning(s) — consider adding <title> and <desc>"
+          else
+            echo "✓ All SVGs have <title> and <desc> elements"
+          fi
