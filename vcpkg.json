@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "explorerlens",
-  "version": "36.4.0",
+  "version": "36.5.0",
   "description": "ExplorerLens - GPU-Accelerated Thumbnail Provider for Windows Shell (200+ formats)",
   "homepage": "https://github.com/yourusername/ExplorerLens",
   "license": "MIT",
