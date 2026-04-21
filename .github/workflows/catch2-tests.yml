@@ -49,7 +49,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install CMake + Ninja
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@v4.3.1
 
       - name: Restore external library cache
         uses: actions/cache@v4

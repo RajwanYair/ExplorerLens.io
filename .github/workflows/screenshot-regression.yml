@@ -73,7 +73,7 @@ jobs:
         # No toolset pin — use whatever VS version the CI runner provides.
 
       - name: Install CMake + Ninja
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@v4.3.1
 
       # ── Restore corpus cache ─────────────────────────────────────────────
 
