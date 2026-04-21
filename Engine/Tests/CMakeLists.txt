@@ -326,10 +326,10 @@ endif()
 # =============================================================================
 # Catch2 Tests (Sprint 46 — DecoderUnit + FormatDetection + CacheSubsystem)
 # =============================================================================
-# Enable with: cmake -DBUILD_CATCH2_TESTS=ON (default OFF to keep CI fast)
+# Enable with: cmake -DBUILD_CATCH2_TESTS=ON (default ON per ROADMAP R2)
 # The Catch2 executable is named EngineCatch2Tests and runs via ctest -L catch2
 
-option(BUILD_CATCH2_TESTS "Build Catch2-based unit tests (requires Catch2 v3)" OFF)
+option(BUILD_CATCH2_TESTS "Build Catch2-based unit tests (requires Catch2 v3)" ON)
 
 if(BUILD_CATCH2_TESTS)
     include(FetchContent)
@@ -349,6 +349,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/PerceptualHashTests.cpp
         Catch2Tests/StreamingDecoderTests.cpp
         Catch2Tests/FormatStatusTests.cpp
+        Catch2Tests/CorpusValidationTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
@@ -370,6 +371,11 @@ if(BUILD_CATCH2_TESTS)
         )
         target_link_libraries(EngineCatch2Tests PRIVATE shlwapi)
     endif()
+
+    # Pass corpus root path so CorpusValidationTests can find test files
+    target_compile_definitions(EngineCatch2Tests PRIVATE
+        CORPUS_ROOT="${CMAKE_SOURCE_DIR}/data/corpus"
+    )
 
     if(MSVC)
         target_compile_options(EngineCatch2Tests PRIVATE /W4 /bigobj)
