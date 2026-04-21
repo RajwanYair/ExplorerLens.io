@@ -1,7 +1,7 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** March 2026
-**Version:** 36.6.0 (Codename: Antares)
+**Version:** 36.7.0 (Codename: Antares)
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---

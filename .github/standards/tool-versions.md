@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 21 April 2026 (v36.6.0 Antares release)
-**Version:** 36.6.0 "Antares"
+**Last Updated:** 21 April 2026 (v36.7.0 Antares release)
+**Version:** 36.7.0 "Antares"
 
 ---
 
