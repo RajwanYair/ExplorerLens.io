@@ -5,6 +5,12 @@
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/powershell:1": {
       "version": "latest"
+    },
+    "ghcr.io/aspect-build/toolchains-features/cmake:1": {
+      "version": "latest"
+    },
+    "ghcr.io/aspect-build/toolchains-features/ninja:1": {
+      "version": "latest"
     }
   },
   "runArgs": ["--isolation=process"],
@@ -28,7 +34,7 @@
     }
   },
   "onCreateCommand": "pwsh -NoProfile -File .devcontainer/setup.ps1",
-  "postCreateCommand": "pwsh -NoProfile -Command \"Write-Host 'ExplorerLens dev container ready. Run: .\\build-scripts\\Build-MSVC.ps1' -ForegroundColor Green\"",
+  "postCreateCommand": "pwsh -NoProfile -Command \"Write-Host 'ExplorerLens dev container ready.' -ForegroundColor Green; Write-Host 'Build:  .\\build-scripts\\Build-MSVC.ps1' -ForegroundColor Cyan; Write-Host 'Test:   ctest --test-dir build -C Release --output-on-failure' -ForegroundColor Cyan; if (Test-Path '.githooks/pre-commit') { git config core.hooksPath .githooks; Write-Host 'Git hooks: .githooks/ configured' -ForegroundColor Green }\"",
   "remoteUser": "ContainerUser",
   "_comment": [
     "ExplorerLens requires Windows containers (COM, WinRT, DirectX).",
@@ -36,8 +42,9 @@
     "Local: Docker Desktop must be in Windows container mode.",
     "Prerequisites installed by setup.ps1:",
     "  - Visual Studio 2022 BuildTools (MSVC v143) via winget",
-    "  - CMake, Ninja, NASM, 7zip via Scoop",
+    "  - CMake, Ninja, NASM, 7zip via Scoop (features provide cmake+ninja as fallback)",
     "  - Windows SDK 10.0.26100",
-    "Note: MSVC v145 (VS 2026) is NOT available in containers yet — v143 is used for CI."
+    "Note: MSVC v145 (VS 2026) is NOT available in containers yet — v143 is used for CI.",
+    "Post-create: configures .githooks/ if present, prints build commands."
   ]
 }
