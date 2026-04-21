@@ -72,13 +72,13 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 
 **Project Organization:**
 
-- [Project Structure](docs/architecture/PROJECT_STRUCTURE.md) — Complete directory organization
 - [System Overview](docs/architecture/system-overview.md) — Architecture diagrams + cache layers
-- [Documentation Index](docs/INDEX.md) — Complete documentation index
+- [Decode Pipeline](docs/architecture/decode-pipeline.md) — File → detect → route → decode → thumbnail
+- [Decoder Status](docs/formats/DECODER_IMPLEMENTATION_STATUS.md) — All 20 priority formats verified
 
 **Development:**
 
-- [Development Guide](docs/development/README.md) — Developer documentation
+- [Developer Guide](docs/development/DEVELOPER_GUIDE.md) — Developer documentation
 - [Contributing](.github/CONTRIBUTING.md) — How to contribute
 - [Coding Standards](.github/standards/coding-standards.md) — Code style and conventions
 - [Build Scripts](build-scripts/README.md) — Build automation reference
@@ -160,10 +160,12 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 
 ### Build
 
-```cmd
-REM Open "x64 Native Tools Command Prompt for VS 2026"
-cd ExplorerLens
-RUN-BUILD.bat
+```powershell
+# Canonical build command (sources vcvars64 automatically)
+.\build-scripts\Build-MSVC.ps1
+
+# Clean build + tests
+.\build-scripts\Build-MSVC.ps1 -Clean -Test
 ```
 
 See [Build Quick Reference](docs/development/BUILD_QUICK_REFERENCE.md) for detailed instructions.
@@ -202,7 +204,7 @@ Run `LENSManager.exe` to enable/disable file format categories.
   <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-build.svg" alt="ExplorerLens Build Pipeline" width="960"/>
 </p>
 
-**GPU Render Priority:** `D3D11 → D3D12 → Vulkan Compute → GDI+ (software)`
+**GPU Render Pipeline:** `GDI+ (current) → D3D11 compute (Phase 2) → D3D12/Vulkan (Phase 3+)`
 
 **COM interfaces implemented:** `IThumbnailProvider`, `IInitializeWithStream`, `IPropertyStore`,
 `IPropertyStoreCapabilities`, `IExtractImage2`, `IPersistFile`, `IQueryInfo`
