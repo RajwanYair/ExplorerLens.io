@@ -69,21 +69,15 @@ updates:
           - "*"
 
   # ============================================================================
-  # VCPKG (C++ package manager manifest)
+  # DOCKER (Dockerfile base image updates)
   # ============================================================================
-  # Dependabot doesn't have a native vcpkg ecosystem; we use the 'bundler'
-  # workaround to monitor vcpkg.json version field.  The real driver for vcpkg
-  # updates is the Bump-Version.ps1 script which stamps vcpkg.json on every
-  # release.  This entry exists to surface GitHub Security advisories for the
-  # vcpkg baseline and any transient C++ library CVEs picked up by Dependabot.
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "monthly"
     labels:
       - "dependencies"
-      - "vcpkg"
-      - "c++"
+      - "docker"
     commit-message:
-      prefix: "chore(vcpkg)"
+      prefix: "chore(docker)"
     open-pull-requests-limit: 2
