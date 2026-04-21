@@ -1,0 +1,44 @@
+# docs-validation.yml — Validate MkDocs navigation integrity
+# Runs mkdocs build --strict to catch broken nav references before merge.
+name: Docs Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "docs/mkdocs.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "docs/mkdocs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  mkdocs-strict:
+    name: MkDocs Strict Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MkDocs + Material
+        run: pip install mkdocs-material pymdown-extensions
+
+      - name: Build docs (strict mode)
+        run: mkdocs build --strict --config-file docs/mkdocs.yml
