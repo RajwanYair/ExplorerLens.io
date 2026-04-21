@@ -204,6 +204,20 @@ Run `LENSManager.exe` to enable/disable file format categories.
   <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-build.svg" alt="ExplorerLens Build Pipeline" width="960"/>
 </p>
 
+### Decode Pipeline
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/decode-pipeline.svg" alt="ExplorerLens Decode Pipeline" width="720"/>
+</p>
+
+### CI/CD Pipeline
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/ci-cd-pipeline.svg" alt="ExplorerLens CI/CD Pipeline" width="960"/>
+</p>
+
+> See all 13 architecture SVGs in [`docs/architecture/`](docs/architecture/README.md)
+
 **GPU Render Pipeline:** `GDI+ (current) → D3D11 compute (Phase 2) → D3D12/Vulkan (Phase 3+)`
 
 **COM interfaces implemented:** `IThumbnailProvider`, `IInitializeWithStream`, `IPropertyStore`,
