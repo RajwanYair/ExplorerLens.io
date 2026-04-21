@@ -1,4 +1,4 @@
-﻿# CI Toolchain Upgrade — v23.6.0 "Vega-W"
+﻿# CI Toolchain Verify — v36.2.0 "Antares"
 # Ensures all CI jobs use the latest available MSVC toolset.
 # On GitHub-hosted windows-latest: MSVC v143 (VS 2022)
 # On local dev: MSVC v145 (VS 18 2026) via Build-MSVC.ps1

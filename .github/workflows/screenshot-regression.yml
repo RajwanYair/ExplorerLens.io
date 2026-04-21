@@ -35,7 +35,8 @@ on:
         description: "Hamming distance threshold (default 6)"
         required: false
         default: "6"
-
+permissions:
+  contents: read
 concurrency:
   group: screenshot-regression-${{ github.ref }}
   cancel-in-progress: true

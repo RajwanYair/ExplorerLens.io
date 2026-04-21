@@ -1,5 +1,5 @@
 # ci-matrix.yml — Canonical CI Pipeline (push/PR) for ExplorerLens Engine
-# ExplorerLens v36.1.0 "Antares"
+# ExplorerLens v36.2.0 "Antares"
 # Builds x64 Debug/Release Engine library; LENSShell.dll via MSBuild; runs CTest.
 # Coverage → coverage.yml  |  Static analysis → code-quality.yml
 # NOTE: build.yml is for manual/scheduled builds only.
@@ -12,6 +12,9 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}

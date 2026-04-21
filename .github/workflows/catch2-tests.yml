@@ -16,6 +16,9 @@ on:
       - "Engine/**"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: catch2-${{ github.ref }}
   cancel-in-progress: true

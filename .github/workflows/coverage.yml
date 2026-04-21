@@ -1,6 +1,6 @@
 ﻿name: Code Coverage
 
-# v36.1.0 "Antares": Measures Engine/Core + Engine/Decoders
+# v36.2.0 "Antares": Measures Engine/Core + Engine/Decoders
 # coverage via OpenCppCoverage (Windows) / gcov-llvm (Linux). Enforces a
 # minimum floor of 60% for each subsystem. Coverage report is uploaded as
 # a CI artifact and the badge in README.md is updated on main.
@@ -18,6 +18,9 @@ on:
       - "Engine/**"
       - "Engine/Tests/**"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: coverage-${{ github.ref }}
