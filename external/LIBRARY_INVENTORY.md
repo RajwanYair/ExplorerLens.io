@@ -1,7 +1,7 @@
 ﻿# External Library Inventory
 
-**Last Updated:** March 8, 2026  
-**Project Version:** 15.0.0 "Zenith"  
+**Last Updated:** April 21, 2026  
+**Project Version:** 36.1.0 "Antares"  
 **CRT Linkage:** All libraries must use `/MD` (`MultiThreadedDLL`).  
 **Build Toolset:** MSVC v145 (cl.exe 19.50.35720) — Visual Studio 18 (2026) BuildTools
 
