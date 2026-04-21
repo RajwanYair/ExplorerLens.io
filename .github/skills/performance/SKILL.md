@@ -176,3 +176,72 @@ Target: 1.5-2× speedup for JPEG/PNG compared to CPU path. Measure SSIM ≥ 0.99
 - [ ] CI perf gate passing (no >10% P95 regression)
 - [ ] Benchmark properly uses `DoNotOptimize` to prevent dead-code elimination
 - [ ] GPU path (if added) shows measurable speedup with SSIM ≥ 0.99
+
+---
+
+## Compile-Time Profiling (`/d1reportTime`)
+
+Use MSVC's `/d1reportTime` flag to identify slow-to-compile headers and template instantiations.
+This is critical for a 500+ header codebase where compile time directly affects developer productivity.
+
+### Quick Profile a Single TU
+
+```powershell
+# Source vcvars and compile one file with timing report
+& "$env:VSINSTALLDIR\VC\Auxiliary\Build\vcvars64.bat"
+cl.exe /c /EHsc /std:c++20 /O2 /d1reportTime Engine/Core/DecodePipeline.cpp 2>&1 |
+    Select-String "time\(" | Sort-Object { [double]($_ -replace '.*time\(([0-9.]+).*','$1') } -Descending |
+    Select-Object -First 20
+```
+
+### Profile the Entire Engine Build
+
+```powershell
+# CMake with /d1reportTime injected via CMAKE_CXX_FLAGS
+cmake --preset default-release -DCMAKE_CXX_FLAGS="/d1reportTime"
+cmake --build build --config Release 2>&1 | Tee-Object -FilePath build-logs/compile-time-report.txt
+
+# Parse slowest includes
+Select-String "time\(" build-logs/compile-time-report.txt |
+    Sort-Object { [double]($_ -replace '.*time\(([0-9.]+).*','$1') } -Descending |
+    Select-Object -First 30 | Format-Table
+```
+
+### What to Look For
+
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Single header > 500ms | Investigate | May need PCH inclusion or forward declarations |
+| Template instantiation > 200ms | Investigate | Consider explicit instantiation or PIMPL |
+| PCH generation > 5s | Monitor | Normal for large PCH; split if > 15s |
+| Full rebuild > 120s | Investigate | Check for unnecessary transitive includes |
+
+### Common Fixes for Slow Compile Times
+
+1. **Move heavy headers to PCH** — add to `Engine/pch.h` if included by >50% of TUs
+2. **Forward-declare instead of include** — `class Foo;` instead of `#include "Foo.h"` in headers
+3. **Explicit template instantiation** — instantiate in `.cpp` to avoid per-TU instantiation
+4. **`#pragma once` on all headers** — already enforced, but verify with:
+   ```powershell
+   Get-ChildItem Engine/**/*.h -Recurse | Where-Object {
+       -not (Get-Content $_.FullName -First 1 | Select-String '#pragma once')
+   }
+   ```
+5. **Include-what-you-use analysis** — remove unnecessary transitive includes
+
+### Tracking Over Time
+
+Store compile-time snapshots in `data/baselines/compile-times.json`:
+
+```json
+{
+  "_comment": "Compile-time profiling baseline — ExplorerLens v37.2.0",
+  "_updated": "2025-01-01T00:00:00Z",
+  "full_rebuild_seconds": 95,
+  "incremental_seconds": 12,
+  "slowest_headers": [
+    { "header": "Engine/pch.h", "time_ms": 3200 },
+    { "header": "Engine/Decoders/AllDecoders.h", "time_ms": 850 }
+  ]
+}
+```
