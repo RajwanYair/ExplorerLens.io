@@ -751,9 +751,10 @@ we stay leaner with native Win32.
 | `lens benchmark <directory>` | Batch decode with P50/P95/P99 output |
 | `lens cache stats` | Hit rate, size, eviction count |
 
-### 12.4 Web Frontend (index.html)
+### 12.4 Web Frontend (index.html) ✅
 
-Move to `docs/` for GitHub Pages. Keep it simple: a marketing page explaining what
+~~Move to `docs/` for GitHub Pages.~~ **Done (Sprint 33).** `index.html` relocated to `docs/`;
+Pages workflow updated to deploy from `docs/`. Keep it simple: a marketing page explaining what
 ExplorerLens does, with screenshots and download link. **Screenshots of actual generated
 thumbnails** are the most important marketing asset for a visual product.
 
