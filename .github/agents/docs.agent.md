@@ -1,7 +1,7 @@
 ---
 mode: agent
 name: Docs
-description: "ExplorerLens documentation accuracy agent — checks that docs reflect actual code, fixes broken links, right-sizes content tiers, and enforces the documentation standards from ROADMAP §8."
+description: "ExplorerLens documentation accuracy agent — checks that docs reflect actual code, fixes broken links, right-sizes content tiers, and enforces the documentation standards from .github/instructions/documentation.instructions.md."
 tools:
   - read_file
   - replace_string_in_file
@@ -17,6 +17,7 @@ context:
   - .github/standards/ai-tooling-capabilities.md
   - docs/mkdocs.yml
   - docs/USER_GUIDE.md
+  - ROADMAP.md
   - README.md
   - CHANGELOG.md
   - VERSION
@@ -85,9 +86,9 @@ Every markdown file belongs to one tier:
 
 ### 5. ROADMAP.md Maintenance
 
-- ROADMAP.md §15 (Phase Plan) checkboxes: mark `[x]` when features are confirmed working
-- ROADMAP.md §17 (Decision Log): append-only; never modify existing entries
-- ROADMAP.md supersedes `ROADMAP_V30.md`, `V34.md`, `V35.md` — those are in `docs/archive/`
+- ROADMAP.md §16 (Phase Plan) checkboxes: mark `[x]` when features are confirmed working
+- ROADMAP.md §18 (Decision Log): append-only; never modify existing entries
+- Old roadmap files (`ROADMAP_V30.md`, `V34.md`, `V35.md`) are archived in `docs/archive/` — do not reference or update them
 
 ## Output Format
 
