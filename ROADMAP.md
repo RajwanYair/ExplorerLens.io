@@ -1,8 +1,10 @@
-# ExplorerLens — Strategic Roadmap v2.0
+# ExplorerLens — Strategic Roadmap v3.0
 
-**Version:** 2.0 — Consolidated April 2026
-**Current Release:** v36.0.0 "Altair"
-**Purpose:** Complete decision rethink, competitive analysis, and consolidated execution plan
+**Version:** 3.0 — April 2026
+**Current Release:** v36.1.0 "Antares"
+**Supersedes:** ROADMAP v2.0, ROADMAP_V35 "Vega", ROADMAP_V34 "Arcturus", ROADMAP_V30 "Deneb"
+**Purpose:** Full decision rethink — architecture, language, libraries, APIs, infrastructure,
+testing, documentation, CI/CD, distribution, and competitive positioning.
 
 ---
 
@@ -22,9 +24,11 @@
 12. [Frontend — Shell, GUI & CLI](#12-frontend--shell-gui--cli)
 13. [Backend — Engine & Decode Pipeline](#13-backend--engine--decode-pipeline)
 14. [GPU, Cross-Platform & Advanced Features](#14-gpu-cross-platform--advanced-features)
-15. [Phase Plan — 6 Phases to Best-in-Class](#15-phase-plan)
-16. [Success Metrics](#16-success-metrics)
-17. [Decision Log](#17-decision-log)
+15. [Infrastructure & Operations](#15-infrastructure--operations)
+16. [Phase Plan — 6 Phases to Best-in-Class](#16-phase-plan)
+17. [Success Metrics](#17-success-metrics)
+18. [Decision Log](#18-decision-log)
+19. [Consolidated Legacy — What We Kept from V30-V35](#19-consolidated-legacy)
 
 ---
 
@@ -41,17 +45,24 @@ professional-grade CMake/Ninja build system, 20 CI/CD workflows, and a WiX MSI i
 - 18 high-quality external libraries (all current, all `/MD`, all statically linked)
 - 20 real CI/CD workflows (~3K lines, 29 jobs)
 - Zero-warnings build discipline
-- Comprehensive AI tooling surface (agents, instructions, prompts, skills, MCP servers)
+- Comprehensive AI tooling surface (4 agents, 13 instructions, 11 prompts, 6 skills, 3 MCP servers)
+- WiX MSI installer, Chocolatey, Scoop, WinGet manifests
+- CLI tool (`lens.exe`) with subcommands
+- REST thumbnail server skeleton (`LensServer`)
+- Dockerfile for headless container deployment
 
 ### What Needs Work (Honest Gaps)
 
-- **1,386 headers, 269 sources** (5.1:1 ratio — target < 2:1)
-- **~4,744 tests** in a custom framework — many test only construction/defaults
-- **No real test corpus** — decoders cannot be validated against real files
-- **No GPU shader code** despite architecture headers for D3D11/D3D12/Vulkan
+- **~1,386 headers, ~269 sources** (5.1:1 ratio — target < 2:1)
+- **~4,744 tests** in a custom framework — many test only construction/defaults, no parameterization
+- **No real test corpus** — decoders cannot be validated against real files in CI
+- **No GPU shader code in hot path** despite architecture headers for D3D11/D3D12/Vulkan
 - **130+ markdown files** — documentation outpaces working code
-- **Version inflation** to v36 in < 6 months of active development
 - **Cross-platform is stubs only** — macOS/Linux `#ifdef` guards, no real implementations
+- **LensServer** at thread-per-connection model, hardcoded version string (35.5.0)
+- **MuPDF AGPL license** — potential legal concern for commercial distribution
+- **Engine/Core/** has ~530 files — needs sub-organization
+- **Dead code** in `src/LensServer/`, `src/PluginHost/`, `src/Tools.PSModule/`, `Engine/Tests/FuzzTargets/`
 
 ### Strategic Direction
 
@@ -61,7 +72,7 @@ that works on any clean Windows 10/11 machine. Everything else waits.
 
 **Competitive differentiator:** No existing tool combines native Explorer integration
 (IThumbnailProvider), modern format support (AVIF/JXL/HEIC), GPU acceleration, and
-cross-platform reach. We fill this gap by executing on substance over vision.
+open-source MIT license. We fill this gap by executing on substance over vision.
 
 ---
 
@@ -69,58 +80,67 @@ cross-platform reach. We fill this gap by executing on substance over vision.
 
 ### 2.1 Competitor Comparison Table
 
-| Dimension | **ExplorerLens** (target) | **QuickLook (QL-Win)** | **SageThumbs** | **Windows Built-in** | **XnView MP** | **macOS Quick Look** | **IrfanView** |
-|-----------|--------------------------|------------------------|----------------|----------------------|---------------|----------------------|---------------|
-| **Type** | Shell extension (IThumbnailProvider) | Space-bar preview app | Shell extension (context menu + thumbnails) | WIC-based thumbnail handlers | Standalone viewer + shell integration | OS-native preview framework | Viewer + shell association |
-| **Language** | C++20 | C# (.NET WPF) | C++ (GFL library) | C++ (OS kernel) | C++/Qt | Objective-C (OS kernel) | C++ (custom) |
-| **Formats** | 200+ (target validated) | 100+ via plugins | 162 (224 extensions) | ~30 (JPEG/PNG/BMP/GIF/TIFF/WIC codecs) | 500+ | ~30 OS-native + plugins | 100+ |
-| **Modern formats (AVIF/JXL/HEIC)** | ✅ All three (linked libs) | Partial (via plugins) | ❌ None (abandoned 2017) | ❌ HEIC only via MS codec | ✅ All three | ✅ HEIC native; JXL/AVIF via 3rd party | Partial (plugins) |
-| **GPU acceleration** | Planned (D3D11 compute) | Hardware-accelerated WPF rendering | ❌ None | WIC + DXGI surface sharing | ❌ None | Metal-backed (OS) | ❌ None |
-| **Explorer integration** | Native thumbnails (IThumbnailProvider) | Separate preview window | Native thumbnails + context menu | Native thumbnails | Separate app | Native Finder previews + thumbnails | Separate app |
-| **Plugin system** | SDK planned (C ABI) | ✅ `.qlplugin` packages, 20+ community plugins | XnView plugins (if installed) | WIC codec packs | XnView plugins | `.qlgenerator` / `.appex` | Plugin DLLs |
-| **Cross-platform** | Windows (macOS/Linux planned) | Windows only | Windows only | Windows only | Windows / macOS / Linux | macOS only | Windows only |
-| **Distribution** | MSI + ZIP + winget (planned) | MS Store + installer + Scoop + nightly | SourceForge MSI | OS built-in | Website download | OS built-in | Website download |
-| **License** | MIT | GPL-3.0 | GPL-2.0 | Proprietary | Freeware (closed source) | Proprietary | Freeware (closed source) |
-| **Stars/Downloads** | New project | 23.1K GitHub stars | 4.3K downloads/week (SourceForge) | N/A (universal) | Millions | N/A (universal) | 180M+ downloads |
-| **Active development** | ✅ Active | ✅ Active (79 contributors) | ❌ Abandoned (last update 2017) | ✅ (Microsoft) | ✅ Active | ✅ (Apple) | ✅ Active |
-| **Open source** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
-| **DLL size** | < 5 MB target | ~15 MB (managed) | ~5 MB | N/A | ~80 MB | N/A | ~3 MB |
-| **Archive thumbnails** | ✅ ZIP/RAR/7Z/CBZ/CBR | ✅ Via plugins | ❌ Images only | ❌ No | Limited | ❌ No | ❌ No |
-| **Document thumbnails** | ✅ PDF/EPUB | ✅ PDF/Office/EPUB | ❌ Images only | ❌ Minimal | ❌ Minimal | ✅ PDF/Office | ❌ No |
-| **RAW photos** | ✅ LibRaw (100+ cameras) | Partial (via plugins) | Partial (GFL) | ❌ Limited (Microsoft codecs) | ✅ All major RAW | ✅ (Apple RAW) | ✅ Via plugins |
-| **Enterprise/GPO** | Planned (ADMX) | ❌ No | ❌ No | ✅ Via Group Policy | ❌ No | ✅ MDM profiles | ❌ No |
+| Dimension | **ExplorerLens** (target) | **QuickLook (QL-Win)** | **SageThumbs** | **Icaros Shell Ext.** | **Windows Built-in** | **XnView MP** | **macOS Quick Look** | **IrfanView** | **ImageGlass** |
+|-----------|--------------------------|------------------------|----------------|-----------------------|----------------------|---------------|----------------------|---------------|----------------|
+| **Type** | Shell ext (IThumbnailProvider) | Space-bar preview app | Shell ext (context menu + thumbnails) | Shell ext (video/audio thumbnails + properties) | WIC-based handlers | Standalone viewer + shell | OS-native preview | Viewer + shell assoc | Standalone viewer |
+| **Language** | C++20 | C# (.NET 8 WPF) | C++ (GFL library) | C++ (FFmpeg/Libav) | C++ (OS kernel) | C++/Qt | Objective-C (OS) | C++ (custom) | C# (.NET 8) |
+| **GitHub Stars** | New project | **23.1K** | N/A (SourceForge) | N/A (Shark007 site) | N/A | N/A | N/A | N/A | **8.7K** |
+| **Active** | ✅ Active | ✅ Active (79 contributors) | ❌ Abandoned (2017) | ✅ Active (2024) | ✅ (Microsoft) | ✅ Active | ✅ (Apple) | ✅ Active | ✅ Active |
+| **License** | MIT | GPL-3.0 | GPL-2.0 | GPL-2.0 | Proprietary | Freeware (closed) | Proprietary | Freeware (closed) | GPL-3.0 |
+| **Image formats** | 200+ (target) | 100+ via plugins | 162 (GFL) | Limited (focus: video) | ~30 (WIC codecs) | 500+ | ~30 + plugins | 100+ | 80+ |
+| **Modern (AVIF/JXL/HEIC)** | ✅ All three | Partial (plugins) | ❌ None | ❌ None | HEIC only (codec) | ✅ All three | ✅ HEIC native | Partial (plugins) | ✅ All three |
+| **Video thumbnails** | ✅ Media Foundation | ✅ Built-in player | ❌ No | ✅ **Best-in-class** (FFmpeg) | Partial (WMP codecs) | Limited | ✅ AVFoundation | ❌ No | ❌ No |
+| **Archive thumbnails** | ✅ ZIP/RAR/7Z/CBZ/CBR | ✅ Via plugins | ❌ Images only | ❌ No | ❌ No | Limited | ❌ No | ❌ No | ❌ No |
+| **Document thumbnails** | ✅ PDF/EPUB | ✅ PDF/Office/EPUB | ❌ Images only | ❌ No | Minimal | Minimal | ✅ PDF/Office | ❌ No | ❌ No |
+| **RAW photos** | ✅ LibRaw (100+ cameras) | Partial (plugins) | Partial (GFL) | ❌ No | Limited (MS codecs) | ✅ All major RAW | ✅ Apple RAW | ✅ Plugins | Limited |
+| **GPU acceleration** | Planned (D3D11 compute) | HW-accelerated WPF | ❌ None | ❌ None | WIC + DXGI sharing | ❌ None | Metal-backed | ❌ None | Direct2D rendering |
+| **Explorer integration** | Native thumbnails | **Separate window** | Native thumbnails + context menu | Native thumbnails + properties | Native thumbnails | Separate app | Native Finder | Separate app | Separate app |
+| **Plugin system** | SDK planned (C ABI) | ✅ `.qlplugin` (20+ plugins) | XnView plugins | ❌ No | WIC codec packs | XnView plugins | `.qlgenerator` | Plugin DLLs | ❌ No |
+| **Context menu preview** | Planned (IContextMenu) | N/A (space bar) | ✅ Right-click thumb | ❌ No | ❌ No | ❌ No | N/A | ❌ No | ❌ No |
+| **Preview pane** | Planned (IPreviewHandler) | N/A | ❌ No | ❌ No | Partial | ❌ No | Integrated | ❌ No | ❌ No |
+| **Enterprise/GPO** | Planned (ADMX) | ❌ No | ❌ No | ❌ No | ✅ Group Policy | ❌ No | ✅ MDM profiles | ❌ No | ❌ No |
+| **Distribution** | MSI + winget + Scoop + Choco | MS Store + installer + Scoop + nightly | SourceForge | Shark007 installer | OS built-in | Website | OS built-in | Website | MS Store + winget |
+| **Install size** | < 5 MB target | ~15 MB (managed) | ~5 MB | ~30 MB (FFmpeg) | N/A | ~80 MB | N/A | ~3 MB | ~15 MB |
+| **Cross-platform** | Windows (macOS/Linux planned) | Windows only | Windows only | Windows only | Windows only | Win/Mac/Linux | macOS only | Windows only | Windows only |
+| **REST API / headless** | ✅ LensServer (planned) | ❌ No | ❌ No | ❌ No | ❌ No | CLI batch mode | ❌ No | CLI batch mode | ❌ No |
+| **Open source** | ✅ MIT | ✅ GPL-3.0 | ✅ GPL-2.0 | ✅ GPL-2.0 | ❌ No | ❌ No | ❌ No | ❌ No | ✅ GPL-3.0 |
 
 ### 2.2 Key Lessons from Competitors
 
 | Competitor | Best Practice to Harvest | How We Apply It |
 |------------|--------------------------|-----------------|
-| **QuickLook** | Plugin ecosystem with `.qlplugin` package format enables community contributions | Prioritize Plugin SDK with C ABI and simple package format; community extends format support |
-| **QuickLook** | Microsoft Store distribution achieves massive reach | Target winget + MS Store (MSIX) as primary channels |
-| **QuickLook** | Fluent Design integration looks native on Windows 11 | LENSManager v2 should use WinUI 3 for modern Windows look |
-| **SageThumbs** | Context menu preview is immediately discoverable | Add IContextMenu alongside IThumbnailProvider for preview-on-right-click |
-| **SageThumbs** | GFL library handles 162 formats through a single dependency | Consider whether fewer, higher-quality decoders beats many thin integrations |
-| **XnView MP** | 500+ format support via mature decode pipeline with real I/O | Validate every format against real files; "supported" means "produces correct output" |
-| **XnView MP** | Cross-platform via Qt abstraction layer | Keep our PAL approach (Platform Abstraction Layer) but defer implementation |
-| **macOS Quick Look** | Deep OS integration (Finder, Spotlight, Time Machine) | Pursue IExtractImage2, IPreviewHandler, IFilter for deeper Windows integration |
-| **macOS Quick Look** | Thumbnail caching with SQLite index | Implement robust L1/L2 cache with SQLite metadata |
-| **IrfanView** | Tiny binary (< 3 MB) with 100+ formats | Aggressive binary size management; < 5 MB DLL target |
-| **IrfanView** | 180M+ downloads through simplicity and reliability | Priority: make it work perfectly for common formats before chasing rare ones |
-| **Windows Built-in** | WIC + DXGI surface sharing for zero-copy GPU thumbnails | Use WIC with D3D11 device hints as Phase 2 GPU strategy |
+| **QuickLook** | Plugin ecosystem with `.qlplugin` package format enables 20+ community contributions | Prioritize Plugin SDK with C ABI and simple package format; community extends format support |
+| **QuickLook** | Microsoft Store + Scoop + nightly builds = massive reach (23K stars) | Target winget + MS Store (MSIX) as primary channels; offer nightly CI builds |
+| **QuickLook** | Fluent Design + acrylic/mica integration looks native on Windows 11 | LENSManager v2 should use WinUI 3 or at minimum dark mode with `SetPreferredAppMode()` |
+| **QuickLook** | .NET 8 WPF with hardware-accelerated rendering for smooth previews | Our C++20 approach is leaner (< 5 MB vs 15 MB) — leverage this as a selling point |
+| **SageThumbs** | Context menu preview is immediately discoverable (right-click → thumbnail) | Add IContextMenu alongside IThumbnailProvider for preview-on-right-click |
+| **SageThumbs** | GFL library handles 162 formats through a single dependency | Validate: fewer, higher-quality decoders beats many thin integrations |
+| **Icaros** | FFmpeg-based video thumbnails with configurable keyframe offset | Leverage Media Foundation first; add FFmpeg as optional Phase 3 dependency for exotic codecs |
+| **Icaros** | IPropertyStore implementation for audio/video metadata in Explorer columns | Add IPropertyStore to LENSShell for file dimensions, duration, codec info in Details view |
+| **XnView MP** | 500+ format support via mature decode pipeline with real I/O | Validate every format against real files; "supported" = "produces correct output" |
+| **XnView MP** | Cross-platform via Qt abstraction layer | Keep our PAL approach but defer implementation until Windows is excellent |
+| **macOS Quick Look** | Deep OS integration (Finder, Spotlight, Time Machine, preview pane) | Pursue IPreviewHandler (preview pane) + IFilter (Windows Search indexing) |
+| **macOS Quick Look** | SQLite-indexed thumbnail cache with file watchers for invalidation | Implement L2 cache with SQLite metadata + `ReadDirectoryChangesW` watcher |
+| **IrfanView** | Tiny binary (< 3 MB) with 100+ formats; 180M+ downloads through simplicity | Priority: make it work perfectly for common formats before chasing rare ones |
+| **IrfanView** | Plugin architecture for format extension without core binary bloat | Design Plugin SDK so exotic formats (DICOM, FITS, NeRF) don't bloat the core DLL |
+| **ImageGlass** | Modern UI with .NET 8 + Direct2D; 8.7K GitHub stars; MS Store presence | Study their release cadence and community engagement model |
+| **ImageGlass** | Supports theme packs and custom image processing pipelines | Consider user-configurable thumbnail processing (brightness, contrast, crop rules) |
 
 ### 2.3 Competitive Gaps We Fill
 
 No existing tool provides ALL of these simultaneously:
 
-1. **Native Explorer thumbnails** (not a separate viewer window)
-2. **Modern image formats** (AVIF + JXL + HEIC) without codec packs
-3. **Archive cover images** (CBZ/CBR/EPUB) as thumbnails in Explorer
-4. **Open source** with MIT license (QuickLook is GPL-3.0)
-5. **GPU-accelerated** decode/resize pipeline
-6. **Cross-platform** architecture (Windows → macOS → Linux)
-7. **Enterprise-ready** (GPO, ETW, Event Log, silent MSI install)
-8. **Plugin SDK** with C ABI for third-party format decoders
+1. **Native Explorer thumbnails** (not a separate viewer window) — eliminates SageThumbs (abandoned), beats QuickLook (separate window)
+2. **Modern image formats** (AVIF + JXL + HEIC) without codec packs — beats Windows built-in, Icaros, SageThumbs
+3. **Archive cover images** (CBZ/CBR/EPUB) as thumbnails in Explorer — unique among native shell extensions
+4. **Open source MIT license** — QuickLook is GPL-3.0; SageThumbs/Icaros are GPL-2.0; MIT enables commercial embedding
+5. **GPU-accelerated** decode/resize pipeline — no competitor offers real GPU compute for thumbnails
+6. **CLI + REST API** for headless/CI use — unique; enables thumbnail generation in pipelines
+7. **Enterprise-ready** (GPO, ETW, Event Log, silent MSI install) — only Windows built-in has GPO today
+8. **Plugin SDK** with C ABI for third-party format decoders — harvested from QuickLook's model
+9. **Cross-platform architecture** (Windows → macOS → Linux) — only XnView MP spans all three, but isn't a shell extension
 
-This is our moat. Execute on items 1-4 first (Phase 1), then 5-8 (Phases 2-4).
+This is our moat. Execute on items 1-4 first (Phase 1), then 5-9 (Phases 2-4).
 
 ---
 
@@ -153,12 +173,18 @@ This is our moat. Execute on items 1-4 first (Phase 1), then 5-8 (Phases 2-4).
 | R6 | **Cross-platform stubs** | `#ifdef` guards ≠ cross-platform support | **Honest README:** "Windows native. macOS/Linux planned for Phase 5." | Don't claim what doesn't work |
 | R7 | **3 separate roadmaps** | ROADMAP_V30, V34, V35 create confusion | **Single ROADMAP.md** (this file); archive old ones | One source of truth |
 | R8 | **130+ markdown files** | More docs than working code | **Right-size:** document what works; move aspirational content here | Docs should lag code, not lead it |
-| R9 | **Claiming GPU acceleration** | No shader files, no D3D device creation in hot path | **WIC-with-D3D11 first** (Phase 2); real compute shaders in Phase 3 | Prove measurable speedup before claiming GPU support |
-| R10 | **Version at v36.0.0** | Semver v36 implies 36 breaking API changes in < 6 months | **Keep v36+ going forward** but adopt calver (2026.X) for next major reset if desired | History has value; don't reset, but slow version velocity to feature-gated bumps |
+| R9 | **Claiming GPU acceleration** | No shader files in hot path, no D3D device creation in decode pipeline | **WIC-with-D3D11 first** (Phase 2); real compute shaders in Phase 3 | Prove measurable speedup before claiming GPU support |
+| R10 | **MuPDF AGPL-3.0 license** | AGPL requires source disclosure for network services; incompatible with MIT | **Evaluate alternatives:** PDFium (BSD), Poppler (GPL), or MuPDF commercial license | MuPDF is excellent but AGPL is risky for MIT-licensed project |
 | R11 | **Cloud/WASM/AI/Collaboration headers** | Aspirational stubs with no runtime integration | **Archive to `docs/archive/vision/`; delete from Engine/** | Focus Phase 1-3 on core thumbnail pipeline |
-| R12 | **Empty packaging dirs** | inno, nsis, msix, vdproj are dead code | **Delete immediately** | Dead code is a maintenance burden |
-| R13 | **Monolithic copilot-instructions.md** | 450 lines mixing build rules, code conventions, release procedure | **Refactor to ~150 lines** + 13 scoped instruction files | Scoped instructions apply only to relevant files |
+| R12 | **Dead code in src/** | LensServer/PluginHost/PSModule have no CMake refs | **Delete `src/LensServer/`, `src/PluginHost/`, `src/Tools.PSModule/`** | Dead code confuses contributors |
+| R13 | **LensServer thread model** | Thread-per-connection with `std::thread::detach()` won't scale | **Replace with thread pool** or async I/O when LensServer ships (Phase 4) | Production servers need bounded concurrency |
 | R14 | **No test corpus** | Cannot validate decoders without real files | **Build corpus of 100+ CC0/public-domain files** covering all 20 priority formats | Single most important gap to close |
+| R15 | **Dockerfile uses VS 2022** | Mismatch with VS 2026 v145 toolset requirement | **Update Dockerfile to VS 2026 BuildTools** when available on mcr.microsoft.com | CI/container builds must match dev toolchain |
+| R16 | **No auto-update mechanism** | Users must manually download new versions | **Implement winget/Scoop upgrade path** + optional in-app update check | QuickLook users get auto-updates via MS Store |
+| R17 | **No crash reporting** | Crashes in explorer.exe context are silent | **Add Windows Error Reporting (WER) + optional telemetry** | Critical for production stability monitoring |
+| R18 | **No IPropertyStore** | Explorer Details view shows no metadata for our formats | **Implement IPropertyStore** for image dimensions, camera model, codec info | Icaros does this for video; we should for images |
+| R19 | **Engine/Tests/EngineTests_Late.cpp at ~486 KB** | Approaching 500 KB mandatory split threshold | **Split immediately** into `_Late.cpp` + `_Platform.cpp` | File size policy compliance |
+| R20 | **LIBRARY_INVENTORY.md header says v15.0.0** | Severely out of date | **Add to Bump-Version.ps1 registry** or remove version from header | Version drift creates confusion |
 
 ### 3.3 Honest Assessment — What ExplorerLens Is Today
 
@@ -167,9 +193,9 @@ This is our moat. Execute on items 1-4 first (Phase 1), then 5-8 (Phases 2-4).
 - An engine library with 18 external decoder libraries statically linked
 - A WTL configuration GUI (`LENSManager.exe`)
 - A CLI tool (`lens.exe`) in early development
-- A LensServer REST skeleton (Winsock2-based)
+- A LensServer REST skeleton (Winsock2-based, thread-per-connection)
 - A professional build/CI/CD/packaging pipeline
-- A comprehensive AI-assisted development surface
+- A comprehensive AI-assisted development surface (agents, skills, prompts, MCP)
 
 **What it isn't yet:**
 - GPU-accelerated (no shader code or D3D device creation in hot path)
@@ -177,6 +203,18 @@ This is our moat. Execute on items 1-4 first (Phase 1), then 5-8 (Phases 2-4).
 - Cross-platform (macOS/Linux stubs only)
 - AI-powered (no model files or inference runtime)
 - Validated for 200+ formats (needs corpus testing)
+- Crash-aware (no WER integration, silent failures in explorer.exe context)
+- Auto-updating (no winget manifest, no in-app update check)
+- Metadata-enriching (no IPropertyStore — Explorer Details view shows nothing for our formats)
+
+**What needs attention:**
+- MuPDF AGPL-3.0 license conflicts with project's MIT license (R10)
+- `EngineTests_Late.cpp` at ~486 KB is dangerously close to the 500 KB split threshold (R19)
+- `LIBRARY_INVENTORY.md` version header is at v15.0.0 — severely stale (R20)
+- Dead code in `src/`: LensServer, PluginHost, PSModule have no CMake integration (R12)
+- LensServer `SERVER_VERSION` hardcoded at `"35.5.0"` — not in Bump-Version.ps1 (R20)
+- Dockerfile uses VS 2022 but project requires VS 2026 v145 toolset (R15)
+- CI workflow version comments are stale (v23.6.0, v32.1.0 instead of v36.1.0)
 
 **This is not a failure.** The architecture is sound, the infrastructure is professional,
 and the external library stack is excellent. The gap is between vision and validated
@@ -311,7 +349,7 @@ private:
 | libde265 | 1.0.15 | HEVC decoding (for libheif) | ✅ Current | None |
 | dav1d | 1.5.1 | AV1 decoding (for libavif) | ✅ Current | None |
 | LibRaw | 0.21.3 | RAW camera (100+ models) | ✅ Current | None |
-| MuPDF | 1.24.11 | PDF rendering | ✅ Current | None |
+| MuPDF | 1.24.11 | PDF rendering | ⚠️ **AGPL-3.0** | Evaluate PDFium (BSD) or obtain commercial license — see R10 |
 | openjpeg | 2.5.3 | JPEG 2000 | ✅ Current | None |
 | bzip2 | 1.0.8 | BZIP2 compression | ✅ Current | None |
 | xz/liblzma | 5.6.3 | XZ compression | ✅ Current | None |
@@ -342,7 +380,7 @@ private:
 
 | API Surface | Current | Target |
 |-------------|---------|--------|
-| **COM (IThumbnailProvider)** | Implemented | Add IExtractImage2 (legacy Explorer), IPreviewHandler (preview pane) |
+| **COM (IThumbnailProvider)** | Implemented | Add IExtractImage2 (legacy Explorer), IPreviewHandler (preview pane), **IPropertyStore** (metadata columns) |
 | **CLI (`lens.exe`)** | 17 source files, early | Make `generate`, `info`, `register`, `doctor`, `benchmark`, `cache` commands work |
 | **REST (`lens-server`)** | Winsock2 skeleton | Defer to Phase 4; replace Winsock2 with cpp-httplib when ready |
 | **Plugin SDK** | Header stubs | Implement C ABI `plugin_api.h` with decode/probe/metadata functions in Phase 3 |
@@ -679,7 +717,7 @@ MyScripts\                              ← SHARED (all projects inherit)
 
 | Aspect | Current | Target |
 |--------|---------|--------|
-| COM interfaces | IThumbnailProvider | Add IExtractImage2 (legacy), IPreviewHandler (preview pane), IContextMenu (right-click) |
+| COM interfaces | IThumbnailProvider | Add IExtractImage2 (legacy), IPreviewHandler (preview pane), IContextMenu (right-click), **IPropertyStore** (metadata columns in Details view — dimensions, codec, camera model) |
 | Registration | Manual `regsvr32` | MSI auto-registration + `lens register` CLI |
 | Error handling | Basic HRESULT | Structured logging to ETW + Windows Event Log |
 | Thumbnail sizes | Standard | 16×16 to 1024×1024 (Extra Large Icons) |
@@ -843,16 +881,78 @@ invalidation. We adopt the same pattern:
 
 ---
 
-## 15. Phase Plan — 6 Phases to Best-in-Class
+## 15. Infrastructure & Operations
+
+### 15.1 Crash Reporting & Stability
+
+| Component | Current | Target |
+|-----------|---------|--------|
+| Crash dump collection | None | Windows Error Reporting (WER) with `SetUnhandledExceptionFilter` |
+| Telemetry | None | Optional ETW-based telemetry (opt-in, no PII) |
+| Diagnostics CLI | `lens doctor` (early) | Full system diagnostics: GPU, libs, registration, cache health, codec availability |
+| Error logging | Basic HRESULT | Structured logging to Windows Event Log (`ExplorerLens` source) |
+
+### 15.2 Auto-Update & Distribution Infrastructure
+
+| Channel | Mechanism | Status |
+|---------|-----------|--------|
+| winget | `winget upgrade ExplorerLens.ExplorerLens` | Priority — submit manifest |
+| Scoop | `scoop update explorerlens` | `scoopfile.json` exists; submit to extras bucket |
+| Chocolatey | `choco upgrade explorerlens` | `packaging/chocolatey/` exists; submit package |
+| In-app check | LENSManager checks GitHub Releases API for newer version | Implement in Phase 3 |
+| MS Store | MSIX package for sandboxed install | Phase 4 |
+
+### 15.3 Database Strategy
+
+**No traditional database needed.** The only persistent state is the thumbnail cache:
+
+| Layer | Storage | Technology |
+|-------|---------|------------|
+| L1 cache | In-process memory | Robin-Hood hash map (XXH3 keys), LRU eviction, 64 MB budget |
+| L2 cache index | `%LOCALAPPDATA%\ExplorerLens\cache.db` | SQLite 3 (single-file, crash-safe, read-concurrent) |
+| L2 cache blobs | `%LOCALAPPDATA%\ExplorerLens\Cache\*.thumb` | Memory-mapped files, size-budgeted |
+| Settings | `HKCU\Software\ExplorerLens` | Windows Registry (via LENSManager) |
+| Corpus baselines | `data/baselines/` | JSON (committed to repo; used by CI) |
+
+### 15.4 Security Hardening Roadmap
+
+| Item | Priority | Description |
+|------|----------|-------------|
+| Fuzz all decoders | P0 | libFuzzer / WinAFL against each decoder with malformed files |
+| ASAN builds in CI | P1 | AddressSanitizer for memory safety validation |
+| Stack canaries | ✅ Done | `/GS` flag (MSVC default) |
+| ASLR + DEP + CFG | ✅ Done | `/DYNAMICBASE`, `/NXCOMPAT`, `/guard:cf` |
+| Input validation | P0 | Validate file size, magic bytes, dimensions before decode |
+| Integer overflow checks | P1 | `SafeInt<>` for dimension calculations (width × height × bpp) |
+| Sandboxed decode | P2 | AppContainer or low-integrity process for untrusted files |
+| Code signing | P2 | Authenticode sign `LENSShell.dll`, `LENSManager.exe`, MSI |
+
+### 15.5 Monitoring & Observability
+
+| Signal | Mechanism | Consumer |
+|--------|-----------|----------|
+| Decode latency | ETW provider (`ExplorerLens-Engine`) | Windows Performance Analyzer, `lens benchmark` |
+| Cache hit/miss rate | Performance counters | `lens cache stats`, LENSManager dashboard |
+| Error rate | Windows Event Log | SIEM, `lens doctor` |
+| Binary size | CI workflow (`binary-size.yml`) | PR gate |
+| Memory usage | ETW + `lens doctor` | Support diagnostics |
+
+---
+
+## 16. Phase Plan — 6 Phases to Best-in-Class
 
 ### Phase 1 — Foundation (4-6 weeks)
 **Goal:** Working, validated, installable product for top 20 formats.
 
-**Infrastructure:**
+**Infrastructure & cleanup:**
+- [ ] Delete dead code: `src/LensServer/`, `src/PluginHost/`, `src/Tools.PSModule/`, `Engine/Tests/FuzzTargets/`, `Engine/Tests/gtest/`
+- [ ] Split `EngineTests_Late.cpp` at ~486 KB (file size policy compliance)
+- [ ] Fix stale version references: `coverage.yml` (v23.6.0→v36.1.0), `ci-matrix.yml` (v32.1.0→v36.1.0), `LIBRARY_INVENTORY.md` (v15.0.0→v36.1.0)
+- [ ] Evaluate MuPDF AGPL license: decide between PDFium (BSD), commercial MuPDF license, or document AGPL compliance
 - [ ] Shared tooling architecture (§11): audit configs, consolidate at MyScripts\, establish inheritance
 - [ ] GitHub AI surface overhaul (§10): refactor instructions, enhance agents/skills/prompts
 - [ ] Config/docs/env standards (§8): rename GitHub files, fix mkdocs, SVG diagrams, dev container
-- [ ] Audit all 1,386 headers: classify as Real / Stub / Dead
+- [ ] Audit all ~1,386 headers: classify as Real / Stub / Dead
 - [ ] Delete dead headers and empty packaging directories
 - [ ] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`
 
@@ -909,9 +1009,15 @@ supported format.
 - [ ] GPO template (ADMX/ADML) for enterprise configuration
 - [ ] ETW tracing for decode pipeline
 - [ ] Event Log entries for decode errors
-- [ ] `lens-server` REST API with cpp-httplib (replace Winsock2 skeleton)
+- [ ] WER crash reporting with `SetUnhandledExceptionFilter`
+- [ ] IPropertyStore for image/video metadata in Explorer Details view
+- [ ] `lens-server` REST API with cpp-httplib (replace Winsock2 skeleton, thread pool)
+- [ ] Update Dockerfile to VS 2026 BuildTools when available
 - [ ] Docker container for `lens-server`
-- [ ] Security audit: fuzz all decoders, fix all crashes
+- [ ] Code signing (Authenticode) for all binaries and MSI
+- [ ] In-app update check (LENSManager → GitHub Releases API)
+- [ ] Security audit: fuzz all decoders with libFuzzer/WinAFL, fix all crashes
+- [ ] ASAN builds in CI for memory safety
 - [ ] SBOM with real dependency graph
 
 **Exit criteria:** IT admins deploy via GPO, monitor via SIEM, run `lens-server`
@@ -942,7 +1048,7 @@ formats in Finder.
 
 ---
 
-## 16. Success Metrics
+## 17. Success Metrics
 
 ### Phase 1 (Foundation)
 
@@ -954,6 +1060,10 @@ formats in Finder.
 | Header-to-source ratio | < 3:1 |
 | Clean install on Windows 10 VM | Yes |
 | Build: 0 errors, 0 warnings | Yes |
+| MuPDF license resolution | Documented and implemented |
+| Stale version references | 0 (all files at current release) |
+| `EngineTests_Late.cpp` size | < 400 KB after split |
+| Dead code directories removed | `src/LensServer/`, `PluginHost/`, `PSModule/`, `FuzzTargets/` |
 
 ### Phase 2 (Performance)
 
@@ -977,6 +1087,17 @@ formats in Finder.
 | winget / Chocolatey / Scoop | Published |
 | GitHub stars | ≥ 100 |
 
+### Phase 4 (Enterprise)
+
+| Metric | Target |
+|--------|--------|
+| WER crash reporting | Integrated + tested |
+| IPropertyStore columns | Dimensions + codec for top 20 formats |
+| `lens-server` REST API | Functional with thread pool |
+| Decoder fuzz targets | ≥ 20 (one per priority format) |
+| ASAN CI builds | Green (zero leaks) |
+| Code signing | All binaries Authenticode-signed |
+
 ### Best-in-Class Criteria
 
 | Dimension | Definition |
@@ -994,7 +1115,7 @@ formats in Finder.
 
 ---
 
-## 17. Decision Log
+## 18. Decision Log
 
 | # | Decision | Rationale |
 |---|----------|-----------|
@@ -1020,6 +1141,13 @@ formats in Finder.
 | D20 | IContextMenu for right-click preview | Harvested from SageThumbs; immediate discoverability |
 | D21 | Plugin SDK with C ABI | Harvested from QuickLook's `.qlplugin`; enables community |
 | D22 | `std::expected<T,E>` for new APIs | C++23 error handling; available in MSVC 19.50 |
+| D23 | IPropertyStore for Explorer metadata | Harvested from Icaros; show dimensions/codec in Details view |
+| D24 | WER crash reporting | Essential for production stability in explorer.exe context |
+| D25 | Evaluate MuPDF license alternatives | AGPL-3.0 conflicts with MIT; consider PDFium (BSD) or commercial license |
+| D26 | Split EngineTests_Late.cpp at 486 KB | File size policy compliance; prevents git perf issues |
+| D27 | Delete dead src/ directories | LensServer, PluginHost, PSModule have no build integration |
+| D28 | Add Icaros-style IPropertyStore | Show image/video metadata in Explorer Details columns |
+| D29 | Nightly CI builds for early adopters | Harvested from QuickLook's nightly distribution model |
 
 ### Decisions Preserved from Original Architecture
 
@@ -1036,9 +1164,66 @@ formats in Finder.
 ## How to Use This Roadmap
 
 1. **Phase 1 is the priority.** Everything else waits until the foundation is solid.
-2. **Measure progress** by success metrics in §16, not by header count or version number.
+2. **Measure progress** by success metrics in §17, not by header count or version number.
 3. **This document supersedes** `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`.
 4. **Archive old roadmaps** to `docs/archive/` for historical reference.
 5. **Check off items** as completed. This is a living document.
+6. **Compare against competitors** in §2.1 regularly — the landscape shifts.
+
+---
+
+## 19. Consolidated Legacy — What We Kept from V30-V35
+
+This section preserves the valuable strategic decisions from the three superseded roadmaps.
+The full original documents are archived at `docs/archive/`.
+
+### From ROADMAP_V30 "Deneb" (v30-v33)
+
+**Preserved decisions:**
+- Platform Abstraction Layer (PAL) architecture — validated and implemented in `Engine/Platform/`
+- DirectStorage zero-copy GPU decompression concept — deferred to Phase 3 but architecture is sound
+- Live Preview Scrubber for video — deferred to Phase 3; Media Foundation approach confirmed
+- Risk mitigations for DirectStorage CI unavailability (mock layer) — still applicable
+
+**Archived (not carried forward):**
+- CLIP semantic search with HNSW index — deferred to Phase 6 (AI features)
+- Generative AI thumbnails (SD-Turbo on-device NPU) — deferred to Phase 6+
+- LevelDB dependency — replaced by SQLite for L2 cache
+
+### From ROADMAP_V34 "Arcturus" (v34)
+
+**Preserved decisions:**
+- Three pillars: format breadth, sub-10ms decode, zero-regression gates — still the core strategy
+- Per-PR automated benchmark gates blocking >5% P95 regression — implemented in CI
+- Ultra HDR (Google Gainmap), Apple ProRAW support — in decoder roadmap
+
+**Archived (not carried forward):**
+- 20-task consolidation plan at tail — from earlier era; contradicts current architecture
+- 350+ extension target as a Phase 1 goal — realistic target is 200+ validated
+
+### From ROADMAP_V35 "Vega" (v35)
+
+**Preserved decisions:**
+- LensServer REST API concept — validated by `src/LensServer/` skeleton
+- Cloud Files hydration detection via CF API — deferred to Phase 4
+- Dockerfile + container deployment — exists and works (needs toolchain update)
+
+**Archived (not carried forward):**
+- Real-time collaboration / live-sync session tokens — deferred to Phase 6+
+- Zero-trust security with signed thumbnail manifests — deferred to Phase 5
+- WebAssembly decoder sandbox — deferred to Phase 6
+- SDXL-Turbo generative thumbnails — speculative; depends on upstream stability
+- Post-quantum cryptography provider — academic research, not production-relevant
+
+### From ROADMAP v2.0 "Altair" (v36)
+
+**All content carried forward and enhanced in this v3.0.** Key additions:
+- Icaros + ImageGlass added to competitor analysis
+- Infrastructure & Operations section (§15) — crash reporting, auto-update, security hardening
+- MuPDF AGPL license concern identified (R10)
+- LensServer scalability concern identified (R13)
+- IPropertyStore for Explorer metadata columns (D23, D28)
+- Nightly CI build distribution model (D29)
+- File size policy compliance for EngineTests_Late.cpp (R19, D26)
 
 ---

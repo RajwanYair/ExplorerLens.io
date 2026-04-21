@@ -5,6 +5,34 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [36.1.0] — 2025-07-18 — Antares
+
+AI tooling overhaul: 13 scoped instructions, 4 agents, 11 prompts, 6 skills, dev container, scoopfile, and test corpus scaffold. copilot-instructions.md slimmed 440→150 lines.
+
+### Added
+
+**AI Tooling Surface**
+- `.github/instructions/`: 6 new scoped instruction files — decoder-authoring, documentation, performance, pr-authoring, release, security (Sprint 4)
+- `.github/instructions/`: 2 previously-untracked files committed — build.instructions.md, cpp-coding.instructions.md (Sprint 8)
+- `.github/agents/`: 3 new agents — docs.agent.md, test-corpus.agent.md, release.agent.md (Sprint 5)
+- `.github/prompts/`: 6 new prompt templates — release-prep, architecture-review, decoder-scaffold, benchmark-analysis, pr-description, debug-build-failure (Sprint 6)
+- `.github/skills/`: 4 new skills — decoder-development, test-corpus, performance, documentation (Sprint 3)
+- `.github/skills/`: 2 expanded skills — explorerlens-build-and-release, explorerlens-workflows-and-mcp (~150 lines each) (Sprint 2)
+- `.github/standards/ai-tooling-capabilities.md`: canonical AI surface inventory (Sprint 8)
+
+**Infrastructure**
+- `.devcontainer/devcontainer.json` + `.devcontainer/setup.ps1`: Windows dev container for Codespaces (Sprint 9)
+- `scoopfile.json`: one-command Scoop tool install (cmake, ninja, git, nasm, meson, nuget, 7zip, wix) (Sprint 9)
+
+**Documentation**
+- `ROADMAP.md` v2.0: competitive analysis, 17 sections, 1,044 lines — strategic planning document (Sprint 1)
+- `.github/copilot-instructions.md`: slimmed from 440 to 150 lines — extracted content to scoped instruction files (Sprint 7)
+
+**GitHub Community Files** (Sprint 1)
+- `.github/CONTRIBUTING.md`, `SECURITY.md`, `CODEOWNERS` renamed to uppercase
+
+---
+
 ## [36.0.0] — 2026-04-16 — Altair
 
 50-sprint Phase-1 Foundation refresh. All items delivered as individual commits.
