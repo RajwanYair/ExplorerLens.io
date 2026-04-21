@@ -14,6 +14,11 @@ concurrency:
   group: codeql-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 env:
   # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -24,11 +29,6 @@ jobs:
     name: CodeQL — C++ Security Analysis
     runs-on: windows-latest
     timeout-minutes: 60
-
-    permissions:
-      actions: read
-      contents: read
-      security-events: write   # Required to upload SARIF results
 
     # GIT_CONFIG_COUNT: inject safe.directory via git env-var config so ALL
     # git invocations — including those inside github/codeql-action — bypass
