@@ -38,6 +38,12 @@
 *.txt text eol=crlf
 *.rtf text eol=crlf
 
+# SVG diagrams — text (not binary), LF-normalized, shown in GitHub language stats
+*.svg text eol=lf linguist-language=SVG linguist-detectable
+
+# Resource files
+*.rc text eol=crlf
+
 # Binary files
 *.dll binary
 *.exe binary
