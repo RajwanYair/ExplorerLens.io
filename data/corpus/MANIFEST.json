@@ -28,7 +28,9 @@
         { "ext": "hdr",  "name": "Radiance HDR", "decoder": "HdrDecoder",        "priority": 3, "test_file": "sample_equirect.hdr" },
         { "ext": "exr",  "name": "OpenEXR",      "decoder": "ExrDecoder",        "priority": 3, "test_file": "sample_rgb16.exr"  },
         { "ext": "dds",  "name": "DirectDraw Surface", "decoder": "DdsDecoder", "priority": 3, "test_file": "sample_bc7.dds"    },
-        { "ext": "ktx2", "name": "KTX2",         "decoder": "KtxDecoder",        "priority": 3, "test_file": "sample_etc2.ktx2"  }
+        { "ext": "ktx2", "name": "KTX2",         "decoder": "KtxDecoder",        "priority": 3, "test_file": "sample_etc2.ktx2"  },
+        { "ext": "tga",  "name": "Targa TGA",    "decoder": "TgaDecoder",        "priority": 3, "test_file": "sample_tga.tga"    },
+        { "ext": "ppm",  "name": "Netpbm PPM",   "decoder": "NetpbmDecoder",     "priority": 3, "test_file": "sample_netpbm.ppm" }
       ]
     },
     "raw": {
