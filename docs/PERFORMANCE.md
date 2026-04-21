@@ -903,9 +903,8 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 ---
 
 **Next Steps:**
-- [Benchmarking Results](BENCHMARK_RESULTS.md) - Reference performance data
-- [User Manual](USER_MANUAL.md) - General configuration guide
 - [Troubleshooting](TROUBLESHOOTING.md) - Fix performance issues
+- [User Guide](USER_GUIDE.md) - General configuration guide
 
 ---
 

@@ -38,7 +38,7 @@
 **Solution:**
 1. Click "More info"
 2. Click "Run anyway"
-3. **Long-term fix:** Use code-signed binaries (see [CODE_SIGNING.md](CODE_SIGNING.md))
+3. **Long-term fix:** Use code-signed binaries (planned for Phase 4)
 
 ---
 

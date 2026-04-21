@@ -132,12 +132,12 @@ MCP servers are configured in `.vscode/mcp.json`. If you change the MCP server i
 
 **Avoid duplicate installation guides**:
 - ✅ `INSTALLATION_READY.md` (root, user-facing)
-- ✅ `docs/getting-started/installation.md` (detailed with troubleshooting)
+- ✅ `docs/build/INSTALLATION_GUIDE.md` (detailed with troubleshooting)
 - ❌ Don't create `QUICK_SETUP.md`, `INSTALL.md`, etc.
 
 **Link to canonical docs**:
 ```markdown
-For detailed troubleshooting, see [Installation Guide](docs/getting-started/installation.md)
+For detailed troubleshooting, see [Installation Guide](docs/build/INSTALLATION_GUIDE.md)
 ```
 
 ### Commit Message Format
@@ -189,8 +189,8 @@ Open an issue with:
 
 ## Questions?
 
-- Check [docs/BUILD_GUIDE.md](../docs/BUILD_GUIDE.md) for build issues
-- Check [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) for build issues
+- Check [docs/build/INSTALLATION_GUIDE.md](../docs/build/INSTALLATION_GUIDE.md) for build issues
+- Check [docs/development/BUILD_QUICK_REFERENCE.md](../docs/development/BUILD_QUICK_REFERENCE.md) for quick build commands
 - Review [CHANGELOG.md](../CHANGELOG.md) for project direction
 - Review [.github/standards/ai-tooling-capabilities.md](../.github/standards/ai-tooling-capabilities.md) for current instructions, agents, prompts, skills, MCP servers, and workflow coverage
 - Open a GitHub Discussion for general questions
