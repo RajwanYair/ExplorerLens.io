@@ -23,6 +23,23 @@ Selection: `${selection}`
 - [ ] Sensitive data not logged in plaintext
 - [ ] No SSRF vectors (external URLs not constructed from user input)
 
+### C++20 / MSVC Quality (ExplorerLens Engine)
+
+- [ ] `#pragma once` on all headers
+- [ ] Header banner: `// File.h — Title` + copyright + description (before `#pragma once`)
+- [ ] Namespace: `namespace ExplorerLens { namespace Engine { ... } }`
+- [ ] Classes `PascalCase`, functions `PascalCase`, variables `camelBack`, members `m_` prefix
+- [ ] Enum values `UPPER_CASE` (enforced by `.clang-tidy`)
+- [ ] No bare `new`/`delete` — use RAII, `std::unique_ptr`, `std::vector`
+- [ ] `(std::min)(a, b)` and `(std::max)(a, b)` parenthesized (Windows macro conflict)
+- [ ] No `__builtin_*` intrinsics (GCC-only; use `memcpy()`, `memset()` for MSVC)
+- [ ] No `memmem()` (POSIX-only; use manual `memcmp` loop)
+- [ ] No `<versionhelpers.h>` include (incompatible with `WIN32_LEAN_AND_MEAN`)
+- [ ] No `/wdXXXX` warning suppressions — fix root cause
+- [ ] No LENSTYPE enum value collisions (check `LENSArchive.h`)
+- [ ] New headers registered in `Engine/CMakeLists.txt` `ENGINE_HEADERS`
+- [ ] New sources registered in `ENGINE_SOURCES`
+
 ### Python Quality
 
 - [ ] Type hints on all function signatures
@@ -36,9 +53,9 @@ Selection: `${selection}`
 ### Architecture
 
 - [ ] Single responsibility — functions do one thing
-- [ ] Dataclasses used for structured data (not raw dicts)
+- [ ] Dataclasses / structs used for structured data (not raw dicts / ad-hoc fields)
 - [ ] Enums used for constants (not magic strings/numbers)
-- [ ] Signal handlers implemented (SIGTERM/SIGINT)
+- [ ] Signal handlers implemented (SIGTERM/SIGINT) where applicable
 - [ ] Configuration loaded from YAML/env, not hardcoded
 
 ### Testing
@@ -46,10 +63,18 @@ Selection: `${selection}`
 - [ ] New code has corresponding tests
 - [ ] Error paths tested (not just happy path)
 - [ ] No test bypasses or `# pragma: no cover` without justification
+- [ ] C++ tests use custom `TEST()`/`ASSERT()`/`RUN_TEST()` macros (not GTest)
+- [ ] Test bodies in `EngineTests_Late.cpp`, extern decls in `EngineTestsExterns.h`
+
+### Build & CI
+
+- [ ] Compiles with 0 errors, 0 warnings under `/W4 /WX` on MSVC v145
+- [ ] No toolset pin in CI workflows (let `ilammy/msvc-dev-cmd` auto-detect)
+- [ ] No new dependencies without `Engine/CMakeLists.txt` link registration
 
 ## Output Format
 
 Provide feedback as:
-1. **Critical issues** (blockers) — security, data loss, crashes
-2. **Standard issues** (should fix) — quality, maintainability
+1. **Critical issues** (blockers) — security, data loss, crashes, build breaks
+2. **Standard issues** (should fix) — quality, maintainability, naming violations
 3. **Suggestions** (optional) — style, performance, clarity

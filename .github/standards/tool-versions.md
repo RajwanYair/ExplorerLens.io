@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 16 April 2026 (v36.0.0 Altair release)
-**Version:** 36.0.0 "Altair"
+**Last Updated:** 19 April 2026 (v36.1.0 Antares release)
+**Version:** 36.1.0 "Antares"
 
 ---
 
@@ -34,6 +34,18 @@
 | **fd** | 10.4.2 | 10.4.2 | ✅ Current | `scoop update fd` |
 | **innounp** | 2.67.6 | 2.67.6 | ✅ Current | `scoop update innounp` |
 | **PowerShell** | 7.6.0 | 7.6.0 | ✅ Current | `winget upgrade PowerShell` |
+
+## AI Tooling & Automation Surface
+
+| Surface | Current Standard | Status | Notes |
+|--------|------------------|--------|-------|
+| GitHub Actions JS runtime | Node 24 opt-in (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`) | ✅ Current | Avoids Node 20 deprecation noise in workflows |
+| Copilot repository instructions | `.github/copilot-instructions.md` + `.github/instructions/*.instructions.md` | ✅ Current | Canonical rules plus scoped instruction files |
+| Custom agent definitions | `.github/agents/*.agent.md` | ✅ Current | ExplorerLens repo-specific delegated agent |
+| Prompt templates | `.github/prompts/*.prompt.md` | ✅ Current | Review, test, project creation, and quality prompts |
+| Repository-local skills | `.github/skills/*/SKILL.md` | ✅ Current | Build/release and workflow/MCP capability playbooks |
+| MCP server configuration | `.vscode/mcp.json` | ✅ Current | GitHub + filesystem + docs-scoped server inventory |
+| AI tooling capability reference | `.github/standards/ai-tooling-capabilities.md` | ✅ Current | Canonical inventory and maintenance contract |
 
 ## External Libraries (Statically Linked)
 

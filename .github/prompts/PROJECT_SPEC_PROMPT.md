@@ -893,10 +893,23 @@ Define tasks for every common operation:
 | File | Scope | Purpose |
 |------|-------|---------|
 | `.github/copilot-instructions.md` | Repository | AI coding instructions for entire repo |
-| `.vscode/*.instructions.md` | Workspace | VS Code-specific AI instructions |
-| `.github/AGENTS.md` | Repository | Custom agent definitions |
-| `SKILL.md` files | Skill | Domain-specific AI knowledge packages |
-| `.prompt.md` files | Prompt | Reusable prompt templates |
+| `.github/instructions/*.instructions.md` | Repository | Scoped instruction files applied by path/pattern |
+| `.github/agents/*.agent.md` | Repository | Custom agent definitions |
+| `.github/skills/*/SKILL.md` | Repository | Domain-specific AI knowledge packages |
+| `.github/prompts/*.prompt.md` | Repository | Reusable prompt templates |
+| `.vscode/mcp.json` | Workspace | MCP server configuration for GitHub and filesystem-backed capabilities |
+
+### MCP Server Configuration
+
+Use `.vscode/mcp.json` to declare repository MCP servers.
+
+Current recommended pattern:
+
+- one GitHub server for issues / PRs / metadata
+- one workspace filesystem server for repo-wide operations
+- one constrained docs filesystem server for `.github/` and `docs/`
+
+Keep MCP scopes explicit and minimal. Whenever MCP inventory changes, update `.github/standards/ai-tooling-capabilities.md`.
 
 ### Build Monitoring Pattern
 

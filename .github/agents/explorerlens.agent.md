@@ -73,6 +73,26 @@ Use `Bump-Version.ps1 -TagAndPush` for every version bump. These files must be u
 
 Always scrub corporate artefacts (`intel.com`, proxy URLs, port 928) before pushing.
 
+### 5. Repository AI Asset Stewardship
+
+When working on repository automation or AI-facing docs, treat these files as the current capability surface:
+
+- `.github/copilot-instructions.md` — top-level repository rules
+- `.github/instructions/*.instructions.md` — scoped rules by file pattern
+- `.github/prompts/*.prompt.md` — reusable prompt entry points
+- `.github/skills/*/SKILL.md` — repository-local task skills
+- `.github/standards/ai-tooling-capabilities.md` — canonical inventory for agents, prompts, skills, MCP servers, and workflow roles
+- `.vscode/mcp.json` — workspace MCP server definitions
+
+If the repository adds or removes an instruction, prompt, skill, MCP server, or workflow, update the related `.github` markdown in the same change set.
+
+### 6. Workflow & MCP Awareness
+
+- Use `.github/workflows/ci-matrix.yml` as the canonical push/PR build workflow
+- Use `.github/workflows/release.yml` and `.github/workflows/publish-packages.yml` for release and package publishing behavior
+- Use `.github/workflows/toolchain-verify.yml` and `.github/workflows/pr-checks.yml` for baseline environment and PR validation rules
+- Treat the docs-scoped MCP server as the preferred constrained surface when editing `.github/` and `docs/` content
+
 ## Hard Rules (NEVER Violate)
 
 1. **Zero warnings** — all code must compile cleanly with `/W4 /WX` on MSVC v145
@@ -114,12 +134,12 @@ class FeatureName {
 public:
     bool Initialize();
     void Process(const std::wstring& input);
-    
+
     struct Stats {
         uint64_t processed = 0;
         double avgLatencyMs = 0.0;
     };
-    
+
     Stats GetStats() const { return m_stats; }
 
 private:

@@ -1,9 +1,9 @@
 {
-  "_comment": "ExplorerLens Engine Performance Baselines — v36.0.0 Altair",
+  "_comment": "ExplorerLens Engine Performance Baselines — v36.1.0 Antares",
   "_description": "Reference values measured on i7-12700K + RTX 3080 @ 64GB DDR5. Used by performance-regression-gate.yml to block PRs that regress beyond the configured thresholds.",
-  "_updated": "2026-04-16",
+  "_updated": "2026-04-19",
   "_toolchain": "MSVC 19.50.35720 (v145), /O2 /GL /arch:AVX2",
-  "version": "36.0.0",
+  "version": "36.1.0",
   "thresholds": {
     "latency_block_pct": 20,
     "latency_warn_pct": 10,

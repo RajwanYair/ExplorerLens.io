@@ -104,3 +104,71 @@ def test_process_handles_any_valid_input(text: str, count: int) -> None:
 - Don't leave temporary files — use `tmp_path` fixture
 - Don't catch exceptions to silence test failures
 - Don't use `assert` on mutable defaults
+
+---
+
+## C++20 Test Conventions (ExplorerLens Engine)
+
+ExplorerLens uses a **custom test framework** — NOT GTest, NOT Catch2.
+
+### Framework Macros (defined in `EngineTestsMacros.h`)
+
+| Macro | Purpose |
+|-------|---------|
+| `TEST(name)` | Define a test function (expands to `void TestName_Runner()`) |
+| `ASSERT(cond)` | Assert condition; throws on failure, increments counters |
+| `RUN_TEST(name)` | Execute a test, catch failures, print pass/fail |
+
+### Test File Layout
+
+```
+Engine/Tests/
+├── EngineTestsIncludes.h      — Shared #include block (all Engine headers)
+├── EngineTestsMacros.h        — TEST/ASSERT/RUN_TEST macros + MockDecoder
+├── EngineTestsExterns.h       — extern void TestXxx_Runner() declarations
+├── EngineTests.cpp            — main() + RUN_TEST() calls
+├── EngineTests_Core.cpp       — TEST() bodies: decoder, registry, cache, GPU
+├── EngineTests_Features.cpp   — TEST() bodies: feature modules, SIMD, enterprise
+├── EngineTests_Mid.cpp        — TEST() bodies: settings, memory, plugin, format
+└── EngineTests_Late.cpp       — TEST() bodies: CLI, workflow, AI, platform
+```
+
+### Adding a New C++ Test
+
+1. **Include:** Add `#include "../SubDir/Header.h"` to `EngineTestsIncludes.h`
+2. **Extern:** Add `extern void TestFeatureName_Runner();` to `EngineTestsExterns.h`
+3. **Run call:** Add `RUN_TEST(TestFeatureName);` to `EngineTests.cpp` (before `// Isolation & Stability Tests`)
+4. **Body:** Add `TEST(TestFeatureName) { ... }` to `EngineTests_Late.cpp`
+
+### C++ Test Pattern
+
+```cpp
+TEST(FeatureName) {
+    using namespace ExplorerLens::Engine;
+
+    // Construction & default state
+    FeatureName feature;
+    ASSERT(feature.GetStats().processed == 0);
+
+    // Initialization
+    ASSERT(feature.Initialize());
+
+    // Core behavior
+    feature.Process(L"test");
+    ASSERT(feature.GetStats().processed > 0);
+
+    // Edge cases
+    feature.Process(L"");
+    ASSERT(feature.GetStats().avgLatencyMs >= 0.0);
+}
+```
+
+### C++ Test Rules
+
+- **7-12 ASSERT() calls** per TEST() block — cover construction, methods, edge cases
+- **Always `using namespace ExplorerLens::Engine;`** at top of TEST block
+- **Parenthesize `(std::min)` / `(std::max)`** to avoid Windows macro conflicts
+- **Never use GTest macros** (`EXPECT_*`, `ASSERT_*`, `TEST_F`) in Engine tests
+- **After adding RUN_TEST() calls, do a clean build** — stale `.obj` can hide missing bodies
+- **Test count:** Update in `Bump-Version.ps1` (`-TestCount`) on each sprint delivery
+- **Split threshold:** When any test split file exceeds 500 KB, split again at `//==` boundary

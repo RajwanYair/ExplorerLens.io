@@ -1,18 +1,82 @@
 ---
 mode: agent
-description: "Generate comprehensive pytest tests for the selected code following workspace testing standards"
+description: "Generate comprehensive tests for the selected code following workspace testing standards"
 ---
 
 # Write Tests
 
-Generate comprehensive pytest tests for the selected/specified code.
+Generate comprehensive tests for the selected/specified code.
 
 ## Context
 
 File to test: `${file}`
 Selected code: `${selection}`
 
-## Requirements
+## Language Detection
+
+- **C++ headers/sources (`Engine/`)** → Use ExplorerLens custom test framework (see below)
+- **Python modules (`src/`, `tests/`)** → Use pytest (see below)
+
+---
+
+## C++ Tests (ExplorerLens Engine)
+
+Follow the custom test framework defined in `Engine/Tests/EngineTestsMacros.h`.
+
+### Test Framework
+
+ExplorerLens uses `TEST(name)`, `ASSERT(cond)`, and `RUN_TEST(name)` macros — **NOT GTest**.
+
+### File Placement Rules
+
+| What | Where |
+|------|-------|
+| `#include` directive | `Engine/Tests/EngineTestsIncludes.h` |
+| `extern void TestXxx_Runner();` | `Engine/Tests/EngineTestsExterns.h` |
+| `RUN_TEST(TestXxx);` call | `Engine/Tests/EngineTests.cpp` (before `// Isolation & Stability Tests`) |
+| `TEST(TestXxx) { ... }` body | `Engine/Tests/EngineTests_Late.cpp` |
+
+### C++ Test Pattern
+
+```cpp
+// In EngineTests_Late.cpp
+TEST(FeatureName) {
+    using namespace ExplorerLens::Engine;
+
+    // 1. Construction / default state
+    FeatureName feature;
+    ASSERT(feature.GetStats().processed == 0);
+
+    // 2. Initialize
+    ASSERT(feature.Initialize());
+
+    // 3. Core functionality
+    feature.Process(L"test-input");
+    ASSERT(feature.GetStats().processed > 0);
+
+    // 4. Edge cases
+    feature.Process(L"");  // empty input
+    ASSERT(feature.GetStats().processed > 0);
+
+    // 5. Boundary conditions
+    ASSERT(feature.GetStats().avgLatencyMs >= 0.0);
+
+    // 6-9. Additional assertions for enums, config, error paths
+}
+```
+
+### C++ Test Checklist
+
+- [ ] 7-12 `ASSERT()` calls per `TEST()` block covering construction, methods, and edge cases
+- [ ] `using namespace ExplorerLens::Engine;` at top of TEST block
+- [ ] No GTest macros (`EXPECT_*`, `ASSERT_*`, `TEST_F`) — use custom `ASSERT()`
+- [ ] `(std::min)` / `(std::max)` parenthesized to avoid Windows macro conflicts
+- [ ] Extern declaration added to `EngineTestsExterns.h`
+- [ ] `RUN_TEST()` call added to `EngineTests.cpp`
+
+---
+
+## Python Tests (pytest)
 
 Follow `.github/instructions/testing.instructions.md`. Generate tests that:
 
@@ -23,7 +87,7 @@ Follow `.github/instructions/testing.instructions.md`. Generate tests that:
 5. **Include property-based tests** using Hypothesis for data transformation functions
 6. **Target 90%+ coverage** for the code under test
 
-## Test Structure
+### Python Test Structure
 
 ```python
 """Tests for <module>."""
@@ -33,7 +97,6 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-# Import the module under test
 from src.<module> import <Class>
 
 
@@ -58,7 +121,7 @@ class Test<Class>:
         ...
 ```
 
-## Naming Conventions
+### Python Naming Conventions
 
 - Test files: `test_<module>.py`
 - Test classes: `Test<ClassName>`
@@ -66,4 +129,4 @@ class Test<Class>:
 
 ## Generate
 
-Create the complete test file with all imports, fixtures, and test cases.
+Create the complete test code with all imports, fixtures, and test cases.

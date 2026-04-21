@@ -8,7 +8,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 36.0.0 (Codename: Altair)
+- **Version:** 36.1.0 (Codename: Antares)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -97,7 +97,7 @@ ctest --test-dir build -C Release --output-on-failure
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~4744 unit tests, 5 benchmarks (v36.0.0 baseline)
+- **Test count:** ~4744 unit tests, 5 benchmarks (v36.1.0 baseline)
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -147,4 +147,3 @@ See `.github/standards/lessons-learned.md` for the full engineering retrospectiv
 | Testing | `.github/instructions/testing.instructions.md` | `**/tests/**, **/*_test.py` |
 | File size | `.github/instructions/file-size-policy.instructions.md` | `**` |
 | Version bump | `.github/instructions/version-bump.instructions.md` | `**` |
-
