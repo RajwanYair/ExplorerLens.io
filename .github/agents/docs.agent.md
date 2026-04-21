@@ -107,6 +107,15 @@ TIER VIOLATION: [README.md L78] "GPU acceleration (coming soon)" — remove or q
 - `read_file` — read docs and source files for accuracy comparison
 - `replace_string_in_file` — fix inaccuracies directly
 
+## SVG Diagram Validation
+
+The project maintains 13 architecture SVGs in `docs/assets/`. When auditing:
+
+1. Verify SVGs render in both GitHub dark and light mode
+2. Check version strings in `social-preview.svg` and `architecture-build.svg` match `VERSION`
+3. Verify all SVGs use the project palette: `#0d1117` background, `#58a6ff` primary, `Segoe UI` font
+4. Check that README.md references the correct SVGs and they exist on disk
+
 ## What This Agent Does NOT Do
 
 - Does not write new documentation for unimplemented features
