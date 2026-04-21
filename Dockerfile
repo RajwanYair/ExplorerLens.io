@@ -29,9 +29,11 @@ RUN Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; \
 
 RUN scoop install cmake ninja git 7zip
 
-# Install VS Build Tools 2022 (smallest footprint — C++ build tools only)
+# Install VS Build Tools 2026 (v145 toolset — smallest footprint, C++ only)
+# NOTE: When VS 2026 BuildTools are available on mcr.microsoft.com, switch to
+# the official container image. Until then, use the installer channel /vs/18/.
 RUN curl -fsSL -o vs_buildtools.exe \
-    'https://aka.ms/vs/17/release/vs_buildtools.exe' && \
+    'https://aka.ms/vs/18/release/vs_buildtools.exe' && \
     Start-Process vs_buildtools.exe -Wait -ArgumentList \
       '--quiet', '--wait', '--norestart', \
       '--add', 'Microsoft.VisualStudio.Workload.VCTools', \
@@ -42,7 +44,7 @@ WORKDIR C:\\build
 COPY . C:\\build
 
 # Build LensServer
-RUN cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" && \
+RUN cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2026\BuildTools\VC\Auxiliary\Build\vcvars64.bat" && \
     cmake --preset default-release -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF && \
     cmake --build --preset default-release --target LensServer -j 4'
 
