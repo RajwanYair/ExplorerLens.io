@@ -1139,50 +1139,264 @@ Remove `NO_PROXY`/`no_proxy` corporate artifacts from `.vscode/mcp.json`.
 
 ---
 
-## 11. Shared Tooling Architecture
+## 11. Shared Tooling Architecture (HIGH PRIORITY) 🔴
 
 **Problem:** Every project under `MyScripts\` duplicates tool configuration. When rules
 change, they must be manually propagated to each project.
 
 **Principle:** Common tools live at `MyScripts\` (workspace root). Each project carries
-only project-specific overrides.
+only project-specific overrides. `MyScripts\` is the single source of truth for shared
+tooling across ~25 projects.
 
-### 11.1 Target Layout
+**Phase:** Phase 1 (Foundation) — must be resolved before adding new projects.
+**Priority:** P0 for consolidation, P1 for CI enforcement, P2 for documentation.
 
+### 11.1 Current State Audit
+
+**Root: `C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\`**
+
+Files that already exist at the MyScripts root (shared across all projects):
+
+| File | Size | Status | Purpose |
+|------|------|--------|---------|
+| `.editorconfig` | 1.7 KB | ✅ Exists | Universal editor rules (charset, indent, EOL) — cascades natively |
+| `.gitattributes` | 4.9 KB | ✅ Exists | Line ending normalization, binary detection |
+| `.gitignore` | 5.7 KB | ✅ Exists | Universal ignore patterns |
+| `.markdownlint.json` | 1.8 KB | ✅ Exists | Markdown lint rules for all projects |
+| `.markdownlintignore` | 76 B | ✅ Exists | Paths excluded from markdown lint |
+| `.pre-commit-config.yaml` | 2.4 KB | ✅ Exists | Shared pre-commit hooks |
+| `.flake8` | 3.4 KB | ✅ Exists | Python flake8 rules (legacy — ruff replaces) |
+| `pyproject.toml` | 9.5 KB | ✅ Exists | Shared Python tool config (ruff, mypy, pytest, black) |
+| `pyrightconfig.json` | 2.7 KB | ✅ Exists | Shared Python type-checking baseline |
+| `package.json` | 1.6 KB | ✅ Exists | Node.js shared dev dependencies |
+| `requirements.txt` | 6.9 KB | ✅ Exists | Shared Python dependencies |
+
+**Shared tooling directory: `MyScripts\tooling\`**
+
+| Path | Purpose |
+|------|---------|
+| `tooling/commitlint.base.cjs` | Commit message lint rules |
+| `tooling/markdownlint.base.json` | Extended markdown lint config |
+| `tooling/prettier.base.json` | Code formatter config |
+| `tooling/eslint/base.mjs` | ESLint shared base config |
+| `tooling/eslint/node-ts-app.mjs` | ESLint config for Node.js TypeScript apps |
+| `tooling/eslint/web-ts-app.mjs` | ESLint config for web TypeScript apps |
+| `tooling/htmlhint/.htmlhintrc` | HTML lint rules |
+| `tooling/htmlhint/base.json` | HTML lint shared base |
+| `tooling/stylelint/base.json` | CSS/SCSS lint rules |
+| `tooling/tsconfig/base-node.json` | TypeScript base config (Node.js) |
+| `tooling/tsconfig/base-typescript.json` | TypeScript base config |
+| `tooling/vitest/base.mjs` | Vitest shared test config |
+| `tooling/vitest/happy-dom.mjs` | Vitest DOM test config |
+| `tooling/vitest/node.mjs` | Vitest Node.js test config |
+| `tooling/playwright.base.ts` | Playwright E2E test config |
+| `tooling/vite.base.ts` | Vite build config |
+| `tooling/README.md` | Tooling documentation |
+
+**Shared VS Code settings: `MyScripts\.vscode\`**
+
+| File | Size | Purpose |
+|------|------|---------|
+| `settings.json` | 33 KB | Universal editor settings, linter configs, formatter prefs |
+| `extensions.json` | 3.0 KB | Recommended extensions for all MyScripts projects |
+| `launch.json` | 5.3 KB | Shared debug configurations |
+| `tasks.json` | 10 KB | Shared build/test tasks |
+
+**Shared GitHub config: `MyScripts\.github\`**
+
+| Path | Purpose |
+|------|---------|
+| `copilot-instructions.md` | Shared Copilot instructions for all Python projects |
+| `dependabot.yml` | Shared Dependabot config |
+| `CODEOWNERS` | Shared ownership rules |
+| `CONTRIBUTING.md` | Shared contribution guide |
+| `SECURITY.md` | Shared security policy |
+| `PULL_REQUEST_TEMPLATE.md` | Shared PR template |
+| `instructions/workspace.instructions.md` | Shared workspace-level Copilot rules |
+| `instructions/python.instructions.md` | Shared Python coding rules |
+| `instructions/testing.instructions.md` | Shared testing rules |
+| `instructions/cicd.instructions.md` | Shared CI/CD rules |
+| `prompts/code-review.prompt.md` | Shared code review prompt |
+| `prompts/create-project.prompt.md` | Shared project scaffolding prompt |
+| `prompts/fix-quality.prompt.md` | Shared quality fix prompt |
+| `prompts/write-tests.prompt.md` | Shared test writing prompt |
+| `workflows/ci.yml` | Shared CI workflow |
+| `workflows/release.yml` | Shared release workflow |
+
+### 11.2 ExplorerLens.io — What's Local vs. What Should Inherit
+
+**Rule:** ExplorerLens.io gets ONLY C++/CMake-specific and repo-specific configs locally.
+Everything Python, editor, markdown, and general tooling inherits from `MyScripts\`.
+
+#### 11.2.1 Files That MUST Stay Local (project-specific)
+
+| File | Reason |
+|------|--------|
+| `.vscode/c_cpp_properties.json` | MSVC v145 include paths, IntelliSense config — C++ only |
+| `.vscode/mcp.json` | Repo-scoped MCP servers (GitHub PAT, workspace paths) |
+| `.vscode/tasks.json` | 24 ExplorerLens-specific build/test tasks |
+| `.vscode/launch.json` | 8 ExplorerLens-specific debug configurations |
+| `.clang-format` | C++20 Microsoft-style formatting — not applicable to Python projects |
+| `.clang-tidy` | C++ static analysis checks — not applicable to Python projects |
+| `CMakePresets.json` | CMake build presets — C++ only |
+| `vcpkg.json` | C++ package manifest — C++ only |
+| `scoopfile.json` | C++ dev tools (cmake, ninja, nasm, meson, wix) |
+| `.github/` (entire directory) | 13 instructions, 4 agents, 11 prompts, 6 skills — all ExplorerLens-specific |
+
+#### 11.2.2 Files That SHOULD Inherit (currently inheriting correctly)
+
+| Config Area | Shared Source | ExplorerLens Override? | Status |
+|-------------|-------------|----------------------|--------|
+| Editor settings | `MyScripts\.editorconfig` | ✅ Yes — adds C++ rules (`*.h`, `*.cpp`) | ✅ Correct |
+| Git attributes | `MyScripts\.gitattributes` | ✅ Yes — adds SVG, binary format rules | ✅ Correct |
+| Git ignore | `MyScripts\.gitignore` | ✅ Yes — adds `build/`, `x64/`, `*.pdb`, etc. | ✅ Correct |
+| Markdown lint | `MyScripts\.markdownlint.json` | ❌ No — inherits shared rules | ✅ Correct |
+| Pre-commit hooks | `MyScripts\.pre-commit-config.yaml` | ❌ No — inherits shared hooks | ✅ Correct |
+| VS Code settings | `MyScripts\.vscode\settings.json` | ✅ Yes — adds C++ IntelliSense, CMake settings | ⚠️ Audit needed |
+| VS Code extensions | `MyScripts\.vscode\extensions.json` | ✅ Yes — adds C++/CMake extensions | ⚠️ Audit needed |
+
+#### 11.2.3 Files That SHOULD NOT Exist Locally (potential duplicates to remove)
+
+These need auditing — if ExplorerLens.io has local copies that merely repeat MyScripts\ rules,
+delete the local copy and let inheritance work:
+
+| Candidate | Check | Action |
+|-----------|-------|--------|
+| `.editorconfig` (920 B) | Compare with MyScripts\ (1.7 KB) | Keep only C++-specific overrides; remove shared rules |
+| `.gitattributes` (1.1 KB) | Compare with MyScripts\ (4.9 KB) | Keep only C++/SVG-specific entries; remove shared entries |
+| `.gitignore` (11.7 KB) | Compare with MyScripts\ (5.7 KB) | Keep only ExplorerLens-specific patterns (`build/`, `x64/`, `*.pdb`); remove shared patterns |
+
+### 11.3 Missing Shared Tooling — Gaps to Fill
+
+Items that should be added to `MyScripts\` root or `MyScripts\tooling\`:
+
+| Item | Purpose | Priority | Action |
+|------|---------|----------|--------|
+| `tooling/clang-tidy/.clang-tidy` | Shared C++ lint baseline (ExplorerLens overrides) | P1 | Create from ExplorerLens.io's `.clang-tidy` as base |
+| `tooling/cmake/msvc-v145.cmake` | Shared MSVC v145 toolchain file | P2 | Extract from ExplorerLens.io CMake presets |
+| `tooling/clang-format/.clang-format` | Shared C++ format baseline | P2 | Create if future C++ projects are added |
+| `.github/instructions/cpp-coding.instructions.md` | Shared C++ rules for any C++ project | P2 | Create if future C++ projects are added |
+
+### 11.4 VS Code Multi-Root Settings Strategy
+
+**Key mechanism:** VS Code multi-root workspaces cascade settings. `MyScripts\.vscode\settings.json`
+applies to ALL projects opened in the workspace. Each project's `.vscode\settings.json` overrides
+only what differs.
+
+**Current `MyScripts\.vscode\settings.json` (33 KB) covers:**
+- Python/Pylance/mypy/ruff/pytest settings
+- Editor defaults (formatOnSave, tabSize, rulers, minimap)
+- File associations and exclusions
+- Terminal profiles and shell integration
+- Git settings (autofetch, confirmSync, smartCommit)
+- Extension-specific settings (markdownlint, prettier, eslint)
+
+**ExplorerLens.io `.vscode\settings.json` (14 KB) SHOULD contain only:**
+- `C_Cpp.*` settings (IntelliSense, clang-format, compilerPath)
+- `cmake.*` settings (configureSettings, buildDirectory, generator)
+- `files.associations` for C++ headers without extensions
+- `search.exclude` for `build/`, `external/`, `x64/`
+- C++ extension-specific settings not covered by the shared layer
+
+**Deliverables:**
+- [ ] Diff `ExplorerLens.io\.vscode\settings.json` against `MyScripts\.vscode\settings.json` — remove any duplicated keys
+- [ ] Diff `ExplorerLens.io\.vscode\extensions.json` against `MyScripts\.vscode\extensions.json` — keep only C++/CMake extension IDs locally
+- [ ] Document which keys ExplorerLens overrides and why (in `docs/TOOLING.md`)
+
+### 11.5 .github Inheritance Strategy
+
+**`MyScripts\.github\` provides shared rules for all repos.** ExplorerLens.io's `.github\` overrides
+and extends with C++/COM/Engine-specific rules.
+
+**Inheritance model:**
+
+| Category | MyScripts\ Shared | ExplorerLens.io Override |
+|----------|-------------------|------------------------|
+| Copilot instructions | `copilot-instructions.md` (Python workspace focus) | `copilot-instructions.md` (C++20/MSVC/COM focus, 24 hard rules) |
+| Scoped instructions | 4 files (workspace, python, testing, cicd) | 13 files (adds cpp-coding, build, decoder, performance, security, etc.) |
+| Prompts | 4 (code-review, create-project, fix-quality, write-tests) | 11 (adds architecture-review, benchmark, decoder-scaffold, release-prep, etc.) |
+| Agents | None | 4 (ExplorerLens, Docs, Release, TestCorpus) |
+| Skills | None | 6 (decoder-dev, docs, build-release, workflows-mcp, performance, test-corpus) |
+| Workflows | 2 (ci.yml, release.yml) | 21 (full CI/CD matrix for C++ build, corpus validation, etc.) |
+| Issue templates | 2 (bug_report, feature_request) | 6 (adds build_issue, performance_issue, plugin_request, config) |
+
+**Key decisions:**
+- **Shared instructions DO cascade** — Copilot reads both `MyScripts\.github\instructions\*` and `ExplorerLens.io\.github\instructions\*` in a multi-root workspace.
+- **Shared prompts ARE available** — VS Code discovers prompts from all workspace folders.
+- **Workflows do NOT cascade** — each repo has its own `.github/workflows/`. ExplorerLens.io manages all 21 independently.
+- **Agents do NOT cascade** — agents are repo-scoped. ExplorerLens.io manages its own 4 agents.
+
+**Deliverables:**
+- [ ] Verify no instruction file name collisions between `MyScripts\.github\instructions\` and `ExplorerLens.io\.github\instructions\`
+- [ ] Verify shared prompts are additive (no conflicts with ExplorerLens-specific prompts of same name)
+- [ ] Document the cascading behavior in `docs/TOOLING.md`
+
+### 11.6 Implementation Steps (Detailed)
+
+| Step | Task | Priority | Files Affected |
+|------|------|----------|----------------|
+| 1 | **Audit `.editorconfig`** — diff ExplorerLens vs. MyScripts, keep only C++ overrides | P0 | 1 |
+| 2 | **Audit `.gitattributes`** — diff ExplorerLens vs. MyScripts, keep only C++/SVG entries | P0 | 1 |
+| 3 | **Audit `.gitignore`** — diff ExplorerLens vs. MyScripts, keep only project-specific patterns | P0 | 1 |
+| 4 | **Audit `.vscode/settings.json`** — remove keys already covered by MyScripts shared layer | P0 | 1 |
+| 5 | **Audit `.vscode/extensions.json`** — remove extension IDs already in MyScripts shared list | P0 | 1 |
+| 6 | **Verify instruction cascading** — check for name collisions across workspace folders | P1 | ~17 |
+| 7 | **Verify prompt cascading** — ensure no conflicts between shared and project prompts | P1 | ~15 |
+| 8 | **Create `tooling/clang-tidy/.clang-tidy`** at MyScripts root as C++ lint baseline | P1 | 1 |
+| 9 | **Update `docs/TOOLING.md`** — document actual inheritance results after audits | P1 | 1 |
+| 10 | **Add CI lint** — script that flags local files duplicating shared configs | P2 | 1 |
+
+### 11.7 Validation Checklist
+
+```powershell
+# 1. Check which ExplorerLens config files duplicate MyScripts root files
+$shared = @('.editorconfig','.gitattributes','.gitignore','.markdownlint.json',
+            '.pre-commit-config.yaml','pyproject.toml','pyrightconfig.json','.flake8')
+$root = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts"
+$project = "$root\ExplorerLens.io"
+foreach ($f in $shared) {
+    $rootExists = Test-Path "$root\$f"
+    $projExists = Test-Path "$project\$f"
+    if ($rootExists -and $projExists) {
+        Write-Host "DUPLICATE: $f exists in BOTH root and project — needs audit" -ForegroundColor Yellow
+    } elseif ($rootExists) {
+        Write-Host "INHERITED: $f (shared only)" -ForegroundColor Green
+    } elseif ($projExists) {
+        Write-Host "LOCAL-ONLY: $f (project only)" -ForegroundColor Cyan
+    }
+}
+
+# 2. Check VS Code settings overlap
+$rootSettings = Get-Content "$root\.vscode\settings.json" | ConvertFrom-Json
+$projSettings = Get-Content "$project\.vscode\settings.json" | ConvertFrom-Json
+$rootKeys = $rootSettings.PSObject.Properties.Name
+$projKeys = $projSettings.PSObject.Properties.Name
+$overlap = $projKeys | Where-Object { $_ -in $rootKeys }
+Write-Host "`nVS Code settings overlap ($($overlap.Count) keys):"
+$overlap | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+
+# 3. Check instruction file name collisions
+$rootInstructions = Get-ChildItem "$root\.github\instructions\*.md" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name }
+$projInstructions = Get-ChildItem "$project\.github\instructions\*.md" | ForEach-Object { $_.Name }
+$collisions = $projInstructions | Where-Object { $_ -in $rootInstructions }
+if ($collisions) {
+    Write-Host "`nINSTRUCTION COLLISIONS:" -ForegroundColor Red
+    $collisions | ForEach-Object { Write-Host "  $_" }
+} else {
+    Write-Host "`nNo instruction file name collisions ✅" -ForegroundColor Green
+}
+
+# 4. Check prompt file name collisions
+$rootPrompts = Get-ChildItem "$root\.github\prompts\*.md" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name }
+$projPrompts = Get-ChildItem "$project\.github\prompts\*.md" | ForEach-Object { $_.Name }
+$promptCollisions = $projPrompts | Where-Object { $_ -in $rootPrompts }
+if ($promptCollisions) {
+    Write-Host "PROMPT COLLISIONS:" -ForegroundColor Red
+    $promptCollisions | ForEach-Object { Write-Host "  $_" }
+} else {
+    Write-Host "No prompt file name collisions ✅" -ForegroundColor Green
+}
 ```
-MyScripts\                              ← SHARED (all projects inherit)
-├── .editorconfig                       ← Universal editor rules
-├── .markdownlint.json                  ← Markdown lint rules
-├── .pre-commit-config.yaml             ← Shared pre-commit hooks
-├── pyproject.toml                      ← Shared Python tool config
-├── pyrightconfig.json                  ← Shared type-checking baseline
-├── tooling/
-│   ├── clang-tidy/.clang-tidy          ← Shared C++ lint baseline
-│   └── cmake/msvc-v145.cmake           ← Shared MSVC toolchain
-│
-├── ExplorerLens.io/                    ← PROJECT-SPECIFIC ONLY
-│   ├── .vscode/ (settings, launch, tasks, mcp)
-│   ├── .clang-tidy                     ← Project-specific overrides
-│   ├── CMakePresets.json               ← Project-specific presets
-│   ├── vcpkg.json                      ← C++ dependency manifest
-│   └── .github/                        ← Repo-specific CI, agents, instructions
-```
-
-### 11.2 Key Rules
-
-1. **Inherit, don't duplicate.** If `MyScripts\` covers it, don't copy to project.
-2. **Override only what differs.** Project config = delta from shared baseline.
-3. **`.editorconfig` cascades natively** (spec-defined upward search).
-4. **VS Code multi-root** cascades settings from outer to inner `.vscode/`.
-5. **Never put secrets or machine-local paths** in shared configs.
-
-### 11.3 Implementation Steps
-
-1. Audit all config files across projects — classify as shared/override/unique
-2. Consolidate shared configs at `MyScripts\`; delete project-level duplicates
-3. Move shared `.clang-tidy` base to `MyScripts\tooling\clang-tidy\`
-4. Create `MyScripts\TOOLING.md` documenting the inheritance architecture
-5. Add CI check flagging duplicate configs
 
 ---
 
@@ -1432,7 +1646,7 @@ invalidation. We adopt the same pattern:
 - [x] Fix mkdocs.yml: removed 19 broken nav entries referencing non-existent files (R8) *(v36.3.0)*
 - [x] Clean external lib references: renamed DarkThumbs→ExplorerLens, fixed /MT→/MD (R8, R10) *(v36.3.0)*
 - [x] Document Catch2 migration decision in ADR-010 *(v36.3.0)*
-- [ ] Shared tooling architecture (§11): audit configs, consolidate at MyScripts\, establish inheritance
+- [ ] **Shared tooling consolidation (§11):** Audit all configs, consolidate common tools at `MyScripts\`, slim ExplorerLens.io to C++/project-specific overrides only — see §11 for full audit + validation checklist
 - [x] GitHub AI surface overhaul (§10): 13 instructions, 4 agents, 11 prompts, 6 skills, MCP config *(v36.1.0–v36.3.0)*
 - [x] Delete dead headers: 6 superseded stubs + GLTFModelDecoderTests.cpp removed *(v36.4.0)*
 - [x] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` → `docs/archive/` *(v36.1.0)*
