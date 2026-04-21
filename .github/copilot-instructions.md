@@ -148,3 +148,4 @@ See `.github/standards/lessons-learned.md` for the full engineering retrospectiv
 | File size | `.github/instructions/file-size-policy.instructions.md` | `**` |
 | Version bump | `.github/instructions/version-bump.instructions.md` | `**` |
 | MCP servers | `.github/instructions/mcp-servers.instructions.md` | `.vscode/mcp.json` |
+| AI agents | `.github/instructions/ai-agents.instructions.md` | `.github/agents/**` |
