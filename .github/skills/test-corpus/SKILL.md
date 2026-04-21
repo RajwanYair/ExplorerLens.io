@@ -346,7 +346,30 @@ Get-ChildItem data/corpus -Recurse -File | Where-Object { $_.Name -ne 'MANIFEST.
     Sort-Object Name
 ```
 
-### 3. Cross-Reference and Report
+### 3. Cross-Reference and Report — Automated Gap Analysis
+
+```powershell
+# Automated corpus gap report — run from workspace root
+$decoders = Get-ChildItem Engine/Decoders/*.h | ForEach-Object { $_.BaseName -replace 'Decoder$','' }
+$corpusDirs = Get-ChildItem data/corpus -Directory -Recurse |
+    Where-Object { (Get-ChildItem $_.FullName -File).Count -gt 0 }
+$corpusFormats = $corpusDirs | ForEach-Object { $_.Name.ToLower() }
+
+$report = foreach ($dec in $decoders) {
+    $fmt = $dec.ToLower()
+    $matched = $corpusDirs | Where-Object { $_.Name -like "*$fmt*" }
+    $count = if ($matched) { (Get-ChildItem $matched.FullName -File).Count } else { 0 }
+    [PSCustomObject]@{
+        Decoder = "${dec}Decoder"
+        Format  = $fmt
+        Files   = $count
+        Status  = if ($count -ge 3) { "OK" } elseif ($count -gt 0) { "LOW" } else { "GAP" }
+    }
+}
+$report | Format-Table -AutoSize
+$gaps = ($report | Where-Object { $_.Status -ne 'OK' }).Count
+Write-Host "`n$gaps decoder(s) need more corpus files" -ForegroundColor $(if($gaps -gt 0){'Yellow'}else{'Green'})
+```
 
 For each decoder, check if a matching `data/corpus/<category>/<format>/` directory exists
 with the required minimum files. Output a gap report:
