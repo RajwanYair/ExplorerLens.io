@@ -216,3 +216,56 @@ git diff --cached --diff-filter=ACMR -z --name-only |
 4. **RAII for all resources** — `std::unique_ptr` with custom deleters for C library handles.
 5. **No `alloca()` or variable-length arrays** — stack overflow risk with attacker-controlled sizes.
 6. **Fuzz testing** — all decoders should be fuzzable targets (see `Engine/Tests/fuzz/`).
+
+---
+
+## Binary Signing (Authenticode)
+
+### Release Signing Requirements
+
+1. **All release DLLs and EXEs must be Authenticode-signed** before distribution.
+2. **Use SHA-256 digest** (`/fd SHA256`) — SHA-1 is rejected by modern Windows.
+3. **Timestamp with RFC 3161** (`/tr http://timestamp.digicert.com /td SHA256`) — ensures
+   signatures remain valid after certificate expiry.
+4. **Never commit signing certificates** (`.pfx`, `.p12`) to the repository.
+5. **CI signing** uses `${{ secrets.SIGN_CERT_BASE64 }}` decoded to a temp file, used, then deleted.
+
+```powershell
+# ✅ Correct signing command (Build-MSVC.ps1 pattern)
+signtool sign /f "$certPath" /p "$certPassword" /fd SHA256 `
+    /tr http://timestamp.digicert.com /td SHA256 `
+    /d "ExplorerLens" /du "https://github.com/RajwanYair/ExplorerLens.io" `
+    "$dllPath"
+```
+
+### Unsigned Build Policy
+
+- Debug builds and local development builds need not be signed.
+- CI builds that skip signing must emit `::warning::Unsigned build — not for distribution`.
+- Installer (MSI/MSIX) must be signed independently of the binaries it contains.
+
+---
+
+## Vulnerability Response
+
+### Disclosure
+
+- **Private vulnerability reporting** is enabled on the GitHub repository.
+- Security issues are filed via GitHub Security Advisories (GHSA).
+- The `SECURITY.md` file documents the reporting process and supported versions.
+
+### Response SLA
+
+| Severity | Response Time | Fix Time |
+|----------|---------------|----------|
+| Critical (RCE, privilege escalation) | 24 hours | 72 hours |
+| High (information disclosure, DoS) | 48 hours | 7 days |
+| Medium (minor info leak, crash) | 7 days | 30 days |
+| Low (cosmetic, minor hardening) | 14 days | Next release |
+
+### CVE for Dependencies
+
+- Subscribe to security advisories for all 18 external libraries.
+- When a CVE is published, evaluate impact within 48 hours.
+- If affected, update the library within the SLA above and issue a patch release.
+- Document the CVE and fix in `CHANGELOG.md` under the "Security" category.
