@@ -1,5 +1,4 @@
 # ci-matrix.yml — Canonical CI Pipeline (push/PR) for ExplorerLens Engine
-# ExplorerLens v36.2.0 "Antares"
 # Builds x64 Debug/Release Engine library; LENSShell.dll via MSBuild; runs CTest.
 # Coverage → coverage.yml  |  Static analysis → code-quality.yml
 # NOTE: build.yml is for manual/scheduled builds only.
@@ -89,6 +88,17 @@ jobs:
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
           restore-keys: |
             external-libs-
+
+      - name: Cache CMake build directory
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/CMakeCache.txt
+            build/CMakeFiles/
+            build/_deps/
+          key: cmake-${{ matrix.config }}-${{ hashFiles('CMakeLists.txt', 'Engine/CMakeLists.txt', 'CMakePresets.json') }}
+          restore-keys: |
+            cmake-${{ matrix.config }}-
 
       - name: Build external libraries
         uses: ./.github/actions/build-external-libs
