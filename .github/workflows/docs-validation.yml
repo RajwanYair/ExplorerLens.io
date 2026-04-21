@@ -9,12 +9,16 @@ on:
       - "docs/**"
       - "docs/mkdocs.yml"
       - "**.svg"
+      - "**.md"
+      - ".markdownlint.json"
   push:
     branches: [main]
     paths:
       - "docs/**"
       - "docs/mkdocs.yml"
       - "**.svg"
+      - "**.md"
+      - ".markdownlint.json"
   workflow_dispatch:
 
 permissions:
@@ -97,3 +101,19 @@ jobs:
           else
             echo "✓ All SVGs have <title> and <desc> elements"
           fi
+
+  markdownlint:
+    name: Markdownlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: |
+            **/*.md
+            !external/**
+            !packages/**
+            !node_modules/**
+            !CHANGELOG-archive.md
