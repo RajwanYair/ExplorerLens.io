@@ -564,6 +564,235 @@ All docs use `UPPER_SNAKE_CASE.md` (except `README.md` and tool configs like `mk
 | Scoop manifest | Individual installs | `scoopfile.json` for one-command tool install |
 | First-build time | Manual (30-60 min) | < 15 minutes from clone to passing tests |
 
+### 8.7 Standards Modernization Plan — VS Code / GitHub / Environment (HIGH PRIORITY) 🔴
+
+**Goal:** Bring ALL configuration files, documentation, and environment to current
+2026 VS Code and GitHub standards. Every config must follow the latest schema,
+every doc must use SVG diagrams for visual architecture, and every environment
+setting must match the actual toolchain.
+
+**Phase:** Phase 1 (Foundation) — execute before any feature work.
+**Priority:** P0 for correctness items, P1 for enhancement items.
+
+#### 8.7.1 VS Code Workspace Configuration Audit (P0)
+
+| File | Status | Action Required |
+|------|--------|-----------------|
+| `.vscode/settings.json` | ✅ Exists | Audit: remove deprecated keys, add `cmake.configureSettings` for v145, verify `C_Cpp.default.cppStandard` = `c++20` |
+| `.vscode/extensions.json` | ✅ Exists | Audit: remove delisted extensions, add `ms-vscode.copilot-nightly` if missing, verify all 30+ IDs still valid |
+| `.vscode/tasks.json` | ✅ Exists (24 tasks) | Audit: ensure `problemMatcher` set on all build tasks, add `group.isDefault` for primary build/test, verify `dependsOn` chains |
+| `.vscode/launch.json` | ✅ Exists (8 configs) | Audit: verify all `program` paths resolve after CMake build, add `preLaunchTask` linking to build |
+| `.vscode/mcp.json` | ✅ Exists (3 servers) | Audit: verify no corporate proxy leaks, ensure `GITHUB_PERSONAL_TOKEN` uses `${input:}` or keyring, verify server versions |
+| `.vscode/c_cpp_properties.json` | ✅ Exists | Audit: verify `compilerPath` matches actual cl.exe, verify all `includePath` entries exist on disk, add missing external lib paths |
+
+**Deliverables:**
+- [ ] Run `code --list-extensions` and cross-check against `extensions.json` — remove any that are no longer published
+- [ ] Validate `.vscode/settings.json` against VS Code settings schema (no unknown/deprecated keys)
+- [ ] Ensure every `.vscode/tasks.json` entry has a valid `problemMatcher` for build error navigation
+- [ ] Verify all 8 launch configs in `launch.json` resolve to existing binaries after build
+- [ ] Add `.vscode/profiles/explorerlens.code-profile` for reproducible workspace layout (optional P2)
+
+#### 8.7.2 GitHub Repository Configuration Audit (P0)
+
+| File | Status | Action Required |
+|------|--------|-----------------|
+| `.github/copilot-instructions.md` | ✅ 450 lines | Keep in sync with actual version/test count — use `Bump-Version.ps1` |
+| `.github/FUNDING.yml` | ✅ Exists | Verify `github: RajwanYair` is current |
+| `.github/CODEOWNERS` | ✅ Exists | Verify ownership matches current contributor set |
+| `.github/CONTRIBUTING.md` | ✅ Uppercase | Verify links to `docs/development/` are not broken |
+| `.github/SECURITY.md` | ✅ Uppercase | Verify private vulnerability reporting URL is correct |
+| `.github/SUPPORT.md` | ✅ Exists | Verify resource links are live |
+| `.github/CODE_OF_CONDUCT.md` | ✅ Exists | Verify Contributor Covenant version is ≥ 2.1 |
+| `.github/pull_request_template.md` | ✅ Exists | Verify checklist items match current CI gates |
+| `.github/release.yml` | ❌ Missing | **Create**: GitHub auto-generated release notes config with category labels |
+| `.github/dependabot.yml` | ✅ Exists | Verify ecosystems: `pip`, `github-actions`, `docker` all present |
+
+**Issue templates:**
+- [ ] Validate all 6 issue templates (`.github/ISSUE_TEMPLATE/`) render correctly on GitHub
+- [ ] Ensure `config.yml` contact links point to live URLs
+- [ ] Verify YAML-form templates (`build_issue.yml`, `plugin_request.yml`) use latest schema
+
+**Deliverables:**
+- [ ] Create `.github/release.yml` with auto-generated release notes categories:
+  ```yaml
+  changelog:
+    categories:
+      - title: "🚀 Features"
+        labels: ["enhancement", "feature"]
+      - title: "🐛 Bug Fixes"
+        labels: ["bug", "fix"]
+      - title: "📦 Build & CI"
+        labels: ["build", "ci", "dependencies"]
+      - title: "📝 Documentation"
+        labels: ["documentation"]
+      - title: "🔒 Security"
+        labels: ["security"]
+  ```
+- [ ] Audit all 21 workflows for deprecated GitHub Actions (v3 → v4 migration, Node.js 16 → 20+)
+- [ ] Verify every workflow has `permissions:` block (GitHub's default restricted permissions since 2024)
+- [ ] Ensure `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` is set where needed (Node.js 24 migration)
+
+#### 8.7.3 Documentation SVG Diagram Coverage (P0)
+
+**Principle:** Every major architecture flow gets a dark-theme SVG in `docs/assets/`.
+SVGs are the canonical visual format — no PNG screenshots, no Mermaid-only diagrams.
+All SVGs use the project's established dark-theme palette (`#0d1117` background, Segoe UI font).
+
+**Current inventory (8 SVGs):**
+
+| SVG | Status | Description |
+|-----|--------|-------------|
+| `architecture-components.svg` | ✅ Done | System component overview |
+| `architecture-dataflow.svg` | ✅ Done | Thumbnail generation data flow |
+| `architecture-build.svg` | ✅ Done | Build pipeline with MSI artifact |
+| `social-preview.svg` | ✅ Done | GitHub social preview card |
+| `logo.svg` | ✅ Done | Project logo |
+| `decode-pipeline.svg` | ✅ Done | 5-stage decode pipeline (Sprint 32) |
+| `ci-cd-pipeline.svg` | ✅ Done | CI/CD workflow visualization (Sprint 32) |
+| `test-architecture.svg` | ✅ Done | Test framework architecture (Sprint 32) |
+
+**Target: 13+ SVGs — remaining 5:**
+
+| SVG | Priority | Description |
+|-----|----------|-------------|
+| `release-flow.svg` | P1 | `Bump-Version.ps1` → 20 files → tag → release → 3 registries |
+| `format-matrix.svg` | P1 | Visual grid: 200+ extensions × decoder family × validation status |
+| `cache-architecture.svg` | P1 | L1 memory → L2 disk (SQLite) → invalidation flow |
+| `plugin-lifecycle.svg` | P2 | Discovery → trust chain → sandbox → execute → result |
+| `gpu-pipeline.svg` | P2 | CPU decode → upload → D3D11 compute → readback → HBITMAP |
+
+**SVG style requirements:**
+- Background: `#0d1117` → `#161b22` gradient
+- Boxes: `#21262d` fill, colored strokes per category
+- Colors: blue `#58a6ff` (primary), green `#3fb950` (success), yellow `#d29922` (warning), pink `#f778ba` (accent), purple `#bc8cff` (AI/GPU)
+- Font: `Segoe UI, system-ui, sans-serif`
+- All SVGs must render correctly in: GitHub README (light + dark mode), MkDocs, VS Code preview
+
+**Deliverables:**
+- [ ] Create `release-flow.svg` — version bump → file updates → git tag → GitHub release → package publish
+- [ ] Create `format-matrix.svg` — visual grid of all format families with decoder/library/status
+- [ ] Create `cache-architecture.svg` — multi-tier cache flow diagram
+- [ ] Create `plugin-lifecycle.svg` — plugin trust and execution pipeline
+- [ ] Create `gpu-pipeline.svg` — GPU acceleration data flow
+- [ ] Add all new SVGs to README.md Architecture section
+- [ ] Add SVG references to MkDocs `docs/architecture/` pages
+- [ ] Verify all SVGs render in GitHub dark mode AND light mode
+
+#### 8.7.4 Code Quality & Linting Configuration (P1)
+
+| File | Status | Action Required |
+|------|--------|-----------------|
+| `.editorconfig` | ✅ Exists | Verify: `charset`, `end_of_line`, `indent_size` match actual file conventions |
+| `.clang-format` | ✅ Exists | Verify: `Standard: c++20`, `BasedOnStyle: Microsoft`, column limit = 120 |
+| `.clang-tidy` | ✅ Exists | Audit: ensure no disabled checks that should be active; add `concurrency-*` checks |
+| `.gitattributes` | ✅ Exists | Verify: SVG files get `text eol=lf` (not binary), `*.svg linguist-language=SVG` for GitHub stats |
+| `.gitignore` | ✅ Exists | Audit: verify `build/`, `x64/`, `packages/`, `*.obj`, `*.pdb` are excluded; add `*.user` if missing |
+| `.markdownlint.json` | ❌ Missing | **Create**: enforce consistent heading style, line length, link format |
+
+**Deliverables:**
+- [ ] Create `.markdownlint.json` (or `.markdownlint-cli2.yaml`):
+  ```json
+  {
+    "MD013": { "line_length": 120 },
+    "MD033": false,
+    "MD041": false,
+    "MD024": { "siblings_only": true }
+  }
+  ```
+- [ ] Add `*.svg text eol=lf` to `.gitattributes` if not already present
+- [ ] Add `*.svg linguist-language=SVG linguist-detectable` to `.gitattributes` for GitHub language stats
+- [ ] Verify `.clang-tidy` checks match the MSVC v145 warning set (no false positives)
+- [ ] Ensure `.editorconfig` `max_line_length` for `*.md` = 120 (match markdownlint)
+
+#### 8.7.5 Dev Container & Environment Modernization (P1)
+
+| File | Status | Action Required |
+|------|--------|-----------------|
+| `.devcontainer/devcontainer.json` | ✅ Exists | Verify: base image version, features list, VS Code extensions match `extensions.json` |
+| `.devcontainer/setup.ps1` | ✅ Exists | Verify: installs all tools from `scoopfile.json`, sources vcvars64, runs cmake configure |
+| `scoopfile.json` | ✅ Exists | Verify: all tool versions match `.github/standards/tool-versions.md` |
+| `.env.ps1` | ✅ Exists | Verify: no hardcoded paths, no corporate proxy URLs, no secrets |
+| `.githooks/` | ✅ Exists | Verify: pre-commit hook runs clang-format + markdownlint on staged files |
+
+**Deliverables:**
+- [ ] Cross-check `scoopfile.json` tool versions against `tool-versions.md` — flag any drift
+- [ ] Verify `.devcontainer/devcontainer.json` features include: `git`, `powershell`, `cmake`, `ninja`
+- [ ] Add `postCreateCommand` that runs `.\build-scripts\Build-MSVC.ps1` to validate environment
+- [ ] Ensure `.githooks/pre-commit` is documented in `CONTRIBUTING.md` with setup instructions
+- [ ] Test full clone-to-build workflow in fresh dev container
+
+#### 8.7.6 Workflow & CI Standards Refresh (P0)
+
+| Item | Current | Target |
+|------|---------|--------|
+| Actions versions | Mixed v3/v4 | All actions at latest stable (checkout@v4, upload-artifact@v4, setup-node@v4) |
+| Node.js runtime | Mixed 16/20 | All workflows use Node.js 20+ (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`) |
+| Permissions | Some missing | Every workflow has explicit `permissions:` block (least-privilege) |
+| Reusable workflows | None | Extract common build/test steps into `.github/workflows/reusable-build.yml` |
+| Concurrency | Partial | All PR workflows use `concurrency: { group: pr-${{ github.ref }} }` |
+| Caching | Partial | All build workflows use `actions/cache@v4` for vcpkg, cmake build, sccache |
+
+**Deliverables:**
+- [ ] Audit all 21 workflows: list every action and its version; create upgrade checklist
+- [ ] Pin all actions to SHA (e.g., `actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683`) for supply-chain security
+- [ ] Add `permissions:` to any workflow missing it
+- [ ] Create `.github/workflows/reusable-build.yml` callable workflow for DRY build steps
+- [ ] Ensure every workflow triggers on `pull_request` use `concurrency` to avoid duplicate runs
+- [ ] Add `workflow_dispatch` to all workflows that don't already have it (manual re-run capability)
+
+#### 8.7.7 Validation Checklist — Full Sweep
+
+Run this validation after completing all sub-items above:
+
+```powershell
+# 1. VS Code settings validation
+code --list-extensions | Sort-Object  # compare with extensions.json
+
+# 2. GitHub Actions version audit
+git ls-files .github/workflows/*.yml | ForEach-Object {
+    Select-String -Path $_ -Pattern 'uses:\s+\S+@v\d' | ForEach-Object { $_.Line.Trim() }
+} | Sort-Object -Unique
+
+# 3. Broken link check in all markdown
+# (requires markdown-link-check or similar)
+Get-ChildItem -Recurse -Filter *.md | Where-Object { $_.FullName -notmatch 'external|node_modules' }
+
+# 4. SVG render check
+Get-ChildItem docs/assets/*.svg | ForEach-Object { "$($_.Name): $([math]::Round($_.Length/1KB, 1)) KB" }
+
+# 5. Git config files present
+@('.editorconfig','.clang-format','.clang-tidy','.gitattributes','.gitignore',
+  '.markdownlint.json','scoopfile.json') | ForEach-Object {
+    "$_ : $(if(Test-Path $_){'✅'}else{'❌'})"
+}
+
+# 6. Stale version references
+$v = Get-Content VERSION -Raw | ForEach-Object { $_.Trim() }
+Write-Host "Current version: $v"
+git ls-files | Where-Object { $_ -notmatch '^external/' } | ForEach-Object {
+    $c = Get-Content $_ -Raw -ErrorAction SilentlyContinue
+    if ($c -and $c -notmatch [regex]::Escape($v) -and $c -match '3[2-5]\.\d+\.\d+') {
+        Write-Host "STALE: $_"
+    }
+}
+```
+
+#### 8.7.8 Summary — Implementation Priority
+
+| Sprint | Task | Priority | Estimated Items |
+|--------|------|----------|-----------------|
+| **Next** | Create `.github/release.yml` | P0 | 1 file |
+| **Next** | Create `.markdownlint.json` | P1 | 1 file |
+| **Next** | Fix `.gitattributes` for SVG handling | P0 | 1 edit |
+| **Next** | Audit all 21 workflows for deprecated actions | P0 | 21 files |
+| **Near** | Create remaining 5 architecture SVGs | P1 | 5 files |
+| **Near** | Add `permissions:` to all workflows | P0 | ~10 files |
+| **Near** | Validate VS Code configs against actual toolchain | P1 | 6 files |
+| **Near** | Cross-check scoopfile/tool-versions for drift | P1 | 2 files |
+| **Later** | Create reusable workflow for DRY build | P2 | 1 file |
+| **Later** | Pin all actions to SHA hashes | P2 | 21 files |
+| **Later** | Dev container full clone-to-build test | P2 | 1 test |
+
 ---
 
 ## 9. CI/CD, Packaging & Distribution
@@ -964,6 +1193,7 @@ invalidation. We adopt the same pattern:
 - [x] GitHub AI surface overhaul (§10): 13 instructions, 4 agents, 11 prompts, 6 skills, MCP config *(v36.1.0–v36.3.0)*
 - [x] Delete dead headers: 6 superseded stubs + GLTFModelDecoderTests.cpp removed *(v36.4.0)*
 - [x] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` → `docs/archive/` *(v36.1.0)*
+- [ ] **Standards modernization (§8.7):** VS Code configs, GitHub configs, SVG diagrams, linting, CI workflow refresh — see §8.7 for full checklist
 
 **Core product:**
 - [x] Create test corpus: synthetic corpus with 21 files covering images, docs, archives, 3D models *(v36.3.0)*
