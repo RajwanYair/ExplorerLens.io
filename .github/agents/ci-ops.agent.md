@@ -18,6 +18,7 @@ context:
   - .github/instructions/security.instructions.md
   - .github/skills/ci-ops/SKILL.md
   - .github/standards/ai-tooling-capabilities.md
+  - .github/standards/tool-versions.md
 ---
 
 # CI-Ops Agent — ExplorerLens

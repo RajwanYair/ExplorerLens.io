@@ -14,9 +14,12 @@ tools:
   - manage_todo_list
 context:
   - .github/instructions/documentation.instructions.md
+  - .github/standards/ai-tooling-capabilities.md
   - docs/mkdocs.yml
+  - docs/USER_GUIDE.md
   - README.md
   - CHANGELOG.md
+  - VERSION
 ---
 
 # Docs Agent — ExplorerLens

@@ -14,9 +14,11 @@ tools:
   - get_terminal_output
   - manage_todo_list
 context:
-  - data/corpus/MANIFEST.json
   - .github/skills/test-corpus/SKILL.md
+  - .github/instructions/testing.instructions.md
+  - data/corpus/MANIFEST.json
   - Engine/Decoders/
+  - Engine/Tests/EngineTests.cpp
 ---
 
 # TestCorpus Agent — ExplorerLens

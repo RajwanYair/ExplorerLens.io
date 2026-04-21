@@ -14,9 +14,11 @@ tools:
 context:
   - .github/instructions/version-bump.instructions.md
   - .github/instructions/release.instructions.md
+  - .github/standards/ai-tooling-capabilities.md
   - build-scripts/Bump-Version.ps1
   - VERSION
   - CHANGELOG.md
+  - Engine/Core/BuildValidation.h
 ---
 
 # Release Agent — ExplorerLens

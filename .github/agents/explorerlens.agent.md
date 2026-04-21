@@ -21,7 +21,11 @@ context:
   - .github/copilot-instructions.md
   - .github/instructions/cpp-coding.instructions.md
   - .github/instructions/build.instructions.md
+  - .github/instructions/performance.instructions.md
+  - .github/instructions/security.instructions.md
+  - .github/standards/lessons-learned.md
   - Engine/CMakeLists.txt
+  - Engine/Tests/EngineTests.cpp
   - VERSION
 ---
 
