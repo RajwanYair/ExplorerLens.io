@@ -12,7 +12,7 @@ GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
-- **GPU:** DirectX 11 + DirectX 12 + Vulkan Compute with CPU fallback
+- **GPU:** CPU decode with GDI+ fallback · DirectX 11/12/Vulkan GPU planned (Phase 2+)
 - **Platforms:** Windows (IThumbnailProvider), macOS Quick Look (stub), Linux Nautilus (stub)
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
 - **Build Status:** 0 errors, 0 warnings
@@ -33,9 +33,9 @@ ExplorerLens is configured for the current 2026 GitHub Copilot and VS Code agent
 |-------|----------|------|
 | Repository rules | `.github/copilot-instructions.md` | Primary project contract for agents and Copilot |
 | Scoped instructions | `.github/instructions/*.instructions.md` | Pattern-specific rules for CI, tests, versions, size policy, and workspace behavior |
-| Custom agent | `.github/agents/explorerlens.agent.md` | Repo-specialized ExplorerLens agent definition |
-| Prompt templates | `.github/prompts/*.prompt.md` | Reusable prompts for review, tests, project creation, and quality work |
-| Repository skills | `.github/skills/*/SKILL.md` | Focused task playbooks for build/release and workflow/MCP work |
+| Custom agents | `.github/agents/*.agent.md` | 4 repo-specialized agents (ExplorerLens, Docs, Release, TestCorpus) + Explore |
+| Prompt templates | `.github/prompts/*.prompt.md` | 11 reusable prompts for review, tests, scaffolding, release, and debug |
+| Repository skills | `.github/skills/*/SKILL.md` | 6 focused task playbooks for build, docs, decoders, corpus, perf, workflows |
 | Capability reference | `.github/standards/ai-tooling-capabilities.md` | Canonical inventory for instructions, agents, prompts, skills, MCP servers, and workflow coverage |
 | MCP configuration | `.vscode/mcp.json` | Workspace MCP servers for GitHub, filesystem, and docs-scoped editing |
 
