@@ -604,7 +604,7 @@ setting must match the actual toolchain.
 | `.github/SUPPORT.md` | ✅ Exists | Verify resource links are live |
 | `.github/CODE_OF_CONDUCT.md` | ✅ Exists | Verify Contributor Covenant version is ≥ 2.1 |
 | `.github/pull_request_template.md` | ✅ Exists | Verify checklist items match current CI gates |
-| `.github/release.yml` | ❌ Missing | **Create**: GitHub auto-generated release notes config with category labels |
+| `.github/release.yml` | ✅ Created | Auto-generated release notes config with category labels |
 | `.github/dependabot.yml` | ✅ Exists | Verify ecosystems: `pip`, `github-actions`, `docker` all present |
 
 **Issue templates:**
@@ -687,7 +687,7 @@ All SVGs use the project's established dark-theme palette (`#0d1117` background,
 | `.clang-tidy` | ✅ Exists | Audit: ensure no disabled checks that should be active; add `concurrency-*` checks |
 | `.gitattributes` | ✅ Exists | Verify: SVG files get `text eol=lf` (not binary), `*.svg linguist-language=SVG` for GitHub stats |
 | `.gitignore` | ✅ Exists | Audit: verify `build/`, `x64/`, `packages/`, `*.obj`, `*.pdb` are excluded; add `*.user` if missing |
-| `.markdownlint.json` | ❌ Missing | **Create**: enforce consistent heading style, line length, link format |
+| `.markdownlint.json` | ✅ Created | Enforce consistent heading style, line length, link format |
 
 **Deliverables:**
 - [ ] Create `.markdownlint.json` (or `.markdownlint-cli2.yaml`):
@@ -699,8 +699,8 @@ All SVGs use the project's established dark-theme palette (`#0d1117` background,
     "MD024": { "siblings_only": true }
   }
   ```
-- [ ] Add `*.svg text eol=lf` to `.gitattributes` if not already present
-- [ ] Add `*.svg linguist-language=SVG linguist-detectable` to `.gitattributes` for GitHub language stats
+- [x] Add `*.svg text eol=lf` to `.gitattributes` *(v37.0.0)*
+- [x] Add `*.svg linguist-language=SVG linguist-detectable` to `.gitattributes` for GitHub language stats *(v37.0.0)*
 - [ ] Verify `.clang-tidy` checks match the MSVC v145 warning set (no false positives)
 - [ ] Ensure `.editorconfig` `max_line_length` for `*.md` = 120 (match markdownlint)
 
@@ -802,11 +802,11 @@ versions of GitHub Copilot, VS Code agents, MCP protocol, and GitHub Actions.
 **Phase:** Phase 1 (Foundation) — current AI surface is functional but underutilizes available capabilities.
 **Priority:** P0 for broken/stale items, P1 for capability gaps, P2 for polish.
 
-**Current baseline (v36.5.0):**
-- 4 agents (ExplorerLens, Docs, Release, TestCorpus)
-- 13 scoped instruction files with `applyTo:` routing
-- 11 prompt templates
-- 6 repository skills (200+ lines each)
+**Current baseline (v38.0.0):**
+- 5 agents (ExplorerLens, Docs, Release, TestCorpus, CI-Ops)
+- 15 scoped instruction files with `applyTo:` routing
+- 14 prompt templates (all with `mode:` frontmatter)
+- 7 repository skills (200+ lines each)
 - 3 MCP servers (github, filesystem, project-docs)
 - 21 CI/CD workflows
 - Canonical inventory: `.github/standards/ai-tooling-capabilities.md`
@@ -822,28 +822,28 @@ No overlapping scope conflicts. All are populated with real content.
 |------|-------|--------|-------------|
 | `cpp-coding.instructions.md` | ~150 | ✅ Good | Add C++23 `std::expected` patterns; add MSVC v145-specific intrinsic allowlist |
 | `build.instructions.md` | ~200 | ✅ Good | Add sccache integration instructions; document `cmake --preset` matrix; add PCH rebuild rules |
-| `cicd.instructions.md` | ~100 | ⚠️ Light | **Expand:** add Node.js 24 migration rules, `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`, reusable workflow patterns, permissions-first policy |
-| `security.instructions.md` | ~100 | ⚠️ Light | **Expand:** add supply-chain security (SHA-pinned actions), SBOM generation rules, secret scanning patterns |
-| `testing.instructions.md` | ~80 | ⚠️ Light | **Expand:** add Catch2 v3 patterns (not just custom TEST macros), corpus-based test patterns, `SECTION`/`GENERATE` examples |
+| `cicd.instructions.md` | ~350 | ✅ Expanded | Node.js 24, permissions-first policy, reusable workflows, concurrency, action version pinning |
+| `security.instructions.md` | ~300 | ✅ Expanded | Supply-chain security (SHA pinning), SBOM rules, secret scanning, memory safety |
+| `testing.instructions.md` | ~250 | ✅ Expanded | Catch2 v3 patterns, corpus-based tests, SECTION/GENERATE examples, performance tests |
 | `decoder-authoring.instructions.md` | ~120 | ✅ Good | Add streaming decode pattern; add multi-threaded decode rules; add `partial_file` handling |
 | `performance.instructions.md` | ~100 | ✅ Good | Add ETW marker integration; add cache-hit vs. cache-miss benchmark separation |
-| `documentation.instructions.md` | ~80 | ⚠️ Light | **Expand:** add SVG diagram creation rules (palette, font, sizing); add MkDocs nav validation |
+| `documentation.instructions.md` | ~200 | ✅ Expanded | SVG diagram rules (palette, font, sizing), MkDocs nav validation, ADR authoring |
 | `release.instructions.md` | ~100 | ✅ Good | Add post-release CI verification step; add rollback procedure |
-| `pr-authoring.instructions.md` | ~60 | ⚠️ Light | **Expand:** add conventional commit scope list; add PR size thresholds; add review assignment rules |
+| `pr-authoring.instructions.md` | ~150 | ✅ Expanded | Conventional commit scopes, PR size thresholds, review assignment rules |
 | `file-size-policy.instructions.md` | ~60 | ✅ Good | No changes needed |
 | `version-bump.instructions.md` | ~100 | ✅ Good | No changes needed |
 | `workspace.instructions.md` | ~150 | ✅ Good | Add ExplorerLens C++ context alongside Python context |
 
 **New instruction files to consider:**
-- [ ] `mcp-servers.instructions.md` — rules for adding/modifying MCP server configs (scope: `.vscode/mcp.json`)
-- [ ] `ai-agents.instructions.md` — rules for creating/modifying agent files (scope: `.github/agents/**`)
+- [x] `mcp-servers.instructions.md` — rules for adding/modifying MCP server configs (scope: `.vscode/mcp.json`) *(v37.0.0)*
+- [x] `ai-agents.instructions.md` — rules for creating/modifying agent files (scope: `.github/agents/**`) *(v37.0.0)*
 
 **Deliverables:**
-- [ ] Expand 5 light files (cicd, security, testing, documentation, pr-authoring) to ≥150 lines each
+- [x] Expand 5 light files (cicd, security, testing, documentation, pr-authoring) to ≥150 lines each *(v37.0.0)*
 - [ ] Add C++23 and Catch2 v3 patterns to relevant instructions
-- [ ] Add supply-chain security rules to `security.instructions.md`
-- [ ] Add Node.js 24 migration and permissions-first policy to `cicd.instructions.md`
-- [ ] Verify all 13 `applyTo:` scopes match their intended file patterns (no gaps, no overlaps)
+- [x] Add supply-chain security rules to `security.instructions.md` *(v37.0.0)*
+- [x] Add Node.js 24 migration and permissions-first policy to `cicd.instructions.md` *(v37.0.0)*
+- [x] Verify all 15 `applyTo:` scopes match their intended file patterns (no gaps, no overlaps) *(v38.0.0)*
 
 #### 8.8.2 Agent Enhancement (4 agents → 5+ agents)
 
@@ -865,12 +865,12 @@ Agents use `description` fields that VS Code reads for delegation.
 | `performance.agent.md` | Performance profiling — benchmark analysis, regression gate management, ETW trace interpretation | P2 |
 
 **Deliverables:**
-- [ ] Create `ci-ops.agent.md` with decision tree for CI debugging vs. workflow authoring vs. action upgrades
+- [x] Create `ci-ops.agent.md` with decision tree for CI debugging vs. workflow authoring vs. action upgrades *(v37.0.0)*
 - [ ] Enhance `test-corpus.agent.md` with corpus gap analysis (compare MANIFEST.json categories vs. decoder count)
-- [ ] Add `tools:` and `context:` sections to all agents (2026 agent schema supports these)
+- [x] Add `tools:` and `context:` sections to all agents (2026 agent schema supports these) *(v38.0.0)*
 - [ ] Update Docs agent to remove references to archived ROADMAP versions
-- [ ] Verify all agent `description` fields match actual capabilities (VS Code reads these for routing)
-- [ ] Update `.github/standards/ai-tooling-capabilities.md` agent inventory
+- [x] Verify all agent `description` fields match actual capabilities (VS Code reads these for routing) *(v38.0.0)*
+- [x] Update `.github/standards/ai-tooling-capabilities.md` agent inventory *(v38.0.0)*
 
 #### 8.8.3 Prompt Template Enhancement (11 prompts → 14+ prompts)
 
@@ -900,13 +900,13 @@ Some lack `mode:` frontmatter that VS Code 2026 uses for agent vs. ask routing.
 | `svg-diagram.prompt.md` | Create dark-theme SVG diagram following project palette and style guide | P2 |
 
 **Deliverables:**
-- [ ] Audit all 4 unverified prompts (`create-project`, `fix-quality`, `pr-description`, `PROJECT_SPEC_PROMPT`) — update or mark deprecated
-- [ ] Add `mode:` frontmatter to all prompts missing it (VS Code 2026 uses this for routing)
-- [ ] Create `ci-troubleshooting.prompt.md` — GitHub Actions-specific debugging
-- [ ] Create `workspace-hygiene.prompt.md` — dead code / stale reference / debt reduction
-- [ ] Create `svg-diagram.prompt.md` — standardized SVG creation with palette and sizing rules
+- [x] Audit all 4 unverified prompts (`create-project`, `fix-quality`, `pr-description`, `PROJECT_SPEC_PROMPT`) — updated stale references *(v38.0.0)*
+- [x] Add `mode:` frontmatter to all prompts (VS Code 2026 uses this for routing) *(v37.0.0)*
+- [x] Create `ci-troubleshooting.prompt.md` — GitHub Actions-specific debugging *(v37.0.0)*
+- [x] Create `workspace-hygiene.prompt.md` — dead code / stale reference / debt reduction *(v37.0.0)*
+- [x] Create `svg-diagram.prompt.md` — standardized SVG creation with palette and sizing rules *(v37.0.0)*
 - [ ] Add Catch2 patterns to `write-tests.prompt.md` and `decoder-scaffold.prompt.md`
-- [ ] Update `.github/standards/ai-tooling-capabilities.md` prompt inventory
+- [x] Update `.github/standards/ai-tooling-capabilities.md` prompt inventory *(v38.0.0)*
 
 #### 8.8.4 Skills Enhancement (6 skills → 7+ skills)
 
@@ -930,10 +930,10 @@ Some lack `mode:` frontmatter that VS Code 2026 uses for agent vs. ask routing.
 **Deliverables:**
 - [ ] Expand `test-corpus` skill with real CC0 file sourcing workflow (Unsplash, Wikimedia Commons, IIIF) and SSIM baseline generation
 - [ ] Add Node.js 24 migration playbook to `explorerlens-workflows-and-mcp` skill
-- [ ] Create `ci-ops/SKILL.md` — comprehensive GitHub Actions management playbook
+- [x] Create `ci-ops/SKILL.md` — comprehensive GitHub Actions management playbook *(v37.0.0)*
 - [ ] Remove stale ROADMAP_V3x references from `documentation` skill
 - [ ] Add Catch2 test templates to `decoder-development` skill
-- [ ] Update `.github/standards/ai-tooling-capabilities.md` skill inventory
+- [x] Update `.github/standards/ai-tooling-capabilities.md` skill inventory *(v38.0.0)*
 
 #### 8.8.5 MCP Server Enhancement (3 servers → 4+ servers)
 
@@ -1006,35 +1006,35 @@ Some lack `mode:` frontmatter that VS Code 2026 uses for agent vs. ask routing.
 **Current state:** Last updated 18 July 2025 (~9 months stale). Claims 11 prompts, 4 agents, 6 skills.
 
 **Required updates:**
-- [ ] Re-verify all 11 prompts exist and list their `mode:` (agent/ask)
-- [ ] Update agent count (4 → 5+ after `ci-ops.agent.md`)
-- [ ] Update skill count (6 → 7+ after `ci-ops/SKILL.md`)
-- [ ] Update prompt count (11 → 14+ after new prompts)
+- [x] Re-verify all 14 prompts exist and list their `mode:` (agent/ask) *(v38.0.0)*
+- [x] Update agent count (4 → 5 after `ci-ops.agent.md`) *(v38.0.0)*
+- [x] Update skill count (6 → 7 after `ci-ops/SKILL.md`) *(v38.0.0)*
+- [x] Update prompt count (11 → 14 after new prompts) *(v38.0.0)*
 - [ ] Update MCP server count (3 → 4+ if git MCP added)
 - [ ] Update workflow count and audit status
-- [ ] Refresh "Last Updated" to current date
-- [ ] Add version column to all asset tables (track when each asset was last revised)
+- [x] Refresh "Last Updated" to current date *(v38.0.0)*
+- [x] Add version column to all asset tables (track when each asset was last revised) *(v38.0.0)*
 
 #### 8.8.8 Summary — Implementation Priority Matrix
 
-| Sprint | Task | Priority | Files |
-|--------|------|----------|-------|
-| **Immediate** | Audit all 21 workflows for deprecated actions + missing permissions | P0 | 21 |
-| **Immediate** | Expand 5 light instruction files (cicd, security, testing, docs, PR) | P0 | 5 |
-| **Immediate** | Audit 4 unverified prompts | P0 | 4 |
-| **Immediate** | Refresh `ai-tooling-capabilities.md` inventory | P0 | 1 |
-| **Next** | Create `ci-ops.agent.md` + `ci-ops/SKILL.md` | P1 | 2 |
-| **Next** | Create 3 new prompts (ci-troubleshoot, hygiene, svg-diagram) | P1 | 3 |
-| **Next** | Add `mode:` frontmatter to all prompts | P1 | 11 |
-| **Next** | Add `tools:`/`context:` to all agents | P1 | 4 |
-| **Next** | Add Catch2 patterns to decoder + testing instructions/prompts/skills | P1 | 5 |
-| **Next** | Expand test-corpus skill with CC0 sourcing workflow | P1 | 1 |
-| **Near** | Add Node.js 24 migration playbook to workflows-and-mcp skill | P1 | 1 |
-| **Near** | Evaluate `@anthropic/mcp-server-git` integration | P1 | 1 |
-| **Near** | Create reusable build workflow | P2 | 1 |
-| **Near** | Pin all actions to SHA hashes | P2 | 21 |
-| **Later** | Create `performance.agent.md` | P2 | 1 |
-| **Later** | Add SQLite/fetch MCP servers | P2 | 1 |
+| Sprint | Task | Priority | Files | Status |
+|--------|------|----------|-------|--------|
+| **Done** | Expand 5 light instruction files (cicd, security, testing, docs, PR) | P0 | 5 | ✅ v37.0.0 |
+| **Done** | Audit 4 unverified prompts | P0 | 4 | ✅ v38.0.0 |
+| **Done** | Refresh `ai-tooling-capabilities.md` inventory | P0 | 1 | ✅ v38.0.0 |
+| **Done** | Create `ci-ops.agent.md` + `ci-ops/SKILL.md` | P1 | 2 | ✅ v37.0.0 |
+| **Done** | Create 3 new prompts (ci-troubleshoot, hygiene, svg-diagram) | P1 | 3 | ✅ v37.0.0 |
+| **Done** | Add `mode:` frontmatter to all prompts | P1 | 14 | ✅ v38.0.0 |
+| **Done** | Add `tools:`/`context:` to all agents | P1 | 5 | ✅ v38.0.0 |
+| **Remaining** | Audit all 21 workflows for deprecated actions + missing permissions | P0 | 21 | ⏳ |
+| **Remaining** | Add Catch2 patterns to decoder + testing instructions/prompts/skills | P1 | 5 | ⏳ |
+| **Remaining** | Expand test-corpus skill with CC0 sourcing workflow | P1 | 1 | ⏳ |
+| **Remaining** | Add Node.js 24 migration playbook to workflows-and-mcp skill | P1 | 1 | ⏳ |
+| **Remaining** | Evaluate `@anthropic/mcp-server-git` integration | P1 | 1 | ⏳ |
+| **Remaining** | Create reusable build workflow | P2 | 1 | ⏳ |
+| **Remaining** | Pin all actions to SHA hashes | P2 | 21 | ⏳ |
+| **Later** | Create `performance.agent.md` | P2 | 1 | ⏳ |
+| **Later** | Add SQLite/fetch MCP servers | P2 | 1 | ⏳ |
 
 ---
 
