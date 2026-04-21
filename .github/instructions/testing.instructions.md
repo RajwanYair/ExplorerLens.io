@@ -172,3 +172,140 @@ TEST(FeatureName) {
 - **After adding RUN_TEST() calls, do a clean build** — stale `.obj` can hide missing bodies
 - **Test count:** Update in `Bump-Version.ps1` (`-TestCount`) on each sprint delivery
 - **Split threshold:** When any test split file exceeds 500 KB, split again at `//==` boundary
+
+---
+
+## Catch2 v3 Integration (ExplorerLens Secondary Test Surface)
+
+ExplorerLens uses **Catch2 v3.7.1** as a secondary test framework for isolated
+component tests that benefit from `SECTION`, `GENERATE`, and `REQUIRE` semantics.
+
+### File Location
+
+```
+Engine/Tests/catch2/
+├── catch2_tests.cpp      — Main Catch2 runner (SESSION_START/END)
+├── test_*.cpp             — Individual test files
+└── CMakeLists.txt         — Links against Catch2::Catch2WithMain
+```
+
+### Catch2 Test Pattern
+
+```cpp
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+
+TEST_CASE("CacheManager basic operations", "[cache]") {
+    CacheManager cache;
+
+    SECTION("empty cache returns miss") {
+        auto result = cache.Get(L"nonexistent.png");
+        REQUIRE_FALSE(result.hit);
+    }
+
+    SECTION("insert then retrieve") {
+        cache.Put(L"test.png", thumbnailData);
+        auto result = cache.Get(L"test.png");
+        REQUIRE(result.hit);
+        REQUIRE(result.data.size() == thumbnailData.size());
+    }
+}
+
+TEST_CASE("Decoder routing with generated inputs", "[decoder]") {
+    auto ext = GENERATE(".png", ".jpg", ".webp", ".avif", ".tiff");
+    CAPTURE(ext);
+
+    auto decoder = DecoderRegistry::FindDecoder(ext);
+    REQUIRE(decoder != nullptr);
+}
+```
+
+### Catch2 Rules
+
+1. **Use `[tags]`** to categorize tests: `[cache]`, `[decoder]`, `[gpu]`, `[perf]`, `[regression]`.
+2. **Use `SECTION` for related scenarios** that share setup — avoids test body duplication.
+3. **Use `GENERATE`** for parameterized inputs — cleaner than manual loops.
+4. **Never mix Catch2 and custom TEST() macros** in the same file — use separate targets.
+5. **CI workflow:** `catch2-tests.yml` runs the Catch2 target independently from `EngineTests`.
+6. **Link against `Catch2::Catch2WithMain`** — do not write your own `main()` in Catch2 tests.
+
+### When to Use Catch2 vs Custom Framework
+
+| Use Custom `TEST()` | Use Catch2 |
+|--------------------- |-----------|
+| Sprint test batches (10 per sprint) | Isolated component deep-dives |
+| Build validation (compile-time checks) | Property-based / generative tests |
+| Quick regression checks (<1ms per test) | Slow integration tests with rich output |
+| Main test count tracking (~4744) | Supplementary validation surface |
+
+---
+
+## Corpus-Based Test Patterns
+
+### Purpose
+
+Corpus tests validate decoder correctness against real files. The test corpus lives in
+`data/corpus/` with CC0-licensed files covering every supported format.
+
+### Structure
+
+```
+data/corpus/
+├── MANIFEST.json          — Index: file, format, expected dimensions, SSIM baseline
+├── images/                — Real image files (PNG, JPEG, WebP, AVIF, TIFF, RAW, ...)
+├── archives/              — Archive formats (ZIP, 7Z, RAR, TAR, ...)
+├── documents/             — Document formats (PDF, EPUB, DOCX, ...)
+└── baselines/             — Reference thumbnail PNGs for SSIM comparison
+```
+
+### Corpus Test Pattern (CI)
+
+```yaml
+# corpus-validation.yml runs:
+# 1. Decode every file in MANIFEST.json
+# 2. Compare output to baseline via SSIM score
+# 3. Fail if SSIM < threshold (default 0.95)
+# 4. Generate visual diff report on failure
+```
+
+### Adding a New Corpus Entry
+
+1. Add the CC0-licensed file to the appropriate `data/corpus/` subdirectory.
+2. Generate a baseline thumbnail: `EngineTests.exe --corpus-baseline <file>`.
+3. Add an entry to `MANIFEST.json` with: path, format, expected width/height, SSIM threshold.
+4. Run corpus validation locally before committing: `ctest -R corpus`.
+
+### Rules
+
+1. **All corpus files must be CC0 or public domain** — no copyrighted material.
+2. **SSIM threshold is per-format** — lossy formats (JPEG, WebP) use 0.92; lossless use 0.99.
+3. **Never check in files > 5 MB** — corpus files should be small representative samples.
+4. **Baseline images are committed to git** — they are the ground truth for regression.
+
+---
+
+## Performance Test Patterns
+
+### Benchmark Framework
+
+ExplorerLens uses **Google Benchmark** for micro-benchmarks alongside the main test suite.
+
+### Running Benchmarks
+
+```powershell
+# Build and run benchmarks
+.\build-scripts\Build-MSVC.ps1 -Test
+.\build\bin\EngineBenchmarks.exe --benchmark_format=json --benchmark_out=results.json
+```
+
+### Performance Regression Gate
+
+The `performance-regression-gate.yml` workflow compares benchmark results against
+`Engine/Tests/benchmarks/baseline.json` and fails if any metric regresses by >10%.
+
+### Rules
+
+1. **Update `baseline.json`** via `Bump-Version.ps1` on each release.
+2. **Gate thresholds:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit.
+3. **Never disable the gate** — fix the regression instead.
+4. **Benchmark names must be stable** — renaming breaks baseline comparison.
