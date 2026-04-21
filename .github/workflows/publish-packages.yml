@@ -27,6 +27,11 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read           # checkout code
+  packages: write          # push to GitHub Packages (NuGet, npm, Container)
+  id-token: write          # OIDC token for container signing (future)
+
 concurrency:
   group: publish-packages-${{ github.ref }}
   cancel-in-progress: false

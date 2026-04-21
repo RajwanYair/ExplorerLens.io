@@ -30,6 +30,11 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: write          # create release, upload assets
+  actions: read            # download workflow artifacts
+  id-token: write          # OIDC token for signing (future)
+
 env:
   BUILD_TYPE: Release
   PLATFORM: x64
