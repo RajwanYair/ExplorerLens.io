@@ -41,23 +41,23 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 
 ### Current Instruction Inventory (15 files)
 
-| File | Primary Scope (`applyTo`) | Use When |
-|------|--------------------------|----------|
-| `workspace.instructions.md` | `**` | Cross-project workspace conventions (Python + C++ projects) |
-| `cpp-coding.instructions.md` | `**/*.h, **/*.cpp` | C++20 coding standards, MSVC v145, naming, patterns |
-| `build.instructions.md` | `**/CMakeLists.txt, **/build-scripts/**` | Build system, CMake, MSBuild, external libraries |
-| `cicd.instructions.md` | `**/*.yml, **/*.yaml, .github/**` | GitHub Actions, CI/CD authoring, workflow patterns |
-| `testing.instructions.md` | `**/tests/**, **/*_test.py, **/conftest.py` | Test authoring (pytest, custom TEST macros, Catch2) |
-| `security.instructions.md` | `**/*.h, **/*.cpp, **/*.ps1, **/*.yml` | OWASP, secrets, supply-chain security, credential handling |
-| `performance.instructions.md` | `**/Engine/**, **/benchmarks/**` | Benchmark scaffolding, profiling, regression gates |
-| `decoder-authoring.instructions.md` | `**/Engine/Decoders/**` | Format decoder creation, ProbeHeader/DecodeAtSize pattern |
-| `documentation.instructions.md` | `**/*.md, docs/**` | Documentation tiers, MkDocs, CHANGELOG, ADR authoring |
-| `release.instructions.md` | `**/Bump-Version.ps1, **/CHANGELOG.md, **/VERSION` | Version bumps, release procedure, artifact validation |
-| `pr-authoring.instructions.md` | `.github/**` | PR title format, conventional commits, review assignment |
-| `version-bump.instructions.md` | `**` | 20-file version registry, idempotency guard, release checklist |
-| `file-size-policy.instructions.md` | `**` | Git performance guardrails (500 KB split, 200 KB monitor) |
-| `mcp-servers.instructions.md` | `.vscode/mcp.json` | MCP server configuration rules, addition checklist, security |
-| `ai-agents.instructions.md` | `.github/agents/**` | Agent file structure, creation checklist, design rules |
+| File | Primary Scope (`applyTo`) | Use When | Last Revised |
+|------|--------------------------|----------|-------------|
+| `workspace.instructions.md` | `**` | Cross-project workspace conventions (Python + C++ projects) | v36.0 |
+| `cpp-coding.instructions.md` | `**/*.h, **/*.cpp` | C++20 coding standards, MSVC v145, naming, patterns | v36.5 |
+| `build.instructions.md` | `**/CMakeLists.txt, **/build-scripts/**` | Build system, CMake, MSBuild, external libraries | v36.5 |
+| `cicd.instructions.md` | `**/*.yml, **/*.yaml, .github/**` | GitHub Actions, CI/CD authoring, workflow patterns | v36.9 |
+| `testing.instructions.md` | `**/tests/**, **/*_test.py, **/conftest.py` | Test authoring (pytest, custom TEST macros, Catch2) | v36.9 |
+| `security.instructions.md` | `**/*.h, **/*.cpp, **/*.ps1, **/*.yml` | OWASP, secrets, supply-chain security, credential handling | v36.9 |
+| `performance.instructions.md` | `**/Engine/**, **/benchmarks/**` | Benchmark scaffolding, profiling, regression gates | v36.5 |
+| `decoder-authoring.instructions.md` | `**/Engine/Decoders/**` | Format decoder creation, ProbeHeader/DecodeAtSize pattern | v36.5 |
+| `documentation.instructions.md` | `**/*.md, docs/**` | Documentation tiers, MkDocs, CHANGELOG, ADR authoring, SVG rules | v36.9 |
+| `release.instructions.md` | `**/Bump-Version.ps1, **/CHANGELOG.md, **/VERSION` | Version bumps, release procedure, artifact validation | v36.5 |
+| `pr-authoring.instructions.md` | `.github/**` | PR title format, conventional commits, review assignment | v36.9 |
+| `version-bump.instructions.md` | `**` | 20-file version registry, idempotency guard, release checklist | v36.0 |
+| `file-size-policy.instructions.md` | `**` | Git performance guardrails (500 KB split, 200 KB monitor) | v36.0 |
+| `mcp-servers.instructions.md` | `.vscode/mcp.json` | MCP server configuration rules, addition checklist, security | v37.0 |
+| `ai-agents.instructions.md` | `.github/agents/**` | Agent file structure, creation checklist, design rules | v37.0 |
 
 ### Authoring Rules
 
@@ -72,14 +72,14 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 
 ### Active Repository Agents
 
-| Agent | File | Role |
-|------|------|------|
-| `ExplorerLens` | `.github/agents/explorerlens.agent.md` | Specialized native-code agent for MSVC/CMake/MSBuild/COM/GPU work |
-| `Docs` | `.github/agents/docs.agent.md` | Documentation accuracy agent — checks docs reflect actual code |
-| `Release` | `.github/agents/release.agent.md` | Release orchestration — version bumps, artifact validation, post-release checks |
-| `TestCorpus` | `.github/agents/test-corpus.agent.md` | Test corpus management — real CC0 files, SSIM scoring, decoder validation |
-| `CI-Ops` | `.github/agents/ci-ops.agent.md` | CI/CD operations — workflow authoring, action auditing, failure debugging |
-| `Explore` | *(built-in)* | Fast read-only codebase exploration and Q&A subagent |
+| Agent | File | Role | Last Revised |
+|------|------|------|--------------|
+| `ExplorerLens` | `.github/agents/explorerlens.agent.md` | Specialized native-code agent for MSVC/CMake/MSBuild/COM/GPU work | v36.9 |
+| `Docs` | `.github/agents/docs.agent.md` | Documentation accuracy agent — checks docs reflect actual code | v36.9 |
+| `Release` | `.github/agents/release.agent.md` | Release orchestration — version bumps, artifact validation, post-release checks | v36.9 |
+| `TestCorpus` | `.github/agents/test-corpus.agent.md` | Test corpus management — real CC0 files, SSIM scoring, decoder validation | v36.9 |
+| `CI-Ops` | `.github/agents/ci-ops.agent.md` | CI/CD operations — workflow authoring, action auditing, failure debugging | v36.9 |
+| `Explore` | *(built-in)* | Fast read-only codebase exploration and Q&A subagent | — |
 
 ### Agent Expectations
 
@@ -105,22 +105,22 @@ Add a new `.agent.md` file only when all of the following are true:
 
 ### Current Prompt Inventory
 
-| Prompt | File | Purpose |
-|-------|------|---------|
-| Architecture review | `.github/prompts/architecture-review.prompt.md` | Architecture and design review |
-| Benchmark analysis | `.github/prompts/benchmark-analysis.prompt.md` | Performance benchmark analysis |
-| Code review | `.github/prompts/code-review.prompt.md` | Structured security, quality, and architecture review |
-| Create project | `.github/prompts/create-project.prompt.md` | Project scaffolding guidance |
-| Debug build failure | `.github/prompts/debug-build-failure.prompt.md` | Build failure diagnosis and fix |
-| Decoder scaffold | `.github/prompts/decoder-scaffold.prompt.md` | New format decoder scaffolding (7-step playbook) |
-| Fix quality | `.github/prompts/fix-quality.prompt.md` | Quality improvement and remediation workflow |
-| PR description | `.github/prompts/pr-description.prompt.md` | Pull request description generation |
-| Project specification | `.github/prompts/PROJECT_SPEC_PROMPT.md` | Repository and project setup conventions |
-| Release prep | `.github/prompts/release-prep.prompt.md` | Release preparation checklist |
-| Write tests | `.github/prompts/write-tests.prompt.md` | Test generation workflow |
-| CI troubleshooting | `.github/prompts/ci-troubleshooting.prompt.md` | Workflow failure diagnosis with 10 known failure patterns |
-| Workspace hygiene | `.github/prompts/workspace-hygiene.prompt.md` | Comprehensive workspace audit (versions, orphans, dead tests, link rot) |
-| SVG diagram | `.github/prompts/svg-diagram.prompt.md` | Standardized SVG diagram generation with brand palette |
+| Prompt | File | Purpose | Last Revised |
+|-------|------|---------|-------------|
+| Architecture review | `.github/prompts/architecture-review.prompt.md` | Architecture and design review | v36.5 |
+| Benchmark analysis | `.github/prompts/benchmark-analysis.prompt.md` | Performance benchmark analysis | v36.5 |
+| Code review | `.github/prompts/code-review.prompt.md` | Structured security, quality, and architecture review | v36.5 |
+| Create project | `.github/prompts/create-project.prompt.md` | Project scaffolding guidance | v36.5 |
+| Debug build failure | `.github/prompts/debug-build-failure.prompt.md` | Build failure diagnosis and fix | v36.5 |
+| Decoder scaffold | `.github/prompts/decoder-scaffold.prompt.md` | New format decoder scaffolding (7-step playbook) | v36.5 |
+| Fix quality | `.github/prompts/fix-quality.prompt.md` | Quality improvement and remediation workflow | v36.5 |
+| PR description | `.github/prompts/pr-description.prompt.md` | Pull request description generation | v36.5 |
+| Project specification | `.github/prompts/PROJECT_SPEC_PROMPT.md` | Repository and project setup conventions | v36.0 |
+| Release prep | `.github/prompts/release-prep.prompt.md` | Release preparation checklist | v36.5 |
+| Write tests | `.github/prompts/write-tests.prompt.md` | Test generation workflow | v36.5 |
+| CI troubleshooting | `.github/prompts/ci-troubleshooting.prompt.md` | Workflow failure diagnosis with 10 known failure patterns | v36.9 |
+| Workspace hygiene | `.github/prompts/workspace-hygiene.prompt.md` | Comprehensive workspace audit (versions, orphans, dead tests, link rot) | v36.9 |
+| SVG diagram | `.github/prompts/svg-diagram.prompt.md` | Standardized SVG diagram generation with brand palette | v36.9 |
 
 ### Prompt Authoring Rules
 
@@ -134,15 +134,15 @@ Add a new `.agent.md` file only when all of the following are true:
 
 ### Current Skill Inventory
 
-| Skill | File | Use For |
-|------|------|---------|
-| ExplorerLens build and release | `.github/skills/explorerlens-build-and-release/SKILL.md` | Build, clean build, test, version bump, release preparation |
-| ExplorerLens workflows and MCP | `.github/skills/explorerlens-workflows-and-mcp/SKILL.md` | Workflow edits, automation review, MCP alignment, repo AI configuration |
-| Decoder development | `.github/skills/decoder-development/SKILL.md` | New decoder authoring, format registration, test integration |
-| Documentation | `.github/skills/documentation/SKILL.md` | Documentation authoring, link validation, standards compliance |
-| Performance | `.github/skills/performance/SKILL.md` | Performance profiling, benchmark analysis, regression investigation |
-| Test corpus | `.github/skills/test-corpus/SKILL.md` | Corpus management, CC0 file sourcing, SSIM scoring, MANIFEST.json |
-| CI operations | `.github/skills/ci-ops/SKILL.md` | Workflow failure debugging, action version audit, permissions, concurrency |
+| Skill | File | Use For | Last Revised |
+|------|------|---------|-------------|
+| ExplorerLens build and release | `.github/skills/explorerlens-build-and-release/SKILL.md` | Build, clean build, test, version bump, release preparation | v36.5 |
+| ExplorerLens workflows and MCP | `.github/skills/explorerlens-workflows-and-mcp/SKILL.md` | Workflow edits, automation review, MCP alignment, repo AI configuration | v37.2 |
+| Decoder development | `.github/skills/decoder-development/SKILL.md` | New decoder authoring, format registration, test integration | v37.2 |
+| Documentation | `.github/skills/documentation/SKILL.md` | Documentation authoring, link validation, standards compliance | v36.5 |
+| Performance | `.github/skills/performance/SKILL.md` | Performance profiling, benchmark analysis, regression investigation | v36.5 |
+| Test corpus | `.github/skills/test-corpus/SKILL.md` | Corpus management, CC0 file sourcing, SSIM scoring, MANIFEST.json | v36.9 |
+| CI operations | `.github/skills/ci-ops/SKILL.md` | Workflow failure debugging, action version audit, permissions, concurrency | v36.9 |
 ### Skill Design Rules
 
 1. Skills should be narrow enough to be reusable.
@@ -156,11 +156,11 @@ Add a new `.agent.md` file only when all of the following are true:
 
 The workspace currently defines MCP servers in `.vscode/mcp.json`.
 
-| Server | Backing Package | Scope | Primary Use |
-|--------|------------------|-------|-------------|
-| `github` | `@modelcontextprotocol/server-github` | GitHub API via PAT input | Issues, PRs, repo metadata, automation triage |
-| `filesystem` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}` | Full workspace file inspection and read/write operations |
-| `project-docs` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}\\.github`, `${workspaceFolder}\\docs` | Documentation-only editing and review |
+| Server | Backing Package | Scope | Primary Use | Last Revised |
+|--------|------------------|-------|-------------|-------------|
+| `github` | `@modelcontextprotocol/server-github` | GitHub API via PAT input | Issues, PRs, repo metadata, automation triage | v37.0 |
+| `filesystem` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}` | Full workspace file inspection and read/write operations | v37.0 |
+| `project-docs` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}\\.github`, `${workspaceFolder}\\docs` | Documentation-only editing and review | v37.0 |
 
 ### MCP Guidance
 
