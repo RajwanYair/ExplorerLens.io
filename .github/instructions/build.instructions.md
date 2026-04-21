@@ -108,3 +108,104 @@ Before merging:
 1. `.\build-scripts\Build-MSVC.ps1 -Clean -Test` → 0 errors, 0 warnings
 2. `ctest --test-dir build -C Release --output-on-failure` → 100% pass
 3. Verify `ENGINE_HEADERS` and `ENGINE_SOURCES` contain new files
+
+## Build Caching — sccache
+
+### Why sccache
+
+ExplorerLens has 500+ headers; full rebuilds take 3–5 minutes even on fast machines.
+[sccache](https://github.com/mozilla/sccache) is a shared compilation cache that wraps MSVC
+`cl.exe` and caches object files by content hash. Cache hits skip compilation entirely.
+
+### Local Setup
+
+```powershell
+# Install via scoop (already in scoopfile.json)
+scoop install sccache
+
+# Set environment variables (user-level, persistent)
+[Environment]::SetEnvironmentVariable('CMAKE_C_COMPILER_LAUNCHER',   'sccache', 'User')
+[Environment]::SetEnvironmentVariable('CMAKE_CXX_COMPILER_LAUNCHER', 'sccache', 'User')
+
+# Or pass to cmake directly:
+cmake --preset default-release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+```
+
+### CI Setup (GitHub Actions)
+
+```yaml
+- name: Setup sccache
+  uses: mozilla-actions/sccache-action@v0.0.7
+  with:
+    version: "v0.10.0"
+
+- name: Configure with sccache
+  shell: pwsh
+  env:
+    CMAKE_C_COMPILER_LAUNCHER: sccache
+    CMAKE_CXX_COMPILER_LAUNCHER: sccache
+  run: cmake --preset ci-release
+```
+
+### Cache Locations
+
+| Storage | Config | Use Case |
+|---------|--------|----------|
+| Local disk | `SCCACHE_DIR` (default `~/.cache/sccache`) | Developer machine |
+| GitHub Actions cache | `SCCACHE_GHA_ENABLED=true` | CI pipeline |
+| S3/Azure Blob | `SCCACHE_BUCKET`, `SCCACHE_AZURE_*` | Shared team cache |
+
+### Checking Cache Hit Rate
+
+```powershell
+sccache --show-stats
+# Target: >70% cache hit rate on incremental builds
+```
+
+### Known Limitations
+
+- `/Zi` debug info: sccache supports MSVC PDB via `/Z7` (embedded) or `/Zi` with recent versions
+- PCH: precompiled headers are NOT cached — sccache skips them. Keep `pch.h` stable to minimize rebuilds
+- `/MP` (parallel compile): not compatible with sccache; cmake Ninja generator already parallelizes
+
+## CMake Build Cache Patterns
+
+### Ninja + ccache/sccache Integration
+
+The `ci-release` preset already uses Ninja generator. Ninja natively supports `CMAKE_*_COMPILER_LAUNCHER`:
+
+```json
+// CMakePresets.json — add to cacheVariables
+{
+    "CMAKE_C_COMPILER_LAUNCHER": "sccache",
+    "CMAKE_CXX_COMPILER_LAUNCHER": "sccache"
+}
+```
+
+### GitHub Actions Cache for build/
+
+Use `actions/cache` to persist the CMake build directory across runs:
+
+```yaml
+- name: Cache CMake build
+  uses: actions/cache@v4
+  with:
+    path: build/
+    key: cmake-${{ runner.os }}-${{ hashFiles('CMakeLists.txt', 'Engine/CMakeLists.txt', 'CMakePresets.json') }}
+    restore-keys: |
+      cmake-${{ runner.os }}-
+```
+
+### External Libraries Cache
+
+Already in CI workflows. Key hashes external lib build scripts:
+
+```yaml
+- name: Cache external libraries
+  uses: actions/cache@v4
+  with:
+    path: external/
+    key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
+    restore-keys: |
+      external-libs-
+```
