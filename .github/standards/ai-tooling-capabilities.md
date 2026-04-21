@@ -1,6 +1,6 @@
 # AI Tooling Capabilities & Integration Matrix
 
-**Last Updated:** 19 April 2026  
+**Last Updated:** 18 July 2025  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -59,11 +59,15 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 
 ## Agent Definitions
 
-### Active Repository Agent
+### Active Repository Agents
 
 | Agent | File | Role |
 |------|------|------|
-| `ExplorerLens` | `.github/agents/explorerlens.agent.md` | Specialized native-code agent for MSVC/CMake/MSBuild/COM/GPU work in this repository |
+| `ExplorerLens` | `.github/agents/explorerlens.agent.md` | Specialized native-code agent for MSVC/CMake/MSBuild/COM/GPU work |
+| `Docs` | `.github/agents/docs.agent.md` | Documentation accuracy agent — checks docs reflect actual code |
+| `Release` | `.github/agents/release.agent.md` | Release orchestration — version bumps, artifact validation, post-release checks |
+| `TestCorpus` | `.github/agents/test-corpus.agent.md` | Test corpus management — real CC0 files, SSIM scoring, decoder validation |
+| `Explore` | *(built-in)* | Fast read-only codebase exploration and Q&A subagent |
 
 ### Agent Expectations
 
@@ -91,10 +95,16 @@ Add a new `.agent.md` file only when all of the following are true:
 
 | Prompt | File | Purpose |
 |-------|------|---------|
+| Architecture review | `.github/prompts/architecture-review.prompt.md` | Architecture and design review |
+| Benchmark analysis | `.github/prompts/benchmark-analysis.prompt.md` | Performance benchmark analysis |
 | Code review | `.github/prompts/code-review.prompt.md` | Structured security, quality, and architecture review |
 | Create project | `.github/prompts/create-project.prompt.md` | Project scaffolding guidance |
+| Debug build failure | `.github/prompts/debug-build-failure.prompt.md` | Build failure diagnosis and fix |
+| Decoder scaffold | `.github/prompts/decoder-scaffold.prompt.md` | New format decoder scaffolding (7-step playbook) |
 | Fix quality | `.github/prompts/fix-quality.prompt.md` | Quality improvement and remediation workflow |
+| PR description | `.github/prompts/pr-description.prompt.md` | Pull request description generation |
 | Project specification | `.github/prompts/PROJECT_SPEC_PROMPT.md` | Repository and project setup conventions |
+| Release prep | `.github/prompts/release-prep.prompt.md` | Release preparation checklist |
 | Write tests | `.github/prompts/write-tests.prompt.md` | Test generation workflow |
 
 ### Prompt Authoring Rules
@@ -112,8 +122,10 @@ Add a new `.agent.md` file only when all of the following are true:
 | Skill | File | Use For |
 |------|------|---------|
 | ExplorerLens build and release | `.github/skills/explorerlens-build-and-release/SKILL.md` | Build, clean build, test, version bump, release preparation |
-| ExplorerLens workflows and MCP | `.github/skills/explorerlens-workflows-and-mcp/SKILL.md` | Workflow edits, automation review, MCP alignment, repo AI configuration |
-
+| ExplorerLens workflows and MCP | `.github/skills/explorerlens-workflows-and-mcp/SKILL.md` | Workflow edits, automation review, MCP alignment, repo AI configuration || Decoder development | `.github/skills/decoder-development/SKILL.md` | New decoder authoring, format registration, test integration |
+| Documentation | `.github/skills/documentation/SKILL.md` | Documentation authoring, link validation, standards compliance |
+| Performance | `.github/skills/performance/SKILL.md` | Performance profiling, benchmark analysis, regression investigation |
+| Test corpus | `.github/skills/test-corpus/SKILL.md` | Corpus management, CC0 file sourcing, SSIM scoring, MANIFEST.json |
 ### Skill Design Rules
 
 1. Skills should be narrow enough to be reusable.
@@ -154,6 +166,7 @@ The workspace currently defines MCP servers in `.vscode/mcp.json`.
 | Code quality | `.github/workflows/code-quality.yml` | Static analysis and quality checks |
 | CodeQL | `.github/workflows/codeql.yml` | Security scanning |
 | Coverage | `.github/workflows/coverage.yml` | Coverage collection and reporting |
+| Docs validation | `.github/workflows/docs-validation.yml` | mkdocs strict build validation on docs changes |
 
 ### Release and Distribution Workflows
 
