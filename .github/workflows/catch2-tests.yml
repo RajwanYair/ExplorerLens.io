@@ -110,7 +110,7 @@ jobs:
 
       - name: Publish test results
         if: always()
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: Catch2 Engine Tests
           path: build/catch2-results.xml
