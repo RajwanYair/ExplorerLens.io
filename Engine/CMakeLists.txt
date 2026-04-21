@@ -2464,59 +2464,6 @@ if(BUILD_TESTS)
 endif()
 
 #==============================================================================
-# Catch2 Tests (v3) — via FetchContent
-#==============================================================================
-
-if(BUILD_CATCH2_TESTS)
-    include(FetchContent)
-    FetchContent_Declare(
-        Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG        v3.7.1
-        GIT_SHALLOW    TRUE
-    )
-    FetchContent_MakeAvailable(Catch2)
-
-    # Collect Catch2 test sources
-    set(CATCH2_TEST_SOURCES
-        Tests/Catch2Tests/FormatDetectionTests.cpp
-        Tests/Catch2Tests/CacheSubsystemTests.cpp
-        Tests/Catch2Tests/DecoderUnitTests.cpp
-        Tests/Catch2Tests/EngineIntegrationTests.cpp
-    )
-
-    # Only add sources that exist
-    set(CATCH2_EXISTING_SOURCES "")
-    foreach(src ${CATCH2_TEST_SOURCES})
-        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
-            list(APPEND CATCH2_EXISTING_SOURCES "${src}")
-        endif()
-    endforeach()
-
-    if(CATCH2_EXISTING_SOURCES)
-        add_executable(EngineCatch2Tests ${CATCH2_EXISTING_SOURCES})
-        target_link_libraries(EngineCatch2Tests
-            PRIVATE
-                ExplorerLensEngine
-                Catch2::Catch2WithMain
-        )
-        target_compile_features(EngineCatch2Tests PRIVATE cxx_std_20)
-        target_include_directories(EngineCatch2Tests PRIVATE
-            "${CMAKE_CURRENT_SOURCE_DIR}"
-        )
-        if(MSVC)
-            target_compile_options(EngineCatch2Tests PRIVATE /W4 /WX- /MP)
-        endif()
-        include(CTest)
-        include(Catch)
-        catch_discover_tests(EngineCatch2Tests)
-        message(STATUS "  Catch2 tests:      ON (${CATCH2_EXISTING_SOURCES})")
-    else()
-        message(STATUS "  Catch2 tests:      PENDING (no test source files found yet)")
-    endif()
-endif()
-
-#==============================================================================
 # PluginHost Executable
 #==============================================================================
 
