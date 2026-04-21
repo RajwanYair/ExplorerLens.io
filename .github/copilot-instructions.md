@@ -33,8 +33,8 @@ ExplorerLens is configured for the current 2026 GitHub Copilot and VS Code agent
 |-------|----------|------|
 | Repository rules | `.github/copilot-instructions.md` | Primary project contract for agents and Copilot |
 | Scoped instructions | `.github/instructions/*.instructions.md` | Pattern-specific rules for CI, tests, versions, size policy, and workspace behavior |
-| Custom agents | `.github/agents/*.agent.md` | 4 repo-specialized agents (ExplorerLens, Docs, Release, TestCorpus) + Explore |
-| Prompt templates | `.github/prompts/*.prompt.md` | 11 reusable prompts for review, tests, scaffolding, release, and debug |
+| Custom agents | `.github/agents/*.agent.md` | 5 repo-specialized agents (ExplorerLens, Docs, Release, TestCorpus, CI-Ops) + Explore |
+| Prompt templates | `.github/prompts/*.prompt.md` | 14 reusable prompts for review, tests, scaffolding, release, debug, CI, and diagrams |
 | Repository skills | `.github/skills/*/SKILL.md` | 6 focused task playbooks for build, docs, decoders, corpus, perf, workflows |
 | Capability reference | `.github/standards/ai-tooling-capabilities.md` | Canonical inventory for instructions, agents, prompts, skills, MCP servers, and workflow coverage |
 | MCP configuration | `.vscode/mcp.json` | Workspace MCP servers for GitHub, filesystem, and docs-scoped editing |

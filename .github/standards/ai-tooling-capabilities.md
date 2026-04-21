@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
-**Last Updated:** 21 April 2026  
-**Version:** v36.5.0 "Antares"  
+**Last Updated:** 22 April 2026  
+**Version:** v36.7.0 "Antares"  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -76,6 +76,7 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 | `Docs` | `.github/agents/docs.agent.md` | Documentation accuracy agent — checks docs reflect actual code |
 | `Release` | `.github/agents/release.agent.md` | Release orchestration — version bumps, artifact validation, post-release checks |
 | `TestCorpus` | `.github/agents/test-corpus.agent.md` | Test corpus management — real CC0 files, SSIM scoring, decoder validation |
+| `CI-Ops` | `.github/agents/ci-ops.agent.md` | CI/CD operations — workflow authoring, action auditing, failure debugging |
 | `Explore` | *(built-in)* | Fast read-only codebase exploration and Q&A subagent |
 
 ### Agent Expectations
@@ -115,6 +116,9 @@ Add a new `.agent.md` file only when all of the following are true:
 | Project specification | `.github/prompts/PROJECT_SPEC_PROMPT.md` | Repository and project setup conventions |
 | Release prep | `.github/prompts/release-prep.prompt.md` | Release preparation checklist |
 | Write tests | `.github/prompts/write-tests.prompt.md` | Test generation workflow |
+| CI troubleshooting | `.github/prompts/ci-troubleshooting.prompt.md` | Workflow failure diagnosis with 10 known failure patterns |
+| Workspace hygiene | `.github/prompts/workspace-hygiene.prompt.md` | Comprehensive workspace audit (versions, orphans, dead tests, link rot) |
+| SVG diagram | `.github/prompts/svg-diagram.prompt.md` | Standardized SVG diagram generation with brand palette |
 
 ### Prompt Authoring Rules
 
