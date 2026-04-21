@@ -25,7 +25,7 @@
         "gruntfuggly.todo-tree", // TODO/FIXME/HACK comment tree view
         "usernamehw.errorlens", // Inline error/warning annotations
         // ── Windows Development ──
-        "ms-vscode.windows-registry", // Windows Registry browsing (COM debugging)
+        "ionutvmi.reg", // Windows .reg file syntax highlighting
         // ── Debugging & Analysis ──
         "vadimcn.vscode-lldb", // LLDB debugger (fallback for native debug)
         "jeff-hykin.better-cpp-syntax", // Extended C++ syntax highlighting
@@ -34,7 +34,7 @@
         "bierner.markdown-mermaid", // Mermaid diagram preview in Markdown files
         // ── Python Development ──
         "ms-python.python",         // Python language support + pytest test runner
-        "ms-python.pylance"         // Fast Python type checking + IntelliSense
+        "ms-python.vscode-pylance"  // Fast Python type checking + IntelliSense (Pylance)
     ],
     "unwantedRecommendations": [
         "ms-vscode.cpptools-themes" // Unnecessary — default themes are sufficient
