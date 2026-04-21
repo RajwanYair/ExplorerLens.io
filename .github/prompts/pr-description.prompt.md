@@ -38,7 +38,7 @@ ${input:securityNotes}
 - [ ] Zero warnings build (MSVC v145)
 - [ ] New headers registered in ENGINE_HEADERS (Engine/CMakeLists.txt)
 - [ ] New sources registered in ENGINE_SOURCES
-- [ ] New tests in EngineTests_Late.cpp + RUN_TEST() in EngineTests.cpp
+- [ ] New tests in EngineTests_Platform.cpp + RUN_TEST() in EngineTests.cpp
 - [ ] No corporate artifacts (intel.com, proxy, port 928)
 - [ ] CHANGELOG.md updated under ## [Unreleased]
 ```
