@@ -2,7 +2,7 @@
 # Submit via: winget validate --manifest packaging/winget/
 # PR target: https://github.com/microsoft/winget-pkgs
 PackageIdentifier: ExplorerLens.ExplorerLens
-PackageVersion: 35.5.0
+PackageVersion: 37.2.0
 PackageLocale: en-US
 Publisher: ExplorerLens Project
 PublisherUrl: https://github.com/RajwanYair/ExplorerLens
@@ -45,8 +45,8 @@ Tags:
   - pdf
   - windows
 ReleaseNotes: |-
-  See https://github.com/RajwanYair/ExplorerLens/releases/tag/v35.5.0
-ReleaseNotesUrl: https://github.com/RajwanYair/ExplorerLens/releases/tag/v35.5.0
+  See https://github.com/RajwanYair/ExplorerLens/releases/tag/v37.2.0
+ReleaseNotesUrl: https://github.com/RajwanYair/ExplorerLens/releases/tag/v37.2.0
 InstallationNotes: |-
   After installation, open Windows Explorer and browse to an image folder to verify thumbnails appear.
   If thumbnails do not appear, run: regsvr32 "%ProgramFiles%\ExplorerLens\LENSShell.dll"
@@ -54,7 +54,7 @@ InstallationNotes: |-
 Installers:
   - Architecture: x64
     InstallerType: msi
-    InstallerUrl: https://github.com/RajwanYair/ExplorerLens/releases/download/v35.5.0/ExplorerLens-35.5.0-x64.msi
+    InstallerUrl: https://github.com/RajwanYair/ExplorerLens/releases/download/v37.2.0/ExplorerLens-37.2.0-x64.msi
     InstallerSha256: PLACEHOLDER_SHA256_REPLACE_ON_RELEASE
     InstallerSwitches:
       Silent: /quiet

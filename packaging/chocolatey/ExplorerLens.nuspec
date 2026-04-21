@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>explorerlens</id>
-    <version>35.5.0</version>
+    <version>37.2.0</version>
     <title>ExplorerLens — GPU Thumbnail Provider</title>
     <authors>ExplorerLens Project Contributors</authors>
     <owners>ExplorerLens Project</owners>
@@ -33,7 +33,7 @@ GPU-accelerated thumbnails for 200+ file formats.
 - ETW structured telemetry
 - LENSManager configuration GUI
     ]]></description>
-    <releaseNotes>https://github.com/RajwanYair/ExplorerLens/releases/tag/v35.5.0</releaseNotes>
+    <releaseNotes>https://github.com/RajwanYair/ExplorerLens/releases/tag/v37.2.0</releaseNotes>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />

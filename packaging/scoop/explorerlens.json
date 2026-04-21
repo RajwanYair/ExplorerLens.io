@@ -1,13 +1,13 @@
 {
-  "version": "35.5.0",
+  "version": "37.2.0",
   "description": "GPU-accelerated thumbnail provider for Windows Explorer (200+ file formats)",
   "homepage": "https://github.com/RajwanYair/ExplorerLens",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/RajwanYair/ExplorerLens/releases/download/v35.5.0/ExplorerLens-35.5.0-Portable.zip",
+      "url": "https://github.com/RajwanYair/ExplorerLens/releases/download/v37.2.0/ExplorerLens-37.2.0-Portable.zip",
       "hash": "PLACEHOLDER_SHA256_REPLACE_ON_RELEASE",
-      "extract_dir": "ExplorerLens-35.5.0"
+      "extract_dir": "ExplorerLens-37.2.0"
     }
   },
   "bin": [
