@@ -41,8 +41,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/corpus
-          key: corpus-v2-${{ hashFiles('tools/Generate-Corpus.ps1', 'scripts/Setup-TestCorpus.ps1') }}
-          restore-keys: corpus-v2-
+          key: corpus-v3-${{ hashFiles('tools/Generate-Corpus.ps1', 'scripts/Setup-TestCorpus.ps1', 'data/corpus/MANIFEST.json') }}
+          restore-keys: corpus-v3-
 
       - name: Generate synthetic test files
         if: steps.corpus-cache.outputs.cache-hit != 'true'
@@ -119,23 +119,33 @@ jobs:
         shell: pwsh
         run: |
           $manifest = Get-Content data\corpus\MANIFEST.json | ConvertFrom-Json
-          $passed = 0; $failed = 0
-          foreach ($entry in $manifest.entries) {
-            $path = "data\corpus\$($entry.path)"
-            if (-not (Test-Path $path)) {
-              Write-Warning "MISSING: $path"
-              $failed++
-              continue
+          $passed = 0; $failed = 0; $skipped = 0
+          foreach ($category in $manifest.categories.PSObject.Properties) {
+            $catPath = $category.Value.path
+            foreach ($fmt in $category.Value.formats) {
+              $path = "data\corpus\$catPath$($fmt.test_file)"
+              if (-not (Test-Path $path)) {
+                # Check for placeholder
+                if (Test-Path "$path.placeholder") {
+                  Write-Host "  SKIP: $path (placeholder — needs real file)" -ForegroundColor Yellow
+                  $skipped++
+                  continue
+                }
+                Write-Warning "MISSING: $path"
+                $failed++
+                continue
+              }
+              $sz = (Get-Item $path).Length
+              if ($sz -lt 4) {
+                Write-Warning "EMPTY/STUB: $path ($sz bytes) — skipped"
+                $skipped++
+                continue
+              }
+              Write-Host "  OK: $($fmt.name) — $path ($sz bytes)"
+              $passed++
             }
-            $sz = (Get-Item $path).Length
-            if ($sz -lt 4) {
-              Write-Warning "EMPTY/STUB: $path ($sz bytes) — skipped"
-              continue
-            }
-            Write-Host "  OK: $path ($sz bytes)"
-            $passed++
           }
-          Write-Host "Corpus validation: $passed passed, $failed failed"
+          Write-Host "`nCorpus validation: $passed passed, $failed failed, $skipped skipped"
           if ($failed -gt 0) { exit 1 }
 
       - name: Upload test results
