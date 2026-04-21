@@ -1,5 +1,5 @@
 # ExplorerLens User Guide
-**Version:** 36.3.0 "Antares"
+**Version:** 36.4.0 "Antares"
 **Last Updated:** July 2026
 
 ## Table of Contents
@@ -135,7 +135,7 @@ The modern Manager provides a full-featured GUI organized into pages:
 - **Export** — Diagnostic bundle (.zip), copy system info, open log folder
 
 ### About
-- **Version** — v36.3.0 (Antares) with build info
+- **Version** — v36.4.0 (Antares) with build info
 - **Quick stats** — 200+ formats, 25+ decoders, <17ms per thumbnail
 - **System info** — GPU, Windows version, COM CLSID, test pass rate
 - **Links** — GitHub, docs, bug reports, changelog
