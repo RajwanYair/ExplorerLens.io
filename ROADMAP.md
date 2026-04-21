@@ -208,13 +208,13 @@ This is our moat. Execute on items 1-4 first (Phase 1), then 5-9 (Phases 2-4).
 - Metadata-enriching (no IPropertyStore — Explorer Details view shows nothing for our formats)
 
 **What needs attention:**
-- MuPDF AGPL-3.0 license conflicts with project's MIT license (R10)
-- `EngineTests_Late.cpp` at ~486 KB is dangerously close to the 500 KB split threshold (R19)
-- `LIBRARY_INVENTORY.md` version header is at v15.0.0 — severely stale (R20)
-- Dead code in `src/`: LensServer, PluginHost, PSModule have no CMake integration (R12)
-- LensServer `SERVER_VERSION` hardcoded at `"35.5.0"` — not in Bump-Version.ps1 (R20)
-- Dockerfile uses VS 2022 but project requires VS 2026 v145 toolset (R15)
-- CI workflow version comments are stale (v23.6.0, v32.1.0 instead of v36.1.0)
+- ~~MuPDF AGPL-3.0 license~~ → Documented in ADR-009; PDFium evaluation planned Phase 3
+- ~~`EngineTests_Late.cpp` at ~486 KB~~ → Split into Late (215 KB) + Platform (256 KB)
+- ~~`LIBRARY_INVENTORY.md` version header at v15.0.0~~ → Updated to v36.1.0
+- ~~Dead code in `src/`~~ → Deleted LensServer, PluginHost, PSModule
+- ~~Dockerfile uses VS 2022~~ → Updated to VS 2026
+- ~~CI workflow version comments stale~~ → Updated to v36.1.0
+- Engine/Core/ has ~530 files (consolidation opportunity — see §4.2)
 
 **This is not a failure.** The architecture is sound, the infrastructure is professional,
 and the external library stack is excellent. The gap is between vision and validated
@@ -945,10 +945,12 @@ invalidation. We adopt the same pattern:
 **Goal:** Working, validated, installable product for top 20 formats.
 
 **Infrastructure & cleanup:**
-- [ ] Delete dead code: `src/LensServer/`, `src/PluginHost/`, `src/Tools.PSModule/`, `Engine/Tests/FuzzTargets/`, `Engine/Tests/gtest/`
-- [ ] Split `EngineTests_Late.cpp` at ~486 KB (file size policy compliance)
-- [ ] Fix stale version references: `coverage.yml` (v23.6.0→v36.1.0), `ci-matrix.yml` (v32.1.0→v36.1.0), `LIBRARY_INVENTORY.md` (v15.0.0→v36.1.0)
-- [ ] Evaluate MuPDF AGPL license: decide between PDFium (BSD), commercial MuPDF license, or document AGPL compliance
+- [x] Delete dead code: `src/LensServer/`, `src/PluginHost/`, `src/Tools.PSModule/`, `Engine/Tests/FuzzTargets/`, `Engine/Tests/gtest/` *(v36.2.0)*
+- [x] Split `EngineTests_Late.cpp` at ~486 KB → Late (215 KB) + Platform (256 KB) *(v36.2.0)*
+- [x] Fix stale version references: `coverage.yml` (v23.6.0→v36.1.0), `ci-matrix.yml` (v32.1.0→v36.1.0), `LIBRARY_INVENTORY.md` (v15.0.0→v36.1.0) *(v36.2.0)*
+- [x] Evaluate MuPDF AGPL license: documented in ADR-009 — keep with compliance docs, evaluate PDFium Phase 3 *(v36.2.0)*
+- [x] Fix Dockerfile VS 2022 → VS 2026 BuildTools *(v36.2.0)*
+- [x] Honest README: tempered GPU claims, added AGPL notice *(v36.2.0)*
 - [ ] Shared tooling architecture (§11): audit configs, consolidate at MyScripts\, establish inheritance
 - [ ] GitHub AI surface overhaul (§10): refactor instructions, enhance agents/skills/prompts
 - [ ] Config/docs/env standards (§8): rename GitHub files, fix mkdocs, SVG diagrams, dev container
