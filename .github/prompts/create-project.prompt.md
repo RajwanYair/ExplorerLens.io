@@ -60,7 +60,7 @@ ${input:projectName}/
     │   ├── bug_report.md
     │   ├── feature_request.md
     │   └── performance_issue.md
-    ├── instructions/           # Copy all 4 from workspace .github/instructions/
+    ├── instructions/           # Copy relevant .instructions.md files from workspace .github/instructions/
     └── workflows/
         ├── ci.yml
         └── release.yml

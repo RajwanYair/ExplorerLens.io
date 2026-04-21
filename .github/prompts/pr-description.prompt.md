@@ -7,32 +7,32 @@ description: "Generate a pull request description for an ExplorerLens change. Fo
 
 Generate a PR description for the following change:
 
-**Branch:** {{branchName}}
-**Type:** {{type}} (feat/fix/perf/refactor/docs/test/chore)
-**Scope:** {{scope}} (engine/shell/manager/cli/tests/ci/ai/gpu/cache/decoder)
+**Branch:** ${input:branchName}
+**Type:** ${input:type:feat} (feat/fix/perf/refactor/docs/test/chore)
+**Scope:** ${input:scope:engine} (engine/shell/manager/cli/tests/ci/ai/gpu/cache/decoder)
 
 ## PR Title
 
 ```
-{{type}}({{scope}}): {{imperativeSummary}}
+${input:type:feat}(${input:scope:engine}): ${input:imperativeSummary}
 ```
 
 ## PR Body Template
 
 ```markdown
 ## Summary
-{{oneParagraphSummary}}
+${input:oneParagraphSummary}
 
 ## Changes
-{{listOfChangedFiles}}
+${input:listOfChangedFiles}
 
 ## Testing
 - [ ] `.\build-scripts\Build-MSVC.ps1 -Test` passes (0 errors, 0 warnings)
-- [ ] {{specificTestsRun}}
+- [ ] ${input:specificTestsRun}
 - [ ] No P95 benchmark regression > 10%
 
 ## Security Considerations
-{{securityNotes}}
+${input:securityNotes}
 
 ## Checklist
 - [ ] Zero warnings build (MSVC v145)

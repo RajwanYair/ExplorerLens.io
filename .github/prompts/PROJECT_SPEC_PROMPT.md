@@ -1,3 +1,8 @@
+---
+mode: agent
+description: "Apply the Universal Project Enhancement Framework v15.0.0 to transform a project into production-ready, enterprise-grade quality"
+---
+
 # UNIVERSAL PROJECT ENHANCEMENT SPECIFICATION
 
 **Professional Software Development Methodology**  
