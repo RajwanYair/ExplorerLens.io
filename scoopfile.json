@@ -23,7 +23,7 @@
     {
       "Source": "main",
       "Name": "nasm",
-      "Version": "2.16.03",
+      "Version": "3.01",
       "_purpose": "NASM assembler — required for dav1d and libjxl SIMD assembly"
     },
     {
@@ -35,7 +35,7 @@
     {
       "Source": "main",
       "Name": "nuget",
-      "Version": "6.12.1",
+      "Version": "7.3.0",
       "_purpose": "NuGet package manager — WTL package for LENSManager"
     },
     {
@@ -43,6 +43,12 @@
       "Name": "7zip",
       "Version": "26.00",
       "_purpose": "7-Zip archive tool — used by build scripts for library extraction"
+    },
+    {
+      "Source": "main",
+      "Name": "sccache",
+      "Version": "0.10.0",
+      "_purpose": "Compilation cache for MSVC cl.exe — speeds up incremental builds"
     },
     {
       "Source": "extras",

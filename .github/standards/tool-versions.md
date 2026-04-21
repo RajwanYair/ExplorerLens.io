@@ -34,6 +34,7 @@
 | **fd** | 10.4.2 | 10.4.2 | ✅ Current | `scoop update fd` |
 | **innounp** | 2.67.6 | 2.67.6 | ✅ Current | `scoop update innounp` |
 | **PowerShell** | 7.6.0 | 7.6.0 | ✅ Current | `winget upgrade PowerShell` |
+| **sccache** | 0.10.0 | 0.10.0 | ✅ Current | `scoop update sccache` |
 
 ## AI Tooling & Automation Surface
 
