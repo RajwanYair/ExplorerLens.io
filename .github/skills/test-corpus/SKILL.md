@@ -198,6 +198,51 @@ TEST_CASE("JpegDecoder: truncated file does not crash", "[decoder][jpeg][fuzz]")
 
 ---
 
+## Current Corpus Status (v36.3.0)
+
+| Format | Files in corpus | Target | Status |
+|--------|----------------|--------|--------|
+| WebP | 1 (webp-basic) | 5+ | Needs expansion |
+| QOI | 1 (qoi-gradient) | 3+ | Needs expansion |
+| PPM | 1 (ppm-red-gradient) | 3+ | Needs expansion |
+| BMP | 1 (bmp-solid-blue) | 3+ | Needs expansion |
+| ICO | 1 (ico-multisize) | 3+ | Needs expansion |
+| TGA | 1 (tga-uncompressed) | 3+ | Needs expansion |
+| JPEG | 0 | 5+ | Missing |
+| PNG | 0 | 5+ | Missing |
+| HEIC | 0 | 3+ | Missing |
+| AVIF | 0 | 3+ | Missing |
+| JXL | 0 | 3+ | Missing |
+| RAW (CR2/NEF/ARW/DNG) | 0 | 5+ | Missing |
+| PDF | 0 | 3+ | Missing |
+| CBZ/CBR | 0 | 3+ | Missing |
+
+**Phase 1 target:** 100+ total corpus files. Current: ~21 (synthetic).
+
+---
+
+## CI Integration
+
+The `corpus-validation.yml` workflow runs corpus tests on push/PR:
+
+```yaml
+# Key steps:
+# 1. Checkout with data/corpus/ included
+# 2. Build Engine with Catch2 tests
+# 3. Run: ctest --test-dir build -C Release -L corpus --output-on-failure
+# 4. Upload test results as artifact
+```
+
+To add corpus files to CI cache (avoiding re-download):
+```yaml
+- uses: actions/cache@v4
+  with:
+    path: data/corpus
+    key: corpus-${{ hashFiles('data/corpus/MANIFEST.json') }}
+```
+
+---
+
 ## Validation Checklist
 
 - [ ] All new corpus files have a MANIFEST.json entry with SHA256
