@@ -8,7 +8,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 36.7.0 (Codename: Antares)
+- **Version:** 36.8.0 (Codename: Antares)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -35,7 +35,7 @@ ExplorerLens is configured for the current 2026 GitHub Copilot and VS Code agent
 | Scoped instructions | `.github/instructions/*.instructions.md` | Pattern-specific rules for CI, tests, versions, size policy, and workspace behavior |
 | Custom agents | `.github/agents/*.agent.md` | 5 repo-specialized agents (ExplorerLens, Docs, Release, TestCorpus, CI-Ops) + Explore |
 | Prompt templates | `.github/prompts/*.prompt.md` | 14 reusable prompts for review, tests, scaffolding, release, debug, CI, and diagrams |
-| Repository skills | `.github/skills/*/SKILL.md` | 6 focused task playbooks for build, docs, decoders, corpus, perf, workflows |
+| Repository skills | `.github/skills/*/SKILL.md` | 7 focused task playbooks for build, docs, decoders, corpus, perf, workflows, ci-ops |
 | Capability reference | `.github/standards/ai-tooling-capabilities.md` | Canonical inventory for instructions, agents, prompts, skills, MCP servers, and workflow coverage |
 | MCP configuration | `.vscode/mcp.json` | Workspace MCP servers for GitHub, filesystem, and docs-scoped editing |
 
@@ -97,7 +97,7 @@ ctest --test-dir build -C Release --output-on-failure
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~4744 unit tests, 5 benchmarks (v36.7.0 baseline)
+- **Test count:** ~4744 unit tests, 5 benchmarks (v36.8.0 baseline)
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 

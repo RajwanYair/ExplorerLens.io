@@ -140,6 +140,7 @@ Add a new `.agent.md` file only when all of the following are true:
 | Documentation | `.github/skills/documentation/SKILL.md` | Documentation authoring, link validation, standards compliance |
 | Performance | `.github/skills/performance/SKILL.md` | Performance profiling, benchmark analysis, regression investigation |
 | Test corpus | `.github/skills/test-corpus/SKILL.md` | Corpus management, CC0 file sourcing, SSIM scoring, MANIFEST.json |
+| CI operations | `.github/skills/ci-ops/SKILL.md` | Workflow failure debugging, action version audit, permissions, concurrency |
 ### Skill Design Rules
 
 1. Skills should be narrow enough to be reusable.
