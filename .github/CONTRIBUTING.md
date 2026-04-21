@@ -35,6 +35,16 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 
 Use the shared MyScripts terminal bootstrap plus the workspace `.env.ps1` helpers when working in VS Code. The default ExplorerLens terminal profile is expected to load the common toolchain layer first, then project-local helpers.
 
+### Git Hooks Setup
+
+The repository includes pre-commit hooks in `.githooks/`. To enable them:
+
+```powershell
+git config core.hooksPath .githooks
+```
+
+The dev container configures this automatically on creation. The pre-commit hook runs `clang-format` on staged C++ files to enforce formatting consistency.
+
 ### Testing Your Changes
 
 ```powershell

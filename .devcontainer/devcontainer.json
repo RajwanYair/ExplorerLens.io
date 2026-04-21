@@ -24,7 +24,13 @@
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "mhutchie.git-graph",
-        "streetsidesoftware.code-spell-checker"
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "DavidAnson.vscode-markdownlint",
+        "EditorConfig.EditorConfig",
+        "usernamehw.errorlens",
+        "redhat.vscode-yaml",
+        "github.vscode-github-actions"
       ],
       "settings": {
         "cmake.configureOnOpen": false,
@@ -34,7 +40,7 @@
     }
   },
   "onCreateCommand": "pwsh -NoProfile -File .devcontainer/setup.ps1",
-  "postCreateCommand": "pwsh -NoProfile -Command \"Write-Host 'ExplorerLens dev container ready.' -ForegroundColor Green; Write-Host 'Build:  .\\build-scripts\\Build-MSVC.ps1' -ForegroundColor Cyan; Write-Host 'Test:   ctest --test-dir build -C Release --output-on-failure' -ForegroundColor Cyan; if (Test-Path '.githooks/pre-commit') { git config core.hooksPath .githooks; Write-Host 'Git hooks: .githooks/ configured' -ForegroundColor Green }\"",
+  "postCreateCommand": "pwsh -NoProfile -Command \"Write-Host 'ExplorerLens dev container ready.' -ForegroundColor Green; Write-Host 'Build:  .\\build-scripts\\Build-MSVC.ps1' -ForegroundColor Cyan; Write-Host 'Test:   ctest --test-dir build -C Release --output-on-failure' -ForegroundColor Cyan; if (Test-Path '.githooks/pre-commit') { git config core.hooksPath .githooks; Write-Host 'Git hooks: .githooks/ configured' -ForegroundColor Green }; Write-Host 'Validating build environment...' -ForegroundColor Yellow; $tools = @('cmake','ninja','cl'); $missing = $tools | Where-Object { -not (Get-Command $_ -ErrorAction SilentlyContinue) }; if ($missing) { Write-Host \"Missing tools: $($missing -join ', ')\" -ForegroundColor Red } else { Write-Host 'All required tools found.' -ForegroundColor Green }\"",
   "remoteUser": "ContainerUser",
   "_comment": [
     "ExplorerLens requires Windows containers (COM, WinRT, DirectX).",
