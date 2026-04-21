@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520">
+  <title>ExplorerLens Release Flow</title>
+  <desc>Release pipeline: Bump-Version.ps1 updates 20 files, creates git tag, pushes to GitHub, triggers CI release workflow, and publishes to package registries.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#58a6ff">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#3fb950">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="520" fill="url(#bg)" rx="12"/>
+
+  <!-- Title -->
+  <text x="480" y="36" text-anchor="middle" fill="#58a6ff" font-size="18" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">ExplorerLens Release Flow</text>
+
+  <!-- Stage 1: Bump-Version.ps1 -->
+  <rect x="30" y="65" width="180" height="56" rx="8" fill="#21262d" stroke="#58a6ff" stroke-width="2"/>
+  <text x="120" y="89" text-anchor="middle" fill="#58a6ff" font-size="13" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Bump-Version.ps1</text>
+  <text x="120" y="108" text-anchor="middle" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">PowerShell script</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="210" y1="93" x2="260" y2="93" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Stage 2: 20 Version Files -->
+  <rect x="262" y="55" width="160" height="76" rx="8" fill="#21262d" stroke="#d29922" stroke-width="2"/>
+  <text x="342" y="79" text-anchor="middle" fill="#d29922" font-size="13" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">20 Files Updated</text>
+  <text x="342" y="96" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">VERSION · CMakeLists.txt</text>
+  <text x="342" y="109" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">*.rc · README · SBOM</text>
+  <text x="342" y="122" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">SVGs · docs · vcpkg.json</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="422" y1="93" x2="472" y2="93" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Stage 3: Git Commit + Tag -->
+  <rect x="474" y="65" width="160" height="56" rx="8" fill="#21262d" stroke="#bc8cff" stroke-width="2"/>
+  <text x="554" y="89" text-anchor="middle" fill="#bc8cff" font-size="13" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Git Commit + Tag</text>
+  <text x="554" y="108" text-anchor="middle" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">vX.Y.Z → origin/main</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="634" y1="93" x2="684" y2="93" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Stage 4: GitHub Push -->
+  <rect x="686" y="65" width="160" height="56" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="2"/>
+  <text x="766" y="89" text-anchor="middle" fill="#3fb950" font-size="13" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">git push + tags</text>
+  <text x="766" y="108" text-anchor="middle" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">Triggers CI workflows</text>
+
+  <!-- Vertical arrow from Push down to CI -->
+  <line x1="766" y1="121" x2="766" y2="168" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- ═══ CI Workflows Row ═══ -->
+  <rect x="30" y="170" width="900" height="100" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="480" y="190" text-anchor="middle" fill="#8b949e" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">GitHub Actions CI Pipeline</text>
+
+  <!-- CI Job 1: Build -->
+  <rect x="50" y="200" width="150" height="50" rx="6" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="125" y="221" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Build Engine</text>
+  <text x="125" y="238" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">CMake + MSVC v145</text>
+
+  <!-- CI Job 2: Test -->
+  <rect x="220" y="200" width="150" height="50" rx="6" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="295" y="221" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Run Tests</text>
+  <text x="295" y="238" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">4744 tests + Catch2</text>
+
+  <!-- CI Job 3: Package -->
+  <rect x="390" y="200" width="160" height="50" rx="6" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="470" y="221" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Build Installer</text>
+  <text x="470" y="238" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">MSI + Portable ZIP</text>
+
+  <!-- CI Job 4: Sign -->
+  <rect x="570" y="200" width="150" height="50" rx="6" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="645" y="221" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Sign Binaries</text>
+  <text x="645" y="238" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Authenticode + SHA256</text>
+
+  <!-- CI Job 5: Release -->
+  <rect x="740" y="200" width="170" height="50" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="825" y="221" text-anchor="middle" fill="#c9d1d9" font-size="11" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">Create Release</text>
+  <text x="825" y="238" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Draft → Published</text>
+
+  <!-- Arrow from CI row down to Artifacts -->
+  <line x1="480" y1="270" x2="480" y2="310" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- ═══ Release Artifacts Row ═══ -->
+  <text x="480" y="330" text-anchor="middle" fill="#c9d1d9" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Release Artifacts</text>
+
+  <!-- Artifact boxes -->
+  <rect x="50" y="345" width="160" height="42" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="130" y="364" text-anchor="middle" fill="#c9d1d9" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">LENSShell.dll</text>
+  <text x="130" y="379" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">COM Shell Extension</text>
+
+  <rect x="230" y="345" width="160" height="42" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="310" y="364" text-anchor="middle" fill="#c9d1d9" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">LENSManager.exe</text>
+  <text x="310" y="379" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Config GUI</text>
+
+  <rect x="410" y="345" width="160" height="42" rx="6" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="490" y="364" text-anchor="middle" fill="#c9d1d9" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">Setup-X.Y.Z.msi</text>
+  <text x="490" y="379" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">WiX Installer</text>
+
+  <rect x="590" y="345" width="160" height="42" rx="6" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="670" y="364" text-anchor="middle" fill="#c9d1d9" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">Portable.zip</text>
+  <text x="670" y="379" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">No-install package</text>
+
+  <rect x="770" y="345" width="160" height="42" rx="6" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="850" y="364" text-anchor="middle" fill="#c9d1d9" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">SHA256SUMS.txt</text>
+  <text x="850" y="379" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Integrity verification</text>
+
+  <!-- Arrow down to registries -->
+  <line x1="480" y1="387" x2="480" y2="420" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+  <!-- ═══ Package Registries Row ═══ -->
+  <text x="480" y="440" text-anchor="middle" fill="#c9d1d9" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Distribution Channels</text>
+
+  <rect x="100" y="455" width="180" height="42" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="190" y="474" text-anchor="middle" fill="#bc8cff" font-size="12" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">GitHub Releases</text>
+  <text x="190" y="489" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">MSI + ZIP + checksums</text>
+
+  <rect x="390" y="455" width="180" height="42" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="480" y="474" text-anchor="middle" fill="#bc8cff" font-size="12" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">NuGet (SDK)</text>
+  <text x="480" y="489" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">C++ SDK package</text>
+
+  <rect x="680" y="455" width="180" height="42" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="770" y="474" text-anchor="middle" fill="#bc8cff" font-size="12" font-weight="600"
+        font-family="'Segoe UI', system-ui, sans-serif">winget / Scoop</text>
+  <text x="770" y="489" text-anchor="middle" fill="#8b949e" font-size="9"
+        font-family="'Segoe UI', system-ui, sans-serif">Package managers</text>
+</svg>
