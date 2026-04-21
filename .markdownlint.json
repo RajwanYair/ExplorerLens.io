@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json",
+  "comment": "ExplorerLens markdownlint configuration — see .github/instructions/documentation.instructions.md",
+  "default": true,
+  "MD003": { "style": "atx" },
+  "MD004": { "style": "dash" },
+  "MD007": { "indent": 2 },
+  "MD009": true,
+  "MD010": true,
+  "MD012": { "maximum": 2 },
+  "MD013": {
+    "line_length": 120,
+    "heading_line_length": 80,
+    "code_block_line_length": 200,
+    "code_blocks": false,
+    "tables": false
+  },
+  "MD024": { "siblings_only": true },
+  "MD025": true,
+  "MD026": true,
+  "MD029": { "style": "one" },
+  "MD033": {
+    "allowed_elements": [
+      "br", "details", "summary", "img", "a", "kbd", "sup", "sub"
+    ]
+  },
+  "MD034": true,
+  "MD036": false,
+  "MD040": true,
+  "MD041": true,
+  "MD046": { "style": "fenced" },
+  "MD048": { "style": "backtick" },
+  "MD049": { "style": "underscore" },
+  "MD050": { "style": "asterisk" }
+}
