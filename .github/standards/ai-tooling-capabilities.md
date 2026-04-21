@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
-**Last Updated:** 22 April 2026  
-**Version:** v36.7.0 "Antares"  
+**Last Updated:** 22 July 2025  
+**Version:** v36.9.0 "Antares"  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -177,12 +177,13 @@ The workspace currently defines MCP servers in `.vscode/mcp.json`.
 |---------|------|---------|
 | Canonical CI | `.github/workflows/ci-matrix.yml` | Main push/PR build matrix for Engine and shell validation |
 | Scheduled build | `.github/workflows/build.yml` | Manual/scheduled weekly verification build (not push/PR) |
+| Reusable build | `.github/workflows/reusable-build.yml` | Reusable `workflow_call` Engine build+test pattern (DRY) |
 | PR validation | `.github/workflows/pr-checks.yml` | PR title, size, changelog, and version consistency checks |
 | Toolchain verification | `.github/workflows/toolchain-verify.yml` | Verifies MSVC, CMake, and Ninja availability |
 | Code quality | `.github/workflows/code-quality.yml` | Static analysis and quality checks |
 | CodeQL | `.github/workflows/codeql.yml` | Security scanning |
 | Coverage | `.github/workflows/coverage.yml` | Coverage collection and reporting |
-| Docs validation | `.github/workflows/docs-validation.yml` | mkdocs strict build validation on docs changes |
+| Docs validation | `.github/workflows/docs-validation.yml` | mkdocs strict build + SVG well-formedness validation |
 
 ### Release and Distribution Workflows
 
