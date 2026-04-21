@@ -143,6 +143,38 @@ When asked to analyze gaps, follow this procedure:
    - [Unsplash](https://unsplash.com/) — high-quality photos (Unsplash License ≈ CC0 for testing)
    - [Wikimedia Commons](https://commons.wikimedia.org/) — filter by CC0/PD license
    - Format spec repos (e.g., libavif test vectors, libjxl conformance suite)
+
+## MANIFEST.json Auto-Update Procedure
+
+When a corpus file is added or removed, update `data/corpus/MANIFEST.json`:
+
+1. Compute SHA-256: `(Get-FileHash $path -Algorithm SHA256).Hash.ToLower()`
+2. Detect format using file extension or `magick identify`
+3. Get dimensions: `magick identify -format "%wx%h" $path`
+4. Add the entry to the `"files"` array with all required fields
+5. Sort entries by `path` for stable diffs
+6. Validate JSON syntax: `Get-Content MANIFEST.json | ConvertFrom-Json`
+
+When removing a file, remove its entry from MANIFEST.json in the same commit.
+
+## SSIM Threshold Enforcement
+
+After generating thumbnails from corpus files, enforce these SSIM thresholds:
+
+| Category | Min SSIM | Examples |
+|----------|----------|---------|
+| Lossless | 0.99 | PNG, BMP, TIFF 8-bit |
+| Lossy high-quality | 0.95 | JPEG q90+, WebP |
+| Lossy compressed | 0.85 | JPEG q50, DDS BC1 |
+| HDR tone-mapped | 0.90 | EXR, AVIF 10-bit |
+| Vector rendered | 0.98 | SVG, fonts |
+
+Procedure:
+1. Generate reference thumbnails: `lens generate --corpus data/corpus/ --output data/baselines/thumbnails/`
+2. Regenerate after code changes: `lens generate --corpus data/corpus/ --output tmp/actual/`
+3. Compare: `magick compare -metric SSIM <ref> <actual> null: 2>&1`
+4. Fail if any format falls below its category threshold
+5. Store scores in `data/baselines/ssim-scores.json`
    - Self-generated synthetic files via ImageMagick/FFmpeg
 
 ## Auto-MANIFEST.json Update
