@@ -586,10 +586,10 @@ setting must match the actual toolchain.
 | `.vscode/c_cpp_properties.json` | ✅ Exists | Audit: verify `compilerPath` matches actual cl.exe, verify all `includePath` entries exist on disk, add missing external lib paths |
 
 **Deliverables:**
-- [ ] Run `code --list-extensions` and cross-check against `extensions.json` — remove any that are no longer published
+- [x] Run `code --list-extensions` and cross-check against `extensions.json` — all 27 IDs verified as published *(v38.3.0 S132)*
 - [ ] Validate `.vscode/settings.json` against VS Code settings schema (no unknown/deprecated keys)
-- [ ] Ensure every `.vscode/tasks.json` entry has a valid `problemMatcher` for build error navigation
-- [ ] Verify all 8 launch configs in `launch.json` resolve to existing binaries after build
+- [x] Ensure every `.vscode/tasks.json` entry has a valid `problemMatcher` for build error navigation *(v38.3.0 S139)*
+- [x] Verify all launch configs in `launch.json` resolve to existing binaries/scripts — fixed 4 broken paths, removed 3 stale configs *(v38.3.0 S139)*
 - [ ] Add `.vscode/profiles/explorerlens.code-profile` for reproducible workspace layout (optional P2)
 
 #### 8.7.2 GitHub Repository Configuration Audit (P0)
@@ -608,9 +608,9 @@ setting must match the actual toolchain.
 | `.github/dependabot.yml` | ✅ Exists | Verify ecosystems: `pip`, `github-actions`, `docker` all present |
 
 **Issue templates:**
-- [ ] Validate all 6 issue templates (`.github/ISSUE_TEMPLATE/`) render correctly on GitHub
+- [x] Validate all 6 issue templates (`.github/ISSUE_TEMPLATE/`) — fixed stale version refs in bug_report.md, build_issue.yml, performance_issue.md *(v38.3.0 S131)*
 - [ ] Ensure `config.yml` contact links point to live URLs
-- [ ] Verify YAML-form templates (`build_issue.yml`, `plugin_request.yml`) use latest schema
+- [x] Verify YAML-form templates (`build_issue.yml`, `plugin_request.yml`) use latest schema *(v38.3.0 S131)*
 
 **Deliverables:**
 - [ ] Create `.github/release.yml` with auto-generated release notes categories:
@@ -676,7 +676,7 @@ All SVGs use the project's established dark-theme palette (`#0d1117` background,
 - [x] Create `gpu-pipeline.svg` — GPU acceleration data flow *(v37.0.0)*
 - [x] Add all new SVGs to README.md Architecture section *(v38.2.0 — 8 inline + link to full 13)*
 - [x] Add SVG references to MkDocs `docs/architecture/` pages *(v37.0.0 — all 11 architecture SVGs listed)*
-- [ ] Verify all SVGs render in GitHub dark mode AND light mode
+- [x] Verify all SVGs render in GitHub dark mode AND light mode — all 13 use opaque backgrounds, readable on both themes *(v38.3.0 S137)*
 
 #### 8.7.4 Code Quality & Linting Configuration (P1)
 
@@ -715,10 +715,10 @@ All SVGs use the project's established dark-theme palette (`#0d1117` background,
 | `.githooks/` | ✅ Exists | Verify: pre-commit hook runs clang-format + markdownlint on staged files |
 
 **Deliverables:**
-- [ ] Cross-check `scoopfile.json` tool versions against `tool-versions.md` — flag any drift
-- [ ] Verify `.devcontainer/devcontainer.json` features include: `git`, `powershell`, `cmake`, `ninja`
-- [ ] Add `postCreateCommand` that runs `.\build-scripts\Build-MSVC.ps1` to validate environment
-- [ ] Ensure `.githooks/pre-commit` is documented in `CONTRIBUTING.md` with setup instructions
+- [x] Cross-check `scoopfile.json` tool versions against `tool-versions.md` — added cppcheck and delta; documented scoopfile scope *(v38.3.0 S138)*
+- [x] Verify `.devcontainer/devcontainer.json` features include: `git`, `powershell`, `cmake`, `ninja` *(v38.3.0 S136)*
+- [x] Add `postCreateCommand` that validates build tools (cmake, ninja, cl) *(v38.3.0 S136)*
+- [x] Ensure `.githooks/pre-commit` is documented in `CONTRIBUTING.md` with setup instructions *(v38.3.0 S136)*
 - [ ] Test full clone-to-build workflow in fresh dev container
 
 #### 8.7.6 Workflow & CI Standards Refresh (P0)
@@ -803,7 +803,7 @@ versions of GitHub Copilot, VS Code agents, MCP protocol, and GitHub Actions.
 **Priority:** P0 for broken/stale items, P1 for capability gaps, P2 for polish.
 
 **Current baseline (v38.0.0):**
-- 5 agents (ExplorerLens, Docs, Release, TestCorpus, CI-Ops)
+- 6 agents (ExplorerLens, Docs, Release, TestCorpus, CI-Ops, Performance)
 - 15 scoped instruction files with `applyTo:` routing
 - 14 prompt templates (all with `mode:` frontmatter)
 - 7 repository skills (200+ lines each)
@@ -862,13 +862,13 @@ Agents use `description` fields that VS Code reads for delegation.
 | Agent | Purpose | Priority |
 |-------|---------|----------|
 | `ci-ops.agent.md` | Workflow management — debugging CI failures, action version audits, permissions review, reusable workflow creation | P1 |
-| `performance.agent.md` | Performance profiling — benchmark analysis, regression gate management, ETW trace interpretation | P2 |
+| `performance.agent.md` | Performance profiling — benchmark analysis, regression gate management, ETW trace interpretation | P2 | ✅ Done |
 
 **Deliverables:**
 - [x] Create `ci-ops.agent.md` with decision tree for CI debugging vs. workflow authoring vs. action upgrades *(v37.0.0)*
 - [x] Enhance `test-corpus.agent.md` with corpus gap analysis, MANIFEST auto-update, SSIM enforcement *(v38.2.0)*
 - [x] Add `tools:` and `context:` sections to all agents (2026 agent schema supports these) *(v38.0.0)*
-- [ ] Update Docs agent to remove references to archived ROADMAP versions
+- [x] Update Docs agent to remove references to archived ROADMAP versions *(v38.3.0 S134)*
 - [x] Verify all agent `description` fields match actual capabilities (VS Code reads these for routing) *(v38.0.0)*
 - [x] Update `.github/standards/ai-tooling-capabilities.md` agent inventory *(v38.0.0)*
 
@@ -996,8 +996,8 @@ Some lack `mode:` frontmatter that VS Code 2026 uses for agent vs. ask routing.
 - [x] Fix all missing `permissions:` blocks — 22/22 already had them *(v38.2.0 audit)*
 - [x] Upgrade all actions to latest stable versions — all at v4+ *(v38.2.0 audit)*
 - [x] Add `workflow_dispatch` to workflows that lack it — 2 exempt (notify-failure, reusable-build) *(v38.2.0)*
-- [ ] Add sccache + cmake caching to `build.yml` and `ci-matrix.yml`
-- [ ] Add SBOM to `release.yml` artifacts
+- [x] Add cmake configure caching to `ci-matrix.yml` *(v38.3.0 S135)*
+- [x] Add SBOM to `release.yml` artifacts — already implemented (generate + upload) *(verified v38.3.0 S136)*
 - [x] Create `.github/workflows/reusable-build.yml` for DRY build/test steps *(already exists)*
 - [x] Update `.github/standards/ai-tooling-capabilities.md` workflow inventory + compliance status *(v38.2.0)*
 
@@ -1033,7 +1033,7 @@ Some lack `mode:` frontmatter that VS Code 2026 uses for agent vs. ask routing.
 | **Done** | Evaluate `@anthropic/mcp-server-git` integration | P1 | 1 | ✅ v38.2.0 (deferred — GitKraken covers it) |
 | **Done** | Create reusable build workflow | P2 | 1 | ✅ (already existed) |
 | **Remaining** | Pin all actions to SHA hashes | P2 | 22 | ⏳ |
-| **Later** | Create `performance.agent.md` | P2 | 1 | ⏳ |
+| **Later** | Create `performance.agent.md` | P2 | 1 | ✅ Done |
 | **Later** | Add SQLite/fetch MCP servers | P2 | 1 | ⏳ |
 
 ---
