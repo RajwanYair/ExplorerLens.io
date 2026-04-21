@@ -15,9 +15,9 @@ This is the **only** correct way to bump a version. Never edit version-bearing f
 
 ---
 
-## Complete Version-Bearing File Registry (21 files)
+## Complete Version-Bearing File Registry (20 files)
 
-All 21 files are updated by `Bump-Version.ps1`. Files marked *(conditional)* are only updated when
+All 20 files are updated by `Bump-Version.ps1`. Files marked *(conditional)* are only updated when
 they exist on disk; the script skips them silently if absent.
 
 | # | File | What Changes | Conditional? |
@@ -41,8 +41,7 @@ they exist on disk; the script skips them silently if absent.
 | 17 | `.github/standards/tool-versions.md` | Version header line | No |
 | 18 | `.github/standards/build-method.md` | Version reference line | No |
 | 19 | `packaging/npm/package.json` | `"version"` field | **Yes** |
-| 20 | `packaging/ruby/lib/explorerlens/version.rb` | `VERSION = 'X.Y.Z'` | **Yes** |
-| 21 | `Dockerfile` | `ARG EXPLORERLENS_VERSION=X.Y.Z` | **Yes** |
+| 20 | `Dockerfile` | `ARG EXPLORERLENS_VERSION=X.Y.Z` | **Yes** |
 
 ---
 

@@ -8,8 +8,8 @@
 #   NuGet      → https://nuget.pkg.github.com/RajwanYair/index.json
 #   npm        → https://npm.pkg.github.com  (@rajwanyair/explorerlens)
 #   Container  → ghcr.io/rajwanyair/explorerlens
-#   Maven      → https://maven.pkg.github.com/RajwanYair/ExplorerLens.io
-#   RubyGems   → https://rubygems.pkg.github.com/RajwanYair
+#
+# DROPPED (R5 — no consumers):  Maven, RubyGems
 #
 # All jobs run in parallel and are independent — a failure in one does not
 # block the others.
@@ -239,135 +239,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ── Apache Maven ──────────────────────────────────────────────────────────────
-  publish-maven:
-    name: "Maven → GitHub Packages"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Resolve version
-        id: version
-        run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            V="${{ github.event.inputs.version }}"
-          elif [ -n "${{ github.event.release.tag_name }}" ]; then
-            V="${{ github.event.release.tag_name }}"
-            V="${V#v}"
-          else
-            V="$(cat VERSION)"
-          fi
-          echo "Publishing Maven artifact version: $V"
-          echo "version=$V" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-
-      - name: Download release ZIP
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          V="${{ steps.version.outputs.version }}"
-          gh release download "v$V" --pattern "ExplorerLens-$V-x64.zip" --dir dist
-          unzip "dist/ExplorerLens-$V-x64.zip" -d dist/extracted
-
-      - name: Stage native binaries for Maven JAR
-        run: |
-          mkdir -p packaging/maven/native
-          for BIN in lens.exe LENSShell.dll LENSManager.exe; do
-            src=$(find dist/extracted -name "$BIN" 2>/dev/null | head -1)
-            if [ -n "$src" ]; then
-              cp "$src" packaging/maven/native/
-              echo "  Staged: $BIN"
-            else
-              echo "  Not found in ZIP: $BIN (non-fatal)"
-            fi
-          done
-
-      - name: Write Maven settings.xml
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml << 'EOF'
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0
-                        https://maven.apache.org/xsd/settings-1.2.0.xsd">
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${env.GITHUB_ACTOR}</username>
-                <password>${env.GITHUB_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-
-      - name: Set Maven version and deploy
-        working-directory: packaging/maven
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-        run: |
-          mvn --batch-mode versions:set -DnewVersion="${{ steps.version.outputs.version }}"
-          mvn --batch-mode deploy -DskipTests -s ~/.m2/settings.xml
-
-  # ── RubyGems ──────────────────────────────────────────────────────────────────
-  publish-rubygems:
-    name: "RubyGems → GitHub Packages"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Resolve version
-        id: version
-        run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            V="${{ github.event.inputs.version }}"
-          elif [ -n "${{ github.event.release.tag_name }}" ]; then
-            V="${{ github.event.release.tag_name }}"
-            V="${V#v}"
-          else
-            V="$(cat VERSION)"
-          fi
-          echo "Publishing RubyGem version: $V"
-          echo "version=$V" >> "$GITHUB_OUTPUT"
-
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3"
-
-      - name: Update gem version
-        run: |
-          V="${{ steps.version.outputs.version }}"
-          sed -i "s/VERSION = '.*'/VERSION = '$V'/" packaging/ruby/lib/explorerlens/version.rb
-
-      - name: Build gem
-        working-directory: packaging/ruby
-        run: gem build explorerlens.gemspec
-
-      - name: Push gem to GitHub Packages RubyGems registry
-        working-directory: packaging/ruby
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p ~/.gem
-          printf ':github: Bearer %s\n' "$GITHUB_TOKEN" > ~/.gem/credentials
-          chmod 0600 ~/.gem/credentials
-          gem push \
-            --key github \
-            --host "https://rubygems.pkg.github.com/${{ env.GH_OWNER }}" \
-            "explorerlens-${{ steps.version.outputs.version }}.gem"
-
   # ── Publish Summary ───────────────────────────────────────────────────────────
   publish-summary:
     name: "Publish Summary"
@@ -377,8 +248,6 @@ jobs:
       - publish-nuget
       - publish-npm
       - publish-container
-      - publish-maven
-      - publish-rubygems
     permissions:
       contents: read
 
@@ -388,8 +257,6 @@ jobs:
           NUGET_RESULT:     ${{ needs.publish-nuget.result }}
           NPM_RESULT:       ${{ needs.publish-npm.result }}
           CONTAINER_RESULT: ${{ needs.publish-container.result }}
-          MAVEN_RESULT:     ${{ needs.publish-maven.result }}
-          RUBYGEMS_RESULT:  ${{ needs.publish-rubygems.result }}
         run: |
           status_icon() {
             case "$1" in
@@ -406,12 +273,10 @@ jobs:
           echo "| NuGet             | $(status_icon "$NUGET_RESULT")     $NUGET_RESULT |"     >> "$GITHUB_STEP_SUMMARY"
           echo "| npm               | $(status_icon "$NPM_RESULT")       $NPM_RESULT |"       >> "$GITHUB_STEP_SUMMARY"
           echo "| Container (ghcr)  | $(status_icon "$CONTAINER_RESULT") $CONTAINER_RESULT |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Apache Maven      | $(status_icon "$MAVEN_RESULT")     $MAVEN_RESULT |"     >> "$GITHUB_STEP_SUMMARY"
-          echo "| RubyGems          | $(status_icon "$RUBYGEMS_RESULT")  $RUBYGEMS_RESULT |"  >> "$GITHUB_STEP_SUMMARY"
           echo ""                                                   >> "$GITHUB_STEP_SUMMARY"
 
           FAILED=0
-          for result in "$NUGET_RESULT" "$NPM_RESULT" "$CONTAINER_RESULT" "$MAVEN_RESULT" "$RUBYGEMS_RESULT"; do
+          for result in "$NUGET_RESULT" "$NPM_RESULT" "$CONTAINER_RESULT"; do
             [ "$result" = "failure" ] && FAILED=$((FAILED + 1))
           done
 

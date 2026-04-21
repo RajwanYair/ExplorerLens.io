@@ -221,14 +221,7 @@ if (Test-Path $npmPath) {
     Write-Host "[bump] packaging/npm/package.json updated"
 }
 
-# 14b. packaging/ruby VERSION constant
-$rubyPath = "$rootDir\packaging\ruby\lib\explorerlens\version.rb"
-if (Test-Path $rubyPath) {
-    $ruby = Get-Content $rubyPath -Raw
-    $ruby = $ruby -replace "(VERSION = ')[\d.]+(')", "`${1}$Version`${2}"
-    Set-Content $rubyPath -Value $ruby -NoNewline
-    Write-Host "[bump] packaging/ruby/lib/explorerlens/version.rb updated"
-}
+# 14b. (removed — packaging/ruby dropped per R5, no Ruby consumers)
 
 # 14c. Dockerfile — ARG EXPLORERLENS_VERSION default
 $dockerPath = "$rootDir\Dockerfile"
@@ -275,7 +268,7 @@ if ($cl.Contains($sectionGuard)) {
 
 # 6. Commit
 $commitMsg = "chore: bump version to $Version ($Codename)"
-$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, LENSShell.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md, USER_GUIDE.md, packaging/npm/package.json, packaging/ruby/lib/explorerlens/version.rb, Dockerfile"
+$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, LENSShell.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md, USER_GUIDE.md, packaging/npm/package.json, Dockerfile"
 $fullMsg = "$commitMsg`n`n$details"
 [IO.File]::WriteAllText("$rootDir\.git\BUMP_MSG.txt", $fullMsg)
 git add -A

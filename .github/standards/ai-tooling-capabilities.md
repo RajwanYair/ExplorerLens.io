@@ -160,7 +160,7 @@ The workspace currently defines MCP servers in `.vscode/mcp.json`.
 | Workflow | File | Purpose |
 |---------|------|---------|
 | Release packaging | `.github/workflows/release.yml` | Build artifacts, package release assets, create draft release |
-| Package publishing | `.github/workflows/publish-packages.yml` | Publish NuGet, npm, container, Maven, and Ruby packages |
+| Package publishing | `.github/workflows/publish-packages.yml` | Publish NuGet, npm, and container packages (Maven/RubyGems removed — R5) |
 | Release drafting | `.github/workflows/release-drafter.yml` | Maintains release draft notes |
 
 ### Regression and Specialized Validation
