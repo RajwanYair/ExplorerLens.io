@@ -81,3 +81,11 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
 - The functionality is already available via built-in VS Code tools (file search, terminal).
 - The server requires a large runtime dependency (e.g., Docker, Python) not in the dev environment.
 - The server handles sensitive data that should not transit through agent context.
+
+## Evaluated and Deferred Servers
+
+| Server | Package | Decision | Rationale |
+|--------|---------|----------|-----------|
+| Git MCP | `@anthropic/mcp-server-git` | **Deferred** | GitKraken MCP (`mcp_gitkraken_*`) already provides git blame, log, diff, stash, branch, status, and push operations. Adding a second git server would be redundant. Re-evaluate if GitKraken MCP is removed. |
+| SQLite MCP | `@anthropic/mcp-server-sqlite` | **Deferred** | No SQLite databases in active development workflow yet. Add when cache DB debugging becomes common (Phase 2). |
+| Fetch MCP | `@anthropic/mcp-server-fetch` | **Deferred** | Built-in `fetch_webpage` tool covers URL content needs. Add only if agents need structured HTTP API access. |
