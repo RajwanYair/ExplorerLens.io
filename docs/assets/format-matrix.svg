@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" width="960" height="680">
+  <title>ExplorerLens Format Support Matrix</title>
+  <desc>Visual grid showing 200+ file extensions organized by decoder family with library and validation status for each format group.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="680" fill="url(#bg)" rx="12"/>
+
+  <!-- Title -->
+  <text x="480" y="36" text-anchor="middle" fill="#58a6ff" font-size="18" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">ExplorerLens Format Support Matrix</text>
+  <text x="480" y="54" text-anchor="middle" fill="#8b949e" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">200+ extensions · 25 decoders · 8 format families</text>
+
+  <!-- Legend -->
+  <rect x="650" y="12" width="12" height="12" rx="2" fill="#3fb950"/>
+  <text x="668" y="23" fill="#8b949e" font-size="10" font-family="'Segoe UI', system-ui, sans-serif">Validated</text>
+  <rect x="730" y="12" width="12" height="12" rx="2" fill="#d29922"/>
+  <text x="748" y="23" fill="#8b949e" font-size="10" font-family="'Segoe UI', system-ui, sans-serif">Partial</text>
+  <rect x="800" y="12" width="12" height="12" rx="2" fill="#58a6ff"/>
+  <text x="818" y="23" fill="#8b949e" font-size="10" font-family="'Segoe UI', system-ui, sans-serif">Planned</text>
+
+  <!-- ═══ Row 1: Raster Images ═══ -->
+  <rect x="20" y="70" width="920" height="68" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="40" y="92" fill="#3fb950" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Raster Images</text>
+  <text x="40" y="108" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">GDI+ · LibRaw · libwebp · libavif · dav1d · libheif · libjxl</text>
+  <!-- Format chips -->
+  <rect x="320" y="78" width="48" height="22" rx="4" fill="#3fb950"/><text x="344" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">JPEG</text>
+  <rect x="374" y="78" width="42" height="22" rx="4" fill="#3fb950"/><text x="395" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PNG</text>
+  <rect x="422" y="78" width="42" height="22" rx="4" fill="#3fb950"/><text x="443" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">BMP</text>
+  <rect x="470" y="78" width="42" height="22" rx="4" fill="#3fb950"/><text x="491" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">GIF</text>
+  <rect x="518" y="78" width="42" height="22" rx="4" fill="#3fb950"/><text x="539" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">TIFF</text>
+  <rect x="566" y="78" width="50" height="22" rx="4" fill="#3fb950"/><text x="591" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">WebP</text>
+  <rect x="622" y="78" width="46" height="22" rx="4" fill="#3fb950"/><text x="645" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">AVIF</text>
+  <rect x="674" y="78" width="46" height="22" rx="4" fill="#3fb950"/><text x="697" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">HEIC</text>
+  <rect x="726" y="78" width="38" height="22" rx="4" fill="#d29922"/><text x="745" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">JXL</text>
+  <rect x="770" y="78" width="42" height="22" rx="4" fill="#3fb950"/><text x="791" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">TGA</text>
+  <rect x="818" y="78" width="42" height="22" rx="4" fill="#3fb950"/><text x="839" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">ICO</text>
+  <rect x="866" y="78" width="50" height="22" rx="4" fill="#d29922"/><text x="891" y="93" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">APNG</text>
+  <!-- Row 2 chips -->
+  <rect x="320" y="106" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="121" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PPM</text>
+  <rect x="368" y="106" width="42" height="22" rx="4" fill="#3fb950"/><text x="389" y="121" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PGM</text>
+  <rect x="416" y="106" width="44" height="22" rx="4" fill="#3fb950"/><text x="438" y="121" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PBM</text>
+  <rect x="466" y="106" width="46" height="22" rx="4" fill="#d29922"/><text x="489" y="121" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">QOI</text>
+
+  <!-- ═══ Row 2: RAW Photography ═══ -->
+  <rect x="20" y="148" width="920" height="52" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="40" y="170" fill="#3fb950" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">RAW Photography</text>
+  <text x="40" y="186" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">LibRaw (50+ camera formats)</text>
+  <rect x="320" y="156" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">CR2</text>
+  <rect x="368" y="156" width="42" height="22" rx="4" fill="#3fb950"/><text x="389" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">CR3</text>
+  <rect x="416" y="156" width="42" height="22" rx="4" fill="#3fb950"/><text x="437" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">NEF</text>
+  <rect x="464" y="156" width="46" height="22" rx="4" fill="#3fb950"/><text x="487" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">ARW</text>
+  <rect x="516" y="156" width="48" height="22" rx="4" fill="#3fb950"/><text x="540" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">DNG</text>
+  <rect x="570" y="156" width="42" height="22" rx="4" fill="#3fb950"/><text x="591" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">RAF</text>
+  <rect x="618" y="156" width="46" height="22" rx="4" fill="#3fb950"/><text x="641" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">ORF</text>
+  <rect x="670" y="156" width="46" height="22" rx="4" fill="#3fb950"/><text x="693" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">RW2</text>
+  <rect x="722" y="156" width="46" height="22" rx="4" fill="#3fb950"/><text x="745" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PEF</text>
+  <rect x="774" y="156" width="44" height="22" rx="4" fill="#d29922"/><text x="796" y="171" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">+40</text>
+
+  <!-- ═══ Row 3: HDR / Scientific ═══ -->
+  <rect x="20" y="210" width="920" height="52" rx="8" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="40" y="232" fill="#d29922" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">HDR / Scientific</text>
+  <text x="40" y="248" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">OpenEXR · tinyexr · custom</text>
+  <rect x="320" y="218" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="233" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">EXR</text>
+  <rect x="368" y="218" width="42" height="22" rx="4" fill="#3fb950"/><text x="389" y="233" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">HDR</text>
+  <rect x="416" y="218" width="42" height="22" rx="4" fill="#3fb950"/><text x="437" y="233" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PFM</text>
+  <rect x="464" y="218" width="42" height="22" rx="4" fill="#58a6ff"/><text x="485" y="233" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">FITS</text>
+
+  <!-- ═══ Row 4: GPU Textures ═══ -->
+  <rect x="20" y="272" width="920" height="52" rx="8" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="40" y="294" fill="#d29922" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">GPU Textures</text>
+  <text x="40" y="310" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">DirectXTex · custom DDS/KTX parser</text>
+  <rect x="320" y="280" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="295" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">DDS</text>
+  <rect x="368" y="280" width="46" height="22" rx="4" fill="#d29922"/><text x="391" y="295" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">KTX2</text>
+  <rect x="420" y="280" width="50" height="22" rx="4" fill="#d29922"/><text x="445" y="295" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">ASTC</text>
+
+  <!-- ═══ Row 5: Creative / Design ═══ -->
+  <rect x="20" y="334" width="920" height="52" rx="8" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="40" y="356" fill="#f778ba" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Creative / Design</text>
+  <text x="40" y="372" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">Custom PSD parser · SVG (GDI+)</text>
+  <rect x="320" y="342" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="357" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PSD</text>
+  <rect x="368" y="342" width="42" height="22" rx="4" fill="#3fb950"/><text x="389" y="357" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">SVG</text>
+  <rect x="416" y="342" width="42" height="22" rx="4" fill="#58a6ff"/><text x="437" y="357" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">AI</text>
+  <rect x="464" y="342" width="42" height="22" rx="4" fill="#58a6ff"/><text x="485" y="357" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">XCF</text>
+
+  <!-- ═══ Row 6: Archives ═══ -->
+  <rect x="20" y="396" width="920" height="52" rx="8" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="40" y="418" fill="#58a6ff" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Archives / Comics</text>
+  <text x="40" y="434" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">minizip-ng · LZMA SDK · UnRAR</text>
+  <rect x="320" y="404" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="419" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">ZIP</text>
+  <rect x="368" y="404" width="42" height="22" rx="4" fill="#3fb950"/><text x="389" y="419" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">RAR</text>
+  <rect x="416" y="404" width="36" height="22" rx="4" fill="#3fb950"/><text x="434" y="419" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">7Z</text>
+  <rect x="458" y="404" width="42" height="22" rx="4" fill="#3fb950"/><text x="479" y="419" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">CBZ</text>
+  <rect x="506" y="404" width="46" height="22" rx="4" fill="#3fb950"/><text x="529" y="419" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">CBR</text>
+  <rect x="558" y="404" width="42" height="22" rx="4" fill="#3fb950"/><text x="579" y="419" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">CB7</text>
+  <rect x="606" y="404" width="52" height="22" rx="4" fill="#3fb950"/><text x="632" y="419" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">EPUB</text>
+
+  <!-- ═══ Row 7: Documents ═══ -->
+  <rect x="20" y="458" width="920" height="52" rx="8" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="40" y="480" fill="#d29922" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Documents</text>
+  <text x="40" y="496" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">PDFium (Chromium) · custom</text>
+  <rect x="320" y="466" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="481" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">PDF</text>
+  <rect x="368" y="466" width="42" height="22" rx="4" fill="#58a6ff"/><text x="389" y="481" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">XPS</text>
+  <rect x="416" y="466" width="50" height="22" rx="4" fill="#58a6ff"/><text x="441" y="481" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">DJVU</text>
+
+  <!-- ═══ Row 8: Fonts ═══ -->
+  <rect x="20" y="520" width="450" height="52" rx="8" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="40" y="542" fill="#bc8cff" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">Fonts</text>
+  <text x="40" y="558" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">GDI+ font rendering</text>
+  <rect x="320" y="528" width="42" height="22" rx="4" fill="#3fb950"/><text x="341" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">TTF</text>
+  <rect x="368" y="528" width="42" height="22" rx="4" fill="#3fb950"/><text x="389" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">OTF</text>
+  <rect x="416" y="528" width="46" height="22" rx="4" fill="#d29922"/><text x="439" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">WOFF</text>
+
+  <!-- ═══ Row 8b: 3D/CAD ═══ -->
+  <rect x="490" y="520" width="450" height="52" rx="8" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="510" y="542" fill="#bc8cff" font-size="13" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">3D / CAD</text>
+  <text x="510" y="558" fill="#8b949e" font-size="10"
+        font-family="'Segoe UI', system-ui, sans-serif">Assimp · tinygltf</text>
+  <rect x="680" y="528" width="50" height="22" rx="4" fill="#d29922"/><text x="705" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">glTF</text>
+  <rect x="736" y="528" width="42" height="22" rx="4" fill="#d29922"/><text x="757" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">OBJ</text>
+  <rect x="784" y="528" width="42" height="22" rx="4" fill="#d29922"/><text x="805" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">FBX</text>
+  <rect x="832" y="528" width="44" height="22" rx="4" fill="#58a6ff"/><text x="854" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">STL</text>
+  <rect x="882" y="528" width="46" height="22" rx="4" fill="#58a6ff"/><text x="905" y="543" text-anchor="middle" fill="#0d1117" font-size="10" font-weight="600" font-family="'Segoe UI', system-ui, sans-serif">STEP</text>
+
+  <!-- Summary stats -->
+  <rect x="20" y="590" width="920" height="70" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="140" y="618" text-anchor="middle" fill="#3fb950" font-size="28" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">200+</text>
+  <text x="140" y="640" text-anchor="middle" fill="#8b949e" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">File Extensions</text>
+
+  <text x="360" y="618" text-anchor="middle" fill="#58a6ff" font-size="28" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">25</text>
+  <text x="360" y="640" text-anchor="middle" fill="#8b949e" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">Specialized Decoders</text>
+
+  <text x="580" y="618" text-anchor="middle" fill="#d29922" font-size="28" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">8</text>
+  <text x="580" y="640" text-anchor="middle" fill="#8b949e" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">Format Families</text>
+
+  <text x="800" y="618" text-anchor="middle" fill="#f778ba" font-size="28" font-weight="700"
+        font-family="'Segoe UI', system-ui, sans-serif">12</text>
+  <text x="800" y="640" text-anchor="middle" fill="#8b949e" font-size="11"
+        font-family="'Segoe UI', system-ui, sans-serif">External Libraries</text>
+</svg>
