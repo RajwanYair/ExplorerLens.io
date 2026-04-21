@@ -1,11 +1,11 @@
 ---
 mode: agent
-description: "Create a new Python project following the Universal Project Enhancement Framework v12.0.0 structure"
+description: "Create a new Python project following the Universal Project Enhancement Framework v15.0.0 structure"
 ---
 
 # Create New Project
 
-Create a new Python project in this workspace following the **Universal Project Enhancement Framework v12.0.0**.
+Create a new Python project in this workspace following the **Universal Project Enhancement Framework v15.0.0**.
 
 ## Project Details
 

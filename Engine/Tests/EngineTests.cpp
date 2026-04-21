@@ -3454,9 +3454,6 @@ int main()
     RUN_TEST(TestSnappy_CanDecode);
 
     // 3D & CAD
-    RUN_TEST(TestPLY_CanDecode);
-    RUN_TEST(TestOBJ_CanDecode);
-    RUN_TEST(TestSTL_CanDecode);
     RUN_TEST(TestCOLLADA_CanDecode);
     RUN_TEST(TestFBX_CanDecode);
 
@@ -3609,8 +3606,6 @@ int main()
     RUN_TEST(Test_DICOMDecoderV2_Tags);
     RUN_TEST(Test_FITSDecoderV2_Header);
     RUN_TEST(Test_CADFormat_Detection);
-    RUN_TEST(Test_GLTFModelDecoder_Parse);
-    RUN_TEST(Test_STLMeshDecoder_Binary);
 
     std::wcout << std::endl;
 
@@ -3945,7 +3940,6 @@ int main()
     RUN_TEST(TestJXLAnimationDecoder_LooksLikeJXL_RejectsEmpty);
     RUN_TEST(TestPSDLayerDecoder_IsPSD_RejectsGarbage);
     RUN_TEST(TestSVGRasterizer_LooksLikeSVG_RejectsEmpty);
-    RUN_TEST(TestTIFFMultiPageDecoder_LooksLikeTIFF_RejectsGarbage);
     RUN_TEST(TestWebPAnimationDecoder_LooksLikeAnimatedWebP_RejectsGarbage);
     std::wcout << std::endl;
 

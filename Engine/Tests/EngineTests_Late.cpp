@@ -7195,4 +7195,3 @@ TEST(TestIdxUpd_Latency)
     IncrementalIndexUpdater updater;
     ASSERT(updater.GetAverageFlushLatencyMs() >= 0.0);
 }
-
