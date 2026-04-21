@@ -151,7 +151,77 @@ ctest --test-dir build -C Release -L jpeg --output-on-failure
 
 ---
 
-## SSIM Comparison (Phase 2+)
+## SSIM Baseline Generation Pipeline
+
+Use this procedure to establish and maintain SSIM baselines for each decoder.
+
+### Step 1: Generate Reference Thumbnails
+
+```powershell
+# Generate reference thumbnails for all corpus files at 256px (CPU decode path)
+$manifest = Get-Content data/corpus/MANIFEST.json | ConvertFrom-Json
+foreach ($file in $manifest.files) {
+    $src = "data/corpus/$($file.path)"
+    $ref = "data/baselines/thumbnails/$($file.path -replace '[/\\]','-').png"
+    .\build\bin\EngineTests.exe --generate-reference $src --output $ref --size 256
+    Write-Host "  Generated: $ref"
+}
+```
+
+### Step 2: Record Baseline SSIM Scores
+
+```powershell
+# Compare actual decode output against reference and record scores
+$results = @()
+foreach ($file in $manifest.files) {
+    $ref = "data/baselines/thumbnails/$($file.path -replace '[/\\]','-').png"
+    $actual = "data/baselines/actual/$($file.path -replace '[/\\]','-').png"
+    $ssim = magick compare -metric SSIM $ref $actual null: 2>&1
+    $results += [PSCustomObject]@{
+        Path   = $file.path
+        Format = $file.format
+        SSIM   = [double]$ssim
+        Pass   = ([double]$ssim -ge 0.99)
+    }
+}
+$results | Format-Table -AutoSize
+$results | ConvertTo-Json | Out-File data/baselines/ssim-scores.json -Encoding utf8
+```
+
+### Step 3: Integrate SSIM into CI
+
+```yaml
+# In .github/workflows/corpus-validation.yml
+- name: SSIM regression check
+  run: |
+    $scores = Get-Content data/baselines/ssim-scores.json | ConvertFrom-Json
+    $failures = $scores | Where-Object { $_.SSIM -lt 0.99 }
+    if ($failures) {
+      $failures | Format-Table
+      throw "SSIM regression: $($failures.Count) files below 0.99 threshold"
+    }
+```
+
+### Step 4: Update Baselines After Intentional Changes
+
+When a decoder improvement intentionally changes output (e.g., better color space handling):
+
+1. Run the full corpus decode with the new code
+2. Visually inspect changed thumbnails: `magick montage old.png new.png -tile 2x1 comparison.png`
+3. Re-generate reference thumbnails (Step 1)
+4. Re-record SSIM scores (Step 2)
+5. Commit updated baselines with a clear message: `"test: update SSIM baselines for JpegDecoder color fix"`
+
+### SSIM Thresholds
+
+| Comparison | Minimum SSIM | Notes |
+|-----------|-------------|-------|
+| CPU decode vs reference | 0.99 | Baseline correctness |
+| GPU decode vs CPU decode | 0.98 | Allow minor GPU rounding |
+| Cross-platform (Win/Mac/Linux) | 0.97 | Platform renderer differences |
+| After decoder update | 0.95 | Flag for manual review if below |
+
+### SSIM Comparison (Programmatic)
 
 When validating GPU vs CPU output or cross-platform SSIM:
 
