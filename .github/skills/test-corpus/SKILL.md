@@ -373,12 +373,23 @@ Priority order for sourcing files:
 |--------|---------|----------|-------|
 | [Unsplash](https://unsplash.com/) | Unsplash License | JPEG, PNG photos | Free for all uses; download direct |
 | [Wikimedia Commons](https://commons.wikimedia.org/) | CC0 / PD | All image formats | Filter: `License = CC0` or `PD-self` |
+| [IIIF Image API](https://iiif.io/api/image/) | Varies (CC0 common) | JPEG, TIFF, JP2 | Museums/libraries; use `info.json` to get format caps |
 | [PDFTron test files](https://github.com/nicholasgasior/gofpdf) | MIT | PDF variants | Multi-page, forms, encrypted |
 | [libavif test vectors](https://github.com/AOMediaCodec/libavif) | BSD | AVIF | Conformance test images |
 | [libjxl conformance](https://github.com/libjxl/conformance) | Apache-2.0 | JXL | Official conformance suite |
 | [OpenEXR test images](https://github.com/AcademySoftwareFoundation/openexr-images) | BSD | EXR | HDR test images |
+| [Raw Samples](https://raw.pixls.us/) | CC0 | RAW (CR2/NEF/ARW/DNG/RAF) | Real camera RAW files from community |
 | ImageMagick `convert` | Self-generated | Any raster | Synthetic, guaranteed clean |
 | FFmpeg | Self-generated | Video keyframes | Create short test clips |
+
+### Acquisition Rules
+
+1. **Always verify license** — only CC0, public domain, BSD, MIT, Apache-2.0, or self-generated
+2. **Document source URL** in MANIFEST.json `"source"` field
+3. **Prefer synthetic** when testing edge cases (rotation, alpha, truncation, HDR)
+4. **Prefer real files** when testing decoder correctness against real-world content
+5. **Never commit copyrighted content** — even from "free stock photo" sites with restrictive licenses
+6. **Use Git LFS** for any corpus file > 500 KB
 
 ### Synthetic File Generation
 

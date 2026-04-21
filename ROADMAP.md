@@ -655,11 +655,11 @@ All SVGs use the project's established dark-theme palette (`#0d1117` background,
 
 | SVG | Priority | Description |
 |-----|----------|-------------|
-| `release-flow.svg` | P1 | `Bump-Version.ps1` → 20 files → tag → release → 3 registries |
-| `format-matrix.svg` | P1 | Visual grid: 200+ extensions × decoder family × validation status |
-| `cache-architecture.svg` | P1 | L1 memory → L2 disk (SQLite) → invalidation flow |
-| `plugin-lifecycle.svg` | P2 | Discovery → trust chain → sandbox → execute → result |
-| `gpu-pipeline.svg` | P2 | CPU decode → upload → D3D11 compute → readback → HBITMAP |
+| `release-flow.svg` | P1 | `Bump-Version.ps1` → 20 files → tag → release → 3 registries | ✅ Done |
+| `format-matrix.svg` | P1 | Visual grid: 200+ extensions × decoder family × validation status | ✅ Done |
+| `cache-architecture.svg` | P1 | L1 memory → L2 disk (SQLite) → invalidation flow | ✅ Done |
+| `plugin-lifecycle.svg` | P2 | Discovery → trust chain → sandbox → execute → result | ✅ Done |
+| `gpu-pipeline.svg` | P2 | CPU decode → upload → D3D11 compute → readback → HBITMAP | ✅ Done |
 
 **SVG style requirements:**
 - Background: `#0d1117` → `#161b22` gradient
@@ -669,11 +669,11 @@ All SVGs use the project's established dark-theme palette (`#0d1117` background,
 - All SVGs must render correctly in: GitHub README (light + dark mode), MkDocs, VS Code preview
 
 **Deliverables:**
-- [ ] Create `release-flow.svg` — version bump → file updates → git tag → GitHub release → package publish
-- [ ] Create `format-matrix.svg` — visual grid of all format families with decoder/library/status
-- [ ] Create `cache-architecture.svg` — multi-tier cache flow diagram
-- [ ] Create `plugin-lifecycle.svg` — plugin trust and execution pipeline
-- [ ] Create `gpu-pipeline.svg` — GPU acceleration data flow
+- [x] Create `release-flow.svg` — version bump → file updates → git tag → GitHub release → package publish *(v37.0.0)*
+- [x] Create `format-matrix.svg` — visual grid of all format families with decoder/library/status *(v37.0.0)*
+- [x] Create `cache-architecture.svg` — multi-tier cache flow diagram *(v37.0.0)*
+- [x] Create `plugin-lifecycle.svg` — plugin trust and execution pipeline *(v37.0.0)*
+- [x] Create `gpu-pipeline.svg` — GPU acceleration data flow *(v37.0.0)*
 - [ ] Add all new SVGs to README.md Architecture section
 - [ ] Add SVG references to MkDocs `docs/architecture/` pages
 - [ ] Verify all SVGs render in GitHub dark mode AND light mode
