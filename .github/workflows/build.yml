@@ -65,6 +65,17 @@ jobs:
         with:
           arch: x64
 
+      # ── sccache — compiler cache for faster rebuilds ─────────
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.7
+
+      - name: Configure sccache environment
+        shell: pwsh
+        run: |
+          echo "CMAKE_C_COMPILER_LAUNCHER=sccache" >> $env:GITHUB_ENV
+          echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> $env:GITHUB_ENV
+          echo "SCCACHE_GHA_ENABLED=true" >> $env:GITHUB_ENV
+
       # ── Build external libraries from source (cache miss path) ──────────────
       # Never commit pre-built .lib files — they corrupt across MSVC versions.
       # Source trees live in external/; this action builds only what's missing.

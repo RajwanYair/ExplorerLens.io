@@ -71,6 +71,17 @@ jobs:
         with:
           arch: x64
 
+      # ── sccache — compiler cache for faster CI rebuilds ──────
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.7
+
+      - name: Configure sccache environment
+        shell: pwsh
+        run: |
+          echo "CMAKE_C_COMPILER_LAUNCHER=sccache" >> $env:GITHUB_ENV
+          echo "CMAKE_CXX_COMPILER_LAUNCHER=sccache" >> $env:GITHUB_ENV
+          echo "SCCACHE_GHA_ENABLED=true" >> $env:GITHUB_ENV
+
       - name: Cache external libraries
         uses: actions/cache@v4
         with:
