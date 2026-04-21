@@ -179,7 +179,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -198,7 +198,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -217,7 +217,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -236,7 +236,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -255,7 +255,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -274,7 +274,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -293,7 +293,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -312,7 +312,7 @@
 				"-Clean"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
@@ -341,7 +341,7 @@
 				"0"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": ["$msCompile"],
 			"presentation": {
 				"reveal": "always",
 				"panel": "new",
