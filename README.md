@@ -9,8 +9,12 @@
 ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **multi-threaded processing** with GPU acceleration planned for Phase 2. The project root directory is `ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
 
 [![Build](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml)
+[![CI Matrix](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/ci-matrix.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/ci-matrix.yml)
 [![Code Quality](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/code-quality.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/code-quality.yml)
 [![CodeQL](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/codeql.yml)
+[![Coverage](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/coverage.yml)
+[![Performance Gate](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/performance-regression-gate.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/performance-regression-gate.yml)
+[![Docs](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/docs-validation.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/docs-validation.yml)
 [![Latest Release](https://img.shields.io/github/v/release/RajwanYair/ExplorerLens.io?label=release&color=brightgreen)](https://github.com/RajwanYair/ExplorerLens.io/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/RajwanYair/ExplorerLens.io/total?color=blue)](https://github.com/RajwanYair/ExplorerLens.io/releases)
 ![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11%20x64-blue)
