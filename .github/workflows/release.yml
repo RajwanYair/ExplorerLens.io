@@ -35,6 +35,10 @@ permissions:
   actions: read            # download workflow artifacts
   id-token: write          # OIDC token for signing (future)
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   BUILD_TYPE: Release
   PLATFORM: x64

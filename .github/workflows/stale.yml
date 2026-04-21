@@ -15,6 +15,10 @@ permissions:
   issues: write
   pull-requests: write
 
+concurrency:
+  group: stale
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
