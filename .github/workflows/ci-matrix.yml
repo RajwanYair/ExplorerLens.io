@@ -93,12 +93,22 @@ jobs:
           Write-Host "Ninja: $(ninja --version)" -ForegroundColor Cyan
 
       - name: Configure Engine
-        run: cmake --preset ${{ matrix.preset }}
+        shell: pwsh
+        run: |
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          cmake --preset ${{ matrix.preset }}
+          $sw.Stop()
+          Write-Host "::notice::Configure took $($sw.Elapsed.TotalSeconds.ToString('F1'))s"
 
       # Build only the Engine static library first — this is the required artifact.
       # EngineTests compilation errors must not block CI for the core library.
       - name: Build Engine Library
-        run: cmake --build --preset ${{ matrix.build_preset }} --target ExplorerLensEngine -j ${{ runner.os == 'Windows' && '4' || '2' }}
+        shell: pwsh
+        run: |
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          cmake --build --preset ${{ matrix.build_preset }} --target ExplorerLensEngine -j ${{ runner.os == 'Windows' && '4' || '2' }}
+          $sw.Stop()
+          Write-Host "::notice::Engine build took $($sw.Elapsed.TotalSeconds.ToString('F1'))s"
 
       # Build tests separately — compilation errors are non-fatal for CI gate.
       # EngineTests.cpp is ~22K lines and may have MSVC version-specific issues.
@@ -118,7 +128,10 @@ jobs:
         if: matrix.config == 'Release' && steps.build-tests.outcome == 'success'
         shell: pwsh
         run: |
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
           ctest --test-dir build -C Release --output-on-failure --timeout 120
+          $sw.Stop()
+          Write-Host "::notice::Tests took $($sw.Elapsed.TotalSeconds.ToString('F1'))s"
           if ($LASTEXITCODE -ne 0) {
             Write-Host "::warning::Some unit tests failed on CI — see ctest output above."
           }

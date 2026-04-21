@@ -89,16 +89,28 @@ jobs:
       # ci-release: no hardcoded local paths, uses cl.exe from vcvars env
       - name: Configure
         shell: pwsh
-        run: cmake --preset ci-release
+        run: |
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          cmake --preset ci-release
+          $sw.Stop()
+          Write-Host "::notice::Configure took $($sw.Elapsed.TotalSeconds.ToString('F1'))s"
 
       - name: Build
         shell: pwsh
-        run: cmake --build --preset ci-release -j $env:NUMBER_OF_PROCESSORS
+        run: |
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          cmake --build --preset ci-release -j $env:NUMBER_OF_PROCESSORS
+          $sw.Stop()
+          Write-Host "::notice::Build took $($sw.Elapsed.TotalSeconds.ToString('F1'))s"
 
       # ── Run tests ────────────────────────────────────────────
       - name: Run tests (CTest)
         shell: pwsh
-        run: ctest --test-dir build -C Release --output-on-failure -j 4
+        run: |
+          $sw = [System.Diagnostics.Stopwatch]::StartNew()
+          ctest --test-dir build -C Release --output-on-failure -j 4
+          $sw.Stop()
+          Write-Host "::notice::Tests took $($sw.Elapsed.TotalSeconds.ToString('F1'))s"
 
       # ── Upload test results ──────────────────────────────────
       - name: Upload test results
