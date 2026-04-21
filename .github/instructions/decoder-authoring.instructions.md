@@ -81,6 +81,36 @@ Every decoder must have:
 2. A `DecodeAtSize` test using a real file from `data/corpus/`
 3. A malformed-input test (decoder must return `success=false`, never crash)
 
+### Custom TEST() Framework (Primary)
+
+Add test bodies to `EngineTests_Platform.cpp` using the custom `TEST(name)` macro.
+Add `extern void` declarations to `EngineTestsExterns.h` and `RUN_TEST()` calls to `EngineTests.cpp`.
+
+### Catch2 Corpus Tests (Secondary)
+
+For each decoder, add a Catch2 test in `Engine/Tests/catch2/` that validates against real corpus files:
+
+```cpp
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("JpegDecoder corpus validation", "[decoder][jpeg][corpus]") {
+    SECTION("ProbeHeader accepts valid JPEG") {
+        auto data = LoadCorpusFile("data/corpus/jpeg/sample.jpg");
+        REQUIRE(JpegDecoder::ProbeHeader(data.data(), data.size()));
+    }
+    SECTION("DecodeAtSize produces correct dimensions") {
+        auto result = DecodeCorpusFile("data/corpus/jpeg/sample.jpg", 256, 256);
+        REQUIRE(result.success);
+        REQUIRE(result.width > 0);
+        REQUIRE(result.height > 0);
+    }
+    SECTION("Malformed input returns failure") {
+        std::vector<uint8_t> garbage(1024, 0xDE);
+        REQUIRE_FALSE(JpegDecoder::ProbeHeader(garbage.data(), garbage.size()));
+    }
+}
+```
+
 ## Naming Convention
 
 | Class | Example |
@@ -89,6 +119,7 @@ Every decoder must have:
 | Source file | `JpegDecoder.cpp`, `WebPDecoder.cpp` |
 | Header file | `JpegDecoder.h`, `WebPDecoder.h` |
 | Test function | `TEST(JpegDecoderTests)`, `TEST(WebPDecoderTests)` |
+| Catch2 test case | `"JpegDecoder corpus validation"` with tags `[decoder][jpeg][corpus]` |
 
 ## Pre-Authoring Checklist
 
@@ -98,5 +129,6 @@ Every decoder must have:
 - [ ] Add `#include` to `EngineTestsIncludes.h`
 - [ ] Add `extern void Runner()` to `EngineTestsExterns.h`
 - [ ] Add `RUN_TEST()` call to `EngineTests.cpp`
-- [ ] Add TEST body to `EngineTests_Late.cpp`
+- [ ] Add TEST body to `EngineTests_Platform.cpp`
+- [ ] Add Catch2 corpus test in `Engine/Tests/catch2/`
 - [ ] Add at least 3 corpus files to `data/corpus/<format>/`
