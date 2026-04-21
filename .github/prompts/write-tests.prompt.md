@@ -34,12 +34,12 @@ ExplorerLens uses `TEST(name)`, `ASSERT(cond)`, and `RUN_TEST(name)` macros — 
 | `#include` directive | `Engine/Tests/EngineTestsIncludes.h` |
 | `extern void TestXxx_Runner();` | `Engine/Tests/EngineTestsExterns.h` |
 | `RUN_TEST(TestXxx);` call | `Engine/Tests/EngineTests.cpp` (before `// Isolation & Stability Tests`) |
-| `TEST(TestXxx) { ... }` body | `Engine/Tests/EngineTests_Late.cpp` |
+| `TEST(TestXxx) { ... }` body | `Engine/Tests/EngineTests_Platform.cpp` |
 
-### C++ Test Pattern
+### C++ Test Pattern (Custom Framework)
 
 ```cpp
-// In EngineTests_Late.cpp
+// In EngineTests_Platform.cpp
 TEST(FeatureName) {
     using namespace ExplorerLens::Engine;
 
@@ -62,6 +62,45 @@ TEST(FeatureName) {
     ASSERT(feature.GetStats().avgLatencyMs >= 0.0);
 
     // 6-9. Additional assertions for enums, config, error paths
+}
+```
+
+### C++ Test Pattern (Catch2 — for decoder corpus tests)
+
+```cpp
+// In Engine/Tests/Catch2Tests_Decoders.cpp
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include "../Decoders/JpegDecoder.h"
+
+using namespace ExplorerLens::Engine;
+
+TEST_CASE("JpegDecoder decodes basic JPEG", "[decoder][jpeg][corpus]") {
+    auto path = GetCorpusPath("images/jpeg/test-basic.jpg");
+    REQUIRE(std::filesystem::exists(path));
+
+    JpegDecoder decoder;
+    auto data = LoadFileToSpan(path);
+
+    SECTION("ProbeHeader identifies format") {
+        auto result = decoder.ProbeHeader(std::span(data).first(64));
+        REQUIRE(result == DecodeResult::Supported);
+    }
+
+    SECTION("DecodeAtSize produces valid thumbnail") {
+        auto stream = MakeIStreamFromSpan(data);
+        auto result = decoder.DecodeAtSize(stream.Get(), 256, std::stop_token{});
+        REQUIRE(result == DecodeResult::Success);
+        REQUIRE(result.width <= 256);
+        REQUIRE(result.height <= 256);
+    }
+
+    SECTION("Malformed input returns error, does not crash") {
+        auto truncated = std::span(data).first(64);
+        auto stream = MakeIStreamFromSpan(truncated);
+        auto result = decoder.DecodeAtSize(stream.Get(), 256, std::stop_token{});
+        REQUIRE(result != DecodeResult::Success);
+    }
 }
 ```
 

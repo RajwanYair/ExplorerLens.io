@@ -71,7 +71,7 @@ Decoders/{{decoderClass}}.cpp
 1. Add `#include "Decoders/{{decoderClass}}.h"` to `EngineTestsIncludes.h`
 2. Add `extern void {{decoderClass}}Tests();` to `EngineTestsExterns.h`
 3. Add `RUN_TEST({{decoderClass}}Tests)` to `EngineTests.cpp`
-4. Add test body to `EngineTests_Late.cpp`:
+4. Add test body to `EngineTests_Platform.cpp`:
 
 ```cpp
 TEST({{decoderClass}}Tests) {
@@ -94,6 +94,48 @@ TEST({{decoderClass}}Tests) {
         auto result = {{decoderClass}}{}.ProbeHeader(garbage);
         ASSERT(!result.success);
     }
+}
+```
+
+### Step 5b: Register Catch2 Corpus Tests (Recommended)
+
+In addition to the custom framework tests, add Catch2 corpus-based tests:
+
+```cpp
+// In Engine/Tests/Catch2Tests_Decoders.cpp (or a new Catch2Tests_{{decoderClass}}.cpp)
+#include <catch2/catch_test_macros.hpp>
+#include "../Decoders/{{decoderClass}}.h"
+
+using namespace ExplorerLens::Engine;
+
+TEST_CASE("{{decoderClass}}: basic decode", "[decoder][{{formatLower}}][corpus]") {
+    auto path = GetCorpusPath("{{corpusPath}}/{{formatLower}}-basic.{{ext}}");
+    REQUIRE(std::filesystem::exists(path));
+
+    {{decoderClass}} decoder;
+    auto data = LoadFileToSpan(path);
+
+    SECTION("ProbeHeader identifies format") {
+        auto probe = decoder.ProbeHeader(std::span(data).first(64));
+        REQUIRE(probe == DecodeResult::Supported);
+    }
+
+    SECTION("DecodeAtSize produces valid thumbnail at 256px") {
+        auto stream = MakeIStreamFromSpan(data);
+        auto result = decoder.DecodeAtSize(stream.Get(), 256, std::stop_token{});
+        REQUIRE(result == DecodeResult::Success);
+        CHECK(result.width <= 256);
+        CHECK(result.height <= 256);
+    }
+}
+
+TEST_CASE("{{decoderClass}}: malformed input", "[decoder][{{formatLower}}][fuzz]") {
+    auto path = GetCorpusPath("{{corpusPath}}/{{formatLower}}-malformed.{{ext}}");
+    {{decoderClass}} decoder;
+    auto data = LoadFileToSpan(path);
+    auto stream = MakeIStreamFromSpan(data);
+    auto result = decoder.DecodeAtSize(stream.Get(), 256, std::stop_token{});
+    REQUIRE(result != DecodeResult::Success);
 }
 ```
 
