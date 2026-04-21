@@ -4,7 +4,7 @@
 > `docs/PERFORMANCE.md` is the **single source of truth** for all performance baselines and targets.
 > This file is retained for CI workflow compatibility; do not edit it directly.
 
-**Version:** 35.5.0 "Vega-V" (superseded — see docs/PERFORMANCE.md for v36.0.0 baselines)
+**Version:** 35.5.0 "Vega-V" (superseded — see docs/PERFORMANCE.md for v37.2.0 baselines)
 **Last Updated:** April 2026  
 
 ---

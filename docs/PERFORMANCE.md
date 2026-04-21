@@ -1,6 +1,6 @@
 # ExplorerLens Performance Reference
 
-> **Version:** 36.0.0 "Altair" | Consolidated from `docs/PERFORMANCE.md` + `.github/standards/performance-benchmarks.md`
+> **Version:** 37.2.0 "Antares" | Consolidated from `docs/PERFORMANCE.md` + `.github/standards/performance-benchmarks.md`
 > **Hardware:** Intel Core Ultra 9 285K · 64 GB DDR5-6400 · NVIDIA RTX 4090 · NVMe 7 GB/s
 > **OS:** Windows 11 24H2 (Build 26100) | **Compiler:** MSVC 19.50.35720 (/O2 /GL /arch:AVX2)
 >

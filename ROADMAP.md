@@ -1,7 +1,7 @@
 # ExplorerLens — Strategic Roadmap v3.0
 
 **Version:** 3.0 — April 2026
-**Current Release:** v36.2.0 "Antares"
+**Current Release:** v37.2.0 "Antares"
 **Supersedes:** ROADMAP v2.0, ROADMAP_V35 "Vega", ROADMAP_V34 "Arcturus", ROADMAP_V30 "Deneb"
 **Purpose:** Full decision rethink — architecture, language, libraries, APIs, infrastructure,
 testing, documentation, CI/CD, distribution, and competitive positioning.

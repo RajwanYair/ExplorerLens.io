@@ -6,12 +6,12 @@ We provide security patches and updates for the following release lines:
 
 | Version | Supported |
 | ------- | --------- |
-| 36.x    | :white_check_mark: **Current** |
-| 35.x    | :white_check_mark: Security fixes |
-| 34.x    | :white_check_mark: Security fixes only |
-| < 34.0  | :x: End of Life |
+| 37.x    | :white_check_mark: **Current** |
+| 36.x    | :white_check_mark: Security fixes |
+| 35.x    | :white_check_mark: Security fixes only |
+| < 35.0  | :x: End of Life |
 
-> We strongly recommend running the latest release (v36.0.0 "Altair").
+> We strongly recommend running the latest release (v37.2.0 "Antares").
 > Patch releases are issued within 7 days for critical/high CVEs.
 
 ## Reporting a Vulnerability
