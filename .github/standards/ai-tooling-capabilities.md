@@ -222,6 +222,20 @@ The workspace currently defines MCP servers in `.vscode/mcp.json`.
 3. Workflow guidance belongs in `.github/instructions/cicd.instructions.md`; workflow inventory belongs here.
 4. When adding a workflow, add both the YAML and a one-line purpose entry in this file.
 
+### Workflow Compliance Status (Audited v38.1.0)
+
+| Check | Status |
+|-------|--------|
+| All actions at v4+ (or latest stable) | 22/22 ✅ |
+| `permissions:` block present | 22/22 ✅ |
+| `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 22/22 ✅ |
+| `concurrency:` block present | 17/22 (5 exempt — see below) |
+| `workflow_dispatch` trigger | 19/22 (3 exempt — see below) |
+
+**Concurrency exemptions:** `notify-failure.yml` (workflow_run), `release.yml` (tag-push), `reusable-build.yml` (callable), `stale.yml` (scheduled), `sync-labels.yml` (utility).
+
+**workflow_dispatch exemptions:** `notify-failure.yml` (auto-trigger only), `reusable-build.yml` (callable only), `stale.yml` (scheduled only).
+
 ---
 
 ## Maintenance Checklist
