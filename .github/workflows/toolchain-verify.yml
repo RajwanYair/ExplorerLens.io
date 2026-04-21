@@ -16,6 +16,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: toolchain-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true

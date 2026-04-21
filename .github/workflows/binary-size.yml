@@ -15,6 +15,10 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: binary-size-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   size-check:
     name: Binary Size Check

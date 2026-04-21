@@ -27,6 +27,10 @@ permissions:
   contents: read
   checks: write
 
+concurrency:
+  group: corpus-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   generate-corpus:
     name: Generate Test Corpus
