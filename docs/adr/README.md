@@ -13,6 +13,7 @@ rationale, and consequences of significant architectural choices.
 | [ADR-003](ADR-003-CLIP-semantic-search.md) | CLIP Embeddings for Semantic Search | Proposed | v30.2.0 |
 | [ADR-008](ADR-008-c23-migration-strategy.md) | C++23 Migration Strategy | Proposed | v30.0.0+ |
 | [ADR-009](ADR-009-mupdf-agpl-license-strategy.md) | MuPDF AGPL-3.0 License Strategy | Accepted | v36.2.0 |
+| [ADR-010](ADR-010-catch2-test-migration.md) | Catch2 as Primary Test Framework | Accepted | v36.2.0+ |
 
 ## Format
 
