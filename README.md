@@ -1,12 +1,12 @@
-# ExplorerLens.io — GPU-Accelerated Thumbnail Generator
+# ExplorerLens.io — High-Performance Thumbnail Generator
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg" alt="ExplorerLens.io — GPU-Accelerated Windows Shell Extension" width="960"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg" alt="ExplorerLens.io — High-Performance Windows Shell Extension" width="960"/>
 </p>
 
-## High-performance Windows Shell extension for 200+ file formats
+## Windows Shell extension for 200+ file formats
 
-ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. The project root directory is `ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
+ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **multi-threaded processing** with GPU acceleration planned for Phase 2. The project root directory is `ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
 
 [![Build](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml)
 [![Code Quality](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/code-quality.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/code-quality.yml)
@@ -24,7 +24,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 | | |
 |---|---|
 | **Type** | Windows Shell Extension (`IThumbnailProvider` COM in-process DLL) |
-| **GPU** | DirectX 11 device + compute shaders · GPU resize · HDR tone-map · CPU GDI+ fallback |
+| **GPU** | CPU decode with GDI+ fallback · DirectX 11 GPU acceleration planned (Phase 2) |
 | **Platform** | **Windows 10 1809+ / Windows 11 (x64)** · macOS/Linux: planned Phase 5 |
 | **Formats** | 200+ extensions — HEIC, AVIF, JXL, WebP, RAW, PDF, CBZ, CBR, EPUB, glTF, DDS, EXR, MP4, MP3, TTF … |
 | **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
@@ -85,8 +85,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 
 **Server & Ops:**
 
-- [LensServer](src/LensServer/) — Lightweight REST thumbnail server (port 8765)
-- [Dockerfile](Dockerfile) — Windows Container 2-stage build image
+- [Dockerfile](Dockerfile) — Windows Container 2-stage build image for LensServer (Phase 4)
 
 ---
 
@@ -144,10 +143,10 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 
 ### Performance
 
-- ⚡ **GPU Accelerated** - DirectX 11 hardware rendering
-- 🚀 **Smart Caching** - Instant display of cached thumbnails
-- 📦 **Multi-Format** - Single extension for all formats
-- 🎯 **Low Memory** - Efficient resource usage
+- ⚡ **Fast Decode** — Multi-threaded CPU decode pipeline with GPU acceleration planned
+- 🚀 **Smart Caching** — Instant display of cached thumbnails
+- 📦 **Multi-Format** — Single extension for all formats
+- 🎯 **Low Memory** — Efficient resource usage
 
 ---
 
@@ -316,7 +315,12 @@ See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for more troubleshooting.
 
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) for details.
+MIT License — See [LICENSE](LICENSE) for details.
+
+> **Note:** MuPDF (PDF rendering) is AGPL-3.0 licensed. See
+> [ADR-009](docs/adr/ADR-009-mupdf-agpl-license-strategy.md) for our compliance
+> strategy and planned migration to PDFium (BSD). All other 17 external libraries
+> use MIT/BSD/zlib/public-domain licenses.
 
 ---
 
