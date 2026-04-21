@@ -13,6 +13,10 @@ tools:
   - run_in_terminal
   - get_terminal_output
   - manage_todo_list
+context:
+  - data/corpus/MANIFEST.json
+  - .github/skills/test-corpus/SKILL.md
+  - Engine/Decoders/
 ---
 
 # TestCorpus Agent — ExplorerLens

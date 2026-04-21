@@ -11,6 +11,12 @@ tools:
   - run_in_terminal
   - get_terminal_output
   - manage_todo_list
+context:
+  - .github/instructions/version-bump.instructions.md
+  - .github/instructions/release.instructions.md
+  - build-scripts/Bump-Version.ps1
+  - VERSION
+  - CHANGELOG.md
 ---
 
 # Release Agent — ExplorerLens

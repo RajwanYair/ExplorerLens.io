@@ -12,6 +12,11 @@ tools:
   - list_dir
   - get_errors
   - manage_todo_list
+context:
+  - .github/instructions/documentation.instructions.md
+  - docs/mkdocs.yml
+  - README.md
+  - CHANGELOG.md
 ---
 
 # Docs Agent — ExplorerLens

@@ -17,6 +17,12 @@ tools:
   - runSubagent
   - manage_todo_list
   - memory
+context:
+  - .github/copilot-instructions.md
+  - .github/instructions/cpp-coding.instructions.md
+  - .github/instructions/build.instructions.md
+  - Engine/CMakeLists.txt
+  - VERSION
 ---
 
 # ExplorerLens Agent
