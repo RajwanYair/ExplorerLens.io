@@ -67,3 +67,151 @@ One paragraph: what changed and why.
 - File parsing / decoder logic (potential path traversal, buffer overflow)
 - Registry operations in `LENSManager/`
 - CI workflow changes (supply chain security)
+
+---
+
+## Conventional Commits Specification
+
+All commits on `main` follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/).
+
+### Type Reference
+
+| Type | When to Use | Bumps |
+|------|------------|-------|
+| `feat` | New feature (decoder, API, capability) | Minor |
+| `fix` | Bug fix | Patch |
+| `perf` | Performance improvement (no functional change) | Patch |
+| `refactor` | Code restructure (no functional change) | — |
+| `test` | Add/fix tests only | — |
+| `docs` | Documentation only | — |
+| `ci` | CI/CD workflow changes | — |
+| `build` | Build system, dependencies | — |
+| `chore` | Housekeeping (version bumps, config) | Patch |
+| `security` | Security hardening | Patch |
+
+### Breaking Changes
+
+```
+feat(decoder)!: rename ProbeHeader to Probe
+
+BREAKING CHANGE: All decoder subclasses must rename ProbeHeader() to Probe().
+```
+
+- Use `!` after the scope for breaking changes.
+- Include a `BREAKING CHANGE:` footer explaining migration steps.
+
+---
+
+## PR Size Guidelines
+
+| Size | Lines Changed | Expected Review Time | Policy |
+|------|--------------|---------------------|--------|
+| XS | 1–10 | < 5 min | Self-merge OK for docs/config |
+| S | 11–50 | 15 min | Standard review |
+| M | 51–200 | 30 min | Standard review |
+| L | 201–500 | 1 hour | Break into smaller PRs if possible |
+| XL | 500+ | **Not allowed** | Must split into sequential PRs |
+
+### Sprint Delivery PRs
+
+Sprint deliveries (10 headers + 10 test bodies + CMakeLists edits) are exempt from
+the XL rule because they are machine-generated batches that must be atomic.
+
+---
+
+## Label Assignment
+
+Apply these labels to PRs based on content:
+
+| Label | When |
+|-------|------|
+| `build` | CMakeLists, build-scripts, external-libs changes |
+| `ci/cd` | `.github/workflows/` changes |
+| `decoder` | `Engine/Decoders/` changes |
+| `performance` | Benchmark, profiling, or hot-path changes |
+| `security` | Security-related changes (see Security Review section) |
+| `documentation` | Docs-only changes |
+| `shell-extension` | `LENSShell/` changes |
+| `installer` | `packaging/` changes |
+
+### Auto-Labeling
+
+The `auto-label.yml` workflow automatically applies labels based on file paths.
+Manual labels override automatic ones.
+
+---
+
+## Draft PRs
+
+Use draft PRs (`gh pr create --draft`) when:
+
+1. Work is in progress and you want early CI feedback.
+2. You need to share context before requesting review.
+3. Sprint work spans multiple sessions.
+
+Convert to "Ready for Review" only when all CI checks pass.
+
+---
+
+## Branch Naming Convention
+
+```
+<type>/<scope>-<short-description>
+
+Examples:
+  feat/decoder-avif-support
+  fix/cache-eviction-bug
+  ci/pin-action-versions
+  docs/update-user-guide
+  sprint/s51-s60-ai-tooling
+```
+
+### Rules
+
+1. **Lowercase with hyphens** — no underscores, no camelCase.
+2. **Include the type prefix** — matches conventional commit types.
+3. **Keep under 50 characters** — branch names appear in many places.
+4. **Delete after merge** — enable "Automatically delete head branches" in repo settings.
+
+---
+
+## Commit Message Best Practices
+
+### Subject Line
+
+- Imperative mood: "add", "fix", "remove" — not "added", "fixes", "removing".
+- No period at the end.
+- Max 72 characters.
+
+### Body
+
+- Separate from subject with a blank line.
+- Wrap at 72 characters.
+- Explain **what** and **why**, not **how** (the diff shows how).
+- Reference issue numbers: `Fixes #123`, `Closes #456`, `Refs #789`.
+
+### Multi-Sprint Commits
+
+```
+chore: bump version to 36.7.0 (Antares)
+
+Sprints S51-S60:
+- S51: expand documentation.instructions.md
+- S52: expand pr-authoring.instructions.md
+- ...
+- S60: version bump
+```
+
+---
+
+## Corporate Artifact Scrub (Pre-Push)
+
+Every PR must pass this scan before pushing:
+
+```powershell
+git diff --cached --name-only | ForEach-Object {
+    Select-String -LiteralPath $_ -Pattern 'intel\.com|proxy\.|:928\b|:911\b' -AllMatches
+} | ForEach-Object { Write-Warning "CORPORATE ARTIFACT: $($_.Filename):$($_.LineNumber): $($_.Line.Trim())" }
+```
+
+If any match is found, the PR must not be opened until the artifact is removed.
