@@ -1,5 +1,5 @@
 ---
-mode: ask
+mode: agent
 description: "Prepare a release for ExplorerLens. Validates build, scrubs corporate artifacts, checks all 21 version-bearing files, and runs the Bump-Version.ps1 command."
 ---
 
