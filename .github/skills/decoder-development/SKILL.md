@@ -110,7 +110,80 @@ Check `LENSShell/LENSArchive.h` for existing values — **no collisions allowed*
 ### 7. Write tests (required before committing)
 
 See the **Test Corpus Skill** for corpus-based testing procedure.
-New decoder tests go in `Engine/Tests/EngineTests_Late.cpp`.
+
+#### Custom TEST() macro (legacy — existing decoders)
+
+New decoder tests go in `Engine/Tests/EngineTests_Platform.cpp`.
+Add `extern void` declarations in `EngineTestsExterns.h` and `RUN_TEST()` calls in `EngineTests.cpp`.
+
+```cpp
+// EngineTests_Platform.cpp
+TEST(TestMyFormatDecoder_ProbeHeader) {
+    MyFormatDecoder dec;
+    uint8_t magic[] = { 0x4D, 0x59 };  // "MY" magic
+    ASSERT(dec.ProbeHeader(magic, sizeof(magic)) == true);
+    uint8_t bad[] = { 0x00, 0x00 };
+    ASSERT(dec.ProbeHeader(bad, sizeof(bad)) == false);
+}
+```
+
+#### Catch2 v3 (preferred for new decoders)
+
+Catch2 tests live in `Engine/Tests/catch2/`. Use `TEST_CASE` + `SECTION` for structured decode testing:
+
+```cpp
+// Engine/Tests/catch2/test_myformat_decoder.cpp
+#include <catch2/catch_test_macros.hpp>
+#include "Engine/Decoders/MyFormatDecoder.h"
+
+TEST_CASE("MyFormatDecoder: probe accepts valid magic", "[decoder][myformat]") {
+    MyFormatDecoder dec;
+    const uint8_t magic[] = { 0x4D, 0x59 };
+    REQUIRE(dec.ProbeHeader(magic, sizeof(magic)));
+}
+
+TEST_CASE("MyFormatDecoder: decode produces valid bitmap", "[decoder][myformat]") {
+    MyFormatDecoder dec;
+    // Load corpus file
+    auto data = LoadCorpusFile("images/myformat/sample.myf");
+    REQUIRE(!data.empty());
+
+    SECTION("256x256 thumbnail") {
+        auto result = dec.DecodeAtSize(data.data(), data.size(), 256, 256);
+        REQUIRE(result.success);
+        REQUIRE(result.width == 256);
+        REQUIRE(result.height <= 256);
+    }
+
+    SECTION("512x512 thumbnail") {
+        auto result = dec.DecodeAtSize(data.data(), data.size(), 512, 512);
+        REQUIRE(result.success);
+        REQUIRE(result.width == 512);
+    }
+}
+
+TEST_CASE("MyFormatDecoder: rejects malformed input", "[decoder][myformat][security]") {
+    MyFormatDecoder dec;
+    SECTION("empty buffer") {
+        auto result = dec.DecodeAtSize(nullptr, 0, 256, 256);
+        REQUIRE_FALSE(result.success);
+    }
+    SECTION("truncated header") {
+        const uint8_t truncated[] = { 0x4D };
+        auto result = dec.DecodeAtSize(truncated, 1, 256, 256);
+        REQUIRE_FALSE(result.success);
+    }
+}
+```
+
+**Catch2 tag conventions:**
+- `[decoder]` — all decoder tests
+- `[myformat]` — format-specific tag (e.g., `[jpeg]`, `[png]`, `[pdf]`)
+- `[security]` — fuzzing/malformed input tests
+- `[corpus]` — requires files from `data/corpus/`
+- `[slow]` — tests > 1 second (excluded from quick runs: `--skip-benchmarks`)
+
+Register Catch2 test files in `Engine/Tests/CMakeLists.txt` under the `Catch2Tests` target.
 
 ---
 
