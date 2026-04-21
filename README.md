@@ -224,7 +224,7 @@ graph TD
     ROOT --> EXT["📦 <b>external/</b><br/>Statically Linked Libraries"]
     ROOT --> DOCS["📚 <b>docs/</b><br/>Architecture &amp; Guides"]
     ROOT --> SDK["🧩 <b>SDK/</b><br/>Plugin SDK · C ABI"]
-    ROOT --> PKG["📋 <b>packaging/</b><br/>MSI · MSIX · Inno Setup"]
+    ROOT --> PKG["📋 <b>packaging/</b><br/>MSI · WiX · Portable ZIP"]
     ROOT --> SLN["📄 <b>LENSShell.sln</b><br/>Visual Studio 18 2026 Solution"]
 
     ENG --> CORE["🏗️ <b>Core/</b><br/>Pipeline · Detection · SIMD"]
@@ -234,7 +234,7 @@ graph TD
     ENG --> MEM["🧠 <b>Memory/</b><br/>BitmapPool · Pressure Ctrl"]
     ENG --> PLUGIN["🔩 <b>Plugin/</b><br/>Plugin Ecosystem · Sandbox"]
     ENG --> AI["🤖 <b>AI/</b><br/>Smart Crop · IQA · Scene"]
-    ENG --> TESTS["✅ <b>Tests/</b><br/>4,483 Unit Tests · 5 Benchmarks"]
+    ENG --> TESTS["✅ <b>Tests/</b><br/>4,744 Unit Tests · 5 Benchmarks"]
 
     style ROOT fill:#1e3a5f,color:#fff,stroke:#4a9eff,stroke-width:2px
     style ENG  fill:#1b4332,color:#fff,stroke:#40916c,stroke-width:2px
@@ -274,10 +274,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 32.3.0 "Fomalhaut-T"
+**Current Version:** 36.4.0 "Antares"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 4,483 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Fomalhaut-T — Annotation, HDR Tone Mapping & Format Detection
+**Test Status:** 4,744 unit tests, 5 benchmarks (100% pass rate)
+**Codename:** Antares
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 

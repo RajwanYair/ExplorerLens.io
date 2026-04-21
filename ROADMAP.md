@@ -517,10 +517,10 @@ synthetically generated with ImageMagick/FFmpeg, real camera RAWs.
 | **Tier 4 — Historical** | Reference | `CHANGELOG-archive.md`, `docs/archive/` | Rarely accessed |
 
 **Actions:**
-- Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` → `docs/archive/`
-- Delete empty `packaging/inno/`, `nsis/`, `msix/`, `vdproj/`
-- Merge `docs/PERFORMANCE.md` ← `.github/standards/performance-benchmarks.md`
-- Update README.md to reflect actual validated capabilities (not aspirational)
+- ~~Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md` → `docs/archive/`~~ ✅ Done
+- ~~Delete empty `packaging/inno/`, `nsis/`, `msix/`, `vdproj/`~~ ✅ Done
+- ~~Merge `docs/PERFORMANCE.md` ← `.github/standards/performance-benchmarks.md`~~ ✅ Done
+- ~~Update README.md to reflect actual validated capabilities (not aspirational)~~ ✅ Done (Sprint 34)
 
 ### 8.2 GitHub Community Files (Fix Casing)
 
