@@ -33,6 +33,7 @@
       "console": "integratedTerminal",
       "symbolSearchPath": "${workspaceFolder}\\build\\bin",
       "sourceFileMap": {},
+      "preLaunchTask": "Build Engine (CMake Release)",
       // Wires this config to the Testing pane's Debug button (▶ with bug icon)
       "purpose": ["debug-test"]
     },
@@ -51,13 +52,14 @@
       "name": "C++: Debug LENSManager",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}\\x64\\Debug\\LENSManager.exe",
+      "program": "${workspaceFolder}\\x64\\Release\\LENSManager.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
       "console": "integratedTerminal",
-      "symbolSearchPath": "${workspaceFolder}\\x64\\Debug"
+      "preLaunchTask": "Build Shell Extension (MSBuild)",
+      "symbolSearchPath": "${workspaceFolder}\\x64\\Release"
     },
     {
       "name": "C++: Attach to Explorer.exe",
