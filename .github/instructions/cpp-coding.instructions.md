@@ -120,3 +120,112 @@ std::min(a, b);
 // ✅ Parenthesized
 (std::min)(a, b);
 ```
+
+## C++23 Migration Patterns
+
+ExplorerLens targets C++20 today but MSVC v145 already supports many C++23 features
+behind `/std:c++latest`. Use these patterns when the compiler supports them.
+
+### `std::expected<T, E>` — Error Handling Without Exceptions
+
+Prefer `std::expected` over custom result types for functions that can fail:
+
+```cpp
+#include <expected>
+
+// ❌ Old pattern: return code + out-parameter
+bool DecodeFile(const wchar_t* path, HBITMAP* out, std::wstring* errMsg);
+
+// ✅ C++23: std::expected
+std::expected<HBITMAP, DecodeError> DecodeFile(const wchar_t* path);
+
+// Usage:
+auto result = DecodeFile(path);
+if (result) {
+    UseThumb(*result);
+} else {
+    LogError(result.error());
+}
+```
+
+When to use:
+- Public API boundaries (decoder entry points, pipeline stages)
+- Functions where callers must handle the error
+
+When NOT to use:
+- Internal hot-path helpers where a `bool` return is sufficient
+- Functions that only fail on programming errors (use `assert`)
+
+### `std::format` — Type-Safe Formatting
+
+Already available in C++20 via `<format>`. Prefer over `sprintf`/`swprintf`:
+
+```cpp
+#include <format>
+
+// ❌ Buffer overflow risk
+char buf[128];
+sprintf(buf, "Decoded %d×%d in %.1fms", w, h, ms);
+
+// ✅ Type-safe, bounds-safe
+auto msg = std::format("Decoded {}×{} in {:.1f}ms", w, h, ms);
+auto wmsg = std::format(L"File: {} ({} bytes)", path, size);
+```
+
+### Structured Bindings — Preferred for Multi-Return
+
+```cpp
+// ❌ Verbose
+auto pair = cache.Lookup(key);
+bool found = pair.first;
+CacheEntry entry = pair.second;
+
+// ✅ Structured binding
+auto [found, entry] = cache.Lookup(key);
+```
+
+### `std::print` (C++23) — Direct Output
+
+When available, prefer `std::print` over `std::cout` in CLI tools:
+
+```cpp
+#include <print>
+
+// ❌ Verbose stream insertion
+std::cout << "Processed " << count << " files in " << ms << "ms\n";
+
+// ✅ C++23 direct print
+std::print("Processed {} files in {}ms\n", count, ms);
+```
+
+### Ranges — Prefer Over Raw Loops for Collection Operations
+
+```cpp
+#include <ranges>
+#include <algorithm>
+
+// ❌ Index-based loop with manual filter
+std::vector<Decoder*> active;
+for (size_t i = 0; i < decoders.size(); ++i)
+    if (decoders[i]->IsEnabled()) active.push_back(decoders[i]);
+
+// ✅ Ranges pipeline
+auto active = decoders | std::views::filter(&Decoder::IsEnabled);
+```
+
+### Concepts — Constrain Template Parameters
+
+```cpp
+#include <concepts>
+
+// ❌ Unconstrained template — error messages are cryptic
+template <typename T>
+void Render(T& decoder) { decoder.Decode(); }
+
+// ✅ Concept-constrained
+template <typename T>
+concept Decodable = requires(T d) { { d.Decode() } -> std::same_as<DecodeResult>; };
+
+template <Decodable T>
+void Render(T& decoder) { decoder.Decode(); }
+```
