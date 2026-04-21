@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" font-family="Segoe UI,system-ui,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0d1117"/><stop offset="100%" stop-color="#161b22"/></linearGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#58a6ff"/><stop offset="100%" stop-color="#1f6feb"/></linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3fb950"/><stop offset="100%" stop-color="#238636"/></linearGradient>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d29922"/><stop offset="100%" stop-color="#9e6a03"/></linearGradient>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f778ba"/><stop offset="100%" stop-color="#db61a2"/></linearGradient>
+    <linearGradient id="g5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bc8cff"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient>
+  </defs>
+  <rect width="900" height="320" rx="12" fill="url(#bg)"/>
+  <text x="450" y="32" text-anchor="middle" fill="#c9d1d9" font-size="16" font-weight="600">ExplorerLens — Decode Pipeline</text>
+  <!-- Stage 1: File Input -->
+  <rect x="20" y="60" width="140" height="70" rx="8" fill="url(#g1)" opacity="0.9"/>
+  <text x="90" y="88" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">IStream Input</text>
+  <text x="90" y="108" text-anchor="middle" fill="#c8e1ff" font-size="10">Explorer → COM</text>
+  <!-- Arrow 1 -->
+  <polygon points="168,95 180,88 180,102" fill="#58a6ff"/>
+  <!-- Stage 2: Magic Detection -->
+  <rect x="188" y="60" width="140" height="70" rx="8" fill="url(#g2)" opacity="0.9"/>
+  <text x="258" y="88" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Format Detect</text>
+  <text x="258" y="108" text-anchor="middle" fill="#aef0be" font-size="10">Magic bytes + ext</text>
+  <!-- Arrow 2 -->
+  <polygon points="336,95 348,88 348,102" fill="#3fb950"/>
+  <!-- Stage 3: Decoder Route -->
+  <rect x="356" y="60" width="140" height="70" rx="8" fill="url(#g3)" opacity="0.9"/>
+  <text x="426" y="88" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Decoder Route</text>
+  <text x="426" y="108" text-anchor="middle" fill="#f0d98c" font-size="10">25 specialized decoders</text>
+  <!-- Arrow 3 -->
+  <polygon points="504,95 516,88 516,102" fill="#d29922"/>
+  <!-- Stage 4: Decode -->
+  <rect x="524" y="60" width="140" height="70" rx="8" fill="url(#g4)" opacity="0.9"/>
+  <text x="594" y="88" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Decode + Scale</text>
+  <text x="594" y="108" text-anchor="middle" fill="#ffc0e0" font-size="10">BGRA thumbnail</text>
+  <!-- Arrow 4 -->
+  <polygon points="672,95 684,88 684,102" fill="#f778ba"/>
+  <!-- Stage 5: Output -->
+  <rect x="692" y="60" width="180" height="70" rx="8" fill="url(#g5)" opacity="0.9"/>
+  <text x="782" y="88" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">HBITMAP Output</text>
+  <text x="782" y="108" text-anchor="middle" fill="#dbc8ff" font-size="10">→ Explorer thumbnail cache</text>
+  <!-- Decoder boxes below -->
+  <text x="450" y="165" text-anchor="middle" fill="#8b949e" font-size="12" font-weight="600">Decoder Families</text>
+  <rect x="20"  y="180" width="120" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="80"  y="200" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="600">Images</text>
+  <text x="80"  y="216" text-anchor="middle" fill="#8b949e" font-size="9">JPEG PNG WebP GIF</text>
+  <rect x="155" y="180" width="120" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="215" y="200" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600">Modern</text>
+  <text x="215" y="216" text-anchor="middle" fill="#8b949e" font-size="9">HEIC AVIF JXL QOI</text>
+  <rect x="290" y="180" width="120" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="350" y="200" text-anchor="middle" fill="#d29922" font-size="11" font-weight="600">RAW Photos</text>
+  <text x="350" y="216" text-anchor="middle" fill="#8b949e" font-size="9">CR2 NEF ARW DNG</text>
+  <rect x="425" y="180" width="120" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="485" y="200" text-anchor="middle" fill="#f778ba" font-size="11" font-weight="600">Archives</text>
+  <text x="485" y="216" text-anchor="middle" fill="#8b949e" font-size="9">ZIP RAR 7Z CBZ</text>
+  <rect x="560" y="180" width="120" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="620" y="200" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="600">Documents</text>
+  <text x="620" y="216" text-anchor="middle" fill="#8b949e" font-size="9">PDF EPUB MOBI</text>
+  <rect x="695" y="180" width="120" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="755" y="200" text-anchor="middle" fill="#f0883e" font-size="11" font-weight="600">3D / Video</text>
+  <text x="755" y="216" text-anchor="middle" fill="#8b949e" font-size="9">STL OBJ MP4 TTF</text>
+  <!-- Bottom row: libraries -->
+  <text x="450" y="260" text-anchor="middle" fill="#8b949e" font-size="12" font-weight="600">External Libraries</text>
+  <rect x="60"  y="272" width="780" height="30" rx="6" fill="#161b22" stroke="#30363d"/>
+  <text x="450" y="292" text-anchor="middle" fill="#7d8590" font-size="10">libraw 0.21 · libheif 1.19 · libjxl 0.11 · libwebp 1.5 · dav1d 1.5 · mupdf · minizip-ng · zlib · zstd · lz4 · lzma</text>
+</svg>

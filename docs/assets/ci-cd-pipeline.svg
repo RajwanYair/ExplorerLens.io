@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="Segoe UI,system-ui,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0d1117"/><stop offset="100%" stop-color="#161b22"/></linearGradient>
+    <linearGradient id="ga" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#58a6ff"/><stop offset="100%" stop-color="#1f6feb"/></linearGradient>
+    <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3fb950"/><stop offset="100%" stop-color="#238636"/></linearGradient>
+    <linearGradient id="gc" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d29922"/><stop offset="100%" stop-color="#9e6a03"/></linearGradient>
+    <linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f778ba"/><stop offset="100%" stop-color="#db61a2"/></linearGradient>
+  </defs>
+  <rect width="900" height="360" rx="12" fill="url(#bg)"/>
+  <text x="450" y="32" text-anchor="middle" fill="#c9d1d9" font-size="16" font-weight="600">ExplorerLens — CI/CD Pipeline</text>
+  <!-- Row 1: Triggers -->
+  <text x="32" y="65" fill="#8b949e" font-size="11" font-weight="600">TRIGGERS</text>
+  <rect x="110" y="48" width="100" height="32" rx="6" fill="url(#ga)" opacity="0.85"/>
+  <text x="160" y="69" text-anchor="middle" fill="#fff" font-size="11">Push main</text>
+  <rect x="224" y="48" width="100" height="32" rx="6" fill="url(#ga)" opacity="0.85"/>
+  <text x="274" y="69" text-anchor="middle" fill="#fff" font-size="11">Pull Request</text>
+  <rect x="338" y="48" width="100" height="32" rx="6" fill="url(#ga)" opacity="0.65"/>
+  <text x="388" y="69" text-anchor="middle" fill="#fff" font-size="11">Tag vX.Y.Z</text>
+  <rect x="452" y="48" width="120" height="32" rx="6" fill="url(#ga)" opacity="0.45"/>
+  <text x="512" y="69" text-anchor="middle" fill="#fff" font-size="11">workflow_dispatch</text>
+  <!-- Row 2: Build -->
+  <text x="32" y="118" fill="#8b949e" font-size="11" font-weight="600">BUILD</text>
+  <rect x="110" y="98" width="170" height="42" rx="6" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="195" y="116" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="600">ci-matrix.yml</text>
+  <text x="195" y="131" text-anchor="middle" fill="#8b949e" font-size="9">CMake + MSVC v145 + CTest</text>
+  <rect x="296" y="98" width="170" height="42" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="381" y="116" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600">toolchain-verify.yml</text>
+  <text x="381" y="131" text-anchor="middle" fill="#8b949e" font-size="9">MSVC + CMake + Ninja check</text>
+  <rect x="482" y="98" width="170" height="42" rx="6" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="567" y="116" text-anchor="middle" fill="#d29922" font-size="11" font-weight="600">docs-validation.yml</text>
+  <text x="567" y="131" text-anchor="middle" fill="#8b949e" font-size="9">mkdocs build --strict</text>
+  <!-- Row 3: Quality -->
+  <text x="32" y="175" fill="#8b949e" font-size="11" font-weight="600">QUALITY</text>
+  <rect x="110" y="155" width="130" height="42" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="175" y="173" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="600">code-quality.yml</text>
+  <text x="175" y="188" text-anchor="middle" fill="#8b949e" font-size="9">Static analysis</text>
+  <rect x="254" y="155" width="130" height="42" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="319" y="173" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="600">codeql.yml</text>
+  <text x="319" y="188" text-anchor="middle" fill="#8b949e" font-size="9">Security scanning</text>
+  <rect x="398" y="155" width="130" height="42" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="463" y="173" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="600">pr-checks.yml</text>
+  <text x="463" y="188" text-anchor="middle" fill="#8b949e" font-size="9">Title/size/version</text>
+  <rect x="542" y="155" width="130" height="42" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+  <text x="607" y="173" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="600">coverage.yml</text>
+  <text x="607" y="188" text-anchor="middle" fill="#8b949e" font-size="9">Test coverage</text>
+  <!-- Row 4: Regression Gates -->
+  <text x="32" y="232" fill="#8b949e" font-size="11" font-weight="600">GATES</text>
+  <rect x="110" y="212" width="150" height="42" rx="6" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="185" y="230" text-anchor="middle" fill="#f778ba" font-size="11" font-weight="600">binary-size.yml</text>
+  <text x="185" y="245" text-anchor="middle" fill="#8b949e" font-size="9">DLL size regression</text>
+  <rect x="274" y="212" width="150" height="42" rx="6" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="349" y="230" text-anchor="middle" fill="#f778ba" font-size="11" font-weight="600">perf-regression.yml</text>
+  <text x="349" y="245" text-anchor="middle" fill="#8b949e" font-size="9">P95 latency gate</text>
+  <rect x="438" y="212" width="150" height="42" rx="6" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="513" y="230" text-anchor="middle" fill="#f778ba" font-size="11" font-weight="600">catch2-tests.yml</text>
+  <text x="513" y="245" text-anchor="middle" fill="#8b949e" font-size="9">Catch2 + corpus</text>
+  <rect x="602" y="212" width="150" height="42" rx="6" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="677" y="230" text-anchor="middle" fill="#f778ba" font-size="11" font-weight="600">corpus-validate.yml</text>
+  <text x="677" y="245" text-anchor="middle" fill="#8b949e" font-size="9">Real file validation</text>
+  <!-- Row 5: Release -->
+  <text x="32" y="292" fill="#8b949e" font-size="11" font-weight="600">RELEASE</text>
+  <rect x="110" y="272" width="170" height="42" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="195" y="290" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600">release.yml</text>
+  <text x="195" y="305" text-anchor="middle" fill="#8b949e" font-size="9">Build + package artifacts</text>
+  <rect x="296" y="272" width="170" height="42" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="381" y="290" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600">publish-packages.yml</text>
+  <text x="381" y="305" text-anchor="middle" fill="#8b949e" font-size="9">NuGet + npm + Container</text>
+  <rect x="482" y="272" width="170" height="42" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="567" y="290" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600">pages.yml</text>
+  <text x="567" y="305" text-anchor="middle" fill="#8b949e" font-size="9">Docs → GitHub Pages</text>
+  <!-- Legend -->
+  <rect x="760" y="272" width="120" height="42" rx="6" fill="#21262d" stroke="#30363d"/>
+  <text x="820" y="290" text-anchor="middle" fill="#c9d1d9" font-size="10" font-weight="600">18 Workflows</text>
+  <text x="820" y="305" text-anchor="middle" fill="#8b949e" font-size="9">0 warnings policy</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" font-family="Segoe UI,system-ui,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0d1117"/><stop offset="100%" stop-color="#161b22"/></linearGradient>
+    <linearGradient id="ga" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#58a6ff"/><stop offset="100%" stop-color="#1f6feb"/></linearGradient>
+    <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3fb950"/><stop offset="100%" stop-color="#238636"/></linearGradient>
+    <linearGradient id="gc" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d29922"/><stop offset="100%" stop-color="#9e6a03"/></linearGradient>
+    <linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f778ba"/><stop offset="100%" stop-color="#db61a2"/></linearGradient>
+    <linearGradient id="ge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bc8cff"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient>
+  </defs>
+  <rect width="900" height="320" rx="12" fill="url(#bg)"/>
+  <text x="450" y="32" text-anchor="middle" fill="#c9d1d9" font-size="16" font-weight="600">ExplorerLens — Test Architecture</text>
+  <!-- Left: Custom Framework -->
+  <rect x="20" y="55" width="260" height="240" rx="8" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="150" y="78" text-anchor="middle" fill="#58a6ff" font-size="13" font-weight="700">Custom Test Framework</text>
+  <text x="150" y="95" text-anchor="middle" fill="#8b949e" font-size="10">~4,744 tests · TEST()/ASSERT()/RUN_TEST()</text>
+  <rect x="35" y="108" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="150" y="125" text-anchor="middle" fill="#c9d1d9" font-size="10">EngineTests.cpp — harness + main()</text>
+  <rect x="35" y="140" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="150" y="157" text-anchor="middle" fill="#c9d1d9" font-size="10">EngineTests_Core.cpp — decoders, cache</text>
+  <rect x="35" y="172" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="150" y="189" text-anchor="middle" fill="#c9d1d9" font-size="10">EngineTests_Features.cpp — SIMD, enterprise</text>
+  <rect x="35" y="204" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="150" y="221" text-anchor="middle" fill="#c9d1d9" font-size="10">EngineTests_Mid.cpp — settings, plugin</text>
+  <rect x="35" y="236" width="110" height="26" rx="4" fill="#161b22"/>
+  <text x="90" y="253" text-anchor="middle" fill="#c9d1d9" font-size="10">...Late.cpp</text>
+  <rect x="155" y="236" width="110" height="26" rx="4" fill="#161b22"/>
+  <text x="210" y="253" text-anchor="middle" fill="#c9d1d9" font-size="10">...Platform.cpp</text>
+  <text x="150" y="282" text-anchor="middle" fill="#7d8590" font-size="9">Split files: each &lt; 400 KB</text>
+  <!-- Center: Catch2 -->
+  <rect x="310" y="55" width="260" height="240" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="440" y="78" text-anchor="middle" fill="#3fb950" font-size="13" font-weight="700">Catch2 v3.7.1</text>
+  <text x="440" y="95" text-anchor="middle" fill="#8b949e" font-size="10">9 test files · REQUIRE/CHECK/SECTION</text>
+  <rect x="325" y="108" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="440" y="125" text-anchor="middle" fill="#c9d1d9" font-size="10">DecoderUnitTests.cpp</text>
+  <rect x="325" y="140" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="440" y="157" text-anchor="middle" fill="#c9d1d9" font-size="10">CorpusValidationTests.cpp</text>
+  <rect x="325" y="172" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="440" y="189" text-anchor="middle" fill="#c9d1d9" font-size="10">CacheTests / PipelineTests</text>
+  <rect x="325" y="204" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="440" y="221" text-anchor="middle" fill="#c9d1d9" font-size="10">GPUTests / MemoryTests</text>
+  <rect x="325" y="236" width="230" height="26" rx="4" fill="#161b22"/>
+  <text x="440" y="253" text-anchor="middle" fill="#c9d1d9" font-size="10">PluginTests / AITests / MediaTests</text>
+  <text x="440" y="282" text-anchor="middle" fill="#7d8590" font-size="9">ADR-010: primary framework going forward</text>
+  <!-- Right: Benchmarks + Fuzz -->
+  <rect x="600" y="55" width="280" height="115" rx="8" fill="#21262d" stroke="#d29922" stroke-width="1.5"/>
+  <text x="740" y="78" text-anchor="middle" fill="#d29922" font-size="13" font-weight="700">Google Benchmark</text>
+  <text x="740" y="95" text-anchor="middle" fill="#8b949e" font-size="10">5 benchmarks · P50/P95/P99 baselines</text>
+  <rect x="615" y="108" width="250" height="26" rx="4" fill="#161b22"/>
+  <text x="740" y="125" text-anchor="middle" fill="#c9d1d9" font-size="10">ThroughputBenchmarks.cpp</text>
+  <text x="740" y="156" text-anchor="middle" fill="#7d8590" font-size="9">baseline.json tracks regressions</text>
+  <rect x="600" y="185" width="280" height="110" rx="8" fill="#21262d" stroke="#f778ba" stroke-width="1.5"/>
+  <text x="740" y="208" text-anchor="middle" fill="#f778ba" font-size="13" font-weight="700">Fuzz Harnesses</text>
+  <text x="740" y="225" text-anchor="middle" fill="#8b949e" font-size="10">libFuzzer (Clang) / MSVC stubs</text>
+  <rect x="615" y="238" width="250" height="26" rx="4" fill="#161b22"/>
+  <text x="740" y="255" text-anchor="middle" fill="#c9d1d9" font-size="10">FuzzFormatDetection / FuzzArchive / FuzzExif</text>
+  <text x="740" y="282" text-anchor="middle" fill="#7d8590" font-size="9">data/corpus/malformed/ for crash testing</text>
+</svg>
