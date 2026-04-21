@@ -1,0 +1,53 @@
+# release.yml — GitHub auto-generated release notes configuration
+# Controls how GitHub categorizes PRs when using "Generate release notes" on the Releases page.
+# See: https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+
+changelog:
+  exclude:
+    labels:
+      - "wontfix"
+      - "invalid"
+      - "duplicate"
+      - "stale"
+    authors:
+      - "dependabot[bot]"
+
+  categories:
+    - title: "⚠️ Breaking Changes"
+      labels:
+        - "breaking-change"
+
+    - title: "🚀 New Features & Decoders"
+      labels:
+        - "enhancement"
+        - "decoder"
+        - "plugin"
+
+    - title: "🐛 Bug Fixes"
+      labels:
+        - "bug"
+
+    - title: "⚡ Performance"
+      labels:
+        - "performance"
+        - "gpu"
+        - "cache"
+        - "memory"
+
+    - title: "🔒 Security"
+      labels:
+        - "security"
+
+    - title: "🔨 Build & CI"
+      labels:
+        - "build"
+        - "ci/cd"
+        - "installer"
+
+    - title: "📚 Documentation"
+      labels:
+        - "documentation"
+
+    - title: "🏠 Other Changes"
+      labels:
+        - "*"
