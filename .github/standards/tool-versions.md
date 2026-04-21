@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 21 April 2026 (v37.2.0 Antares release)
-**Version:** 37.2.0 "Antares"
+**Last Updated:** 21 April 2026 (v38.0.0 Betelgeuse release)
+**Version:** 38.0.0 "Betelgeuse"
 
 ---
 
