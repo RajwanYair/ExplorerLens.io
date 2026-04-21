@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
-**Last Updated:** 22 July 2025  
-**Version:** v36.9.0 "Antares"  
+**Last Updated:** 23 April 2026  
+**Version:** v37.0.0 "Antares"  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -39,7 +39,7 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 
 ## Instruction Files
 
-### Current Instruction Inventory (13 files)
+### Current Instruction Inventory (15 files)
 
 | File | Primary Scope (`applyTo`) | Use When |
 |------|--------------------------|----------|
@@ -56,6 +56,8 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 | `pr-authoring.instructions.md` | `.github/**` | PR title format, conventional commits, review assignment |
 | `version-bump.instructions.md` | `**` | 20-file version registry, idempotency guard, release checklist |
 | `file-size-policy.instructions.md` | `**` | Git performance guardrails (500 KB split, 200 KB monitor) |
+| `mcp-servers.instructions.md` | `.vscode/mcp.json` | MCP server configuration rules, addition checklist, security |
+| `ai-agents.instructions.md` | `.github/agents/**` | Agent file structure, creation checklist, design rules |
 
 ### Authoring Rules
 
