@@ -100,6 +100,35 @@ BREAKING CHANGE: All decoder subclasses must rename ProbeHeader() to Probe().
 - Use `!` after the scope for breaking changes.
 - Include a `BREAKING CHANGE:` footer explaining migration steps.
 
+### Complete Scope Reference
+
+| Scope | Directory / Domain | Examples |
+|-------|--------------------|----------|
+| `engine` | `Engine/Core/`, `Engine/Engine.h` | Pipeline changes, core architecture |
+| `shell` | `LENSShell/` | COM DLL, thumbnail provider, shell integration |
+| `manager` | `LENSManager/` | GUI config utility, WTL dialogs |
+| `decoder` | `Engine/Decoders/` | New/modified format decoders |
+| `cache` | `Engine/Cache/` | Cache manager, eviction, budget |
+| `gpu` | `Engine/GPU/` | GPU decode, vendor routing |
+| `ai` | `Engine/AI/` | ML modules, scene understanding, IQA |
+| `memory` | `Engine/Memory/` | Compactor, hot-mode, pressure controller |
+| `pipeline` | `Engine/Pipeline/` | Fallback engine, zero-copy, parallel I/O |
+| `plugin` | `Engine/Plugin/`, `Engine/PluginHost/` | Plugin SDK, trust chain, sandbox |
+| `platform` | `Engine/Platform/` | PAL — Win32, macOS QL, Linux Nautilus |
+| `media` | `Engine/Media/` | Video preview, timeline, scrubber |
+| `tests` | `Engine/Tests/` | Test framework, test bodies, benchmarks |
+| `cli` | `Engine/CLI/` | Command-line interface |
+| `ci` | `.github/workflows/` | CI/CD pipelines, actions |
+| `build` | `CMakeLists.txt`, `build-scripts/` | Build system, external libs |
+| `packaging` | `packaging/` | MSI, Inno Setup, MSIX, portable ZIP |
+| `sdk` | `SDK/` | Plugin SDK, C ABI headers |
+| `docs` | `docs/`, `*.md` | Documentation, diagrams |
+| `deps` | `external/`, `vcpkg.json` | Dependency updates |
+| `security` | Cross-cutting | Security hardening, signing, audit |
+
+Use the most specific scope. If a change spans multiple scopes, use the primary scope
+and mention others in the commit body.
+
 ---
 
 ## PR Size Guidelines
@@ -215,3 +244,38 @@ git diff --cached --name-only | ForEach-Object {
 ```
 
 If any match is found, the PR must not be opened until the artifact is removed.
+
+---
+
+## Review Assignment Rules
+
+### Ownership Areas
+
+| Path Pattern | Required Reviewer | Reason |
+|-------------|-------------------|--------|
+| `LENSShell/**` | Security-aware reviewer | COM DLL loaded by explorer.exe |
+| `Engine/Core/**` | Engine lead | Core pipeline changes affect all decoders |
+| `Engine/Decoders/**` | Decoder author + one other | Format-specific expertise required |
+| `packaging/**` | Release engineer | Installer changes affect distribution |
+| `.github/workflows/**` | CI owner | Supply chain security |
+| `external/**` | Build engineer | Third-party dependency changes |
+| `build-scripts/**` | Build engineer | Build system integrity |
+
+### Review SLA
+
+| PR Size | Initial Review | Final Approval |
+|---------|---------------|----------------|
+| XS / S | Same day | Same day |
+| M | 1 business day | 2 business days |
+| L | 2 business days | 3 business days |
+
+### Self-Merge Exceptions
+
+The following changes may be self-merged without reviewer approval:
+
+1. **Docs-only** — `docs/**`, `*.md` (non-code) with no functional impact.
+2. **CI config** — `.github/workflows/` tweaks that only adjust timeouts, labels, or caching.
+3. **Version bumps** — automated `Bump-Version.ps1` commits (all 20 files).
+4. **Sprint housekeeping** — instruction/prompt/skill file expansion (no Engine code).
+
+All other changes require at least one reviewer approval before merge.
