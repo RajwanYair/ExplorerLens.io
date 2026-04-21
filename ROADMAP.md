@@ -1,7 +1,7 @@
 # ExplorerLens — Strategic Roadmap v3.0
 
 **Version:** 3.0 — April 2026
-**Current Release:** v36.1.0 "Antares"
+**Current Release:** v36.2.0 "Antares"
 **Supersedes:** ROADMAP v2.0, ROADMAP_V35 "Vega", ROADMAP_V34 "Arcturus", ROADMAP_V30 "Deneb"
 **Purpose:** Full decision rethink — architecture, language, libraries, APIs, infrastructure,
 testing, documentation, CI/CD, distribution, and competitive positioning.
@@ -210,10 +210,13 @@ This is our moat. Execute on items 1-4 first (Phase 1), then 5-9 (Phases 2-4).
 **What needs attention:**
 - ~~MuPDF AGPL-3.0 license~~ → Documented in ADR-009; PDFium evaluation planned Phase 3
 - ~~`EngineTests_Late.cpp` at ~486 KB~~ → Split into Late (215 KB) + Platform (256 KB)
-- ~~`LIBRARY_INVENTORY.md` version header at v15.0.0~~ → Updated to v36.1.0
+- ~~`LIBRARY_INVENTORY.md` version header at v15.0.0~~ → Updated to v36.2.0
 - ~~Dead code in `src/`~~ → Deleted LensServer, PluginHost, PSModule
 - ~~Dockerfile uses VS 2022~~ → Updated to VS 2026
 - ~~CI workflow version comments stale~~ → Updated to v36.1.0
+- ~~mkdocs.yml 19 broken nav references~~ → Removed in v36.3.0
+- ~~Maven/RubyGems CI publish jobs~~ → Dropped in v36.3.0 (no consumers)
+- ~~external/CMakeLists.txt old "DarkThumbs" naming + /MT CRT~~ → Fixed in v36.3.0
 - Engine/Core/ has ~530 files (consolidation opportunity — see §4.2)
 
 **This is not a failure.** The architecture is sound, the infrastructure is professional,
@@ -951,18 +954,22 @@ invalidation. We adopt the same pattern:
 - [x] Evaluate MuPDF AGPL license: documented in ADR-009 — keep with compliance docs, evaluate PDFium Phase 3 *(v36.2.0)*
 - [x] Fix Dockerfile VS 2022 → VS 2026 BuildTools *(v36.2.0)*
 - [x] Honest README: tempered GPU claims, added AGPL notice *(v36.2.0)*
+- [x] Drop Maven + RubyGems from CI publish (R5) — 3 registries remain *(v36.3.0)*
+- [x] Header audit tooling: `build-scripts/Audit-Headers.ps1` classifies Real/Stub/Dead/Orphan *(v36.3.0)*
+- [x] Fix mkdocs.yml: removed 19 broken nav entries referencing non-existent files (R8) *(v36.3.0)*
+- [x] Clean external lib references: renamed DarkThumbs→ExplorerLens, fixed /MT→/MD (R8, R10) *(v36.3.0)*
+- [x] Document Catch2 migration decision in ADR-010 *(v36.3.0)*
 - [ ] Shared tooling architecture (§11): audit configs, consolidate at MyScripts\, establish inheritance
 - [ ] GitHub AI surface overhaul (§10): refactor instructions, enhance agents/skills/prompts
-- [ ] Config/docs/env standards (§8): rename GitHub files, fix mkdocs, SVG diagrams, dev container
-- [ ] Audit all ~1,386 headers: classify as Real / Stub / Dead
 - [ ] Delete dead headers and empty packaging directories
 - [ ] Archive `ROADMAP_V30.md`, `ROADMAP_V34.md`, `ROADMAP_V35.md`
 
 **Core product:**
+- [x] Create test corpus: synthetic corpus with 21 files covering images, docs, archives, 3D models *(v36.3.0)*
+- [x] Integrate Catch2 as primary test framework: enabled by default, 9 test files, corpus validation *(v36.3.0)*
 - [ ] Verify all 18 external libraries build and link correctly
 - [ ] Implement or fix top 20 format decoders with real `.cpp` files
-- [ ] Create test corpus: 5+ real CC0 files per format (100+ total)
-- [ ] Integrate Catch2 as primary test framework
+- [ ] Expand test corpus: 5+ real CC0 files per format (100+ total)
 - [ ] Write 500+ meaningful tests replacing mechanical stubs
 - [ ] Run all decoders against corpus → 100% correct output
 - [ ] `lens generate <file>` works for all 20 formats
