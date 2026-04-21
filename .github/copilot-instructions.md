@@ -120,7 +120,7 @@ ctest --test-dir build -C Release --output-on-failure
 15. **Never use `/wdXXXX` warning suppressions** — fix the root cause; zero-warnings by fixing code, not hiding it
 16. **Enum values must be UPPER_CASE** — enforced by `.clang-tidy`; rename before committing
 17. **Always `grep_search` for new type names before committing** — prevent naming collisions in 500+ header codebase
-18. **New TEST() bodies go to `EngineTests_Late.cpp`** — `extern void Runner()` decls go to `EngineTestsExterns.h`; `RUN_TEST()` calls go to `EngineTests.cpp`; `#include` goes to `EngineTestsIncludes.h`
+18. **New TEST() bodies go to `EngineTests_Platform.cpp`** — `extern void Runner()` decls go to `EngineTestsExterns.h`; `RUN_TEST()` calls go to `EngineTests.cpp`; `#include` goes to `EngineTestsIncludes.h`
 19. **After adding `RUN_TEST()` calls, always do a clean build** — stale `.obj` files can hide missing test bodies (Sprint 1131-1140 incident)
 20. **`std::min`/`std::max` must be parenthesized** — use `(std::min)(a, b)` to avoid Windows macro expansion
 21. **`PerfRegressionGate.h` uses `namespace ExplorerLens`** (not `ExplorerLens::Engine`) — tests must use `using namespace ExplorerLens` for this header

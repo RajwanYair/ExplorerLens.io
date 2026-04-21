@@ -16,6 +16,7 @@ add_executable(EngineTests
     EngineTests_Features.cpp
     EngineTests_Mid.cpp
     EngineTests_Late.cpp
+    EngineTests_Platform.cpp
     test_gpu.cpp
     PluginCompatKitTests.cpp
     PluginReferencePackTests.cpp

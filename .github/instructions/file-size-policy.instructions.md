@@ -38,11 +38,12 @@ Engine/Tests/
 ├── EngineTests_Core.cpp       — TEST() bodies: decoder, registry, cache, GPU, gate
 ├── EngineTests_Features.cpp   — TEST() bodies: feature modules, SIMD, enterprise
 ├── EngineTests_Mid.cpp        — TEST() bodies: settings, memory, plugin, format
-└── EngineTests_Late.cpp       — TEST() bodies: CLI, workflow, AI, platform PAL
+├── EngineTests_Late.cpp       — TEST() bodies: CLI, workflow, AI (sprint ≤1060)
+└── EngineTests_Platform.cpp   — TEST() bodies: platform PAL, security, advanced (sprint 1061+)
 ```
 
 **Rules:**
-- New TEST() bodies go into `EngineTests_Late.cpp` (or the most relevant split file)
+- New TEST() bodies go into `EngineTests_Platform.cpp` (or the most relevant split file)
 - New `extern void` declarations + `RUN_TEST()` calls go into `EngineTests.cpp`
 - New `#include` directives go into `EngineTestsIncludes.h`
 - When any split file exceeds 500 KB, split it again at a `//==` section boundary
