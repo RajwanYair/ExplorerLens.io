@@ -1,0 +1,20 @@
+{
+  "_comment": "Binary size baselines — v37.0.0 (2026-04-23). Sizes in bytes. Alert threshold: >10% growth.",
+  "version": "37.0.0",
+  "updated": "2026-04-23",
+  "threshold_pct": 10,
+  "artifacts": {
+    "ExplorerLensEngine.lib": {
+      "size_bytes": 0,
+      "size_note": "Populated by CI build — varies with toolchain and link-time state"
+    },
+    "LENSShell.dll": {
+      "size_bytes": 3010560,
+      "size_note": "~2940 KB as of v37.0.0 (COM shell extension)"
+    },
+    "LENSManager.exe": {
+      "size_bytes": 409600,
+      "size_note": "~400 KB as of v37.0.0 (WTL config GUI)"
+    }
+  }
+}

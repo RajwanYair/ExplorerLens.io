@@ -102,9 +102,14 @@ jobs:
           $sign = if ($delta -ge 0) { "+" } else { "" }
 
           $warn = ""
-          # Gate: block if engine lib grows > 5 MB vs base
+          # Gate 1: block if engine lib grows > 10% vs base
+          if ($base -gt 0 -and $pct -gt 10) {
+            $warn += "⚠️ **Size regression > 10% — please investigate**`n"
+            Write-Error "Engine lib grew by ${pct}% (> 10% threshold)"
+          }
+          # Gate 2: block if engine lib grows > 5 MB absolute vs base
           if ($delta -gt 5MB) {
-            $warn = "⚠️ **Size regression > 5 MB — please investigate**"
+            $warn += "⚠️ **Size regression > 5 MB — please investigate**`n"
             Write-Error "Engine lib grew by $delta bytes (> 5 MB threshold)"
           }
 
