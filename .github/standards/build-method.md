@@ -1,7 +1,7 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** March 2026
-**Version:** 38.1.0 (Codename: Betelgeuse)
+**Version:** 38.2.0 (Codename: Betelgeuse)
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---
