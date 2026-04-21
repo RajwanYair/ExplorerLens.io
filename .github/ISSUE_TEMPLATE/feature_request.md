@@ -29,7 +29,7 @@ How important is this feature to you?
 - [ ] Low - minor improvement
 
 ## Roadmap Alignment
-Have you checked if this aligns with the project [CHANGELOG.md](../../CHANGELOG.md)?
+Have you checked if this aligns with the project [CHANGELOG.md](https://github.com/RajwanYair/ExplorerLens.io/blob/main/CHANGELOG.md)?
 - [ ] Yes, aligns with existing plans
 - [ ] No, this is a new direction
 - [ ] Not sure
