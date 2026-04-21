@@ -117,6 +117,63 @@ Verify with: `gh auth status` (check "Token scopes:" line).
 
 ---
 
+## Action Version Audit and SHA Pinning
+
+### Why SHA Pin?
+
+Tag-based references like `actions/checkout@v4` can be force-pushed. SHA pinning prevents
+supply-chain attacks where a compromised action replaces its tag.
+
+### Step-by-Step: Audit Action Versions
+
+```powershell
+# List all action references across workflows (sorted unique)
+Get-ChildItem .github/workflows/*.yml | ForEach-Object {
+    Select-String -Path $_.FullName -Pattern 'uses:\s+(\S+)@(\S+)' | ForEach-Object {
+        $_.Matches[0].Groups[1].Value + "@" + $_.Matches[0].Groups[2].Value
+    }
+} | Sort-Object -Unique
+```
+
+### Step-by-Step: Pin Action to SHA
+
+1. Find the action's release tag on GitHub: `https://github.com/<owner>/<action>/releases`
+2. Find the commit SHA for that tag: `git ls-remote https://github.com/<owner>/<action> refs/tags/v4`
+3. Replace tag reference with SHA + comment:
+   ```yaml
+   # Before:
+   - uses: actions/checkout@v4
+   # After:
+   - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+   ```
+4. The `# vX.Y.Z` comment is mandatory for readability.
+
+### Approved Action Registry
+
+| Action | Current Pin | Node Runtime |
+|--------|------------|-------------|
+| `actions/checkout` | `@v4` | node20 |
+| `actions/upload-artifact` | `@v4` | node20 |
+| `actions/download-artifact` | `@v4` | node20 |
+| `actions/cache` | `@v4` | node20 |
+| `actions/setup-node` | `@v4` | node20 |
+| `ilammy/msvc-dev-cmd` | `@v1` | node20 |
+| `actions/github-script` | `@v7` | node20 |
+
+### Renovate / Dependabot Auto-Update
+
+If using Dependabot for `github-actions` ecosystem, it will auto-update SHA pins
+when a new release is published. Ensure `.github/dependabot.yml` includes:
+
+```yaml
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+```
+
+---
+
 ## Node.js 24 Migration Playbook
 
 GitHub Actions is migrating from Node.js 20 to Node.js 24. Actions still using Node 16 or 20
