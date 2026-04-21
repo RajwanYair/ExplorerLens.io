@@ -74,11 +74,46 @@ jobs:
 
 ## Step-by-Step: MCP Server Changes
 
-1. Edit `.vscode/mcp.json` — only add servers that are actually installed and tested
-2. **Never add** `NO_PROXY`, `no_proxy`, or corporate proxy URLs to MCP env blocks
-3. After adding a server, document it in `.github/copilot-instructions.md` (MCP Servers section)
-4. Update `.github/standards/ai-tooling-capabilities.md` MCP inventory
-5. Verify the server works: open VS Code → Copilot agent → invoke a tool from the new server
+### Adding a New MCP Server
+
+1. **Evaluate the need** — verify the agent workflow that requires the server.
+   Current servers: `github` (GitHub API), `filesystem` (full workspace), `project-docs` (docs-only).
+2. **Check for conflicts** — ensure the new server doesn't overlap with existing ones.
+3. **Edit `.vscode/mcp.json`** — add the server entry following this template:
+   ```json
+   "server-name": {
+     "command": "npx",
+     "args": ["-y", "@scope/mcp-server-package", "${workspaceFolder}\\scope-dir"],
+     "env": {
+       "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:PATH}"
+     }
+   }
+   ```
+4. **Security checks:**
+   - Never embed tokens directly — use `"${input:token-name}"` with `"password": true` in inputs.
+   - Never scope filesystem servers above `${workspaceFolder}`.
+   - Never add corporate proxy URLs (`NO_PROXY`, `no_proxy`, proxy host:port).
+5. **Test locally** — open VS Code, invoke the server via Copilot Chat, verify tools appear.
+6. **Update 3 inventory files** in the same commit:
+   - `.github/instructions/mcp-servers.instructions.md` (server inventory table)
+   - `.github/copilot-instructions.md` (MCP Servers section)
+   - `.github/standards/ai-tooling-capabilities.md` (MCP inventory)
+
+### Evaluating Git MCP Servers (§8.8.5 Backlog)
+
+If agents need git history access (blame, log, diff), evaluate:
+- `@anthropic/mcp-server-git` — Anthropic's official git MCP server
+- GitKraken MCP (if installed) — `mcp_gitkraken_*` tools already available
+- Before adding, verify: Does the agent need git history, or can it use `run_in_terminal` with `git`?
+
+### Verifying GitHub PAT Scopes
+
+The `github` MCP server requires a PAT with these minimum scopes:
+- `repo` — full repository access (read/write)
+- `workflow` — GitHub Actions (trigger, read status)
+- `read:packages` — package registry access
+
+Verify with: `gh auth status` (check "Token scopes:" line).
 
 ---
 
@@ -86,10 +121,10 @@ jobs:
 
 | Asset Type | Count | Location |
 |------------|-------|----------|
-| Instructions (scoped) | 13 | `.github/instructions/` |
-| Agents | 4 | `.github/agents/` |
-| Prompts | 11 | `.github/prompts/` |
-| Skills | 6 | `.github/skills/` |
+| Instructions (scoped) | 15 | `.github/instructions/` |
+| Agents | 5 | `.github/agents/` |
+| Prompts | 13 | `.github/prompts/` |
+| Skills | 7 | `.github/skills/` |
 | MCP servers | 3 | `.vscode/mcp.json` |
 
 ---
