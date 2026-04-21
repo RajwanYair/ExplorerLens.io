@@ -1,6 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
-**Last Updated:** 18 July 2025  
+**Last Updated:** 21 April 2026  
+**Version:** v36.5.0 "Antares"  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -38,15 +39,23 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 
 ## Instruction Files
 
-### Current Instruction Inventory
+### Current Instruction Inventory (13 files)
 
-| File | Primary Scope | Use When |
-|------|---------------|----------|
-| `.github/instructions/workspace.instructions.md` | Cross-project workspace conventions | Working anywhere in the repo |
-| `.github/instructions/cicd.instructions.md` | GitHub Actions and CI/CD authoring | Editing workflows, release automation, CI scripts |
-| `.github/instructions/testing.instructions.md` | Python test authoring conventions | Editing pytest-based test suites |
-| `.github/instructions/version-bump.instructions.md` | Release/version synchronization | Bumping versions or preparing releases |
-| `.github/instructions/file-size-policy.instructions.md` | Git performance guardrails | Adding or expanding large source/test/docs files |
+| File | Primary Scope (`applyTo`) | Use When |
+|------|--------------------------|----------|
+| `workspace.instructions.md` | `**` | Cross-project workspace conventions (Python + C++ projects) |
+| `cpp-coding.instructions.md` | `**/*.h, **/*.cpp` | C++20 coding standards, MSVC v145, naming, patterns |
+| `build.instructions.md` | `**/CMakeLists.txt, **/build-scripts/**` | Build system, CMake, MSBuild, external libraries |
+| `cicd.instructions.md` | `**/*.yml, **/*.yaml, .github/**` | GitHub Actions, CI/CD authoring, workflow patterns |
+| `testing.instructions.md` | `**/tests/**, **/*_test.py, **/conftest.py` | Test authoring (pytest, custom TEST macros, Catch2) |
+| `security.instructions.md` | `**/*.h, **/*.cpp, **/*.ps1, **/*.yml` | OWASP, secrets, supply-chain security, credential handling |
+| `performance.instructions.md` | `**/Engine/**, **/benchmarks/**` | Benchmark scaffolding, profiling, regression gates |
+| `decoder-authoring.instructions.md` | `**/Engine/Decoders/**` | Format decoder creation, ProbeHeader/DecodeAtSize pattern |
+| `documentation.instructions.md` | `**/*.md, docs/**` | Documentation tiers, MkDocs, CHANGELOG, ADR authoring |
+| `release.instructions.md` | `**/Bump-Version.ps1, **/CHANGELOG.md, **/VERSION` | Version bumps, release procedure, artifact validation |
+| `pr-authoring.instructions.md` | `.github/**` | PR title format, conventional commits, review assignment |
+| `version-bump.instructions.md` | `**` | 20-file version registry, idempotency guard, release checklist |
+| `file-size-policy.instructions.md` | `**` | Git performance guardrails (500 KB split, 200 KB monitor) |
 
 ### Authoring Rules
 
@@ -122,7 +131,8 @@ Add a new `.agent.md` file only when all of the following are true:
 | Skill | File | Use For |
 |------|------|---------|
 | ExplorerLens build and release | `.github/skills/explorerlens-build-and-release/SKILL.md` | Build, clean build, test, version bump, release preparation |
-| ExplorerLens workflows and MCP | `.github/skills/explorerlens-workflows-and-mcp/SKILL.md` | Workflow edits, automation review, MCP alignment, repo AI configuration || Decoder development | `.github/skills/decoder-development/SKILL.md` | New decoder authoring, format registration, test integration |
+| ExplorerLens workflows and MCP | `.github/skills/explorerlens-workflows-and-mcp/SKILL.md` | Workflow edits, automation review, MCP alignment, repo AI configuration |
+| Decoder development | `.github/skills/decoder-development/SKILL.md` | New decoder authoring, format registration, test integration |
 | Documentation | `.github/skills/documentation/SKILL.md` | Documentation authoring, link validation, standards compliance |
 | Performance | `.github/skills/performance/SKILL.md` | Performance profiling, benchmark analysis, regression investigation |
 | Test corpus | `.github/skills/test-corpus/SKILL.md` | Corpus management, CC0 file sourcing, SSIM scoring, MANIFEST.json |
@@ -161,6 +171,7 @@ The workspace currently defines MCP servers in `.vscode/mcp.json`.
 | Workflow | File | Purpose |
 |---------|------|---------|
 | Canonical CI | `.github/workflows/ci-matrix.yml` | Main push/PR build matrix for Engine and shell validation |
+| Scheduled build | `.github/workflows/build.yml` | Manual/scheduled weekly verification build (not push/PR) |
 | PR validation | `.github/workflows/pr-checks.yml` | PR title, size, changelog, and version consistency checks |
 | Toolchain verification | `.github/workflows/toolchain-verify.yml` | Verifies MSVC, CMake, and Ninja availability |
 | Code quality | `.github/workflows/code-quality.yml` | Static analysis and quality checks |
