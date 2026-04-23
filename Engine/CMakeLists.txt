@@ -195,6 +195,15 @@ add_compile_definitions(
     NTDDI_VERSION=0x0A000000
 )
 
+# ==============================================================================
+# Phase 1 — Engine 16→7 Directory Consolidation
+# Status: CLI→Core ✓, Codec→Decoders ✓
+#         AI/Enterprise/Media/Memory/Pipeline/Plugin → Phase 2
+# Deprecated directories (contain forwarding headers only):
+#   Engine/CLI/  → Engine/Core/
+#   Engine/Codec/ → Engine/Decoders/
+# ==============================================================================
+
 #==============================================================================
 # Source Files
 #==============================================================================
@@ -699,12 +708,12 @@ set(ENGINE_HEADERS
     AI/AdaptiveColorProfileManager.h
     AI/ThumbnailAccessibilityEngine.h
 
-    # Codec modules
-    Codec/CodecLoader.h
-    Codec/CodecModuleSpecs.h
-    Codec/FormatConverter.h
-    Codec/ICodecModule.h
-    Codec/LazyCodecManager.h
+    # Codec modules consolidated to Decoders/ (Phase 1 — Codec/ deprecated)
+    Decoders/CodecLoader.h
+    Decoders/CodecModuleSpecs.h
+    Decoders/FormatConverter.h
+    Decoders/ICodecModule.h
+    Decoders/LazyCodecManager.h
 
     # Cloud integration
 
@@ -1762,8 +1771,9 @@ set(ENGINE_HEADERS
 
     # Consolidated — previously unregistered headers
     AI/ImageQualityAssessorV2.h
-    CLI/CLICommandParser.h
-    CLI/LensCLI.h
+    # CLI headers consolidated to Core/ (Phase 1 — CLI/ deprecated)
+    Core/CLICommandParser.h
+    Core/LensCLI.h
     Core/FormatFallbackEngine.h
     Core/LocalizationEngine.h
     Core/ResourceUsageProfiler.h
