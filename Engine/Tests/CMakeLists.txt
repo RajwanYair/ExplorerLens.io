@@ -383,6 +383,8 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/MultiPageTests.cpp
         Catch2Tests/COMInterfaceTests.cpp
         Catch2Tests/LibraryInventoryTests.cpp
+        # Wave 5 (S221–S230)
+        Catch2Tests/StdExpectedContractTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
