@@ -386,6 +386,7 @@ if(BUILD_CATCH2_TESTS)
         # Wave 5 (S221–S230)
         Catch2Tests/StdExpectedContractTests.cpp
         Catch2Tests/JpegTurboDecoderTests.cpp
+        Catch2Tests/EmbeddedPreviewTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
