@@ -76,6 +76,56 @@ To download the corpus locally:
 The corpus covers 40+ formats and is validated against SSIM baselines. When adding a new decoder,
 add at least one entry to `data/corpus/MANIFEST.json` with a CC0 source URL and expected SSIM score.
 
+### Unit Testing — Catch2 Migration (ADR-010)
+
+ExplorerLens is migrating its unit tests from the legacy custom-macro harness to
+**Catch2 v3**.  The migration status is tracked in `docs/adr/ADR-010-catch2-migration.md`.
+
+**Current state (v38.5+):** 10 Catch2 test files in `Engine/Tests/Catch2Tests/`:
+
+| File | Coverage area |
+|------|--------------|
+| `FormatDetectionTests.cpp` | Magic byte detection for 18+ formats |
+| `CacheSubsystemTests.cpp` | LRU cache invariants, eviction, hit-rate |
+| `DecoderUnitTests.cpp` | EXIF orientation, size grid, prefetch engine |
+| `MagicBytesDatabaseTests.cpp` | MagicBytesDatabase probe accuracy |
+| `PerceptualHashTests.cpp` | dHash, pHash, aHash, SSIM comparators |
+| `StreamingDecoderTests.cpp` | IStreamingDecoder two-phase contract |
+| `FormatStatusTests.cpp` | Format capability status reporting |
+| `CorpusValidationTests.cpp` | CC0 corpus magic-byte checks |
+| `InputValidationTests.cpp` | Security: dimension bounds, path traversal, format ID sanitisation |
+| `DecoderRegistryTests.cpp` | DecoderRegistryV2 registration, priority, enable/disable, thread-safety |
+
+**Adding new Catch2 tests:**
+
+1. Create your test file in `Engine/Tests/Catch2Tests/`.  Follow the naming
+   convention: `<SubsystemName>Tests.cpp`.
+2. Register the file in `Engine/Tests/CMakeLists.txt` under the
+   `add_executable(EngineCatch2Tests …)` block.
+3. Use `[tag]` annotations on every `TEST_CASE` so tests can be filtered with
+   `ctest -L catch2 -R "<tag>"`.
+4. Tests must be self-contained — no real file I/O unless tagged `[corpus]`.
+5. For security-related tests, tag with `[security]` and reference the relevant
+   OWASP category in a comment (§15.1).
+
+```powershell
+# Run only Catch2 tests
+ctest --test-dir build -C Release -L catch2 --output-on-failure
+
+# Run a specific tag
+& '.\build\bin\EngineCatch2Tests.exe' "[cache]"
+```
+
+### Dev Container
+
+The repository ships a `.devcontainer/` configuration with VS Code Remote Containers
+support.  On first launch, `post-create-validate.ps1` runs automatically to verify the
+build environment.  If you see a validation failure, re-run it manually:
+
+```powershell
+.\.devcontainer\post-create-validate.ps1
+```
+
 ## Code Standards
 
 - **C++20** standard
