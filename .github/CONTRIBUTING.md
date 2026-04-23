@@ -6,13 +6,18 @@ Thank you for your interest in contributing to ExplorerLens!
 
 1. **Review the documentation:**
  - [README.md](../README.md) - Project overview
+ - [ARCHITECTURE.md](../ARCHITECTURE.md) - Architecture and decoder pipeline
+ - [ROADMAP.md](../ROADMAP.md) - Delivery roadmap and sprint tracker
  - [CHANGELOG.md](../CHANGELOG.md) - Development history
 - [docs/build/INSTALLATION_GUIDE.md](../docs/build/INSTALLATION_GUIDE.md) - Build & installation instructions
 
 2. **Set up your development environment:**
  - Visual Studio 18 2026 BuildTools with MSVC v145 (cl.exe 19.50)
- - CMake 3.25+ and Ninja 1.13+ (install via Scoop: `scoop install cmake ninja`)
+ - CMake 4.3.1 and Ninja 1.13.2 (install via Scoop: `scoop install cmake ninja`)
  - Windows SDK 10.0.26100.0
+ - vcpkg 2026-02-21 (optional, managed by `Setup-Vcpkg.ps1`)
+ - WiX 6.0.2 (for MSI packaging only)
+ - PowerShell 7.5+
  - See [BUILD_QUICK_REFERENCE.md](../docs/development/BUILD_QUICK_REFERENCE.md) for detailed setup
 
 ## Development Workflow
@@ -58,6 +63,18 @@ ctest --test-dir build -C Release --output-on-failure
 regsvr32 /s x64\Release\LENSShell.dll
 regsvr32 /u /s x64\Release\LENSShell.dll
 ```
+
+### Test Corpus
+
+ExplorerLens maintains a CC0/public-domain test corpus for real-file decoder validation.
+To download the corpus locally:
+
+```powershell
+.\build-scripts\corpus\Fetch-Corpus.ps1 -ManifestPath data/corpus/MANIFEST.json -CorpusDir data/corpus
+```
+
+The corpus covers 40+ formats and is validated against SSIM baselines. When adding a new decoder,
+add at least one entry to `data/corpus/MANIFEST.json` with a CC0 source URL and expected SSIM score.
 
 ## Code Standards
 
