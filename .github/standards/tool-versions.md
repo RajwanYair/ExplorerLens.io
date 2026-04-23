@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 23 April 2026 (v39.0.0 Betelgeuse release)
-**Version:** 39.0.0 "Betelgeuse"
+**Last Updated:** 23 April 2026 (v39.1.0 Betelgeuse release)
+**Version:** 39.1.0 "Betelgeuse"
 
 ---
 

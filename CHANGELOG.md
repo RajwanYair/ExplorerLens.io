@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.1.0] — 2026-04-23 — Betelgeuse
+
+Sprint S211-S218: FormatDetectorTests (SS7.1), ThumbnailDimensionTests (SS7.2), WICCodecTableTests (SS7.3), SecurityBoundaryTests (SS15.1), BitmapAlphaTests (SS7.4), MultiPageTests (D38), COMInterfaceTests (SS6.1), LibraryInventoryTests (SS8.1). 42 Catch2 test files total.
+
+---
+
 ## [39.0.0] — 2026-04-23 — Betelgeuse
 
 Sprint S201-S208: IStreamingDecoderTests (§7.4 D38/D39), CacheTierTests (§7.5 D42), DecoderPriorityTierTests (§7.3 P0-P3), CLIContractTests (§6.3), PluginSDKContractTests (§17.4 Phase 3 prep), PlatformProfileTests (§16.1 ADR-013), ErrorDomainTests (§7.4 D31), CompressionAlgorithmTests (§7.3 P1). 34 Catch2 test files total.
