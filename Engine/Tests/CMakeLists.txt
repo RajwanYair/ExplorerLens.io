@@ -362,6 +362,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/ColorSpaceTests.cpp
         Catch2Tests/CorpusCoverageTests.cpp
         Catch2Tests/EngineConfigTests.cpp
+        Catch2Tests/PathValidationTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
