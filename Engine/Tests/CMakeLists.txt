@@ -349,6 +349,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/StreamingDecoderTests.cpp
         Catch2Tests/FormatStatusTests.cpp
         Catch2Tests/CorpusValidationTests.cpp
+        Catch2Tests/InputValidationTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
