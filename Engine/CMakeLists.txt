@@ -1089,6 +1089,7 @@ set(ENGINE_HEADERS
     Core/FormatValidator.h
     Core/DecoderValidationRunner.h
     Core/StatelessFormatDetector.h
+    Core/SafeDimensions.h
     Core/FormatStatusProvider.h
     Core/ShellNotificationProvider.h
     Cache/CacheInvalidationWatcher.h
