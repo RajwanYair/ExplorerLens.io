@@ -364,6 +364,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/EngineConfigTests.cpp
         Catch2Tests/PathValidationTests.cpp
         Catch2Tests/ObservabilityTests.cpp
+        Catch2Tests/VersionValidationTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
