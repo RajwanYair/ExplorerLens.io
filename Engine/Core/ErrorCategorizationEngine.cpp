@@ -29,35 +29,34 @@ std::string DecodeErrorRecord::Summary() const {
 
 DecodeErrorCategory ErrorCategorizationEngine::FromHresult(
     uint32_t hr, std::string_view /*format*/) noexcept {
-    using H = HResult;
     // Success
-    if (hr == H::S_OK) return DecodeErrorCategory::None;
+    if (hr == 0x00000000u) return DecodeErrorCategory::None;            // S_OK
     // Memory
-    if (hr == H::E_OUTOFMEMORY) return DecodeErrorCategory::OutOfMemory;
+    if (hr == 0x8007000Eu) return DecodeErrorCategory::OutOfMemory;     // E_OUTOFMEMORY
     // Access / I/O
-    if (hr == H::E_ACCESSDENIED) return DecodeErrorCategory::PermissionDenied;
-    if (hr == H::E_FILENOTFOUND) return DecodeErrorCategory::FileNotFound;
-    if (hr == H::E_PATHNOTFOUND) return DecodeErrorCategory::FileNotFound;
+    if (hr == 0x80070005u) return DecodeErrorCategory::PermissionDenied; // E_ACCESSDENIED
+    if (hr == 0x80070002u) return DecodeErrorCategory::FileNotFound;    // E_FILENOTFOUND
+    if (hr == 0x80070003u) return DecodeErrorCategory::FileNotFound;    // E_PATHNOTFOUND
     // Argument validation
-    if (hr == H::E_INVALIDARG) return DecodeErrorCategory::InvalidFormat;
+    if (hr == 0x80070057u) return DecodeErrorCategory::InvalidFormat;   // E_INVALIDARG
     // Timeout
-    if (hr == H::E_TIMEOUT) return DecodeErrorCategory::Timeout;
+    if (hr == 0x80070102u) return DecodeErrorCategory::Timeout;         // E_TIMEOUT
     // WIC codec errors
-    if (hr == H::WINCODEC_UNSUPPORTED_PIXEL)  return DecodeErrorCategory::UnsupportedVersion;
-    if (hr == H::WINCODEC_FRAMEMISSING)        return DecodeErrorCategory::CorruptedData;
-    if (hr == H::WINCODEC_INVALIDJPEGSCANTYPE) return DecodeErrorCategory::CorruptedData;
-    if (hr == H::WINCODEC_WRONGSTATE)          return DecodeErrorCategory::DecoderInitFailed;
-    if ((hr & 0xFFFF0000) == H::WINCODEC_ERR_BASE) return DecodeErrorCategory::LibraryError;
+    if (hr == 0x88982F80u) return DecodeErrorCategory::UnsupportedVersion;  // WINCODEC_UNSUPPORTED_PIXEL
+    if (hr == 0x88982F61u) return DecodeErrorCategory::CorruptedData;       // WINCODEC_FRAMEMISSING
+    if (hr == 0x88982F20u) return DecodeErrorCategory::CorruptedData;       // WINCODEC_INVALIDJPEGSCANTYPE
+    if (hr == 0x88982F04u) return DecodeErrorCategory::DecoderInitFailed;   // WINCODEC_WRONGSTATE
+    if ((hr & 0xFFFF0000u) == 0x88980000u) return DecodeErrorCategory::LibraryError; // WINCODEC_ERR_BASE
     // GPU errors
-    if (hr == H::DXGI_ERROR_DEVICE_REMOVED)        return DecodeErrorCategory::GPUResourceUnavailable;
-    if (hr == H::DXGI_ERROR_DEVICE_RESET)          return DecodeErrorCategory::GPUResourceUnavailable;
-    if (hr == H::DXGI_ERROR_DRIVER_INTERNAL_ERROR) return DecodeErrorCategory::GPUResourceUnavailable;
-    if (hr == H::DXGI_ERROR_NOT_FOUND)             return DecodeErrorCategory::GPUResourceUnavailable;
-    if (hr == H::DXGI_ERROR_UNSUPPORTED)           return DecodeErrorCategory::DecoderUnsupported;
-    if (hr == H::DXGI_ERROR_INVALID_CALL)          return DecodeErrorCategory::DecoderInitFailed;
-    if (hr == H::D2DERR_RECREATE_TARGET)           return DecodeErrorCategory::GPUResourceUnavailable;
+    if (hr == 0x887A0005u) return DecodeErrorCategory::GPUResourceUnavailable; // DXGI_ERROR_DEVICE_REMOVED
+    if (hr == 0x887A0007u) return DecodeErrorCategory::GPUResourceUnavailable; // DXGI_ERROR_DEVICE_RESET
+    if (hr == 0x887A0020u) return DecodeErrorCategory::GPUResourceUnavailable; // DXGI_ERROR_DRIVER_INTERNAL_ERROR
+    if (hr == 0x887A0002u) return DecodeErrorCategory::GPUResourceUnavailable; // DXGI_ERROR_NOT_FOUND
+    if (hr == 0x887A0004u) return DecodeErrorCategory::DecoderUnsupported;     // DXGI_ERROR_UNSUPPORTED
+    if (hr == 0x887A0001u) return DecodeErrorCategory::DecoderInitFailed;      // DXGI_ERROR_INVALID_CALL
+    if (hr == 0x8899000Cu) return DecodeErrorCategory::GPUResourceUnavailable; // D2DERR_RECREATE_TARGET
     // Not-implemented
-    if (hr == H::E_NOTIMPL) return DecodeErrorCategory::DecoderUnsupported;
+    if (hr == 0x80004001u) return DecodeErrorCategory::DecoderUnsupported;     // E_NOTIMPL
     // Generic failure
     return DecodeErrorCategory::IOError;
 }

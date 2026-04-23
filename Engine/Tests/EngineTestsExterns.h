@@ -2496,6 +2496,16 @@ extern void TestWasmCacheAdapter_Store_Runner();
 extern void TestWasmCacheAdapter_Evict_Runner();
 extern void TestProgressiveThumbnailStream_Emit_Runner();
 extern void TestProgressiveThumbnailStream_Complete_Runner();
+extern void TestDeviceSyncManifest_Upsert_Runner();
+extern void TestDeviceSyncManifest_Serialize_Runner();
+extern void TestCrossDeviceCacheSync_Upload_Runner();
+extern void TestCrossDeviceCacheSync_Bidirectional_Runner();
+extern void TestThumbnailPackFile_PackExtract_Runner();
+extern void TestThumbnailPackFile_InvalidMagic_Runner();
+extern void TestSyncConflictResolver_LatestEtag_Runner();
+extern void TestSyncConflictResolver_RemoteWins_Runner();
+extern void TestDeviceCapabilityAdvertiser_Probe_Runner();
+extern void TestDeviceCapabilityAdvertiser_FindBest_Runner();
 
 
 // ─── Tests defined in EngineTests_Core.cpp + EngineTests_Features.cpp ─────────

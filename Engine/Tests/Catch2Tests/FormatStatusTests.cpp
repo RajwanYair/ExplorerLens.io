@@ -37,7 +37,7 @@ TEST_CASE("FormatStatusProvider: HEALTHY when 0 failures", "[fsp][health]") {
 TEST_CASE("FormatStatusProvider: FAILING when failure rate > 10%", "[fsp][health]") {
     auto fmt = UniqueFormat("TIFF");
     auto& fsp = FormatStatusProvider::Instance();
-    for (int i = 0; i < 10; ++i) fsp.RecordFailure(fmt);
+    for (int i = 0; i < 10; ++i) fsp.RecordFailure(fmt, "test error");
     for (int i = 0; i < 5; ++i)  fsp.RecordSuccess(fmt, 5000);
     // 10 fail / 15 total = 66% failure rate → FAILING
     CHECK(fsp.GetHealth(fmt) == DecoderHealth::FAILING);
@@ -46,7 +46,7 @@ TEST_CASE("FormatStatusProvider: FAILING when failure rate > 10%", "[fsp][health
 TEST_CASE("FormatStatusProvider: DEGRADED when failure rate 1-10%", "[fsp][health]") {
     auto fmt = UniqueFormat("PNG");
     auto& fsp = FormatStatusProvider::Instance();
-    for (int i = 0; i < 1; ++i)  fsp.RecordFailure(fmt);
+    for (int i = 0; i < 1; ++i)  fsp.RecordFailure(fmt, "test error");
     for (int i = 0; i < 19; ++i) fsp.RecordSuccess(fmt, 7000);
     // 1 fail / 20 total = 5% → DEGRADED
     CHECK(fsp.GetHealth(fmt) == DecoderHealth::DEGRADED);
@@ -109,7 +109,7 @@ TEST_CASE("FormatStatusProvider: GetAllSnapshots snapshots are sorted by formatI
 TEST_CASE("FormatStatusProvider: HasFailingDecoders returns true when FAILING decoder exists", "[fsp][gate]") {
     auto fmt = UniqueFormat("DDS");
     auto& fsp = FormatStatusProvider::Instance();
-    for (int i = 0; i < 20; ++i) fsp.RecordFailure(fmt);
+    for (int i = 0; i < 20; ++i) fsp.RecordFailure(fmt, "test error");
     CHECK(fsp.HasFailingDecoders());
 }
 
@@ -132,7 +132,7 @@ TEST_CASE("FormatStatusProvider: average decode time is computed correctly", "[f
     auto it = std::find_if(snaps.begin(), snaps.end(),
                             [&](const FormatStatusSnapshot& s) { return s.formatId == fmt; });
     REQUIRE(it != snaps.end());
-    // Average should be ~20ms (20000 µs)
-    CHECK(it->avgDecodeUs >= 15000);
-    CHECK(it->avgDecodeUs <= 25000);
+    // Average should be ~20ms (20000 µs → 20 ms)
+    CHECK(it->avgDecodeMs >= 15.0);
+    CHECK(it->avgDecodeMs <= 25.0);
 }

@@ -32,10 +32,10 @@ bool SyncConflictResolver::ShouldKeepLocal(const SyncManifestEntry& local,
     return true;
 }
 
-MergeResult SyncConflictResolver::Merge(std::vector<SyncManifestEntry>& local,
+SyncMergeResult SyncConflictResolver::Merge(std::vector<SyncManifestEntry>& local,
                                         const std::vector<SyncManifestEntry>& remote)
 {
-    MergeResult result;
+    SyncMergeResult result;
 
     for (const auto& remoteEntry : remote) {
         auto it = std::find_if(local.begin(), local.end(),

@@ -36,7 +36,7 @@ struct ConflictRecord {
 };
 
 // Result of a merge operation.
-struct MergeResult {
+struct SyncMergeResult {
     size_t                    entriesMerged  = 0;
     size_t                    conflictsFound = 0;
     std::vector<ConflictRecord> conflicts;
@@ -51,7 +51,7 @@ public:
 
     // Merge remote entries into local. Returns the unified entry list
     // and a summary of conflicts encountered.
-    MergeResult Merge(std::vector<SyncManifestEntry>& local,
+    SyncMergeResult Merge(std::vector<SyncManifestEntry>& local,
                       const std::vector<SyncManifestEntry>& remote);
 
     ConflictResolutionMode Mode() const { return m_mode; }

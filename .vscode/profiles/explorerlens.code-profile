@@ -1,0 +1,7 @@
+{
+  "name": "ExplorerLens",
+  "icon": "puzzle",
+  "settings": "",
+  "globalState": "",
+  "extensions": "[{\"identifier\":{\"id\":\"ms-vscode.cpptools\"},\"displayName\":\"C/C++\"},{\"identifier\":{\"id\":\"ms-vscode.cmake-tools\"},\"displayName\":\"CMake Tools\"},{\"identifier\":{\"id\":\"ms-vscode.cpptools-extension-pack\"},\"displayName\":\"C/C++ Extension Pack\"},{\"identifier\":{\"id\":\"ms-vscode.powershell\"},\"displayName\":\"PowerShell\"},{\"identifier\":{\"id\":\"github.copilot\"},\"displayName\":\"GitHub Copilot\"},{\"identifier\":{\"id\":\"github.copilot-chat\"},\"displayName\":\"GitHub Copilot Chat\"},{\"identifier\":{\"id\":\"mhutchie.git-graph\"},\"displayName\":\"Git Graph\"},{\"identifier\":{\"id\":\"streetsidesoftware.code-spell-checker\"},\"displayName\":\"Code Spell Checker\"},{\"identifier\":{\"id\":\"yzhang.markdown-all-in-one\"},\"displayName\":\"Markdown All in One\"},{\"identifier\":{\"id\":\"davidanson.vscode-markdownlint\"},\"displayName\":\"markdownlint\"},{\"identifier\":{\"id\":\"editorconfig.editorconfig\"},\"displayName\":\"EditorConfig for VS Code\"}]"
+}

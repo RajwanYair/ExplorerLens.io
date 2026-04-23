@@ -26,7 +26,7 @@ namespace fs = std::filesystem;
 // ---------------------------------------------------------------------------
 
 int ExportCommand::Execute(const ParsedArgs& args) {
-    const auto& positional = args.Positional();
+    const auto& positional = args.positional;
     if (positional.size() < 2) {
         std::wcerr << L"lens export: requires <input-file> <output-file>\n"
                    << L"Usage: " << Usage() << L"\n";
@@ -41,18 +41,20 @@ int ExportCommand::Execute(const ParsedArgs& args) {
     int  quality    = 90;
     std::wstring fmt = L"png";
 
-    if (auto v = args.GetOption(L"size")) {
-        try { targetSize = std::stoi(*v); } catch (...) {
+    if (args.HasOption(L"size")) {
+        auto v = args.GetOption(L"size");
+        try { targetSize = std::stoi(v); } catch (...) {
             std::wcerr << L"lens export: --size requires an integer\n"; return 1;
         }
     }
-    if (auto v = args.GetOption(L"quality")) {
-        try { quality = std::clamp(std::stoi(*v), 1, 100); } catch (...) {
+    if (args.HasOption(L"quality")) {
+        auto v = args.GetOption(L"quality");
+        try { quality = std::clamp(std::stoi(v), 1, 100); } catch (...) {
             std::wcerr << L"lens export: --quality requires 1-100\n"; return 1;
         }
     }
-    if (auto v = args.GetOption(L"format")) {
-        fmt = *v;
+    if (args.HasOption(L"format")) {
+        fmt = args.GetOption(L"format");
         std::transform(fmt.begin(), fmt.end(), fmt.begin(), ::towlower);
     }
 

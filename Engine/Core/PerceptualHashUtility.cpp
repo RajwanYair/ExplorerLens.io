@@ -3,6 +3,9 @@
 //
 // dHash, pHash, aHash implementations operating on BGRA32 pixel buffers.
 //
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
 #include "PerceptualHashUtility.h"
 #include <algorithm>
 #include <cassert>
@@ -11,6 +14,10 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace ExplorerLens {
 namespace Engine {

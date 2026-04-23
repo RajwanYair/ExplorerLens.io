@@ -15,15 +15,15 @@ namespace ExplorerLens { namespace Engine {
 
 // Severity levels for toast notifications.
 enum class NotifySeverity : uint8_t {
-    INFO    = 0,  // Informational — shown in notification centre only
-    WARNING = 1,  // Warning — shown as a transient toast
-    ERROR   = 2,  // Error — shown as persistent toast with reshow on next shell open
+    INFO         = 0,  // Informational — shown in notification centre only
+    NOTIFY_WARN  = 1,  // Warning — shown as a transient toast
+    NOTIFY_ERROR = 2,  // Error — shown as persistent toast with reshow on next shell open
 };
 
 // ShellNotificationProvider — fire-and-forget WinRT toast bridge.
 //
 // Usage:
-//   ShellNotificationProvider::Notify(L"Decode failed", L"Unable to render PDF thumbnail.", NotifySeverity::ERROR);
+//   ShellNotificationProvider::Notify(L"Decode failed", L"Unable to render PDF thumbnail.", NotifySeverity::NOTIFY_ERROR);
 //
 // Implementation notes:
 //   * Initialises the WinRT apartment on first call (RoInitialize MTA).

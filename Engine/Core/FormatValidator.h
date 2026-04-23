@@ -48,7 +48,7 @@ struct ValidationConfig {
     uint32_t targetSize         = 256;
     int      dhashThreshold     = 8;
     int      phashThreshold     = 10;
-    float    ssimThreshold      = SSIMComparator::SSIM_PASS_THRESHOLD;
+    float    ssimThreshold      = SSIM_PASS_THRESHOLD;
     bool     requireHashBaseline = false;   // if true, SKIP_NO_BASELINE → FAIL
 };
 

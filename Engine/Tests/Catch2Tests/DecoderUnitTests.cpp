@@ -34,8 +34,12 @@ TEST_CASE("ExifOrientationNormalizer — orientation 1 is identity", "[exif][nor
 
     auto original = pixels;
 
-    ExifOrientationNormalizer norm;
-    norm.NormalizeInPlace(pixels.data(), W, H, 4 * W, 1);
+    PixelBuffer buf;
+    buf.pixels = pixels.data();
+    buf.width  = W;
+    buf.height = H;
+    buf.stride = W * 4;
+    ExifOrientationNormalizer::Normalize(buf, ExifOrientation::NORMAL);
 
     REQUIRE(pixels == original);
 }
@@ -49,10 +53,15 @@ TEST_CASE("ExifOrientationNormalizer — Rotate180 is involution", "[exif][norma
 
     auto original = pixels;
 
-    ExifOrientationNormalizer norm;
+    PixelBuffer buf;
+    buf.pixels = pixels.data();
+    buf.width  = W;
+    buf.height = H;
+    buf.stride = W * 4;
     // Orientation 3 = Rotate180
-    norm.NormalizeInPlace(pixels.data(), W, H, 4 * W, 3);
-    norm.NormalizeInPlace(pixels.data(), W, H, 4 * W, 3);
+    ExifOrientationNormalizer::Normalize(buf, ExifOrientation::ROTATE_180);
+    buf.pixels = pixels.data();  // re-point after potential resize
+    ExifOrientationNormalizer::Normalize(buf, ExifOrientation::ROTATE_180);
 
     REQUIRE(pixels == original);
 }
@@ -66,10 +75,15 @@ TEST_CASE("ExifOrientationNormalizer — FlipH then FlipH equals identity", "[ex
 
     auto original = pixels;
 
-    ExifOrientationNormalizer norm;
+    PixelBuffer buf;
+    buf.pixels = pixels.data();
+    buf.width  = W;
+    buf.height = H;
+    buf.stride = W * 4;
     // Orientation 2 = FlipH
-    norm.NormalizeInPlace(pixels.data(), W, H, 4 * W, 2);
-    norm.NormalizeInPlace(pixels.data(), W, H, 4 * W, 2);
+    ExifOrientationNormalizer::Normalize(buf, ExifOrientation::FLIP_HORIZONTAL);
+    buf.pixels = pixels.data();
+    ExifOrientationNormalizer::Normalize(buf, ExifOrientation::FLIP_HORIZONTAL);
 
     REQUIRE(pixels == original);
 }
@@ -80,13 +94,16 @@ TEST_CASE("ExifOrientationNormalizer — orientation 8 produces transposed dimen
     const uint32_t W = 6, H = 4;
     std::vector<uint8_t> pixels(W * H * 4, 0xCC);
 
-    ExifOrientationNormalizer norm;
-    uint32_t outW = W, outH = H;
+    PixelBuffer buf;
+    buf.pixels = pixels.data();
+    buf.width  = W;
+    buf.height = H;
+    buf.stride = W * 4;
     // Orientation 8 = Rotate90CCW; result should be H×W
-    norm.NormalizeInPlace(pixels.data(), outW, outH, 4 * outW, 8, &outW, &outH);
+    ExifOrientationNormalizer::Normalize(buf, ExifOrientation::ROTATE_90_CCW);
 
-    REQUIRE(outW == H);
-    REQUIRE(outH == W);
+    REQUIRE(buf.width  == H);
+    REQUIRE(buf.height == W);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,33 +114,33 @@ TEST_CASE("ThumbnailSizeGrid — NearestPreset rounds to closest canonical size"
     using namespace ExplorerLens::Engine;
 
     // Exact hits
-    REQUIRE(ThumbnailSizeGrid::NearestPreset(256) == 256);
-    REQUIRE(ThumbnailSizeGrid::NearestPreset(512) == 512);
-    REQUIRE(ThumbnailSizeGrid::NearestPreset(64)  == 64);
+    REQUIRE(NearestPreset(256) == ThumbnailSize::THUMBNAIL_256);
+    REQUIRE(NearestPreset(512) == ThumbnailSize::THUMBNAIL_512);
+    REQUIRE(NearestPreset(64)  == ThumbnailSize::ICON_XLARGE);
 
     // Below smallest
-    REQUIRE(ThumbnailSizeGrid::NearestPreset(5) == 16);
+    REQUIRE(NearestPreset(5) == ThumbnailSize::ICON_SMALL);
 
     // Between 256 and 512: closer to 256
-    REQUIRE(ThumbnailSizeGrid::NearestPreset(300) == 256);
+    REQUIRE(NearestPreset(300) == ThumbnailSize::THUMBNAIL_256);
 
     // Between 256 and 512: closer to 512
-    REQUIRE(ThumbnailSizeGrid::NearestPreset(400) == 512);
+    REQUIRE(NearestPreset(400) == ThumbnailSize::THUMBNAIL_512);
 }
 
 TEST_CASE("ThumbnailSizeGrid — ComputeGrid produces correct row/column counts", "[sizegrid]") {
     using namespace ExplorerLens::Engine;
 
-    auto layout = ThumbnailSizeGrid::ComputeGrid(10, 128, 4, 4);
+    auto layout = ComputeGrid(10, 128, 4, 4);
     REQUIRE(layout.columns == 4);
     REQUIRE(layout.rows    == 3);   // ceil(10 / 4)
-    REQUIRE(layout.count   == 10);
+    REQUIRE(layout.cellCount == 10);
 }
 
 TEST_CASE("ThumbnailSizeGrid — ComputeGrid with count <= maxColumns", "[sizegrid]") {
     using namespace ExplorerLens::Engine;
 
-    auto layout = ThumbnailSizeGrid::ComputeGrid(3, 64, 6, 2);
+    auto layout = ComputeGrid(3, 64, 6, 2);
     REQUIRE(layout.columns == 3);
     REQUIRE(layout.rows    == 1);
 }
@@ -131,9 +148,8 @@ TEST_CASE("ThumbnailSizeGrid — ComputeGrid with count <= maxColumns", "[sizegr
 TEST_CASE("ThumbnailSizeGrid — Preset table is sorted ascending", "[sizegrid]") {
     using namespace ExplorerLens::Engine;
 
-    const auto& presets = ThumbnailSizeGrid::Presets();
-    for (size_t i = 1; i < presets.size(); ++i) {
-        REQUIRE(presets[i] > presets[i-1]);
+    for (size_t i = 1; i < THUMBNAIL_SIZE_TABLE.size(); ++i) {
+        REQUIRE(THUMBNAIL_SIZE_TABLE[i].pixels > THUMBNAIL_SIZE_TABLE[i-1].pixels);
     }
 }
 

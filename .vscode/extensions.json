@@ -20,7 +20,6 @@
         "github.vscode-github-actions", // GitHub Actions workflow authoring + status
         "github.vscode-pull-request-github", // GitHub Pull Request integration
         // ── AI & Copilot ──
-        "github.copilot", // GitHub Copilot AI code completion
         "github.copilot-chat", // GitHub Copilot Chat for AI-assisted development
         // ── Productivity ──
         "ms-vscode.hexeditor", // Hex editor for binary file inspection

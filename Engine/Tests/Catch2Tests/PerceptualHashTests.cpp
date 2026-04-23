@@ -152,7 +152,7 @@ TEST_CASE("FromHexString rejects non-hex characters", "[phash][hex][error]") {
 TEST_CASE("SSIM: identical images score 1.0", "[ssim]") {
     auto px = Gradient(32, 32);
     auto result = SSIMComparator::Compare(px, px, 32, 32);
-    REQUIRE(result.ssim >= SSIMComparator::SSIM_IDENTICAL_THRESHOLD);
+    REQUIRE(result.ssim >= SSIM_IDENTICAL_THRESHOLD);
     CHECK(result.isIdentical);
 }
 

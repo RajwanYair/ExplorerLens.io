@@ -11,6 +11,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -156,7 +157,7 @@ private:
     // Per-format counters. In practice the number of formats is small (<50),
     // so a simple map with a shared mutex is fine here.
     mutable std::atomic_flag                            m_lock = ATOMIC_FLAG_INIT;
-    std::unordered_map<std::string, FormatCounters>     m_counters;
+    std::unordered_map<std::string, std::unique_ptr<FormatCounters>> m_counters;
 };
 
 // ---------------------------------------------------------------------------

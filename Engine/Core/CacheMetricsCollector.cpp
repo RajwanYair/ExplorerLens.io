@@ -124,11 +124,8 @@ CacheSnapshot CacheMetricsCollector::ParseStats(const std::string& json) const {
     return snap;
 }
 
-void CacheMetricsCollector::EmitETW(const CacheSnapshot& snap) const {
+void CacheMetricsCollector::EmitETW(const CacheSnapshot& /*snap*/) const {
     // ETW emission is handled by ETWTraceProvider; we log to stderr in non-Windows or debug builds.
-#if defined(_DEBUG) || !defined(_WIN32)
-    (void)snap;
-#endif
     // In production, ETWTraceProvider::Instance().EmitCacheMetrics(snap) would be called here.
     // Decoupled to avoid circular dependency — ETWTraceProvider includes this header's snapshot type.
 }

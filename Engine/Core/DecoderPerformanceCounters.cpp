@@ -121,10 +121,10 @@ FormatCounters& DecoderPerformanceCounters::GetOrCreate(std::string_view format)
     SpinLock lk(m_lock);
     auto it = m_counters.find(std::string(format));
     if (it == m_counters.end()) {
-        m_counters.emplace(std::string(format), FormatCounters{});
-        it = m_counters.find(std::string(format));
+        auto [ins, _] = m_counters.emplace(std::string(format), std::make_unique<FormatCounters>());
+        return *ins->second;
     }
-    return it->second;
+    return *it->second;
 }
 
 void DecoderPerformanceCounters::RecordDecode(
@@ -162,7 +162,7 @@ void DecoderPerformanceCounters::RecordCacheMiss(std::string_view format) noexce
 const FormatCounters* DecoderPerformanceCounters::GetCounters(std::string_view format) const noexcept {
     SpinLock lk(m_lock);
     auto it = m_counters.find(std::string(format));
-    return (it != m_counters.end()) ? &it->second : nullptr;
+    return (it != m_counters.end()) ? it->second.get() : nullptr;
 }
 
 std::vector<PerFormatReport> DecoderPerformanceCounters::GenerateReport() const {
@@ -172,18 +172,18 @@ std::vector<PerFormatReport> DecoderPerformanceCounters::GenerateReport() const 
     for (const auto& [fmt, c] : m_counters) {
         PerFormatReport r;
         r.format          = fmt;
-        r.totalAttempts   = c.decodeAttempts .load(std::memory_order_relaxed);
-        r.totalSuccesses  = c.decodeSuccesses.load(std::memory_order_relaxed);
-        r.totalFailures   = c.decodeFailures .load(std::memory_order_relaxed);
-        r.hitRate         = c.HitRate();
-        r.errorRate       = c.ErrorRate();
-        r.coldP50Ms       = c.coldLatency.P50();
-        r.coldP95Ms       = c.coldLatency.P95();
-        r.coldP99Ms       = c.coldLatency.P99();
-        r.coldMeanMs      = c.coldLatency.Mean();
-        r.warmP50Ms       = c.warmLatency.P50();
-        r.gpuDecodes      = c.gpuDecodes.load(std::memory_order_relaxed);
-        r.cpuDecodes      = c.cpuDecodes.load(std::memory_order_relaxed);
+        r.totalAttempts   = c->decodeAttempts .load(std::memory_order_relaxed);
+        r.totalSuccesses  = c->decodeSuccesses.load(std::memory_order_relaxed);
+        r.totalFailures   = c->decodeFailures .load(std::memory_order_relaxed);
+        r.hitRate         = c->HitRate();
+        r.errorRate       = c->ErrorRate();
+        r.coldP50Ms       = c->coldLatency.P50();
+        r.coldP95Ms       = c->coldLatency.P95();
+        r.coldP99Ms       = c->coldLatency.P99();
+        r.coldMeanMs      = c->coldLatency.Mean();
+        r.warmP50Ms       = c->warmLatency.P50();
+        r.gpuDecodes      = c->gpuDecodes.load(std::memory_order_relaxed);
+        r.cpuDecodes      = c->cpuDecodes.load(std::memory_order_relaxed);
         out.push_back(std::move(r));
     }
     std::sort(out.begin(), out.end(), [](const PerFormatReport& a, const PerFormatReport& b){
@@ -206,14 +206,14 @@ std::string DecoderPerformanceCounters::SerializeJson() const {
 
 void DecoderPerformanceCounters::ResetAll() noexcept {
     SpinLock lk(m_lock);
-    for (auto& [fmt, c] : m_counters) { c.Reset(); }
+    for (auto& [fmt, c] : m_counters) { c->Reset(); }
 }
 
 uint64_t DecoderPerformanceCounters::TotalAttempts() const noexcept {
     SpinLock lk(m_lock);
     uint64_t total = 0;
     for (const auto& [_, c] : m_counters) {
-        total += c.decodeAttempts.load(std::memory_order_relaxed);
+        total += c->decodeAttempts.load(std::memory_order_relaxed);
     }
     return total;
 }
@@ -222,7 +222,7 @@ uint64_t DecoderPerformanceCounters::TotalSuccesses() const noexcept {
     SpinLock lk(m_lock);
     uint64_t total = 0;
     for (const auto& [_, c] : m_counters) {
-        total += c.decodeSuccesses.load(std::memory_order_relaxed);
+        total += c->decodeSuccesses.load(std::memory_order_relaxed);
     }
     return total;
 }
@@ -231,7 +231,7 @@ uint64_t DecoderPerformanceCounters::TotalFailures() const noexcept {
     SpinLock lk(m_lock);
     uint64_t total = 0;
     for (const auto& [_, c] : m_counters) {
-        total += c.decodeFailures.load(std::memory_order_relaxed);
+        total += c->decodeFailures.load(std::memory_order_relaxed);
     }
     return total;
 }

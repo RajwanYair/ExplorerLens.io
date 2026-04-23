@@ -90,34 +90,5 @@ public:
         DecodeErrorCategory context) noexcept;
 };
 
-// ---------------------------------------------------------------------------
-// Common HRESULT constants (avoids winerror.h dependency)
-// ---------------------------------------------------------------------------
-
-namespace HResult {
-    inline constexpr uint32_t S_OK               = 0x00000000;
-    inline constexpr uint32_t E_FAIL             = 0x80004005;
-    inline constexpr uint32_t E_OUTOFMEMORY      = 0x8007000E;
-    inline constexpr uint32_t E_INVALIDARG       = 0x80070057;
-    inline constexpr uint32_t E_ACCESSDENIED     = 0x80070005;
-    inline constexpr uint32_t E_NOTIMPL          = 0x80004001;
-    inline constexpr uint32_t E_FILENOTFOUND     = 0x80070002;
-    inline constexpr uint32_t E_PATHNOTFOUND     = 0x80070003;
-    inline constexpr uint32_t E_TIMEOUT          = 0x80070102;
-    inline constexpr uint32_t E_INSUFFICIENT_BUF = 0x8007007A;
-    inline constexpr uint32_t WINCODEC_ERR_BASE  = 0x88982F00;
-    inline constexpr uint32_t WINCODEC_UNSUPPORTED_PIXEL  = 0x88982F80;
-    inline constexpr uint32_t WINCODEC_WRONGSTATE          = 0x88982F04;
-    inline constexpr uint32_t WINCODEC_FRAMEMISSING        = 0x88982F61;
-    inline constexpr uint32_t WINCODEC_INVALIDJPEGSCANTYPE = 0x88982F20;
-    inline constexpr uint32_t D2DERR_RECREATE_TARGET       = 0x8899000C;
-    inline constexpr uint32_t DXGI_ERROR_DEVICE_REMOVED    = 0x887A0005;
-    inline constexpr uint32_t DXGI_ERROR_DEVICE_RESET      = 0x887A0007;
-    inline constexpr uint32_t DXGI_ERROR_DRIVER_INTERNAL_ERROR = 0x887A0020;
-    inline constexpr uint32_t DXGI_ERROR_INVALID_CALL      = 0x887A0001;
-    inline constexpr uint32_t DXGI_ERROR_NOT_FOUND         = 0x887A0002;
-    inline constexpr uint32_t DXGI_ERROR_UNSUPPORTED       = 0x887A0004;
-} // namespace HResult
-
 } // namespace Engine
 } // namespace ExplorerLens

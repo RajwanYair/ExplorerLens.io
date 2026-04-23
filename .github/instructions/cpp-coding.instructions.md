@@ -89,6 +89,85 @@ Before committing any new header batch:
 grep_search "struct MyNewType" Engine/**/*.h
 ```
 
+## C++23 Error Handling with `std::expected<T, E>`
+
+MSVC 19.50 (v145) supports `std::expected<T, E>` from C++23. Use it for engine-internal
+results where exceptions are undesirable (tight loops, decoder hot paths).
+
+```cpp
+#include <expected>
+
+enum class EngineError { OK = 0, IO_FAILURE, FORMAT_MISMATCH, DECODE_OVERFLOW };
+
+// ✅ Return expected instead of out-param + bool
+std::expected<PixelBuffer, EngineError> DecodeAtSize(
+    IStream* stream, uint32_t targetSize, std::stop_token cancel) noexcept;
+
+// ✅ Chain results with monadic API
+auto result = DecodeAtSize(stream, 256, token)
+    .transform([](PixelBuffer buf) { return Resize(buf, 256); })
+    .transform_error([](EngineError e) { return MapToHRESULT(e); });
+
+// ✅ Caller checks
+if (!result) {
+    LOG_WARNING("Decode failed: {}", static_cast<int>(result.error()));
+    return E_FAIL;
+}
+```
+
+**Rules:**
+- Use `std::expected` for new engine-internal APIs (decoders, cache, pipeline).
+- Use `HRESULT` for all COM interface boundaries — the shell layer converts.
+- `EngineError` enum lives in `Engine/Core/EngineTypes.h`.
+- Never use `std::expected` in headers included by COM-facing code — HRESULT only at the boundary.
+
+## Catch2 v3 Test Patterns
+
+New tests go in `Engine/Tests/Catch2Tests/*.cpp` using Catch2 v3 syntax.
+
+```cpp
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+// ── Basic assertion ─────────────────────────────────────────────────
+TEST_CASE("JpegDecoder — baseline JPEG returns BGRA32", "[jpeg][decoder]") {
+    JpegDecoder dec;
+    auto result = dec.DecodeAtSize(OpenCorpusFile("images/sample_1mp.jpg"), 256, {});
+    REQUIRE(result.has_value());
+    CHECK(result->width == 256);
+    CHECK(result->bytesPerPixel == 4);
+}
+
+// ── Parameterized with GENERATE ─────────────────────────────────────
+TEST_CASE("ThumbnailSizeGrid — nearest preset", "[grid]") {
+    auto [input, expected] = GENERATE(table<int, int>({
+        {  48,  48 }, { 128, 128 }, { 256, 256 }, { 512, 512 },
+    }));
+    REQUIRE(ThumbnailSizeGrid::NearestPreset(input) == expected);
+}
+
+// ── Sections for related checks ─────────────────────────────────────
+TEST_CASE("CacheManager — hit/miss/evict cycle", "[cache]") {
+    SECTION("Cold cache misses") {
+        CacheManager cm;
+        REQUIRE_FALSE(cm.Lookup("test.jpg", 256).has_value());
+    }
+    SECTION("Warm cache hits") {
+        CacheManager cm;
+        cm.Store("test.jpg", 256, MakeSampleBitmap());
+        REQUIRE(cm.Lookup("test.jpg", 256).has_value());
+    }
+}
+```
+
+**Rules:**
+- Tag every TEST_CASE with at least one category tag (`[decoder]`, `[cache]`, `[pipeline]`, `[gpu]`).
+- Use `SKIP()` not `CHECK(false)` when corpus files are missing.
+- Use `REQUIRE` for fatal assertions, `CHECK` for non-fatal.
+- `GENERATE` with `table<>` replaces manually duplicated TEST_CASEs.
+- All new Catch2 test files go in `Engine/Tests/Catch2Tests/` and must be listed in `Engine/Tests/CMakeLists.txt`.
+
 ## Test Registration (for new source files)
 
 1. Header → `Engine/CMakeLists.txt` ENGINE_HEADERS

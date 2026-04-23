@@ -8,13 +8,6 @@
 
 namespace ExplorerLens { namespace Engine {
 
-static int64_t NowUs() noexcept
-{
-    using namespace std::chrono;
-    return duration_cast<microseconds>(
-        steady_clock::now().time_since_epoch()).count();
-}
-
 void ScrollVelocityTracker::AddSample(const ScrollSample& sample) noexcept
 {
     m_samples[m_head % k_maxSamples] = sample;

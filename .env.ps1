@@ -18,6 +18,17 @@ param(
 # Guard: only run once per session
 if ($env:EXPLORERLENS_ENV_LOADED -eq '1') { return }
 
+# ── Corporate proxy for Go-based CLIs (gh, etc.) ────────────────────────────
+if (-not $env:HTTPS_PROXY) {
+    $sysProxy = [System.Net.WebRequest]::GetSystemWebProxy()
+    $testUri  = [Uri]'https://api.github.com'
+    if (-not $sysProxy.IsBypassed($testUri)) {
+        $proxyUri = $sysProxy.GetProxy($testUri).ToString()
+        $env:HTTP_PROXY  = $proxyUri
+        $env:HTTPS_PROXY = $proxyUri
+    }
+}
+
 if (-not $SkipCommonBootstrap) {
     $commonBootstrap = Join-Path (Split-Path $PSScriptRoot -Parent) '.vscode\scripts\Initialize-CommonTooling.ps1'
     if (Test-Path $commonBootstrap -PathType Leaf) {

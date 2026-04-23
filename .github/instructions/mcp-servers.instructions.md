@@ -82,10 +82,35 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
 - The server requires a large runtime dependency (e.g., Docker, Python) not in the dev environment.
 - The server handles sensitive data that should not transit through agent context.
 
+## Required GitHub Personal Access Token (PAT) Scopes
+
+The `github` MCP server requires a PAT with the following scopes for full agent functionality:
+
+| Scope | Why Needed | Required? |
+|-------|-----------|-----------|
+| `repo` | Read/write repo contents, issues, PRs, releases | ✅ Required |
+| `workflow` | Trigger and view GitHub Actions workflow runs | ✅ Required |
+| `read:packages` | Read packages from GitHub Packages (NuGet, Container) | ✅ Required |
+| `write:packages` | Publish packages (for Release agent) | ✅ Required |
+| `actions:read` | Read Actions secrets, variables, runner groups | ✅ Required for CI-Ops agent |
+| `admin:repo_hook` | Manage webhooks | ⏳ Deferred — not needed yet |
+| `delete_repo` | Delete repository | ❌ Never grant |
+
+**Verification script:**
+```powershell
+# Check current PAT scopes (requires gh CLI authenticated)
+gh auth status --show-token
+# Or via API:
+gh api /user -H "Accept: application/json" | Select-Object login
+```
+
+If the PAT is missing `workflow` scope, the CI-Ops agent cannot re-run workflows.
+If the PAT is missing `write:packages`, the Release agent cannot publish to GitHub Packages.
+
 ## Evaluated and Deferred Servers
 
 | Server | Package | Decision | Rationale |
 |--------|---------|----------|-----------|
 | Git MCP | `@anthropic/mcp-server-git` | **Deferred** | GitKraken MCP (`mcp_gitkraken_*`) already provides git blame, log, diff, stash, branch, status, and push operations. Adding a second git server would be redundant. Re-evaluate if GitKraken MCP is removed. |
-| SQLite MCP | `@anthropic/mcp-server-sqlite` | **Deferred** | No SQLite databases in active development workflow yet. Add when cache DB debugging becomes common (Phase 2). |
-| Fetch MCP | `@anthropic/mcp-server-fetch` | **Deferred** | Built-in `fetch_webpage` tool covers URL content needs. Add only if agents need structured HTTP API access. |
+| SQLite MCP | `@anthropic/mcp-server-sqlite` | **Deferred** | No SQLite databases in active development workflow yet. Add when cache DB debugging becomes common (Phase 2+). |
+| Fetch MCP | `@anthropic/mcp-server-fetch` | **Deferred** | Built-in `fetch_webpage` tool covers URL content needs. Add only if agents need structured HTTP API access to format specification servers. |

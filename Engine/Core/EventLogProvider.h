@@ -11,6 +11,12 @@
 #include <string>
 #include <cstdint>
 
+// Windows <winbase.h> defines ReportEvent as a macro (→ ReportEventW/A).
+// Undefine it so our method name is not mangled.
+#ifdef ReportEvent
+#undef ReportEvent
+#endif
+
 namespace ExplorerLens {
 namespace Engine {
 

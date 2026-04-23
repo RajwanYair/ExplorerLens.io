@@ -5,10 +5,19 @@
 #include <algorithm>
 #include <cstdio>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <numeric>
 #include <string>
 #include <vector>
+
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <shlobj.h>
+#endif
 
 namespace ExplorerLens {
 namespace CLI {
@@ -27,14 +36,16 @@ int CleanCommand::Execute(const ParsedArgs& args) {
     int    maxAge      = 0;
     int64_t limitMB    = 0;
 
-    if (auto v = args.GetOption(L"older-than")) {
-        try { maxAge = std::stoi(*v); } catch (...) {
+    if (args.HasOption(L"older-than")) {
+        auto v = args.GetOption(L"older-than");
+        try { maxAge = std::stoi(v); } catch (...) {
             std::wcerr << L"lens clean: --older-than requires an integer (days)\n";
             return 1;
         }
     }
-    if (auto v = args.GetOption(L"size-limit")) {
-        try { limitMB = std::stoll(*v); } catch (...) {
+    if (args.HasOption(L"size-limit")) {
+        auto v = args.GetOption(L"size-limit");
+        try { limitMB = std::stoll(v); } catch (...) {
             std::wcerr << L"lens clean: --size-limit requires an integer (MB)\n";
             return 1;
         }

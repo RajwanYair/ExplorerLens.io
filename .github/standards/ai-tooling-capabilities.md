@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
-**Last Updated:** 21 April 2026  
-**Version:** v38.0.0 "Betelgeuse"  
+**Last Updated:** 22 April 2026  
+**Version:** v38.4.0 "Betelgeuse"  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -159,9 +159,12 @@ The workspace currently defines MCP servers in `.vscode/mcp.json`.
 
 | Server | Backing Package | Scope | Primary Use | Last Revised |
 |--------|------------------|-------|-------------|-------------|
-| `github` | `@modelcontextprotocol/server-github` | GitHub API via PAT input | Issues, PRs, repo metadata, automation triage | v38.0 |
-| `filesystem` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}` | Full workspace file inspection and read/write operations | v38.0 |
-| `project-docs` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}\\.github`, `${workspaceFolder}\\docs` | Documentation-only editing and review | v38.0 |
+| `github` | `@modelcontextprotocol/server-github` | GitHub API via PAT input | Issues, PRs, repo metadata, automation triage | v38.4 |
+| `filesystem` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}` | Full workspace file inspection and read/write operations | v38.4 |
+| `project-docs` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}\.github`, `${workspaceFolder}\docs` | Documentation-only editing and review | v38.4 |
+
+**Required PAT scopes:** `repo`, `workflow`, `read:packages`, `write:packages`, `actions:read`.
+See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope table and verification script.
 
 ### MCP Guidance
 
@@ -223,7 +226,7 @@ The workspace currently defines MCP servers in `.vscode/mcp.json`.
 3. Workflow guidance belongs in `.github/instructions/cicd.instructions.md`; workflow inventory belongs here.
 4. When adding a workflow, add both the YAML and a one-line purpose entry in this file.
 
-### Workflow Compliance Status (Audited v38.1.0)
+### Workflow Compliance Status (Audited v38.4.0)
 
 | Check | Status |
 |-------|--------|

@@ -4,8 +4,12 @@
 #include "EventLogProvider.h"
 
 #ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #endif
 
@@ -13,6 +17,11 @@
 #include <codecvt>
 #include <locale>
 
+// Undo the ReportEvent → ReportEventW macro from <winbase.h>
+// so our method definitions use the un-mangled name.
+#ifdef ReportEvent
+#undef ReportEvent
+#endif
 namespace ExplorerLens {
 namespace Engine {
 

@@ -240,12 +240,6 @@ static bool MatchMagic(std::span<const uint8_t> header,
     return true;
 }
 
-static std::string ToLower(std::string_view s) {
-    std::string out(s);
-    for (char& c : out) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-    return out;
-}
-
 } // anonymous namespace
 
 // ---------------------------------------------------------------------------

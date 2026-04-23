@@ -105,7 +105,7 @@ std::wstring ShellNotificationProvider::BuildXml(const std::wstring& title,
     auto safeBody  = XmlEscape(body.substr(0, (std::min)(body.size(), MAX_BODY)));
 
     // scenario attribute: "default" for INFO/WARNING, "reminder" for ERROR
-    const wchar_t* scenario = (severity == NotifySeverity::ERROR) ? L"reminder" : L"default";
+    const wchar_t* scenario = (severity == NotifySeverity::NOTIFY_ERROR) ? L"reminder" : L"default";
 
     std::wostringstream xml;
     xml << L"<toast scenario=\"" << scenario << L"\">"
