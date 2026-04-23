@@ -461,6 +461,26 @@
 				"showReuseMessage": false
 			}
 		},
+		{
+			"label": "Serve Local Site",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}/build-scripts/Serve-Docs.ps1"
+			],
+			"group": "none",
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true,
+				"showReuseMessage": false
+			}
+		},
 		// ══════════════════════════════════════════════════════════
 		//  RUN TESTS
 		// ══════════════════════════════════════════════════════════
