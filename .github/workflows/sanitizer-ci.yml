@@ -1,0 +1,190 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ExplorerLens — Sanitizer CI (ASAN + UBSAN)
+#
+# PHASE:   4 — Enterprise & Hardening
+# STATUS:  STUB — workflow is defined but jobs are gated behind a feature flag
+#          until Phase 4. Set `enable_sanitizers: true` to activate manually.
+#
+# PURPOSE: Catch memory errors (use-after-free, buffer overflows, null deref)
+#          and undefined behaviour in the Engine decode pipeline.
+#
+# WHEN ACTIVATED: Runs on push to `main` when sanitizers are available.
+# BLOCKER:  MSVC /fsanitize=address requires VS 2022 17.x+ and Windows SDK
+#           10.0.22621+. The GitHub Actions `windows-latest` runner may need
+#           an explicit VS version pin for full ASAN support.
+#
+# ROADMAP: §12.1 (Phase 4 workflows), D37, §15.1
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Sanitizer CI (ASAN + UBSAN)
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_sanitizers:
+        description: "Enable sanitizers (Phase 4 — requires MSVC ASAN support)"
+        required: false
+        default: "false"
+        type: boolean
+  # Uncomment when Phase 4 lands:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'Engine/**'
+  #     - 'LENSShell/**'
+  # pull_request:
+  #   branches: [main]
+  #   paths:
+  #     - 'Engine/**'
+
+permissions:
+  contents: read
+  actions: write
+  checks: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: sanitizer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Phase 4 gate ──────────────────────────────────────────────────────────
+  phase4-check:
+    name: Phase 4 gate check
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check if sanitizers are enabled
+        id: check
+        run: |
+          if [[ "${{ github.event.inputs.enable_sanitizers }}" == "true" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Sanitizer jobs will run"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "⏸️  Sanitizer jobs skipped — Phase 4 feature gate not set"
+            echo "   To enable: use workflow_dispatch with enable_sanitizers=true"
+            echo "   Phase 4 auto-enable: add push/PR triggers when ASAN is production-ready"
+          fi
+
+  # ── ASAN — Address Sanitizer ─────────────────────────────────────────────
+  asan:
+    name: ASAN Build + Tests
+    runs-on: windows-latest
+    needs: phase4-check
+    if: needs.phase4-check.outputs.enabled == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup MSVC (v145)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: 14.5
+
+      - name: Configure with ASAN
+        shell: pwsh
+        run: |
+          cmake --preset default-release `
+            -DCMAKE_C_FLAGS="/fsanitize=address" `
+            -DCMAKE_CXX_FLAGS="/fsanitize=address" `
+            -DASAN_BUILD=ON
+        # Note: /fsanitize=address is incompatible with /RTC1 and /LTCG
+        # CMakeLists.txt must strip these flags when ASAN_BUILD=ON
+
+      - name: Build (ASAN)
+        shell: pwsh
+        run: cmake --build build --config Release -j 4
+
+      - name: Run tests under ASAN
+        shell: pwsh
+        env:
+          ASAN_OPTIONS: "halt_on_error=1:detect_leaks=1:check_initialization_order=1"
+        run: |
+          ctest --test-dir build -C Release --output-on-failure -j 2
+          # Note: ASAN is single-threaded safe; reduce parallelism to avoid
+          # false positives from race conditions in test infrastructure
+
+      - name: Upload ASAN report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asan-report-${{ github.sha }}
+          path: |
+            build/Testing/
+            *.asan.log
+          retention-days: 14
+
+  # ── UBSAN — Undefined Behaviour Sanitizer ─────────────────────────────────
+  ubsan:
+    name: UBSAN Build + Tests
+    runs-on: windows-latest
+    needs: phase4-check
+    if: needs.phase4-check.outputs.enabled == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup MSVC (v145)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: 14.5
+
+      - name: Configure with UBSAN
+        shell: pwsh
+        run: |
+          # MSVC does not have a direct /fsanitize=undefined equivalent.
+          # Use /sdl /GS /guard:cf /RTC1 as a best-effort substitute.
+          # Full UBSAN requires Clang-cl nightly lane (Phase 2 plan §5.2).
+          cmake --preset default-release `
+            -DCMAKE_CXX_FLAGS="/sdl /GS /guard:cf /RTC1 /D_ITERATOR_DEBUG_LEVEL=2" `
+            -DUBSAN_BUILD=ON
+
+      - name: Build (UBSAN-equivalent)
+        shell: pwsh
+        run: cmake --build build --config Release -j 4
+
+      - name: Run tests under UBSAN guards
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Upload UBSAN report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubsan-report-${{ github.sha }}
+          path: build/Testing/
+          retention-days: 14
+
+  # ── Summary ───────────────────────────────────────────────────────────────
+  sanitizer-summary:
+    name: Sanitizer Summary
+    runs-on: ubuntu-latest
+    needs: [phase4-check, asan, ubsan]
+    if: always()
+    steps:
+      - name: Report status
+        run: |
+          echo "## Sanitizer CI Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ needs.phase4-check.outputs.enabled }}" != "true" ]]; then
+            echo "⏸️ **Phase 4 gate not enabled.** Sanitizer jobs skipped." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Enable via: \`workflow_dispatch\` with \`enable_sanitizers=true\`" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Job | Result |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|-----|--------|" >> "$GITHUB_STEP_SUMMARY"
+            echo "| ASAN | ${{ needs.asan.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| UBSAN | ${{ needs.ubsan.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          fi

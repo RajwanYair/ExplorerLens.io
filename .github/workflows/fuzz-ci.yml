@@ -1,0 +1,219 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ExplorerLens — Fuzz CI (libFuzzer / WinAFL)
+#
+# PHASE:   4 — Enterprise & Hardening
+# STATUS:  STUB — workflow is defined but jobs are gated behind a feature flag
+#          until Phase 4. Set `enable_fuzzing: true` to activate manually.
+#
+# PURPOSE: Run fuzz targets against each decoder to find crashes and hangs
+#          caused by malformed or adversarial input files.
+#
+# FUZZ TARGETS: One per P0/P1 decoder — JPEG, PNG, WebP, AVIF, HEIC, JXL,
+#               PDF, RAW, ZIP/CBZ, RAR, 7Z, GIF, BMP, TIFF, EXR, DDS, SVG
+#
+# ROADMAP: §12.1 (Phase 4 workflows), D37, §15.1, §10.2
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Fuzz CI (libFuzzer)
+
+on:
+  workflow_dispatch:
+    inputs:
+      enable_fuzzing:
+        description: "Enable fuzz jobs (Phase 4 — requires fuzz harness implementation)"
+        required: false
+        default: "false"
+        type: boolean
+      target:
+        description: "Fuzz target name (leave empty to run all)"
+        required: false
+        default: ""
+        type: string
+      duration_seconds:
+        description: "Fuzzing duration per target in seconds"
+        required: false
+        default: "60"
+        type: string
+  # Uncomment when Phase 4 lands:
+  # schedule:
+  #   - cron: '0 3 * * 0'   # Weekly on Sunday 03:00 UTC
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'Engine/Decoders/**'
+
+permissions:
+  contents: read
+  actions: write
+  security-events: write   # Upload SARIF fuzz findings
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FUZZ_DURATION: ${{ github.event.inputs.duration_seconds || '60' }}
+
+concurrency:
+  group: fuzz-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Phase 4 gate ──────────────────────────────────────────────────────────
+  phase4-check:
+    name: Phase 4 gate check
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check if fuzzing is enabled
+        id: check
+        run: |
+          if [[ "${{ github.event.inputs.enable_fuzzing }}" == "true" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Fuzz jobs will run"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "⏸️  Fuzz jobs skipped — Phase 4 feature gate not set"
+            echo "   Phase 4 plan: libFuzzer + WinAFL, ≥20 targets, §10.2"
+          fi
+
+  # ── Build fuzz harnesses ──────────────────────────────────────────────────
+  build-fuzz:
+    name: Build Fuzz Targets
+    runs-on: windows-latest
+    needs: phase4-check
+    if: needs.phase4-check.outputs.enabled == 'true'
+    outputs:
+      targets_list: ${{ steps.list.outputs.targets }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup MSVC (v145)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: 14.5
+
+      - name: Configure with fuzzing enabled
+        shell: pwsh
+        run: |
+          cmake --preset default-release `
+            -DBUILD_FUZZ_TARGETS=ON `
+            -DCMAKE_CXX_FLAGS="/fsanitize=fuzzer /fsanitize=address"
+          # BUILD_FUZZ_TARGETS=ON enables Engine/Tests/FuzzTargets/ CMake target
+          # which is gated with: if(BUILD_FUZZ_TARGETS)
+
+      - name: Build fuzz targets
+        shell: pwsh
+        run: cmake --build build --target FuzzTargets --config Release -j 4
+
+      - name: List available fuzz targets
+        id: list
+        shell: pwsh
+        run: |
+          $targets = Get-ChildItem build/bin/Fuzz*.exe | ForEach-Object { $_.BaseName }
+          $json = $targets | ConvertTo-Json -Compress
+          "targets=$json" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Found fuzz targets: $($targets -join ', ')"
+
+      - name: Upload fuzz binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-targets-${{ github.sha }}
+          path: build/bin/Fuzz*.exe
+          retention-days: 7
+
+  # ── Run fuzz targets ──────────────────────────────────────────────────────
+  fuzz-run:
+    name: Fuzz — ${{ matrix.target }}
+    runs-on: windows-latest
+    needs: [phase4-check, build-fuzz]
+    if: needs.phase4-check.outputs.enabled == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - FuzzJpegDecoder
+          - FuzzPngDecoder
+          - FuzzWebPDecoder
+          - FuzzAvifDecoder
+          - FuzzHeicDecoder
+          - FuzzJxlDecoder
+          - FuzzPdfDecoder
+          - FuzzRawDecoder
+          - FuzzZipDecoder
+          - FuzzRarDecoder
+          # Phase 3 targets (added when decoders land):
+          # - FuzzExrDecoder
+          # - FuzzDdsDecoder
+          # - FuzzGlbDecoder
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download fuzz binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: fuzz-targets-${{ github.sha }}
+          path: build/bin/
+
+      - name: Download corpus seed files
+        shell: pwsh
+        run: |
+          # Use the data/corpus/ directory as seed corpus for coverage-guided fuzzing
+          $format = "${{ matrix.target }}" -replace 'Fuzz(\w+)Decoder', '$1' | ForEach-Object { $_.ToLower() }
+          $seedDir = "data/corpus/images/$format"
+          if (Test-Path $seedDir) {
+            Write-Host "Using corpus seed: $seedDir"
+          } else {
+            Write-Host "No corpus seed found for $format — fuzzer will start from empty corpus"
+            New-Item -ItemType Directory -Path "fuzz-seed" -Force | Out-Null
+          }
+
+      - name: Run libFuzzer (${{ env.FUZZ_DURATION }}s)
+        shell: pwsh
+        run: |
+          $target = "build/bin/${{ matrix.target }}.exe"
+          $seed = if (Test-Path "data/corpus/images/${{ matrix.target -replace 'Fuzz(\w+)Decoder','$1' | ToLower() }}") {
+            "data/corpus/images/${{ matrix.target -replace 'Fuzz(\w+)Decoder','$1' | ToLower() }}"
+          } else { "" }
+          & $target -max_total_time=${{ env.FUZZ_DURATION }} -artifact_prefix="fuzz-artifacts/" $seed
+        continue-on-error: true   # Collect artifacts even on crash
+
+      - name: Upload crash artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crashes-${{ matrix.target }}-${{ github.sha }}
+          path: fuzz-artifacts/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # ── Summary ───────────────────────────────────────────────────────────────
+  fuzz-summary:
+    name: Fuzz Summary
+    runs-on: ubuntu-latest
+    needs: [phase4-check, build-fuzz, fuzz-run]
+    if: always()
+    steps:
+      - name: Report status
+        run: |
+          echo "## Fuzz CI Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ needs.phase4-check.outputs.enabled }}" != "true" ]]; then
+            echo "⏸️ **Phase 4 gate not enabled.** Fuzz jobs skipped." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Phase 4 plan (§10.2):** ≥20 fuzz targets, libFuzzer + WinAFL, continuous" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Phase | Status |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Build fuzz targets | ${{ needs.build-fuzz.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Run fuzz targets | ${{ needs.fuzz-run.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Crash artifacts are stored as workflow artifacts for 30 days." >> "$GITHUB_STEP_SUMMARY"
+          fi
