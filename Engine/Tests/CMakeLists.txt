@@ -411,3 +411,60 @@ if(BUILD_CATCH2_TESTS)
         PROPERTIES  LABELS "catch2;unit"
     )
 endif() # BUILD_CATCH2_TESTS
+
+# =============================================================================
+# Google Benchmark Tests (S197 — ThumbnailBenchmarks.cpp stubs)
+# =============================================================================
+# Enable with: cmake -DBUILD_GBENCHMARKS=ON
+# Run with:    build/bin/EngineGBenchmarks --benchmark_out=results.json
+# Benchmark names match data/benchmarks/baseline.json targets.
+
+option(BUILD_GBENCHMARKS "Build Google Benchmark stubs (requires network for FetchContent)" OFF)
+
+if(BUILD_GBENCHMARKS)
+    include(FetchContent)
+    FetchContent_Declare(
+        googlebenchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG        v1.9.1
+        GIT_SHALLOW    TRUE
+    )
+    # Disable Google Benchmark's own tests to keep configure time short
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googlebenchmark)
+
+    add_executable(EngineGBenchmarks
+        Benchmarks/ThumbnailBenchmarks.cpp
+    )
+
+    target_link_libraries(EngineGBenchmarks
+        PRIVATE
+            benchmark::benchmark
+    )
+
+    if(WIN32)
+        target_compile_definitions(EngineGBenchmarks PRIVATE
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+            _WIN32_WINNT=0x0A00
+        )
+    endif()
+
+    if(MSVC)
+        target_compile_options(EngineGBenchmarks PRIVATE /W4 /O2)
+    endif()
+
+    add_test(
+        NAME GBenchmarks
+        COMMAND EngineGBenchmarks
+                --benchmark_format=json
+                --benchmark_out="${CMAKE_BINARY_DIR}/gbench-results.json"
+                --benchmark_min_time=0.01s
+    )
+    set_tests_properties(GBenchmarks PROPERTIES
+        LABELS   "benchmark;gbench"
+        TIMEOUT  300
+    )
+endif() # BUILD_GBENCHMARKS
