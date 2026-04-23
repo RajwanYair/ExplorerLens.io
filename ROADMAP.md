@@ -1065,8 +1065,8 @@ All v3.0 decisions (D1–D29) preserved; v4.0 adds:
 | 12 | `.vscode` workspace standards | **DONE** | `settings.json`, `extensions.json`, `tasks.json`, `launch.json`, `c_cpp_properties.json`, `mcp.json`, `profiles/` |
 | 13 | `.github` hygiene | **DONE** | CODEOWNERS, CONTRIBUTING, SECURITY, SUPPORT, CoC, PR template, 2 issue templates, FUNDING, 22 workflows |
 | 14 | Dependabot | **DONE** | `.github/dependabot.yml` covers npm (wrapper), github-actions, vcpkg (manual-monitored) |
-| 15 | Update README | **DONE** (points to v38.3 + ROADMAP v4) | `README.md` |
-| 16 | Update CHANGELOG | **DONE** (keep-a-changelog format, archive split) | `CHANGELOG.md`, `CHANGELOG-archive.md` |
+| 15 | Update README | **DONE** (v38.4 — test count 4978, ARCHITECTURE.md + ROADMAP v4 links) | `README.md` |
+| 16 | Update CHANGELOG | **DONE** (keep-a-changelog format, 8 versions backfilled, v38.4.0 entry finalized) | `CHANGELOG.md`, `CHANGELOG-archive.md` |
 | 17 | Mermaid diagrams | **DONE** | New `ARCHITECTURE.md` adds 5 Mermaid diagrams (system / decode / subsystems / build / CI); 11 SVGs exist in `docs/assets/` |
 | 18 | Remove redundant configs | **DONE** | Single source of truth verified |
 | 19 | Consolidate docs | **Deferred** (~130 md → ~60, scheduled in ROADMAP §11) | ROADMAP §11 |
@@ -1086,6 +1086,18 @@ All v3.0 decisions (D1–D29) preserved; v4.0 adds:
 - `docs/archive/ROADMAP_V3.md` — prior roadmap archived
 - `build-scripts/Audit-Repo.ps1` — repo-state audit script
 - `build-logs/audit.txt` — Phase-0 audit snapshot
+
+### Sprint outputs captured (S141–S148 session)
+
+- `CHANGELOG.md` — 8 versions (v37.0–v38.3) backfilled from git log; v38.4.0 entry finalized
+- `build-scripts/Serve-Docs.ps1` — local doc server (`python -m http.server` wrapper)
+- `docs/LOCAL_VERIFICATION.md` — SVG diagram verification checklist
+- `.vscode/tasks.json` — "Serve Local Site" VS Code task added
+- `.github/workflows/nightly.yml` — nightly build + corpus validation + benchmark check
+- `build-scripts/corpus/Fetch-Corpus.ps1` — CC0/public-domain corpus ingest with SHA-256 verification
+- `build-scripts/utilities/Pin-Actions.ps1` — action tag-to-SHA hardening utility
+- `README.md` — test count updated to 4,978; ARCHITECTURE.md + ROADMAP v4 links added
+- `.github/CONTRIBUTING.md` — toolchain table updated to CMake 4.3.1/Ninja 1.13.2/WiX 6.0.2/PS 7.5; corpus guide added
 
 
 ---
