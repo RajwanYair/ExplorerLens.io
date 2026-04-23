@@ -1088,6 +1088,7 @@ set(ENGINE_HEADERS
     Core/ThumbnailHashRegistry.h
     Core/FormatValidator.h
     Core/DecoderValidationRunner.h
+    Core/StatelessFormatDetector.h
     Core/FormatStatusProvider.h
     Core/ShellNotificationProvider.h
     Cache/CacheInvalidationWatcher.h
