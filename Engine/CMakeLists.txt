@@ -177,6 +177,14 @@ else()
     set(HAS_FREETYPE OFF CACHE BOOL "Enhanced font — FreeType not built (run Build-FreeType.ps1)" FORCE)
 endif()
 
+# --- libjpeg-turbo (S222) ---
+set(LIBJPEG_TURBO_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjpeg-turbo-3.1.0/install")
+if(EXISTS "${LIBJPEG_TURBO_INSTALL_DIR}/lib/jpeg-static.lib" AND EXISTS "${LIBJPEG_TURBO_INSTALL_DIR}/include/jpeglib.h")
+    set(HAS_LIBJPEG_TURBO ON CACHE BOOL "libjpeg-turbo JPEG decode auto-detected" FORCE)
+else()
+    set(HAS_LIBJPEG_TURBO OFF CACHE BOOL "libjpeg-turbo not found (run Build-LibjpegTurbo.ps1)" FORCE)
+endif()
+
 #==============================================================================
 # Compiler Settings
 #==============================================================================
@@ -518,6 +526,7 @@ set(ENGINE_HEADERS
     Decoders/VTFDecoder.h
     Decoders/VideoDecoder.h
     Decoders/WebPDecoder.h
+    Decoders/JpegTurboDecoder.h   # S222: libjpeg-turbo 3.x fast-path decoder
     Decoders/WMFDecoder.h
     Decoders/XCFDecoder.h
     Decoders/ExampleDecoder.h
@@ -2305,6 +2314,15 @@ if(ENGINE_SOURCES)
             message(STATUS "Enhanced font rendering (FreeType): DISABLED (run Build-FreeType.ps1)")
         endif()
 
+        if(HAS_LIBJPEG_TURBO)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBJPEG_TURBO)
+            target_include_directories(ExplorerLensEngine PRIVATE
+                "${LIBJPEG_TURBO_INSTALL_DIR}/include")
+            message(STATUS "libjpeg-turbo JPEG decode: ENABLED")
+        else()
+            message(STATUS "libjpeg-turbo JPEG decode: DISABLED (run Build-LibjpegTurbo.ps1)")
+        endif()
+
         if(HAS_LIBARCHIVE)
             target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBARCHIVE LIBARCHIVE_STATIC ENABLE_LIBARCHIVE_SUPPORT)
             message(STATUS "libarchive support: ENABLED (TAR/CPIO/ISO/XAR/AR/CAB)")
@@ -2416,6 +2434,10 @@ if(ENGINE_SOURCES)
         endif()
         if(HAS_FREETYPE)
             target_link_libraries(ExplorerLensEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/freetype.lib")
+        endif()
+        if(HAS_LIBJPEG_TURBO)
+            target_link_libraries(ExplorerLensEngine PUBLIC
+                "${LIBJPEG_TURBO_INSTALL_DIR}/lib/jpeg-static.lib")
         endif()
         if(HAS_LIBARCHIVE)
             target_link_libraries(ExplorerLensEngine PUBLIC "${LIBARCHIVE_LIBRARY_PATH}")
@@ -2544,6 +2566,7 @@ message(STATUS "    HAS_MUPDF:             ${HAS_MUPDF}")
 message(STATUS "    HAS_LIBARCHIVE:        ${HAS_LIBARCHIVE}")
 message(STATUS "    HAS_OPENJPEG:          ${HAS_OPENJPEG}")
 message(STATUS "    HAS_FREETYPE:          ${HAS_FREETYPE}")
+message(STATUS "    HAS_LIBJPEG_TURBO:     ${HAS_LIBJPEG_TURBO}")
 message(STATUS "    ENABLE_VIDEO_DECODER:  ${ENABLE_VIDEO_DECODER}")
 message(STATUS "    ENABLE_AUDIO_DECODER:  ${ENABLE_AUDIO_DECODER}")
 message(STATUS "")
