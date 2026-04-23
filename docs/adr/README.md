@@ -17,6 +17,7 @@ rationale, and consequences of significant architectural choices.
 | [ADR-011](ADR-011-streaming-decoder-interface.md) | IStreamingDecoder Probe-then-Decode Interface | Accepted | v38.4.0+ |
 | [ADR-012](ADR-012-engine-directory-consolidation.md) | Engine Directory Consolidation 16→7 | Accepted | v38.4.0 |
 | [ADR-013](ADR-013-sqlite-l2-cache.md) | SQLite WAL for L2 Thumbnail Cache Index | Accepted | v38.4.0+ |
+| [ADR-014](ADR-014-safe-integer-overflow.md) | Safe Integer Arithmetic for Decode Dimensions | Accepted | v38.7.0 |
 
 ## Format
 
