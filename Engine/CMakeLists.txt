@@ -527,6 +527,7 @@ set(ENGINE_HEADERS
     Decoders/VideoDecoder.h
     Decoders/WebPDecoder.h
     Decoders/JpegTurboDecoder.h   # S222: libjpeg-turbo 3.x fast-path decoder
+    Decoders/RawEmbeddedPreviewDecoder.h  # S223: LibRaw::unpack_thumb() fast-path
     Decoders/WMFDecoder.h
     Decoders/XCFDecoder.h
     Decoders/ExampleDecoder.h
