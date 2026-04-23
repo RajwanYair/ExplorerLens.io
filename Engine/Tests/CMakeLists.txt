@@ -369,6 +369,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/MemoryBudgetTests.cpp
         Catch2Tests/IStreamingDecoderTests.cpp
         Catch2Tests/CacheTierTests.cpp
+        Catch2Tests/DecoderPriorityTierTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
