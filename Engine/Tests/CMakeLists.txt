@@ -379,6 +379,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/ThumbnailDimensionTests.cpp
         Catch2Tests/WICCodecTableTests.cpp
         Catch2Tests/SecurityBoundaryTests.cpp
+        Catch2Tests/BitmapAlphaTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
