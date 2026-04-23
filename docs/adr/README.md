@@ -14,6 +14,9 @@ rationale, and consequences of significant architectural choices.
 | [ADR-008](ADR-008-c23-migration-strategy.md) | C++23 Migration Strategy | Proposed | v30.0.0+ |
 | [ADR-009](ADR-009-mupdf-agpl-license-strategy.md) | MuPDF AGPL-3.0 License Strategy | Accepted | v36.2.0 |
 | [ADR-010](ADR-010-catch2-test-migration.md) | Catch2 as Primary Test Framework | Accepted | v36.2.0+ |
+| [ADR-011](ADR-011-streaming-decoder-interface.md) | IStreamingDecoder Probe-then-Decode Interface | Accepted | v38.4.0+ |
+| [ADR-012](ADR-012-engine-directory-consolidation.md) | Engine Directory Consolidation 16→7 | Accepted | v38.4.0 |
+| [ADR-013](ADR-013-sqlite-l2-cache.md) | SQLite WAL for L2 Thumbnail Cache Index | Accepted | v38.4.0+ |
 
 ## Format
 
