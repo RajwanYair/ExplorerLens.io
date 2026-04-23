@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
 **Last Updated:** 23 April 2026  
-**Version:** v38.6.0 "Betelgeuse" (post S151–S179)  
+**Version:** v38.7.0 "Betelgeuse" (post S151–S188)  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -238,7 +238,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 3. Workflow guidance belongs in `.github/instructions/cicd.instructions.md`; workflow inventory belongs here.
 4. When adding a workflow, add both the YAML and a one-line purpose entry in this file.
 
-### Workflow Compliance Status (Audited v38.6.0 — post S179)
+### Workflow Compliance Status (Audited v38.7.0 — post S188)
 
 | Check | Status |
 |-------|--------|

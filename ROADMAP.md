@@ -1,7 +1,7 @@
 # ExplorerLens — Strategic Roadmap v4.0 "Betelgeuse → Rigel"
 
 **Version:** 4.0 — April 2026
-**Current Release:** v38.6.0 "Betelgeuse" (4,978 tests, 0 errors, 0 warnings)
+**Current Release:** v38.7.0 "Betelgeuse" (4,978 tests, 0 errors, 0 warnings)
 **Supersedes:** ROADMAP v3.0 "Antares" (archived to `docs/archive/ROADMAP_V3.md`), v2.0, V35 "Vega", V34 "Arcturus", V30 "Deneb"
 **Scope:** Full re-examination of every decision — architecture, frontend, backend, language, libraries, APIs, database, infrastructure, tests, docs, CI/CD, distribution, AI surface, and competitive positioning. Nothing is assumed correct until re-justified here.
 
@@ -491,11 +491,21 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 
 | Metric | Value | Issue |
 |--------|-------|-------|
-| Tests | ~4,744 | Many test only default-construction |
-| Framework | Custom macros | No fixtures / parameterization / XML |
-| Corpus | ~21 files | **Blocking** |
-| GPU tests | 0 | No GPU path exercised |
+| Tests | ~4,978 | Growing; Catch2 migration S161–S188 added 20 test files |
+| Framework | Custom macros + Catch2 v3 | Catch2 used for all new tests (S161+) |
+| Corpus | 106 format entries (MANIFEST.json v2, S187) | Phase 1 goal ✅ (≥100 entries met) |
+| GPU tests | 0 | No GPU path exercised — Phase 2 |
 | Fuzz tests | 0 active | `FuzzTargets/` removed — not yet replaced |
+
+**Sprint S181–S188 completed (session 5):**
+- S181: `ResultTypeTests.cpp` — 35+ tests for `Result<T,E>` error monad (§10.2 D31)
+- S182: `ProbeHeaderTests.cpp` — 35+ magic-byte format detection tests (§7.3 P0/P1)
+- S183: `DecoderFallbackChainTests.cpp` — 25+ fallback chain tests (§7.3 D43)
+- S184: `CacheKeyTests.cpp` — 25+ L1/L2 cache key composition tests (§7.5 D42)
+- S185: `CLICommandParserTests.cpp` — 30+ CLI type + struct default tests (§lens.exe)
+- S186: `ColorSpaceTests.cpp` — 30+ sRGB/linear/P3 color math tests (§9.3 GPU Phase 2 prep)
+- S187: `data/corpus/MANIFEST.json` — 16 → 106 format entries, 10 categories, v2
+- S188: `CorpusCoverageTests.cpp` — 35+ corpus manifest integrity tests (§10.3 D57)
 
 ### 10.2 Target stack
 
@@ -511,18 +521,24 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 
 **Total target: ~1,270 deep tests replacing ~4,744 shallow ones.**
 
-### 10.3 Test corpus plan (§7.3 references)
+### 10.3 Test corpus plan (§7.3 references) — **Phase 1 goal ✅**
+
+**Status (S187):** MANIFEST.json v2 has 106 format entries across 10 decoder families.
 
 ```
 data/corpus/
-├── images/ {jpeg,png,webp,avif,heic,jxl,gif,bmp,tiff,ico,qoi,tga,exr,hdr,psd}/
-├── archives/ {zip,rar,7z,tar,gz,bz2,xz,cbz,cbr,cb7}/
-├── documents/ {pdf,epub,mobi,fb2}/
-├── fonts/ {ttf,otf,woff,woff2}/
-├── models/ {gltf,glb,obj,stl,fbx}/
-├── raw/ {cr2,cr3,nef,arw,dng,raf,orf,rw2,pef,x3f}/
-├── video/ {mp4,mkv,webm,avi}/
-└── MANIFEST.json (SHA256, expected SSIM, source attribution, license)
+├── images/     {jpeg,png,webp,avif,heic,jxl,gif,bmp,tiff,ico,qoi,tga,exr,hdr,psd,
+│                jp2,ppm,pgm,pbm,apng,pcx,sgi,xcf,cur,ani,xbm,wbmp}/
+├── archives/   {zip,rar,7z,tar.gz,tar.xz,tar.bz2,gz,xz,cbz,cbr,cb7,cbt}/
+├── documents/  {pdf,epub,djvu,mobi,fb2,xps,oxps}/
+├── fonts/      {ttf,otf,woff,woff2,pfb,bdf}/
+├── models/     {gltf,glb,obj,stl,fbx,dae,ply,3ds,usdz,blend}/
+├── raw/        {dng,cr2,cr3,nef,nrw,arw,rw2,orf,raf,pef,x3f,srw,3fr,mef,rwl}/
+├── video/      {mp4,mkv,webm,avi,mov,m4v,wmv,flv,ts}/
+├── audio/      {mp3,flac,ogg,m4a,wav,opus}/
+├── scientific/ {fits,tif16,nc,npy}/
+├── cad/        {dwg,dxf,step,iges}/
+└── MANIFEST.json v2 (106 entries, SHA256, expected perf baselines, source attribution)
 ```
 
 Sourcing via `build-scripts/corpus/Fetch-Corpus.ps1`. Every file CC0 or explicitly licensed for redistribution.
