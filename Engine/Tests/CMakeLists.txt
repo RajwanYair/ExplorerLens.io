@@ -350,6 +350,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/FormatStatusTests.cpp
         Catch2Tests/CorpusValidationTests.cpp
         Catch2Tests/InputValidationTests.cpp
+        Catch2Tests/DecoderRegistryTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
