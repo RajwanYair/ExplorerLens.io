@@ -1,0 +1,113 @@
+ExplorerLens — Third-Party Software Notices
+==========================================
+
+This file contains notices required for third-party libraries included in or
+linked by ExplorerLens.  Libraries listed under LGPL are statically linked;
+their complete corresponding source is available at the URLs below.
+
+==============================================================================
+1. libheif — HEIF/HEIC image codec
+==============================================================================
+Version:  1.19.5
+License:  GNU Lesser General Public License v3.0 (LGPL-3.0-only)
+Source:   https://github.com/strukturag/libheif
+Built:    external/image-libs/libheif-1.19.5/
+Contact:  Dirk Farin <dirk.farin@gmail.com>, struktur AG
+
+libheif is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 3 of the License, or (at your option)
+any later version.
+
+A copy of the LGPL v3.0 is provided in LICENSES/LGPL-3.0.txt.
+The complete machine-readable source of libheif 1.19.5 is available at
+the URL above and in external/image-libs/libheif-1.19.5/
+
+==============================================================================
+2. libde265 — H.265/HEVC decoder (used by libheif)
+==============================================================================
+Version:  1.0.15
+License:  GNU Lesser General Public License v3.0 (LGPL-3.0-only)
+Source:   https://github.com/strukturag/libde265
+Built:    external/image-libs/libde265-1.0.15/
+Contact:  Dirk Farin <dirk.farin@gmail.com>, struktur AG
+
+libde265 is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 3 of the License, or (at your option)
+any later version.
+
+A copy of the LGPL v3.0 is provided in LICENSES/LGPL-3.0.txt.
+The complete machine-readable source of libde265 1.0.15 is available at
+the URL above and in external/image-libs/libde265-1.0.15/
+
+==============================================================================
+3. LibRaw — Camera RAW processor
+==============================================================================
+Version:  0.21.3
+License:  GNU Lesser General Public License v2.1 (LGPL-2.1-only)
+          (also available under CDDL-1.0; ExplorerLens uses the LGPL edition)
+Source:   https://github.com/LibRaw/LibRaw
+          https://www.libraw.org
+Built:    external/camera-libs/libraw-install/
+Contact:  LibRaw LLC <info@libraw.org>
+
+LibRaw is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 2.1 of the License, or (at your option)
+any later version.
+
+A copy of the LGPL v2.1 is provided in LICENSES/LGPL-2.1.txt.
+The complete machine-readable source of LibRaw 0.21.3 is available at
+the URL above and in external/camera-libs/
+
+==============================================================================
+4. libjpeg-turbo — High-speed JPEG decoder (optional, S222)
+==============================================================================
+Version:  3.1.0
+License:  BSD 3-Clause / IJG License (permissive)
+Source:   https://github.com/libjpeg-turbo/libjpeg-turbo
+Built:    external/image-libs/libjpeg-turbo-3.1.0/install/ (when present)
+
+libjpeg-turbo is copyright (C) 2009-2024 D. R. Commander.
+All rights reserved.  See the LICENSE.md file in the libjpeg-turbo source for
+the complete BSD 3-Clause text.  No LGPL/GPL obligations arise from this
+library.
+
+==============================================================================
+5. Other Libraries (MIT / BSD / Apache 2.0 — no source distribution required)
+==============================================================================
+
+Library          Version   License
+---------------- --------- --------------------------------------------------
+libwebp          1.5.0     BSD 3-Clause (Google)
+libjxl           0.11.1    BSD 3-Clause (Google / JPEG XL Working Group)
+libavif          1.3.0     BSD 2-Clause
+dav1d            1.5.1     BSD 2-Clause (VideoLAN)
+minizip-ng       4.0.10    zlib/libpng License
+zlib             1.3.1     zlib/libpng License
+LZ4              1.9.4     BSD 2-Clause
+Zstd             1.5.6     BSD 3-Clause / GPLv2 (statically linked; BSD used)
+LZMA SDK         24.09     Public Domain
+MuPDF            1.24.11   GNU AGPLv3 — loaded only when user opts in *
+OpenJPEG         2.5.3     BSD 2-Clause
+FreeType         2.13.3    FreeType License (BSD-style)
+libarchive       3.7.6     BSD 2-Clause
+WTL              10.0      Microsoft Public License (LENSManager GUI only)
+Catch2           3.7.1     BSL-1.0 (test binary only, not shipped)
+nlohmann/json    3.11.3    MIT (Engine/AI and telemetry serialisation)
+
+* MuPDF (AGPLv3): ExplorerLens links MuPDF only in opt-in PDF preview mode.
+  If you distribute a modified ExplorerLens binary with MuPDF enabled, the
+  AGPLv3 obligations (source availability) apply to the MuPDF portions.
+  Contact legal@explorerlens.io for commercial licensing options.
+
+==============================================================================
+Full license texts
+==============================================================================
+LICENSES/LGPL-3.0.txt    — GNU Lesser General Public License v3.0
+LICENSES/LGPL-2.1.txt    — GNU Lesser General Public License v2.1
+LICENSES/BSD-3-Clause.txt — BSD 3-Clause reference text
+
+For inquiries: legal@explorerlens.io
+ExplorerLens Project — https://github.com/RajwanYair/ExplorerLens.io
