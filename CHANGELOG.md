@@ -5,6 +5,153 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [38.4.0] — 2026-04-23 — Betelgeuse
+
+Production-readiness sprint v39 Rigel prep: 10-sprint session adding ARCHITECTURE.md (5 Mermaid
+diagrams), CHANGELOG gap fill for 8 versions (v36.4–v38.3), binary-size CI workflow, nightly build
+workflow, corpus ingest scaffolding (Fetch-Corpus.ps1 + MANIFEST.json), docs local-server helpers,
+README/CONTRIBUTING refresh, and Pin-Actions tooling for action SHA hardening.
+
+### Added
+- `ARCHITECTURE.md`: root-level architecture doc with 5 Mermaid diagrams (system context, decode pipeline, Engine subsystems, build graph, CI topology)
+- `build-scripts/Serve-Docs.ps1`: local documentation server (`python -m http.server`)
+- `docs/LOCAL_VERIFICATION.md`: local dev server setup and doc verification checklist
+- `.github/workflows/binary-size.yml`: CI workflow tracking LENSShell.dll size per PR (10% growth gate)
+- `.github/workflows/nightly.yml`: nightly clean build + corpus validation + benchmark baseline check
+- `build-scripts/corpus/Fetch-Corpus.ps1`: scripted CC0/public-domain corpus ingest with SHA-256 verification
+- `data/corpus/MANIFEST.json`: corpus file manifest (format, source, license, expected SSIM)
+- `build-scripts/utilities/Pin-Actions.ps1`: helper to update workflow action references to commit SHAs
+- `.vscode/tasks.json`: added "Serve Local Site" task
+
+### Changed
+- `ROADMAP.md`: appended Sprint v39.0.0 Rigel 20-task status matrix
+- `CHANGELOG.md`: backfilled 8 missing versions (v36.4.0 – v38.3.0) reconstructed from git log
+- `.github/CONTRIBUTING.md`: updated toolchain table to v38.4, added corpus contribution guide
+- `README.md`: refreshed version badge, accurate build steps, links to ARCHITECTURE.md + ROADMAP v4
+
+---
+
+## [38.3.0] — 2026-04-18 — Betelgeuse
+
+VS Code tooling audit sprint (S131–S140): stale reference fixes, extensions.json verification,
+Performance agent, Docs agent modernization, SVG dark/light mode audit, scoopfile sync, ROADMAP Phase 1 progress update.
+
+### Added
+- `.github/agents/performance.agent.md`: new Performance agent for benchmark analysis and regression gates
+
+### Changed
+- `.github/agents/docs.agent.md`: modernized description, added ROADMAP context, fix section refs
+- `.vscode/extensions.json`: all 27 extension IDs verified as published, 2 stale removed
+- `.vscode/launch.json`, `.vscode/tasks.json`: fixed 2 broken script paths (S139)
+- `scoopfile.json`: synced `_updated` timestamp with `tool-versions.md` (S138)
+- All 13 SVG diagrams in `docs/assets/`: verified readable in dark and light mode (S137)
+- `.github/issue_template/`: fixed stale references in bug_report and feature_request templates (S131)
+
+---
+
+## [38.2.0] — 2026-04-10 — Betelgeuse
+
+Workflow audit sprint (S121–S130): 100% permissions/Node24 compliance, concurrency blocks, corpus gap analysis, Catch2 decoder patterns, SSIM baseline enforcement, and skill expansion.
+
+### Added
+- `build-scripts/scripts/Analyze-CorpusGaps.ps1`: automated corpus gap analysis script (S125)
+- `.github/agents/testcorpus.agent.md`: enhanced with MANIFEST auto-update and SSIM enforcement (S126)
+
+### Changed
+- All 22 GitHub Actions workflows: 100% `permissions:` + `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` (S121)
+- `.github/workflows/sync-labels.yml`, `stale.yml`, `release.yml`: added `concurrency:` blocks (S122)
+- `.github/skills/decoder-development/SKILL.md`: added Catch2 corpus test pattern (S124)
+- `.github/skills/test-corpus/SKILL.md`: expanded with SSIM baseline generation pipeline (S127)
+- `docs/architecture/README.md`: added `test-architecture.svg`, `release-flow.svg`, `cache-architecture.svg` links (S123)
+- `docs/assets/`: 3 new SVGs — `test-architecture.svg`, `release-flow.svg`, `cache-architecture.svg` (S123)
+- `README.md`: added CI Matrix, Coverage, Perf Gate, Docs validation badges (S123)
+
+---
+
+## [38.1.0] — 2026-03-28 — Betelgeuse
+
+AI tooling hardening sprint (S111–S120): Catch2/streaming decode patterns, SHA pinning playbook, SVG validation role expansion, documentation skill modernization, and 38.0 baseline sync.
+
+### Added
+- `.github/skills/explorerlens-workflows-and-mcp/SKILL.md`: added action SHA pinning playbook (S119)
+- `.github/skills/decoder-development/SKILL.md`: added streaming decode patterns and cancel-token guide (S118)
+- `.github/agents/docs.agent.md`: added SVG validation duties (S120)
+
+### Changed
+- All Catch2 test templates in decoder prompts: added `SECTION`/`REQUIRE` patterns (S117)
+- `docs/assets/`: added `format-matrix.svg`, `plugin-lifecycle.svg`, `gpu-pipeline.svg` (S116)
+- `ROADMAP.md`: marked Phase 1 items complete for S111–S115 (S115)
+- `.github/standards/ai-tooling-capabilities.md`: refreshed to v38.0.0 baseline (S111)
+- `Engine/Tests/Catch2Tests/`: 9 files updated with new patterns from S112–S118
+
+---
+
+## [38.0.0] — 2026-03-15 — Betelgeuse
+
+Betelgeuse epoch start: stale v35.x reference scrub, root `index.html` for local verification,
+README badge wall, packaging manifests synchronized to v37.2.0.
+
+### Added
+- `index.html` (repo root): local web server verification page (serves docs site structure)
+- `docs/assets/`: added CI Matrix, Coverage, and Performance Gate status badges to README
+
+### Changed
+- `README.md`: CI Matrix, Coverage, Perf Gate, Docs validation badges added
+- `packaging/`: all version strings updated from v35.5.0 → v37.2.0
+- All documentation: scrubbed remaining stale v35.x references
+
+---
+
+## [37.2.0] — 2026-03-01 — Antares
+
+Node.js 24 migration, compile-time profiling guide, SSIM baseline pipeline, skill expansion.
+
+### Added
+- `docs/development/compile-time-profiling.md`: `/d1reportTime` workflow guide
+- `.github/skills/performance/SKILL.md`: added compile-time profiling section
+- `.github/skills/test-corpus/SKILL.md`: added SSIM baseline generation pipeline
+
+### Changed
+- All 22 workflows: top-level `permissions:` + `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` (Node 24 migration)
+- `.vscode/extensions.json`: audited, 2 invalid IDs corrected
+- `scoopfile.json`: synchronized `_updated` timestamp with `tool-versions.md`
+- `docs/architecture/README.md`: updated Last Revised columns in all AI tooling tables
+
+---
+
+## [37.1.0] — 2026-02-15 — Antares
+
+Binary size gate, SVG diagrams in README, agent instructions, MCP server procedures.
+
+### Added
+- `.github/workflows/binary-size.yml` (initial): 10% DLL size growth gate + baseline (§9.1)
+- `docs/assets/`: 6 new SVGs integrated into README — system components, data flow, decode pipeline, CI/CD pipeline, test architecture (§8.7.3)
+- `.github/instructions/ai-agents.instructions.md`: agent authoring rules
+- `.github/instructions/mcp-servers.instructions.md`: MCP configuration rules
+- `.github/skills/explorerlens-workflows-and-mcp/SKILL.md`: expanded MCP server procedures
+
+### Changed
+- `README.md`: SVG diagram gallery section added
+- `.devcontainer/devcontainer.json`: cmake/ninja features, git-hooks, additional extensions
+- External library CMake scripts: removed phantom `IfcOpenShell`, `oneVPL` references
+
+---
+
+## [37.0.0] — 2026-02-01 — Antares
+
+sccache integration, markdownlint CI, instruction file expansion (5 domains).
+
+### Added
+- sccache compiler caching in `build.yml` and `ci-matrix.yml`
+- Markdownlint job to `docs-validation.yml`
+- `problemMatcher` patterns for 9 external library build tasks
+
+### Changed
+- 5 scoped instruction files expanded: `cpp-coding`, `cicd`, `security`, `testing`, `documentation`
+- `.vscode/extensions.json`: fixed 2 invalid extension IDs
+
+---
+
 ## [36.3.0] — 2025-07-18 — Antares
 
 Infrastructure hardening: Catch2 enabled by default, mkdocs nav fix (19 broken entries),
