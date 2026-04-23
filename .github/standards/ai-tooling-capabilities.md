@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
 **Last Updated:** 23 April 2026  
-**Version:** v38.5.0 "Betelgeuse" (post S151–S169)  
+**Version:** v38.6.0 "Betelgeuse" (post S151–S179)  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -229,6 +229,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 | Pages | `.github/workflows/pages.yml` | Documentation/site publishing |
 | Stale | `.github/workflows/stale.yml` | Issue/PR stale lifecycle management |
 | Pin actions | `.github/workflows/pin-actions.yml` | SHA-pin all workflow action references (supply chain, D40); creates PR via `peter-evans/create-pull-request` |
+| Devcontainer test | `.github/workflows/devcontainer-test.yml` | Clone-to-build gate for `.devcontainer/**`; runs `post-create-validate.ps1` (§11.2, S178) |
 
 ### Workflow Authoring Rules
 
@@ -237,15 +238,15 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 3. Workflow guidance belongs in `.github/instructions/cicd.instructions.md`; workflow inventory belongs here.
 4. When adding a workflow, add both the YAML and a one-line purpose entry in this file.
 
-### Workflow Compliance Status (Audited v38.5.0 — post S169)
+### Workflow Compliance Status (Audited v38.6.0 — post S179)
 
 | Check | Status |
 |-------|--------|
-| All actions at v4+ (or latest stable) | 25/25 ✅ |
-| `permissions:` block present | 25/25 ✅ |
-| `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 25/25 ✅ |
-| `concurrency:` block present | 20/25 (5 exempt — see below) |
-| `workflow_dispatch` trigger | 22/25 (3 exempt — see below) |
+| All actions at v4+ (or latest stable) | 26/26 ✅ |
+| `permissions:` block present | 26/26 ✅ |
+| `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 26/26 ✅ |
+| `concurrency:` block present | 21/26 (5 exempt — see below) |
+| `workflow_dispatch` trigger | 23/26 (3 exempt — see below) |
 
 **Concurrency exemptions:** `notify-failure.yml` (workflow_run), `release.yml` (tag-push), `reusable-build.yml` (callable), `stale.yml` (scheduled), `sync-labels.yml` (utility).
 
@@ -268,7 +269,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 
 ADRs live in `docs/adr/` and are indexed in `docs/adr/README.md`.
 
-### Active ADRs (v38.5.0)
+### Active ADRs (v38.6.0)
 
 | ADR | File | Status | Topic | Version |
 |-----|------|--------|-------|---------|
@@ -281,6 +282,7 @@ ADRs live in `docs/adr/` and are indexed in `docs/adr/README.md`.
 | ADR-011 | `ADR-011-streaming-decoder-interface.md` | Accepted | IStreamingDecoder probe-then-decode interface (D38, §7.4) | v38.4 |
 | ADR-012 | `ADR-012-engine-directory-consolidation.md` | Accepted | Engine directory consolidation 16→7 (D32, §7.2) | v38.4 |
 | ADR-013 | `ADR-013-sqlite-l2-cache.md` | Accepted | SQLite WAL for L2 thumbnail cache index (D42, §7.5, §14) | v38.4 |
+| ADR-014 | `ADR-014-safe-integer-overflow.md` | Accepted | Safe integer arithmetic for decode dimensions (§15.1 P0, CWE-190, OWASP A4/A8) | v38.6 |
 
 ---
 
