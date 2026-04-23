@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
 **Last Updated:** 23 April 2026  
-**Version:** v38.7.0 "Betelgeuse" (post S151–S188)  
+**Version:** v38.8.0 "Betelgeuse" (post S191–S198)  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---

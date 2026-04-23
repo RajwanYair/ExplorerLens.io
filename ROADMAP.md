@@ -491,7 +491,7 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 
 | Metric | Value | Issue |
 |--------|-------|-------|
-| Tests | ~4,978 | Growing; Catch2 migration S161–S188 added 20 test files |
+| Tests | ~4,978 | Growing; Catch2 migration S161–S198 added 26 test files |
 | Framework | Custom macros + Catch2 v3 | Catch2 used for all new tests (S161+) |
 | Corpus | 106 format entries (MANIFEST.json v2, S187) | Phase 1 goal ✅ (≥100 entries met) |
 | GPU tests | 0 | No GPU path exercised — Phase 2 |
@@ -506,6 +506,16 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 - S186: `ColorSpaceTests.cpp` — 30+ sRGB/linear/P3 color math tests (§9.3 GPU Phase 2 prep)
 - S187: `data/corpus/MANIFEST.json` — 16 → 106 format entries, 10 categories, v2
 - S188: `CorpusCoverageTests.cpp` — 35+ corpus manifest integrity tests (§10.3 D57)
+
+**Sprint S191–S198 completed (session 6):**
+- S191: `EngineConfigTests.cpp` — 35+ registry/settings contract tests (§14, §15.1)
+- S192: `PathValidationTests.cpp` — 45+ path traversal security tests (§15.1, OWASP A1, CWE-23)
+- S193: `ObservabilityTests.cpp` — 45+ ETW/logging contract tests (§15.2)
+- S194: `VersionValidationTests.cpp` — 40+ semver format + BuildValidation.h constant tests
+- S195: `FormatFamilyTests.cpp` — 35+ format category classification tests (§7.1, §10.3 MANIFEST)
+- S196: winget + scoop distribution manifests updated to v38.8.0 (§12.2)
+- S197: `Engine/Tests/Benchmarks/ThumbnailBenchmarks.cpp` — Google Benchmark stubs; `BUILD_GBENCHMARKS` CMake option; 8 BM_ fixtures aligned to baseline.json targets (§10.2, §17.4)
+- S198: `MemoryBudgetTests.cpp` — 35+ memory budget enforcement tests (§7.5, §14, §15.1)
 
 ### 10.2 Target stack
 
