@@ -1,7 +1,7 @@
 # ExplorerLens — Strategic Roadmap v4.0 "Betelgeuse → Rigel"
 
 **Version:** 4.0 — April 2026
-**Current Release:** v38.3.0 "Betelgeuse" (4,744 tests, 0 errors, 0 warnings)
+**Current Release:** v38.4.0 "Betelgeuse" (4,978 tests, 0 errors, 0 warnings)
 **Supersedes:** ROADMAP v3.0 "Antares" (archived to `docs/archive/ROADMAP_V3.md`), v2.0, V35 "Vega", V34 "Arcturus", V30 "Deneb"
 **Scope:** Full re-examination of every decision — architecture, frontend, backend, language, libraries, APIs, database, infrastructure, tests, docs, CI/CD, distribution, AI surface, and competitive positioning. Nothing is assumed correct until re-justified here.
 
