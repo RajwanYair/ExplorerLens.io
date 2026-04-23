@@ -352,6 +352,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/InputValidationTests.cpp
         Catch2Tests/DecoderRegistryTests.cpp
         Catch2Tests/SafeDimensionsTests.cpp
+        Catch2Tests/PipelineIntegrationTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
