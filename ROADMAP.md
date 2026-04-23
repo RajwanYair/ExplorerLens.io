@@ -491,7 +491,7 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 
 | Metric | Value | Issue |
 |--------|-------|-------|
-| Tests | ~4,978 | Growing; Catch2 migration S161–S198 added 26 test files |
+| Tests | ~4,978 | Growing; Catch2 migration S161–S208 added 34 test files |
 | Framework | Custom macros + Catch2 v3 | Catch2 used for all new tests (S161+) |
 | Corpus | 106 format entries (MANIFEST.json v2, S187) | Phase 1 goal ✅ (≥100 entries met) |
 | GPU tests | 0 | No GPU path exercised — Phase 2 |
@@ -516,6 +516,16 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 - S196: winget + scoop distribution manifests updated to v38.8.0 (§12.2)
 - S197: `Engine/Tests/Benchmarks/ThumbnailBenchmarks.cpp` — Google Benchmark stubs; `BUILD_GBENCHMARKS` CMake option; 8 BM_ fixtures aligned to baseline.json targets (§10.2, §17.4)
 - S198: `MemoryBudgetTests.cpp` — 35+ memory budget enforcement tests (§7.5, §14, §15.1)
+
+**Sprint S201–S208 completed (session 7):**
+- S201: `IStreamingDecoderTests.cpp` — 40+ streaming decoder interface contract tests (§7.4, D38, D39)
+- S202: `CacheTierTests.cpp` — 35+ L1/L2 cache tier contract tests (§7.5, D42)
+- S203: `DecoderPriorityTierTests.cpp` — 30+ P0/P1/P2/P3 decoder tier table tests (§7.3)
+- S204: `CLIContractTests.cpp` — 30+ lens.exe command contract tests (§6.3)
+- S205: `PluginSDKContractTests.cpp` — 30+ Plugin C-ABI SDK contract tests (§17.4, Phase 3 prep)
+- S206: `PlatformProfileTests.cpp` — 30+ PAL platform profile compile-time tests (§16.1, ADR-013)
+- S207: `ErrorDomainTests.cpp` — 35+ error domain + HRESULT mapping tests (§7.4, D31)
+- S208: `CompressionAlgorithmTests.cpp` — 35+ compression algorithm identifier tests (§7.3 P1 archives)
 
 ### 10.2 Target stack
 
