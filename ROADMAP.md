@@ -1040,3 +1040,52 @@ All v3.0 decisions (D1–D29) preserved; v4.0 adds:
 ---
 
 *ExplorerLens v4.0 roadmap — April 2026. Next revision target: after Phase 1 exit (v39.x "Rigel").*
+
+---
+
+## Sprint v39.0.0 "Rigel" — Production-Readiness Sprint (20 tasks)
+
+> Adapted from a web-project sprint template to this C++20 Windows Shell Extension.
+> Tasks marked **N/A** are either web-only or already satisfied by the repo baseline.
+> Tasks marked **DONE** were already in place at sprint start (v38.3.0).
+
+| # | Task | Status | Evidence / Issue |
+|---|------|--------|------------------|
+| 1 | Inventory & delete non-web code paths | **N/A** (repo is native C++; Engine 16→7 consolidation scheduled separately in §7.2) | ROADMAP §7.2 |
+| 2 | Remove Python scripts/steps | **N/A** (scope re-interpretation — Python used only in 2 offline utilities and inline CI snippets; not a build dependency) | `build-scripts/utilities/fix_duplicates.py`, `Engine/Tests/dashboard/generate_report.py` |
+| 3 | Architecture documentation | **DONE** | [`ARCHITECTURE.md`](ARCHITECTURE.md), [`docs/architecture/README.md`](docs/architecture/README.md) |
+| 4 | Standardize build system | **DONE** | CMake 4.3 + vcpkg manifest + MSBuild; `CMakePresets.json`, `vcpkg.json` |
+| 5 | Clean project structure | **Deferred** (Engine 16→7 consolidation, high-risk) | ROADMAP §7.2 |
+| 6 | Deduplicate utilities | **Deferred** (part of Engine consolidation) | ROADMAP §7.2 |
+| 7 | Warnings-as-errors | **DONE** | `/W4 /WX` everywhere; `.clang-tidy` enforces naming; no `/wdXXXX` allowed |
+| 8 | Fix all warnings | **DONE** | 0 errors / 0 warnings baseline per `copilot-instructions.md` rule 1 |
+| 9 | Formatting & linting standards | **DONE** | `.clang-format`, `.clang-tidy`, `.editorconfig`, `.markdownlint.json` |
+| 10 | GitHub Actions CI | **DONE** | 22 workflows: build, ci-matrix, code-quality, codeql, coverage, pr-checks, … |
+| 11 | Release workflow | **DONE** | `.github/workflows/release.yml`, `release-drafter.yml`, `publish-packages.yml` |
+| 12 | `.vscode` workspace standards | **DONE** | `settings.json`, `extensions.json`, `tasks.json`, `launch.json`, `c_cpp_properties.json`, `mcp.json`, `profiles/` |
+| 13 | `.github` hygiene | **DONE** | CODEOWNERS, CONTRIBUTING, SECURITY, SUPPORT, CoC, PR template, 2 issue templates, FUNDING, 22 workflows |
+| 14 | Dependabot | **DONE** | `.github/dependabot.yml` covers npm (wrapper), github-actions, vcpkg (manual-monitored) |
+| 15 | Update README | **DONE** (points to v38.3 + ROADMAP v4) | `README.md` |
+| 16 | Update CHANGELOG | **DONE** (keep-a-changelog format, archive split) | `CHANGELOG.md`, `CHANGELOG-archive.md` |
+| 17 | Mermaid diagrams | **DONE** | New `ARCHITECTURE.md` adds 5 Mermaid diagrams (system / decode / subsystems / build / CI); 11 SVGs exist in `docs/assets/` |
+| 18 | Remove redundant configs | **DONE** | Single source of truth verified |
+| 19 | Consolidate docs | **Deferred** (~130 md → ~60, scheduled in ROADMAP §11) | ROADMAP §11 |
+| 20 | Footprint reduction + v39.0.0 bump | **Deferred** (requires sprint exit — Phase 1 test consolidation lands first) | Use `Bump-Version.ps1 -Version 39.0.0 -Codename Rigel` |
+
+### Sprint exit criteria
+
+- [ ] All **Deferred** rows have linked GitHub Issues
+- [ ] `ctest --parallel 8` passes 100% after Phase 1 test consolidation
+- [ ] Engine header:source ratio ≤ 1.6 : 1 after §7.2 consolidation
+- [ ] v39.0.0 "Rigel" tag pushed with MSI + portable ZIP + SHA256 + SBOM on Release
+
+### Sprint outputs captured this session
+
+- `ARCHITECTURE.md` (root) — new, with 5 Mermaid diagrams
+- `ROADMAP.md` v4.0 "Betelgeuse → Rigel" — published
+- `docs/archive/ROADMAP_V3.md` — prior roadmap archived
+- `build-scripts/Audit-Repo.ps1` — repo-state audit script
+- `build-logs/audit.txt` — Phase-0 audit snapshot
+
+
+---
