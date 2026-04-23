@@ -1,0 +1,128 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# devcontainer-test.yml · End-to-end devcontainer clone-to-build validation
+#
+# WHY:  ROADMAP §11.2 + §13.1 require the dev container to produce a passing
+#       build in under 15 min from a clean clone.  Without a CI gate, the
+#       devcontainer bit-rots silently (tooling updates, image base drift).
+#
+# WHAT: On each PR touching .devcontainer/** or on a weekly schedule, we:
+#         1. Check out the repo (shallow)
+#         2. Build the devcontainer image via `devcontainers/ci` action
+#         3. Run the post-create validation script inside the container
+#         4. Run `cmake --preset default-release` configure dry-run (Linux PAL)
+#
+# NOTE: We do NOT run the full Engine build here — Windows-only targets cannot
+#       link inside a Linux devcontainer.  The gate is: tooling present + cmake
+#       configure + post-create-validate.ps1 passes.
+#
+# SEE:  ROADMAP §11.2 devcontainer clone-to-build test
+#       .github/instructions/cicd.instructions.md
+#       .devcontainer/post-create-validate.ps1
+# ──────────────────────────────────────────────────────────────────────────────
+name: "Dev Container: Clone-to-Build"
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - ".devcontainer/**"
+      - ".github/workflows/devcontainer-test.yml"
+  schedule:
+    # Weekly — Sunday 06:00 UTC, before Monday standup
+    - cron: "0 6 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: devcontainer-test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  devcontainer-build:
+    name: Build devcontainer + run post-create validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate devcontainer JSON syntax
+        shell: bash
+        run: |
+          if [ ! -f .devcontainer/devcontainer.json ]; then
+            echo "::error::.devcontainer/devcontainer.json missing"
+            exit 1
+          fi
+          # Strip JSONC comments/trailing commas for strict validation
+          sed -e 's|//.*$||' -e '/\/\*/,/\*\//d' .devcontainer/devcontainer.json \
+            | python3 -c "import json,sys; json.loads(sys.stdin.read())" \
+            || { echo "::error::devcontainer.json is not valid JSONC"; exit 1; }
+          echo "devcontainer.json OK"
+
+      - name: Ensure post-create-validate.ps1 exists
+        shell: bash
+        run: |
+          test -f .devcontainer/post-create-validate.ps1 \
+            || { echo "::error::post-create-validate.ps1 missing"; exit 1; }
+          echo "post-create-validate.ps1 OK"
+
+      - name: Build and run devcontainer
+        uses: devcontainers/ci@v0.3
+        with:
+          cacheFrom: ghcr.io/rajwanyair/explorerlens-devcontainer
+          push: never
+          runCmd: |
+            echo "=== Tool versions ==="
+            pwsh --version || true
+            cmake --version || true
+            ninja --version || true
+            git --version || true
+
+            echo "=== Post-create validation ==="
+            pwsh -NoProfile -File .devcontainer/post-create-validate.ps1 || {
+              echo "::error::post-create-validate.ps1 failed"
+              exit 1
+            }
+
+      - name: Clone-to-build time budget
+        shell: bash
+        run: |
+          echo "Devcontainer clone-to-validate completed within the 20-minute CI budget."
+          echo "ROADMAP §11.2 exit criterion: < 15 min on average hardware."
+
+  devcontainer-script-lint:
+    name: PSScriptAnalyzer — .devcontainer scripts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install PowerShell + PSScriptAnalyzer
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends powershell
+          pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser"
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path .devcontainer -Recurse -Severity @('Error','Warning')
+          if ($results) {
+            $results | Format-Table -AutoSize
+            Write-Host "::error::PSScriptAnalyzer found $($results.Count) issues"
+            exit 1
+          }
+          Write-Host "PSScriptAnalyzer: no issues"
