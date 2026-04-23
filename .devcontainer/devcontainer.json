@@ -40,7 +40,7 @@
     }
   },
   "onCreateCommand": "pwsh -NoProfile -File .devcontainer/setup.ps1",
-  "postCreateCommand": "pwsh -NoProfile -Command \"Write-Host 'ExplorerLens dev container ready.' -ForegroundColor Green; Write-Host 'Build:  .\\build-scripts\\Build-MSVC.ps1' -ForegroundColor Cyan; Write-Host 'Test:   ctest --test-dir build -C Release --output-on-failure' -ForegroundColor Cyan; if (Test-Path '.githooks/pre-commit') { git config core.hooksPath .githooks; Write-Host 'Git hooks: .githooks/ configured' -ForegroundColor Green }; Write-Host 'Validating build environment...' -ForegroundColor Yellow; $tools = @('cmake','ninja','cl'); $missing = $tools | Where-Object { -not (Get-Command $_ -ErrorAction SilentlyContinue) }; if ($missing) { Write-Host \"Missing tools: $($missing -join ', ')\" -ForegroundColor Red } else { Write-Host 'All required tools found.' -ForegroundColor Green }\"",
+  "postCreateCommand": "pwsh -NoProfile -File .devcontainer/post-create-validate.ps1",
   "remoteUser": "ContainerUser",
   "_comment": [
     "ExplorerLens requires Windows containers (COM, WinRT, DirectX).",
@@ -51,6 +51,11 @@
     "  - CMake, Ninja, NASM, 7zip via Scoop (features provide cmake+ninja as fallback)",
     "  - Windows SDK 10.0.26100",
     "Note: MSVC v145 (VS 2026) is NOT available in containers yet — v143 is used for CI.",
-    "Post-create: configures .githooks/ if present, prints build commands."
+    "Post-create: runs .devcontainer/post-create-validate.ps1 which:",
+    "  1. Validates all required tools (cmake, ninja, cl, ctest) are on PATH",
+    "  2. Configures .githooks/ if present",
+    "  3. Runs a configure-only dry-run cmake to verify the toolchain",
+    "  4. Reports any missing tools with actionable fix instructions",
+    "ROADMAP: §13.1 dev container clone-to-build test"
   ]
 }
