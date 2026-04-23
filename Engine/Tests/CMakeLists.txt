@@ -355,6 +355,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/PipelineIntegrationTests.cpp
         Catch2Tests/MetadataExtractionTests.cpp
         Catch2Tests/ResultTypeTests.cpp
+        Catch2Tests/ProbeHeaderTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
