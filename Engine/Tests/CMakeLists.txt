@@ -377,6 +377,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/CompressionAlgorithmTests.cpp
         Catch2Tests/FormatDetectorTests.cpp
         Catch2Tests/ThumbnailDimensionTests.cpp
+        Catch2Tests/WICCodecTableTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
