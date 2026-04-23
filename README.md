@@ -21,7 +21,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
 ![MSVC](https://img.shields.io/badge/MSVC-v145%20%2819.50%29-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-4978%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-5045%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 ![Roadmap](https://img.shields.io/badge/Roadmap-Phase%201%20Foundation-informational)
 
@@ -34,7 +34,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 | **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
 | **Language** | C++20 · MSVC v145 · Visual Studio 18 2026 BuildTools |
 | **Build** | CMake 4.3 · Ninja · vcpkg / local external libs |
-| **Tests** | 4,978 unit tests · 5 benchmarks · 100% pass rate |
+| **Tests** | 5,045 unit tests · 5 benchmarks · 100% pass rate |
 | **Install** | One-click MSI **or** `winget install ExplorerLens.ExplorerLens` **or** `regsvr32 LENSShell.dll` |
 
 <!--
@@ -310,7 +310,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 39.1.0 "Betelgeuse"
+**Current Version:** 39.2.0 "Betelgeuse"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 4,978 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Betelgeuse

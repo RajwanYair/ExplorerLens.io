@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.2.0] — 2026-04-23 — Betelgeuse
+
+Phase 1 foundation: engine consolidation (CLI->Core, Codec->Decoders), libjpeg-turbo interface, LibRaw embedded preview fast-path, NOTICE file (LGPL), README Windows-only scope, 3 new Catch2 wave-5 test files
+
+---
+
 ## [39.1.0] — 2026-04-23 — Betelgeuse
 
 Sprint S211-S218: FormatDetectorTests (SS7.1), ThumbnailDimensionTests (SS7.2), WICCodecTableTests (SS7.3), SecurityBoundaryTests (SS15.1), BitmapAlphaTests (SS7.4), MultiPageTests (D38), COMInterfaceTests (SS6.1), LibraryInventoryTests (SS8.1). 42 Catch2 test files total.
