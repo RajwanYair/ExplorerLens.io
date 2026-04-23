@@ -1,0 +1,197 @@
+name: Nightly Build and Corpus Validation
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 02:00 UTC every night
+  workflow_dispatch:
+    inputs:
+      skip_corpus:
+        description: 'Skip corpus validation (faster run)'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: read
+  actions: write       # Upload artifact
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. Clean Engine build + test ─────────────────────────────────────────
+  build-and-test:
+    name: Nightly Build + Tests
+    runs-on: windows-latest
+    outputs:
+      build_ok: ${{ steps.build.outcome }}
+      test_count: ${{ steps.tests.outputs.test_count }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure (clean)
+        id: configure
+        run: cmake --preset default-release -DBUILD_CATCH2_TESTS=ON
+
+      - name: Build Engine
+        id: build
+        run: cmake --build --preset default-release -j 4
+
+      - name: Run Engine Tests
+        id: tests
+        shell: pwsh
+        run: |
+          $exe = "build\bin\EngineTests.exe"
+          if (Test-Path $exe) {
+            & $exe 2>&1 | Tee-Object -Variable output
+            $last = $output | Where-Object { $_ -match 'Tests passed|PASSED|tests run' } | Select-Object -Last 1
+            $count = if ($last -match '(\d+)') { $matches[1] } else { 'N/A' }
+            "test_count=$count" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Error "EngineTests.exe not found — build may have failed"
+            exit 1
+          }
+
+      - name: Upload test binary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-engine-bin-${{ github.run_id }}
+          path: |
+            build/bin/EngineTests.exe
+            build/lib/ExplorerLensEngine.lib
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ── 2. Corpus validation (runs only when build succeeds) ─────────────────
+  corpus-validation:
+    name: Corpus Validation
+    needs: build-and-test
+    if: needs.build-and-test.outputs.build_ok == 'success' && inputs.skip_corpus != 'true'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check corpus manifest exists
+        id: manifest_check
+        shell: pwsh
+        run: |
+          $manifest = "data/corpus/MANIFEST.json"
+          if (Test-Path $manifest) {
+            $count = (Get-Content $manifest | ConvertFrom-Json).files.Count
+            Write-Host "Corpus manifest: $count files"
+            "manifest_count=$count" >> $env:GITHUB_OUTPUT
+            "manifest_ok=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Warning "Corpus manifest not found — skipping format validation"
+            "manifest_ok=false" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Validate corpus files present
+        if: steps.manifest_check.outputs.manifest_ok == 'true'
+        shell: pwsh
+        run: |
+          $manifest = Get-Content "data/corpus/MANIFEST.json" | ConvertFrom-Json
+          $missing = 0
+          foreach ($f in $manifest.files) {
+            if (-not (Test-Path "data/corpus/$($f.path)")) {
+              Write-Warning "Missing corpus file: $($f.path)"
+              $missing++
+            }
+          }
+          if ($missing -gt 0) {
+            Write-Warning "$missing corpus file(s) missing — run Fetch-Corpus.ps1 to populate"
+          } else {
+            Write-Host "All $($manifest.files.Count) corpus files present" -ForegroundColor Green
+          }
+
+      - name: Corpus gap analysis
+        shell: pwsh
+        run: |
+          Write-Host "=== Nightly corpus gap report ===" -ForegroundColor Cyan
+          $decoders = @(
+            'AVIF','JXL','HEIC','RAW','CR2','NEF','ARW','WEBP',
+            'PNG','BMP','GIF','TIFF','ZIP','7Z','RAR','PDF','EPUB',
+            'DJVU','SVG','PSD','AI','DWG','FBX','GLTF','STL'
+          )
+          $corpusDir = "data/corpus"
+          foreach ($fmt in $decoders) {
+            $files = Get-ChildItem "$corpusDir" -Recurse -Filter "*.$($fmt.ToLower())" `
+                     -ErrorAction SilentlyContinue
+            $count = ($files | Measure-Object).Count
+            $status = if ($count -gt 0) { "[$count files]" } else { "[MISSING]" }
+            Write-Host "  $($fmt.PadRight(6)) $status"
+          }
+
+  # ── 3. Benchmark baseline check ─────────────────────────────────────────
+  benchmark-check:
+    name: Benchmark Baseline Check
+    needs: build-and-test
+    if: needs.build-and-test.outputs.build_ok == 'success'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate baseline.json format
+        shell: pwsh
+        run: |
+          $baseline = "Engine/Tests/benchmarks/baseline.json"
+          if (-not (Test-Path $baseline)) {
+            Write-Error "baseline.json not found"
+            exit 1
+          }
+          $data = Get-Content $baseline | ConvertFrom-Json
+          Write-Host "Baseline version  : $($data.version)"
+          Write-Host "Baseline timestamp: $($data._updated)"
+          Write-Host "Benchmark entries : $($data.benchmarks.Count)"
+
+          # Check for obviously stale baseline (more than 90 days old)
+          $updated = [datetime]$data._updated
+          $age = (Get-Date) - $updated
+          if ($age.TotalDays -gt 90) {
+            Write-Warning "Baseline is $([int]$age.TotalDays) days old — consider refreshing"
+          } else {
+            Write-Host "Baseline age: $([int]$age.TotalDays) days (OK)" -ForegroundColor Green
+          }
+
+  # ── 4. Nightly summary ──────────────────────────────────────────────────
+  nightly-summary:
+    name: Nightly Summary
+    needs: [build-and-test, corpus-validation, benchmark-check]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print nightly report
+        env:
+          BUILD_OK: ${{ needs.build-and-test.outputs.build_ok }}
+          TEST_COUNT: ${{ needs.build-and-test.outputs.test_count }}
+          CORPUS_STATUS: ${{ needs.corpus-validation.result }}
+          BENCH_STATUS: ${{ needs.benchmark-check.result }}
+        run: |
+          echo "## Nightly ExplorerLens Report — $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo ""
+          echo "| Job | Status |"
+          echo "|-----|--------|"
+          echo "| Build + Tests | $BUILD_OK (tests: $TEST_COUNT) |"
+          echo "| Corpus Validation | $CORPUS_STATUS |"
+          echo "| Benchmark Check | $BENCH_STATUS |"
