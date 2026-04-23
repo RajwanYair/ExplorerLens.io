@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
-**Last Updated:** 22 April 2026  
-**Version:** v38.4.0 "Betelgeuse"  
+**Last Updated:** 23 April 2026  
+**Version:** v38.4.0 "Betelgeuse" (post S151–S157)  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -80,6 +80,7 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 | `TestCorpus` | `.github/agents/test-corpus.agent.md` | Test corpus management — real CC0 files, SSIM scoring, decoder validation | v38.0 |
 | `CI-Ops` | `.github/agents/ci-ops.agent.md` | CI/CD operations — workflow authoring, action auditing, failure debugging | v38.0 |
 | `Performance` | `.github/agents/performance.agent.md` | Benchmark analysis, regression gates, ETW traces, decode latency targets | v38.3 |
+| `Corpus` | `.github/agents/corpus.agent.md` | Corpus ingest, CC0 file sourcing, SSIM drift detection, MANIFEST.json validation | v38.4 |
 | `Explore` | *(built-in)* | Fast read-only codebase exploration and Q&A subagent | — |
 
 ### Agent Expectations
@@ -122,6 +123,8 @@ Add a new `.agent.md` file only when all of the following are true:
 | CI troubleshooting | `.github/prompts/ci-troubleshooting.prompt.md` | Workflow failure diagnosis with 10 known failure patterns | v38.0 |
 | Workspace hygiene | `.github/prompts/workspace-hygiene.prompt.md` | Comprehensive workspace audit (versions, orphans, dead tests, link rot) | v38.0 |
 | SVG diagram | `.github/prompts/svg-diagram.prompt.md` | Standardized SVG diagram generation with brand palette | v38.0 |
+| Spec fetch | `.github/prompts/spec-fetch.prompt.md` | 5-step authoritative format specification fetch for decoder authoring | v38.4 |
+| Roadmap guardian | `.github/prompts/roadmap-guardian.prompt.md` | 7-gate PR validation against roadmap phase plan, decision log, and corpus requirements | v38.4 |
 
 ### Prompt Authoring Rules
 
@@ -199,6 +202,13 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 | Package publishing | `.github/workflows/publish-packages.yml` | Publish NuGet, npm, and container packages (Maven/RubyGems removed — R5) |
 | Release drafting | `.github/workflows/release-drafter.yml` | Maintains release draft notes |
 
+### Phase 4 Stub Workflows (gated — not yet active on push/PR)
+
+| Workflow | File | Purpose |
+|---------|------|---------|
+| Sanitizer CI | `.github/workflows/sanitizer-ci.yml` | ASAN + UBSAN build + tests (Phase 4 gate; `workflow_dispatch` only) |
+| Fuzz CI | `.github/workflows/fuzz-ci.yml` | libFuzzer targets for 13 P0/P1 decoders (Phase 4 gate; `workflow_dispatch` only) |
+
 ### Regression and Specialized Validation
 
 | Workflow | File | Purpose |
@@ -226,19 +236,39 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 3. Workflow guidance belongs in `.github/instructions/cicd.instructions.md`; workflow inventory belongs here.
 4. When adding a workflow, add both the YAML and a one-line purpose entry in this file.
 
-### Workflow Compliance Status (Audited v38.4.0)
+### Workflow Compliance Status (Audited v38.4.0 — post S155)
 
 | Check | Status |
 |-------|--------|
-| All actions at v4+ (or latest stable) | 22/22 ✅ |
-| `permissions:` block present | 22/22 ✅ |
-| `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 22/22 ✅ |
-| `concurrency:` block present | 17/22 (5 exempt — see below) |
-| `workflow_dispatch` trigger | 19/22 (3 exempt — see below) |
+| All actions at v4+ (or latest stable) | 24/24 ✅ |
+| `permissions:` block present | 24/24 ✅ |
+| `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 24/24 ✅ |
+| `concurrency:` block present | 19/24 (5 exempt — see below) |
+| `workflow_dispatch` trigger | 21/24 (3 exempt — see below) |
 
 **Concurrency exemptions:** `notify-failure.yml` (workflow_run), `release.yml` (tag-push), `reusable-build.yml` (callable), `stale.yml` (scheduled), `sync-labels.yml` (utility).
 
 **workflow_dispatch exemptions:** `notify-failure.yml` (auto-trigger only), `reusable-build.yml` (callable only), `stale.yml` (scheduled only).
+
+---
+
+## Architecture Decision Records (ADRs)
+
+ADRs live in `docs/adr/` and are indexed in `docs/adr/README.md`.
+
+### Active ADRs (v38.4.0)
+
+| ADR | File | Status | Topic | Version |
+|-----|------|--------|-------|---------|
+| ADR-001 | `ADR-001-wasm-sandbox.md` | Accepted | WASM sandbox for plugin isolation | — |
+| ADR-002 | `ADR-002-npu-acceleration.md` | Accepted | NPU acceleration strategy | — |
+| ADR-003 | `ADR-003-clip-embeddings.md` | Accepted | CLIP embeddings for visual search | — |
+| ADR-008 | `ADR-008-cpp23-adoption.md` | Accepted | C++23 adoption timeline | — |
+| ADR-009 | `ADR-009-mupdf-agpl-license-strategy.md` | Accepted | MuPDF AGPL-3.0 license strategy | v36.2 |
+| ADR-010 | `ADR-010-catch2-test-migration.md` | Accepted | Catch2 as primary test framework | v36.2+ |
+| ADR-011 | `ADR-011-streaming-decoder-interface.md` | Accepted | IStreamingDecoder probe-then-decode interface (D38, §7.4) | v38.4 |
+| ADR-012 | `ADR-012-engine-directory-consolidation.md` | Accepted | Engine directory consolidation 16→7 (D32, §7.2) | v38.4 |
+| ADR-013 | `ADR-013-sqlite-l2-cache.md` | Accepted | SQLite WAL for L2 thumbnail cache index (D42, §7.5, §14) | v38.4 |
 
 ---
 
