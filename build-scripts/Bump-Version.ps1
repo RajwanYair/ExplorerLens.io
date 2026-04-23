@@ -147,7 +147,7 @@ if (Test-Path $baselinePath) {
     Write-Host "[bump] baseline.json updated"
 }
 
-# 9. README.md — Tests badge + feature table row
+# 9. README.md — Tests badge + feature table row + status section
 $readmePath = "$rootDir\README.md"
 if (Test-Path $readmePath) {
     $readme = Get-Content $readmePath -Raw
@@ -155,6 +155,9 @@ if (Test-Path $readmePath) {
         $readme = $readme -replace 'Tests-\d+%20passing', "Tests-$TestCount%20passing"
         $readme = $readme -replace '(\| \*\*Tests\*\*\s*\| )[\d,]+ unit tests', "`${1}$("{0:N0}" -f $TestCount) unit tests"
     }
+    # Update status section version + codename (S225 fix)
+    $readme = $readme -replace '\*\*Current Version:\*\*\s+[\d.]+\s+"[^"]+"', "**Current Version:** $Version `"$Codename`""
+    $readme = $readme -replace '(\*\*Codename:\*\*\s+)\S+', "`${1}$Codename"
     Set-Content $readmePath -Value $readme -NoNewline
     Write-Host "[bump] README.md updated"
 }

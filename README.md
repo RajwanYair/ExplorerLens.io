@@ -310,10 +310,14 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 36.4.0 "Antares"
+**Current Version:** 39.1.0 "Betelgeuse"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 4,978 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Antares
+**Codename:** Betelgeuse
+
+> **Platform scope:** ExplorerLens is a **Windows-only** Shell Extension (`IThumbnailProvider`).
+> macOS Quick Look and Linux Nautilus extensions are on the roadmap (Phase 5 and Phase 6 respectively)
+> but are **not yet implemented**. See [ROADMAP.md](ROADMAP.md) §16 for the cross-platform plan.
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 
