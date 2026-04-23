@@ -5,6 +5,71 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+---
+
+## [38.7.0] — 2026-04-23 — Betelgeuse
+
+Sprint S171–S179: safe integer arithmetic, Catch2 test expansion, compile-time PAL header, corpus hardening, and devcontainer CI gate.
+
+### Added
+- `Engine/Core/SafeDimensions.h`: overflow-safe integer dimension math (`SafeDim`, `SafeDimensions`, `SafeMul2`, `SafeMul3`, `SafeAdd`) — CWE-190, OWASP A4/A8, §15.1 P0
+- `Engine/Tests/Catch2Tests/SafeDimensionsTests.cpp`: 50+ Catch2 tests covering overflow, zero, max-value, mul2/mul3, structured-binding decomposition
+- `docs/adr/ADR-014-safe-integer-overflow.md`: ADR-014 — Safe Integer Arithmetic for Decode Dimensions
+- `Engine/Tests/Catch2Tests/PipelineIntegrationTests.cpp`: 12 pipeline state-machine integration tests — mock decoders, `std::stop_token` cancellation, 25-combo parametric dimensions (§7.1, §10.2)
+- `Engine/Tests/Catch2Tests/MetadataExtractionTests.cpp`: 20+ Catch2 tests for EXIF orientation (values 1–8, TIFF 6.0 §F.5.4), TIFF endianness (`II`/`MM`), `Read16`/`Read32`, dimension swap (§6.1, §10.4)
+- `Engine/Platform/PlatformProfile.h`: header-only `constexpr` PAL header in `ExplorerLens::Platform` — enums `TargetPlatform`, `ShellIntegrationKind`, `GraphicsBackend`, `FilesystemSemantics`; platform factories; predicates (ADR-013, §16.1)
+- `.github/workflows/devcontainer-test.yml`: clone-to-build CI gate — JSONC validation, `devcontainers/ci@v0.3`, PSScriptAnalyzer lane (§11.2, §13.1)
+
+### Changed
+- `build-scripts/corpus/Fetch-Corpus.ps1`: added `-DryRun`, `-ReportOnly`, `-StrictLicenses` modes; permissive-license audit (CC0/MIT/BSD/Apache/Apache-2.0/SIL-OFL/Zlib); exit codes 0–3 (§10.3, §8.6)
+- `ROADMAP.md`: header → v38.6.0; Phase 1 tracker marks S171–S178 complete; S170–S179 sprint outputs block added
+- `.github/standards/ai-tooling-capabilities.md`: 26 workflows (adds `devcontainer-test.yml`); ADR-014 in active ADR list
+
+---
+
+## [38.6.0] — 2026-04-23 — Betelgeuse
+
+Sprint S161–S169: distribution manifests, security test coverage, pure-library format detection, supply-chain hardening.
+
+### Added
+- `Engine/Tests/Catch2Tests/InputValidationTests.cpp`: 30+ Catch2 security/input-validation tests — dimension overflow, path traversal, `FormatId` injection, magic-byte adversarial inputs (§10.4, §15.1)
+- `Engine/Tests/Catch2Tests/DecoderRegistryTests.cpp`: 17 Catch2 tests for `DecoderRegistryV2` — registration, priority ordering, enable/disable, 8-thread concurrent safety (§10.4, D43)
+- `Engine/Core/StatelessFormatDetector.h`: header-only, stateless format detector; no decoder dependencies; thread-safe; `ExplorerLens::Core` namespace (D43, §7.1)
+- `.github/workflows/pin-actions.yml`: SHA-pin automation for all workflow action references; creates PR via `peter-evans/create-pull-request` (D40, §13.1)
+- `.github/standards/mcp-server-evaluation.md`: SQLite + fetch MCP server adoption notes with OWASP risk assessment (§13.1 P2)
+
+### Changed
+- `packaging/winget/ExplorerLens.yaml` + `packaging/scoop/explorerlens.json`: synced to v38.5.0 (§12.2)
+- `data/baselines/PerFormatBaselines.json`: version field → v38.5.0, corrected generation date (§14.1)
+- `.github/CONTRIBUTING.md`: Catch2 migration guide, 10-file test inventory table, devcontainer workflow notes (§10.4, §11.2)
+- `ROADMAP.md`: Phase 1 tracker updated; `ai-tooling-capabilities.md` synced to 25 workflows
+
+---
+
+## [38.5.0] — 2026-04-23 — Betelgeuse
+
+Sprint S151–S159: dedicated corpus agent, architecture ADRs (011–013), sanitizer/fuzzer CI stubs, devcontainer validation script, benchmark history baseline, and AI tooling sync.
+
+### Added
+- `.github/agents/corpus.agent.md`: Corpus agent — CC0 ingest, SSIM drift detection, MANIFEST validation, missing-format gap reporting
+- `.github/prompts/spec-fetch.prompt.md`: 5-step format-spec research prompt (H12 workflow)
+- `.github/prompts/roadmap-guardian.prompt.md`: 7-gate PR validation prompt against roadmap phase plan
+- `docs/adr/ADR-011-streaming-decoder-contract.md`: IStreamingDecoder probe-then-decode pipeline (D38, §7.4)
+- `docs/adr/ADR-012-cache-architecture.md`: Engine directory consolidation 16→7 subdirectories (D32, §7.2)
+- `docs/adr/ADR-013-cross-platform-pal.md`: SQLite WAL-mode L2 thumbnail cache architecture (D42, §7.5, §14)
+- `.github/workflows/sanitizer-ci.yml`: ASAN + UBSAN workflow stub (Phase 4 gated, D37)
+- `.github/workflows/fuzz-ci.yml`: libFuzzer stub for 13 P0/P1 decoders (Phase 4 gated, D37)
+- `data/benchmarks/history.jsonl`: v38.4.0 benchmark baseline + schema README (§14)
+- `.devcontainer/post-create-validate.ps1`: clone-to-build tool-chain validation script (§13.1)
+
+### Changed
+- `.github/standards/ai-tooling-capabilities.md`: synced to v38.4 additions (9 ADRs, 8 agents, 15 prompts, 24 workflows)
+- `ROADMAP.md`: header updated to v38.4.0 / 4,978 tests (S159)
+
+---
+
 ## [38.4.0] — 2026-04-23 — Betelgeuse
 
 Production-readiness sprint v39 Rigel prep: 10-sprint session adding ARCHITECTURE.md (5 Mermaid
