@@ -491,7 +491,7 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 
 | Metric | Value | Issue |
 |--------|-------|-------|
-| Tests | ~4,978 | Growing; Catch2 migration S161–S208 added 34 test files |
+| Tests | ~4,978 | Growing; Catch2 migration S161–S218 added 42 test files |
 | Framework | Custom macros + Catch2 v3 | Catch2 used for all new tests (S161+) |
 | Corpus | 106 format entries (MANIFEST.json v2, S187) | Phase 1 goal ✅ (≥100 entries met) |
 | GPU tests | 0 | No GPU path exercised — Phase 2 |
@@ -526,6 +526,16 @@ Ingest script: `build-scripts/corpus/Fetch-Corpus.ps1` (Phase 1) — fetches, ve
 - S206: `PlatformProfileTests.cpp` — 30+ PAL platform profile compile-time tests (§16.1, ADR-013)
 - S207: `ErrorDomainTests.cpp` — 35+ error domain + HRESULT mapping tests (§7.4, D31)
 - S208: `CompressionAlgorithmTests.cpp` — 35+ compression algorithm identifier tests (§7.3 P1 archives)
+
+**Sprint S211–S218 completed (session 8):**
+- S211: `FormatDetectorTests.cpp` — 35+ StatelessFormatDetector pure-library tests (§7.1, H12, D43)
+- S212: `ThumbnailDimensionTests.cpp` — 35+ output dimension + aspect-ratio contract tests (§6.1, §7.2)
+- S213: `WICCodecTableTests.cpp` — 30+ WIC decoder routing, pixel-format GUID, platform availability tests (§7.3 P0/P1)
+- S214: `SecurityBoundaryTests.cpp` — 35+ zip-bomb, dimension overflow, path traversal, stream-limit tests (§15.1, OWASP A1/A3/A5)
+- S215: `BitmapAlphaTests.cpp` — 35+ BGRA32 layout, premultiplied alpha, sRGB gamma, HDR clamp tests (§7.4, §9.3)
+- S216: `MultiPageTests.cpp` — 30+ PDF/TIFF IFD/GIF/APNG multi-page and animation contract tests (§7.4, D38)
+- S217: `COMInterfaceTests.cpp` — 35+ CLSID, STA model, HRESULT table, DLL export, COM registration tests (§6.1)
+- S218: `LibraryInventoryTests.cpp` — 30+ external library version + license category table tests (§8.1, 18 libs)
 
 ### 10.2 Target stack
 
