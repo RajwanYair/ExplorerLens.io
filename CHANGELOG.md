@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [38.8.0] — 2026-04-23 — Betelgeuse
+
+Sprint S181-S188: ResultTypeTests (35+ Result<T,E> monad tests §10.2 D31), ProbeHeaderTests (35+ magic-byte format detection §7.3), DecoderFallbackChainTests (25+ fallback chain tests D43), CacheKeyTests (25+ L1/L2 cache key composition tests D42), CLICommandParserTests (30+ CLI type/struct tests), ColorSpaceTests (30+ sRGB/linear/P3 color math §9.3 GPU Phase 2 prep), corpus MANIFEST.json expanded 16→106 entries 10 categories (§10.3 Phase 1 ≥100 milestone), CorpusCoverageTests (35+ corpus manifest integrity §10.3 D57), ROADMAP Phase 1 tracker sync v38.7.0, ai-tooling-capabilities.md synced to S188
+
+---
+
 ## [38.7.0] — 2026-04-23 — Betelgeuse
 
 Sprint S171–S179: safe integer arithmetic, Catch2 test expansion, compile-time PAL header, corpus hardening, and devcontainer CI gate.
