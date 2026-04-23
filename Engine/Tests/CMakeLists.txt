@@ -360,6 +360,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/CacheKeyTests.cpp
         Catch2Tests/CLICommandParserTests.cpp
         Catch2Tests/ColorSpaceTests.cpp
+        Catch2Tests/CorpusCoverageTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
