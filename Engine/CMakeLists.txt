@@ -1848,6 +1848,7 @@ set(ENGINE_HEADERS
     Platform/Win32ShellProvider.h
     Platform/PlatformDetector.h
     Platform/PlatformGPURouter.h
+    Platform/PlatformProfile.h
     # Sprint 1161-1170 — Enterprise Console v4 (v33.2.0 "Spica-S")
     Enterprise/EnterprisePolicyV4.h
     Enterprise/GPOPolicyTemplate.h
