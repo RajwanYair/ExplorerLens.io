@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [38.9.0] — 2026-04-23 — Betelgeuse
+
+Sprint S191-S198: EngineConfigTests (35+ registry/settings §14), PathValidationTests (45+ path traversal OWASP A1 CWE-23 §15.1), ObservabilityTests (45+ ETW/logging contracts §15.2), VersionValidationTests (40+ semver/BuildValidation.h), FormatFamilyTests (35+ format category classification §7.1), winget+scoop manifests v38.8.0 sync (§12.2), Google Benchmark infrastructure ThumbnailBenchmarks.cpp (§10.2), MemoryBudgetTests (35+ decode size limits §7.5), ROADMAP Phase 1 tracker sync. 26 Catch2 test files total.
+
+---
+
 ## [38.8.0] — 2026-04-23 — Betelgeuse
 
 Sprint S181-S188: ResultTypeTests (35+ Result<T,E> monad tests §10.2 D31), ProbeHeaderTests (35+ magic-byte format detection §7.3), DecoderFallbackChainTests (25+ fallback chain tests D43), CacheKeyTests (25+ L1/L2 cache key composition tests D42), CLICommandParserTests (30+ CLI type/struct tests), ColorSpaceTests (30+ sRGB/linear/P3 color math §9.3 GPU Phase 2 prep), corpus MANIFEST.json expanded 16→106 entries 10 categories (§10.3 Phase 1 ≥100 milestone), CorpusCoverageTests (35+ corpus manifest integrity §10.3 D57), ROADMAP Phase 1 tracker sync v38.7.0, ai-tooling-capabilities.md synced to S188
