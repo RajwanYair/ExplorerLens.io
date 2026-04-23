@@ -1,7 +1,7 @@
 # ExplorerLens — Strategic Roadmap v4.0 "Betelgeuse → Rigel"
 
 **Version:** 4.0 — April 2026
-**Current Release:** v38.4.0 "Betelgeuse" (4,978 tests, 0 errors, 0 warnings)
+**Current Release:** v38.5.0 "Betelgeuse" (4,978 tests, 0 errors, 0 warnings)
 **Supersedes:** ROADMAP v3.0 "Antares" (archived to `docs/archive/ROADMAP_V3.md`), v2.0, V35 "Vega", V34 "Arcturus", V30 "Deneb"
 **Scope:** Full re-examination of every decision — architecture, frontend, backend, language, libraries, APIs, database, infrastructure, tests, docs, CI/CD, distribution, AI surface, and competitive positioning. Nothing is assumed correct until re-justified here.
 
@@ -824,15 +824,17 @@ Everything concrete the engineering org must do, grouped by action verb.
 Foundation cleanup (most already done in v36–v38):
 - ✅ Dead code removed, `EngineTests_Late.cpp` split, stale version refs fixed, mkdocs strict, Docker VS 2026, SVG diagram set, MCP config hygiene, 6 agents, 15 instructions, 14 prompts, 7 skills.
 
-Open in Phase 1:
+Open in Phase 1 (progress as of v38.5.0 / S161–S169):
 - Consolidate Engine subdirectories 16 → 7
 - Implement-before-declare sweep; header ratio ≤ 1.6:1
 - Source 100+ real corpus files via `Fetch-Corpus.ps1`
-- Migrate 500 meaningful tests to Catch2
+- Migrate 500 meaningful tests to Catch2 — 10 Catch2 files, 180+ tests implemented; `InputValidationTests.cpp` + `DecoderRegistryTests.cpp` added (S165–S166)
 - libjpeg-turbo integrated; top-20 decoders P50 budget met
 - `lens.exe` commands (generate/info/register/doctor) working
-- winget + Scoop submission
-- Pin GitHub Actions to SHA
+- ✅ winget + Scoop manifests updated to v38.5.0 (S161, §12.2)
+- ✅ Pin GitHub Actions to SHA — `pin-actions.yml` workflow created (S163, D40); `Pin-Actions.ps1` utility available
+- ✅ `StatelessFormatDetector.h` pure-library format detection (D43, S167) — `ExplorerLens::Core` namespace, thread-safe, no decoder deps
+- ✅ SQLite + fetch MCP server evaluation documented (S164, `mcp-server-evaluation.md`)
 - Dev container clone-to-build test
 
 **Exit:** Clean Windows 10 VM + MSI install → every file in Pictures gets a correct thumbnail.
@@ -1098,6 +1100,28 @@ All v3.0 decisions (D1–D29) preserved; v4.0 adds:
 - `build-scripts/utilities/Pin-Actions.ps1` — action tag-to-SHA hardening utility
 - `README.md` — test count updated to 4,978; ARCHITECTURE.md + ROADMAP v4 links added
 - `.github/CONTRIBUTING.md` — toolchain table updated to CMake 4.3.1/Ninja 1.13.2/WiX 6.0.2/PS 7.5; corpus guide added
+
+### Sprint outputs captured (S151–S169 session — v38.5.0 → v38.6.0)
+
+**S151** — `.github/agents/corpus.agent.md` — dedicated corpus ingest / SSIM validation agent
+**S152** — `.github/prompts/spec-fetch.prompt.md` + `roadmap-guardian.prompt.md` — 2 new prompts
+**S153** — `docs/adr/ADR-011-streaming-decoder-contract.md` — IStreamingDecoder contract ADR
+**S154** — `docs/adr/ADR-012-cache-architecture.md` + `ADR-013-cross-platform-pal.md` + `docs/adr/README.md` updated
+**S155** — `.github/workflows/sanitizer-ci.yml` + `fuzz-ci.yml` — ASAN/UBSAN + libFuzzer workflow stubs
+**S156** — `data/benchmarks/history.jsonl` — benchmark history log initialized
+**S157** — `.devcontainer/post-create-validate.ps1` — devcontainer build/test validation script
+**S158** — `.github/standards/ai-tooling-capabilities.md` — capability reference synced to v38.4 additions
+**S159** — `ROADMAP.md` header updated to v38.4.0 / 4,978 tests
+**S160** — v38.5.0 Bump-Version + gh release (tag `v38.5.0`)
+**S161** — `packaging/winget/ExplorerLens.yaml` + `packaging/scoop/explorerlens.json` → updated to v38.5.0 (§12.2 Phase 1)
+**S162** — `data/baselines/PerFormatBaselines.json` → version synced to v38.5.0 (§14.1)
+**S163** — `.github/workflows/pin-actions.yml` — SHA-pin automation with PR creation (D40, §13.1)
+**S164** — `.github/standards/mcp-server-evaluation.md` — SQLite + fetch MCP evaluation (§13.1 P2)
+**S165** — `Engine/Tests/Catch2Tests/InputValidationTests.cpp` — 30+ security/input-validation Catch2 tests (§10.4, §15.1)
+**S166** — `Engine/Tests/Catch2Tests/DecoderRegistryTests.cpp` — 17 DecoderRegistryV2 Catch2 tests (registration, priority, thread-safety; §10.4, D43)
+**S167** — `Engine/Core/StatelessFormatDetector.h` — pure-library format detection (D43, §7.1, H12 Apache Tika harvest); registered in ENGINE_HEADERS
+**S168** — `.github/CONTRIBUTING.md` — Catch2 migration guide, devcontainer notes, 10-file test inventory added (§10.4, §11.2)
+**S169** — `ROADMAP.md` Phase 1 tracker + header updated to v38.5.0; ai-tooling-capabilities sync
 
 
 ---

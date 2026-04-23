@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
 **Last Updated:** 23 April 2026  
-**Version:** v38.4.0 "Betelgeuse" (post S151–S157)  
+**Version:** v38.5.0 "Betelgeuse" (post S151–S169)  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -228,6 +228,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 | Notify failure | `.github/workflows/notify-failure.yml` | Failure notification routing |
 | Pages | `.github/workflows/pages.yml` | Documentation/site publishing |
 | Stale | `.github/workflows/stale.yml` | Issue/PR stale lifecycle management |
+| Pin actions | `.github/workflows/pin-actions.yml` | SHA-pin all workflow action references (supply chain, D40); creates PR via `peter-evans/create-pull-request` |
 
 ### Workflow Authoring Rules
 
@@ -236,15 +237,15 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 3. Workflow guidance belongs in `.github/instructions/cicd.instructions.md`; workflow inventory belongs here.
 4. When adding a workflow, add both the YAML and a one-line purpose entry in this file.
 
-### Workflow Compliance Status (Audited v38.4.0 — post S155)
+### Workflow Compliance Status (Audited v38.5.0 — post S169)
 
 | Check | Status |
 |-------|--------|
-| All actions at v4+ (or latest stable) | 24/24 ✅ |
-| `permissions:` block present | 24/24 ✅ |
-| `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 24/24 ✅ |
-| `concurrency:` block present | 19/24 (5 exempt — see below) |
-| `workflow_dispatch` trigger | 21/24 (3 exempt — see below) |
+| All actions at v4+ (or latest stable) | 25/25 ✅ |
+| `permissions:` block present | 25/25 ✅ |
+| `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 25/25 ✅ |
+| `concurrency:` block present | 20/25 (5 exempt — see below) |
+| `workflow_dispatch` trigger | 22/25 (3 exempt — see below) |
 
 **Concurrency exemptions:** `notify-failure.yml` (workflow_run), `release.yml` (tag-push), `reusable-build.yml` (callable), `stale.yml` (scheduled), `sync-labels.yml` (utility).
 
@@ -252,11 +253,22 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 
 ---
 
+## Standards Reference Documents
+
+| Document | File | Purpose | Last Revised |
+|----------|------|---------|-------------|
+| Lessons learned | `.github/standards/lessons-learned.md` | Engineering retrospective, sprint incident log | v38.4 |
+| Tool versions | `.github/standards/tool-versions.md` | Canonical toolchain version table | v38.4 |
+| Build method | `.github/standards/build-method.md` | Build entry-point reference | v38.4 |
+| MCP server evaluation | `.github/standards/mcp-server-evaluation.md` | SQLite + fetch MCP adoption evaluation, OWASP risk, config snippets (S164) | v38.5 |
+
+---
+
 ## Architecture Decision Records (ADRs)
 
 ADRs live in `docs/adr/` and are indexed in `docs/adr/README.md`.
 
-### Active ADRs (v38.4.0)
+### Active ADRs (v38.5.0)
 
 | ADR | File | Status | Topic | Version |
 |-----|------|--------|-------|---------|
