@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.0.0] — 2026-04-23 — Betelgeuse
+
+Sprint S201-S208: IStreamingDecoderTests (§7.4 D38/D39), CacheTierTests (§7.5 D42), DecoderPriorityTierTests (§7.3 P0-P3), CLIContractTests (§6.3), PluginSDKContractTests (§17.4 Phase 3 prep), PlatformProfileTests (§16.1 ADR-013), ErrorDomainTests (§7.4 D31), CompressionAlgorithmTests (§7.3 P1). 34 Catch2 test files total.
+
+---
+
 ## [38.9.0] — 2026-04-23 — Betelgeuse
 
 Sprint S191-S198: EngineConfigTests (35+ registry/settings §14), PathValidationTests (45+ path traversal OWASP A1 CWE-23 §15.1), ObservabilityTests (45+ ETW/logging contracts §15.2), VersionValidationTests (40+ semver/BuildValidation.h), FormatFamilyTests (35+ format category classification §7.1), winget+scoop manifests v38.8.0 sync (§12.2), Google Benchmark infrastructure ThumbnailBenchmarks.cpp (§10.2), MemoryBudgetTests (35+ decode size limits §7.5), ROADMAP Phase 1 tracker sync. 26 Catch2 test files total.
