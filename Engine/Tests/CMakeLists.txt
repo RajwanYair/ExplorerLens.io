@@ -372,6 +372,7 @@ if(BUILD_CATCH2_TESTS)
         Catch2Tests/DecoderPriorityTierTests.cpp
         Catch2Tests/CLIContractTests.cpp
         Catch2Tests/PluginSDKContractTests.cpp
+        Catch2Tests/PlatformProfileTests.cpp
     )
 
     target_include_directories(EngineCatch2Tests
