@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "PixelPipeline16Bit.h"
+#include "../Core/PixelPipeline16Bit.h"
 
 namespace ExplorerLens::Engine {
 
