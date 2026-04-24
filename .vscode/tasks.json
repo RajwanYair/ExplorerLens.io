@@ -224,25 +224,7 @@
 				"showReuseMessage": false
 			}
 		},
-		{
-			"label": "Build LZMA",
-			"type": "shell",
-			"command": "pwsh",
-			"args": [
-				"-NoProfile",
-				"-NoLogo",
-				"-File",
-				"${workspaceFolder}/build-scripts/external-libs/Build-LZMA-SDK-26.00.ps1",
-				"-Clean"
-			],
-			"group": "build",
-			"problemMatcher": ["$msCompile"],
-			"presentation": {
-				"reveal": "always",
-				"panel": "new",
-				"showReuseMessage": false
-			}
-		},
+
 		{
 			"label": "Build LibWebP",
 			"type": "shell",
