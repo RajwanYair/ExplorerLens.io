@@ -1,0 +1,8 @@
+# ExplorerLens — winget Package Manifest
+# Manifest type: version
+# ROADMAP v6.0 §14 — Phase 1: winget-pkgs distribution (mandatory)
+PackageIdentifier: ExplorerLens.ExplorerLens
+PackageVersion: 39.2.0
+DefaultLocale: en-US
+ManifestType: version
+ManifestVersion: 1.6.0

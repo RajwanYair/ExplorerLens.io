@@ -1,0 +1,33 @@
+# ExplorerLens — winget Default Locale Manifest
+PackageIdentifier: ExplorerLens.ExplorerLens
+PackageVersion: 39.2.0
+PackageLocale: en-US
+Publisher: ExplorerLens Project
+PublisherUrl: https://github.com/RajwanYair/ExplorerLens.io
+PublisherSupportUrl: https://github.com/RajwanYair/ExplorerLens.io/issues
+Author: ExplorerLens Contributors
+PackageName: ExplorerLens
+PackageUrl: https://github.com/RajwanYair/ExplorerLens.io
+License: MIT
+LicenseUrl: https://github.com/RajwanYair/ExplorerLens.io/blob/main/LICENSE
+Copyright: Copyright (c) 2026 ExplorerLens Project
+ShortDescription: Windows Shell thumbnail provider for 200+ file formats across 25 decoders.
+Description: |-
+  ExplorerLens is a Windows Shell Extension that generates thumbnails for
+  200+ file formats, including HEIC/AVIF, RAW camera files from 600+ models,
+  archive covers for ZIP/7z/RAR, and more. Integrates natively with File
+  Explorer through IThumbnailProvider.
+Moniker: explorerlens
+Tags:
+  - thumbnail
+  - shell-extension
+  - image-viewer
+  - heic
+  - avif
+  - raw
+  - archive
+  - com
+  - explorer
+ReleaseNotesUrl: https://github.com/RajwanYair/ExplorerLens.io/releases/tag/v39.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
