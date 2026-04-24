@@ -1349,7 +1349,14 @@ extern void RunGPUTests();
 
 using namespace ExplorerLens::Engine;
 
-
-#include "EngineTestsMacros.h"
+// Sprint S231-S237 (ROADMAP v6.0 Phase 1) headers under test
+#include <thread>
+#include "../Core/LensFormatsCommand.h"
+#include "../Core/NodiscardMacros.h"
+#include "../Core/COMBoundaryGuard.h"
+#include "../Core/ProbeCache.h"
+#include "../Cache/CacheKeyV2.h"
+#include "../Core/STAComplianceGuard.h"
+#include "../Cache/CacheBlobFormatV1.h"
 
 #include "EngineTestsMacros.h"

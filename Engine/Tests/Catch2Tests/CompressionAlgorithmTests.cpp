@@ -132,7 +132,7 @@ TEST_CASE("AlgorithmNames — all names are lowercase (no uppercase chars)",
     for (const auto& a : ALGORITHM_REGISTRY) {
         for (char c : a.name) {
             INFO("Algo: " << a.name << " char: " << c);
-            CHECK_FALSE(c >= 'A' && c <= 'Z');
+            CHECK_FALSE((c >= 'A' && c <= 'Z'));
         }
     }
 }

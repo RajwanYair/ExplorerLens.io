@@ -8397,3 +8397,185 @@ TEST(TestDeviceCapabilityAdvertiser_FindBest)
     ASSERT(best != nullptr);
     ASSERT(best->deviceId == "peer-2"); // NVDEC > DX12 > DX11
 }
+
+
+//==============================================================================
+// Sprint S231-S237 — ROADMAP v6.0 Phase 1 foundation tests
+//==============================================================================
+
+// --- S231 LensFormatsCommand -------------------------------------------------
+TEST(TestS231_LensFormats_EmptyCatalogue)
+{
+    LensFormatsCommand cmd;
+    ASSERT(cmd.Count() == 0);
+    auto json = cmd.RenderJson();
+    ASSERT(json.find("\"schema\":\"lens.formats.v1\"") != std::string::npos);
+    ASSERT(json.find("\"formats\":[]") != std::string::npos);
+}
+TEST(TestS231_LensFormats_RegisterEntry)
+{
+    LensFormatsCommand cmd;
+    LensFormatsCommand::FormatEntry e;
+    e.familyId   = "jpeg";
+    e.displayName = "JPEG / JFIF";
+    e.extensions = { ".jpg", ".jpeg" };
+    e.mimeTypes  = { "image/jpeg" };
+    e.decoder    = "libjpeg-turbo";
+    e.enabled    = true;
+    cmd.Register(e);
+    ASSERT(cmd.Count() == 1);
+    auto json = cmd.RenderJson();
+    ASSERT(json.find("\"id\":\"jpeg\"") != std::string::npos);
+    ASSERT(json.find("libjpeg-turbo") != std::string::npos);
+    ASSERT(json.find("\"enabled\":true") != std::string::npos);
+}
+TEST(TestS231_LensFormats_JsonEscape)
+{
+    LensFormatsCommand cmd;
+    LensFormatsCommand::FormatEntry e;
+    e.familyId    = "quote\"test";
+    e.displayName = "has\\backslash";
+    e.decoder     = "x";
+    cmd.Register(e);
+    auto json = cmd.RenderJson();
+    ASSERT(json.find("\\\"") != std::string::npos);
+    ASSERT(json.find("\\\\") != std::string::npos);
+}
+
+// --- S232 Nodiscard macro ----------------------------------------------------
+TEST(TestS232_NodiscardMacro_Expands)
+{
+    // Call the probe; we explicitly consume the return to satisfy nodiscard.
+    int v = NodiscardExpectedProbe::Probe();
+    ASSERT(v == 0);
+}
+
+// --- S233 COMBoundaryGuard ---------------------------------------------------
+TEST(TestS233_COMBoundary_PODIsValid)
+{
+    using namespace ExplorerLens::Engine::COM;
+    COMDecodeRequest req{};
+    req.pathHash  = 0xDEADBEEFCAFEBABEULL;
+    req.fileSize  = 1024;
+    req.thumbSize = 256;
+    req.flags     = 0;
+    ASSERT(IsValidCOMArg(&req));
+    ASSERT(!IsValidCOMArg<COMDecodeRequest>(nullptr));
+}
+TEST(TestS233_COMBoundary_CheckerAccepts)
+{
+    using namespace ExplorerLens::Engine::COM;
+    static_assert(CheckCOMBoundary<COMDecodeRequest>::value,
+                  "COMDecodeRequest must pass the boundary check");
+    ASSERT(CheckCOMBoundary<COMDecodeRequest>::value);
+}
+
+// --- S234 ProbeCache ---------------------------------------------------------
+TEST(TestS234_ProbeCache_MissThenHit)
+{
+    ProbeCache pc(16);
+    ProbeCacheEntry out{};
+    ASSERT(pc.Size() == 0);
+    ASSERT(!pc.TryGet(0xAA, out));
+    ASSERT(pc.Misses() == 1);
+
+    ProbeCacheEntry ins{};
+    ins.formatFamilyId = "jpeg";
+    ins.fileSize       = 42;
+    ins.conclusive     = true;
+    pc.Put(0xAA, ins);
+    ASSERT(pc.Size() == 1);
+    ASSERT(pc.TryGet(0xAA, out));
+    ASSERT(out.formatFamilyId == "jpeg");
+    ASSERT(pc.Hits() == 1);
+}
+TEST(TestS234_ProbeCache_Eviction)
+{
+    ProbeCache pc(2);
+    ProbeCacheEntry a, b, c;
+    a.formatFamilyId = "a";
+    b.formatFamilyId = "b";
+    c.formatFamilyId = "c";
+    pc.Put(1, a);
+    pc.Put(2, b);
+    pc.Put(3, c); // evicts key 1 (LRU)
+    ProbeCacheEntry out{};
+    ASSERT(!pc.TryGet(1, out));
+    ASSERT(pc.TryGet(2, out));
+    ASSERT(pc.TryGet(3, out));
+    ASSERT(pc.Size() == 2);
+}
+
+// --- S235 CacheKeyV2 ---------------------------------------------------------
+TEST(TestS235_CacheKeyV2_Size)
+{
+    using namespace ExplorerLens::Engine::Cache;
+    ASSERT(sizeof(CacheKeyV2) == 32);
+    ASSERT(kCacheKeySchemaVersion == 2);
+}
+TEST(TestS235_CacheKeyV2_Equality)
+{
+    using namespace ExplorerLens::Engine::Cache;
+    CacheKeyV2 k1{};
+    k1.pathHash       = 0x1111;
+    k1.fileSize       = 100;
+    k1.mtime100ns     = 12345;
+    k1.decoderVersion = 5;
+    k1.thumbSize      = 256;
+    CacheKeyV2 k2 = k1;
+    ASSERT(k1 == k2);
+    ASSERT(HashCacheKeyV2(k1) == HashCacheKeyV2(k2));
+    k2.decoderVersion = 6;
+    ASSERT(k1 != k2);
+    ASSERT(HashCacheKeyV2(k1) != HashCacheKeyV2(k2));
+}
+
+// --- S236 STAComplianceGuard -------------------------------------------------
+TEST(TestS236_STA_ApartmentDetect)
+{
+    STAComplianceGuard::ResetCounters();
+    ApartmentKind kind = STAComplianceGuard::DetectApartment();
+    // Test runs on a non-COM thread usually (None) or MTA — both OK
+    ASSERT(kind == ApartmentKind::None || kind == ApartmentKind::MTA ||
+           kind == ApartmentKind::STA);
+}
+TEST(TestS236_STA_ViolationCounter)
+{
+    STAComplianceGuard::ResetCounters();
+    {
+        // 1us budget + ~2ms sleep reliably exceeds budget regardless of timer resolution.
+        STAComplianceGuard g(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    }
+    ASSERT(STAComplianceGuard::Violations() >= 1);
+}
+
+// --- S237 CacheBlobFormatV1 --------------------------------------------------
+TEST(TestS237_CacheBlob_HeaderSize)
+{
+    using namespace ExplorerLens::Engine::Cache;
+    ASSERT(sizeof(CacheBlobHeaderV1) == 32);
+    ASSERT(kCacheBlobMagic == 0x424E454CU);
+    ASSERT(kCacheBlobVersion == 1);
+}
+TEST(TestS237_CacheBlob_MakeAndValidate)
+{
+    using namespace ExplorerLens::Engine::Cache;
+    auto hdr = MakeBgra8Header(256, 256, 256u * 256u * 4u, 0, false);
+    ASSERT(IsValidCacheBlobHeader(hdr));
+    ASSERT(hdr.stride == 256u * 4u);
+    ASSERT(hdr.pixelFormat == static_cast<std::uint8_t>(CacheBlobPixelFormat::BGRA8));
+}
+TEST(TestS237_CacheBlob_RejectsBadMagic)
+{
+    using namespace ExplorerLens::Engine::Cache;
+    CacheBlobHeaderV1 hdr{};
+    hdr.magic = 0xDEADBEEFU;
+    ASSERT(!IsValidCacheBlobHeader(hdr));
+}
+TEST(TestS237_CacheBlob_RejectsOversizedPayload)
+{
+    using namespace ExplorerLens::Engine::Cache;
+    auto hdr = MakeBgra8Header(256, 256, 64u * 1024u * 1024u, 0, false);
+    ASSERT(!IsValidCacheBlobHeader(hdr));
+}

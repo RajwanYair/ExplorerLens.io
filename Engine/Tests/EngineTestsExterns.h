@@ -4803,3 +4803,21 @@ extern void Test_ReproBuild_ArtifactTypes_Runner();
 extern void Test_ReproBuild_VerifyStatuses_Runner();
 extern void Test_ReproBuild_StrictPolicy_Runner();
 extern void Test_ReproBuild_RelaxedPolicy_Runner();
+
+// ─── Sprint S231-S237 (ROADMAP v6.0 Phase 1) ─────────────────────────────────
+extern void TestS231_LensFormats_EmptyCatalogue_Runner();
+extern void TestS231_LensFormats_RegisterEntry_Runner();
+extern void TestS231_LensFormats_JsonEscape_Runner();
+extern void TestS232_NodiscardMacro_Expands_Runner();
+extern void TestS233_COMBoundary_PODIsValid_Runner();
+extern void TestS233_COMBoundary_CheckerAccepts_Runner();
+extern void TestS234_ProbeCache_MissThenHit_Runner();
+extern void TestS234_ProbeCache_Eviction_Runner();
+extern void TestS235_CacheKeyV2_Size_Runner();
+extern void TestS235_CacheKeyV2_Equality_Runner();
+extern void TestS236_STA_ApartmentDetect_Runner();
+extern void TestS236_STA_ViolationCounter_Runner();
+extern void TestS237_CacheBlob_HeaderSize_Runner();
+extern void TestS237_CacheBlob_MakeAndValidate_Runner();
+extern void TestS237_CacheBlob_RejectsBadMagic_Runner();
+extern void TestS237_CacheBlob_RejectsOversizedPayload_Runner();

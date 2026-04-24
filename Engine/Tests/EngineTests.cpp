@@ -2811,6 +2811,25 @@ int main()
     RUN_TEST(Test_ReproBuild_StrictPolicy);
     RUN_TEST(Test_ReproBuild_RelaxedPolicy);
 
+    // Sprint S231-S237 (ROADMAP v6.0 Phase 1) ─────────────────────────────────
+    std::wcout << L"\nROADMAP v6.0 Phase 1 (S231-S237) Tests:" << std::endl;
+    RUN_TEST(TestS231_LensFormats_EmptyCatalogue);
+    RUN_TEST(TestS231_LensFormats_RegisterEntry);
+    RUN_TEST(TestS231_LensFormats_JsonEscape);
+    RUN_TEST(TestS232_NodiscardMacro_Expands);
+    RUN_TEST(TestS233_COMBoundary_PODIsValid);
+    RUN_TEST(TestS233_COMBoundary_CheckerAccepts);
+    RUN_TEST(TestS234_ProbeCache_MissThenHit);
+    RUN_TEST(TestS234_ProbeCache_Eviction);
+    RUN_TEST(TestS235_CacheKeyV2_Size);
+    RUN_TEST(TestS235_CacheKeyV2_Equality);
+    RUN_TEST(TestS236_STA_ApartmentDetect);
+    RUN_TEST(TestS236_STA_ViolationCounter);
+    RUN_TEST(TestS237_CacheBlob_HeaderSize);
+    RUN_TEST(TestS237_CacheBlob_MakeAndValidate);
+    RUN_TEST(TestS237_CacheBlob_RejectsBadMagic);
+    RUN_TEST(TestS237_CacheBlob_RejectsOversizedPayload);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);

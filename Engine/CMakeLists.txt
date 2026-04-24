@@ -1788,6 +1788,15 @@ set(ENGINE_HEADERS
     Core/LocalizationEngine.h
     Core/ResourceUsageProfiler.h
     Core/WorkStealingSchedulerV2.h
+
+    # Sprint S231-S237 — ROADMAP v6.0 Phase 1 foundation headers
+    Core/LensFormatsCommand.h      # S231 — `lens formats --json` catalogue
+    Core/NodiscardMacros.h         # S232 — LENS_NODISCARD_EXPECTED
+    Core/COMBoundaryGuard.h        # S233 — COM boundary static_assert guards
+    Core/ProbeCache.h              # S234 — in-memory probe memoization (A19)
+    Cache/CacheKeyV2.h             # S235 — decoder_version in cache key (ADR-013)
+    Core/STAComplianceGuard.h      # S236 — VerifySTA() at COM entry (A10)
+    Cache/CacheBlobFormatV1.h      # S237 — on-disk cache blob v1 (ADR-022)
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h
