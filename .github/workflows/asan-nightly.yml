@@ -1,0 +1,100 @@
+# ============================================================================
+# asan-nightly.yml -- S270 / ROADMAP v6.0 T12 sanitizers gate
+#
+# Nightly AddressSanitizer run against the Engine test suite on Windows.
+# MSVC cl 19.50 supports /fsanitize=address (since VS 2019 16.9).  The suite
+# is memory-heavy (PCH, decoders, cache); ASAN catches stride miscounts and
+# use-after-free that production /analyze missed.  A soft failure posts to
+# the workflow summary; a hard failure blocks the nightly branch.
+# ============================================================================
+name: asan-nightly
+
+on:
+  schedule:
+    - cron: '30 3 * * *'   # 03:30 UTC every night
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/asan-nightly.yml'
+      - 'Engine/**/*.cpp'
+      - 'Engine/Tests/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: asan-nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  asan:
+    name: AddressSanitizer (MSVC /fsanitize=address)
+    runs-on: windows-2025
+    timeout-minutes: 75
+
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      # ASAN options for Windows: symbolise, dump leaks, no halt_on_error so
+      # multiple failures in one run can be aggregated.
+      ASAN_OPTIONS: >-
+        symbolize=1:print_stacktrace=1:halt_on_error=0:alloc_dealloc_mismatch=1:check_initialization_order=1:detect_stack_use_after_return=1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global safe.directory '*'
+
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg_installed
+            ~/AppData/Local/vcpkg/archives
+          key: vcpkg-asan-${{ hashFiles('vcpkg.json') }}
+
+      - name: Configure (CMake + ASAN)
+        shell: pwsh
+        run: |
+          cmake --preset default-release `
+            -DLENS_ENABLE_ASAN=ON `
+            -DCMAKE_CXX_FLAGS_RELEASE="/O1 /Ob1 /DNDEBUG /fsanitize=address /Zi"
+
+      - name: Build Engine tests under ASAN
+        shell: pwsh
+        run: cmake --build --preset default-release --target EngineTests
+
+      - name: Run EngineTests under ASAN
+        id: run
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          & build\bin\EngineTests.exe 2>&1 | Tee-Object -FilePath asan-output.log
+          "exit=$LASTEXITCODE" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Summarise ASAN findings
+        shell: pwsh
+        run: |
+          $log = Get-Content asan-output.log -Raw -ErrorAction SilentlyContinue
+          if (-not $log) { $log = '' }
+          $errors   = [regex]::Matches($log, 'ERROR: AddressSanitizer').Count
+          $leaks    = [regex]::Matches($log, 'detected memory leaks').Count
+          $passed   = [regex]::Matches($log, 'TESTS PASSED').Count
+          "## ASAN Nightly Results"                                 | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          "- ASAN ERROR occurrences: $errors"                       | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          "- Leak reports:           $leaks"                        | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          "- Passing test blocks:    $passed"                       | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          if ($errors -gt 0) { Write-Error "ASAN reported $errors ERRORs"; exit 1 }
+
+      - name: Upload ASAN log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asan-nightly-${{ github.run_number }}
+          path: asan-output.log
+          retention-days: 14
