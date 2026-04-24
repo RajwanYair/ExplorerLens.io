@@ -4850,3 +4850,17 @@ extern void TestS256_PropertyGen_DeterministicSeed_Runner();
 extern void TestS257_LibPng_ColorTypeValues_Runner();
 extern void TestS258_LibTiff_CompressionValues_Runner();
 extern void TestS259_OpenEXR3_ProbeCompact_Runner();
+
+// Sprint S261-S269 (ROADMAP v6.0 Phase 3) Shell + decoder contracts
+extern void TestS261_ShellPreview_BudgetsSane_Runner();
+extern void TestS261_ShellPreview_MaxPaneSide_Runner();
+extern void TestS262_ShellPropStore_SchemaPopulated_Runner();
+extern void TestS262_ShellPropStore_ValueTypeShape_Runner();
+extern void TestS263_ShellContextMenu_VerbTable_Runner();
+extern void TestS264_SvgResvg_OptionsDefault_Runner();
+extern void TestS265_MFKeyframe_BudgetsSane_Runner();
+extern void TestS266_FontSpecimen_PointSizeRange_Runner();
+extern void TestS267_TinyGltf_TriangleBudget_Runner();
+extern void TestS268_PluginTrustV1_BudgetOrder_Runner();
+extern void TestS269_FolderCover_NamesCount_Runner();
+extern void TestS269_FolderCover_StrategyEnum_Runner();

@@ -2859,6 +2859,21 @@ int main()
     RUN_TEST(TestS258_LibTiff_CompressionValues);
     RUN_TEST(TestS259_OpenEXR3_ProbeCompact);
 
+    // ROADMAP v6.0 Phase 3 (S261-S269) Tests:
+    std::wcout << L"\nROADMAP v6.0 Phase 3 (S261-S269) Tests:" << std::endl;
+    RUN_TEST(TestS261_ShellPreview_BudgetsSane);
+    RUN_TEST(TestS261_ShellPreview_MaxPaneSide);
+    RUN_TEST(TestS262_ShellPropStore_SchemaPopulated);
+    RUN_TEST(TestS262_ShellPropStore_ValueTypeShape);
+    RUN_TEST(TestS263_ShellContextMenu_VerbTable);
+    RUN_TEST(TestS264_SvgResvg_OptionsDefault);
+    RUN_TEST(TestS265_MFKeyframe_BudgetsSane);
+    RUN_TEST(TestS266_FontSpecimen_PointSizeRange);
+    RUN_TEST(TestS267_TinyGltf_TriangleBudget);
+    RUN_TEST(TestS268_PluginTrustV1_BudgetOrder);
+    RUN_TEST(TestS269_FolderCover_NamesCount);
+    RUN_TEST(TestS269_FolderCover_StrategyEnum);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);

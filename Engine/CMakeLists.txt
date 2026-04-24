@@ -1819,6 +1819,17 @@ set(ENGINE_HEADERS
     Decoders/LibPngDecoderStub.h      # S257 — libpng decoder contract (L10)
     Decoders/LibTiffDecoderStub.h     # S258 — libtiff decoder contract (L10)
     Decoders/OpenEXR3DecoderStub.h    # S259 — OpenEXR 3.x evaluation (L11)
+
+    # Sprint S261-S269 — ROADMAP v6.0 Phase 3 Shell + decoder contracts
+    Core/ShellPreviewHandlerContract.h           # S261 — IPreviewHandler contract (F6)
+    Core/ShellPropertyStoreContract.h            # S262 — IPropertyStore schema (F6)
+    Core/ShellContextMenuContract.h              # S263 — IContextMenu verbs (F6)
+    Decoders/SvgResvgDecoderStub.h               # S264 — resvg SVG replacement (L8)
+    Decoders/MediaFoundationKeyframeStub.h       # S265 — MF video keyframe (H10)
+    Decoders/FreeTypeFontSpecimenStub.h          # S266 — FreeType font thumbs (L12)
+    Decoders/TinyGltfModelDecoderStub.h          # S267 — tinygltf 3D thumbs (L13)
+    Plugin/PluginTrustChainValidatorV1.h         # S268 — plugin trust chain (S7)
+    Pipeline/FolderCoverImageStage.h             # S269 — folder cover thumbs (F5)
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h

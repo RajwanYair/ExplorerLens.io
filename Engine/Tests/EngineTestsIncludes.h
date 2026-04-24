@@ -1381,4 +1381,15 @@ using namespace ExplorerLens::Engine;
 #include "../Decoders/LibTiffDecoderStub.h"
 #include "../Decoders/OpenEXR3DecoderStub.h"
 
+// Sprint S261-S269 (ROADMAP v6.0 Phase 3) Shell + decoder contracts
+#include "../Core/ShellPreviewHandlerContract.h"
+#include "../Core/ShellPropertyStoreContract.h"
+#include "../Core/ShellContextMenuContract.h"
+#include "../Decoders/SvgResvgDecoderStub.h"
+#include "../Decoders/MediaFoundationKeyframeStub.h"
+#include "../Decoders/FreeTypeFontSpecimenStub.h"
+#include "../Decoders/TinyGltfModelDecoderStub.h"
+#include "../Plugin/PluginTrustChainValidatorV1.h"
+#include "../Pipeline/FolderCoverImageStage.h"
+
 #include "EngineTestsMacros.h"

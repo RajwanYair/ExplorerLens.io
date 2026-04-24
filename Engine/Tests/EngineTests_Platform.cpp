@@ -8856,3 +8856,135 @@ TEST(TestS259_OpenEXR3_ProbeCompact)
               static_cast<int>(OpenEXRChannelLayout::RGBA));
     ASSERT(kOpenEXRMaxPartCount == 64u);
 }
+
+// ============================================================================
+// Sprint S261-S269 — ROADMAP v6.0 Phase 3 Shell + decoder contracts
+// ============================================================================
+
+TEST(TestS261_ShellPreview_BudgetsSane)
+{
+    ASSERT(kShellPreviewDefaultBudgetMs < kShellPreviewMaxBudgetMs);
+    ASSERT(kShellPreviewDefaultBudgetMs == 250u);
+    ASSERT(kShellPreviewMaxBudgetMs == 500u);
+    ShellPreviewRequest req{};
+    ASSERT_EQ(req.dpi, 96u);
+    ASSERT(req.fitToPane);
+    ASSERT(!req.allowAnimation);
+}
+
+TEST(TestS261_ShellPreview_MaxPaneSide)
+{
+    ASSERT(kShellPreviewMaxPaneSide == 8192u);
+    ShellPreviewResult r{};
+    ASSERT_EQ(static_cast<int>(r.status), static_cast<int>(ShellPreviewStatus::OK));
+    ASSERT_EQ(r.emittedWidth, 0u);
+}
+
+TEST(TestS262_ShellPropStore_SchemaPopulated)
+{
+    ASSERT_EQ(kShellPropStoreSchemaCount, static_cast<size_t>(16));
+    for (size_t i = 0; i < kShellPropStoreSchemaCount; ++i) {
+        ASSERT(kShellPropStoreSchema[i].pkeyName != nullptr);
+    }
+}
+
+TEST(TestS262_ShellPropStore_ValueTypeShape)
+{
+    ShellPropStoreKey k{};
+    ASSERT_EQ(static_cast<int>(k.id),
+              static_cast<int>(ShellPropStoreKeyId::IMAGE_WIDTH));
+    ASSERT_EQ(static_cast<int>(k.valueType),
+              static_cast<int>(ShellPropStoreValueType::NONE));
+    ASSERT(k.readOnly);
+    ShellPropStoreRational r{};
+    ASSERT_EQ(r.denominator, 1);
+}
+
+TEST(TestS263_ShellContextMenu_VerbTable)
+{
+    ASSERT_EQ(kShellMenuCommandsCount, static_cast<size_t>(8));
+    ASSERT(kShellMenuInvokeBudgetMs == 16u);
+    ASSERT(kShellMenuMaxSelection == 1024u);
+    for (size_t i = 0; i < kShellMenuCommandsCount; ++i) {
+        ASSERT(kShellMenuCommands[i].canonicalName != nullptr);
+        ASSERT(kShellMenuCommands[i].displayNameEn != nullptr);
+    }
+}
+
+TEST(TestS264_SvgResvg_OptionsDefault)
+{
+    SvgResvgDecodeOptions opt{};
+    ASSERT_EQ(static_cast<int>(opt.backend),
+              static_cast<int>(SvgResvgBackend::RESVG_20));
+    ASSERT(!opt.allowExternalRefs);
+    ASSERT(!opt.allowScripts);
+    ASSERT(kSvgResvgDefaultBudgetMs < kSvgResvgHardBudgetMs);
+    ASSERT(kSvgResvgMaxViewBoxSide == 16384u);
+}
+
+TEST(TestS265_MFKeyframe_BudgetsSane)
+{
+    MediaFoundationKeyframeOptions opt{};
+    ASSERT_EQ(static_cast<int>(opt.seekPolicy),
+              static_cast<int>(MediaFoundationSeekPolicy::FIXED_PERCENT_10));
+    ASSERT(opt.allowHardwareDecode);
+    ASSERT(kMediaFoundationDefaultBudgetMs < kMediaFoundationHardBudgetMs);
+    ASSERT(kMediaFoundationMaxScanMs == 5000u);
+}
+
+TEST(TestS266_FontSpecimen_PointSizeRange)
+{
+    ASSERT(kFreeTypeFontSpecimenMinPointSize == 8u);
+    ASSERT(kFreeTypeFontSpecimenMaxPointSize == 256u);
+    ASSERT(kFreeTypeFontSpecimenDefaultBudgetMs <
+           kFreeTypeFontSpecimenHardBudgetMs);
+    FreeTypeFontSpecimenOptions opt{};
+    ASSERT_EQ(static_cast<int>(opt.layout),
+              static_cast<int>(FreeTypeFontSpecimenLayout::PANGRAM_LATIN));
+    ASSERT(opt.enableKerning);
+    ASSERT(opt.useHarfBuzz);
+}
+
+TEST(TestS267_TinyGltf_TriangleBudget)
+{
+    ASSERT(kTinyGltfMaxTriangles == 20000000ull);
+    ASSERT(kTinyGltfDefaultBudgetMs < kTinyGltfHardBudgetMs);
+    TinyGltfDecodeOptions opt{};
+    ASSERT_EQ(static_cast<int>(opt.input),
+              static_cast<int>(TinyGltfInputFormat::AUTO_DETECT));
+    ASSERT(opt.pbrLighting);
+    ASSERT_EQ(opt.msaaSamples, 4u);
+}
+
+TEST(TestS268_PluginTrustV1_BudgetOrder)
+{
+    PluginTrustChainV1Policy p{};
+    ASSERT(p.requireAuthenticode);
+    ASSERT(p.requireSandboxCompat);
+    ASSERT(!p.allowUnsignedDevBuilds);
+    ASSERT(p.stageBudgetMs < p.totalBudgetMs);
+    ASSERT(kPluginTrustChainV1StageCount == 8u);
+    ASSERT(kPluginTrustChainV1DefaultBudgetMs <
+           kPluginTrustChainV1HardBudgetMs);
+}
+
+TEST(TestS269_FolderCover_NamesCount)
+{
+    ASSERT_EQ(kFolderCoverImageExplicitNamesCount, static_cast<size_t>(10));
+    for (size_t i = 0; i < kFolderCoverImageExplicitNamesCount; ++i) {
+        ASSERT(kFolderCoverImageExplicitNames[i] != nullptr);
+    }
+    ASSERT(kFolderCoverImageDefaultBudgetMs < kFolderCoverImageHardBudgetMs);
+    ASSERT(kFolderCoverImageMaxScanLimit == 4096u);
+}
+
+TEST(TestS269_FolderCover_StrategyEnum)
+{
+    FolderCoverImageRequest req{};
+    ASSERT_EQ(static_cast<int>(req.strategy),
+              static_cast<int>(FolderCoverImageStrategy::EXPLICIT_COVER_FILE));
+    ASSERT_EQ(req.targetWidth, 256u);
+    ASSERT_EQ(req.targetHeight, 256u);
+    ASSERT(!req.respectHidden);
+    ASSERT(!req.followShortcuts);
+}
