@@ -111,6 +111,43 @@
     footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem;
              border-top: 1px solid var(--border); }
     footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Format catalogue search (Sprint S240) ── */
+    .formats-panel {
+      margin: 1.5rem 0 2rem; padding: 1rem 1.2rem;
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .formats-panel h3 { margin: 0 0 0.6rem; font-size: 1.05rem; color: var(--text); }
+    .formats-panel .search-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .formats-panel input[type="search"] {
+      flex: 1 1 14rem; min-width: 12rem;
+      padding: 0.55rem 0.8rem;
+      background: rgba(255,255,255,0.06); color: var(--text);
+      border: 1px solid var(--border); border-radius: 0.55rem;
+      font-size: 0.9rem;
+    }
+    .formats-panel input[type="search"]:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.15);
+    }
+    .formats-panel .formats-count { color: var(--muted); font-size: 0.8rem;
+      align-self: center; white-space: nowrap; }
+    .formats-list { list-style: none; padding: 0; margin: 0.8rem 0 0;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+      gap: 0.5rem; }
+    .formats-list li {
+      padding: 0.5rem 0.7rem; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 0.5rem;
+      font-size: 0.85rem; color: var(--text);
+    }
+    .formats-list li strong { color: var(--accent); font-weight: 600; }
+    .formats-list li .ext { color: var(--muted); font-size: 0.78rem;
+      font-family: "Cascadia Code", "Fira Code", monospace; display: block;
+      margin-top: 0.2rem; }
+    .formats-list li.hidden { display: none; }
+    .formats-empty { color: var(--muted); font-size: 0.85rem;
+      padding: 0.8rem; text-align: center; }
   </style>
 </head>
 <body>
@@ -126,6 +163,16 @@
   </nav>
 
   <div class="content">
+    <div class="formats-panel" aria-label="ExplorerLens format catalogue">
+      <h3>Supported formats <span class="formats-count" id="fmtCount"></span></h3>
+      <div class="search-row">
+        <input type="search" id="fmtSearch"
+               placeholder="Filter by name, extension, or decoder (e.g. heic, raw, libjpeg)"
+               autocomplete="off" spellcheck="false">
+      </div>
+      <ul class="formats-list" id="fmtList"></ul>
+      <p class="formats-empty" id="fmtEmpty" hidden>No formats match your filter.</p>
+    </div>
     <div class="loading" id="loading">Loading README…</div>
     <div class="error" id="error" hidden>
       <h2>No README found</h2>
@@ -184,6 +231,72 @@
           document.getElementById("loading").hidden = true;
           document.getElementById("error").hidden = false;
         });
+    })();
+
+    // Sprint S240 — vanilla-JS format catalogue search.
+    // Data schema matches `lens formats --json` (Sprint S231 / LensFormatsCommand.h).
+    (function () {
+      var FORMATS = [
+        { id: "jpeg",  name: "JPEG / JFIF",          decoder: "libjpeg-turbo", ext: [".jpg", ".jpeg", ".jpe", ".jfif"] },
+        { id: "png",   name: "PNG",                   decoder: "stb_image",    ext: [".png"] },
+        { id: "webp",  name: "WebP",                  decoder: "libwebp",      ext: [".webp"] },
+        { id: "gif",   name: "GIF",                   decoder: "GDI+",         ext: [".gif"] },
+        { id: "bmp",   name: "BMP / DIB",             decoder: "GDI+",         ext: [".bmp", ".dib"] },
+        { id: "tiff",  name: "TIFF",                  decoder: "libtiff",      ext: [".tif", ".tiff"] },
+        { id: "heic",  name: "HEIC / HEIF",           decoder: "libheif + libde265", ext: [".heic", ".heif", ".heifs"] },
+        { id: "avif",  name: "AVIF",                  decoder: "libheif + dav1d", ext: [".avif", ".avifs"] },
+        { id: "raw",   name: "RAW camera (600+ models)", decoder: "LibRaw",    ext: [".cr2", ".cr3", ".nef", ".arw", ".dng", ".raf", ".orf", ".rw2", ".pef", ".srw"] },
+        { id: "dds",   name: "DDS",                   decoder: "DirectXTex",   ext: [".dds"] },
+        { id: "hdr",   name: "Radiance HDR",          decoder: "DirectXTex",   ext: [".hdr"] },
+        { id: "exr",   name: "OpenEXR",               decoder: "tinyexr",      ext: [".exr"] },
+        { id: "tga",   name: "Targa TGA",             decoder: "stb_image",    ext: [".tga", ".targa"] },
+        { id: "jxr",   name: "JPEG XR",               decoder: "WIC",          ext: [".jxr", ".wdp"] },
+        { id: "zip",   name: "ZIP archive cover",     decoder: "minizip-ng",   ext: [".zip"] },
+        { id: "7z",    name: "7z archive cover",      decoder: "minizip-ng",   ext: [".7z"] },
+        { id: "rar",   name: "RAR archive cover",     decoder: "UnRAR",        ext: [".rar"] },
+        { id: "pdf",   name: "PDF (first page) — Phase 2", decoder: "PDFium",  ext: [".pdf"] },
+        { id: "svg",   name: "SVG — Phase 3",         decoder: "resvg",        ext: [".svg"] },
+        { id: "psd",   name: "Photoshop PSD — Phase 2", decoder: "libpsd",     ext: [".psd", ".psb"] }
+      ];
+      var list  = document.getElementById("fmtList");
+      var count = document.getElementById("fmtCount");
+      var empty = document.getElementById("fmtEmpty");
+      var input = document.getElementById("fmtSearch");
+
+      function render() {
+        list.innerHTML = "";
+        FORMATS.forEach(function (f) {
+          var li = document.createElement("li");
+          li.dataset.id = f.id;
+          li.dataset.haystack = (
+            f.id + " " + f.name + " " + f.decoder + " " + f.ext.join(" ")
+          ).toLowerCase();
+          li.innerHTML = "<strong>" + f.name + "</strong>" +
+                         "<span class=\"ext\">" + f.ext.join(", ") +
+                         " &middot; " + f.decoder + "</span>";
+          list.appendChild(li);
+        });
+        updateCount(FORMATS.length);
+      }
+
+      function updateCount(visible) {
+        count.textContent = visible + " of " + FORMATS.length;
+        empty.hidden = visible !== 0;
+      }
+
+      function filter() {
+        var q = (input.value || "").trim().toLowerCase();
+        var visible = 0;
+        Array.prototype.forEach.call(list.children, function (li) {
+          var match = !q || li.dataset.haystack.indexOf(q) !== -1;
+          li.classList.toggle("hidden", !match);
+          if (match) visible++;
+        });
+        updateCount(visible);
+      }
+
+      render();
+      input.addEventListener("input", filter);
     })();
   </script>
 </body>
