@@ -4821,3 +4821,18 @@ extern void TestS237_CacheBlob_HeaderSize_Runner();
 extern void TestS237_CacheBlob_MakeAndValidate_Runner();
 extern void TestS237_CacheBlob_RejectsBadMagic_Runner();
 extern void TestS237_CacheBlob_RejectsOversizedPayload_Runner();
+
+// Sprint S241-S249 — ROADMAP v6.0 Phase 1/2 scaffold tests
+extern void TestS241_PixelSpan2D_Packed_Runner();
+extern void TestS241_PixelSpan2D_StridedRow_Runner();
+extern void TestS242_CancelToken_DefaultIsLive_Runner();
+extern void TestS242_CancelToken_ExplicitCancel_Runner();
+extern void TestS243_SSIM_ThresholdsByFamily_Runner();
+extern void TestS243_SSIM_GateReasons_Runner();
+extern void TestS244_CorpusEntry_CompliancePasses_Runner();
+extern void TestS244_CorpusEntry_RejectsMissingLicense_Runner();
+extern void TestS245_StreamingDecoderV2_PodLayout_Runner();
+extern void TestS246_CETCompat_BitsPhase2Extends1_Runner();
+extern void TestS247_SAL_EnabledOnMSVC_Runner();
+extern void TestS248_PDFium_DefaultsValid_Runner();
+extern void TestS249_D3D11Resize_RequestIsPod_Runner();

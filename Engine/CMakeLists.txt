@@ -1797,6 +1797,17 @@ set(ENGINE_HEADERS
     Cache/CacheKeyV2.h             # S235 — decoder_version in cache key (ADR-013)
     Core/STAComplianceGuard.h      # S236 — VerifySTA() at COM entry (A10)
     Cache/CacheBlobFormatV1.h      # S237 — on-disk cache blob v1 (ADR-022)
+
+    # Sprint S241-S249 — ROADMAP v6.0 Phase 1/2 scaffolds
+    Core/PixelSpan2D.h             # S241 — std::mdspan stand-in (ADR-016)
+    Core/DecodeCancelToken.h       # S242 — std::jthread cancellation (A15)
+    Core/SSIMValidator.h           # S243 — SSIM CI gate policy
+    Core/CorpusManifestV2.h        # S244 — MANIFEST.v2 entry schema
+    Core/StreamingDecoderV2.h      # S245 — chunked streaming contract (ADR-015)
+    Core/CETCompatibility.h        # S246 — mitigation policy (/CETCOMPAT, A13)
+    Core/SALAnnotations.h          # S247 — SAL 2.0 shim macros (A12)
+    Decoders/PDFiumDecoderStub.h   # S248 — PDFium decoder contract (Phase 2)
+    GPU/D3D11ResizePipeline.h      # S249 — D3D11 batch resize contract (ADR-017)
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h

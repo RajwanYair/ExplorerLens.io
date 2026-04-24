@@ -1359,4 +1359,15 @@ using namespace ExplorerLens::Engine;
 #include "../Core/STAComplianceGuard.h"
 #include "../Cache/CacheBlobFormatV1.h"
 
+// Sprint S241-S249 (ROADMAP v6.0 Phase 1/2) scaffolds under test
+#include "../Core/PixelSpan2D.h"
+#include "../Core/DecodeCancelToken.h"
+#include "../Core/SSIMValidator.h"
+#include "../Core/CorpusManifestV2.h"
+#include "../Core/StreamingDecoderV2.h"
+#include "../Core/CETCompatibility.h"
+#include "../Core/SALAnnotations.h"
+#include "../Decoders/PDFiumDecoderStub.h"
+#include "../GPU/D3D11ResizePipeline.h"
+
 #include "EngineTestsMacros.h"

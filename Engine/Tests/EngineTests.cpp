@@ -2830,6 +2830,21 @@ int main()
     RUN_TEST(TestS237_CacheBlob_RejectsBadMagic);
     RUN_TEST(TestS237_CacheBlob_RejectsOversizedPayload);
 
+    std::wcout << L"\nROADMAP v6.0 Phase 1/2 (S241-S249) Tests:" << std::endl;
+    RUN_TEST(TestS241_PixelSpan2D_Packed);
+    RUN_TEST(TestS241_PixelSpan2D_StridedRow);
+    RUN_TEST(TestS242_CancelToken_DefaultIsLive);
+    RUN_TEST(TestS242_CancelToken_ExplicitCancel);
+    RUN_TEST(TestS243_SSIM_ThresholdsByFamily);
+    RUN_TEST(TestS243_SSIM_GateReasons);
+    RUN_TEST(TestS244_CorpusEntry_CompliancePasses);
+    RUN_TEST(TestS244_CorpusEntry_RejectsMissingLicense);
+    RUN_TEST(TestS245_StreamingDecoderV2_PodLayout);
+    RUN_TEST(TestS246_CETCompat_BitsPhase2Extends1);
+    RUN_TEST(TestS247_SAL_EnabledOnMSVC);
+    RUN_TEST(TestS248_PDFium_DefaultsValid);
+    RUN_TEST(TestS249_D3D11Resize_RequestIsPod);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);

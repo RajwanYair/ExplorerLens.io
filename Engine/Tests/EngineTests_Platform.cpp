@@ -8579,3 +8579,156 @@ TEST(TestS237_CacheBlob_RejectsOversizedPayload)
     auto hdr = MakeBgra8Header(256, 256, 64u * 1024u * 1024u, 0, false);
     ASSERT(!IsValidCacheBlobHeader(hdr));
 }
+
+//==============================================================================
+// Sprint S241-S249 — ROADMAP v6.0 Phase 1/2 scaffold tests
+//==============================================================================
+
+TEST(TestS241_PixelSpan2D_Packed)
+{
+    std::uint32_t buf[4 * 3] = {0};
+    auto view = PixelSpan2D<std::uint32_t>::Packed(buf, 4, 3);
+    ASSERT(view.IsValid());
+    ASSERT_EQ(view.Width(), 4u);
+    ASSERT_EQ(view.Height(), 3u);
+    ASSERT_EQ(view.StrideBytes(), 16u);
+    view(0, 0) = 0xDEADBEEFu;
+    view(3, 2) = 0xFEEDFACEu;
+    ASSERT_EQ(buf[0], 0xDEADBEEFu);
+    ASSERT_EQ(buf[11], 0xFEEDFACEu);
+}
+
+TEST(TestS241_PixelSpan2D_StridedRow)
+{
+    std::uint8_t backing[4 * 32] = {0};
+    PixelSpan2D<std::uint32_t> view(reinterpret_cast<std::uint32_t*>(backing), 4, 4, 32);
+    ASSERT(view.IsValid());
+    ASSERT_EQ(view.SizeBytes(), 4u * 32u);
+    auto empty = PixelSpan2D<std::uint32_t>::Empty();
+    ASSERT(!empty.IsValid());
+}
+
+TEST(TestS242_CancelToken_DefaultIsLive)
+{
+    DecodeCancelToken tok;
+    ASSERT(!tok.IsCancelled());
+    ASSERT(!tok.IsTimeExpired());
+    ASSERT_EQ(static_cast<int>(tok.Reason()), static_cast<int>(DecodeCancelReason::NONE));
+}
+
+TEST(TestS242_CancelToken_ExplicitCancel)
+{
+    DecodeCancelToken tok;
+    tok.Cancel(DecodeCancelReason::USER);
+    ASSERT(tok.IsCancelled());
+    ASSERT_EQ(static_cast<int>(tok.Reason()), static_cast<int>(DecodeCancelReason::USER));
+    // second cancel is a no-op on reason
+    tok.Cancel(DecodeCancelReason::TIMEOUT);
+    ASSERT_EQ(static_cast<int>(tok.Reason()), static_cast<int>(DecodeCancelReason::USER));
+}
+
+TEST(TestS243_SSIM_ThresholdsByFamily)
+{
+    ASSERT(SSIMThresholdFor(SSIMFormatFamily::PNG)  > SSIMThresholdFor(SSIMFormatFamily::JPEG));
+    ASSERT(SSIMThresholdFor(SSIMFormatFamily::JPEG) > SSIMThresholdFor(SSIMFormatFamily::THREE_D));
+    ASSERT_EQ(kSSIMValidationSchema, std::string_view{"lens.ssim-gate.v1"});
+}
+
+TEST(TestS243_SSIM_GateReasons)
+{
+    ASSERT_EQ(static_cast<int>(EvaluateSSIMScore(0.99, SSIMFormatFamily::PNG, true)),
+              static_cast<int>(SSIMGateReason::PASS));
+    ASSERT_EQ(static_cast<int>(EvaluateSSIMScore(0.50, SSIMFormatFamily::PNG, true)),
+              static_cast<int>(SSIMGateReason::FAIL_BELOW_THRESHOLD));
+    ASSERT_EQ(static_cast<int>(EvaluateSSIMScore(0.99, SSIMFormatFamily::PNG, false)),
+              static_cast<int>(SSIMGateReason::FAIL_MISSING_BASELINE));
+    ASSERT_EQ(static_cast<int>(EvaluateSSIMScore(-0.1, SSIMFormatFamily::PNG, true)),
+              static_cast<int>(SSIMGateReason::FAIL_DECODE_ERROR));
+}
+
+TEST(TestS244_CorpusEntry_CompliancePasses)
+{
+    CorpusEntryV2 e;
+    e.path     = "jpeg/flower.jpg";
+    e.sha256   = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    e.license  = CorpusLicense::PUBLIC_DOMAIN;
+    e.family   = SSIMFormatFamily::JPEG;
+    ASSERT(IsCorpusEntryCompliant(e));
+}
+
+TEST(TestS244_CorpusEntry_RejectsMissingLicense)
+{
+    CorpusEntryV2 e;
+    e.path     = "png/x.png";
+    e.sha256   = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    e.license  = CorpusLicense::UNKNOWN;
+    ASSERT(!IsCorpusEntryCompliant(e));
+
+    CorpusEntryV2 needsAttrib;
+    needsAttrib.path     = "webp/y.webp";
+    needsAttrib.sha256   = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    needsAttrib.license  = CorpusLicense::CC_BY;
+    needsAttrib.sourceUrl = "";
+    ASSERT(!IsCorpusEntryCompliant(needsAttrib));
+}
+
+TEST(TestS245_StreamingDecoderV2_PodLayout)
+{
+    StreamingDecoderHandle h{};
+    ASSERT(!h.IsValid());
+    h.opaque = 42;
+    ASSERT(h.IsValid());
+    ASSERT(kStreamingThresholdBytes == (50ull * 1024ull * 1024ull));
+    ASSERT(kStreamingDefaultChunkBytes == (1u << 20));
+    ASSERT(kStreamingMaxInflight == 4u);
+
+    StreamingChunkResult r{};
+    r.status = StreamingChunkStatus::OK;
+    r.bytesReturned = 1024;
+    ASSERT_EQ(static_cast<int>(r.status), static_cast<int>(StreamingChunkStatus::OK));
+}
+
+TEST(TestS246_CETCompat_BitsPhase2Extends1)
+{
+    ASSERT(HasBit(kMitigationsPhase1, MitigationBits::GUARD_CF));
+    ASSERT(!HasBit(kMitigationsPhase1, MitigationBits::CET_COMPAT));
+    ASSERT(HasBit(kMitigationsPhase2, MitigationBits::CET_COMPAT));
+    ASSERT(HasBit(kMitigationsPhase2, MitigationBits::GUARD_EH));
+    ASSERT_EQ(kLENSShellPolicy.binaryName, std::string_view{"LENSShell.dll"});
+}
+
+TEST(TestS247_SAL_EnabledOnMSVC)
+{
+#if defined(_MSC_VER)
+    ASSERT(kLensSalEnabled);
+#else
+    ASSERT(!kLensSalEnabled);
+#endif
+}
+
+TEST(TestS248_PDFium_DefaultsValid)
+{
+    PDFDecodeOptions opts;
+    ASSERT_EQ(opts.thumbWidthPx, 256u);
+    ASSERT_EQ(opts.thumbHeightPx, 256u);
+    ASSERT_EQ(static_cast<int>(opts.renderMode), static_cast<int>(PDFRenderMode::FIRST_PAGE));
+    ASSERT(opts.antialias);
+    ASSERT(opts.thumbWidthPx <= kPDFMaxThumbDim);
+    ASSERT(kPDFMaxFileBytes > 0ull);
+}
+
+TEST(TestS249_D3D11Resize_RequestIsPod)
+{
+    D3D11ResizeRequest req;
+    req.srcWidth = 1024;
+    req.srcHeight = 768;
+    req.dstWidth  = 256;
+    req.dstHeight = 256;
+    ASSERT_EQ(static_cast<int>(req.quality), static_cast<int>(ResizeQuality::CATMULL_ROM));
+    ASSERT_EQ(static_cast<int>(req.colorMode), static_cast<int>(ResizeColorMode::BGRA8_SRGB));
+    ASSERT(kResizeMaxBatch == 64u);
+    ASSERT(kResizeMaxDim  == 16384u);
+    D3D11ResizeResult r{};
+    r.status = ResizeStatus::OK;
+    ASSERT_EQ(static_cast<int>(r.status), static_cast<int>(ResizeStatus::OK));
+}
