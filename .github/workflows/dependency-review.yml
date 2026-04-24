@@ -1,0 +1,38 @@
+name: Dependency Review
+
+# ROADMAP v6.0 S9 / Sprint S260
+# Blocks supply-chain vulnerabilities by scanning every PR for newly introduced
+# dependencies with known CVEs or disallowed licenses.  Runs only on PRs.
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: Review PR dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Block any new dep at CVSS >= 7 (high severity).
+          fail-on-severity: high
+          # Block copyleft / incompatible licenses from entering the supply chain.
+          deny-licenses: GPL-3.0, AGPL-3.0, LGPL-3.0-only
+          # Emit a comment on the PR summarising findings.
+          comment-summary-in-pr: on-failure
+          # Include any vulnerability with a GHSA advisory, even if no CVSS.
+          vulnerability-check: true
+          license-check: true
