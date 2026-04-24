@@ -1312,3 +1312,24 @@ Items from v5.0 that survived re-examination and remain in the backlog.
 ---
 
 *ExplorerLens ROADMAP v6.0 — April 2026 — targeting best-in-class Windows thumbnail provider*
+| **P1** | `NOTICE` file for LGPL libraries |
+| **P1** | winget + Scoop public bucket submission |
+| **P2** | Remove cross-platform claims from README |
+| **P2** | Delete Maven + RubyGems publish workflows |
+
+---
+
+## How to use this roadmap
+
+1. **Phase 1 is the only priority until its exit metric is met** — clean-VM install → SSIM-validated thumbnails for 20+ format families.
+2. **Measure by §19 metrics, not by version number or header count.**
+3. **This document supersedes ROADMAP v4.0** (archived at `docs/archive/ROADMAP_V4.md`).
+4. **Update §20 Decision Log** whenever a significant choice changes.
+5. **Re-run the competitor matrix (§3) quarterly.** Landscape shifts fastest in AVIF/JXL/HEIC and GPU decode.
+6. **No new feature lands without:** (a) a corpus test, (b) a perf budget entry, (c) a §17 register row, (d) an ADR if decision-altering.
+7. **Pre-sprint collision check (MANDATORY):** `grep_search` every new `struct`, `enum class`, `class` name across `Engine/**/*.h` before committing. Zero matches required.
+
+---
+
+*ExplorerLens ROADMAP v5.0 "Rigel" — April 2026. Current release: v39.1.0 "Betelgeuse".*  
+*Next revision target: after Phase 1 exit (v40.0.0 "Rigel").*
