@@ -8732,3 +8732,127 @@ TEST(TestS249_D3D11Resize_RequestIsPod)
     r.status = ResizeStatus::OK;
     ASSERT_EQ(static_cast<int>(r.status), static_cast<int>(ResizeStatus::OK));
 }
+
+// ============================================================================
+// Sprint S251-S259 — ROADMAP v6.0 Phase 2 scaffold tests
+// ============================================================================
+
+TEST(TestS251_SqliteSchema_ColumnCountAndSql)
+{
+    ASSERT(kSqliteCacheSchemaVersion == 1u);
+    const size_t colCount = sizeof(kSqliteCacheColumns) / sizeof(kSqliteCacheColumns[0]);
+    ASSERT_EQ(static_cast<int>(colCount), 14);
+    ASSERT(kSqliteCacheCreateSql != nullptr);
+    ASSERT(kSqliteCachePragmas   != nullptr);
+    SqliteCacheSchema s{};
+    ASSERT_EQ(static_cast<int>(s.version), static_cast<int>(kSqliteCacheSchemaVersion));
+}
+
+TEST(TestS251_SqliteSchema_BudgetOrder)
+{
+    ASSERT(kSqliteCacheL1BytesDefault < kSqliteCacheL2BytesDefault);
+    ASSERT(kSqliteCacheL1BytesDefault == 64ull  * 1024 * 1024);
+    ASSERT(kSqliteCacheL2BytesDefault == 512ull * 1024 * 1024);
+}
+
+TEST(TestS252_Pixel16_BytesPerSampleMatch)
+{
+    ASSERT(PixelBytesPerSample(PixelDepth::EIGHT)      == 1u);
+    ASSERT(PixelBytesPerSample(PixelDepth::SIXTEEN)    == 2u);
+    ASSERT(PixelBytesPerSample(PixelDepth::HALF_FLOAT) == 2u);
+    ASSERT(PixelBytesPerSample(PixelDepth::FLOAT)      == 4u);
+    ASSERT(PixelBytesPerBGRAPixel(PixelDepth::SIXTEEN) == 8u);
+}
+
+TEST(TestS252_Pixel16_PreservePolicy)
+{
+    ASSERT(!ShouldPreserve16Bit(PixelDepth::EIGHT,   Pixel16Path::PRESERVE));
+    ASSERT( ShouldPreserve16Bit(PixelDepth::SIXTEEN, Pixel16Path::PRESERVE));
+    ASSERT(!ShouldPreserve16Bit(PixelDepth::SIXTEEN, Pixel16Path::QUANTISE_8));
+}
+
+TEST(TestS253_ExifAutoRotate_TagMapping)
+{
+    ASSERT_EQ(static_cast<int>(ExifTagToTransform(1)),
+              static_cast<int>(ExifAutoRotateTransform::IDENTITY));
+    ASSERT_EQ(static_cast<int>(ExifTagToTransform(6)),
+              static_cast<int>(ExifAutoRotateTransform::ROTATE_90_CW));
+    ASSERT_EQ(static_cast<int>(ExifTagToTransform(8)),
+              static_cast<int>(ExifAutoRotateTransform::ROTATE_270_CW));
+    ASSERT_EQ(static_cast<int>(ExifTagToTransform(99)),
+              static_cast<int>(ExifAutoRotateTransform::IDENTITY));
+}
+
+TEST(TestS253_ExifAutoRotate_DimSwap)
+{
+    ASSERT(!ExifTransformSwapsDims(ExifAutoRotateTransform::IDENTITY));
+    ASSERT(!ExifTransformSwapsDims(ExifAutoRotateTransform::FLIP_HORIZONTAL));
+    ASSERT( ExifTransformSwapsDims(ExifAutoRotateTransform::ROTATE_90_CW));
+    ASSERT( ExifTransformSwapsDims(ExifAutoRotateTransform::ROTATE_270_CW));
+}
+
+TEST(TestS254_AsyncPlaceholder_BudgetsReasonable)
+{
+    ASSERT(kPlaceholderDefaultLatencyMs <  kPlaceholderMaxLatencyMs);
+    ASSERT(kPlaceholderMaxLatencyMs     <= 33u);
+    PlaceholderRequest req{};
+    PlaceholderResult  res{};
+    ASSERT_EQ(static_cast<int>(res.kind),   static_cast<int>(PlaceholderKind::NONE));
+    ASSERT_EQ(static_cast<int>(res.status), static_cast<int>(PlaceholderStatus::UNAVAILABLE));
+    ASSERT(req.allowDowngrade);
+}
+
+TEST(TestS255_TiledTiff_LayoutDefaults)
+{
+    TiledTiffLayout lay{};
+    ASSERT(!lay.isBigTiff);
+    ASSERT(!lay.isTiled);
+    ASSERT(kTiledTiffMaxTileSide      == 8192u);
+    ASSERT(kTiledTiffMaxPyramidLevels == 16u);
+    TiledTiffProbeResult pr{};
+    ASSERT_EQ(static_cast<int>(pr.status), static_cast<int>(TiledTiffStatus::OK));
+}
+
+TEST(TestS256_PropertyGen_DeterministicSeed)
+{
+    const auto a = MakePropertySeed(0, PropertyTestFamily::STRIDE_INVARIANT);
+    const auto b = MakePropertySeed(0, PropertyTestFamily::STRIDE_INVARIANT);
+    ASSERT(a.width  == b.width);
+    ASSERT(a.height == b.height);
+    const auto c = MakePropertySeed(1, PropertyTestFamily::STRIDE_INVARIANT);
+    ASSERT(a.seed != c.seed);
+    ASSERT(kPropertyTestSmokeIterations < kPropertyTestIterations);
+}
+
+TEST(TestS257_LibPng_ColorTypeValues)
+{
+    ASSERT_EQ(static_cast<int>(LibPngColorType::GRAY),       0);
+    ASSERT_EQ(static_cast<int>(LibPngColorType::RGB),        2);
+    ASSERT_EQ(static_cast<int>(LibPngColorType::PALETTE),    3);
+    ASSERT_EQ(static_cast<int>(LibPngColorType::GRAY_ALPHA), 4);
+    ASSERT_EQ(static_cast<int>(LibPngColorType::RGBA),       6);
+    LibPngDecodeOptions opt{};
+    ASSERT(opt.expandGrayToRgba);
+}
+
+TEST(TestS258_LibTiff_CompressionValues)
+{
+    ASSERT_EQ(static_cast<int>(LibTiffCompression::NONE),    1);
+    ASSERT_EQ(static_cast<int>(LibTiffCompression::LZW),     5);
+    ASSERT_EQ(static_cast<int>(LibTiffCompression::JPEG),    7);
+    ASSERT_EQ(static_cast<int>(LibTiffCompression::DEFLATE), 8);
+    LibTiffDecodeOptions opt{};
+    ASSERT(opt.allowTiled);
+    ASSERT(opt.honorOrientation);
+}
+
+TEST(TestS259_OpenEXR3_ProbeCompact)
+{
+    ASSERT(sizeof(OpenEXRProbeResult) <= 64u);
+    OpenEXRDecodeOptions opt{};
+    ASSERT_EQ(static_cast<int>(opt.interiorDepth),
+              static_cast<int>(PixelDepth::HALF_FLOAT));
+    ASSERT_EQ(static_cast<int>(opt.preferredLayout),
+              static_cast<int>(OpenEXRChannelLayout::RGBA));
+    ASSERT(kOpenEXRMaxPartCount == 64u);
+}

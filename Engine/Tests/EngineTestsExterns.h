@@ -4836,3 +4836,17 @@ extern void TestS246_CETCompat_BitsPhase2Extends1_Runner();
 extern void TestS247_SAL_EnabledOnMSVC_Runner();
 extern void TestS248_PDFium_DefaultsValid_Runner();
 extern void TestS249_D3D11Resize_RequestIsPod_Runner();
+
+// Sprint S251-S259 — ROADMAP v6.0 Phase 2 scaffold tests
+extern void TestS251_SqliteSchema_ColumnCountAndSql_Runner();
+extern void TestS251_SqliteSchema_BudgetOrder_Runner();
+extern void TestS252_Pixel16_BytesPerSampleMatch_Runner();
+extern void TestS252_Pixel16_PreservePolicy_Runner();
+extern void TestS253_ExifAutoRotate_TagMapping_Runner();
+extern void TestS253_ExifAutoRotate_DimSwap_Runner();
+extern void TestS254_AsyncPlaceholder_BudgetsReasonable_Runner();
+extern void TestS255_TiledTiff_LayoutDefaults_Runner();
+extern void TestS256_PropertyGen_DeterministicSeed_Runner();
+extern void TestS257_LibPng_ColorTypeValues_Runner();
+extern void TestS258_LibTiff_CompressionValues_Runner();
+extern void TestS259_OpenEXR3_ProbeCompact_Runner();

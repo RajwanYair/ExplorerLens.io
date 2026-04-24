@@ -1370,4 +1370,15 @@ using namespace ExplorerLens::Engine;
 #include "../Decoders/PDFiumDecoderStub.h"
 #include "../GPU/D3D11ResizePipeline.h"
 
+// Sprint S251-S259 (ROADMAP v6.0 Phase 2) scaffolds under test
+#include "../Cache/SqliteThumbnailSchema.h"
+#include "../Core/PixelPipeline16Bit.h"
+#include "../Core/ExifAutoRotatePolicy.h"
+#include "../Pipeline/AsyncPlaceholderStage.h"
+#include "../Decoders/TiledTiffReaderStub.h"
+#include "PropertyTestGenerators.h"
+#include "../Decoders/LibPngDecoderStub.h"
+#include "../Decoders/LibTiffDecoderStub.h"
+#include "../Decoders/OpenEXR3DecoderStub.h"
+
 #include "EngineTestsMacros.h"

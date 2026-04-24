@@ -2845,6 +2845,20 @@ int main()
     RUN_TEST(TestS248_PDFium_DefaultsValid);
     RUN_TEST(TestS249_D3D11Resize_RequestIsPod);
 
+    std::wcout << L"\nROADMAP v6.0 Phase 2 (S251-S259) Tests:" << std::endl;
+    RUN_TEST(TestS251_SqliteSchema_ColumnCountAndSql);
+    RUN_TEST(TestS251_SqliteSchema_BudgetOrder);
+    RUN_TEST(TestS252_Pixel16_BytesPerSampleMatch);
+    RUN_TEST(TestS252_Pixel16_PreservePolicy);
+    RUN_TEST(TestS253_ExifAutoRotate_TagMapping);
+    RUN_TEST(TestS253_ExifAutoRotate_DimSwap);
+    RUN_TEST(TestS254_AsyncPlaceholder_BudgetsReasonable);
+    RUN_TEST(TestS255_TiledTiff_LayoutDefaults);
+    RUN_TEST(TestS256_PropertyGen_DeterministicSeed);
+    RUN_TEST(TestS257_LibPng_ColorTypeValues);
+    RUN_TEST(TestS258_LibTiff_CompressionValues);
+    RUN_TEST(TestS259_OpenEXR3_ProbeCompact);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);

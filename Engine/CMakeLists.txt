@@ -1808,6 +1808,17 @@ set(ENGINE_HEADERS
     Core/SALAnnotations.h          # S247 — SAL 2.0 shim macros (A12)
     Decoders/PDFiumDecoderStub.h   # S248 — PDFium decoder contract (Phase 2)
     GPU/D3D11ResizePipeline.h      # S249 — D3D11 batch resize contract (ADR-017)
+
+    # Sprint S251-S259 — ROADMAP v6.0 Phase 2 scaffolds
+    Cache/SqliteThumbnailSchema.h     # S251 — SQLite L2 cache schema (B2, B3)
+    Core/PixelPipeline16Bit.h         # S252 — 16-bit pixel pipeline policy (H24)
+    Core/ExifAutoRotatePolicy.h       # S253 — EXIF auto-rotate policy (H19)
+    Pipeline/AsyncPlaceholderStage.h  # S254 — async placeholder thumbnail (H7)
+    Decoders/TiledTiffReaderStub.h    # S255 — tiled TIFF pyramid reader (H10)
+    Tests/PropertyTestGenerators.h    # S256 — property-based pixel tests (T9)
+    Decoders/LibPngDecoderStub.h      # S257 — libpng decoder contract (L10)
+    Decoders/LibTiffDecoderStub.h     # S258 — libtiff decoder contract (L10)
+    Decoders/OpenEXR3DecoderStub.h    # S259 — OpenEXR 3.x evaluation (L11)
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h
