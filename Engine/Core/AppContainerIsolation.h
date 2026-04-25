@@ -11,7 +11,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class AppContainerCapability {
+enum class AppContainerCapability : uint32_t {
     InternetClient,
     InternetClientServer,
     PrivateNetworkClientServer,
