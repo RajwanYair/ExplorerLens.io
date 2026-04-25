@@ -8988,3 +8988,236 @@ TEST(TestS269_FolderCover_StrategyEnum)
     ASSERT(!req.respectHidden);
     ASSERT(!req.followShortcuts);
 }
+
+// ============================================================================
+// Sprint S271-S279 — ROADMAP v6.0 Phase 3 GPU / color / HDR / privacy
+// ============================================================================
+
+TEST(TestS271_GpuVendorRouting_IdsCorrect)
+{
+    ASSERT_EQ(static_cast<int>(GpuVendorId::NVIDIA), 0x10DE);
+    ASSERT_EQ(static_cast<int>(GpuVendorId::INTEL),  0x8086);
+    ASSERT_EQ(static_cast<int>(GpuVendorId::AMD),    0x1002);
+    ASSERT_EQ(static_cast<int>(GpuVendorId::MICROSOFT), 0x1414);
+}
+
+TEST(TestS271_GpuVendorRouting_PolicyDefaults)
+{
+    GpuVendorRoutingPolicy p{};
+    ASSERT(p.allowHwVideoDecode);
+    ASSERT(p.allowHwImageDecode);
+    ASSERT(p.allowD3D11Resize);
+    ASSERT(!p.allowWarpFallback);
+    ASSERT_EQ(p.vramBudgetMb, 512u);
+    ASSERT(kGpuVendorRoutingMaxAdapters == 8u);
+}
+
+TEST(TestS272_IccColor_PolicyDefaults)
+{
+    IccColorPipelinePolicy p{};
+    ASSERT(p.applyBpc);
+    ASSERT(p.useDisplayProfile);
+    ASSERT(p.fastSrgbShortcut);
+    ASSERT_EQ(p.lutSize, 33u);
+    ASSERT(kIccColorPipelineDefaultBudgetMs < kIccColorPipelineHardBudgetMs);
+    ASSERT(kIccColorPipelineMaxProfileBytes == 2u * 1024u * 1024u);
+}
+
+TEST(TestS273_AnimatedImage_BudgetsSane)
+{
+    AnimatedImagePlaybackOptions opt{};
+    ASSERT_EQ(opt.maxFrames, 1024u);
+    ASSERT_EQ(opt.minFrameMs, 20u);
+    ASSERT(opt.skipOnBattery);
+    ASSERT(opt.preferHwDecode);
+    ASSERT(kAnimatedImageDefaultBudgetMs < kAnimatedImageHardBudgetMs);
+    ASSERT(kAnimatedImageMaxFrames == 10000u);
+}
+
+TEST(TestS274_ArchiveNesting_PolicyDefaults)
+{
+    ArchiveNestingGuardPolicy p{};
+    ASSERT_EQ(p.maxDepth, 4u);
+    ASSERT_EQ(p.maxCompressionRatio, 200u);
+    ASSERT(p.abortOnCycle);
+    ASSERT(p.logDeniedRequests);
+    ASSERT(kArchiveNestingGuardMaxDepth == 8u);
+    ASSERT(kArchiveNestingGuardHardRatio == 1000u);
+}
+
+TEST(TestS275_DecoderWatchdog_BudgetOrder)
+{
+    DecoderWatchdogPolicy p{};
+    ASSERT(p.softBudgetMs < p.hardBudgetMs);
+    ASSERT(p.hardBudgetMs < p.terminateBudgetMs);
+    ASSERT_EQ(p.quarantineAfterFails, 3u);
+    ASSERT(p.emitEtwEvents);
+    ASSERT(kDecoderWatchdogMaxBudgetMs == 5000u);
+}
+
+TEST(TestS276_TelemetryPrivacy_RuleCount)
+{
+    ASSERT_EQ(kTelemetryPrivacyRulesCount, static_cast<size_t>(10));
+    for (size_t i = 0; i < kTelemetryPrivacyRulesCount; ++i) {
+        ASSERT(kTelemetryPrivacyRules[i].etwPropertyName != nullptr);
+        ASSERT(kTelemetryPrivacyRules[i].mode !=
+               TelemetryPrivacyRedactMode::PASS_THROUGH);
+    }
+}
+
+TEST(TestS276_TelemetryPrivacy_NoPassthrough)
+{
+    TelemetryPrivacyPolicy p{};
+    ASSERT(p.redactFilePaths);
+    ASSERT(p.redactHostIdentifiers);
+    ASSERT(p.redactPhotoExifPii);
+    ASSERT(!p.allowPassThroughInDev);
+    ASSERT(p.maxPayloadBytes == 32u * 1024u);
+}
+
+TEST(TestS277_Hdr10ToneMapping_Defaults)
+{
+    Hdr10ToneMappingPolicy p{};
+    ASSERT_EQ(static_cast<int>(p.curve),
+              static_cast<int>(Hdr10ToneCurve::BT2390));
+    ASSERT(p.useFrameMetadata);
+    ASSERT(p.preserveHueRotation);
+    ASSERT(kHdr10ToneMappingDefaultBudgetMs <
+           kHdr10ToneMappingHardBudgetMs);
+    ASSERT(kHdr10ToneMappingReferenceWhiteNits == 203.0f);
+}
+
+TEST(TestS278_ClipboardIntegration_PlanShape)
+{
+    ASSERT_EQ(kClipboardIntegrationPlanCount, static_cast<size_t>(4));
+    for (size_t i = 0; i < kClipboardIntegrationPlanCount; ++i) {
+        const auto& row = kClipboardIntegrationPlan[i];
+        ASSERT(row.sizeCapBytes > 0u);
+        ASSERT(row.primaryFormat != ClipboardIntegrationFormatId::NONE);
+    }
+    ASSERT(kClipboardIntegrationMaxImageBytes == 32u * 1024u * 1024u);
+}
+
+TEST(TestS279_AccessibilityDescriptor_Bounds)
+{
+    AccessibilityDescriptorPolicy p{};
+    ASSERT_EQ(p.maxCharacters, 240u);
+    ASSERT(!p.allowAiGeneration);
+    ASSERT(p.includeDecoderHint);
+    ASSERT(p.includeDimensions);
+    ASSERT(kAccessibilityDescriptorDefaultChars <
+           kAccessibilityDescriptorHardMaxChars);
+    ASSERT(kAccessibilityDescriptorHardMaxChars == 1024u);
+}
+
+// ============================================================================
+// Sprint S281-S289 — ROADMAP v6.0 Phase 3/4 shell / plugin / WER / enterprise
+// ============================================================================
+
+TEST(TestS281_SpacebarPreview_Defaults)
+{
+    SpacebarPreviewPolicy p{};
+    ASSERT(p.enableGlobalHotkey);
+    ASSERT(p.closeOnFocusLoss);
+    ASSERT(p.dimBackground);
+    ASSERT(p.advanceOnArrowKeys);
+    ASSERT_EQ(p.animationDurationMs, 150u);
+    ASSERT_EQ(p.readyBudgetMs, 250u);
+    ASSERT(kSpacebarPreviewDefaultBudgetMs < kSpacebarPreviewHardBudgetMs);
+}
+
+TEST(TestS282_PluginManifest_KeyCount)
+{
+    ASSERT_EQ(kPluginManifestSchemaKeyCount, static_cast<size_t>(14));
+    ASSERT_EQ(kPluginManifestSchemaVersion, 1u);
+    ASSERT(kPluginManifestMaxBytes == 64u * 1024u);
+}
+
+TEST(TestS282_PluginManifest_AllKeysNonNull)
+{
+    for (size_t i = 0; i < kPluginManifestSchemaKeyCount; ++i) {
+        ASSERT(kPluginManifestSchema[i].jsonPath != nullptr);
+    }
+}
+
+TEST(TestS283_LiveEtwSession_PolicyBounds)
+{
+    LiveEtwSessionPolicy p{};
+    ASSERT_EQ(p.ringBufferEntries, 4096u);
+    ASSERT(p.ringBufferEntries <= kLiveEtwSessionMaxRingEntries);
+    ASSERT(p.maxEventsPerSecond <= kLiveEtwSessionMaxEventsPerSecond);
+    ASSERT(p.dropOldestOnFull);
+    ASSERT(p.pauseWhenWindowHidden);
+    ASSERT(!p.writeRotatingEtlFile);
+}
+
+TEST(TestS284_ShellComHostInTest_Defaults)
+{
+    ShellComHostInTestPolicy p{};
+    ASSERT_EQ(static_cast<int>(p.mode),
+              static_cast<int>(ShellComHostInTestMode::IN_PROCESS_REGFREE));
+    ASSERT(p.minSsim >= kShellComHostInTestMinAcceptableSsim);
+    ASSERT(p.invokeBudgetMs < kShellComHostInTestHardBudgetMs);
+    ASSERT(p.validateAlphaChannel);
+    ASSERT(p.requireStride4Alignment);
+    ASSERT(p.failOnComLeakedRefs);
+}
+
+TEST(TestS285_WinUI3Gate_CriteriaCount)
+{
+    WinUI3GatePolicy p{};
+    ASSERT(p.coldStartBudgetMs > p.warmStartBudgetMs);
+    ASSERT(p.requireUnpackagedSupport);
+    ASSERT(p.requireComBridge);
+    ASSERT(p.requireAccessibilityNvda);
+    ASSERT_EQ(kWinUI3GateCriterionCount, static_cast<size_t>(10));
+}
+
+TEST(TestS286_AppContainerHost_BudgetOrder)
+{
+    AppContainerHostPolicy p{};
+    ASSERT(p.handshakeBudgetMs < p.decodeBudgetMs);
+    ASSERT(p.handshakeBudgetMs < kAppContainerHostHandshakeHardMs);
+    ASSERT(p.workingSetLimitMb <= kAppContainerHostMaxWorkingSetMb);
+    ASSERT(p.requireLowIlToken);
+    ASSERT(p.logDeniedCapabilities);
+    // capability bit set independence
+    ASSERT_EQ(static_cast<uint32_t>(AppContainerPluginHostCapability::INTERNET_CLIENT), 1u);
+    ASSERT_EQ(static_cast<uint32_t>(AppContainerPluginHostCapability::GPU_ADAPTER_READ), 1u << 6);
+}
+
+TEST(TestS287_EvSigning_TimestampUrls)
+{
+    ASSERT_EQ(kEvSigningTimestampUrlCount, static_cast<size_t>(4));
+    for (size_t i = 0; i < kEvSigningTimestampUrlCount; ++i) {
+        ASSERT(kEvSigningTimestampUrls[i].url != nullptr);
+        ASSERT(kEvSigningTimestampUrls[i].rfc3161);
+    }
+    EvSigningPolicy p{};
+    ASSERT(p.requireDualSignature);
+    ASSERT(p.requireRfc3161Timestamp);
+    ASSERT(p.signBudgetMsPerArtifact < kEvSigningHardBudgetMsPerArtifact);
+}
+
+TEST(TestS288_WerCrashReporter_OptInDefault)
+{
+    WerCrashReporterPolicy p{};
+    ASSERT_EQ(static_cast<int>(p.submissionMode),
+              static_cast<int>(WerSubmissionMode::DISABLED));
+    ASSERT(p.requireExplicitOptIn);
+    ASSERT(p.redactFilePaths);
+    ASSERT(p.redactDecoderPayload);
+    ASSERT(p.stripUsernameFromPaths);
+    ASSERT(p.maxDumpBytes <= kWerCrashReporterHardMaxDumpBytes);
+    ASSERT(p.rateLimitPerHour <= kWerCrashReporterHardRateLimitPerHour);
+}
+
+TEST(TestS289_AdmxPolicy_KeyCount)
+{
+    ASSERT_EQ(kAdmxPolicyKeyCount, static_cast<size_t>(15));
+    for (size_t i = 0; i < kAdmxPolicyKeyCount; ++i) {
+        ASSERT(kAdmxPolicyKeys[i].registryValueName != nullptr);
+    }
+    ASSERT(kAdmxPolicyRegistryRoot != nullptr);
+    ASSERT(kAdmxPolicyNamespace != nullptr);
+}

@@ -1830,6 +1830,28 @@ set(ENGINE_HEADERS
     Decoders/TinyGltfModelDecoderStub.h          # S267 — tinygltf 3D thumbs (L13)
     Plugin/PluginTrustChainValidatorV1.h         # S268 — plugin trust chain (S7)
     Pipeline/FolderCoverImageStage.h             # S269 — folder cover thumbs (F5)
+
+    # Sprint S271-S279 — ROADMAP v6.0 Phase 3 GPU / color / HDR / privacy
+    GPU/GpuVendorRoutingContract.h               # S271 — GPU vendor routing (H8)
+    Core/IccColorPipelineContract.h              # S272 — ICC color pipeline (H20)
+    Decoders/AnimatedImagePlaybackContract.h     # S273 — animated thumbs (L14)
+    Pipeline/ArchiveNestingGuardStage.h          # S274 — archive nesting guard (S10)
+    Core/DecoderWatchdogCoordinator.h            # S275 — decoder watchdog (H11)
+    Core/TelemetryPrivacyRedactor.h              # S276 — telemetry privacy (S8)
+    Core/Hdr10ToneMappingContract.h              # S277 — HDR10 / HLG tone-map (H21)
+    Core/ClipboardIntegrationContract.h          # S278 — clipboard verbs (F7)
+    Core/AccessibilityDescriptorContract.h       # S279 — UIA a11y (F8)
+
+    # Sprint S281-S289 — ROADMAP v6.0 Phase 3/4 shell, plugin, WER, enterprise
+    Core/SpacebarPreviewShortcutContract.h       # S281 — QuickLook space-bar (H3)
+    Plugin/PluginManifestSchemaContract.h        # S282 — .lens manifest schema (H4/H23)
+    Core/LiveEtwSessionContract.h                # S283 — LENSManager ETW pane (O5)
+    Core/ShellComHostInTestContract.h            # S284 — COM host-in-test (T7)
+    Core/WinUI3EvaluationGateContract.h          # S285 — WinUI 3 gate (H20)
+    Plugin/AppContainerPluginHostContract.h      # S286 — AppContainer sandbox (S4)
+    Core/EvCodeSigningPipelineContract.h         # S287 — EV signing (S5)
+    Core/WerCrashReporterContract.h              # S288 — WER crash reports (O3)
+    Enterprise/AdmxGroupPolicySchemaContract.h   # S289 — ADMX GPO schema (H1)
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h

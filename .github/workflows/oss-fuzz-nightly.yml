@@ -1,0 +1,131 @@
+# ============================================================================
+# oss-fuzz-nightly.yml -- S290 / ROADMAP v6.0 T6 + H21 OSS-Fuzz integration
+#
+# Nightly fuzz-testing harness for the decoder surface.  Builds libFuzzer
+# binaries via Clang (CI-only exception -- production builds MUST use MSVC)
+# and exercises one decoder per job with a 5-minute budget.  Corpus is
+# seeded from `data/corpus/` and new discoveries are uploaded as artefacts.
+# ============================================================================
+name: oss-fuzz-nightly
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Single decoder fuzz target (leave blank for all)'
+        required: false
+        default: ''
+      duration_seconds:
+        description: 'Budget per target (seconds)'
+        required: false
+        default: '300'
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: oss-fuzz-nightly
+  cancel-in-progress: true
+
+jobs:
+  fuzz:
+    name: libFuzzer ${{ matrix.target }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - jpeg_decoder_fuzz
+          - png_decoder_fuzz
+          - webp_decoder_fuzz
+          - heif_decoder_fuzz
+          - avif_decoder_fuzz
+          - jxl_decoder_fuzz
+          - raw_header_fuzz
+          - archive_nesting_fuzz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install Clang 18 + libFuzzer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 lld-18 ninja-build cmake
+
+      - name: Skip when target mismatched
+        if: ${{ github.event.inputs.target != '' && github.event.inputs.target != matrix.target }}
+        run: |
+          echo "Skipping ${{ matrix.target }} (dispatch filter: ${{ github.event.inputs.target }})"
+          exit 0
+
+      - name: Configure fuzz build (Clang)
+        run: |
+          cmake -S Engine -B build-fuzz -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang-18 \
+            -DCMAKE_CXX_COMPILER=clang++-18 \
+            -DENABLE_LIBFUZZER=ON \
+            -DBUILD_TESTS=OFF \
+            -DBUILD_FUZZ_TARGETS=ON \
+            -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer"
+
+      - name: Build fuzz target
+        run: |
+          cmake --build build-fuzz --target ${{ matrix.target }} --parallel
+
+      - name: Seed corpus
+        run: |
+          mkdir -p fuzz-corpus/${{ matrix.target }}
+          cp -r data/corpus/*.bin fuzz-corpus/${{ matrix.target }}/ 2>/dev/null || true
+
+      - name: Run fuzzer
+        id: fuzz
+        run: |
+          DURATION="${{ github.event.inputs.duration_seconds || '300' }}"
+          set +e
+          timeout "${DURATION}s" ./build-fuzz/fuzz/${{ matrix.target }} \
+            fuzz-corpus/${{ matrix.target }} \
+            -max_total_time=$DURATION \
+            -rss_limit_mb=2048 \
+            -timeout=30 \
+            -print_final_stats=1 \
+            2>&1 | tee fuzz-${{ matrix.target }}.log
+          RC=${PIPESTATUS[0]}
+          echo "rc=$RC" >> "$GITHUB_OUTPUT"
+          # 77 is timeout's expected exit on duration hit — treat as success
+          if [ "$RC" -ne 0 ] && [ "$RC" -ne 124 ]; then
+            echo "Fuzzer reported a bug (exit $RC)"
+            exit $RC
+          fi
+
+      - name: Upload crashes and corpus delta
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-${{ matrix.target }}-${{ github.run_id }}
+          path: |
+            fuzz-${{ matrix.target }}.log
+            crash-*
+            leak-*
+            timeout-*
+            fuzz-corpus/${{ matrix.target }}
+          retention-days: 14
+
+  summary:
+    name: Nightly fuzz summary
+    needs: fuzz
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Emit summary
+        run: |
+          echo "## OSS-Fuzz Nightly Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "Run: ${{ github.run_id }} — see matrix job logs for per-target stats." >> "$GITHUB_STEP_SUMMARY"

@@ -2874,6 +2874,33 @@ int main()
     RUN_TEST(TestS269_FolderCover_NamesCount);
     RUN_TEST(TestS269_FolderCover_StrategyEnum);
 
+    // ROADMAP v6.0 Phase 3 (S271-S279) Tests:
+    std::wcout << L"\nROADMAP v6.0 Phase 3 (S271-S279) Tests:" << std::endl;
+    RUN_TEST(TestS271_GpuVendorRouting_IdsCorrect);
+    RUN_TEST(TestS271_GpuVendorRouting_PolicyDefaults);
+    RUN_TEST(TestS272_IccColor_PolicyDefaults);
+    RUN_TEST(TestS273_AnimatedImage_BudgetsSane);
+    RUN_TEST(TestS274_ArchiveNesting_PolicyDefaults);
+    RUN_TEST(TestS275_DecoderWatchdog_BudgetOrder);
+    RUN_TEST(TestS276_TelemetryPrivacy_RuleCount);
+    RUN_TEST(TestS276_TelemetryPrivacy_NoPassthrough);
+    RUN_TEST(TestS277_Hdr10ToneMapping_Defaults);
+    RUN_TEST(TestS278_ClipboardIntegration_PlanShape);
+    RUN_TEST(TestS279_AccessibilityDescriptor_Bounds);
+
+    // ROADMAP v6.0 Phase 3/4 (S281-S289) Tests:
+    std::wcout << L"\nROADMAP v6.0 Phase 3/4 (S281-S289) Tests:" << std::endl;
+    RUN_TEST(TestS281_SpacebarPreview_Defaults);
+    RUN_TEST(TestS282_PluginManifest_KeyCount);
+    RUN_TEST(TestS282_PluginManifest_AllKeysNonNull);
+    RUN_TEST(TestS283_LiveEtwSession_PolicyBounds);
+    RUN_TEST(TestS284_ShellComHostInTest_Defaults);
+    RUN_TEST(TestS285_WinUI3Gate_CriteriaCount);
+    RUN_TEST(TestS286_AppContainerHost_BudgetOrder);
+    RUN_TEST(TestS287_EvSigning_TimestampUrls);
+    RUN_TEST(TestS288_WerCrashReporter_OptInDefault);
+    RUN_TEST(TestS289_AdmxPolicy_KeyCount);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);

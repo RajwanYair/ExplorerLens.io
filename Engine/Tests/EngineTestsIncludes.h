@@ -1392,4 +1392,26 @@ using namespace ExplorerLens::Engine;
 #include "../Plugin/PluginTrustChainValidatorV1.h"
 #include "../Pipeline/FolderCoverImageStage.h"
 
+// Sprint S271-S279 (ROADMAP v6.0 Phase 3) GPU / color / HDR / privacy
+#include "../GPU/GpuVendorRoutingContract.h"
+#include "../Core/IccColorPipelineContract.h"
+#include "../Decoders/AnimatedImagePlaybackContract.h"
+#include "../Pipeline/ArchiveNestingGuardStage.h"
+#include "../Core/DecoderWatchdogCoordinator.h"
+#include "../Core/TelemetryPrivacyRedactor.h"
+#include "../Core/Hdr10ToneMappingContract.h"
+#include "../Core/ClipboardIntegrationContract.h"
+#include "../Core/AccessibilityDescriptorContract.h"
+
+// Sprint S281-S289 (ROADMAP v6.0 Phase 3/4) shell / plugin / WER / enterprise
+#include "../Core/SpacebarPreviewShortcutContract.h"
+#include "../Plugin/PluginManifestSchemaContract.h"
+#include "../Core/LiveEtwSessionContract.h"
+#include "../Core/ShellComHostInTestContract.h"
+#include "../Core/WinUI3EvaluationGateContract.h"
+#include "../Plugin/AppContainerPluginHostContract.h"
+#include "../Core/EvCodeSigningPipelineContract.h"
+#include "../Core/WerCrashReporterContract.h"
+#include "../Enterprise/AdmxGroupPolicySchemaContract.h"
+
 #include "EngineTestsMacros.h"

@@ -4864,3 +4864,28 @@ extern void TestS267_TinyGltf_TriangleBudget_Runner();
 extern void TestS268_PluginTrustV1_BudgetOrder_Runner();
 extern void TestS269_FolderCover_NamesCount_Runner();
 extern void TestS269_FolderCover_StrategyEnum_Runner();
+
+// Sprint S271-S279 (ROADMAP v6.0 Phase 3) GPU / color / HDR / privacy
+extern void TestS271_GpuVendorRouting_IdsCorrect_Runner();
+extern void TestS271_GpuVendorRouting_PolicyDefaults_Runner();
+extern void TestS272_IccColor_PolicyDefaults_Runner();
+extern void TestS273_AnimatedImage_BudgetsSane_Runner();
+extern void TestS274_ArchiveNesting_PolicyDefaults_Runner();
+extern void TestS275_DecoderWatchdog_BudgetOrder_Runner();
+extern void TestS276_TelemetryPrivacy_RuleCount_Runner();
+extern void TestS276_TelemetryPrivacy_NoPassthrough_Runner();
+extern void TestS277_Hdr10ToneMapping_Defaults_Runner();
+extern void TestS278_ClipboardIntegration_PlanShape_Runner();
+extern void TestS279_AccessibilityDescriptor_Bounds_Runner();
+
+// Sprint S281-S289 (ROADMAP v6.0 Phase 3/4) shell / plugin / WER / enterprise
+extern void TestS281_SpacebarPreview_Defaults_Runner();
+extern void TestS282_PluginManifest_KeyCount_Runner();
+extern void TestS282_PluginManifest_AllKeysNonNull_Runner();
+extern void TestS283_LiveEtwSession_PolicyBounds_Runner();
+extern void TestS284_ShellComHostInTest_Defaults_Runner();
+extern void TestS285_WinUI3Gate_CriteriaCount_Runner();
+extern void TestS286_AppContainerHost_BudgetOrder_Runner();
+extern void TestS287_EvSigning_TimestampUrls_Runner();
+extern void TestS288_WerCrashReporter_OptInDefault_Runner();
+extern void TestS289_AdmxPolicy_KeyCount_Runner();
