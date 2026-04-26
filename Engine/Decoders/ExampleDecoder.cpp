@@ -344,7 +344,8 @@ std::vector<uint8_t> ExampleDecoder::ScaleRGBA(const uint8_t* srcPixels, int src
                                                int dstHeight) const
 {
     // Simple bilinear interpolation
-    // For production, consider using stb_image_resize or similar library
+    // TODO(S302/Phase2): replace stb_image_resize with a direct SIMD resize kernel or libjpeg-turbo DCT-scale
+    // See ROADMAP.md §19 "REWRITE" table — stb_image removal (H28)
 
     std::vector<uint8_t> dst(dstWidth * dstHeight * 4);
 

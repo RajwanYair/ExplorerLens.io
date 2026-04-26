@@ -84,8 +84,10 @@ static constexpr std::array<DecoderEntry, 27> DECODER_REGISTRY = {{
     { "PSD",    DecoderTier::P2, "custom",                   15,  0 },
     { "DDS",    DecoderTier::P2, "DirectXTex",               15,  0 },
     { "SVG",    DecoderTier::P2, "nanosvg",                  15,  0 },
+    // TODO(S302/Phase2): HDR decode — replace stb_image with a direct Radiance RGBE parser
     { "HDR",    DecoderTier::P2, "stb_image",                15,  0 },
     { "QOI",    DecoderTier::P2, "qoi",                      15,  0 },
+    // TODO(S302/Phase2): TGA decode — replace stb_image with a minimal TGA reader
     { "TGA",    DecoderTier::P2, "stb_image",                15,  0 },
     // P3 — Video & 3D
     { "MP4",    DecoderTier::P3, "WMF",                      30,  0 },

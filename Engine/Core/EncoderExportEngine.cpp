@@ -99,7 +99,8 @@ bool EncoderExportEngine::WritePNG(const uint8_t* data, uint32_t w, uint32_t h, 
     if (!data || w == 0 || h == 0)
         return false;
     // Minimal PNG: signature + IHDR + IDAT (uncompressed) + IEND
-    // For production, use libpng or stb_image_write
+    // TODO(S302/Phase2): replace stb_image_write with libspng (PNG) or libjpeg-turbo (JPEG) direct API
+    // See ROADMAP.md §19 "REWRITE" table and ADR A — stb_image removal
     // This is a placeholder that creates a valid but minimal structure
     output.clear();
     // PNG signature
