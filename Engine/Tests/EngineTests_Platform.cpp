@@ -9221,3 +9221,122 @@ TEST(TestS289_AdmxPolicy_KeyCount)
     ASSERT(kAdmxPolicyRegistryRoot != nullptr);
     ASSERT(kAdmxPolicyNamespace != nullptr);
 }
+
+// ── S291 — LensRestApiEndpointContract ───────────────────────────────────────
+
+TEST(TestS291_RestApi_EndpointCount)
+{
+    ASSERT_EQ(kLensRestApiEndpointCount, static_cast<size_t>(7));
+    for (size_t i = 0; i < kLensRestApiEndpointCount; ++i) {
+        ASSERT(kLensRestApiEndpoints[i].path != nullptr);
+        ASSERT(kLensRestApiEndpoints[i].description != nullptr);
+        ASSERT(kLensRestApiEndpoints[i].softTimeoutMs <= kLensRestApiEndpoints[i].hardTimeoutMs);
+    }
+    ASSERT(kLensRestApiDefaultPort > 1024u);
+    ASSERT(kLensRestApiSchemaVersion == 1);
+}
+
+// ── S292 — SqlitePHashIndexContract ──────────────────────────────────────────
+
+TEST(TestS292_SqlitePHash_ThresholdBounds)
+{
+    ASSERT(kSqlitePHashHammingThreshold <= kSqlitePHashHardMaxThreshold);
+    ASSERT(kSqlitePHashHardMaxThreshold <= kSqlitePHashBitDepth);
+    ASSERT(kSqlitePHashBitDepth == 64u);
+    SqlitePHashIndexPolicy p;
+    ASSERT(p.hammingThreshold <= kSqlitePHashHardMaxThreshold);
+    ASSERT(p.algorithm == SqlitePHashAlgorithm::DCT_PHASH);
+}
+
+// ── S293 — CrashTelemetryConsentContract ─────────────────────────────────────
+
+TEST(TestS293_CrashTelemetry_DefaultDisabled)
+{
+    CrashTelemetryConsentPolicy p;
+    ASSERT(p.mode == CrashTelemetryConsentMode::DISABLED);
+    ASSERT(p.piiFilter == CrashTelemetryPiiFilter::STRICT);
+    ASSERT(p.maxDumpKb <= kCrashTelemetryMaxDumpKb);
+    ASSERT(p.rateLimitPerDay <= kCrashTelemetryHardRateLimitPerDay);
+    ASSERT(kCrashTelemetrySchemaVersion == 1);
+}
+
+// ── S294 — ArchiveFileBadgeOverlayContract ────────────────────────────────────
+
+TEST(TestS294_ArchiveFileBadge_PolicyDefaults)
+{
+    ArchiveFileBadgeOverlayPolicy p;
+    ASSERT(p.position == ArchiveFileBadgePosition::BOTTOM_RIGHT);
+    ASSERT(p.style == ArchiveFileBadgeStyle::ROUNDED_PILL);
+    ASSERT(p.badgeSizePx >= kArchiveFileBadgeMinSizePx);
+    ASSERT(p.badgeSizePx <= kArchiveFileBadgeMaxSizePx);
+    ArchiveFileBadgeCoverPolicy cp;
+    ASSERT(cp.hardTimeoutMs <= kArchiveFileBadgeHardTimeoutMs);
+    ASSERT(cp.scanLimitFiles <= kArchiveFileBadgeScanHardLimit);
+}
+
+// ── S295 — MtlsRestAuthContract ───────────────────────────────────────────────
+
+TEST(TestS295_MtlsRestAuth_DefaultDisabled)
+{
+    MtlsRestAuthPolicy p;
+    ASSERT(p.mode == MtlsRestAuthMode::DISABLED);
+    ASSERT(p.clientValidation == MtlsRestCertValidation::STRICT);
+    ASSERT(!p.allowSelfSigned);
+    ASSERT(p.handshakeTimeoutMs <= kMtlsRestAuthHandshakeHardMs);
+    ASSERT(p.sessionLifetimeMs <= kMtlsRestAuthSessionHardMs);
+    ASSERT(kMtlsRestAuthSchemaVersion == 1);
+}
+
+// ── S296 — EngineDllAbiContract ───────────────────────────────────────────────
+
+TEST(TestS296_EngineDllAbi_ExportCount)
+{
+    ASSERT_EQ(kEngineDllAbiExportCount, static_cast<size_t>(8));
+    for (size_t i = 0; i < kEngineDllAbiExportCount; ++i) {
+        ASSERT(kEngineDllAbiExports[i].symbolName != nullptr);
+        ASSERT(kEngineDllAbiExports[i].signature != nullptr);
+    }
+    ASSERT(kEngineDllAbiMajorVersion == 1);
+    ASSERT(kEngineDllAbiCurrentVersion == (1u << 16) | 0u);
+}
+
+// ── S297 — VulkanResizePipelineContract ──────────────────────────────────────
+
+TEST(TestS297_VulkanResize_ApiVersion)
+{
+    ASSERT(kVulkanResizeMinApiVersion > 0u);
+    ASSERT(kVulkanResizeMaxBatchSizeHard >= 64u);
+    ASSERT(kVulkanResizeHardTimeoutMs >= 1000u);
+    ASSERT(kVulkanResizeSchemaVersion == 1);
+    VulkanResizePipelinePolicy p;
+    ASSERT(p.maxBatchSize <= kVulkanResizeMaxBatchSizeHard);
+    ASSERT(p.filter == VulkanResizeFilter::LANCZOS3);
+}
+
+// ── S298 — DbusThumbnailerContract ───────────────────────────────────────────
+
+TEST(TestS298_DbusThumbnailer_DefaultDisabled)
+{
+    DbusThumbnailerPolicy p;
+    ASSERT(p.mode == DbusThumbnailerMode::DISABLED);
+    ASSERT(p.maxThumbnailPx <= kDbusThumbnailerMaxSizePx);
+    ASSERT(p.hardTimeoutMs <= kDbusThumbnailerHardTimeoutMs);
+    ASSERT(kDbusThumbnailerServiceName != nullptr);
+    ASSERT(kDbusThumbnailerInterface != nullptr);
+    ASSERT(kDbusThumbnailerSchemaVersion == 1);
+}
+
+// ── S299 — PluginCatalogSchemaContract ───────────────────────────────────────
+
+TEST(TestS299_PluginCatalog_SchemaVersion)
+{
+    ASSERT(kPluginCatalogSchemaVersion == 1);
+    ASSERT(kPluginCatalogMaxEntries > 0u);
+    ASSERT(kPluginCatalogFetchHardMs >= 5000u);
+    ASSERT(kPluginCatalogRemoteBaseUrl != nullptr);
+    PluginCatalogPolicy p;
+    ASSERT(!p.allowRemoteFetch);          // Default: local only
+    ASSERT(p.requireSignedHash);          // Must verify SHA-256
+    ASSERT(p.enforceTrustChain);          // Must run trust chain
+    ASSERT(p.maxCatalogEntries <= kPluginCatalogMaxEntries);
+}

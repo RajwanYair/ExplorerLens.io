@@ -1,0 +1,152 @@
+name: SSIM Validation
+
+# S300 / ROADMAP v6.0 T4 Phase 1 — SSIM CI gate
+# Runs the corpus-driven SSIM quality gate against all registered decoders.
+# Threshold: SSIM >= 0.95 per decoder family (SSIMValidator.h, S243).
+# Blocks merge if any decoder falls below threshold.
+#
+# Trigger: pull_request (to main) + nightly schedule on main.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Engine/**'
+      - 'data/corpus/**'
+      - 'data/baselines/**'
+      - '.github/workflows/ssim-validation.yml'
+  schedule:
+    # Nightly at 02:30 UTC
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+    inputs:
+      threshold:
+        description: 'SSIM threshold override (0.0–1.0, default 0.95)'
+        required: false
+        default: '0.95'
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  ssim-gate:
+    name: SSIM Quality Gate
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    env:
+      SSIM_THRESHOLD: ${{ github.event.inputs.threshold || '0.95' }}
+      CORPUS_DIR: data/corpus
+      BASELINE_DIR: data/baselines
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Setup MSVC (vcvars64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: '14.5'
+
+      - name: Cache CMake build
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: ssim-build-${{ runner.os }}-${{ hashFiles('Engine/CMakeLists.txt', 'CMakePresets.json') }}
+          restore-keys: ssim-build-${{ runner.os }}-
+
+      - name: Configure (CMake Release)
+        run: |
+          cmake --preset default-release -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build EngineTests
+        run: |
+          cmake --build build --config Release --target EngineTests -j 4
+
+      - name: Verify corpus manifest exists
+        run: |
+          if (-not (Test-Path "$env:CORPUS_DIR/MANIFEST.json")) {
+            Write-Error "Corpus MANIFEST.json not found — corpus may be empty"
+            exit 1
+          }
+          $manifest = Get-Content "$env:CORPUS_DIR/MANIFEST.json" | ConvertFrom-Json
+          $count = ($manifest.files | Measure-Object).Count
+          Write-Host "Corpus: $count files registered"
+          if ($count -lt 10) {
+            Write-Warning "Corpus is small ($count files) — SSIM gate may be incomplete"
+          }
+        shell: pwsh
+
+      - name: Run SSIM validation
+        id: ssim
+        run: |
+          $exe = "build\bin\EngineTests.exe"
+          if (-not (Test-Path $exe)) {
+            Write-Error "EngineTests.exe not found at $exe"
+            exit 1
+          }
+          # Run SSIM-tagged tests (filter by prefix)
+          & $exe --filter "SSIM*" 2>&1 | Tee-Object -FilePath ssim-results.txt
+          $exit = $LASTEXITCODE
+          Write-Host "SSIM test exit code: $exit"
+          exit $exit
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Parse SSIM results
+        id: parse
+        run: |
+          $results = Get-Content ssim-results.txt -Raw -ErrorAction SilentlyContinue
+          $failed = @($results -split "`n" | Where-Object { $_ -match "FAIL|ssim.*<.*0\." })
+          $passed = @($results -split "`n" | Where-Object { $_ -match "PASS" })
+          $passCount = $passed.Count
+          $failCount = $failed.Count
+          Write-Host "SSIM passed: $passCount  failed: $failCount"
+          "ssim_pass=$passCount" >> $env:GITHUB_OUTPUT
+          "ssim_fail=$failCount" >> $env:GITHUB_OUTPUT
+          if ($failCount -gt 0) {
+            Write-Host "##[error] $failCount decoder(s) failed SSIM >= $env:SSIM_THRESHOLD threshold"
+            $failed | ForEach-Object { Write-Host "  FAIL: $_" }
+            exit 1
+          }
+        shell: pwsh
+
+      - name: Post SSIM summary
+        if: always()
+        run: |
+          $pass = '${{ steps.parse.outputs.ssim_pass }}'
+          $fail = '${{ steps.parse.outputs.ssim_fail }}'
+          $threshold = '${{ env.SSIM_THRESHOLD }}'
+          $summary = @"
+          ## SSIM Quality Gate Results
+
+          | Metric | Value |
+          |--------|-------|
+          | Threshold | >= $threshold |
+          | Decoders passed | $pass |
+          | Decoders failed | $fail |
+          | Corpus dir | ``${{ env.CORPUS_DIR }}`` |
+
+          $(if ($fail -eq '0') { '**All decoders meet the SSIM threshold. ✅**' } else { "**$fail decoder(s) below threshold. ❌**" })
+          "@
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+        shell: pwsh
+
+      - name: Upload SSIM artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssim-results-${{ github.run_number }}
+          path: ssim-results.txt
+          retention-days: 14
+
+      - name: Fail if SSIM gate failed
+        if: steps.ssim.outcome == 'failure'
+        run: |
+          Write-Error "SSIM quality gate failed — at least one decoder is below threshold $env:SSIM_THRESHOLD"
+          exit 1
+        shell: pwsh

@@ -1852,6 +1852,18 @@ set(ENGINE_HEADERS
     Core/EvCodeSigningPipelineContract.h         # S287 — EV signing (S5)
     Core/WerCrashReporterContract.h              # S288 — WER crash reports (O3)
     Enterprise/AdmxGroupPolicySchemaContract.h   # S289 — ADMX GPO schema (H1)
+
+    # Sprint S291-S299 — ROADMAP v6.0 Phase 4/6/7 REST / pHash / telemetry / badge / mTLS / DLL / Vulkan / D-Bus / catalog
+    Core/LensRestApiEndpointContract.h           # S291 — REST API endpoint manifest (H11/H22)
+    Core/SqlitePHashIndexContract.h              # S292 — pHash SQLite dedup index (H14)
+    Core/CrashTelemetryConsentContract.h         # S293 — opt-in crash telemetry (H2)
+    Decoders/ArchiveFileBadgeOverlayContract.h   # S294 — archive cover + file-count badge (H5)
+    Core/MtlsRestAuthContract.h                  # S295 — mTLS auth for REST API (S12)
+    Core/EngineDllAbiContract.h                  # S296 — Engine.lib -> Engine.dll C-ABI (B1)
+    GPU/VulkanResizePipelineContract.h           # S297 — Vulkan resize stub (Phase 6)
+    Platform/DbusThumbnailerContract.h           # S298 — D-Bus thumbnailer Linux stub (H18)
+    Plugin/PluginCatalogSchemaContract.h         # S299 — plugin catalog schema (Phase 7)
+
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h

@@ -2901,6 +2901,17 @@ int main()
     RUN_TEST(TestS288_WerCrashReporter_OptInDefault);
     RUN_TEST(TestS289_AdmxPolicy_KeyCount);
 
+    // ROADMAP v6.0 Phase 4/6/7 (S291-S299) Tests:
+    RUN_TEST(TestS291_RestApi_EndpointCount);
+    RUN_TEST(TestS292_SqlitePHash_ThresholdBounds);
+    RUN_TEST(TestS293_CrashTelemetry_DefaultDisabled);
+    RUN_TEST(TestS294_ArchiveFileBadge_PolicyDefaults);
+    RUN_TEST(TestS295_MtlsRestAuth_DefaultDisabled);
+    RUN_TEST(TestS296_EngineDllAbi_ExportCount);
+    RUN_TEST(TestS297_VulkanResize_ApiVersion);
+    RUN_TEST(TestS298_DbusThumbnailer_DefaultDisabled);
+    RUN_TEST(TestS299_PluginCatalog_SchemaVersion);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);
