@@ -1429,4 +1429,15 @@ using namespace ExplorerLens::Engine;
 #include "../Core/EmbeddedJpegExtractor.h"
 #include "../Codec/IccProfileManager.h"
 
+// Sprint S311-S320 — ROADMAP v7.0 Phase 2 First GPU Pixels
+#include "../GPU/D3D11DeviceManager.h"
+#include "../GPU/DXVA2JpegDecodeContract.h"
+#include "../Core/CancelAwareBindCallback.h"
+#include "../Core/OOMKillGuard.h"
+#include "../Pipeline/LastCachedBitmapContract.h"
+#include "../Pipeline/ReadaheadIOContract.h"
+#include "../GPU/D3D11TextureBlitPipeline.h"
+#include "../Decoders/LibJpegTurboEncodeWrapper.h"
+#include "../Decoders/LibSpngDecodeWrapper.h"
+
 #include "EngineTestsMacros.h"
