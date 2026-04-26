@@ -1870,6 +1870,17 @@ set(ENGINE_HEADERS
     Core/EmbeddedJpegExtractor.h                 # S308 — EXIF embedded JPEG fast-path (H13)
     Codec/IccProfileManager.h                    # S309 — lcms2 ICC profile pipeline stub (H32)
 
+    # Sprint S311-S319 — ROADMAP v7.0 Phase 2 First GPU Pixels
+    GPU/D3D11DeviceManager.h                     # S311 — D3D11 device init contract (Phase 2)
+    GPU/DXVA2JpegDecodeContract.h                # S312 — DXVA2 JPEG hw-decode contract (Phase 2)
+    Core/CancelAwareBindCallback.h               # S313 — IBindStatusCallback+AsyncDecodeToken (H36)
+    Core/OOMKillGuard.h                          # S314 — SetProcessWorkingSetSizeEx OOM guard
+    Pipeline/LastCachedBitmapContract.h          # S315 — return last-cached bitmap immediately (H7)
+    Pipeline/ReadaheadIOContract.h               # S316 — parallel I/O readahead N=8 contract (H9)
+    GPU/D3D11TextureBlitPipeline.h               # S317 — D3D11 texture blit (first GPU pixels)
+    Decoders/LibJpegTurboEncodeWrapper.h         # S318 — libjpeg-turbo encode; replaces stb_image_write
+    Decoders/LibSpngDecodeWrapper.h              # S319 — libspng decode; replaces stb_image PNG path
+
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h
