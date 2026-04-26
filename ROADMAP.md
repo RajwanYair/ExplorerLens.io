@@ -1,1335 +1,1133 @@
-# ExplorerLens — Strategic Roadmap v6.0 "Rigel"
+# ExplorerLens — ROADMAP v7.0 "Sirius"
 
-**Version:** 6.0 — April 2026  
-**Current Release:** v39.2.0 "Betelgeuse" (5,045 tests · 45 Catch2 files · 0 errors · 0 warnings)  
-**Supersedes:** ROADMAP v5.0 → archived to `docs/archive/ROADMAP_V5.md`  
-**Prior archive chain:** v4.0 → `ROADMAP_V4.md`, v3.0 → `ROADMAP_V3.md`, v1/v2 → `docs/archive/`  
-**Scope:** Full re-examination — no decision is exempt. Every "Keep" verdict from v5.0 is challenged again.
-
-> "The moment a decision is declared immune to reconsideration is the moment it starts accumulating technical debt."
+> **Deep-rethink edition.** Every major decision re-examined from first principles.
+> Archived: `docs/archive/ROADMAP_V6.md` (v6.0 "Rigel", 63 KB, 97 sections, ADRs A1–A22).
+> Current version: **39.2.0 "Betelgeuse"** · Last updated: **2026-04-26**
 
 ---
 
 ## Table of Contents
 
-1. [Executive Summary & North Star](#1-executive-summary--north-star)
-2. [Full Decision Audit — Every Domain Reopened](#2-full-decision-audit)
-3. [Competitor Matrix — 20 Products, 32 Dimensions](#3-competitor-matrix)
-4. [Harvested Best Practices — 24 Patterns](#4-harvested-best-practices)
-5. [Language, Runtime & Compiler](#5-language-runtime--compiler)
-6. [Frontend — Shell, GUI, CLI & Web](#6-frontend)
-7. [Backend — Engine, Pipeline, Cache & GPU](#7-backend)
-8. [API Design, Error Handling & Versioning](#8-api-design-error-handling--versioning)
-9. [External Libraries, APIs & Data Sources](#9-external-libraries-apis--data-sources)
-10. [Build System, Toolchain & Developer Experience](#10-build-system-toolchain--developer-experience)
-11. [Testing, Quality & Corpus Strategy](#11-testing-quality--corpus-strategy)
-12. [Database & Persistent Storage](#12-database--persistent-storage)
-13. [Documentation Strategy](#13-documentation-strategy)
-14. [CI/CD, Packaging & Distribution](#14-cicd-packaging--distribution)
-15. [Security, Sandboxing & Observability](#15-security-sandboxing--observability)
-16. [Cross-Platform, AI/ML & Advanced Features](#16-cross-platform-aiml--advanced-features)
-17. [Refactor / Rewrite / Delete / Add Register](#17-refactor--rewrite--delete--add-register)
-18. [9-Phase Plan to Best-in-Class](#18-9-phase-plan-to-best-in-class)
-19. [Success Metrics & Exit Criteria](#19-success-metrics--exit-criteria)
-20. [Architecture Decision Log (v6.0)](#20-architecture-decision-log-v60)
-21. [AI Tooling Surface & MCP](#21-ai-tooling-surface--mcp)
-22. [Consolidated Work — v5.0 Survivors](#22-consolidated-work--v50-survivors)
-23. [Sprint Delivery Log](#23-sprint-delivery-log)
+1. [Executive Summary — What Changed from v6.0](#1-executive-summary)
+2. [Reality Check — Honest Current-State Assessment](#2-reality-check)
+3. [North Star & Explicit Non-Goals](#3-north-star--explicit-non-goals)
+4. [Competitor & Reference Matrix](#4-competitor--reference-matrix)
+5. [Harvested Best Practices (H1–H36)](#5-harvested-best-practices)
+6. [Language & Compiler — Final Verdicts](#6-language--compiler)
+7. [Frontend Architecture Rethink](#7-frontend-architecture-rethink)
+8. [Backend Architecture Rethink](#8-backend-architecture-rethink)
+9. [API Design — COM, REST, SDK, CLI](#9-api-design)
+10. [External Libraries & Third-Party APIs](#10-external-libraries--third-party-apis)
+11. [Database & Persistence Strategy](#11-database--persistence-strategy)
+12. [Infrastructure & Distribution](#12-infrastructure--distribution)
+13. [CI/CD Pipeline (27 Workflows)](#13-cicd-pipeline)
+14. [Testing & Quality Strategy](#14-testing--quality-strategy)
+15. [Security Stack](#15-security-stack)
+16. [Observability Stack](#16-observability-stack)
+17. [Documentation Strategy](#17-documentation-strategy)
+18. [Tools & Versions Matrix](#18-tools--versions-matrix)
+19. [Refactor / Rewrite / Delete / Add Register](#19-refactor--rewrite--delete--add-register)
+20. [10-Phase Plan to Best-in-Class](#20-10-phase-plan-to-best-in-class)
+21. [Success Metrics & Exit Criteria](#21-success-metrics--exit-criteria)
+22. [ADR Log v7.0 (ADRs A1–A28)](#22-adr-log-v70)
+23. [Decisions Reversed from v6.0](#23-decisions-reversed-from-v60)
+24. [Sprint Delivery Pipeline S301+](#24-sprint-delivery-pipeline-s301)
 
 ---
 
-## 1. Executive Summary & North Star
+## 1. Executive Summary
 
-**North Star:** ExplorerLens is the definitive Windows Shell thumbnail provider — faster than anything built-in, broader than any competitor, safe enough for enterprise, open enough for community.
+v7.0 is a first-principles rewrite of the roadmap. v6.0 was an incremental evolution; v7.0 forces kill/keep verdicts, adds a 25-product comparison matrix across 40 dimensions, expands harvested best practices from 24 to 36, and commits to specific build outputs per phase rather than vague milestones.
 
-### What v6.0 changes versus v5.0
+### What is materially different in v7.0
 
-| Domain | v5.0 Decision | v6.0 Verdict | Rationale |
-|--------|--------------|--------------|-----------|
-| C++ standard | C++20, C++23 deferred | **C++23 now** for `std::expected`, `std::mdspan`, `if consteval` | MSVC v145 supports C++23 fully |
-| WTL GUI | Keep WTL | **WTL now, WinUI 3 gate at Phase 3** | WTL is productive; WinUI 3 evaluated on merit in Phase 3 |
-| Static HTML | Plain HTML | **HTML + vanilla JS format search** | Zero dependency, fast, works offline |
-| LZMA SDK | Soft retire | **Hard retire Phase 1** — replace with minizip-ng | 13 dead scripts confirmed |
-| Engine layout | 16 subdirectories | **Consolidate to 7 dirs Phase 1** — Phase 1 blocker | 16→7 reduces cognitive load, CMake complexity |
-| STA model | Assumed compliant | **STA audit Phase 1** — block host thread, never pump | Defects found in prototype review |
-| Static analysis | `/W4` only | **`/analyze` + SAL annotations Phase 2** | CET and bounds violations caught pre-ship |
-| Security mitigations | ASLR/DEP/GS | **+CET `/CETCOMPAT` Phase 2** | Win11 hardware enforcement for free |
-| COM boundary | Permissive | **Strict — no STL across COM boundary** | ABI stability, no runtime mismatch |
-| Cache key | Format+size+mtime | **+decoder version Phase 1** | Stale cache after upgrades fixed |
-| PDF backend | MuPDF Phase 3 | **PDFium accelerated to Phase 2** | Better licensing, actively maintained |
-| Streaming decoder | Not planned | **IStreamingDecoder for >50 MB Phase 2** | Large PSD/TIF without full load |
-| Corpus size | 106 files | **150 Phase 1, 300 Phase 2, 500 Phase 3** | SSIM validation requires real files |
-| ADRs | 11 records | **22 ADRs in §20** | Captures v6.0 reopened decisions |
-| Packaging | winget optional | **winget mandatory Phase 1** | Discovery is table stakes |
+| Dimension | v6.0 Decision | v7.0 Verdict |
+|---|---|---|
+| C++ standard | C++20 now, C++23 "plan" | **C++23 commit** — modules, `std::expected`, `std::stacktrace` |
+| Rust research lane | Explore (vague) | **KILL** — no Rust in production path; C++23 with sanitizer coverage is sufficient |
+| WTL GUI framework | Keep WTL for now | **KILL WTL** — migrate LENSManager to WinUI 3 XAML Islands (Phase 3) |
+| stb_image bundled copy | Keep as decoder fallback | **REPLACE** with libspng + libjpeg-turbo direct; stb_image removed from Engine |
+| tinyexr bundled | Keep | **KEEP** — no better lightweight EXR option; pin to v1.0.4 |
+| UnRAR SDK | Ship as optional | **KEEP** but dual-license gate — build without it by default, feature-flag only |
+| REST API transport | HTTP/1.1 | **HTTP/2** (WinHTTP/2 + nghttp2) from Phase 2 |
+| Plugin marketplace | Vague "future" | **Concrete design** — JSON catalog schema, mTLS, code-signed `.lenspkg` bundles |
+| Documentation count | "65 docs" target | **Reduce to 45** high-quality docs — quantity is waste without quality |
+| ADR count | 22 ADRs | **28 ADRs** — 6 new covering GPU, Arm64, mTLS, C++23, WinUI3, UnRAR |
+| Phase count | 9 phases | **10 phases** — Phase 10 adds native Arm64 EC + macOS GA |
+| Test count target | 6,000 | **8,000** by v45.0; automated corpus regression ≥ 750 CC0 files |
+| Decoder directory count | 8 decoder families | **7 decoder families** — Scientific+CAD merged into `Decoders/Specialized/` |
 
 ---
 
-## 2. Full Decision Audit
+## 2. Reality Check
 
-Every decision category from v5.0 is reopened. Verdict: **Execute**, **Keep**, **Accelerate**, **Defer**, or **Kill**.
+An honest snapshot of the project as of v39.2.0 before optimistic roadmap language:
 
-### 2.1 Architecture (A1–A22)
+### What is working well
+- Zero-warnings MSVC v145 build discipline — sustained for 39 major versions
+- Custom test harness at ~5,045 tests with 100% pass rate
+- Sprint cadence: 10 sprints/session, 290+ sprints shipped
+- Contract-header model: new features enter as typed API contracts first, enabling parallel frontend/backend work
+- ETW + structured logging foundation solid; GUID registered
+- COM CLSID registered and stable (`9E6ECB90-5A61-42BD-B851-D3297D9C7F39`)
 
-| # | Decision | v5.0 | v6.0 Verdict | Phase |
-|---|----------|------|--------------|-------|
-| A1 | COM in-process DLL as delivery vehicle | Keep | **Keep** — fastest IPC, no marshal overhead | — |
-| A2 | Single-threaded apartment (STA) host thread; decode on worker pool | Keep | **Keep + Audit** — add `VerifySTA()` assertion at COM entry | P1 |
-| A3 | `std::expected<T,E>` for error propagation; no exception throws across COM | Execute | **Execute** ✅ done in Sprint S211-S220 | Done |
-| A4 | FormatDetect by magic bytes, not file extension | Keep | **Keep** — extension-only detection is fragile | — |
-| A5 | 9-stage decode pipeline: Detect→Probe→CacheCheck→Route→Embedded→Decode→Color→GPUResize→Store | Keep | **Keep** — pipeline is correct; add streaming tap after Probe | — |
-| A6 | GDI+ as CPU fallback renderer | Keep | **Keep until Phase 2** — D3D11 replaces for batch mode | P2 |
-| A7 | libjpeg-turbo fast path for JPEG | Execute | **Execute** ✅ done in S221 | Done |
-| A8 | Engine directory consolidation 16→7 | Defer | **Execute Phase 1 blocker** — 16 dirs is unsustainable | P1 |
-| A9 | 5:1 test-to-source ratio maintained | Keep | **Execute** — ratio at 4.8:1; add 200 tests in P1 | P1 |
-| A10 | STA compliance audit on all COM entry points | Not listed | **Execute Phase 1** — new in v6.0 | P1 |
-| A11 | `std::mdspan` for 2D pixel buffer views | Defer | **Execute Phase 2** — eliminates manual stride arithmetic | P2 |
-| A12 | `/analyze` + SAL annotations on Engine/Core | Not listed | **Execute Phase 2** | P2 |
-| A13 | `/CETCOMPAT` linker flag for CET enforcement | Not listed | **Execute Phase 2** | P2 |
-| A14 | Decoder version embedded in cache key | Defer | **Execute Phase 1** | P1 |
-| A15 | `std::jthread` + `std::stop_token` for cancellable decode | Defer | **Execute Phase 2** — enables timeout + Explorer cancel | P2 |
-| A16 | Plugin trust chain: signed manifest + hash verification | Keep | **Keep** — plugin sandbox redesigned in §15 | P3 |
-| A17 | Structured ETW events per pipeline stage | Execute | **Keep** — ETW provider registered ✅ | Done |
-| A18 | Zero warnings policy enforced by CI | Keep | **Keep** — non-negotiable | — |
-| A19 | Format probe result cached in memory (ProbeCache) | Not listed | **Execute Phase 1** — avoid re-probe on Explorer refresh | P1 |
-| A20 | RAII wrappers for all Win32 handles | Keep | **Keep** — `wil::` adopted for new code | — |
-| A21 | Strict COM boundary: no STL containers across boundary | Not listed | **Execute Phase 1** — audit + `static_assert` guards | P1 |
-| A22 | Structured cache blob format v1 with version header | Not listed | **Execute Phase 1** — enables zero-copy mmap reads | P1 |
+### What is genuinely lagging
+- **GPU decode**: DirectX 11/12 + Vulkan planned since v1.0 — still `[TODO]` stubs; no GPU pixels have ever been rendered by ExplorerLens in production
+- **LENSManager UX**: WTL dialog-based circa 2004 patterns; no dark mode, no high-DPI awareness, no accessibility
+- **Real format coverage**: ~200 declared formats, but the majority of decoders produce stub/fallback output; actual tested decode coverage is ~40–50 real formats via corpus
+- **stb_image**: a bundled single-header "fallback" that silently downgrades decode quality without surfacing that to the user
+- **Documentation drift**: Tier 1 docs (README, USER_GUIDE) are version-synced but Tier 3 ADRs and format validation docs are stale (some reference v22 decisions)
+- **macOS / Linux stubs**: Platform stubs exist but have zero function bodies; "cross-platform" is aspirational marketing at this point
+- **Plugin ecosystem**: PluginCatalogSchemaContract exists as a contract header; zero real plugins exist outside the Engine itself
+- **REST API**: LensRestApiEndpointContract defines 7 endpoints; none are wired to an actual HTTP server
 
-### 2.2 Frontend (F1–F8)
-
-| # | Decision | v5.0 | v6.0 Verdict | Phase |
-|---|----------|------|--------------|-------|
-| F1 | IThumbnailProvider as primary COM interface | Keep | **Keep** — it IS the product | — |
-| F2 | WTL for LENSManager | Keep | **Keep** — battle-tested, zero overhead | — |
-| F3 | Dark mode via `DwmSetWindowAttribute` | Keep | **Keep** | — |
-| F4 | lens.exe CLI for headless decode + batch | Execute | **Keep + Expand** — add `--profile` and `--compare` flags P2 | P2 |
-| F5 | Static HTML format catalogue | Execute | **Keep + vanilla JS search** — Phase 1 add filter/search | P1 |
-| F6 | IPreviewHandler (full-resolution in-pane preview) | Defer | **Execute Phase 3 P0** — highest Explorer UX win | P3 |
-| F7 | System tray icon for quick settings | Defer | **Execute Phase 3** — complements IPreviewHandler | P3 |
-| F8 | First-run wizard / onboarding UX | Not listed | **Execute Phase 3** — reduces support burden | P3 |
-
-### 2.3 Backend (B1–B10)
-
-| # | Decision | v5.0 | v6.0 Verdict | Phase |
-|---|----------|------|--------------|-------|
-| B1 | ExplorerLensEngine.lib (static) → Engine.dll (Phase 4) | Keep | **Keep schedule** — static is safe during refactor | P4 |
-| B2 | SQLite 3.45+ for thumbnail cache | Execute | **Execute Phase 2** — replaces bespoke binary cache | P2 |
-| B3 | L1 in-memory LRU (64 MB), L2 SQLite on-disk (512 MB) | Execute | **Execute Phase 2** with cache key v2 | P2 |
-| B4 | Multi-tenant cache isolation by SID | Defer | **Execute Phase 2** | P2 |
-| B5 | GPU decode pipeline: NVDEC/QuickSync/AMF | Defer | **Execute Phase 2** for D3D11 resize; vendor decode Phase 3 | P2/P3 |
-| B6 | SIMD (AVX2) pixel format conversion | Keep | **Keep** — verified in perf tests | — |
-| B7 | LibRaw embedded preview fast-path | Execute | **Execute** ✅ done in S222 | Done |
-| B8 | PDFium as PDF backend | Phase 3 | **Accelerate to Phase 2** — licensing and maintenance advantage | P2 |
-| B9 | IStreamingDecoder interface for large files (>50 MB) | Not listed | **Execute Phase 2** — PSD/TIF/TIFF zero-copy | P2 |
-| B10 | Decoder version in cache key | Not listed | **Execute Phase 1** | P1 |
-
-### 2.4 Libraries (L1–L16)
-
-| # | Library | v5.0 | v6.0 Verdict |
-|---|---------|------|--------------|
-| L1 | zlib 1.3.1 | Keep | **Keep** |
-| L2 | LZ4 1.9.6 | Keep | **Keep** |
-| L3 | zstd 1.5.6 | Keep | **Keep** |
-| L4 | minizip-ng 4.0.x | Keep | **Keep** — LZMA SDK dead scripts retired |
-| L5 | libjpeg-turbo 3.0.4 | Execute | **Keep** ✅ |
-| L6 | LibWebP 1.4.0 | Keep | **Keep** |
-| L7 | LibRaw 0.21.3 | Execute | **Keep** ✅ |
-| L8 | libheif 1.19.x + libde265 1.0.15 | Keep | **Keep — LGPL compliance via NOTICE** |
-| L9 | dav1d 1.4.x (AV1) | Keep | **Keep** |
-| L10 | stb_image (PNG/TGA/BMP/PNM fallback) | Keep | **Demote to fallback only Phase 2** — replace with libpng + libtiff |
-| L11 | tinyexr (OpenEXR) | Keep | **Keep until Phase 2** — evaluate OpenEXR 3.x |
-| L12 | DirectXTex (DDS/HDR) | Keep | **Keep** |
-| L13 | UnRAR 7.x | Keep | **Review** — license restrictive; evaluate libarchive RAR5 P2 |
-| L14 | LZMA SDK 26.00 | Soft retire | **Hard retire Phase 1** — 13 scripts dead, minizip-ng covers use cases |
-| L15 | MuPDF 1.24 | Phase 3 | **Kill — PDFium replaces** P2 |
-| L16 | WTL 10.0 | Keep | **Keep** |
-
-### 2.5 Testing (T1–T9)
-
-| # | Decision | v5.0 | v6.0 Verdict | Phase |
-|---|----------|------|--------------|-------|
-| T1 | Custom TEST/ASSERT macros as primary harness | Keep | **Keep** — 5,045 tests passing | — |
-| T2 | Catch2 v3.7.1 for integration/behavioral tests | Execute | **Keep + Expand** — 45 files, target 60 files P2 | P2 |
-| T3 | Google Benchmark for perf regression | Keep | **Keep** — 5 benchmarks in baseline.json | — |
-| T4 | SSIM validation in CI for decoder output | Execute | **Execute Phase 1** — threshold ≥0.95 all decoders | P1 |
-| T5 | Corpus-driven testing from `data/corpus/` | Execute | **Execute + Grow** — 150 P1, 300 P2, 500 P3 | P1+ |
-| T6 | Fuzz testing (libFuzzer) per decoder | Defer | **Execute Phase 4** — OSS-Fuzz integration (H21) | P4 |
-| T7 | COM integration tests (host-in-test) | Not listed | **Execute Phase 3** — register DLL in test harness | P3 |
-| T8 | Dev container for reproducible CI environment | Execute | **Keep** ✅ | Done |
-| T9 | Property-based tests for pixel math | Not listed | **Execute Phase 2** — RapidCheck or custom generator | P2 |
-
-### 2.6 Security (S1–S12)
-
-| # | Decision | v5.0 | v6.0 Verdict | Phase |
-|---|----------|------|--------------|-------|
-| S1 | ASLR + DEP + GS via MSVC defaults | Keep | **Keep** | — |
-| S2 | SafeInt for all pixel dimension arithmetic | Keep | **Keep** | — |
-| S3 | No C runtime allocation in STA thread | Keep | **Keep** | — |
-| S4 | OOP AppContainer for plugin host | Defer | **Execute Phase 4** | P4 |
-| S5 | EV code signing | Defer | **Execute Phase 4** | P4 |
-| S6 | SBOM generation in CI | Execute | **Keep** ✅ | Done |
-| S7 | CET (`/CETCOMPAT`) | Not listed | **Execute Phase 2** | P2 |
-| S8 | SAL annotations on all public Engine headers | Not listed | **Execute Phase 2** | P2 |
-| S9 | `dependency-review` GitHub Action | Not listed | **Execute Phase 1** — blocks supply-chain vulns | P1 |
-| S10 | Secret scanning + push protection | Keep | **Keep** | — |
-| S11 | ASAN build in CI nightly | Defer | **Execute Phase 4** | P4 |
-| S12 | mTLS for REST API (Phase 4) | Not listed | **Execute Phase 4** | P4 |
-
-### 2.7 Observability (O1–O5)
-
-| # | Decision | v5.0 | v6.0 Verdict | Phase |
-|---|----------|------|--------------|-------|
-| O1 | ETW provider `ExplorerLens-Engine` | Execute | **Keep** ✅ | Done |
-| O2 | Structured JSON logger (fallback) | Keep | **Keep** | — |
-| O3 | WER crash reporting integration | Defer | **Execute Phase 4** — custom WER handler | P4 |
-| O4 | Perf regression gate in CI (baseline.json) | Execute | **Keep** ✅ | Done |
-| O5 | Live ETW session in LENSManager | Defer | **Execute Phase 3** | P3 |
+### What should be cut or deferred
+- ADMX Group Policy schema (S289) — valid enterprise feature but zero enterprise customers confirmed; defer to Phase 5
+- Linux DBus Thumbnailer (S298) — Linux platform stub not viable until Platform PAL is real; defer to Phase 9
+- AI/Scene-Understanding headers — good ambition, but AI module has no real model weights; must be research-gated
 
 ---
 
-## 3. Competitor Matrix
+## 3. North Star & Explicit Non-Goals
 
-20 products × 32 dimensions. ✅ = yes/strong, ⚠️ = partial/limited, ❌ = no/absent, — = N/A.
+### North Star
+> ExplorerLens is the **fastest, most format-complete, GPU-accelerated Windows thumbnail provider** that ships as a zero-trust shell extension with a first-class developer plugin API.
 
-> Competitors studied: PowerToys, QuickLook, SageThumbs, Icaros, Windows built-in, XnView MP,  
-> macOS Quick Look, ImageGlass, Nomacs, GNOME Tumbler, libvips, Apache Tika, Eagle,  
-> digiKam, Files App (WinUI 3), Kap, RawTherapee, ExplorerLens (current), ExplorerLens (target)
+Operationally: every supported format produces a **correct, color-managed, high-DPI-aware** thumbnail in **< 17 ms** at 235 img/sec batch throughput with **< 5 ms cache hit** latency.
 
-| Dimension | ExplorerLens Now | ExplorerLens Target | PowerToys | QuickLook | SageThumbs | Icaros | Win Built-in | XnView MP | macOS QL | ImageGlass | Nomacs | GNOME Tumbler | libvips | Apache Tika | Eagle | digiKam | Files App | Kap | RawTherapee |
-|-----------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Shell integration (native)** | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **Language / runtime** | C++20 | C++23 | C++ | C# | C++ | C++ | C++ | C++ | ObjC/Swift | C# | C++ | C | C | Java | Electron | C++ | React | Swift | C++ |
-| **License** | MIT | MIT | MIT | GPL3 | Shareware | Freeware | Proprietary | Freeware | Proprietary | MIT | GPL3 | LGPL | LGPL | Apache2 | Proprietary | GPL2 | MIT | GPL3 | GPL3 |
-| **Actively maintained** | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **AVIF / JXL / HEIC** | HEIC✅ AVIF✅ JXL❌ | ✅ | ⚠️ | ⚠️ | ❌ | ❌ | HEIC✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ❌ |
-| **RAW camera (50+ models)** | ✅ | ✅ | ❌ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ⚠️ | ✅ | ✅ | ❌ | ❌ | ✅ |
-| **Archive covers (ZIP/RAR/7z)** | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **PDF thumbnail** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Video keyframe** | ❌ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
-| **3D model (glTF/OBJ/STL)** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Font specimen sheet** | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **SVG rendering** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ❌ |
-| **GPU-accelerated decode** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **IPreviewHandler** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | — | ❌ | ❌ | — | — | — | ❌ | ❌ | ⚠️ | — | — |
-| **IPropertyStore** | ❌ | ✅ | ⚠️ | ❌ | ❌ | ❌ | ✅ | ❌ | — | ❌ | ❌ | — | — | — | ❌ | ❌ | ❌ | — | — |
-| **IContextMenu** | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | — | ❌ | ❌ | — | — | — | ❌ | ❌ | ❌ | — | — |
-| **Plugin ecosystem** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ⚠️ | ✅ | ❌ | ✅ | ❌ |
-| **Headless CLI** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ |
-| **REST API** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **SQLite / persistent cache** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **SSIM-validated CI** | ⚠️ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **SBOM in CI** | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Fuzz testing** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Crash reporting (WER)** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| **EV code signed** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | — | — | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **winget package** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | — | ❌ | — | ✅ | ✅ | — | — | — | ❌ | ❌ | ✅ | ✅ | ❌ |
-| **Enterprise / GPO** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | — | ❌ | ❌ | — | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Store / MSIX** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | — | — | — | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **EXIF-aware rotation** | ✅ | ✅ | ❌ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| **16-bit pixel pipeline** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ |
-| **Perceptual hash (pHash)** | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Open source / MIT** | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+### Success Looks Like
+- A developer can add a new format decoder in < 2 hours via the Plugin SDK
+- An enterprise admin can deploy via ADMX Group Policy + MSIX in a silent push
+- A power user sees thumbnails for `.dng`, `.heic`, `.avif`, `.glb`, `.step`, `.psd` with zero configuration
+- CI catches every performance regression before merge via SSIM + benchmark gates
 
-**Score (out of 32):** ExplorerLens Now = **14** · ExplorerLens Target = **32** · PowerToys = **16** · macOS QL = **18**
+### Explicit Non-Goals (no roadmap item may target these)
+| Non-Goal | Rationale |
+|---|---|
+| Full image editor (crop, adjust, export) | That is Lightroom / darktable; we are a thumbnail provider |
+| Video player or audio player | Shell preview is sufficient; we supply a keyframe thumbnail |
+| Cloud sync or remote storage | We are a local Shell Extension; network I/O is a threat surface |
+| AI model training or inference at user endpoint | Model weights in Shell Extension = unacceptable attack surface |
+| Replacing Windows Explorer | We extend it; we do not replace it |
+| Supporting Windows 7 / 8 / 8.1 | COM APIs we depend on require Windows 10 1903+ |
+| Supporting 32-bit (x86) Shell | Explorer on modern Windows is 64-bit |
 
 ---
 
-## 4. Harvested Best Practices
+## 4. Competitor & Reference Matrix
 
-24 concrete patterns taken from competitors and applied to ExplorerLens.
+Scoring: ✅ = strong · ⚠️ = partial/limited · ❌ = absent/poor · `–` = N/A
 
-| # | Source | Practice | Target Phase |
-|---|--------|----------|--------------|
-| H1 | PowerToys | ADMX Group Policy templates for enterprise config | Phase 4 |
-| H2 | PowerToys | Centralized crash telemetry with user opt-in | Phase 4 |
-| H3 | QuickLook | Space-bar preview shortcut wired through IPreviewHandler | Phase 3 |
-| H4 | QuickLook | Plugin manifest JSON schema — third-party decoders as `.lens` bundles | Phase 3 |
-| H5 | SageThumbs | Multi-image archive: render first frame, overlay file count badge | Phase 2 |
-| H6 | Icaros | Video keyframe scrubbing: seek to 10% point, not frame 0 | Phase 3 |
-| H7 | macOS QL | Async generator: return low-res placeholder immediately, upgrade async | Phase 2 |
-| H8 | macOS QL | QLPreviewPanel style: blurred background, true-color display | Phase 3 |
-| H9 | libvips | Sequential-access decode for large TIFF/PSD: zero full-load | Phase 2 |
-| H10 | libvips | Tile-based decode: read only the thumbnail region from TIFF pyramids | Phase 2 |
-| H11 | Apache Tika | REST server mode: stateless, horizontally scalable decode service | Phase 4 |
-| H12 | Apache Tika | MIME detection from stream: no extension dependency | Done |
-| H13 | XnView MP | EXIF thumbnail extraction as priority path before full decode | Done |
-| H14 | ImageGlass | pHash deduplication: detect resized/re-encoded duplicates | Phase 4 |
-| H15 | digiKam | SQLite metadata cache: schema with index on phash + file_id | Phase 2 |
-| H16 | digiKam | Full LGPL compliance: NOTICE file + link-only usage | Done |
-| H17 | Eagle | Folder-level cover image: first image in folder is folder thumbnail | Phase 3 |
-| H18 | GNOME Tumbler | D-Bus activation model for background daemon — adapt to COM surrogate | Phase 4 |
-| H19 | digiKam | EXIF-aware smart rotation baked into all decoder outputs | Phase 2 |
-| H20 | Files App (WinUI 3) | Mica/Acrylic material + XAML components for LENSManager redesign | Phase 3 gate |
-| H21 | libvips / OSS-Fuzz | Continuous fuzzing via Google OSS-Fuzz integration per decoder | Phase 4 |
-| H22 | Apache Tika REST | Stateless REST service: `POST /decode` returns image + metadata JSON | Phase 4 |
-| H23 | Kap | Plugin manifest with typed JSON schema + validator at load time | Phase 3 |
-| H24 | RawTherapee | Full 16-bit decode pipeline: no premature 8-bit clamping in Engine | Phase 2 |
+| Dimension | ExplorerLens (v39) | Windows Shell Built-in | Apple Quick Look | FastStone Image Viewer | IrfanView 4.7 | XnView MP 1.8 | ACDSee Photo Studio | Adobe Bridge 2026 | Adobe Lightroom Classic | Photo Mechanic 6 | Capture One 24 | darktable 4.8 | digiKam 8 | Nomacs 3.21 | geeqie 2.4 | Affinity Photo 2 | macOS Finder | GNOME Files / Nautilus | KDE Dolphin | ffmpegthumbnailer | GNOME Thumbnailer | WinZip | 7-Zip 24 | Microsoft Photos | Google Photos |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Decode depth** | | | | | | | | | | | | | | | | | | | | | | | | | |
+| Raw camera (DNG/CR3/ARW) | ⚠️ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ❌ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ⚠️ | ✅ |
+| HEIC/AVIF/JXL | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| PSD / PSB layered | ⚠️ | ❌ | ✅ | ⚠️ | ❌ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| EXR / HDR / TIFF 32-bit | ⚠️ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 3D: glTF/OBJ/FBX/STEP | ⚠️ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Archives: ZIP/RAR/7z badge | ⚠️ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Video keyframe | ⚠️ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ |
+| Font preview (TTF/OTF) | ⚠️ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| PDF page 1 thumbnail | ⚠️ | ❌ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ❌ | ❌ | ❌ |
+| **Performance** | | | | | | | | | | | | | | | | | | | | | | | | | |
+| GPU-accelerated decode | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ⚠️ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Sub-5ms cache hit | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| Batch throughput > 200/s | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ⚠️ | ✅ |
+| Async/non-blocking decode | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ |
+| **Quality** | | | | | | | | | | | | | | | | | | | | | | | | | |
+| ICC color management | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ✅ |
+| HDR tone-mapping pipeline | ❌ | ❌ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| High-DPI aware | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| SSIM-validated output | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Platform & Distribution** | | | | | | | | | | | | | | | | | | | | | | | | | |
+| Native Arm64 | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ❌ | ✅ | ✅ |
+| macOS support | ❌ | – | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | – | – | ❌ | – | ✅ | ✅ | ❌ | ✅ |
+| Linux support | ❌ | – | – | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | – | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ |
+| MSIX / Store-ready | ❌ | – | – | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | – | – | ❌ | – | ✅ | ✅ | ✅ | – |
+| Group Policy / ADMX | ❌ | ✅ | – | ❌ | ❌ | ❌ | ✅ | ⚠️ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ❌ |
+| Silent enterprise deploy | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Install footprint < 10 MB | ✅ | – | – | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | – | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | – |
+| **Security & Trust** | | | | | | | | | | | | | | | | | | | | | | | | | |
+| EV code-signed binaries | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | – | – | ❌ | – | ✅ | ✅ | ✅ | ✅ |
+| Plugin sandbox (AppContainer) | ⚠️ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| SLSA provenance level ≥ 2 | ⚠️ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ⚠️ | ⚠️ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Reproducible builds | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Crash telemetry opt-in | ✅ | ⚠️ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| **Developer Experience** | | | | | | | | | | | | | | | | | | | | | | | | | |
+| Public plugin API / SDK | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Plugin marketplace / catalog | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| REST/headless API | ⚠️ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| SBOM (Software Bill of Materials) | ✅ | ❌ | ⚠️ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ⚠️ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ⚠️ | ✅ | ✅ | ⚠️ | ⚠️ | ❌ | ❌ | ⚠️ | ❌ |
+| Fuzzing / OSS-Fuzz | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **UX & Accessibility** | | | | | | | | | | | | | | | | | | | | | | | | | |
+| Dark mode | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | – | – | ✅ | ✅ | ✅ | ✅ |
+| Accessibility (a11y WCAG AA) | ❌ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | – | – | ✅ | ✅ | ✅ | ✅ |
+| Explorer cancel-aware | ⚠️ | ✅ | ✅ | – | – | – | – | – | – | – | – | – | – | – | – | – | ✅ | – | – | – | – | – | – | – | – |
 
----
+### Scorecard Summary (count of ✅)
 
-## 5. Language, Runtime & Compiler
+| Product | ✅ Count / 40 | Tier |
+|---|---|---|
+| Adobe Bridge 2026 | 30 | A |
+| Adobe Lightroom Classic | 29 | A |
+| Apple Quick Look | 28 | A |
+| macOS Finder | 27 | A |
+| Capture One 24 | 26 | A |
+| ACDSee Photo Studio | 25 | A |
+| Photo Mechanic 6 | 22 | B |
+| darktable 4.8 | 22 | B |
+| digiKam 8 | 21 | B |
+| GNOME Files / Nautilus | 20 | B |
+| KDE Dolphin | 19 | B |
+| XnView MP | 19 | B |
+| FastStone Image Viewer | 19 | B |
+| IrfanView 4.7 | 17 | B |
+| Affinity Photo 2 | 17 | B |
+| Microsoft Photos | 16 | B |
+| Google Photos | 16 | B |
+| **ExplorerLens v39** | **15 / 40** | **C (target A)** |
+| WinZip | 12 | C |
+| 7-Zip 24 | 11 | C |
+| Windows Shell Built-in | 9 | C |
+| Nomacs 3.21 | 8 | C |
+| ffmpegthumbnailer | 8 | C |
+| geeqie 2.4 | 8 | C |
+| GNOME Thumbnailer | 8 | C |
 
-### Primary: C++23 / MSVC v145 (cl.exe 19.50)
+**ExplorerLens scores 15/40 today. Target is 32+/40 by v45.0 (Tier A).**
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| `std::expected<T,E>` | ✅ Done | All Engine APIs migrated (S211-S220) |
-| `std::format` | ✅ Done | Replaces `sprintf` in log paths |
-| `std::ranges` | ✅ Done | Decoder dispatch tables use ranges |
-| `std::jthread` / `std::stop_token` | Phase 2 | Cancellable decode workers |
-| `std::mdspan` | Phase 2 | 2D pixel buffer views, stride-safe |
-| `if consteval` | Phase 2 | Compile-time magic byte tables |
-| `std::flat_map` | Phase 3 | Format registry (ordered, cache-friendly) |
-| `[[nodiscard("reason")]]` | Phase 1 | All `std::expected` return sites |
-
-### Language Research Lanes
-
-| Language | Role | Status |
-|----------|------|--------|
-| C++23 (MSVC v145) | Production — everything | Active |
-| Rust 1.80+ | Research lane — parser modules only | Phase 2 eval |
-| Python 3.12 | Build scripts, corpus tooling | Active |
-| PowerShell 7.4 | Build automation, CI glue | Active |
-
-**Rust de-risk plan:** If Rust modules can link as `extern "C"` static libs with zero overhead in MSVC, adopt for format parsers Phase 3. Otherwise kill the lane and close ADR-019.
-
-### WTL vs. WinUI 3
-
-| Criteria | WTL (now) | WinUI 3 (Phase 3 gate) |
-|----------|-----------|------------------------|
-| Dependency | None — header-only | WindowsAppSDK 1.6+ |
-| Build complexity | Low | High (MSIX, package identity) |
-| Runtime cost | ~0 KB | ~25 MB WindowsAppSDK |
-| Visual quality | Win32 classic | Mica/Acrylic, XAML |
-| Accessibility | Manual | XAML accessibility tree |
-| Decision | Keep for v40.x | Evaluate H20 in Phase 3 |
-
----
-
-## 6. Frontend
-
-### 6.1 COM Shell Interfaces
-
-| Interface | Status | Priority | Description |
-|-----------|--------|----------|-------------|
-| `IThumbnailProvider` | ✅ Done | P0 | Core product — thumbnail in Explorer |
-| `IPreviewHandler` | Phase 3 | P0 | Full-resolution in-pane preview (Space) |
-| `IPropertyStore` | Phase 3 | P0 | Expose EXIF/XMP in Details pane |
-| `IContextMenu` | Phase 3 | P1 | "Generate full-res thumbnail" right-click |
-| `IExtractImage` | Phase 4 | P2 | Compat with pre-Vista hosts |
-| `IThumbnailHandlerFactory` | Phase 4 | P2 | Batch generation via factory |
-
-### 6.2 LENSManager GUI (WTL)
-
-| Feature | Status | Phase |
-|---------|--------|-------|
-| COM registration / unregistration | ✅ Done | — |
-| Format enable/disable grid | ✅ Done | — |
-| Cache statistics panel | ✅ Done | — |
-| Decoder health check (DecoderHealthCheck.h) | ✅ Done | — |
-| Export diagnostics (ExportDiagnostics.h) | ✅ Done | — |
-| Dark mode (DarkModeController.h) | ✅ Done | — |
-| Live ETW trace viewer | Phase 3 | P1 |
-| First-run onboarding wizard | Phase 3 | P1 |
-| WinUI 3 redesign | Phase 3 gate | P2 |
-
-### 6.3 lens.exe CLI
-
-| Command | Status | Notes |
-|---------|--------|-------|
-| `lens generate <file>` | ✅ Done | Single thumbnail to stdout / file |
-| `lens batch <dir>` | ✅ Done | Batch with progress bar |
-| `lens cache stats` | ✅ Done | Cache hit/miss/size report |
-| `lens cache purge` | ✅ Done | Invalidate by format or all |
-| `lens register` | ✅ Done | COM registration (admin) |
-| `lens unregister` | ✅ Done | COM unregistration |
-| `lens formats` | Phase 1 | List all supported formats as JSON |
-| `lens profile <file>` | Phase 2 | Per-stage timing breakdown |
-| `lens compare <f1> <f2>` | Phase 2 | SSIM diff between two renders |
-
-### 6.4 Static HTML Format Catalogue
-
-Located at `index.html` (root) and `docs/index.html`.
-
-| Feature | Status |
-|---------|--------|
-| Full format table (200+ rows) | ✅ Done |
-| Decoder family grouping | ✅ Done |
-| Vanilla JS search / filter | Phase 1 |
-| MIME type column | Phase 1 |
-| Corpus coverage badge per format | Phase 2 |
+The biggest gaps are: GPU decode (0), ICC color management (0), dark mode (0), native Arm64 (0), EV code signing (partial), macOS (stub only), MSIX/Store (not started).
 
 ---
 
-## 7. Backend
+## 5. Harvested Best Practices
 
-### 7.1 9-Stage Decode Pipeline
+### From Apple Quick Look (A-tier)
+**H1 — Async placeholder UX**: Render a blurred/scaled version of the last cached thumbnail immediately while the real decode runs in background. Explorer never shows a blank white square. [Phase 2]
 
+**H2 — Crash telemetry opt-in at first run**: Show a single consent dialog on first install. No silent telemetry. Map directly to `CrashTelemetryConsentContract`. [Done — S293]
+
+**H3 — ICC color profile passthrough**: Embed the source ICC profile in the decoded pixel buffer; let the display pipeline apply color management. Do not tone-map inside the decoder. [Phase 3]
+
+**H4 — Spacebar instant preview shortcut**: A single key activates a floating preview panel in Explorer without opening the file. Map to `SpacebarPreviewShortcutContract`. [Done — S281]
+
+**H5 — Cancel-aware decode**: Honor `IThumbnailProvider::GetThumbnail` cancellation via `IBindStatusCallback`. Abort in-flight decode, return `E_ABORT` cleanly. [Phase 2]
+
+### From Adobe Bridge / Lightroom (A-tier)
+**H6 — Smart previews (offline proxy)**: Store a 2560px JPEG proxy in the cache DB alongside the full thumbnail. When the source file is unavailable (network share, disconnected drive), serve the proxy. [Phase 4]
+
+**H7 — Catalog database with per-file metadata**: SQLite `perceptual_hash_index` table keyed on file inode + mtime, not just path. Detect renames and moves without re-decode. Map to `SqlitePHashIndexContract`. [Done — S292]
+
+**H8 — Color-managed preview rendering pipeline**: Bridge uses AGM (Adobe Color Engine). We use LittleCMS (lcms2). Wire lcms2 into the GPU blit path: source profile → sRGB display. [Phase 3]
+
+**H9 — Ingest-time format validation**: When a new file appears in a watched folder, validate its header bytes against the expected magic signature before dispatching to the decoder. Reject corrupt files fast. [Phase 2]
+
+**H10 — Video keyframe extraction**: Extract first non-black keyframe (not necessarily frame 0). Map to `MediaFoundationVideoKeyframeContract`. [Done — S265]
+
+**H11 — REST headless rendering endpoint**: Bridge Cloud can serve thumbnails over HTTP. Wire `LensRestApiEndpointContract` into a real `lens.exe --serve` mode. [Phase 5]
+
+### From Photo Mechanic 6 (B-tier, fastest ingest tool in market)
+**H12 — Parallel I/O with readahead**: Photo Mechanic reads the next N files from a folder while displaying the current one. Implement `ParallelIoManagerContract` with directory readahead of N=8. [Phase 2]
+
+**H13 — Embedded JPEG preview extraction**: For camera raw files, extract the embedded JPEG preview (EXIF tag 0x0201/0x0202) before invoking the raw decoder. This gives a sub-1ms thumbnail for most camera files. [Phase 2]
+
+**H14 — Ingest progress pipeline**: Surface decode progress as an ETW event + REST SSE stream. Consumers can subscribe to progress without polling. [Phase 5]
+
+### From darktable / digiKam (B-tier, open-source, Linux-first)
+**H15 — Reproducible build pipeline**: darktable CI produces bit-for-bit identical binaries via controlled CFLAGS + timestamp stripping. Target: ExplorerLens MSVC builds should match SHA-256 across identical source trees on CI. [Phase 6]
+
+**H16 — SSIM-gated CI**: digiKam CI validates thumbnail output against reference images using SSIM. We now have `ssim-validation.yml` (S300). Target SSIM ≥ 0.95 vs reference. [Done — S300]
+
+**H17 — Plugin API with stable ABI**: darktable's module ABI uses `dt_iop_module_so_t` with explicit versioning. Mirror with `EngineDllAbiContract` v0x00010000. [Done — S296]
+
+**H18 — DBus thumbnailer protocol (Linux)**: Compliant with FreeDesktop.org Thumbnailer D-Bus spec. Enables `gdk-pixbuf-thumbnailer`, Nautilus, and Dolphin to use ExplorerLens decoders. Map to `DbusThumbnailerContract`. [Done — S298, deferred to Phase 9]
+
+### From FastStone / XnView (B-tier, Windows-native, broad format support)
+**H19 — Side-by-side comparison view**: Two thumbnails from different files displayed side-by-side with synchronized zoom/pan. Expose via `IContextMenu` verb `CompareTo`. [Phase 4]
+
+**H20 — WinUI 3 XAML Islands for settings GUI**: FastStone's settings dialog is WTL-era; XnView uses a custom widget toolkit. Both feel dated. WinUI 3 with dark mode + a11y is the right path for LENSManager. [Phase 3]
+
+**H21 — Format filter sidebar**: XnView's filter sidebar lets you show only specific formats. Expose as a LENSManager pane backed by the SQLite format stats table. [Phase 4]
+
+### From IrfanView (B-tier, legendary footprint efficiency)
+**H22 — < 10 MB install footprint**: IrfanView's installer is < 3 MB. Target: ExplorerLens MSI < 8 MB. Current MSI is ~12 MB. Audit all bundled assets. [Phase 3]
+
+**H23 — Plugin marketplace with self-hosted catalog**: IrfanView has a community plugin page. Target: a JSON catalog at `plugins.explorerlens.io` with signed `.lenspkg` bundles. `PluginCatalogSchemaContract` defines the schema. [Done — S299, Phase 7]
+
+### From GNOME / KDE / ffmpegthumbnailer (Linux ecosystem)
+**H24 — FreeDesktop thumbnail spec compliance**: Store thumbnails in `~/.cache/thumbnails/large/` as PNG with `Thumb::URI` and `Thumb::MTime` XMP tags. Enables cross-application thumbnail reuse. [Phase 9]
+
+**H25 — Shared thumbnail cache via DBus**: KDE Dolphin and GNOME Files share a single cache daemon. On Windows, expose a COM out-of-process thumbnail server to allow multiple Explorer windows to share a single cache. [Phase 5]
+
+### From Google Photos (cloud-scale thumbnail pipeline)
+**H26 — Perceptual hash deduplication**: Before decoding, compute a quick pHash of the first 4 KB of the file. If pHash matches a cached entry with same file size, skip decode and return cached bitmap. [Phase 2]
+
+**H27 — Progressive JPEG streaming**: For large JPEG/HEIC files, decode the lowest-resolution scan first and progressively refine. User sees a thumbnail instantly; quality improves in background. [Phase 3]
+
+### From Microsoft Photos (in-box Windows)
+**H28 — WIC codec integration**: Microsoft Photos uses WIC (Windows Imaging Component) as the primary decode path, falling back to custom decoders only for unsupported formats. Audit our WIC passthrough — some formats we hand-decode that WIC handles natively. [Phase 2]
+
+**H29 — MSIX sparse package for shell integration**: Microsoft Photos ships as an MSIX sparse package that can register COM servers without full trust. This avoids the registry pollution of a traditional MSI shell extension. [Phase 6]
+
+### From WinZip / 7-Zip (archive preview specialists)
+**H30 — Archive cover art extraction**: For ZIP/RAR/7z containing image files, extract and display the first image as the archive thumbnail. `ArchiveFileBadgeOverlayContract` covers the badge; the cover art is a separate feature. [Phase 4]
+
+**H31 — Lazy archive enumeration**: Do not enumerate the full archive to find the cover image. Read only the central directory (ZIP), then seek to the first matching file. O(1) for well-formed archives. [Phase 4]
+
+### Cross-cutting (synthesized from matrix gaps)
+**H32 — ICC profile display pipeline (end-to-end)**: Full ICC pipeline: decoder emits `(pixels, icc_profile_bytes)` pair. Renderer applies lcms2 transform to sRGB D65. This is the single biggest quality gap vs Adobe-tier competitors. [Phase 3]
+
+**H33 — Native Arm64 EC build**: Windows on Arm is the fastest-growing PC platform segment. Build with `/arm64EC` (Arm64 Emulation-Compatible) to handle x64 COM host interop. [Phase 6]
+
+**H34 — SLSA Level 2 provenance**: Add `actions/attest-build-provenance@v2` to release workflow. Adds a signed SLSA attestation to every GitHub release artifact. [Phase 3]
+
+**H35 — OOM kill protection**: Register with Windows Memory Dispatcher via `SetProcessWorkingSetSizeEx` + heap trim on `WM_SETTINGCHANGE` for low-memory. Prevent shell host crash when decoding large RAW files. [Phase 2]
+
+**H36 — Explorer cancel-aware batch decode**: Implement `IBindStatusCallback::OnProgress` in the COM server. When Explorer navigates away, cancel in-flight decodes within 50 ms to avoid stalling the shell thread. [Phase 2]
+
+---
+
+## 6. Language & Compiler
+
+### C++ Standard — Final Verdict: C++23 Commit
+
+**Decision (ADR A23)**: Migrate Engine codebase to C++23 at v40.0. No opt-out.
+
+| Feature | C++20 Status | C++23 Gain | Use Case |
+|---|---|---|---|
+| `std::expected<T,E>` | Absent | ✅ Available | Replace `HRESULT` error returns in Engine API |
+| `std::stacktrace` | Absent | ✅ Available | Crash reporter — structured stack in ETW event |
+| `std::flat_map` | Absent | ✅ Available | Hot path LENSTYPE→decoder dispatch (cache-friendly) |
+| `std::print` / `std::println` | Absent | ✅ Available | Replace raw `printf` in CLI and test harness |
+| C++ modules (import std;) | Partial | ✅ Stable in MSVC 19.50 | Reduce PCH rebuild time by ~40% |
+| `[[assume(expr)]]` | Absent | ✅ Available | Decoder hot-path branch hints |
+| Deducing `this` | Absent | ✅ Available | CRTP-free decoder base class |
+| `constexpr std::string` | Partial | ✅ Full | Format magic-byte tables as `constexpr` |
+
+**Migration path**: Set `/std:c++23` in `Engine/CMakeLists.txt`. Address any MSVC C++23 warnings iteratively, one sprint at a time.
+
+### Rust Research Lane — Final Verdict: KILL
+
+**Decision (ADR A24)**: No Rust in ExplorerLens production path. Ever.
+
+**Rationale**:
+- ExplorerLens is a Windows COM in-process DLL. The Rust→COM interglue (`windows-rs`) works but adds 1.2 MB to DLL size and a separate runtime allocator conflict risk in the shell host process.
+- C++23 + ASAN + fuzzing coverage achieves equivalent safety guarantees for the use case.
+- The engineering cost of maintaining a mixed C++/Rust codebase with a 1-person team is unjustifiable.
+- All "Rust decoder" research sprints are cancelled. If a decoder already in Rust exists (e.g., `zune-jpeg`), use it as a C-ABI plugin, not embedded in the Engine.
+
+### Clang/LLVM — Status: CI-only (no production binaries)
+Clang 18 is used only in: ASan workflow, fuzzer build, static analysis (clang-tidy). Production DLL is always MSVC v145.
+
+### Compiler Flags (authoritative)
 ```
-[Explorer IStream] ──▶ FormatDetect ──▶ ProbeHeader ──▶ CacheCheck
-                                                              │
-                             ┌────────────────────────────── hit ──▶ [return cached]
-                             │
-                           miss
-                             │
-                             ▼
-                         Route ──▶ EmbeddedPreview? ──▶ Decode ──▶ ColorCorrect
-                                                                         │
-                                                                    GPUResize ──▶ CacheStore ──▶ [return HBITMAP]
+/std:c++23 /W4 /WX /permissive- /Zc:__cplusplus /Zc:preprocessor
+/fp:fast /GL /Gy /GR- /EHsc /MP
+/D NOMINMAX /D WIN32_LEAN_AND_MEAN /D UNICODE
 ```
 
-**New in v6.0:**
-- ProbeCache: memoize probe result in memory — avoid re-probe on Explorer refresh
-- Streaming tap after ProbeHeader: IStreamingDecoder for files >50 MB
-- Cache key v2: `format + size + mtime + decoder_version`
+---
 
-### 7.2 Engine Directory Consolidation (Phase 1 Blocker)
+## 7. Frontend Architecture Rethink
 
-| Current (16 dirs) | Target (7 dirs) | Rationale |
-|-------------------|-----------------|-----------|
-| Core/ | Core/ | Keep — decode pipeline, render |
-| Decoders/ | Decoders/ | Keep — format decoders |
-| Cache/ | Core/Cache/ | Merge into Core |
-| Pipeline/ | Core/Pipeline/ | Merge into Core |
-| Memory/ | Core/Memory/ | Merge into Core |
-| GPU/ | Core/GPU/ | Merge into Core |
-| Codec/ | Decoders/Codec/ | Merge into Decoders |
-| AI/ | Features/AI/ | New Features/ dir |
-| Media/ | Features/Media/ | New Features/ dir |
-| Platform/ | Platform/ | Keep — PAL |
-| Plugin/ | Plugin/ | Keep |
-| PluginHost/ | Plugin/Host/ | Merge into Plugin |
-| Enterprise/ | Platform/Enterprise/ | Merge into Platform |
-| Utils/ | Utils/ | Keep — shared helpers |
-| CLI/ | CLI/ | Keep |
-| Tests/ | Tests/ | Keep |
+### 7.1 Shell Extension — Keep, Harden
 
-### 7.3 Decoder Priority Tiers
+`LENSShell.dll` stays as a COM in-process server. No change to CLSID. Key hardening work:
 
-| Tier | Formats | Decoder | Phase |
-|------|---------|---------|-------|
-| P0 | JPEG, PNG, BMP, GIF, TIFF | libjpeg-turbo, GDI+, stb_image | ✅ Done |
-| P0 | HEIC, HEIF, AVIF | libheif + libde265 + dav1d | ✅ Done |
-| P0 | WebP | libwebp | ✅ Done |
-| P0 | RAW (600+ camera models) | LibRaw (embedded preview fast-path) | ✅ Done |
-| P0 | ZIP/7z/RAR archives | minizip-ng + dav1d | ✅ Done |
-| P1 | PDF (first page) | PDFium | Phase 2 |
-| P1 | DDS/HDR/TGA | DirectXTex + stb_image | ✅ Done |
-| P1 | OpenEXR | tinyexr → OpenEXR 3.x eval | Phase 2 |
-| P1 | SVG | Direct2D / resvg | Phase 3 |
-| P1 | Video keyframe | FFmpeg mini / MediaFoundation | Phase 3 |
-| P2 | glTF/OBJ/STL | tiny_gltf / par_shapes | Phase 3 |
-| P2 | Font (TTF/OTF) | FreeType 2 | Phase 3 |
-| P2 | PSD/PSB large | IStreamingDecoder (libpsd) | Phase 2 |
-| P3 | DICOM | dcmtk stub | Phase 4 |
-| P3 | HDF5 / scientific | custom stub | Phase 4 |
+| Work Item | Priority | Phase |
+|---|---|---|
+| Cancel-aware decode via `IBindStatusCallback` (H36) | P0 | 2 |
+| Async placeholder thumbnail (H1) | P0 | 2 |
+| OOM kill protection (H35) | P0 | 2 |
+| AppContainer sandbox for decoder spawning | P1 | 3 |
+| Arm64 EC build of LENSShell.dll | P1 | 6 |
+| MSIX sparse package registration (H29) | P2 | 6 |
 
-### 7.4 Cache Architecture
+### 7.2 LENSManager GUI — Kill WTL, Adopt WinUI 3
 
-**L1 — In-memory LRU**
-- Capacity: 64 MB (configurable via registry)
-- Key: `CacheKey_v2 = Blake3(path + size + mtime + decoder_ver)`
-- Eviction: LRU with pinned-set for recently opened files
-- Thread-safe: `std::shared_mutex`
+**Decision (ADR A25)**: Replace WTL with WinUI 3 XAML Islands.
 
-**L2 — SQLite on-disk**
-- Path: `%LOCALAPPDATA%\ExplorerLens\thumbnails.db`
-- Capacity: 512 MB (configurable)
-- Schema: see §12
-- Eviction: LRU by `last_access`; vacuum on startup if >90% full
-- Multi-tenant: isolated by user SID
+WTL was last updated for VS2010 patterns. The LENSManager GUI has:
+- No dark mode support (gap vs every A-tier competitor)
+- No accessibility (MSAA only, no UIA automation)
+- No high-DPI dynamic DPI handling (DPI aware via manifest only)
+- No fluent styling
 
-**Cache Key v2 format:**
+**Migration**:
+- Phase 3: New WinUI 3 project `LENSManager.WinUI/`
+- Legacy WTL `LENSManager/` retained as fallback until WinUI version reaches feature parity
+- All settings read/write goes through `EngineSettings` COM interface; GUI is pure display layer
+
+### 7.3 CLI (`lens.exe`) — Expand
+
+`lens.exe` is the headless CLI and future REST server host.
+
+| Command | Status | Phase |
+|---|---|---|
+| `lens decode <file>` | ✅ Contract exists | 2 |
+| `lens serve --port 7472` | ⚠️ Contract only | 5 |
+| `lens validate <dir>` | ⚠️ Stub | 3 |
+| `lens benchmark` | ✅ Wired to Google Benchmark | Done |
+| `lens inspect <file>` | ❌ New | 4 |
+| `lens corpus ingest <dir>` | ❌ New | 4 |
+
+### 7.4 Static HTML (`index.html`) — Retire
+
+The project root `index.html` is a GitHub Pages landing page with duplicate content from `README.md`. It is unmaintained and out of date. **Decision**: retire `index.html`, redirect GitHub Pages to `docs/` (MkDocs build). [Phase 1]
+
+---
+
+## 8. Backend Architecture Rethink
+
+### 8.1 Directory Consolidation — Target 7 Decoder Families
+
+Current decoder directories (8): `Core/`, `Image/`, `Raw/`, `Document/`, `Archive/`, `Specialized/`, `Vector/`, `Media/`
+
+v7.0 change: merge `Specialized/` and `CAD/` into one `Specialized/` directory. Final 7 families:
+
+| Family | Contents |
+|---|---|
+| `Decoders/Image/` | JPEG, PNG, WebP, AVIF, JXL, BMP, ICO, TIFF |
+| `Decoders/Raw/` | LibRaw: DNG, CR3, ARW, NEF, RAF, ORF, RW2 |
+| `Decoders/Document/` | PDF (PDFium), Office (WinOLE), Font (FreeType) |
+| `Decoders/Archive/` | ZIP, RAR (UnRAR SDK), 7z, TAR |
+| `Decoders/Specialized/` | EXR, HDR, FITS, STEP/OBJ/FBX, glTF, SVG |
+| `Decoders/Vector/` | SVG (resvg), EMF/WMF, CGM |
+| `Decoders/Media/` | Video keyframe (MF), Audio waveform, GIF/APNG animation |
+
+### 8.2 9-Stage Pipeline — Keep, Add ICC Stage
+
+Current pipeline stages (v6.0):
+1. Format Detection
+2. Decoder Selection
+3. Header Validation (H9)
+4. Decode
+5. Color Transform
+6. Resize
+7. Cache Write
+8. Bitmap Delivery
+9. Fallback
+
+v7.0 adds **Stage 5a: ICC Profile Application** between decode and color transform:
+- Decoder emits raw pixels + embedded ICC profile bytes
+- lcms2 transform converts to sRGB D65
+- Stage 5 (color transform) receives already-managed pixels
+
+### 8.3 Concurrency Model
+
+| Component | v6.0 | v7.0 |
+|---|---|---|
+| Decoder dispatch | Thread pool, manual join | `std::jthread` + cancellation token (C++20) |
+| Cache reads | RW lock (SRWLOCK) | `std::shared_mutex` + `std::expected` error path |
+| GPU upload | Staging buffer, manual sync | Zero-copy pipeline via `ZeroCopyUploadContract` |
+| Parallel I/O | Single file at a time | Directory readahead N=8 (H12) |
+
+### 8.4 GPU Pipeline — Concrete Plan (Phase 2–6)
+
+| Phase | Milestone | API |
+|---|---|---|
+| 2 | DirectX 11 texture blit (GDI+ → DX11) | D3D11 |
+| 3 | DXVA2 JPEG/HEIC hardware decode | DXVA2 |
+| 4 | DirectX 12 async upload queue | D3D12 |
+| 5 | NVDEC vendor path (NVIDIA) | NVDEC |
+| 5 | QuickSync vendor path (Intel) | MFX |
+| 6 | Vulkan resize pipeline (H17/S297) | Vulkan 1.1 |
+| 6 | AMF vendor path (AMD) | AMF |
+
+**No GPU decode will ship without a functional software fallback.** Every GPU path has an ASAN-clean CPU fallback.
+
+### 8.5 Cache Architecture
+
+Three cache tiers (unchanged from v6.0, but with concrete size contracts):
+
+| Tier | Storage | Max Size | Eviction |
+|---|---|---|---|
+| L1 in-process | `std::unordered_map<pHash, HBITMAP>` | 64 MB | LRU |
+| L2 file-backed | SQLite BLOB + PNG file in `%LOCALAPPDATA%\ExplorerLens\cache\` | 512 MB | LRU + mtime |
+| L3 proxy (H6) | 2560px JPEG smart preview in SQLite | 2 GB | LRU |
+
+Smart previews (L3) are only generated for camera RAW files and are opt-in via LENSManager.
+
+---
+
+## 9. API Design
+
+### 9.1 COM Interface Contract (Shell ↔ Engine)
+
 ```cpp
-struct CacheKey_v2 {
-    uint64_t path_hash;       // Blake3 of normalized path
-    uint64_t file_size;
-    uint64_t mtime_100ns;
-    uint32_t decoder_version; // NEW in v6.0
-    uint32_t thumb_size;      // requested thumbnail dimension
+// Stable ABI, version 0x00010000 (EngineDllAbiContract)
+interface ILensDecoder : IUnknown {
+    HRESULT Decode(IStream* pStream, UINT cx, HBITMAP* phbmp);
+    HRESULT GetFormatInfo(LENSFORMAT_INFO* pInfo);
+    HRESULT Cancel();  // NEW in v7.0
+};
+
+interface ILensColorManager : IUnknown {
+    HRESULT ApplyIccProfile(BYTE* pixels, UINT cb, const BYTE* pIcc, UINT cbIcc);
 };
 ```
 
----
+### 9.2 REST API (lens.exe --serve, Phase 5)
 
-## 8. API Design, Error Handling & Versioning
+7 endpoints from `LensRestApiEndpointContract`, HTTP/2 transport:
 
-### 8.1 EngineError Enum (v2)
+| Method | Path | Description |
+|---|---|---|
+| GET | `/v1/thumbnail?path={}&size={}` | Decode + return PNG thumbnail |
+| GET | `/v1/formats` | JSON array of supported formats |
+| GET | `/v1/cache/stats` | Cache hit/miss counters |
+| DELETE | `/v1/cache` | Flush all cache tiers |
+| POST | `/v1/decode` | Multipart file decode (headless) |
+| GET | `/v1/health` | Liveness + version |
+| GET | `/v1/metrics` | Prometheus-format counters |
 
-```cpp
-enum class EngineError : uint32_t {
-    OK                  = 0,
-    FORMAT_UNKNOWN      = 1,
-    DECODE_FAILED       = 2,
-    IO_ERROR            = 3,
-    UNSUPPORTED_VARIANT = 4,
-    TIMEOUT             = 5,
-    PLUGIN_REJECTED     = 6,
-    CACHE_MISS          = 7,
-    CACHE_CORRUPT       = 8,   // NEW v6.0
-    PROBE_INCONCLUSIVE  = 9,   // NEW v6.0
-    OUT_OF_MEMORY       = 10,  // NEW v6.0
-    CANCELLED           = 11,  // NEW v6.0 (jthread cancel)
-};
+Auth: mTLS only (`MtlsRestAuthContract`). No API key, no bearer token.
+
+### 9.3 Plugin SDK (C ABI)
+
+```c
+// plugin_api.h — stable C ABI, PluginCatalogSchemaContract
+typedef struct {
+    uint32_t api_version;       // 0x00010000
+    const char* format_id;      // "image/avif"
+    const char* display_name;   // "AVIF Decoder"
+    HRESULT (*decode)(IStream*, UINT cx, HBITMAP* out);
+    void    (*on_unload)(void);
+} LensPluginV1;
 ```
 
-### 8.2 IStreamingDecoder Interface (Phase 2)
+Plugin package format: `.lenspkg` = ZIP containing `plugin.dll` + `manifest.json` (signed, `PluginManifestSchemaContract`).
+
+### 9.4 Error Design (C++23 `std::expected`)
 
 ```cpp
-struct IStreamingDecoder {
-    virtual std::expected<ThumbnailResult, EngineError>
-        DecodeStream(ISequentialStream* stream, const DecodeParams& p) = 0;
-
-    virtual std::expected<ThumbnailResult, EngineError>
-        DecodeEmbeddedPreview(ISequentialStream* stream) = 0;  // NEW v6.0
-
-    virtual uint64_t EstimatedMemoryPeak(uint64_t file_size) const noexcept = 0;
-    virtual ~IStreamingDecoder() = default;
-};
+// v7.0: replace HRESULT error returns in Engine-internal paths
+std::expected<DecodedBitmap, EngineError> Decode(
+    IStream* pStream, UINT cx);
 ```
 
-### 8.3 REST API (Phase 4)
-
-Built with `cpp-httplib` (header-only, no Boost).
-
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/v1/decode` | POST | Bearer | Decode file → thumbnail (multipart) |
-| `/v1/decode/batch` | POST | Bearer | Batch decode list of paths |
-| `/v1/formats` | GET | None | List all supported formats as JSON |
-| `/v1/cache/stats` | GET | Bearer | Cache hit/miss/size/eviction counts |
-| `/v1/cache/purge` | DELETE | Bearer | Purge cache by format glob or all |
-| `/v1/health` | GET | None | Liveness probe (Kubernetes-compatible) |
-| `/v1/version` | GET | None | Version + build info JSON |
-
-Auth model: `Authorization: Bearer <token>` — token is a SHA-256 HMAC over a per-session secret. mTLS in Phase 4 for enterprise deployments.
-
-### 8.4 Versioning Policy
-
-- **COM interface versioning:** New interfaces registered under new ProgID suffix (`LENSShell.v2`)
-- **Engine ABI:** Static lib — no ABI compat required until Engine.dll Phase 4
-- **Cache format versioning:** Version byte at offset 0 of every blob; migration on open
-- **REST API versioning:** URI path (`/v1/`, `/v2/`) — never break `/v1/` once GA
+`EngineError` carries: `HRESULT hresult`, `std::string_view context`, `std::stacktrace trace`.
 
 ---
 
-## 9. External Libraries, APIs & Data Sources
+## 10. External Libraries & Third-Party APIs
 
-### 9.1 Library Inventory (30 total)
+### Kill List (libraries to remove)
+| Library | Reason | Replacement |
+|---|---|---|
+| `stb_image` | Silent quality downgrade; limited color depth | libspng (PNG) + libjpeg-turbo (JPEG) direct |
+| `tinyxml2` (if present) | Redundant — pugixml already in use | pugixml only |
 
-| Library | Version | Purpose | License | Phase |
-|---------|---------|---------|---------|-------|
-| zlib | 1.3.1 | Deflate (ZIP, PNG) | zlib | ✅ |
-| LZ4 | 1.9.6 | LZ4 frame decode | BSD-2 | ✅ |
-| zstd | 1.5.6 | Zstandard decode | BSD-3 | ✅ |
-| minizip-ng | 4.0.x | ZIP/7z/LZMA archives | zlib | ✅ |
-| libjpeg-turbo | 3.0.4 | JPEG fast decode | IJG+BSD | ✅ |
-| libwebp | 1.4.0 | WebP decode | BSD-3 | ✅ |
-| LibRaw | 0.21.3 | RAW camera decode | LGPL2.1 | ✅ |
-| libheif | 1.19.x | HEIC/HEIF container | LGPL3 | ✅ |
-| libde265 | 1.0.15 | HEVC decoder for HEIF | LGPL3 | ✅ |
-| dav1d | 1.4.x | AV1 decoder (AVIF) | BSD-2 | ✅ |
-| stb_image | 2.30 | PNG/TGA/BMP/PNM fallback | MIT/PD | ✅ |
-| tinyexr | 1.0.9 | OpenEXR decode | BSD-3 | ✅ |
-| DirectXTex | Jun 2024 | DDS/HDR/TGA | MIT | ✅ |
-| WTL | 10.0 | GUI framework | MIT | ✅ |
-| WIL | 1.0.240803 | Win32 RAII wrappers | MIT | ✅ |
-| Catch2 | 3.7.1 | Integration test harness | BSL-1.0 | ✅ |
-| Google Benchmark | 1.8.4 | Microbenchmarks | Apache-2.0 | ✅ |
-| nlohmann/json | 3.11.3 | JSON for CLI output, plugin manifests | MIT | ✅ |
-| SQLite | 3.46.x | L2 thumbnail cache | PD | Phase 2 |
-| PDFium | latest | PDF first-page thumbnail | Apache-2.0 | Phase 2 |
-| OpenEXR | 3.x | Full EXR (replaces tinyexr) | BSD-3 | Phase 2 eval |
-| libpng | 1.6.x | PNG (replaces stb_image for PNG) | libpng | Phase 2 |
-| libtiff | 4.6.x | TIFF streaming | libtiff | Phase 2 |
-| FreeType | 2.13.x | Font specimen | FreeType | Phase 3 |
-| resvg | 0.43.x | SVG via Rust C API | MIT | Phase 3 |
-| tiny_gltf | 2.9.x | glTF parse | MIT | Phase 3 |
-| par_shapes | — | 3D mesh → thumbnail | MIT | Phase 3 |
-| ONNX Runtime | 1.18.x | AI scene understanding | MIT | Phase 5 |
-| cpp-httplib | 0.16.x | REST server | MIT | Phase 4 |
-| libarchive | 3.7.x | RAR5 alt to UnRAR | BSD-2 | Phase 2 eval |
+### Keep List (with version pins)
+| Library | Version | Purpose | License |
+|---|---|---|---|
+| zlib | 1.3.1 | Deflate decompression | zlib |
+| LZ4 | 1.9.4 | Fast compression for L1 cache | BSD-2 |
+| zstd | 1.5.6 | High-ratio compression for L2 cache | BSD-3 |
+| libwebp | 1.4.0 | WebP decode/encode | BSD-3 |
+| minizip-ng | 4.0.7 | ZIP archive handling | zlib |
+| LibRaw | 0.21.3 | Camera RAW decode | LGPL-2.1 |
+| dav1d | 1.4.3 | AV1 video decode | BSD-2 |
+| libde265 | 1.0.15 | HEVC decode (HEIF) | LGPL-3 |
+| libheif | 1.19.5 | HEIF/HEIC container | LGPL-3 |
+| tinyexr | 1.0.4 | OpenEXR decode | BSD-3 |
+| tinygltf | 2.8.22 | glTF 2.0 decode | MIT |
+| resvg | 0.44 | SVG rasterization (Rust, C-ABI) | MPL-2 |
+| FreeType | 2.13.3 | Font rasterization | FTL |
+| PDFium | 6721 | PDF page rasterization | BSD-3 |
+| lcms2 | 2.16 | ICC color management | MIT |
+| SQLite | 3.46.1 | Cache + catalog database | Public Domain |
+| pugixml | 1.14 | XML parsing | MIT |
+| Google Benchmark | 1.9.1 | Performance benchmarks | Apache-2 |
+| Catch2 | 3.7.1 | Unit test framework | BSL-1 |
 
-### 9.2 APIs & Data Sources
+### Evaluate / Add List
+| Library | Purpose | Decision Gate |
+|---|---|---|
+| libjpeg-turbo 3.0 | Replace stb_image for JPEG; SIMD-accelerated | Phase 2 |
+| libspng 0.7 | Replace stb_image for PNG; ASAN-clean | Phase 2 |
+| lcms2 (already listed) | Wire into decode pipeline — exists but not wired | Phase 3 |
+| nghttp2 1.62 | HTTP/2 for REST server | Phase 5 |
+| WinUI 3 (WindowsAppSDK 1.5) | LENSManager GUI replacement | Phase 3 |
+| OpenColorIO 2.4 | ACES/DCI-P3 wide gamut support | Phase 7 (research) |
 
-| API / Source | Purpose | Phase |
-|--------------|---------|-------|
-| Windows ETW | Observability events | ✅ Done |
-| Windows WER | Crash report integration | Phase 4 |
-| Windows Imaging Component (WIC) | GDI+ fallback encode | ✅ Done |
-| Direct2D / Direct3D 11 | GPU-accelerated resize | Phase 2 |
-| MediaFoundation | Video keyframe decode | Phase 3 |
-| GitHub Actions API | CI status badges | ✅ Done |
-| OSS-Fuzz | Continuous fuzz testing | Phase 4 |
-| winget-pkgs repo | Package distribution | Phase 1 |
-| Chocolatey community | Alt distribution | Phase 2 |
-| Microsoft Store | MSIX distribution | Phase 5 |
-
----
-
-## 10. Build System, Toolchain & Developer Experience
-
-### 10.1 Current Toolchain
-
-| Tool | Version | Role |
-|------|---------|------|
-| MSVC cl.exe | 19.50 (v145) | C++23 compiler |
-| CMake | 4.3.1 | Engine build system |
-| Ninja | 1.12.x | Build backend |
-| MSBuild | 17.x | LENSShell + LENSManager |
-| vcpkg | 2024.x | Package manager |
-| WiX | 4.0.x | MSI packaging |
-| Inno Setup | 6.3.x | Portable installer |
-| PowerShell | 7.4+ | Build scripts |
-| CMake presets | — | `default-release`, `default-debug`, `asan` |
-
-### 10.2 Developer Experience Improvements
-
-| Improvement | Status | Phase |
-|-------------|--------|-------|
-| `Build-MSVC.ps1` one-command build | ✅ Done | — |
-| Dev container (`.devcontainer/`) | ✅ Done | — |
-| `dependency-review` GH Action | Phase 1 | P1 |
-| Retire 13 dead build scripts | Phase 1 | P1 |
-| `asan` CMake preset in CI nightly | Phase 4 | P4 |
-| `--preset default-debug` with `/fsanitize=address` | Phase 4 | P4 |
-| Reproducible builds (Dockerfile) | ✅ Done | — |
-| `lens.exe formats --json` for tooling | Phase 1 | P1 |
-
-### 10.3 Scripts to Retire (Phase 1)
-
-| Script | Reason |
-|--------|--------|
-| `Build-LZMA-SDK-26.00.ps1` | LZMA SDK hard retired |
-| `Rebuild-All-With-MD.ps1` | Superseded by Build-MSVC.ps1 |
-| `Remove-Win32-Configurations.ps1` | Win32 configs removed |
-| `Fix-PCH-Corruption.ps1` | PCH issues resolved |
-| `Update-All-Libraries.ps1` | Replaced by vcpkg |
-| `Download-Updates.ps1` | Replaced by vcpkg |
-| `build-and-log.bat` | Replaced by PowerShell |
-| `test-and-log.bat` | Replaced by PowerShell |
-| `ExplorerLens-Profile.ps1` | Merged into Build-MSVC.ps1 |
-| `Find-All-Tools.ps1` | Merged into Test-Build-Environment.ps1 |
-| `Sign-Binaries.ps1` | Placeholder — no EV cert yet |
-| `Verify-Complete-Build.ps1` | Superseded by Check-Build-Status.ps1 |
-| `Run-CodeCoverage.ps1` | Replaced by coverage preset |
+### Third-Party APIs
+| API | Purpose | Auth | Phase |
+|---|---|---|---|
+| Windows Imaging Component (WIC) | Native Windows codec passthrough | None (COM in-proc) | 2 |
+| Windows Media Foundation | Video keyframe extraction | None | 2 |
+| DXVA2 / MFT | Hardware video decode | None | 3 |
+| ETW (Event Tracing for Windows) | Structured telemetry | None | Done |
+| GitHub Releases API | CI artifact upload | GITHUB_TOKEN | Done |
+| OSS-Fuzz | Fuzzer integration | GCP service account | Done (S290) |
 
 ---
 
-## 11. Testing, Quality & Corpus Strategy
+## 11. Database & Persistence Strategy
 
-### 11.1 Test Framework Stack (9 Layers)
+### Primary Store: SQLite (no change, but schema evolved)
 
-| Layer | Framework | Count | Purpose |
-|-------|-----------|-------|---------|
-| 1 | Custom TEST/ASSERT macros | ~5,045 | Unit tests — logic, pixel math, format parsing |
-| 2 | Catch2 v3.7.1 | ~1,380 | Integration + behavioral (45 files) |
-| 3 | Google Benchmark | 5 | Perf regression (baseline.json) |
-| 4 | SSIM validation | Per decoder | Image quality gating in CI |
-| 5 | Corpus-driven | 106 files now | Real I/O decoder validation |
-| 6 | Fuzz (libFuzzer) | Phase 4 | Per-decoder crash resistance |
-| 7 | COM integration | Phase 3 | Host DLL in test harness |
-| 8 | Property-based | Phase 2 | Pixel math generators |
-| 9 | ASAN nightly | Phase 4 | Memory safety |
+**Decision (ADR A14 — retained)**: SQLite is the correct choice. No LMDB, no Redis, no RocksDB. ExplorerLens is an in-process Shell Extension; a network database is a security boundary violation.
 
-### 11.2 Quality Gates (CI blocking)
-
-| Gate | Threshold | Status |
-|------|-----------|--------|
-| Build (0 errors, 0 warnings) | Mandatory | ✅ |
-| Unit tests (all pass) | 100% | ✅ |
-| Catch2 tests (all pass) | 100% | ✅ |
-| Perf regression (baseline.json) | ≤5% regress | ✅ |
-| SSIM ≥ 0.95 per decoder | All decoders | Phase 1 |
-| Corpus coverage badge | All P0 decoders | Phase 1 |
-| `dependency-review` | No critical CVEs | Phase 1 |
-| SBOM generated | Every release | ✅ |
-| Secret scanning | No secrets in git | ✅ |
-| Code coverage (Engine/) | ≥75% line | Phase 2 |
-| ASAN nightly | 0 violations | Phase 4 |
-| Fuzz CI | No crashes | Phase 4 |
-| COM integration | All interfaces | Phase 3 |
-
-### 11.3 Corpus Growth Plan
-
-| Phase | Target Files | Formats | SSIM Gate |
-|-------|-------------|---------|-----------|
-| Now | 106 | P0 decoders | Manual |
-| Phase 1 | 150 | +PDF, +EXR, +DDS | CI automated |
-| Phase 2 | 300 | +PSD, +TIFF large, +video | CI + baseline |
-| Phase 3 | 500 | +SVG, +font, +3D | Per-format |
-| Phase 4 | 750 | All decoders | Fuzz-seeded |
-
-### 11.4 Test File Placement Rules
-
-- New `TEST()` bodies → `Engine/Tests/EngineTests_Platform.cpp`
-- New `extern void` decls → `Engine/Tests/EngineTestsExterns.h`
-- New `RUN_TEST()` calls → `Engine/Tests/EngineTests.cpp`
-- New `#include` directives → `Engine/Tests/EngineTestsIncludes.h`
-- New Catch2 test files → `Engine/Tests/Catch2Tests/`
-- File size limit: 500 KB per file; split at `//==` boundaries
-
----
-
-## 12. Database & Persistent Storage
-
-### 12.1 Storage Items
-
-| Item | Storage | Location | Notes |
-|------|---------|----------|-------|
-| Thumbnail blobs (L2 cache) | SQLite | `%LOCALAPPDATA%\ExplorerLens\thumbnails.db` | Phase 2 |
-| User settings | Registry | `HKCU\Software\ExplorerLens` | ✅ Done |
-| COM registration | Registry | `HKCR\CLSID\{...}` | ✅ Done |
-| Format enable/disable | Registry | `HKCU\Software\ExplorerLens\Formats` | ✅ Done |
-| ETW trace sessions | Windows ETW | — | ✅ Done |
-| Corpus MANIFEST.json | JSON file | `data/corpus/MANIFEST.json` | ✅ Done |
-| Benchmark baseline | JSON file | `data/benchmarks/baseline.json` | ✅ Done |
-| Decoder SSIM baselines | JSON file | `data/baselines/` | Phase 1 |
-| Plugin manifests | JSON files | `%PROGRAMDATA%\ExplorerLens\Plugins\` | Phase 3 |
-| Enterprise ADMX policy | Registry (GPO) | HKLM + ADMX template | Phase 4 |
-
-### 12.2 SQLite Schema (Phase 2)
+### Schema v7.0
 
 ```sql
-CREATE TABLE thumbnails (
-    path_hash     BLOB NOT NULL,   -- Blake3(normalized_path), 32 bytes
-    file_size     INTEGER NOT NULL,
-    mtime_100ns   INTEGER NOT NULL,
-    decoder_ver   INTEGER NOT NULL, -- CacheKey_v2.decoder_version
-    thumb_size    INTEGER NOT NULL,
-    phash         INTEGER,          -- perceptual hash (Phase 4)
-    palette       BLOB,             -- dominant colors JSON (Phase 4)
-    pixel_data    BLOB NOT NULL,    -- compressed BGRA thumbnail
-    created_at    INTEGER NOT NULL,
-    last_access   INTEGER NOT NULL,
-    PRIMARY KEY (path_hash, thumb_size)
-) WITHOUT ROWID, STRICT;
+-- Thumbnail cache index
+CREATE TABLE thumbnail_cache (
+    id          INTEGER PRIMARY KEY,
+    file_path   TEXT NOT NULL,
+    file_inode  INTEGER,           -- for rename detection
+    file_mtime  INTEGER NOT NULL,  -- Unix timestamp
+    file_size   INTEGER NOT NULL,
+    phash       BLOB,              -- 8-byte perceptual hash (SqlitePHashIndexContract)
+    thumb_path  TEXT,              -- path to .png in cache dir
+    width       INTEGER,
+    height      INTEGER,
+    decoder_id  TEXT,              -- which decoder produced it
+    decode_ms   INTEGER,           -- decode latency for analytics
+    created_at  INTEGER DEFAULT (unixepoch()),
+    last_hit    INTEGER DEFAULT (unixepoch())
+);
+CREATE INDEX idx_phash ON thumbnail_cache(phash);
+CREATE INDEX idx_path  ON thumbnail_cache(file_path);
+CREATE INDEX idx_mtime ON thumbnail_cache(file_mtime);
 
-CREATE INDEX idx_last_access ON thumbnails(last_access);
+-- Smart preview store (H6, Phase 4)
+CREATE TABLE smart_previews (
+    id           INTEGER PRIMARY KEY,
+    cache_id     INTEGER REFERENCES thumbnail_cache(id) ON DELETE CASCADE,
+    jpeg_blob    BLOB,             -- 2560px JPEG
+    icc_profile  BLOB,            -- embedded ICC profile
+    created_at   INTEGER DEFAULT (unixepoch())
+);
+
+-- Plugin catalog (PluginCatalogSchemaContract)
+CREATE TABLE plugins (
+    id           INTEGER PRIMARY KEY,
+    plugin_id    TEXT UNIQUE NOT NULL,
+    version      TEXT NOT NULL,
+    display_name TEXT,
+    install_path TEXT,
+    manifest_sig BLOB,            -- ed25519 signature of manifest.json
+    enabled      INTEGER DEFAULT 1,
+    installed_at INTEGER DEFAULT (unixepoch())
+);
+
+-- Format statistics (for LENSManager sidebar, H21)
+CREATE TABLE format_stats (
+    format_id    TEXT PRIMARY KEY, -- MIME type or LENSTYPE name
+    decode_count INTEGER DEFAULT 0,
+    error_count  INTEGER DEFAULT 0,
+    avg_ms       REAL DEFAULT 0,
+    last_seen    INTEGER DEFAULT (unixepoch())
+);
 ```
 
-### 12.3 Rejected Alternatives
+### Write-Ahead Logging
+`PRAGMA journal_mode = WAL;` — required for concurrent shell thread reads + background writer. Already in plan; confirm in `CacheDatabase.h`.
 
-| Alternative | Rejected Because |
-|-------------|-----------------|
-| LMDB | Complex build; no SQL query for diagnostics |
-| RocksDB | 10 MB+ overhead; overkill for thumbnail blobs |
-| Redis | Requires daemon; wrong deployment model |
-| Custom binary file | No query, no migration path |
-| Win32 File Cache API | OS-managed; no eviction control |
-| ESENT | Complex API; deprecated in modern Windows |
+### Database Location
+`%LOCALAPPDATA%\ExplorerLens\catalog.db` — per-user, not per-machine. Enterprise deployments may redirect via ADMX policy key `LocalCacheRoot`.
 
 ---
 
-## 13. Documentation Strategy
+## 12. Infrastructure & Distribution
 
-### 13.1 Documentation Tiers
+### Build Infrastructure
+| Component | Current | Target |
+|---|---|---|
+| Build host | GitHub Actions `windows-latest` (Server 2025) | `windows-latest` + self-hosted Arm64 runner (Phase 6) |
+| Compiler | MSVC cl.exe 19.50 v145 | MSVC 19.50 v145 + Clang 18 (CI-only) |
+| Build system | CMake 4.3.1 + Ninja 1.13.2 | Same; add CMake presets for Arm64 EC |
+| Package manager | vcpkg (manifest mode) | Same; pin all packages in `vcpkg.json` |
+| Artifact storage | GitHub Releases | GitHub Releases + GitHub Packages (MSIX) |
 
-| Tier | Content | Location | Rule |
-|------|---------|----------|------|
-| T1 User | Install, use, formats | README.md, USER_GUIDE.md, CHANGELOG.md | Working features only |
-| T2 Developer | Build, contribute, debug | docs/development/, CONTRIBUTING.md | Working commands only |
-| T3 Architecture | Decisions, roadmap, ADRs | ROADMAP.md, docs/architecture/, docs/adr/ | Vision + current, clearly labeled |
-| T4 Historical | Old roadmaps, sprint archive | docs/archive/ | Read-only |
+### Distribution Channels
+| Channel | Format | Status | Phase |
+|---|---|---|---|
+| GitHub Releases | `.msi` + `.zip` (portable) | ✅ Done | Done |
+| Scoop bucket | `scoopfile.json` | ✅ Done | Done |
+| MSIX / Microsoft Store | Sparse package | ❌ Not started | 6 |
+| WinGet manifest | `winget` YAML | ❌ Not started | 3 |
+| Chocolatey | `.nupkg` | ❌ Not started | 4 |
+| NuGet (Engine SDK) | `.nupkg` | ⚠️ Stub in CI | 5 |
+| Container (Docker) | `Dockerfile` | ⚠️ Exists, untested | 5 |
 
-### 13.2 Target: 65 Active Docs
+### Infrastructure Decisions
 
-| Category | Count | Examples |
-|----------|-------|---------|
-| Tier 1 | 5 | README, USER_GUIDE, CHANGELOG, LICENSE, NOTICE |
-| Tier 2 | 15 | CONTRIBUTING, TROUBLESHOOTING, QUICK_START, PERFORMANCE, FORMAT_VALIDATION_STATUS, build/ docs |
-| Tier 3 | 20 | ROADMAP, ARCHITECTURE, 22 ADRs |
-| Tier 4 | 15 | Archive chain, old roadmaps, sprint logs |
-| Spec / generated | 10 | SBOM.json, baseline.json, MANIFEST.json |
+**Decision (ADR A26)**: Add WinGet manifest in Phase 3. WinGet is the primary Windows package manager for enterprise deployment as of 2025. Scoop remains the developer-friendly option.
 
-### 13.3 ADR Registry — 22 Records
+**Decision**: Retire `Dockerfile` or make it testable. Docker on Windows + COM Shell Extension is an unsupported configuration. Convert Dockerfile to a CI build-environment image only (no DLL registration).
 
-See §20 for full ADR log. Template:
-
-```markdown
-# ADR-NNN — Decision Title
-
-**Date:** YYYY-MM-DD  
-**Status:** Accepted | Superseded by ADR-NNN | Deprecated  
-**Deciders:** (author name or "team")
-
-## Context
-Why this decision was needed.
-
-## Decision
-What was decided.
-
-## Consequences
-Trade-offs accepted.
-```
-
-### 13.4 Documentation Quality Standards
-
-- ROADMAP is Tier 3 — clearly label **Done**, **Phase N**, **Research Lane**
-- README is Tier 1 — only features that work today
-- CHANGELOG follows Keep-a-Changelog 1.1.0 format
-- ADRs are immutable once `Accepted` — supersede, don't edit
-- All doc links checked by CI (markdown-link-check, Phase 1)
+### Install Footprint Target (H22)
+| Component | Current | Target v42.0 |
+|---|---|---|
+| LENSShell.dll | 2,940 KB | < 2,500 KB (strip debug, ThinLTO) |
+| LENSManager.exe | 400 KB | < 350 KB |
+| External libs (bundled) | ~8 MB | < 6 MB (prune stb_image, unused codecs) |
+| **Total MSI** | **~12 MB** | **< 8 MB** |
 
 ---
 
-## 14. CI/CD, Packaging & Distribution
+## 13. CI/CD Pipeline
 
-### 14.1 Current Workflows (27)
+27 workflows as of v39.2.0. Full inventory below with status and phase alignment.
 
-Major workflows:
-- `build.yml` — CMake Release + Debug
-- `test.yml` — CTest + custom EngineTests
-- `catch2-tests.yml` — Catch2 integration tests
-- `perf-regression.yml` — Benchmark vs. baseline.json
-- `sbom.yml` — SPDX SBOM generation
-- `publish-packages.yml` — NuGet, npm, Container
-- `release.yml` — GitHub Release + artifact upload
-- `codeql.yml` — CodeQL security scanning
-- `dependency-review.yml` — Phase 1
+| # | Workflow File | Status | Trigger | Phase |
+|---|---|---|---|---|
+| 1 | `build.yml` | ✅ Active | push/PR | Done |
+| 2 | `test.yml` | ✅ Active | push/PR | Done |
+| 3 | `release.yml` | ✅ Active | tag push | Done |
+| 4 | `codeql.yml` | ✅ Active | push/PR + schedule | Done |
+| 5 | `dependency-review.yml` | ✅ Active | PR | Done |
+| 6 | `ossf-scorecard.yml` | ✅ Active | schedule | Done |
+| 7 | `asan.yml` | ✅ Active | push/PR | Done (S270) |
+| 8 | `oss-fuzz.yml` | ✅ Active | schedule | Done (S290) |
+| 9 | `ssim-validation.yml` | ✅ Active | push/PR | Done (S300) |
+| 10 | `benchmark.yml` | ✅ Active | schedule | Done |
+| 11 | `publish-packages.yml` | ✅ Active | release | Done |
+| 12 | `clang-tidy.yml` | ✅ Active | push/PR | Done |
+| 13 | `valgrind.yml` | ⚠️ Linux-only | schedule | Phase 9 |
+| 14 | `arm64-build.yml` | ❌ Planned | push/PR | Phase 6 |
+| 15 | `msix-package.yml` | ❌ Planned | tag push | Phase 6 |
+| 16 | `winget-publish.yml` | ❌ Planned | release | Phase 3 |
+| 17 | `corpus-validate.yml` | ❌ Planned | schedule | Phase 3 |
+| 18 | `coverage.yml` | ⚠️ Manual | schedule | Phase 2 |
+| 19 | `msan.yml` | ❌ Planned | schedule | Phase 4 |
+| 20 | `tsan.yml` | ❌ Planned | schedule | Phase 4 |
+| 21 | `ubsan.yml` | ❌ Planned | schedule | Phase 4 |
+| 22 | `perf-regression.yml` | ⚠️ Gate only | push | Phase 2 |
+| 23 | `sbom-update.yml` | ⚠️ Manual | release | Phase 3 |
+| 24 | `slsa-provenance.yml` | ❌ Planned | release | Phase 3 |
+| 25 | `plugin-sdk-test.yml` | ❌ Planned | push/PR | Phase 5 |
+| 26 | `macos-quicklook.yml` | ❌ Planned | push | Phase 10 |
+| 27 | `linux-nautilus.yml` | ❌ Planned | push | Phase 9 |
 
-### 14.2 Planned Phase 2 Additions
-
-| Workflow | Purpose |
-|----------|---------|
-| `ssim-validation.yml` | SSIM gate per decoder against corpus baselines |
-| `coverage.yml` | Line coverage report + badge (≥75% gate) |
-| `asan-nightly.yml` | ASAN build nightly on `main` |
-
-### 14.3 Distribution Channels
-
-| Channel | Status | Phase |
-|---------|--------|-------|
-| GitHub Releases (MSI + ZIP + DLL) | ✅ Done | — |
-| SHA256SUMS + SBOM per release | ✅ Done | — |
-| winget (winget-pkgs PR) | Phase 1 | P1 |
-| Chocolatey community | Phase 2 | P2 |
-| NuGet (ExplorerLensEngine) | Phase 2 | P2 |
-| npm (ExplorerLens CLI wrapper) | Phase 2 | P2 |
-| Docker / ghcr.io (REST server) | Phase 4 | P4 |
-| Microsoft Store (MSIX) | Phase 5 | P5 |
-| Homebrew (macOS stub) | Phase 5 | P5 |
-| Flatpak (Linux stub) | Phase 6 | P6 |
-
-### 14.4 Release Cadence
-
-| Type | Trigger | Contents |
-|------|---------|----------|
-| Sprint release | Every 10 sprints | Changelog, binaries, updated corpus baselines |
-| Patch release | Critical bug / security | Binaries + SHA256SUMS only |
-| Major release | Phase completion | Full build: MSI + ZIP + DLL + EXE + SBOM |
+### Pipeline Quality Gates (must-pass for merge)
+1. `build.yml` — 0 errors, 0 warnings
+2. `test.yml` — 100% pass rate (all ~5K+ tests)
+3. `codeql.yml` — 0 high/critical findings
+4. `asan.yml` — 0 memory errors
+5. `ssim-validation.yml` — SSIM ≥ 0.95 vs reference
+6. `perf-regression.yml` — no metric > 10% regression vs `baseline.json`
+7. `clang-tidy.yml` — 0 tidy violations
 
 ---
 
-## 15. Security, Sandboxing & Observability
+## 14. Testing & Quality Strategy
 
-### 15.1 Security Model
+### Test Count Targets
+| Version | Test Count | Corpus Files | SSIM Gate |
+|---|---|---|---|
+| v39.2.0 (now) | ~5,045 | ~106 CC0 files | 0.95 (new) |
+| v41.0 | 6,000 | 300 CC0 files | 0.95 |
+| v43.0 | 7,000 | 500 CC0 files | 0.97 |
+| v45.0 | 8,000 | 750 CC0 files | 0.97 |
 
-| Layer | Control | Status |
-|-------|---------|--------|
-| ASLR | `/DYNAMICBASE` | ✅ |
-| DEP | `/NXCOMPAT` | ✅ |
-| Stack protection | `/GS` | ✅ |
-| SafeInt | All pixel math | ✅ |
-| Control Flow Guard | `/guard:cf` | ✅ |
-| CET (hardware shadow stack) | `/CETCOMPAT` | Phase 2 |
-| SAL annotations | Engine/Core headers | Phase 2 |
-| OOP AppContainer (plugin host) | `CreateProcessAsUser` + low-integrity | Phase 4 |
-| EV code signing | Authenticode SHA-256 | Phase 4 |
-| ASAN build in CI | `/fsanitize=address` | Phase 4 |
-| libFuzzer per decoder | OSS-Fuzz | Phase 4 |
-| mTLS REST | client cert + CA pin | Phase 4 |
-| Secret scanning | GH push protection | ✅ |
-| dependency-review | GH Action on PRs | Phase 1 |
-| CodeQL | GH Action on push | ✅ |
-| SBOM + NOTICE | Every release | ✅ |
+### Test Layers (9 Layers)
+1. **Unit** — `TEST()` macro harness, pure functions, zero I/O
+2. **Integration** — `IntegrationTests.exe`, real file I/O on corpus
+3. **SSIM regression** — `ssim-validation.yml` vs reference PNGs
+4. **Performance** — Google Benchmark vs `baseline.json` gates
+5. **Fuzz** — OSS-Fuzz + local libFuzzer for 8 decoder targets
+6. **ASAN** — clang + address sanitizer in CI
+7. **Catch2** — property-based tests for cache + hash components
+8. **TSAN/MSAN/UBSan** — sanitizer suite (Phase 4)
+9. **Corpus real-decode** — `corpus-validate.yml`, real file formats, not mocks
 
-### 15.2 Plugin Sandbox Design (Phase 3)
+### Test File Placement (mandatory — Rule #18)
+- New `TEST()` bodies → `Engine/Tests/EngineTests_Platform.cpp`
+- New `extern void RunnerFoo()` → `Engine/Tests/EngineTestsExterns.h`
+- New `RUN_TEST(Foo)` → `Engine/Tests/EngineTests.cpp`
+- New `#include` → `Engine/Tests/EngineTestsIncludes.h`
 
-```
-LENSShell.dll (host)
-    │
-    └─▶ PluginHost.exe (low-integrity, OOP AppContainer — Phase 4)
-            │
-            └─▶ Plugin.dll (loaded in surrogate process)
-                    manifest.json (signed, hash-verified)
-                    plugin_api.h (C ABI only, no STL)
-```
-
-Phase 3: validate signed manifest before load  
-Phase 4: OOP surrogate process with AppContainer  
-
-### 15.3 Crash Reporting (Phase 4)
-
-```cpp
-// WER custom handler
-HRESULT RegisterWERHandler() {
-    return WerRegisterRuntimeExceptionModule(
-        L"ExplorerLens.WerHandler.dll", nullptr);
-}
-```
-
-Crash dumps upload to private Azure Blob (opt-in telemetry, no PII).
-
-### 15.4 Observability Stack
-
-| Layer | Tool | Status |
-|-------|------|--------|
-| ETW provider | `ExplorerLens-Engine` GUID | ✅ Done |
-| Structured JSON log | `ObservabilityIntegration` singleton | ✅ Done |
-| Perf counters | ETW manifest + XPERF | ✅ Done |
-| Live trace viewer | LENSManager ETW panel | Phase 3 |
-| Crash reporting | WER custom handler | Phase 4 |
+### Quality Gate Exit Criteria (per phase)
+| Phase | Gate |
+|---|---|
+| 1 | Build: 0 errors/warnings; Tests: 100% pass; ASAN: clean |
+| 2 | + GPU stub replaced by real D3D11 blit; corpus 300 files |
+| 3 | + SSIM 0.95; ICC pipeline active; WinGet manifest |
+| 4 | + TSAN/MSAN/UBSan clean; corpus 500 files |
+| 5 | + REST API endpoint tested via integration test; SLSA L2 |
+| 6 | + Arm64 EC build green; MSIX package CI passes |
+| 7 | + Plugin marketplace catalog tested with 1 real plugin |
+| 8 | + Smart previews: 2560px JPEG generated for RAW corpus |
+| 9 | + Linux Nautilus CI green; FreeDesktop thumb spec compliant |
+| 10 | + macOS Quick Look CI green; v45.0 released |
 
 ---
 
-## 16. Cross-Platform, AI/ML & Advanced Features
+## 15. Security Stack
 
-### 16.1 Cross-Platform Honest Timeline
-
-| Platform | Status | Phase | Notes |
-|----------|--------|-------|-------|
-| Windows 10 22H2+ | ✅ Full | — | Primary platform |
-| Windows 11 | ✅ Full | — | CET enforcement bonus |
-| Windows Server 2019+ | ✅ Full | — | COM hosting confirmed |
-| macOS 14+ (Quick Look) | Stub | Phase 5 | `QLPreviewProvider` |
-| Linux (Nautilus / KIO) | Stub | Phase 6 | Tumbler D-Bus thumbnailer |
-| Browser (WASM) | Research | Phase 6 | Emscripten + Wasm decode |
-
-### 16.2 AI/ML Features `[ai]` Feature Flag
-
-All AI features are gated behind `LENS_FEATURE_AI` compile flag.
-
-| Feature | Model | Phase |
-|---------|-------|-------|
-| Scene understanding (classify foreground) | MobileNet V3 (ONNX) | Phase 5 |
-| Smart crop (saliency-based thumbnail center) | U² Net (ONNX) | Phase 5 |
-| Image Quality Assessment (reject blurry) | BRISQUE (custom) | Phase 5 |
-| Semantic search index (`lens search "sunset"`) | CLIP (ONNX) | Phase 6 |
-| Upscale low-res thumbnails | ESRGAN 4x (ONNX) | Phase 5 |
-| Face-aware crop | RetinaFace (ONNX) | Phase 6 |
-
-ONNX Runtime 1.18.x — CPU EP by default, DirectML EP if GPU available.
-
-### 16.3 Advanced Features by Phase
-
-| Feature | Phase |
-|---------|-------|
-| Stereo / panoramic image viewer | Phase 7 |
-| Design file formats (Figma export, Sketch) | Phase 7 |
-| Third-party plugin catalog (lens-plugins.io) | Phase 7 |
-| 1,000+ corpus files | Phase 8 |
-| Published benchmarks vs. competitors | Phase 8 |
-| D3D12 Video decode pipeline | Phase 9 |
-| Neural upscaling (non-ONNX, custom kernel) | Phase 9 |
-| WASM plugin sandbox | Phase 9 |
+### 15 Security Controls (v6.0 preserved + 3 new)
+| ID | Control | Status | Phase |
+|---|---|---|---|
+| S1 | EV code signing pipeline | ⚠️ Partial (S287) | 3 |
+| S2 | COM server registration hardening (no self-registration on network) | ✅ Done | Done |
+| S3 | Input validation in all decoders (magic byte check before decode) | ⚠️ Partial | 2 |
+| S4 | AppContainer plugin sandbox | ⚠️ Contract (S286) | 3 |
+| S5 | mTLS for REST API | ⚠️ Contract (S295) | 5 |
+| S6 | Plugin trust chain validator | ✅ Done (S268) | Done |
+| S7 | ADMX Group Policy schema | ⚠️ Contract (S289) | 5 |
+| S8 | ASAN + fuzzer coverage on all decoders | ✅ Done (S270, S290) | Done |
+| S9 | CodeQL SAST on every push | ✅ Done | Done |
+| S10 | OSSF Scorecard > 7.0 | ⚠️ Active | Phase 2 |
+| S11 | Dependency review on every PR | ✅ Done | Done |
+| S12 | SBOM CycloneDX 1.4 on every release | ✅ Done | Done |
+| S13 | Crash telemetry opt-in consent (no silent telemetry) | ✅ Done (S293) | Done |
+| S14 | WER crash reporter integration | ⚠️ Contract (S288) | 4 |
+| S15 | SLSA Level 2 provenance (H34) | ❌ Not started | 3 |
+| S16 | OOM kill protection (H35) | ❌ Not started | 2 |
+| S17 | Reproducible builds | ❌ Not started | 6 |
+| S18 | UnRAR dual-license gate (feature-flag only) | ⚠️ Design | 3 |
 
 ---
 
-## 17. Refactor / Rewrite / Delete / Add Register
+## 16. Observability Stack
 
-### 17.1 Delete (Phase 1)
+### ETW Events (structured, not printf)
+| Provider | GUID | Events |
+|---|---|---|
+| ExplorerLens-Engine | `{registered}` | Decode start/end, cache hit/miss, error |
+| ExplorerLens-Shell | `{registered}` | COM activate, IThumbnailProvider calls |
+| ExplorerLens-Plugin | `{registered}` | Plugin load/unload, trust check result |
 
+### Metrics Surface (Phase 5)
+`GET /v1/metrics` returns Prometheus-format counters:
+```
+lens_decode_total{format="jpeg",result="ok"} 1234
+lens_decode_duration_ms{quantile="0.95"} 14.2
+lens_cache_hit_total 5678
+lens_cache_miss_total 234
+```
+
+### Live ETW Session (S283)
+`LiveEtwSessionContract` defines a real-time ETW consumer session. `lens.exe --trace` starts it for debugging.
+
+---
+
+## 17. Documentation Strategy
+
+### Reduce from 65 to 45 High-Quality Docs
+
+v6.0 targeted 65 documents. v7.0 reduces to 45. More docs is not better docs. Each document must have an owner, a version tag, and a last-reviewed date.
+
+### 4 Tiers (unchanged)
+| Tier | Audience | Files | Count |
+|---|---|---|---|
+| T1 | End users | README, USER_GUIDE, QUICK_START, TROUBLESHOOTING, CHANGELOG | 5 |
+| T2 | Developers / contributors | ARCHITECTURE, FORMAT_VALIDATION_STATUS, PERFORMANCE, TOOLING, RELEASE_PROCESS, LOCAL_VERIFICATION | 6 |
+| T3 | Design record | ADR files (28), ROADMAP | 29 |
+| T4 | Reference | Format pages (10), API docs (5) | 15 |
+| **Total** | | | **55 docs** |
+
+Wait — 5+6+29+15 = 55. Target is 45. Reduction comes from: collapsing per-format pages into a single `docs/formats/SUPPORTED_FORMATS.md` table, retiring 5 stale ADRs from v1–v5 era, removing `docs/archive/` from the count.
+
+### Documentation Anti-Patterns to Eliminate
+- Version references in Tier 3 docs that are more than 2 major versions stale — **auto-flagged by `Audit-Headers.ps1`**
+- "TODO" sections in Tier 1 docs — end users should not see future plans in the user guide
+- Duplicate content between README and USER_GUIDE — README is 5-minute overview; USER_GUIDE is comprehensive
+
+### ADR Status Lifecycle
+`Proposed → Accepted → Superseded → Deprecated`  
+All 28 ADRs in v7.0 must have explicit status. A22 (v6.0) and below require review.
+
+---
+
+## 18. Tools & Versions Matrix
+
+| Tool | Current Version | Min Supported | Notes |
+|---|---|---|---|
+| MSVC cl.exe | 19.50.35728 (v145) | 19.40 | C++23 requires 19.38+ |
+| CMake | 4.3.1 | 3.25 | Presets v6 format |
+| Ninja | 1.13.2 | 1.11 | |
+| vcpkg | 2025-01 | 2024-06 | manifest mode only |
+| Windows SDK | 10.0.26100.0 | 10.0.19041.0 | |
+| Clang | 18.1.8 | 18.0 | CI-only, not production |
+| Python | 3.12.4 | 3.10 | build scripts only |
+| PowerShell | 7.4.3 | 7.2 | all build-scripts/ |
+| Git | 2.45.2 | 2.30 | |
+| WiX Toolset | 4.0.5 | 4.0 | MSI packaging |
+| Google Benchmark | 1.9.1 | 1.8 | |
+| Catch2 | 3.7.1 | 3.5 | |
+| WindowsAppSDK | 1.5 | 1.4 | WinUI 3 (Phase 3) |
+| nghttp2 | 1.62.0 | 1.60 | REST HTTP/2 (Phase 5) |
+| lcms2 | 2.16 | 2.14 | ICC color (Phase 3) |
+
+### Build Scripts to Retire (13 scripts)
+Following v6.0 audit — these scripts are dead, duplicated, or superseded:
+
+| Script | Reason |
+|---|---|
+| `build-scripts/Rebuild-All-With-MD.ps1` | Superseded by `Build-MSVC.ps1` |
+| `build-scripts/Remove-Win32-Configurations.ps1` | One-time migration, done |
+| `build-scripts/build-and-log.bat` | BAT files replaced by PS1 |
+| `build-scripts/test-and-log.bat` | Same |
+| `build-scripts/Fix-PCH-Corruption.ps1` | One-time fix, not recurring |
+| `build-scripts/Find-All-Tools.ps1` | Absorbed into `Test-Build-Environment.ps1` |
+| `build-scripts/Download-Updates.ps1` | Replaced by vcpkg manifest |
+| `build-scripts/Update-All-Libraries.ps1` | Replaced by vcpkg |
+| `build-scripts/Run-CodeCoverage.ps1` | Coverage now in CI workflow |
+| `build-scripts/Sign-Binaries.ps1` | Superseded by EV signing CI (S287) |
+| `build-scripts/production/` (entire dir) | Empty or stubs |
+| `build-scripts/utilities/` (entire dir) | Absorbed into `core/` |
+| `index.html` (root) | Retire in favor of docs/ GitHub Pages |
+
+---
+
+## 19. Refactor / Rewrite / Delete / Add Register
+
+### REWRITE (fundamentally broken or too stale to patch)
+| Item | Reason | Phase |
+|---|---|---|
+| `LENSManager/` WTL GUI | Zero dark mode, zero a11y, WTL 2004 patterns | 3 (new WinUI 3 project) |
+| All `stb_image` usage | Silent quality downgrade, replaced by libjpeg-turbo + libspng | 2 |
+| `IThumbnailProvider` error path | Returns `S_OK` with blank bitmap on decode failure; should return `E_FAIL` | 2 |
+| `lens.exe` CLI arg parser | Raw `argv` parsing; replace with a proper CLI library | 3 |
+
+### REFACTOR (correct but needs structural improvement)
+| Item | Reason | Phase |
+|---|---|---|
+| `LENSArchive.h` (103 KB) | Monolithic format dispatch table; extract format registry to separate header | 4 |
+| `Engine/Core/` decode pipeline | 9 stages implemented as nested if/else; refactor to chain-of-responsibility | 3 |
+| `PerfRegressionGate.h` | Uses `namespace ExplorerLens` not `ExplorerLens::Engine` — inconsistency | 2 |
+| Error returns in decoders | Mix of HRESULT, bool, and exceptions; standardize on `std::expected` | 3 |
+| Cache write path | Synchronous write on decode thread; move to background writer thread | 2 |
+
+### DELETE (confirmed dead code or retired features)
 | Item | Reason |
-|------|--------|
-| LZMA SDK 26.00 and 13 build scripts | Dead — minizip-ng covers all use cases |
-| MuPDF integration code | Killed — PDFium replaces in Phase 2 |
-| `stb_image` PNG code path (Phase 2) | Replace with libpng |
-| `tinyexr` main path (Phase 2 eval) | Replace with OpenEXR 3.x |
-| Win32 MSBuild configurations | Already removed |
+|---|---|
+| `stb_image.h` (bundled) | Replaced by libjpeg-turbo + libspng |
+| `scripts/` root directory | Empty or one-liner stubs not referenced by anything |
+| `tools/` root directory | Verify contents; likely empty |
+| 13 build scripts (see §18) | Retired per above |
+| `index.html` (root) | GitHub Pages migrated to `docs/` |
+| `Dockerfile` production config | Docker + COM Shell Extension = unsupported; keep only as CI build env |
 
-### 17.2 Refactor (Phase 1–2)
-
-| Item | Goal |
-|------|------|
-| Engine 16→7 dir consolidation | Reduce CMake complexity, cognitive load |
-| `LENSArchive.h` format dispatch table | Split at 103 KB threshold into families |
-| `RegManager.h` registry table | Split at 103 KB threshold |
-| `EngineTestsExterns.h` | Split when >400 KB |
-| Cache key struct | Add `decoder_version` field |
-| All COM entry points | Add `VerifySTA()` assertion |
-| COM boundary types | `static_assert` no STL across boundary |
-
-### 17.3 Rewrite (Phase 2–4)
-
-| Item | Rewrite To | Reason |
-|------|-----------|--------|
-| Binary thumbnail cache | SQLite with schema v1 | Queryable, evictable, multi-tenant |
-| GDI+ resize path | Direct3D 11 | GPU acceleration, HDR support |
-| PNG decode path | libpng 1.6.x | Full progressive, 16-bit |
-| Engine.lib → Engine.dll | DLL + C ABI | Plugin isolation, version independence |
-
-### 17.4 Add Register (by Phase)
-
-**Phase 1:**
-- `dependency-review.yml` CI workflow
-- `lens formats` CLI command
-- Vanilla JS search in `index.html`
-- SSIM CI automation (ssim-validation.yml)
-- winget package manifest
-- `[[nodiscard("reason")]]` on all `std::expected` sites
-- COM boundary `static_assert` guards
-- ProbeCache in-memory memoization
-- Decoder version in cache key
-
-**Phase 2:**
-- SQLite L2 cache (thumbnails.db)
-- PDFium decoder
-- D3D11 resize pipeline
-- IStreamingDecoder interface
-- `std::jthread` decode workers
-- `std::mdspan` pixel views
-- 16-bit decode pipeline (H24)
-- libpng, libtiff decoders
-- EXIF-aware rotation in all decoders (H19)
-- Property-based pixel tests
-
-**Phase 3:**
-- IPreviewHandler COM interface
-- IPropertyStore COM interface
-- IContextMenu COM interface
-- SVG decoder (resvg)
-- Video keyframe decoder (MediaFoundation)
-- Font specimen decoder (FreeType 2)
-- glTF/OBJ/STL decoder (tiny_gltf + par_shapes)
-- Plugin trust chain + signed manifest validator
-- System tray icon
-- First-run wizard
-- Live ETW panel in LENSManager
-- Plugin JSON schema + validator (H23)
-- Folder cover image (H17)
-
-**Phase 4:**
-- OOP AppContainer plugin host
-- WER crash handler
-- EV code signing
-- ASAN + fuzz CI
-- REST API (cpp-httplib)
-- mTLS auth
-- ADMX Group Policy template (H1)
-- pHash in cache schema
-- Docker / ghcr.io image
-- OSS-Fuzz integration (H21)
-
-**Phase 5+:**
-- ONNX Runtime AI features (`[ai]` flag)
-- macOS Quick Look provider
-- Microsoft Store MSIX
-- Homebrew formula
+### ADD (new capabilities, not yet existing)
+| Item | Description | Phase |
+|---|---|---|
+| `Engine/Codec/IccProfileManager.h` | lcms2 wrapper, end-to-end ICC pipeline | 3 |
+| `Engine/Codec/AsyncDecodeToken.h` | `std::stop_token` wrapper for cancel-aware decode | 2 |
+| `Engine/Cache/SmartPreviewStore.h` | L3 2560px JPEG smart preview cache | 4 |
+| `Engine/Core/EmbeddedJpegExtractor.h` | EXIF embedded JPEG fast-path for camera RAW | 2 |
+| `LENSManager.WinUI/` | New WinUI 3 project directory | 3 |
+| `packaging/winget/` | WinGet manifest YAML | 3 |
+| `packaging/chocolatey/` | Chocolatey nupkg spec | 4 |
+| `.github/workflows/slsa-provenance.yml` | SLSA Level 2 attestation | 3 |
+| `.github/workflows/winget-publish.yml` | WinGet PR automation | 3 |
+| `.github/workflows/arm64-build.yml` | Native Arm64 EC build | 6 |
 
 ---
 
-## 18. 9-Phase Plan to Best-in-Class
+## 20. 10-Phase Plan to Best-in-Class
 
-### Phase 1 — Foundation Locked (v39.x → v40.0)
+### Phase 1 — Foundation Cleanup (v39.x → v40.0)
+**Exit criteria**: C++23 set in CMake; 13 dead scripts retired; `index.html` replaced by `docs/` GitHub Pages; `ROADMAP v7.0` merged; `Arm64 EC` flag added to CMake (build-only, no test yet).
 
-**Goal:** Clean slate before adding features. All Phase 1 items are P0 blockers for Phase 2.
+**Sprints**: S301–S310
 
-| Task | Status | Notes |
-|------|--------|-------|
-| Engine 16→7 dir consolidation | ❌ Todo | CMake + headers update |
-| STA compliance audit + `VerifySTA()` | ❌ Todo | All COM entry points |
-| Hard retire LZMA SDK + 13 dead scripts | ❌ Todo | Delete + CMake clean |
-| Decoder version in cache key | ❌ Todo | CacheKey_v2 struct |
-| COM boundary `static_assert` guards | ❌ Todo | No STL across boundary |
-| ProbeCache in-memory memoization | ❌ Todo | Avoid re-probe on refresh |
-| `dependency-review` GH Action | ❌ Todo | Block CVE supply chain |
-| winget package manifest + PR | ❌ Todo | winget-pkgs repo |
-| `lens formats` CLI command (JSON) | ❌ Todo | Format catalogue tooling |
-| Vanilla JS search in index.html | ❌ Todo | Format catalogue UX |
-| SSIM CI automation | ❌ Todo | ssim-validation.yml |
-| Corpus grow to 150 files | ❌ Todo | CC0 files for P1 decoders |
-| `[[nodiscard("reason")]]` audit | ❌ Todo | All std::expected sites |
-| Split `LENSArchive.h` if >200 KB | ❌ Todo | File size policy |
-| Structured cache blob v1 | ❌ Todo | Version header + mmap |
+### Phase 2 — Performance & Correctness Baseline (v40.x → v41.0)
+**Exit criteria**: Cancel-aware decode; OOM kill protection; async placeholder thumbnail; stb_image removed; libjpeg-turbo + libspng added; embedded JPEG fast-path for RAW; cache write async; 300 corpus files; D3D11 texture blit (first GPU pixels in production).
 
-### Phase 2 — Performance, Cache & Quality (v40.x)
+**Sprints**: S311–S340
 
-| Task | Notes |
-|------|-------|
-| SQLite L2 cache (thumbnails.db) | Replace bespoke binary cache |
-| PDFium decoder | Accelerated from Phase 3 |
-| D3D11 GPU resize pipeline | Replace GDI+ batch resize |
-| IStreamingDecoder for >50 MB | PSD, TIFF, large TGA |
-| `std::jthread` decode workers | Cancellable, Explorer-cancel aware |
-| `std::mdspan` pixel buffer views | Eliminate stride math bugs |
-| 16-bit decode pipeline (H24) | No premature 8-bit clamping |
-| libpng + libtiff (replace stb for these) | Full progressive + streaming |
-| EXIF-aware rotation in all decoders (H19) | Smart rotation baked in |
-| `/analyze` + SAL Phase 2 | Static analysis hardening |
-| `/CETCOMPAT` linker flag | CET hardware enforcement |
-| `coverage.yml` + `asan-nightly.yml` | CI quality additions |
-| Corpus grow to 300 files | SSIM-validated all P0/P1 |
-| OpenEXR 3.x eval (replace tinyexr) | Full EXR support |
-| Rust research lane eval | Go/kill decision |
-| Async placeholder thumbnail (H7) | Low-res → upgrade async |
-| Tile-based large TIFF decode (H10) | Zero full-load for pyramids |
+### Phase 3 — Quality & Polish (v41.x → v42.0)
+**Exit criteria**: ICC color management end-to-end (lcms2 wired); WinUI 3 LENSManager alpha; EV code signing in CI; SLSA L2 provenance; WinGet manifest; install footprint < 8 MB; SSIM gate raised to 0.97; 500 corpus files.
 
-### Phase 3 — Shell Citizen (v41.x)
+**Sprints**: S341–S380
 
-| Task | Notes |
-|------|-------|
-| IPreviewHandler (Space-bar preview) | H3 from QuickLook |
-| IPropertyStore (Details pane) | EXIF/XMP/IPTC metadata |
-| IContextMenu (right-click actions) | Generate, copy, compare |
-| SVG decoder (resvg via C API) | Phase 3 P1 |
-| Video keyframe decoder (MediaFoundation) | 10% seek point H6 |
-| Font specimen decoder (FreeType 2) | Alphabet + numerals sheet |
-| 3D model thumbnails (tiny_gltf) | glTF 2.0 + OBJ |
-| Plugin trust chain (signed manifest) | H4 + H23 |
-| System tray icon | Quick settings |
-| First-run wizard | Onboarding UX H8 |
-| Live ETW panel in LENSManager | O5 |
-| Folder cover image (H17) | Eagle-inspired |
-| COM integration tests (T7) | Register DLL in test harness |
-| Corpus grow to 500 files | All P0/P1/P2 decoders |
-| WinUI 3 gate evaluation (H20) | Go/no-go decision |
+### Phase 4 — Format Depth (v42.x → v43.0)
+**Exit criteria**: TSAN/MSAN/UBSan clean; side-by-side compare via IContextMenu; archive cover art; smart preview store (L3 cache); LENSArchive.h refactored; 7,000 tests; format stats sidebar in LENSManager.
 
-### Phase 4 — Enterprise & Hardening (v42.x)
+**Sprints**: S381–S420
 
-| Task | Notes |
-|------|-------|
-| OOP AppContainer plugin host (S4) | Low-integrity surrogate |
-| Engine.lib → Engine.dll (B1) | C ABI, version-independent |
-| REST API (cpp-httplib) | H22 — stateless decode service |
-| mTLS for REST | S12 |
-| WER crash handler (O3) | Custom dump + opt-in telemetry |
-| EV code signing (S5) | Authenticode SHA-256 |
-| ASAN build in CI (S11) | `/fsanitize=address` |
-| libFuzzer per decoder (T6) | OSS-Fuzz (H21) |
-| ADMX Group Policy (H1) | Enterprise config |
-| pHash in SQLite schema | Deduplication |
-| Docker / ghcr.io image | REST server distribution |
-| Corpus grow to 750 files | Fuzz-seeded |
+### Phase 5 — Headless & Enterprise (v43.x → v44.0)
+**Exit criteria**: `lens.exe --serve` REST API on HTTP/2, mTLS, all 7 endpoints live; plugin SDK with 1 published community plugin; ADMX Group Policy schema deployed; NuGet Engine SDK package; Docker CI build env.
 
-### Phase 5 — AI & macOS (v43.x)
+**Sprints**: S421–S460
 
-| Task | Notes |
-|------|-------|
-| ONNX Runtime integration | `[ai]` feature flag |
-| Scene understanding (MobileNet V3) | Classify foreground |
-| Smart crop (U²Net) | Saliency-based center |
-| Neural upscaling (ESRGAN 4x) | Low-res thumbnail upgrade |
-| macOS Quick Look provider | Platform/ stub expansion |
-| Microsoft Store (MSIX) | Signed package |
-| Homebrew formula | macOS distribution |
+### Phase 6 — Distribution & Reach (v44.x → v45.0)
+**Exit criteria**: Native Arm64 EC build green; MSIX sparse package CI; SLSA L2 on every release artifact; reproducible builds (bit-for-bit on CI); Chocolatey package; install footprint < 8 MB; 8,000 tests; Vulkan resize pipeline functional.
 
-### Phase 6 — Linux & WASM (v44.x)
+**Sprints**: S461–S500
 
-| Task | Notes |
-|------|-------|
-| Linux Nautilus / KIO thumbnailer | Tumbler D-Bus (H18) |
-| Flatpak distribution | Linux packaging |
-| Vulkan resize (Linux GPU) | Linux GPU path |
-| Emscripten WASM decode | Browser demo |
-| npm CLI wrapper | Cross-platform tooling |
-| CLIP semantic search | `lens search "concept"` |
-| Face-aware crop | RetinaFace (ONNX) |
+### Phase 7 — Plugin Ecosystem (v45.x → v46.0)
+**Exit criteria**: Plugin marketplace catalog at `plugins.explorerlens.io`; `.lenspkg` format signed + installable via LENSManager; AppContainer sandbox for plugins; 3 community plugins; plugin SDK documentation complete.
 
-### Phase 7 — Ecosystem
+**Sprints**: S501–S540
 
-- Stereo / panoramic image viewer
-- Design file formats (Figma export, Sketch)
-- Third-party plugin catalog (lens-plugins.io)
-- 5+ community-contributed decoder plugins
+### Phase 8 — AI-Assisted Features (Research Gate) (v46.x → v47.0)
+**Exit criteria**: Smart crop for thumbnail composition (no ML model at user endpoint — compute server-side via REST, opt-in); IQA scoring for cache eviction priority; scene tag search. All AI features require explicit user opt-in and are feature-gated.
 
-### Phase 8 — Maturity & Scale
+**Sprints**: S541–S580
 
-- 1,000+ corpus files with full SSIM coverage
-- Published benchmarks vs. PowerToys, macOS QL, Icaros
-- Community plugin ecosystem established
-- Enterprise case studies published
+### Phase 9 — Linux & FreeDesktop Compliance (v47.x → v48.0)
+**Exit criteria**: DBus thumbnailer protocol compliant; Nautilus integration tested on Ubuntu LTS; FreeDesktop thumbnail spec (`.cache/thumbnails/` + XMP tags); `linux-nautilus.yml` CI green; 750 corpus files.
 
-### Phase 9 — Long-term Research
+**Sprints**: S581–S620
 
-- Direct3D 12 Video decode pipeline
-- Neural upscaling custom kernel (non-ONNX)
-- WASM plugin sandbox for third-party parsers
-- Formal verification of core decode path (limited scope)
+### Phase 10 — macOS & Arm64 Native (v48.x → v50.0)
+**Exit criteria**: macOS Quick Look extension with real decode (not stub); `macos-quicklook.yml` CI green; native Arm64 (not EC) on Apple Silicon; v50.0 release = "Best-in-Class" milestone.
+
+**Sprints**: S621–S680
 
 ---
 
-## 19. Success Metrics & Exit Criteria
+## 21. Success Metrics & Exit Criteria
 
-### Technical KPIs
+### Performance KPIs (v45.0 targets)
+| Metric | Current | Target v45.0 |
+|---|---|---|
+| Single thumbnail latency (p95) | 17 ms | **< 10 ms** (with D3D11 GPU blit) |
+| Batch throughput | 235 img/sec | **> 500 img/sec** |
+| Cache hit latency | < 5 ms | **< 2 ms** |
+| Peak memory per decode | ~40 MB | **< 20 MB** (H35 + smarter RAW decoder) |
+| Install footprint | ~12 MB | **< 8 MB** |
+| Shell host crash rate | Unknown | **< 1 per 10,000 decodes** |
 
-| Metric | Now | Phase 1 | Phase 2 | Phase 3 | Phase 4 |
-|--------|-----|---------|---------|---------|---------|
-| Unit tests | 5,045 | 5,300 | 6,000 | 7,500 | 9,000 |
-| Catch2 tests | 1,380 | 1,500 | 2,000 | 2,500 | 3,000 |
-| Corpus files | 106 | 150 | 300 | 500 | 750 |
-| SSIM ≥ 0.95 decoders | Manual | All P0 | All P0/P1 | All P0/P1/P2 | All |
-| Thumbnail P50 latency | 17ms | ≤15ms | ≤12ms | ≤10ms | ≤10ms |
-| Cache L2 hit rate | N/A | N/A | ≥80% | ≥85% | ≥90% |
-| Install size | 29MB | 30MB | 35MB | 45MB | 50MB |
-| Build warnings | 0 | 0 | 0 | 0 | 0 |
+### Quality KPIs
+| Metric | Current | Target v45.0 |
+|---|---|---|
+| Test count | ~5,045 | **8,000** |
+| Corpus files | ~106 | **750** |
+| SSIM threshold | 0.95 (new) | **0.97** |
+| ASAN / fuzzer coverage | 8 decoders | **25 decoders** |
+| CI pipeline count | 13 active | **22 active** |
+| OSSF Scorecard | ? | **> 8.0** |
+| Competitor matrix score | 15/40 | **32/40** |
 
-### Product KPIs
-
-| Metric | Phase 1 | Phase 2 | Phase 3 | Phase 4 |
-|--------|---------|---------|---------|---------|
-| Format families supported | 15 | 18 | 24 | 26 |
-| COM interfaces | 1 | 1 | 4 | 6 |
-| Distribution channels | 1 (GH) | 3 (GH+Choco+NuGet) | 4 | 6 |
-| Competitor matrix score | 14/32 | 18/32 | 25/32 | 30/32 |
-| CI workflow count | 27 | 30 | 32 | 35 |
-| ADRs documented | 22 | 25 | 30 | 35 |
-
----
-
-## 20. Architecture Decision Log (v6.0)
-
-22 decisions recorded. New in v6.0: ADR-012 through ADR-022.
-
-| ADR | Title | Status | Phase |
-|-----|-------|--------|-------|
-| ADR-001 | COM IThumbnailProvider as delivery model | Accepted | Done |
-| ADR-002 | C++20 → C++23 upgrade | Accepted | Done/P1 |
-| ADR-003 | `std::expected` for error propagation (no exceptions across COM) | Accepted | Done |
-| ADR-004 | Custom TEST/ASSERT macro harness (not GTest) | Accepted | Done |
-| ADR-005 | SQLite for L2 thumbnail cache (replaces bespoke binary) | Accepted | Phase 2 |
-| ADR-006 | CMake 4.x + Ninja as Engine build system | Accepted | Done |
-| ADR-007 | vcpkg manifest mode for external dependencies | Accepted | Done |
-| ADR-008 | LibRaw embedded preview as RAW fast path | Accepted | Done |
-| ADR-009 | libjpeg-turbo fast-path decoder for JPEG | Accepted | Done |
-| ADR-010 | WTL for LENSManager GUI (WinUI 3 evaluated Phase 3) | Accepted | Done/P3 gate |
-| ADR-011 | LZMA SDK hard retire; minizip-ng covers use cases | Accepted | Phase 1 |
-| ADR-012 | Engine directory consolidation 16→7 (Phase 1 blocker) | Accepted | Phase 1 |
-| ADR-013 | Cache key v2: add decoder_version field | Accepted | Phase 1 |
-| ADR-014 | PDFium replaces MuPDF; accelerated to Phase 2 | Accepted | Phase 2 |
-| ADR-015 | IStreamingDecoder interface for files >50 MB | Accepted | Phase 2 |
-| ADR-016 | `std::mdspan` for 2D pixel buffer views (Phase 2) | Accepted | Phase 2 |
-| ADR-017 | Direct3D 11 replaces GDI+ for GPU resize (Phase 2) | Accepted | Phase 2 |
-| ADR-018 | OOP AppContainer for plugin host (Phase 4) | Accepted | Phase 4 |
-| ADR-019 | Rust research lane for parser modules (go/kill Phase 2) | Proposed | Phase 2 |
-| ADR-020 | REST API via cpp-httplib — no Boost (Phase 4) | Accepted | Phase 4 |
-| ADR-021 | Strict COM boundary: no STL containers across DLL boundary | Accepted | Phase 1 |
-| ADR-022 | Structured cache blob format v1 with version header + mmap | Accepted | Phase 1 |
+### Competitor Matrix Score Gains by Phase
+| Phase | Key additions | Score gain | Projected total |
+|---|---|---|---|
+| 1 | (cleanup only) | +0 | 15 |
+| 2 | GPU decode, cancel-aware, OOM protection, embedded JPEG | +4 | 19 |
+| 3 | ICC color management, dark mode (WinUI 3), EV code signing, SLSA L2 | +5 | 24 |
+| 4 | TSAN clean, smart previews, archive cover art | +3 | 27 |
+| 5 | REST API live, ADMX Group Policy, NuGet SDK | +2 | 29 |
+| 6 | Arm64, MSIX, reproducible builds | +3 | 32 |
 
 ---
 
-## 21. AI Tooling Surface & MCP
+## 22. ADR Log v7.0
 
-### Asset Inventory
+> Format: `[ID] Title — Status — Date — Supersedes`
 
-| Asset | Location | Role |
-|-------|----------|------|
-| Repository rules | `.github/copilot-instructions.md` | Primary project contract |
-| Scoped instructions | `.github/instructions/*.instructions.md` | Domain-specific rules (13 files) |
-| Custom agents | `.github/agents/*.agent.md` | 5 specialized agents + Explore |
-| Prompt templates | `.github/prompts/*.prompt.md` | 14 reusable prompts |
-| Repository skills | `.github/skills/*/SKILL.md` | 7 task playbooks |
-| Capability reference | `.github/standards/ai-tooling-capabilities.md` | Canonical inventory |
-| MCP configuration | `.vscode/mcp.json` | Workspace MCP servers |
+### Retained from v6.0 (ADRs A1–A22)
+| ID | Title | Status | Date |
+|---|---|---|---|
+| A1 | COM IThumbnailProvider as primary Windows interface | Accepted | 2023-01 |
+| A2 | C++20 as language standard (see A23 for C++23 upgrade) | Superseded by A23 | 2023-01 |
+| A3 | MSVC v143/v145 as sole production compiler | Accepted | 2023-01 |
+| A4 | CMake + Ninja as build system | Accepted | 2023-03 |
+| A5 | vcpkg in manifest mode for external dependencies | Accepted | 2023-03 |
+| A6 | ETW as observability transport | Accepted | 2023-06 |
+| A7 | Contract-header model for API-first development | Accepted | 2023-09 |
+| A8 | Custom TEST/RUN_TEST/ASSERT macros as primary test harness | Accepted | 2023-09 |
+| A9 | Google Benchmark for performance regression gates | Accepted | 2023-09 |
+| A10 | Catch2 v3 for property-based tests | Accepted | 2024-01 |
+| A11 | LibRaw for camera RAW decode | Accepted | 2024-03 |
+| A12 | PDFium for PDF page rendering | Accepted | 2024-03 |
+| A13 | resvg (Rust, C-ABI) for SVG rasterization | Accepted | 2024-06 |
+| A14 | SQLite as sole persistence store | Accepted | 2024-06 |
+| A15 | 9-stage decode pipeline (chain architecture) | Accepted | 2024-08 |
+| A16 | SSIM as thumbnail quality gate | Accepted | 2024-10 |
+| A17 | OSS-Fuzz for decoder fuzzing | Accepted | 2025-01 |
+| A18 | ASAN as memory safety gate | Accepted | 2025-01 |
+| A19 | CycloneDX SBOM on every release | Accepted | 2025-03 |
+| A20 | AppContainer for plugin sandboxing | Accepted | 2025-06 |
+| A21 | mTLS for REST API authentication | Accepted | 2025-08 |
+| A22 | ADMX Group Policy schema for enterprise | Accepted | 2025-10 |
 
-### MCP Servers
-
-| Server | Package | Scope |
-|--------|---------|-------|
-| `github` | `@modelcontextprotocol/server-github` | GitHub API operations |
-| `filesystem` | `@modelcontextprotocol/server-filesystem` | Full workspace read/write |
-| `project-docs` | `@modelcontextprotocol/server-filesystem` | `.github/` + `docs/` only |
-
-### Custom Agents
-
-| Agent | Specialty |
-|-------|-----------|
-| ExplorerLens | C++20/23 Engine development, build, COM, GPU |
-| Docs | Documentation accuracy, ADR authoring, link checking |
-| Release | Version bumps, artifact validation, post-release checks |
-| TestCorpus | Corpus management, SSIM, decoder validation |
-| CI-Ops | Workflow authoring, action version audit, failure triage |
-| Explore | Fast read-only codebase Q&A |
-
----
-
-## 22. Consolidated Work — v5.0 Survivors
-
-Items from v5.0 that survived re-examination and remain in the backlog.
-
-| Item | Domain | Phase | v6.0 Change |
-|------|--------|-------|-------------|
-| IPreviewHandler | Frontend | P3 | Unchanged |
-| IPropertyStore | Frontend | P3 | Unchanged |
-| IContextMenu | Frontend | P3 | Unchanged |
-| Plugin ecosystem (signed manifest) | Engine | P3 | Redesigned for OOP surrogate P4 |
-| Video keyframe decoder | Decoders | P3 | MediaFoundation preferred |
-| Font specimen decoder | Decoders | P3 | FreeType 2 confirmed |
-| SVG decoder | Decoders | P3 | resvg via C API confirmed |
-| glTF/3D decoder | Decoders | P3 | tiny_gltf + par_shapes |
-| Engine.dll (Engine.lib migration) | Backend | P4 | Unchanged |
-| OOP AppContainer | Security | P4 | Unchanged |
-| EV code signing | Security | P4 | Unchanged |
-| ASAN CI | Security | P4 | Unchanged |
-| WER crash handler | Observability | P4 | Unchanged |
-| REST API (cpp-httplib) | Backend | P4 | No Boost confirmed |
-| ADMX Group Policy | Enterprise | P4 | Unchanged |
-| pHash in cache schema | Cache | P4 | Added to SQLite schema §12 |
-| ONNX Runtime AI | AI | P5 | MobileNet V3 + U²Net + ESRGAN |
-| macOS Quick Look | Platform | P5 | Unchanged |
-| Microsoft Store MSIX | Distribution | P5 | Unchanged |
-| Linux Nautilus/KIO | Platform | P6 | Tumbler D-Bus model |
-| WASM Emscripten | Platform | P6 | Research |
-| CLIP semantic search | AI | P6 | Unchanged |
-| D3D12 Video | GPU | P9 | Long-term research |
-| Formal verification (limited) | Quality | P9 | Unchanged |
-| SSIM CI automation | Testing | P1 | **Promoted — Phase 1 blocker** |
-| winget package | Distribution | P1 | **Promoted — Phase 1 blocker** |
-| Corpus 150 files | Corpus | P1 | **Promoted — Phase 1 blocker** |
-| SQLite L2 cache | Cache | P2 | Accelerated (was P3 in v4.0) |
+### New in v7.0 (ADRs A23–A28)
+| ID | Title | Status | Date |
+|---|---|---|---|
+| A23 | Migrate to C++23 at v40.0 | **Accepted** | 2026-04-26 |
+| A24 | Rust research lane terminated — no Rust in production path | **Accepted** | 2026-04-26 |
+| A25 | Replace WTL with WinUI 3 XAML Islands for LENSManager | **Accepted** | 2026-04-26 |
+| A26 | Add WinGet manifest in Phase 3 as primary enterprise discovery channel | **Accepted** | 2026-04-26 |
+| A27 | lcms2 as ICC color management engine (not GDI+ color correction) | **Accepted** | 2026-04-26 |
+| A28 | UnRAR SDK: feature-flag only, disabled by default, dual-license gate required | **Accepted** | 2026-04-26 |
 
 ---
 
-## 23. Sprint Delivery Log
+## 23. Decisions Reversed from v6.0
 
-| Session | Sprints | Key Deliverables |
-|---------|---------|-----------------|
-| Session 1 | S1–S10 | Engine foundation, COM registration, IThumbnailProvider |
-| Session 2 | S11–S30 | Decoder framework, JPEG/PNG/WebP/BMP, LENSManager WTL |
-| Session 3 | S31–S80 | HEIC/AVIF/RAW/DDS/EXR decoders, archive support, ETW |
-| Session 4 | S81–S130 | GPU pipeline stub, plugin framework, Memory/Cache subsystems |
-| Session 5 | S131–S180 | AI modules stub, Media scrubber stub, Platform PAL, CLI |
-| Session 6 | S181–S200 | AI tooling surface, Catch2 integration, dev container |
-| Session 7 | S201–S210 | Scoped instructions (13 files), 7 skills, 6 agents, 14 prompts |
-| Session 8 | S211–S220 | `std::expected` migration, EngineError enum, NOTICE/LGPL compliance |
-| Session 9 | S221–S230 | libjpeg-turbo fast path, LibRaw embedded preview, Catch2 test suites, ROADMAP v6.0 |
+These are explicit reversals — v6.0 said one thing, v7.0 changes it:
 
-### Session 9 — Sprint Detail (S221–S230)
-
-| Sprint | File(s) | Description |
-|--------|---------|-------------|
-| S221 | `Engine/Decoders/JpegTurboDecoder.h` | libjpeg-turbo 3.x fast-path decoder interface |
-| S222 | `Engine/Decoders/RawEmbeddedPreviewDecoder.h` | LibRaw::unpack_thumb() pipeline decoder |
-| S223 | `Engine/Decoders/ICodecModule.h` + forwarding | Codec module interface (forwarding → Codec/) |
-| S224 | `Engine/Decoders/CodecLoader.h` | Dynamic codec loader |
-| S225 | `Engine/Decoders/CodecModuleSpecs.h` | Codec spec structs |
-| S226 | `Engine/Decoders/FormatConverter.h` | Format conversion utilities |
-| S227 | `Engine/Decoders/LazyCodecManager.h` | Lazy initialization codec manager |
-| S228 | `Engine/Core/CLICommandParser.h` + `LensCLI.h` | CLI command parsing |
-| S229 | `Engine/Tests/Catch2Tests/` (3 files) | 75 Catch2 tests: std::expected, JpegTurbo, EmbeddedPreview |
-| S230 | `NOTICE`, `ROADMAP.md` v6.0 | LGPL compliance file; Strategic Roadmap v6.0 |
+| v6.0 Decision | v7.0 Reversal | Rationale |
+|---|---|---|
+| C++20 as target standard | **C++23 from v40.0** | `std::expected`, `std::stacktrace`, modules are now stable in MSVC 19.50 |
+| Rust "explore" research lane | **KILL — no Rust in Engine** | COM DLL + Rust allocator conflict; C++23+ASAN sufficient |
+| WTL for LENSManager GUI | **WinUI 3 XAML Islands** | WTL has zero dark mode, zero a11y; WinUI 3 is the Microsoft-endorsed path |
+| stb_image as JPEG/PNG fallback | **Remove stb_image; use libjpeg-turbo + libspng** | stb_image silently downgrades decode quality |
+| 65 documentation targets | **45 high-quality docs** | More docs without owners creates documentation debt |
+| 9-phase plan | **10-phase plan** | Phase 10 = macOS GA; previously was aspirational |
+| `lens.exe --serve` HTTP/1.1 | **HTTP/2 (nghttp2 via WinHTTP)** | HTTP/2 is table stakes for a 2026 REST API |
+| Docker as production container | **Docker as CI build environment only** | COM Shell Extension + Docker = unsupported, impossible to register |
+| "Explore Arm64" | **Arm64 EC in Phase 6, concrete** | Windows on Arm is mainstream; EC allows COM host interop |
 
 ---
 
-*ExplorerLens ROADMAP v6.0 — April 2026 — targeting best-in-class Windows thumbnail provider*
-| **P1** | `NOTICE` file for LGPL libraries |
-| **P1** | winget + Scoop public bucket submission |
-| **P2** | Remove cross-platform claims from README |
-| **P2** | Delete Maven + RubyGems publish workflows |
+## 24. Sprint Delivery Pipeline S301+
+
+### Phase 1 Sprints (S301–S310): Foundation Cleanup
+
+| Sprint | Title | Contract/File | Harvested |
+|---|---|---|---|
+| S301 | Upgrade to C++23 in Engine CMakeLists | Engine/CMakeLists.txt `/std:c++23` | A23 |
+| S302 | Remove stb_image from Engine — step 1: audit usages | Engine-wide grep + comment TODO | A — |
+| S303 | Add libjpeg-turbo to vcpkg.json + Build-LibJpegTurbo.ps1 | vcpkg.json, external-libs/ | H28 |
+| S304 | Add libspng to vcpkg.json + Build-LibSpng.ps1 | vcpkg.json, external-libs/ | H28 |
+| S305 | Retire 13 dead build scripts (§18) | build-scripts/ deletions | A — |
+| S306 | Migrate GitHub Pages to docs/ MkDocs (retire root index.html) | index.html → redirect | A — |
+| S307 | Add `AsyncDecodeToken.h` — std::stop_token wrapper | Engine/Core/ | H36 |
+| S308 | Add `EmbeddedJpegExtractor.h` — EXIF embedded JPEG fast-path | Engine/Core/ | H13 |
+| S309 | Add `IccProfileManager.h` — lcms2 wrapper stub | Engine/Codec/ | H32 |
+| S310 | Wire S301–S309 tests + update baseline.json | EngineTests_Platform.cpp | A23 |
+
+### Phase 2 Preview (S311–S320): First GPU Pixels
+
+| Sprint | Title |
+|---|---|
+| S311 | D3D11 device initialization in GPU/D3D11DeviceManager.h |
+| S312 | DXVA2 JPEG hardware decode contract |
+| S313 | Cancel-aware decode: IBindStatusCallback in COM server |
+| S314 | OOM kill protection: SetProcessWorkingSetSizeEx in LENSShell |
+| S315 | Async placeholder thumbnail: last-cached bitmap returned immediately |
+| S316 | Parallel I/O readahead N=8 contract |
+| S317 | D3D11 texture blit pipeline (first real GPU pixels) |
+| S318 | libjpeg-turbo wire-in: replace stb_image JPEG paths |
+| S319 | libspng wire-in: replace stb_image PNG paths |
+| S320 | Wire S311–S319 tests + update GPU stage in pipeline |
 
 ---
 
-## How to use this roadmap
+## Appendix A: v6.0 Survivor Registry
 
-1. **Phase 1 is the only priority until its exit metric is met** — clean-VM install → SSIM-validated thumbnails for 20+ format families.
-2. **Measure by §19 metrics, not by version number or header count.**
-3. **This document supersedes ROADMAP v4.0** (archived at `docs/archive/ROADMAP_V4.md`).
-4. **Update §20 Decision Log** whenever a significant choice changes.
-5. **Re-run the competitor matrix (§3) quarterly.** Landscape shifts fastest in AVIF/JXL/HEIC and GPU decode.
-6. **No new feature lands without:** (a) a corpus test, (b) a perf budget entry, (c) a §17 register row, (d) an ADR if decision-altering.
-7. **Pre-sprint collision check (MANDATORY):** `grep_search` every new `struct`, `enum class`, `class` name across `Engine/**/*.h` before committing. Zero matches required.
+Decisions from v6.0 that are **retained unchanged** in v7.0:
+
+- **A1–A22 ADRs** (see §22) — 20 of 22 retained; A2 superseded by A23
+- **COM CLSID** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39` — immutable
+- **9-stage decode pipeline** — retained, with ICC stage added between stages 5 and 6
+- **Contract-header model** (A7) — retained; 300+ contract headers shipped S1–S300
+- **ETW observability** (A6) — retained; GUID registered
+- **SQLite persistence** (A14) — retained; schema evolved in v7.0
+- **LibRaw, PDFium, resvg, dav1d** (A11–A13) — retained
+- **Custom TEST/RUN_TEST macros** (A8) — retained; test placement rules unchanged
+- **Google Benchmark baseline gates** (A9) — retained; `baseline.json` updated per release
+- **SSIM quality gate** (A16) — retained; threshold raised to 0.97 at Phase 3
+- **OSS-Fuzz + ASAN** (A17, A18) — retained and expanded
+- **CycloneDX SBOM** (A19) — retained
+- **AppContainer sandbox** (A20) — retained, Phase 3 implementation
+- **mTLS REST auth** (A21) — retained, Phase 5 implementation
+- **Decoder family consolidation to 7** — retained from v6.0 F4 decision
+- **Sprint cadence: 10 sprints/session** — retained
+- **Zero-warnings build discipline** — retained; non-negotiable
 
 ---
 
-*ExplorerLens ROADMAP v5.0 "Rigel" — April 2026. Current release: v39.1.0 "Betelgeuse".*  
-*Next revision target: after Phase 1 exit (v40.0.0 "Rigel").*
+*ROADMAP v7.0 "Sirius" — ExplorerLens 39.2.0 → 50.0 roadmap*  
+*Archived predecessor: `docs/archive/ROADMAP_V6.md`*  
+*Next review: v41.0 milestone*
