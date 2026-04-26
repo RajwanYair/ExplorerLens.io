@@ -2912,6 +2912,12 @@ int main()
     RUN_TEST(TestS298_DbusThumbnailer_DefaultDisabled);
     RUN_TEST(TestS299_PluginCatalog_SchemaVersion);
 
+    // ROADMAP v7.0 Phase 1 (S301-S310) Tests:
+    RUN_TEST(TestS302_StbImageAudit_SiteCount);
+    RUN_TEST(TestS307_AsyncDecodeToken_Construct);
+    RUN_TEST(TestS308_EmbeddedJpegExtractor_Defaults);
+    RUN_TEST(TestS309_IccProfileManager_Disabled);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);

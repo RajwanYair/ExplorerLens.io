@@ -9340,3 +9340,95 @@ TEST(TestS299_PluginCatalog_SchemaVersion)
     ASSERT(p.enforceTrustChain);          // Must run trust chain
     ASSERT(p.maxCatalogEntries <= kPluginCatalogMaxEntries);
 }
+
+//===========================================================================
+// ROADMAP v7.0 Phase 1 Foundation Cleanup Tests (S301-S310)
+//===========================================================================
+
+TEST(TestS302_StbImageAudit_SiteCount)
+{
+    // stb_image removal audit: exactly 4 sites remain (Phase 2 target: S318/S319)
+    ASSERT(StbImageAuditPending::kRemainingUsageSites == 4);
+    ASSERT(StbImageAuditPending::kTargetSprintRemoval >= 319);
+    ASSERT(StbImageAuditPending::kJpegReplacement != nullptr);
+    ASSERT(StbImageAuditPending::kPngReplacement != nullptr);
+    ASSERT(StbImageAuditPending::kHdrReplacement != nullptr);
+    ASSERT(StbImageAuditPending::kTgaReplacement != nullptr);
+}
+
+TEST(TestS307_AsyncDecodeToken_Construct)
+{
+    // Default-constructed token: not cancelled, valid request ID
+    AsyncDecodeToken tok;
+    ASSERT(!tok.IsCancellationRequested());
+    ASSERT(tok.RequestId() > 0u);
+    ASSERT(tok.PriorityHint() == 0);
+
+    // After RequestCancellation(): stop is signalled
+    tok.RequestCancellation();
+    ASSERT(tok.IsCancellationRequested());
+
+    // std::stop_token from GetToken() reflects the same state
+    auto st = tok.GetToken();
+    ASSERT(st.stop_requested());
+
+    // DecodeTokenView wraps correctly
+    AsyncDecodeToken tok2;
+    DecodeTokenView view{ tok2 };
+    ASSERT(!view.IsCancellationRequested());
+    ASSERT(view.requestId == tok2.RequestId());
+
+    // AlreadyCancelled factory
+    auto cancelled = AsyncDecodeToken::AlreadyCancelled();
+    ASSERT(cancelled.IsCancellationRequested());
+}
+
+TEST(TestS308_EmbeddedJpegExtractor_Defaults)
+{
+    // Constants within expected bounds
+    ASSERT(EmbeddedJpegExtractor::kMaxEmbeddedJpegBytes == 64u * 1024u * 1024u);
+    ASSERT(EmbeddedJpegExtractor::kMinEmbeddedJpegBytes == 128u);
+    ASSERT(EmbeddedJpegExtractor::kMinEmbeddedJpegBytes < EmbeddedJpegExtractor::kMaxEmbeddedJpegBytes);
+
+    // EXIF tag constants match TIFF/EXIF specification
+    ASSERT(ExifTag::kJpegInterchangeFormat       == 0x0201u);
+    ASSERT(ExifTag::kJpegInterchangeFormatLength == 0x0202u);
+
+    // IsJpegSoi: valid JPEG SoI (FF D8)
+    const std::byte validSoi[]{ std::byte{0xFF}, std::byte{0xD8}, std::byte{0xFF}, std::byte{0xE0} };
+    ASSERT(EmbeddedJpegExtractor::IsJpegSoi(validSoi));
+
+    // IsJpegSoi: not a JPEG
+    const std::byte notJpeg[]{ std::byte{0x89}, std::byte{0x50} };
+    ASSERT(!EmbeddedJpegExtractor::IsJpegSoi(notJpeg));
+
+    // IsJpegSoi: empty span
+    ASSERT(!EmbeddedJpegExtractor::IsJpegSoi(std::span<const std::byte>{}));
+
+    // Phase 2 stub: Extract(nullptr) returns nullopt (no crash)
+    EmbeddedJpegExtractor ext;
+    auto result = ext.Extract(nullptr);
+    ASSERT(!result.has_value());
+}
+
+TEST(TestS309_IccProfileManager_Disabled)
+{
+    // Phase 3 stub: ICC correction must be off until lcms2 is linked
+    ASSERT(!IccProfileManager::IsEnabled());
+    ASSERT(IccProfileManager::BackendVersion() == 0);
+
+    // All operations are no-ops and must not crash
+    IccProfileManager mgr;
+    const auto info = mgr.ParseProfile({});
+    ASSERT(!info.isValid);
+
+    auto* xform = mgr.CreateTransform({}, {});
+    ASSERT(xform == nullptr);
+
+    // DestroyTransform(nullptr) must be safe
+    mgr.DestroyTransform(nullptr);
+
+    // ApplyTransform with empty span must be safe
+    std::byte dummyPixel[4]{};
+    mgr.ApplyTransform(nullptr, std::span<std::byte>{ dummyPixel, 4 }, 1u);
+}

@@ -1423,4 +1423,10 @@ using namespace ExplorerLens::Engine;
 #include "../Platform/DbusThumbnailerContract.h"
 #include "../Plugin/PluginCatalogSchemaContract.h"
 
+// Sprint S301-S310 — ROADMAP v7.0 Phase 1 Foundation Cleanup
+#include "../Core/StbImageAuditContract.h"
+#include "../Core/AsyncDecodeToken.h"
+#include "../Core/EmbeddedJpegExtractor.h"
+#include "../Codec/IccProfileManager.h"
+
 #include "EngineTestsMacros.h"

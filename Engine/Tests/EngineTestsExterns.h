@@ -4898,3 +4898,7 @@ extern void TestS296_EngineDllAbi_ExportCount_Runner();
 extern void TestS297_VulkanResize_ApiVersion_Runner();
 extern void TestS298_DbusThumbnailer_DefaultDisabled_Runner();
 extern void TestS299_PluginCatalog_SchemaVersion_Runner();
+extern void TestS302_StbImageAudit_SiteCount_Runner();
+extern void TestS307_AsyncDecodeToken_Construct_Runner();
+extern void TestS308_EmbeddedJpegExtractor_Defaults_Runner();
+extern void TestS309_IccProfileManager_Disabled_Runner();
