@@ -1,0 +1,102 @@
+# ============================================================================
+# sbom-attestation.yml -- S280 / ROADMAP v6.0 S11 SBOM attestation
+#
+# Emits a CycloneDX SBOM for every tagged release and attaches a Sigstore
+# keyless provenance attestation.  Complements `publish-packages.yml` and
+# the existing offline SBOM in `docs/SBOM.json`.  Runs on release publish
+# plus manual dispatch.
+# ============================================================================
+name: sbom-attestation
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref (tag or branch) to attest'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: sbom-attestation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sbom:
+    name: Generate CycloneDX SBOM + Sigstore attestation
+    runs-on: windows-2025
+    timeout-minutes: 25
+
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global safe.directory '*'
+
+      - name: Read project version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = (Get-Content VERSION -Raw).Trim()
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Resolved version: $v"
+
+      - name: Install CycloneDX CLI
+        shell: pwsh
+        run: |
+          $url = 'https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/cyclonedx-win-x64.exe'
+          New-Item -ItemType Directory -Force -Path tools | Out-Null
+          Invoke-WebRequest -Uri $url -OutFile tools/cyclonedx.exe
+          tools/cyclonedx.exe --version
+
+      - name: Build SBOM from vcpkg manifest
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path sbom-out | Out-Null
+          tools/cyclonedx.exe merge `
+            --input-format json `
+            --output-format json `
+            --output-file sbom-out/explorerlens-${{ steps.ver.outputs.version }}.cdx.json `
+            --group io.github.rajwanyair `
+            --name ExplorerLens `
+            --version ${{ steps.ver.outputs.version }} `
+            --input-files docs/SBOM.json
+          Get-ChildItem sbom-out
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx-${{ steps.ver.outputs.version }}
+          path: sbom-out/*.cdx.json
+          retention-days: 90
+
+      - name: Attest SBOM with Sigstore (keyless)
+        uses: actions/attest-sbom@v2
+        with:
+          subject-path: sbom-out/explorerlens-${{ steps.ver.outputs.version }}.cdx.json
+          sbom-path: sbom-out/explorerlens-${{ steps.ver.outputs.version }}.cdx.json
+
+      - name: Attach SBOM to GitHub Release
+        if: github.event_name == 'release'
+        shell: pwsh
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} `
+            sbom-out/explorerlens-${{ steps.ver.outputs.version }}.cdx.json `
+            --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
