@@ -189,7 +189,7 @@ endif()
 # Compiler Settings
 #==============================================================================
 
-set(CMAKE_CXX_STANDARD 20)  # C++20 for latest features
+set(CMAKE_CXX_STANDARD 23)  # C++23 (ADR A23): std::expected, std::flat_map, std::stacktrace, deducing-this
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
@@ -1864,6 +1864,12 @@ set(ENGINE_HEADERS
     Platform/DbusThumbnailerContract.h           # S298 — D-Bus thumbnailer Linux stub (H18)
     Plugin/PluginCatalogSchemaContract.h         # S299 — plugin catalog schema (Phase 7)
 
+    # Sprint S301-S309 — ROADMAP v7.0 Phase 1 Foundation Cleanup
+    Core/StbImageAuditContract.h                 # S302 — stb_image removal audit marker (H28)
+    Core/AsyncDecodeToken.h                      # S307 — std::stop_token cancel-aware decode (H36)
+    Core/EmbeddedJpegExtractor.h                 # S308 — EXIF embedded JPEG fast-path (H13)
+    Codec/IccProfileManager.h                    # S309 — lcms2 ICC profile pipeline stub (H32)
+
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h
@@ -2633,7 +2639,7 @@ message(STATUS "  Build Type:        ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Shared Library:    ${BUILD_SHARED_LIBS}")
 message(STATUS "  Build Tests:       ${BUILD_TESTS}")
 message(STATUS "  GPU Acceleration:  ${ENABLE_GPU}")
-message(STATUS "  C++ Standard:      ${CMAKE_CXX_STANDARD}")
+message(STATUS "  C++ Standard:      ${CMAKE_CXX_STANDARD} (ADR A23 — C++23 commit)")
 message(STATUS "  Feature Flags:")
 message(STATUS "    HAS_LIBJXL:            ${HAS_LIBJXL}")
 message(STATUS "    HAS_LIBHEIF:           ${HAS_LIBHEIF}")
