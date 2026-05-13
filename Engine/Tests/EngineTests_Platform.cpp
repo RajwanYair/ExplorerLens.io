@@ -10859,3 +10859,310 @@ TEST(TestS350_WinGetManifestSchema_Factory)
     ASSERT_EQ(static_cast<std::uint8_t>(WinGetInstallerType::WIX),          6u);
     ASSERT_EQ(static_cast<std::uint8_t>(WinGetManifestValidationStatus::OK), 0u);
 }
+
+// =============================================================================
+// Sprint S352-S360 — ROADMAP v8.0 Phase 3/4 Depth & Safety
+// =============================================================================
+
+TEST(TestS352_CodeSigningValidator_DevConfig)
+{
+    using namespace ExplorerLens::Engine;
+    // DevBuild config: relaxed policy
+    auto devCfg = CodeSigningConfig::ForDevBuild();
+    ASSERT(!devCfg.requireTrustedChain);
+    ASSERT(!devCfg.requireNotExpired);
+    ASSERT(!devCfg.useRevocationCheck);
+
+    // ReleaseBuild config: strict policy
+    auto relCfg = CodeSigningConfig::ForReleaseBuild();
+    ASSERT(relCfg.requireTrustedChain);
+    ASSERT(relCfg.requireNotExpired);
+    ASSERT(relCfg.useRevocationCheck);
+    ASSERT(!relCfg.expectedSubjectPrefix.empty());
+
+    // Status enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(PeSignatureStatus::VALID),         0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(PeSignatureStatus::NOT_SIGNED),    1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(PeSignatureStatus::NOT_WIN32),     6u);
+    ASSERT_EQ(static_cast<std::uint8_t>(PeSignatureStatus::NULL_PATH),     9u);
+
+    // Constants
+    ASSERT_EQ(kExpectedThumbprintHexLength, 40u);
+}
+
+TEST(TestS353_MiniDumpCapture_DefaultDir)
+{
+    using namespace ExplorerLens::Engine;
+    // Status enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(MiniDumpCaptureStatus::OK),             0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(MiniDumpCaptureStatus::NOT_WIN32),      1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(MiniDumpCaptureStatus::ALREADY_WRITING),7u);
+
+    // Variant enum ordinals
+    ASSERT_EQ(static_cast<std::uint32_t>(MiniDumpVariant::MINI),          0x00000000u);
+    ASSERT_EQ(static_cast<std::uint32_t>(MiniDumpVariant::TRIAGE),        0x00000040u);
+
+    // Config defaults
+    auto cfg = MiniDumpConfig::Default();
+    ASSERT(cfg.variant == MiniDumpVariant::TRIAGE);
+    ASSERT(cfg.includeExceptionInfo);
+    ASSERT(cfg.timestampFilename);
+    ASSERT(!cfg.overwriteExisting);
+    ASSERT_EQ(cfg.maxDumpsInDirectory, 10u);
+
+    // Constants
+    ASSERT_EQ(kMiniDumpDefaultMaxDumps, 10u);
+}
+
+TEST(TestS354_DecodeFaultBarrier_OkPath)
+{
+    using namespace ExplorerLens::Engine;
+    // Status enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(FaultBarrierStatus::OK),               0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FaultBarrierStatus::ACCESS_VIOLATION),  1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FaultBarrierStatus::NOT_WIN32),         6u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FaultBarrierStatus::NOT_EXECUTED),      7u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FaultBarrierStatus::CPP_EXCEPTION),     8u);
+
+    // Default config
+    auto cfg = FaultBarrierConfig::Default();
+    ASSERT(!cfg.captureContinuable);
+    ASSERT(cfg.logOnFault);
+    ASSERT(!cfg.triggerMiniDump);
+    ASSERT(!cfg.rethrowCppExceptions);
+
+    // Shell host config
+    auto shellCfg = FaultBarrierConfig::ForShellHost();
+    ASSERT(shellCfg.logOnFault);
+    ASSERT(!shellCfg.triggerMiniDump);
+
+    // Execute a plain function — should always succeed
+    DecodeFaultBarrier barrier;
+    ASSERT(barrier.Status() == FaultBarrierStatus::NOT_EXECUTED);
+    bool ran = false;
+    barrier.Execute([&]() { ran = true; });
+    ASSERT(ran);
+    ASSERT(barrier.Succeeded());
+    ASSERT(!barrier.HasFaulted());
+
+    // Reset
+    barrier.Reset();
+    ASSERT(barrier.Status() == FaultBarrierStatus::NOT_EXECUTED);
+
+    // SEH constants
+    ASSERT_EQ(kSehAccessViolation, 0xC0000005u);
+    ASSERT_EQ(kSehStackOverflow,   0xC00000FDu);
+}
+
+TEST(TestS355_Dxva2SurfacePool_Constants)
+{
+    using namespace ExplorerLens::Engine;
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(Dxva2SurfacePoolStatus::OK),              0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(Dxva2SurfacePoolStatus::NOT_WIN32),       1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(Dxva2SurfacePoolStatus::FORMAT_UNSUPPORTED), 8u);
+
+    // Constants
+    ASSERT_EQ(kDxva2DefaultPoolCount, 4u);
+    ASSERT_EQ(kDxva2MaxPoolCount,     32u);
+    ASSERT_EQ(kDxva2MaxSurfaceWidth,  16384u);
+    ASSERT_EQ(kDxva2MaxSurfaceHeight, 16384u);
+
+    // Config factory
+    auto cfg = Dxva2PoolConfig::ForThumbnail(256u, 256u);
+    ASSERT_EQ(cfg.width,       256u);
+    ASSERT_EQ(cfg.height,      256u);
+    ASSERT_EQ(cfg.surfaceCount, 4u);
+    ASSERT(cfg.format == Dxva2SurfaceFormat::NV12);
+    ASSERT(cfg.allowResize);
+
+    // SurfaceDesc bytes()
+    Dxva2SurfaceDesc d;
+    d.width  = 4u;
+    d.height = 4u;
+    d.format = Dxva2SurfaceFormat::NV12;
+    ASSERT_EQ(d.Bytes(), 24u); // 4*4*1.5 = 24
+    ASSERT(!d.IsValid()); // pSurface is null
+}
+
+TEST(TestS356_ExifPropertyProvider_EmptySet)
+{
+    using namespace ExplorerLens::Engine;
+    // Empty set behaviour
+    ExifPropertySet empty;
+    ASSERT(!empty.parsedSuccessfully);
+    ASSERT(empty.records.empty());
+    ASSERT(empty.Find(ExifPropertyId::MAKE) == nullptr);
+    ASSERT(empty.GetString(ExifPropertyId::MODEL).empty());
+    ASSERT(!empty.HasGps());
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint32_t>(ExifPropertyId::MAKE),   271u);
+    ASSERT_EQ(static_cast<std::uint32_t>(ExifPropertyId::MODEL),  272u);
+    ASSERT_EQ(static_cast<std::uint32_t>(ExifPropertyId::EXPOSURE_TIME), 33434u);
+
+    // Status enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(ExifPropertyProviderStatus::OK),        0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ExifPropertyProviderStatus::NO_EXIF),   1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ExifPropertyProviderStatus::NULL_BUFFER), 3u);
+
+    // Config defaults
+    auto cfg = ExifPropertyProviderConfig::Default();
+    ASSERT(cfg.parseGps);
+    ASSERT(!cfg.parseMakerNote);
+    ASSERT(!cfg.strictMode);
+    ASSERT_EQ(cfg.maxExifBytes, 128u * 1024u);
+
+    // Constants
+    ASSERT_EQ(kExifMaxProperties, 256u);
+    ASSERT_EQ(kExifMaxExifBytes,  128u * 1024u);
+
+    // Rational arithmetic
+    ExifRational rat{1u, 125u};
+    ASSERT(rat.ToDouble() < 0.01); // 1/125 = 0.008
+}
+
+TEST(TestS357_OutOfProcessDecoder_NotWin32)
+{
+    using namespace ExplorerLens::Engine;
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(OutOfProcDecodeStatus::OK),            0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(OutOfProcDecodeStatus::NOT_WIN32),     1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(OutOfProcDecodeStatus::IPC_PROTOCOL_ERROR), 10u);
+
+    // Config defaults
+    auto cfg = OutOfProcDecodeConfig::Default();
+    ASSERT_EQ(cfg.timeoutMs, 5000u);
+    ASSERT(cfg.killOnTimeout);
+    ASSERT(!cfg.reuseProcess);
+
+    // Untrusted format config is more restrictive
+    auto untrustedCfg = OutOfProcDecodeConfig::ForUntrustedFormat();
+    ASSERT(untrustedCfg.timeoutMs < cfg.timeoutMs);
+    ASSERT(untrustedCfg.maxOutputBytes < cfg.maxOutputBytes);
+    ASSERT(untrustedCfg.maxWidth <= 2048u);
+
+    // Constants
+    ASSERT_EQ(kOopDefaultTimeoutMs, 5000u);
+    ASSERT_EQ(kOopPipeBufferBytes,  4096u);
+
+    // IPC message magic values
+    ASSERT_EQ(kOopDecodeRequestMagic,  0x4C454E53u);
+    ASSERT_EQ(kOopDecodeResponseMagic, 0x4C454E52u);
+    ASSERT_EQ(kOopDecodeProtocolVer,   1u);
+}
+
+TEST(TestS358_UbsanSuppressor_IsClean)
+{
+    using namespace ExplorerLens::Engine;
+    // Fresh global tracker must be clean
+    UbsanViolationTracker::Global().Reset();
+    ASSERT(UbsanViolationTracker::Global().IsClean());
+    ASSERT_EQ(UbsanViolationTracker::Global().Count(), 0u);
+
+    // Record a violation
+    UbsanViolationTracker::Global().Record(
+        UbsanViolationType::SHIFT_EXPONENT, __FILE__, __LINE__);
+    ASSERT_EQ(UbsanViolationTracker::Global().Count(), 1u);
+    ASSERT(!UbsanViolationTracker::Global().IsClean());
+    ASSERT_EQ(UbsanViolationTracker::Global().CountOf(UbsanViolationType::SHIFT_EXPONENT), 1u);
+    ASSERT_EQ(UbsanViolationTracker::Global().CountOf(UbsanViolationType::VPTR),           0u);
+
+    // Reset clears everything
+    UbsanViolationTracker::Global().Reset();
+    ASSERT(UbsanViolationTracker::Global().IsClean());
+
+    // Phase4 gate
+    ASSERT_EQ(kUbsanPhase4ViolationBudget, 0u);
+    ASSERT(UbsanSuppressor::Phase4GatePassed());
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(UbsanViolationType::SIGNED_INTEGER_OVERFLOW), 0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(UbsanViolationType::UNKNOWN), 15u);
+
+    // Macro presence check (LENS_UBSAN_HAS_SUPPORT is 0 or 1)
+    // This is a compile-time property; just verify it expands without error
+    volatile int hasSupport = LENS_UBSAN_HAS_SUPPORT;
+    (void)hasSupport;
+}
+
+TEST(TestS359_ChocolateyPackageSchema_Factory)
+{
+    using namespace ExplorerLens::Engine;
+    // Factory produces a valid schema
+    std::wstring sha64(64u, L'a');
+    auto schema = ChocolateyPackageSchema::MakeExplorerLens(
+        39u, 6u, 0u,
+        L"https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.6.0/ExplorerLens-Setup-39.6.0.msi",
+        std::wstring(64u, L'a'));
+
+    // ASSERT valid
+    ASSERT_EQ(schema.metadata.packageId, std::wstring(L"explorerlens"));
+    ASSERT_EQ(schema.metadata.version.major, 39u);
+    ASSERT_EQ(schema.metadata.version.minor, 6u);
+    ASSERT(schema.metadata.description.length() >= 50u);
+    ASSERT(!schema.metadata.tags.empty());
+    ASSERT(schema.installer.IsHttps());
+
+    // Validation should pass
+    auto v = schema.Validate();
+    ASSERT(v == ChocolateyValidationStatus::OK);
+    ASSERT(schema.IsValid());
+
+    // Version.ToString
+    auto vstr = schema.metadata.version.ToString();
+    ASSERT(!vstr.empty());
+    ASSERT(vstr.find(L"39") != std::wstring::npos);
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(ChocolateyInstallType::MSI),        0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ChocolateyInstallType::PORTABLE),   4u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ChocolateyValidationStatus::OK),    0u);
+
+    // Constants
+    ASSERT_EQ(kChocolateySha256HexLength, 64u);
+    ASSERT(!std::wstring(kChocolateyPackageId).empty());
+}
+
+TEST(TestS360_ThumbnailStreamSerializer_PremulNoop)
+{
+    using namespace ExplorerLens::Engine;
+    // Status enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(StreamSerializeStatus::OK),              0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(StreamSerializeStatus::NOT_WIN32),       8u);
+    ASSERT_EQ(static_cast<std::uint8_t>(StreamSerializeStatus::PREMUL_OVERFLOW), 9u);
+
+    // Pixel format enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(ThumbnailPixelFormat::BGRA8_STRAIGHT), 0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ThumbnailPixelFormat::BGR8),           3u);
+
+    // Config factories
+    auto def     = ThumbnailStreamConfig::Default();
+    auto shellCfg = ThumbnailStreamConfig::ForShellReturn();
+    ASSERT(shellCfg.premultiplyAlpha);
+    ASSERT(!shellCfg.encodeAsPng);
+    ASSERT(!shellCfg.flipVertical);
+
+    // Constants
+    ASSERT_EQ(kMaxSerializeWidth,   8192u);
+    ASSERT_EQ(kMaxSerializeHeight,  8192u);
+    ASSERT_EQ(kBytesPerPixelBgra,   4u);
+
+    // PremultiplyAlpha: fully opaque pixel unchanged
+    uint8_t px[4] = {128u, 64u, 32u, 255u}; // B G R A=255 → premul = same
+    bool ok = ThumbnailStreamSerializer::PremultiplyAlpha(px, 1u);
+    ASSERT(ok);
+    ASSERT_EQ(px[0], 128u);
+    ASSERT_EQ(px[1], 64u);
+    ASSERT_EQ(px[2], 32u);
+    ASSERT_EQ(px[3], 255u);
+
+    // Fully transparent pixel → all zeros after premul
+    uint8_t px2[4] = {200u, 100u, 50u, 0u}; // A=0
+    ok = ThumbnailStreamSerializer::PremultiplyAlpha(px2, 1u);
+    ASSERT(ok);
+    ASSERT_EQ(px2[0], 0u);
+    ASSERT_EQ(px2[1], 0u);
+    ASSERT_EQ(px2[2], 0u);
+    ASSERT_EQ(px2[3], 0u);
+}

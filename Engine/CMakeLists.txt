@@ -1911,6 +1911,15 @@ set(ENGINE_HEADERS
     Cache/ThumbnailEvictionPolicy.h              # S348 — SSIM-weighted eviction policy (Phase3 SSIM gate)
     Pipeline/DecodeTimeBudget.h                  # S349 — per-decode CPU time budget RAII (Phase3 perf)
     Core/WinGetManifestSchema.h                  # S350 — WinGet manifest schema types (Phase3 distribution)
+    Core/CodeSigningValidator.h                  # S352 — PE code signature verification (Phase3 security)
+    Core/MiniDumpCapture.h                       # S353 — structured mini-dump writer (Phase3 crash telemetry)
+    Pipeline/DecodeFaultBarrier.h                # S354 — SEH fault barrier for decoder isolation (Phase4)
+    GPU/Dxva2SurfacePool.h                       # S355 — DXVA2 decode surface pool (Phase4 HW JPEG)
+    Core/ExifPropertyProvider.h                  # S356 — IPropertyStore EXIF adapter (H46/Phase4)
+    Platform/OutOfProcessDecoder.h               # S357 — out-of-process decoder proxy (H36/Phase4)
+    Core/UbsanSuppressor.h                       # S358 — UBSAN annotation helpers (Phase4 CI)
+    Core/ChocolateyPackageSchema.h               # S359 — Chocolatey manifest schema (Phase4 distribution)
+    Pipeline/ThumbnailStreamSerializer.h         # S360 — BGRA → HBITMAP/IStream serializer (Phase3/4)
 
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h

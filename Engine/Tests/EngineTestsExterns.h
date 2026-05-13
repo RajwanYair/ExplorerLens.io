@@ -4940,3 +4940,13 @@ extern void TestS347_SlsaAttestationRecord_Validate_Runner();
 extern void TestS348_ThumbnailEvictionPolicy_ClassifyEntry_Runner();
 extern void TestS349_DecodeTimeBudget_DefaultConfig_Runner();
 extern void TestS350_WinGetManifestSchema_Factory_Runner();
+// Sprint S352-S360
+extern void TestS352_CodeSigningValidator_DevConfig_Runner();
+extern void TestS353_MiniDumpCapture_DefaultDir_Runner();
+extern void TestS354_DecodeFaultBarrier_OkPath_Runner();
+extern void TestS355_Dxva2SurfacePool_Constants_Runner();
+extern void TestS356_ExifPropertyProvider_EmptySet_Runner();
+extern void TestS357_OutOfProcessDecoder_NotWin32_Runner();
+extern void TestS358_UbsanSuppressor_IsClean_Runner();
+extern void TestS359_ChocolateyPackageSchema_Factory_Runner();
+extern void TestS360_ThumbnailStreamSerializer_PremulNoop_Runner();

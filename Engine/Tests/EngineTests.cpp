@@ -2950,6 +2950,27 @@ int main()
     RUN_TEST(TestS338_L2SqliteCacheIndex_Schema);
     RUN_TEST(TestS339_AsyncDecodeContext_DefaultState);
     RUN_TEST(TestS340_IccProfilePassthrough_ValidateEmpty);
+    // ROADMAP v8.0 Phase 3 Quality & Polish (S342-S350) Tests:
+    RUN_TEST(TestS342_LcmsColorTransform_BuildStub);
+    RUN_TEST(TestS343_CpuLanczosResizer_Identity);
+    RUN_TEST(TestS344_DllBudgetChecker_Constants);
+    RUN_TEST(TestS345_WtlDarkModeTheme_SupportCheck);
+    RUN_TEST(TestS346_WtlHighDpiAdaptor_DefaultDpi);
+    RUN_TEST(TestS347_SlsaAttestationRecord_Validate);
+    RUN_TEST(TestS348_ThumbnailEvictionPolicy_ClassifyEntry);
+    RUN_TEST(TestS349_DecodeTimeBudget_DefaultConfig);
+    RUN_TEST(TestS350_WinGetManifestSchema_Factory);
+
+    // ROADMAP v8.0 Phase 3/4 Depth & Safety (S352-S360) Tests:
+    RUN_TEST(TestS352_CodeSigningValidator_DevConfig);
+    RUN_TEST(TestS353_MiniDumpCapture_DefaultDir);
+    RUN_TEST(TestS354_DecodeFaultBarrier_OkPath);
+    RUN_TEST(TestS355_Dxva2SurfacePool_Constants);
+    RUN_TEST(TestS356_ExifPropertyProvider_EmptySet);
+    RUN_TEST(TestS357_OutOfProcessDecoder_NotWin32);
+    RUN_TEST(TestS358_UbsanSuppressor_IsClean);
+    RUN_TEST(TestS359_ChocolateyPackageSchema_Factory);
+    RUN_TEST(TestS360_ThumbnailStreamSerializer_PremulNoop);
 
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;

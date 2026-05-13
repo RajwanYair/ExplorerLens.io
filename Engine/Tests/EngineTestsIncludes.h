@@ -1471,5 +1471,15 @@ using namespace ExplorerLens::Engine;
 #include "../Cache/ThumbnailEvictionPolicy.h"
 #include "../Pipeline/DecodeTimeBudget.h"
 #include "../Core/WinGetManifestSchema.h"
+// Sprint S352-S360 — ROADMAP v8.0 Phase 3/4 Depth & Safety
+#include "../Core/CodeSigningValidator.h"
+#include "../Core/MiniDumpCapture.h"
+#include "../Pipeline/DecodeFaultBarrier.h"
+#include "../GPU/Dxva2SurfacePool.h"
+#include "../Core/ExifPropertyProvider.h"
+#include "../Platform/OutOfProcessDecoder.h"
+#include "../Core/UbsanSuppressor.h"
+#include "../Core/ChocolateyPackageSchema.h"
+#include "../Pipeline/ThumbnailStreamSerializer.h"
 
 #include "EngineTestsMacros.h"
