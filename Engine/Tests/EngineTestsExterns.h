@@ -4930,3 +4930,13 @@ extern void TestS337_HighDpiScaleHelper_ScaleFactor_Runner();
 extern void TestS338_L2SqliteCacheIndex_Schema_Runner();
 extern void TestS339_AsyncDecodeContext_DefaultState_Runner();
 extern void TestS340_IccProfilePassthrough_ValidateEmpty_Runner();
+// Sprint S342-S350
+extern void TestS342_LcmsColorTransform_BuildStub_Runner();
+extern void TestS343_CpuLanczosResizer_Identity_Runner();
+extern void TestS344_DllBudgetChecker_Constants_Runner();
+extern void TestS345_WtlDarkModeTheme_SupportCheck_Runner();
+extern void TestS346_WtlHighDpiAdaptor_DefaultDpi_Runner();
+extern void TestS347_SlsaAttestationRecord_Validate_Runner();
+extern void TestS348_ThumbnailEvictionPolicy_ClassifyEntry_Runner();
+extern void TestS349_DecodeTimeBudget_DefaultConfig_Runner();
+extern void TestS350_WinGetManifestSchema_Factory_Runner();

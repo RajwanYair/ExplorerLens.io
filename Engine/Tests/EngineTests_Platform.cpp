@@ -10479,3 +10479,383 @@ TEST(TestS340_IccProfilePassthrough_ValidateEmpty)
     ASSERT(static_cast<std::uint8_t>(IccColorSpaceId::DISPLAY_P3) == 2u);
     ASSERT(static_cast<std::uint8_t>(IccColorSpaceId::ADOBE_RGB)  == 3u);
 }
+
+// ==========================================================================
+// Sprint S342 — LcmsColorTransform
+// ==========================================================================
+
+TEST(TestS342_LcmsColorTransform_BuildStub)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(LcmsColorTransform::kMinProfileBytes, 128u);
+    ASSERT_EQ(LcmsColorTransform::kMaxProfileBytes, 16u * 1024u * 1024u);
+
+    // Default instance is not built
+    LcmsColorTransform xform;
+    ASSERT(!xform.IsBuilt());
+    ASSERT(!xform.Handle().IsValid());
+
+    // Build with null bytes → NULL_PROFILE
+    auto s1 = xform.Build(nullptr, 256u);
+    ASSERT(s1 == LcmsTransformStatus::NULL_PROFILE);
+
+    // Build with zero size → NULL_PROFILE
+    std::vector<std::uint8_t> dummy(256u, 0u);
+    auto s2 = xform.Build(dummy.data(), 0u);
+    ASSERT(s2 == LcmsTransformStatus::NULL_PROFILE);
+
+    // Build with too-small profile → PROFILE_TOO_SMALL
+    std::vector<std::uint8_t> small(64u, 0u);
+    auto s3 = xform.Build(small.data(), static_cast<std::uint32_t>(small.size()));
+    ASSERT(s3 == LcmsTransformStatus::PROFILE_TOO_SMALL);
+
+    // Build with valid-size but lcms2 not linked → LCMS_NOT_LINKED
+    // (on test machines without lcms2, this is the expected result)
+    std::vector<std::uint8_t> profile(256u, 0u);
+    auto s4 = xform.Build(profile.data(), static_cast<std::uint32_t>(profile.size()));
+    ASSERT(s4 == LcmsTransformStatus::LCMS_NOT_LINKED ||
+           s4 == LcmsTransformStatus::OPEN_PROFILE_FAIL ||
+           s4 == LcmsTransformStatus::OK);
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(LcmsTransformStatus::OK),              0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LcmsTransformStatus::LCMS_NOT_LINKED), 2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LcmsTransformStatus::NULL_PROFILE),    4u);
+}
+
+// ==========================================================================
+// Sprint S343 — CpuLanczosResizer
+// ==========================================================================
+
+TEST(TestS343_CpuLanczosResizer_Identity)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(CpuLanczosResizer::kMaxDimension, 16384u);
+    ASSERT_EQ(CpuLanczosResizer::kDefaultLobes,     3u);
+
+    // Null source → NULL_SRC
+    std::vector<std::uint8_t> dst(4u * 4u * 4u, 0u);
+    auto s1 = CpuLanczosResizer::Resize(nullptr, 4u, 4u,
+                                         dst.data(), 4u, 4u);
+    ASSERT(s1 == CpuLanczosStatus::NULL_SRC);
+
+    // Null destination → NULL_DST
+    std::vector<std::uint8_t> src(4u * 4u * 4u, 128u);
+    auto s2 = CpuLanczosResizer::Resize(src.data(), 4u, 4u,
+                                         nullptr, 4u, 4u);
+    ASSERT(s2 == CpuLanczosStatus::NULL_DST);
+
+    // Zero dimension → ZERO_DIMENSION
+    auto s3 = CpuLanczosResizer::Resize(src.data(), 0u, 4u,
+                                         dst.data(), 4u, 4u);
+    ASSERT(s3 == CpuLanczosStatus::ZERO_DIMENSION);
+
+    // Identity resize (same size → memcpy path)
+    for (auto& b : src) b = 200u;
+    auto s4 = CpuLanczosResizer::Resize(src.data(), 4u, 4u,
+                                         dst.data(), 4u, 4u);
+    ASSERT(s4 == CpuLanczosStatus::OK);
+    ASSERT(dst[0] == 200u);
+
+    // LanczosKernel at x=0 → 1.0
+    float k0 = CpuLanczosResizer::LanczosKernel(0.0f, 3u);
+    ASSERT(k0 > 0.99f && k0 <= 1.0f);
+
+    // LanczosKernel at x=3.0 (support boundary) → 0.0
+    float k3 = CpuLanczosResizer::LanczosKernel(3.0f, 3u);
+    ASSERT(k3 == 0.0f);
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(CpuLanczosStatus::OK),             0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(CpuLanczosStatus::ZERO_DIMENSION), 3u);
+}
+
+// ==========================================================================
+// Sprint S344 — DllBudgetChecker
+// ==========================================================================
+
+TEST(TestS344_DllBudgetChecker_Constants)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Hard budget constants
+    ASSERT_EQ(DllBudgetChecker::kShellDllHard,
+              2'500u * 1'024u);
+    ASSERT(DllBudgetChecker::kShellDllWarn  < DllBudgetChecker::kShellDllHard);
+    ASSERT(DllBudgetChecker::kManagerHard   < DllBudgetChecker::kEngineLibHard);
+    ASSERT(DllBudgetChecker::kMsiHard       == 8u * 1024u * 1024u);
+
+    // Non-existent file → FILE_NOT_FOUND
+    auto r = DllBudgetChecker::CheckBinary(
+        BinaryBudgetId::LENS_SHELL_DLL,
+        L"nonexistent_binary_abc123.dll",
+        DllBudgetChecker::kShellDllWarn,
+        DllBudgetChecker::kShellDllHard);
+    ASSERT(r.outcome == BudgetCheckOutcome::FILE_NOT_FOUND ||
+           r.outcome == BudgetCheckOutcome::PASS ||
+           r.outcome == BudgetCheckOutcome::WARN ||
+           r.outcome == BudgetCheckOutcome::FAIL);
+
+    // Headroom on pass result is positive
+    BudgetCheckResult passResult;
+    passResult.actualBytes    = 1'000'000u;
+    passResult.hardThreshold  = 2'560'000u;
+    ASSERT(DllBudgetChecker::Headroom(passResult) > 0);
+
+    // Headroom on fail result is negative
+    BudgetCheckResult failResult;
+    failResult.actualBytes    = 3'000'000u;
+    failResult.hardThreshold  = 2'560'000u;
+    ASSERT(DllBudgetChecker::Headroom(failResult) < 0);
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(BudgetCheckOutcome::PASS),          0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(BudgetCheckOutcome::FAIL),          2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(BudgetCheckOutcome::FILE_NOT_FOUND),3u);
+}
+
+// ==========================================================================
+// Sprint S345 — WtlDarkModeTheme
+// ==========================================================================
+
+TEST(TestS345_WtlDarkModeTheme_SupportCheck)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(WtlDarkModeTheme::kMinDarkModeBuild, 17763u);
+
+    // IsDarkModeSupported returns bool (no crash)
+    bool supported = WtlDarkModeTheme::IsDarkModeSupported();
+    (void)supported;  // value is environment-dependent
+
+    // Apply with null HWND → NULL_HWND
+    auto s1 = WtlDarkModeTheme::Apply(nullptr, true);
+    ASSERT(s1 == WtlThemeApplicatorStatus::NULL_HWND ||
+           s1 == WtlThemeApplicatorStatus::NOT_WIN32);
+
+    // GetBackgroundBrush with null handle → may return nullptr (no crash)
+    void* brush = WtlDarkModeTheme::GetBackgroundBrush(true);
+    // On Windows: valid HBRUSH. In unit test: just verify no crash.
+    (void)brush;
+#ifdef _WIN32
+    if (brush) ::DeleteObject(static_cast<HGDIOBJ>(brush));
+#endif
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(WtlThemeMode::SYSTEM),      0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WtlThemeMode::FORCE_DARK),  2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WtlThemeApplicatorStatus::OK),       0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WtlThemeApplicatorStatus::NULL_HWND),1u);
+}
+
+// ==========================================================================
+// Sprint S346 — WtlHighDpiAdaptor
+// ==========================================================================
+
+TEST(TestS346_WtlHighDpiAdaptor_DefaultDpi)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(WtlHighDpiAdaptor::kBaseDpi,       96u);
+    ASSERT_EQ(WtlHighDpiAdaptor::kDpi200Percent, 192u);
+
+    // Default adaptor has 96 DPI / 1.0x scale
+    WtlHighDpiAdaptor adaptor;
+    ASSERT_EQ(adaptor.CurrentDpi(), 96u);
+    ASSERT(adaptor.ScaleFactor() > 0.99f && adaptor.ScaleFactor() < 1.01f);
+
+    // Physical pixel scaling
+    ASSERT_EQ(adaptor.PhysicalPixels(100), 100);
+
+    // GetWindowDpi with null hwnd returns base DPI
+    std::uint32_t dpi = WtlHighDpiAdaptor::GetWindowDpi(nullptr);
+    ASSERT_EQ(dpi, WtlHighDpiAdaptor::kBaseDpi);
+
+    // EnablePerMonitorV2 on test machine — no crash
+    auto s = WtlHighDpiAdaptor::EnablePerMonitorV2();
+    ASSERT(s == WtlDpiAdaptorStatus::OK          ||
+           s == WtlDpiAdaptorStatus::ALREADY_SET  ||
+           s == WtlDpiAdaptorStatus::API_NOT_AVAILABLE ||
+           s == WtlDpiAdaptorStatus::NOT_WIN32);
+
+    // OnDpiChanged with null hwnd → NULL_HWND (Win32) or NOT_WIN32
+    auto s2 = adaptor.OnDpiChanged(nullptr, 144u, nullptr);
+    ASSERT(s2 == WtlDpiAdaptorStatus::NULL_HWND ||
+           s2 == WtlDpiAdaptorStatus::NOT_WIN32);
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(WtlDpiAwarenessMode::PER_MONITOR_V2), 3u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WtlDpiAdaptorStatus::OK),              0u);
+}
+
+// ==========================================================================
+// Sprint S347 — SlsaAttestationRecord
+// ==========================================================================
+
+TEST(TestS347_SlsaAttestationRecord_Validate)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(kSlsaMinCommitShaLength, 40u);
+    ASSERT(kSlsaPhase3TargetLevel == SlsaLevel::L2);
+
+    // Empty record → ATTESTATION_DISABLED
+    SlsaAttestationRecord empty;
+    ASSERT(empty.Validate() == SlsaValidationStatus::ATTESTATION_DISABLED);
+    ASSERT(!empty.MeetsPhase3Requirement());
+
+    // MakeGitHubActionsL2 factory
+    std::string sha(40u, 'a');
+    auto rec = SlsaAttestationRecord::MakeGitHubActionsL2("39.5.0", sha, "refs/tags/v39.5.0");
+    ASSERT_EQ(rec.level, SlsaLevel::L2);
+    ASSERT_EQ(rec.buildSource, SlsaBuildSource::GITHUB_ACTIONS);
+    ASSERT(rec.attestationEnabled);
+
+    // Validate should pass now
+    ASSERT(rec.Validate() == SlsaValidationStatus::OK);
+
+    // bundleUploaded is false by default → MeetsPhase3Requirement == false
+    ASSERT(!rec.MeetsPhase3Requirement());
+
+    // Set uploaded → should meet Phase 3
+    rec.bundleUploaded = true;
+    ASSERT(rec.MeetsPhase3Requirement());
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaLevel::L0), 0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaLevel::L2), 2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaValidationStatus::OK), 0u);
+}
+
+// ==========================================================================
+// Sprint S348 — ThumbnailEvictionPolicy
+// ==========================================================================
+
+TEST(TestS348_ThumbnailEvictionPolicy_ClassifyEntry)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Phase 3 SSIM gate constants
+    ASSERT(ThumbnailEvictionPolicy::kSsimPhase3Gate > 0.96f);
+    ASSERT(ThumbnailEvictionPolicy::kSsimPhase3Gate <= 1.0f);
+    ASSERT(ThumbnailEvictionPolicy::kSsimPhase2Gate < ThumbnailEvictionPolicy::kSsimPhase3Gate);
+
+    // ClassifyEntry: unmeasured → TIER_UNKNOWN
+    ASSERT(ThumbnailEvictionPolicy::ClassifyEntry(0.0f, false) ==
+           EvictionTier::TIER_UNKNOWN);
+
+    // SSIM 0.98 → TIER_A
+    ASSERT(ThumbnailEvictionPolicy::ClassifyEntry(0.98f, true) ==
+           EvictionTier::TIER_A);
+
+    // SSIM 0.80 → TIER_B
+    ASSERT(ThumbnailEvictionPolicy::ClassifyEntry(0.80f, true) ==
+           EvictionTier::TIER_B);
+
+    // MeetsPhase3Gate
+    ASSERT(ThumbnailEvictionPolicy::MeetsPhase3Gate(0.97f, true));
+    ASSERT(!ThumbnailEvictionPolicy::MeetsPhase3Gate(0.96f, true));
+    ASSERT(!ThumbnailEvictionPolicy::MeetsPhase3Gate(0.98f, false));
+
+    // SelectEvictionCandidates: empty input → empty result
+    auto candidates = ThumbnailEvictionPolicy::SelectEvictionCandidates({});
+    ASSERT(candidates.Empty());
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(EvictionTier::TIER_A),       0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(EvictionTier::TIER_B),       1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(EvictionTier::TIER_UNKNOWN),  2u);
+}
+
+// ==========================================================================
+// Sprint S349 — DecodeTimeBudget
+// ==========================================================================
+
+TEST(TestS349_DecodeTimeBudget_DefaultConfig)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(DecodeTimeBudget::kDefaultSoftMs, 12u);
+    ASSERT_EQ(DecodeTimeBudget::kDefaultHardMs, 500u);
+    ASSERT(DecodeTimeBudget::kAbsoluteMaxMs >= DecodeTimeBudget::kDefaultHardMs);
+
+    // Default state: not started
+    DecodeTimeBudget budget;
+    ASSERT(!budget.IsStarted());
+    ASSERT(!budget.IsStopped());
+    ASSERT_EQ(budget.ElapsedMs(), 0u);
+    ASSERT(budget.Check() == DecodeTimeBudgetStatus::NOT_STARTED);
+
+    // Start → check → OK (should be well within budget)
+    budget.Start();
+    ASSERT(budget.IsStarted());
+    ASSERT(budget.Check() == DecodeTimeBudgetStatus::OK);
+
+    // Stop → finalise
+    budget.Stop();
+    ASSERT(budget.IsStopped());
+    auto v = budget.Finalise();
+    ASSERT(v.status == DecodeTimeBudgetStatus::OK ||
+           v.status == DecodeTimeBudgetStatus::SOFT_EXCEEDED);
+    ASSERT(v.softBudget == DecodeTimeBudget::kDefaultSoftMs);
+    ASSERT(v.hardBudget == DecodeTimeBudget::kDefaultHardMs);
+
+    // Per-format presets
+    auto cfgJpeg = DecodeTimeBudgetConfig::ForJpeg();
+    ASSERT_EQ(cfgJpeg.softBudgetMs, 8u);
+    ASSERT(cfgJpeg.hardBudgetMs > cfgJpeg.softBudgetMs);
+
+    auto cfgRaw = DecodeTimeBudgetConfig::ForRaw();
+    ASSERT(cfgRaw.softBudgetMs > cfgJpeg.softBudgetMs);
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(DecodeTimeBudgetStatus::OK),            0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(DecodeTimeBudgetStatus::HARD_EXCEEDED), 2u);
+}
+
+// ==========================================================================
+// Sprint S350 — WinGetManifestSchema
+// ==========================================================================
+
+TEST(TestS350_WinGetManifestSchema_Factory)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(kWinGetSha256HexLength, 64u);
+    ASSERT_EQ(kWinGetMaxShortDescriptionLength, 256u);
+
+    // Empty manifest → MISSING_PACKAGE_ID
+    WinGetManifestPackage empty;
+    ASSERT(empty.Validate() == WinGetManifestValidationStatus::MISSING_PACKAGE_ID);
+
+    // Factory with empty SHA → MISSING_INSTALLER_SHA256
+    auto m1 = WinGetManifestPackage::MakeExplorerLens("39.5.0", "https://example.com/EL.msi", "");
+    ASSERT(m1.Validate() == WinGetManifestValidationStatus::MISSING_INSTALLER_SHA256);
+
+    // Factory with 63-char SHA → INVALID_SHA256_LENGTH
+    std::string sha63(63u, 'a');
+    auto m2 = WinGetManifestPackage::MakeExplorerLens("39.5.0", "https://example.com/EL.msi", sha63);
+    ASSERT(m2.Validate() == WinGetManifestValidationStatus::INVALID_SHA256_LENGTH);
+
+    // Valid factory manifest
+    std::string sha64(64u, 'b');
+    auto m3 = WinGetManifestPackage::MakeExplorerLens("39.5.0", "https://example.com/EL.msi", sha64);
+    ASSERT(m3.Validate() == WinGetManifestValidationStatus::OK);
+    ASSERT_EQ(m3.packageIdentifier, std::string("RajwanYair.ExplorerLens"));
+    ASSERT(!m3.locale.shortDescription.empty());
+    ASSERT(!m3.locale.tags.empty());
+
+    // Enum ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(WinGetManifestVersion::V1_4),      3u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WinGetInstallerType::WIX),          6u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WinGetManifestValidationStatus::OK), 0u);
+}

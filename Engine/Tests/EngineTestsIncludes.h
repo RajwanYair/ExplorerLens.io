@@ -1461,5 +1461,15 @@ using namespace ExplorerLens::Engine;
 #include "../Cache/L2SqliteCacheIndex.h"
 #include "../Core/AsyncDecodeContext.h"
 #include "../Core/IccProfilePassthrough.h"
+// Sprint S342-S350 — ROADMAP v8.0 Phase 3 Quality & Polish
+#include "../Core/LcmsColorTransform.h"
+#include "../Pipeline/CpuLanczosResizer.h"
+#include "../Core/DllBudgetChecker.h"
+#include "../Platform/WtlDarkModeTheme.h"
+#include "../Platform/WtlHighDpiAdaptor.h"
+#include "../Core/SlsaAttestationRecord.h"
+#include "../Cache/ThumbnailEvictionPolicy.h"
+#include "../Pipeline/DecodeTimeBudget.h"
+#include "../Core/WinGetManifestSchema.h"
 
 #include "EngineTestsMacros.h"

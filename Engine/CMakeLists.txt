@@ -1902,6 +1902,15 @@ set(ENGINE_HEADERS
     Cache/L2SqliteCacheIndex.h                   # S338 — SQLite WAL catalog schema + key types
     Core/AsyncDecodeContext.h                    # S339 — unified Phase 2 decode context
     Core/IccProfilePassthrough.h                 # S340 — Phase 3 kickoff: ICC (pixels,icc) pair (H3/H30)
+    Core/LcmsColorTransform.h                    # S342 — lcms2 ICC colour transform pipeline (H12/H30/Phase3)
+    Pipeline/CpuLanczosResizer.h                 # S343 — CPU AVX2 Lanczos-3 thumbnail resizer (H41/Phase3)
+    Core/DllBudgetChecker.h                      # S344 — DLL binary size budget enforcement (H18/Phase3)
+    Platform/WtlDarkModeTheme.h                  # S345 — WTL dark mode theme applicator (Phase3 LENSManager)
+    Platform/WtlHighDpiAdaptor.h                 # S346 — WM_DPICHANGED high-DPI adaptor (Phase3 LENSManager)
+    Core/SlsaAttestationRecord.h                 # S347 — SLSA L2 build provenance record (H32/Phase3)
+    Cache/ThumbnailEvictionPolicy.h              # S348 — SSIM-weighted eviction policy (Phase3 SSIM gate)
+    Pipeline/DecodeTimeBudget.h                  # S349 — per-decode CPU time budget RAII (Phase3 perf)
+    Core/WinGetManifestSchema.h                  # S350 — WinGet manifest schema types (Phase3 distribution)
 
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
