@@ -29,16 +29,16 @@ enum class MtlsRestAuthMode : uint8_t {
 // ── Certificate Validation Level ─────────────────────────────────────────────
 
 enum class MtlsRestCertValidation : uint8_t {
-    STRICT   = 0,  // Chain + hostname + expiry + revocation (default)
-    STANDARD = 1,  // Chain + expiry (no revocation check)
-    PINNED   = 2,  // SHA-256 public-key pin only
+    STRICT_MODE = 0,  // Chain + hostname + expiry + revocation (default)
+    STANDARD    = 1,  // Chain + expiry (no revocation check)
+    PINNED      = 2,  // SHA-256 public-key pin only
 };
 
 // ── Auth Policy ───────────────────────────────────────────────────────────────
 
 struct MtlsRestAuthPolicy {
     MtlsRestAuthMode       mode               = MtlsRestAuthMode::DISABLED;
-    MtlsRestCertValidation clientValidation   = MtlsRestCertValidation::STRICT;
+    MtlsRestCertValidation clientValidation   = MtlsRestCertValidation::STRICT_MODE;
     uint32_t               handshakeTimeoutMs = 5000;   // TLS handshake budget
     uint32_t               sessionLifetimeMs  = 3600000; // 1 hour session reuse
     bool                   requireSan         = true;    // Require Subject Alt Name

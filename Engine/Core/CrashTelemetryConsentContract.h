@@ -29,9 +29,9 @@ enum class CrashTelemetryConsentMode : uint8_t {
 // ── PII Filtering Level ───────────────────────────────────────────────────────
 
 enum class CrashTelemetryPiiFilter : uint8_t {
-    STRICT   = 0,  // Strip paths, hostnames, usernames, EXIF PII (default)
-    MODERATE = 1,  // Strip obvious PII only
-    NONE     = 2,  // No filtering (enterprise network-isolated deployments only)
+    STRICT_MODE = 0,  // Strip paths, hostnames, usernames, EXIF PII (default)
+    MODERATE    = 1,  // Strip obvious PII only
+    NONE        = 2,  // No filtering (enterprise network-isolated deployments only)
 };
 
 // ── Upload Target ─────────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ enum class CrashTelemetryUploadTarget : uint8_t {
 
 struct CrashTelemetryConsentPolicy {
     CrashTelemetryConsentMode   mode           = CrashTelemetryConsentMode::DISABLED;
-    CrashTelemetryPiiFilter     piiFilter       = CrashTelemetryPiiFilter::STRICT;
+    CrashTelemetryPiiFilter     piiFilter       = CrashTelemetryPiiFilter::STRICT_MODE;
     CrashTelemetryUploadTarget  uploadTarget    = CrashTelemetryUploadTarget::LOCAL_ONLY;
     uint32_t                    maxDumpKb       = 8192;    // 8 MiB default (hard cap via WerCrashReporter)
     uint32_t                    rateLimitPerDay = 3;       // Max crash reports per day

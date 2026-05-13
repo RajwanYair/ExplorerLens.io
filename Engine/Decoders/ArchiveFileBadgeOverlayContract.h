@@ -29,10 +29,10 @@ enum class ArchiveFileBadgePosition : uint8_t {
 // ── Badge Style ───────────────────────────────────────────────────────────────
 
 enum class ArchiveFileBadgeStyle : uint8_t {
-    ROUNDED_PILL   = 0,  // Dark pill with white digit(s) — default
-    CIRCLE         = 1,  // Circle badge (single-digit counts)
-    TRANSPARENT    = 2,  // Translucent overlay
-    NONE           = 3,  // Suppress badge entirely
+    ROUNDED_PILL      = 0,  // Dark pill with white digit(s) — default
+    CIRCLE            = 1,  // Circle badge (single-digit counts)
+    BADGE_TRANSPARENT = 2,  // Translucent overlay
+    NONE              = 3,  // Suppress badge entirely
 };
 
 // ── Badge Policy ──────────────────────────────────────────────────────────────

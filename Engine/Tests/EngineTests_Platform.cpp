@@ -9254,7 +9254,7 @@ TEST(TestS293_CrashTelemetry_DefaultDisabled)
 {
     CrashTelemetryConsentPolicy p;
     ASSERT(p.mode == CrashTelemetryConsentMode::DISABLED);
-    ASSERT(p.piiFilter == CrashTelemetryPiiFilter::STRICT);
+    ASSERT(p.piiFilter == CrashTelemetryPiiFilter::STRICT_MODE);
     ASSERT(p.maxDumpKb <= kCrashTelemetryMaxDumpKb);
     ASSERT(p.rateLimitPerDay <= kCrashTelemetryHardRateLimitPerDay);
     ASSERT(kCrashTelemetrySchemaVersion == 1);
@@ -9280,7 +9280,7 @@ TEST(TestS295_MtlsRestAuth_DefaultDisabled)
 {
     MtlsRestAuthPolicy p;
     ASSERT(p.mode == MtlsRestAuthMode::DISABLED);
-    ASSERT(p.clientValidation == MtlsRestCertValidation::STRICT);
+    ASSERT(p.clientValidation == MtlsRestCertValidation::STRICT_MODE);
     ASSERT(!p.allowSelfSigned);
     ASSERT(p.handshakeTimeoutMs <= kMtlsRestAuthHandshakeHardMs);
     ASSERT(p.sessionLifetimeMs <= kMtlsRestAuthSessionHardMs);
@@ -9297,7 +9297,7 @@ TEST(TestS296_EngineDllAbi_ExportCount)
         ASSERT(kEngineDllAbiExports[i].signature != nullptr);
     }
     ASSERT(kEngineDllAbiMajorVersion == 1);
-    ASSERT(kEngineDllAbiCurrentVersion == (1u << 16) | 0u);
+    ASSERT(kEngineDllAbiCurrentVersion == ((1u << 16) | 0u));
 }
 
 // ── S297 — VulkanResizePipelineContract ──────────────────────────────────────
@@ -9411,24 +9411,273 @@ TEST(TestS308_EmbeddedJpegExtractor_Defaults)
     ASSERT(!result.has_value());
 }
 
-TEST(TestS309_IccProfileManager_Disabled)
+TEST(TestS309_IccProfileManager_WIC)
 {
-    // Phase 3 stub: ICC correction must be off until lcms2 is linked
-    ASSERT(!IccProfileManager::IsEnabled());
-    ASSERT(IccProfileManager::BackendVersion() == 0);
+    // WIC-backed ICC correction must be enabled on Windows
+    ASSERT(IccProfileManager::IsEnabled());
+    ASSERT(strcmp(IccProfileManager::BackendName(), "WIC") == 0);
 
-    // All operations are no-ops and must not crash
     IccProfileManager mgr;
-    const auto info = mgr.ParseProfile({});
-    ASSERT(!info.isValid);
 
-    auto* xform = mgr.CreateTransform({}, {});
-    ASSERT(xform == nullptr);
+    // Empty buffer must not validate
+    const auto infoEmpty = mgr.ParseProfile({});
+    ASSERT(!infoEmpty.isValid);
+
+    // A 96-byte stub (less than 128-byte header) must not validate
+    std::byte shortHdr[96]{};
+    const auto infoShort = mgr.ParseProfile(std::span<const std::byte>{ shortHdr, 96 });
+    ASSERT(!infoShort.isValid);
+
+    // Valid 128-byte dummy header with 'RGB ' at offset 16 must parse
+    std::byte hdr[128]{};
+    // Set profile size (big-endian) = 128
+    hdr[0] = std::byte{ 0x00 }; hdr[1] = std::byte{ 0x00 };
+    hdr[2] = std::byte{ 0x00 }; hdr[3] = std::byte{ 0x80 };
+    // Color space 'RGB ' at bytes 16-19
+    hdr[16] = std::byte{ 'R' }; hdr[17] = std::byte{ 'G' };
+    hdr[18] = std::byte{ 'B' }; hdr[19] = std::byte{ ' ' };
+    const auto infoValid = mgr.ParseProfile(std::span<const std::byte>{ hdr, 128 });
+    ASSERT(infoValid.isValid);
+    ASSERT(infoValid.colorSpace == "RGB");
+
+    // CreateTransform with empty source ICC must return nullptr (passthrough)
+    auto* xformNull = mgr.CreateTransform({}, {});
+    ASSERT(xformNull == nullptr);
 
     // DestroyTransform(nullptr) must be safe
     mgr.DestroyTransform(nullptr);
 
-    // ApplyTransform with empty span must be safe
+    // ApplyTransform with null transform handle must be a no-op
     std::byte dummyPixel[4]{};
     mgr.ApplyTransform(nullptr, std::span<std::byte>{ dummyPixel, 4 }, 1u);
+}
+
+//==============================================================================
+// Sprint S311-S319 — ROADMAP v7.0 Phase 2 First GPU Pixels
+//==============================================================================
+
+TEST(TestS311_D3D11DeviceManager_Contract)
+{
+    // Manager must report not-ready before Initialise() is called
+    D3D11DeviceManager mgr;
+    ASSERT(!mgr.IsReady());
+
+    // Default config constants must hold project-mandated values
+    ASSERT(D3D11DeviceManager::kMaxAdaptersToTry == 8u);
+    ASSERT(D3D11DeviceManager::kMaxTDRResets     == 3u);
+
+    // QueryInfo on uninitialised manager must return a zeroed struct
+    const auto info = mgr.QueryInfo();
+    ASSERT(!info.isInitialised);
+
+    // Shutdown on uninitialised manager must be safe (no crash)
+    mgr.Shutdown();
+    ASSERT(!mgr.IsReady());
+}
+
+TEST(TestS312_DXVA2JpegDecoder_NotSupported)
+{
+    // Hardware JPEG decode is expected to be unavailable on CI machines
+    ASSERT(!DXVA2JpegDecoder::IsHardwareSupported());
+
+    DXVA2JpegDecoder dec;
+    ASSERT(!dec.IsOpen());
+
+    // Decode without Open() must return HARDWARE_UNAVAILABLE
+    DXVA2JpegDecodeResult res = dec.Decode({});
+    ASSERT(res.status == DXVA2DecodeStatus::HARDWARE_UNAVAILABLE);
+
+    // Constants must satisfy project-mandated floor values
+    ASSERT(DXVA2JpegDecoder::kMaxDecodeSidePixels >= 4096u);
+    ASSERT(DXVA2JpegDecoder::kMinBitstreamBytes   == 32u);
+}
+
+TEST(TestS313_CancelAwareBindCallback_Policy)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Construct with a trivial token view (null / default)
+    DecodeTokenView token{};
+    CancelAwareBindCallback cb{ token };
+
+    // Fresh callback: not cancelled, call count zero
+    ASSERT(!cb.IsCancelled());
+    ASSERT(cb.CallCount() == 0u);
+
+    // Policy check without any progress calls must default to CONTINUE
+    ASSERT(cb.ShouldCancel() == BindCallbackPolicy::CONTINUE);
+
+    ASSERT(CancelAwareBindCallback::kMaxProgressCallsBeforeForceCheck == 1024u);
+    ASSERT(CancelAwareBindCallback::kHResultAbort == static_cast<long>(0x80004004));
+}
+
+TEST(TestS314_OOMKillGuard_ArmRelease)
+{
+    using namespace ExplorerLens::Engine;
+
+    OOMKillGuard guard;
+    ASSERT(!guard.IsArmed());
+
+    // Arm() — no args (Win32 SetProcessWorkingSetSizeEx path on Windows)
+    const auto armStatus = guard.Arm();
+    // On Windows the call may succeed or be permission-denied by OS policy;
+    // both outcomes are valid — what matters is the guard knows its state.
+    ASSERT(armStatus == OOMKillGuardStatus::OK
+        || armStatus == OOMKillGuardStatus::PERMISSION_DENIED
+        || armStatus == OOMKillGuardStatus::RESERVATION_FAILED);
+
+    if (armStatus == OOMKillGuardStatus::OK) {
+        ASSERT(guard.IsArmed());
+
+        // Release must succeed and transition to not-armed
+        const auto relStatus = guard.Release();
+        ASSERT(relStatus == OOMKillGuardStatus::OK);
+        ASSERT(!guard.IsArmed());
+
+        // Calling Release() again must be safe and return NOT_ACTIVE
+        const auto rel2 = guard.Release();
+        ASSERT(rel2 == OOMKillGuardStatus::NOT_ACTIVE);
+    }
+
+    ASSERT(OOMKillGuard::kAbsoluteMaxWorkingSetBytes > 0u);
+    ASSERT(OOMKillGuard::kMinEmergencyRegionBytes     == 65536u);
+}
+
+TEST(TestS315_LastCachedBitmap_DefaultNone)
+{
+    using namespace ExplorerLens::Engine;
+
+    LastCachedBitmapContract contract;
+    ASSERT(!contract.IsBackendAvailable());
+
+    const auto result = contract.Fetch({});
+    ASSERT(result.kind == PlaceholderBitmapKind::NONE);
+    ASSERT(!result.HasPixels());
+
+    ASSERT(LastCachedBitmapContract::kMaxCachedSidePixels == 2048u);
+}
+
+TEST(TestS316_ReadaheadIO_SlotCount)
+{
+    using namespace ExplorerLens::Engine;
+
+    ReadaheadIOContract io;
+    ASSERT(!io.IsInitialised());
+
+    const auto initStatus = io.Initialize({});
+    ASSERT(initStatus == ReadaheadIOStatus::OK);
+    ASSERT(io.IsInitialised());
+
+    // Before any enqueue, slot counts must be zero
+    ASSERT(io.ReadySlotCount()   == 0u);
+    ASSERT(io.PendingSlotCount() == 0u);
+
+    // Consume on empty queue must return nullptr
+    ASSERT(io.Consume(0u) == nullptr);
+
+    io.Shutdown();
+    ASSERT(!io.IsInitialised());
+
+    ASSERT(ReadaheadIOConfig::kDefaultSlotCount == 8u);
+    ASSERT(ReadaheadIOConfig::kMaxSlotCount     == 32u);
+}
+
+TEST(TestS317_D3D11BlitPipeline_CPUFallback)
+{
+    using namespace ExplorerLens::Engine;
+
+    D3D11TextureBlitPipeline pipeline;
+
+    // GPU path is not wired until Sprint ≥ S330; CPU bilinear fallback must be present
+    ASSERT(!D3D11TextureBlitPipeline::IsGPUPathAvailable());
+    ASSERT( D3D11TextureBlitPipeline::IsCPUFallbackAvailable());
+
+    // Blit with null pixels must return INVALID_DESCRIPTOR
+    BlitDescriptor bad{};
+    const auto badResult = pipeline.Blit(bad);
+    ASSERT(badResult.status == BlitStatus::INVALID_DESCRIPTOR);
+
+    // Blit with a valid 2×2 BGRA-8 descriptor must succeed via CPU bilinear path
+    BlitDescriptor desc{};
+    // 2×2 source: 4 bytes per pixel × 2 pixels wide × 2 pixels tall
+    static std::byte src[16]{};
+    desc.srcPixels      = src;
+    desc.srcWidth       = 2u;
+    desc.srcHeight      = 2u;
+    desc.srcStrideBytes = 8u;   // 2 pixels × 4 bytes
+    desc.dstWidth       = 1u;
+    desc.dstHeight      = 1u;
+    const auto result = pipeline.Blit(desc);
+    ASSERT(result.status == BlitStatus::OK);
+    ASSERT(result.pixels.size() == 4u); // 1×1 BGRA-8 = 4 bytes
+
+    ASSERT(D3D11TextureBlitPipeline::kMaxTextureDimension          == 16384u);
+    ASSERT(D3D11TextureBlitPipeline::kMinBlitDimension             == 16u);
+    ASSERT(D3D11TextureBlitPipeline::kStagingTexturePitchAlignment == 256u);
+}
+
+TEST(TestS318_LibJpegTurboEncode_WIC)
+{
+    using namespace ExplorerLens::Engine;
+
+    // WIC JPEG encode must be available on Windows
+    ASSERT(LibJpegTurboEncodeWrapper::IsAvailable());
+    ASSERT(strcmp(LibJpegTurboEncodeWrapper::BackendName(), "WIC") == 0);
+
+    // Encode a 1×1 opaque white BGRA-8 pixel
+    LibJpegTurboEncodeWrapper enc;
+    std::byte src[4]{ std::byte{0xFF}, std::byte{0xFF}, std::byte{0xFF}, std::byte{0xFF} };
+    const auto result = enc.Encode(
+        std::span<const std::byte>{ src, 4 }, 1u, 1u, 4u);
+    ASSERT(result.status == JpegEncodeStatus::OK);
+    ASSERT(!result.jpegBytes.empty());
+    // Verify JPEG SOI marker (0xFF 0xD8)
+    ASSERT(result.jpegBytes.size() >= 2u);
+    ASSERT(result.jpegBytes[0] == std::byte{0xFF});
+    ASSERT(result.jpegBytes[1] == std::byte{0xD8});
+
+    // Zero-size encode must return INVALID_INPUT
+    const auto badResult = enc.Encode({}, 0u, 0u, 0u);
+    ASSERT(badResult.status == JpegEncodeStatus::INVALID_INPUT);
+
+    ASSERT(LibJpegTurboEncodeWrapper::kMinQuality     == 1u);
+    ASSERT(LibJpegTurboEncodeWrapper::kMaxQuality     == 100u);
+    ASSERT(LibJpegTurboEncodeWrapper::kDefaultQuality == 85u);
+    ASSERT(LibJpegTurboEncodeWrapper::kMaxDimension   == 65535u);
+}
+
+TEST(TestS319_LibSpngDecode_WIC)
+{
+    using namespace ExplorerLens::Engine;
+
+    // WIC PNG decode must be available on Windows
+    ASSERT(LibSpngDecodeWrapper::IsAvailable());
+    ASSERT(strcmp(LibSpngDecodeWrapper::BackendName(), "WIC") == 0);
+
+    LibSpngDecodeWrapper dec;
+
+    // Empty buffer must return INVALID_INPUT
+    const auto emptyResult = dec.Decode({});
+    ASSERT(emptyResult.status == SpngDecodeStatus::INVALID_INPUT);
+
+    // Short buffer (< 8 bytes) must return NOT_PNG
+    std::byte shortBuf[4]{};
+    const auto shortResult = dec.Decode(std::span<const std::byte>{ shortBuf, 4 });
+    ASSERT(shortResult.status == SpngDecodeStatus::NOT_PNG);
+
+    // 8 bytes with wrong signature must return NOT_PNG
+    std::byte fakePng[8]{};
+    const auto fakeResult = dec.Decode(std::span<const std::byte>{ fakePng, 8 });
+    ASSERT(fakeResult.status == SpngDecodeStatus::NOT_PNG);
+    ASSERT(fakeResult.pixels.empty());
+
+    // A correctly-signed buffer that is not a valid PNG must return NOT_PNG or DECODE_FAILED
+    std::byte pngSig[16]{ std::byte{0x89}, std::byte{0x50}, std::byte{0x4E}, std::byte{0x47},
+                          std::byte{0x0D}, std::byte{0x0A}, std::byte{0x1A}, std::byte{0x0A} };
+    const auto badPngResult = dec.Decode(std::span<const std::byte>{ pngSig, 16 });
+    ASSERT(badPngResult.status == SpngDecodeStatus::NOT_PNG
+        || badPngResult.status == SpngDecodeStatus::DECODE_FAILED);
+
+    ASSERT(LibSpngDecodeWrapper::kMaxSpngDimension     == 1'048'576u);
+    ASSERT(LibSpngDecodeWrapper::kMinPngSignatureBytes == 8u);
 }

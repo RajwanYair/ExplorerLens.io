@@ -18,9 +18,9 @@ namespace Engine {
 // ── HTTP Method ──────────────────────────────────────────────────────────────
 
 enum class LensRestApiMethod : uint8_t {
-    GET    = 0,
-    POST   = 1,
-    DELETE = 2,
+    GET         = 0,
+    POST        = 1,
+    HTTP_DELETE = 2,
 };
 
 // ── Auth Mode ────────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ static constexpr LensRestApiEndpoint kLensRestApiEndpoints[kLensRestApiEndpointC
     { "/v1/decode/batch",    LensRestApiMethod::POST,        LensRestApiAuthMode::BEARER, 2000,30000, "Batch decode list of paths" },
     { "/v1/formats",         LensRestApiMethod::GET,         LensRestApiAuthMode::NONE,     50,  500, "List supported formats as JSON" },
     { "/v1/cache/stats",     LensRestApiMethod::GET,         LensRestApiAuthMode::BEARER,   20,  200, "Cache hit/miss/size/eviction counts" },
-    { "/v1/cache/purge",     LensRestApiMethod::DELETE,      LensRestApiAuthMode::BEARER,  100, 1000, "Purge cache by format glob or all" },
+    { "/v1/cache/purge",     LensRestApiMethod::HTTP_DELETE,      LensRestApiAuthMode::BEARER,  100, 1000, "Purge cache by format glob or all" },
     { "/v1/health",          LensRestApiMethod::GET,         LensRestApiAuthMode::NONE,      5,   50, "Liveness probe (Kubernetes-compatible)" },
     { "/v1/version",         LensRestApiMethod::GET,         LensRestApiAuthMode::NONE,      5,   50, "Version + build info JSON" },
 };

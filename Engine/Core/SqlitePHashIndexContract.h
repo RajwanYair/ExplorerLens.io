@@ -27,9 +27,9 @@ static constexpr uint32_t kSqlitePHashBitDepth              = 64;  // 64-bit DCT
 // ── Algorithm selection ──────────────────────────────────────────────────────
 
 enum class SqlitePHashAlgorithm : uint8_t {
-    DCT_PHASH   = 0,  // Discrete Cosine Transform — most robust (default)
-    DIFFERENCE  = 1,  // dHash — fast, good for near-duplicates
-    AVERAGE     = 2,  // aHash — simplest, most false positives
+    DCT_PHASH       = 0,  // Discrete Cosine Transform — most robust (default)
+    PHASH_DIFFERENCE = 1, // dHash — fast, good for near-duplicates
+    AVERAGE          = 2, // aHash — simplest, most false positives
 };
 
 // ── Index entry (as stored in SQLite column) ─────────────────────────────────

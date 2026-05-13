@@ -2916,7 +2916,7 @@ int main()
     RUN_TEST(TestS302_StbImageAudit_SiteCount);
     RUN_TEST(TestS307_AsyncDecodeToken_Construct);
     RUN_TEST(TestS308_EmbeddedJpegExtractor_Defaults);
-    RUN_TEST(TestS309_IccProfileManager_Disabled);
+    RUN_TEST(TestS309_IccProfileManager_WIC);
 
     // ROADMAP v7.0 Phase 2 (S311-S319) Tests:
     RUN_TEST(TestS311_D3D11DeviceManager_Contract);
@@ -2925,9 +2925,9 @@ int main()
     RUN_TEST(TestS314_OOMKillGuard_ArmRelease);
     RUN_TEST(TestS315_LastCachedBitmap_DefaultNone);
     RUN_TEST(TestS316_ReadaheadIO_SlotCount);
-    RUN_TEST(TestS317_D3D11BlitPipeline_Disabled);
-    RUN_TEST(TestS318_LibJpegTurboEncode_Disabled);
-    RUN_TEST(TestS319_LibSpngDecode_Disabled);
+    RUN_TEST(TestS317_D3D11BlitPipeline_CPUFallback);
+    RUN_TEST(TestS318_LibJpegTurboEncode_WIC);
+    RUN_TEST(TestS319_LibSpngDecode_WIC);
 
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;

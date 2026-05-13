@@ -1,6 +1,270 @@
 // Engine/Pipeline/ReadaheadIOContract.h
-// ExplorerLens — Parallel I/O readahead N=8 contract (H9 / ROADMAP v7.0 Phase 2)
+// ExplorerLens — Parallel I/O readahead N=8 ring-buffer (H9 / ROADMAP v7.0 Phase 2)
 // Sprint S316.
+//
+// Purpose:
+//   When Explorer opens a folder with 200+ thumbnails, each file is opened,
+//   read, decoded, and closed sequentially.  Storage I/O is the dominant
+//   bottleneck for HDD and even NVMe on cold paths.
+//
+//   The readahead pattern (Harvested from IrfanView batch mode — H9) solves
+//   this by:
+//     1. Accepting a ring-buffer of N=8 IStream slots.
+//     2. Prefetching the next 8 files while the GPU decodes the current one.
+//     3. Delivering IStream* already at position 0 — zero seek latency.
+//
+//   Expected throughput improvement (H9 harvest):
+//     HDD:  140 → 350 thumbnails/sec  (2.5×, I/O-bound → compute-bound)
+//     NVMe: 235 → 400 thumbnails/sec  (1.7×, overlap decode + I/O)
+//
+// Integration note:
+//   Enqueue() accepts a file-path hash for slot-tracking and deduplication.
+//   The IStream* is supplied by the caller via CommitStream(); Consume()
+//   then hands it to the decode pipeline.  This keeps I/O scheduling in
+//   the pipeline layer and slot-lifecycle management here.
+//
+#pragma once
+#ifndef EXPLORERLENS_ENGINE_READAHEAD_IO_CONTRACT_H
+#define EXPLORERLENS_ENGINE_READAHEAD_IO_CONTRACT_H
+
+#include <cstdint>
+#include <array>
+#include <atomic>
+#include <algorithm>
+
+// Forward declaration — avoids pulling in objidl.h
+struct IStream;
+
+namespace ExplorerLens::Engine {
+
+// ---------------------------------------------------------------------------
+// ReadaheadSlotState
+// ---------------------------------------------------------------------------
+enum class ReadaheadSlotState : std::uint8_t {
+    EMPTY      = 0,   ///< Slot is available for a new file path
+    PENDING    = 1,   ///< Async I/O prefetch in flight
+    READY      = 2,   ///< IStream ready for consumer
+    CONSUMED   = 3,   ///< Consumer has taken the stream; slot can be reused
+    SLOT_ERROR = 4,   ///< Prefetch failed (file not found, access denied, etc.)
+};
+
+// ---------------------------------------------------------------------------
+// ReadaheadSlot
+// ---------------------------------------------------------------------------
+struct ReadaheadSlot final {
+    ReadaheadSlotState   state{ ReadaheadSlotState::EMPTY };
+    IStream*             stream{ nullptr };    ///< Non-owning; AddRef'd by prefetch
+    std::uint64_t        filePathHash{};       ///< CacheKeyV2 hash of the path
+    std::uint32_t        fileSizeBytes{};      ///< 0 if unknown at queue time
+    std::uint32_t        prefetchDurationUs{}; ///< Measured prefetch wall time
+};
+
+// ---------------------------------------------------------------------------
+// ReadaheadIOConfig
+// ---------------------------------------------------------------------------
+struct ReadaheadIOConfig final {
+    // Number of concurrent prefetch slots.  8 matches Explorer's typical
+    // parallelism and saturates most NVMe queues without overcommitting.
+    static constexpr std::uint32_t kDefaultSlotCount = 8u;
+    static constexpr std::uint32_t kMaxSlotCount     = 32u;
+    static constexpr std::uint32_t kMinSlotCount     = 1u;
+
+    std::uint32_t slotCount = kDefaultSlotCount;
+
+    // Maximum file size to prefetch into RAM.  Files larger than this are
+    // opened but not read ahead (the IStream is returned at position 0).
+    std::uint32_t maxPrefetchBytes = 32u * 1024u * 1024u;  // 32 MiB
+
+    // If true, prefetch I/O runs on the thread pool; false = synchronous
+    // (synchronous mode used in unit tests and low-memory environments).
+    bool asyncPrefetch = true;
+};
+
+// ---------------------------------------------------------------------------
+// ReadaheadIOStatus
+// ---------------------------------------------------------------------------
+enum class ReadaheadIOStatus : std::uint8_t {
+    OK              = 0,
+    QUEUE_FULL      = 1,   ///< All slots occupied; caller should wait
+    INVALID_PATH    = 2,   ///< Null or empty file path
+    ALREADY_QUEUED  = 3,   ///< Same file hash already in a slot
+    NOT_INITIALISED = 4,   ///< Call Initialize() first
+};
+
+// ---------------------------------------------------------------------------
+// ReadaheadIOContract
+// ---------------------------------------------------------------------------
+// Ring-buffer of N ReadaheadSlots.  Enqueue() claims a slot (PENDING);
+// CommitStream() transitions it to READY; Consume() returns the stream
+// and marks it CONSUMED so the slot can be recycled.
+//
+class ReadaheadIOContract final {
+public:
+    ReadaheadIOContract() noexcept  = default;
+    ~ReadaheadIOContract() noexcept = default;
+
+    ReadaheadIOContract(const ReadaheadIOContract&)            = delete;
+    ReadaheadIOContract& operator=(const ReadaheadIOContract&) = delete;
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    /// Initialise the slot pool.  Must be called before Enqueue().
+    [[nodiscard]] ReadaheadIOStatus Initialize(
+        const ReadaheadIOConfig& cfg = ReadaheadIOConfig{}) noexcept
+    {
+        m_config = cfg;
+        // Clamp slot count to valid range.
+        m_slotCount = (std::min)(
+            (std::max)(cfg.slotCount, ReadaheadIOConfig::kMinSlotCount),
+            ReadaheadIOConfig::kMaxSlotCount);
+
+        // Clear all slots.
+        for (auto& slot : m_slots) {
+            slot = ReadaheadSlot{};
+        }
+        m_initialised.store(true, std::memory_order_release);
+        return ReadaheadIOStatus::OK;
+    }
+
+    /// Drain all pending slots and mark as not initialised.
+    void Shutdown() noexcept
+    {
+        CancelAll();
+        m_initialised.store(false, std::memory_order_release);
+    }
+
+    [[nodiscard]] bool IsInitialised() const noexcept
+    {
+        return m_initialised.load(std::memory_order_acquire);
+    }
+
+    // ── Queue management ──────────────────────────────────────────────────────
+
+    /// Reserve a slot for the file identified by filePathHash.
+    /// The slot transitions to PENDING; call CommitStream() when the IStream
+    /// is ready to advance it to READY.
+    [[nodiscard]] ReadaheadIOStatus Enqueue(
+        std::uint64_t filePathHash,
+        std::uint32_t fileSizeHintBytes = 0u) noexcept
+    {
+        if (!m_initialised.load(std::memory_order_acquire)) {
+            return ReadaheadIOStatus::NOT_INITIALISED;
+        }
+
+        // Reject duplicates.
+        for (std::uint32_t i = 0; i < m_slotCount; ++i) {
+            const auto& s = m_slots[i];
+            if ((s.state == ReadaheadSlotState::PENDING ||
+                 s.state == ReadaheadSlotState::READY)
+                && s.filePathHash == filePathHash) {
+                return ReadaheadIOStatus::ALREADY_QUEUED;
+            }
+        }
+
+        // Find an EMPTY or CONSUMED slot to recycle.
+        for (std::uint32_t i = 0; i < m_slotCount; ++i) {
+            auto& s = m_slots[i];
+            if (s.state == ReadaheadSlotState::EMPTY ||
+                s.state == ReadaheadSlotState::CONSUMED) {
+                s.stream           = nullptr;
+                s.filePathHash     = filePathHash;
+                s.fileSizeBytes    = fileSizeHintBytes;
+                s.prefetchDurationUs = 0u;
+                s.state            = ReadaheadSlotState::PENDING;
+                return ReadaheadIOStatus::OK;
+            }
+        }
+
+        return ReadaheadIOStatus::QUEUE_FULL;
+    }
+
+    /// Attach a ready IStream to the slot identified by filePathHash.
+    /// Advances the slot from PENDING → READY.
+    /// Returns false if no matching PENDING slot is found.
+    bool CommitStream(std::uint64_t filePathHash,
+                      IStream*      stream,
+                      std::uint32_t prefetchDurationUs = 0u) noexcept
+    {
+        for (std::uint32_t i = 0; i < m_slotCount; ++i) {
+            auto& s = m_slots[i];
+            if (s.state == ReadaheadSlotState::PENDING &&
+                s.filePathHash == filePathHash) {
+                s.stream             = stream;
+                s.prefetchDurationUs = prefetchDurationUs;
+                s.state              = ReadaheadSlotState::READY;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// Consume a ready IStream for the given file hash.
+    /// Marks the slot CONSUMED.  Returns nullptr if not yet READY.
+    [[nodiscard]] IStream* Consume(std::uint64_t filePathHash) noexcept
+    {
+        for (std::uint32_t i = 0; i < m_slotCount; ++i) {
+            auto& s = m_slots[i];
+            if (s.state == ReadaheadSlotState::READY &&
+                s.filePathHash == filePathHash) {
+                IStream* result = s.stream;
+                s.stream        = nullptr;
+                s.state         = ReadaheadSlotState::CONSUMED;
+                return result;
+            }
+        }
+        return nullptr;
+    }
+
+    /// Cancel all pending and ready prefetches; reset all slots to EMPTY.
+    void CancelAll() noexcept
+    {
+        for (std::uint32_t i = 0; i < m_slotCount; ++i) {
+            auto& s = m_slots[i];
+            // Release the IStream reference held in PENDING/READY slots.
+            // Caller is responsible for actual IStream::Release() before
+            // calling CancelAll(); we null the pointer to prevent use-after-free.
+            s.stream = nullptr;
+            s.state  = ReadaheadSlotState::EMPTY;
+        }
+    }
+
+    // ── Diagnostics ───────────────────────────────────────────────────────────
+
+    [[nodiscard]] std::uint32_t ReadySlotCount() const noexcept
+    {
+        std::uint32_t n = 0;
+        for (std::uint32_t i = 0; i < m_slotCount; ++i) {
+            if (m_slots[i].state == ReadaheadSlotState::READY) { ++n; }
+        }
+        return n;
+    }
+
+    [[nodiscard]] std::uint32_t PendingSlotCount() const noexcept
+    {
+        std::uint32_t n = 0;
+        for (std::uint32_t i = 0; i < m_slotCount; ++i) {
+            if (m_slots[i].state == ReadaheadSlotState::PENDING) { ++n; }
+        }
+        return n;
+    }
+
+    // ── Constants ─────────────────────────────────────────────────────────────
+
+    static constexpr std::uint32_t kDefaultSlotCount  = ReadaheadIOConfig::kDefaultSlotCount;
+    static constexpr std::uint32_t kMaxSlotCount      = ReadaheadIOConfig::kMaxSlotCount;
+    static constexpr std::uint32_t kMinSlotCount      = ReadaheadIOConfig::kMinSlotCount;
+
+private:
+    ReadaheadIOConfig                                    m_config{};
+    std::array<ReadaheadSlot, ReadaheadIOConfig::kMaxSlotCount> m_slots{};
+    std::uint32_t                                        m_slotCount{ ReadaheadIOConfig::kDefaultSlotCount };
+    std::atomic<bool>                                    m_initialised{ false };
+};
+
+} // namespace ExplorerLens::Engine
+
+#endif // EXPLORERLENS_ENGINE_READAHEAD_IO_CONTRACT_H
+
 //
 // Purpose:
 //   When Explorer opens a folder with 200+ thumbnails, each file is opened,
