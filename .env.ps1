@@ -36,6 +36,17 @@ if (-not $SkipCommonBootstrap) {
     }
 }
 
+# Ensure git is resolvable even if Initialize-CommonTooling was skipped
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    $scoopGit = "$env:USERPROFILE\scoop\apps\git\current\cmd"
+    $scoopShims = "$env:USERPROFILE\scoop\shims"
+    foreach ($p in @($scoopShims, $scoopGit)) {
+        if ((Test-Path $p) -and ($env:PATH -split ';') -notcontains $p) {
+            $env:PATH = "$p;$env:PATH"
+        }
+    }
+}
+
 # ── ExplorerLens project helpers ─────────────────────────────────────────────
 function Invoke-ELBuild        { & "$PSScriptRoot\build-scripts\Build-MSVC.ps1" @args }
 function Invoke-ELCleanBuild   { & "$PSScriptRoot\build-scripts\Build-MSVC.ps1" -Clean @args }

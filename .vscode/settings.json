@@ -188,7 +188,13 @@
         "path": "pwsh.exe",
         "args": [
             "-NoProfile",
-            "-NoLogo"
+            "-NoLogo",
+            "-NoExit",
+            "-File",
+            "${workspaceFolder}/../.vscode/scripts/Initialize-CommonTooling.ps1",
+            "-WorkspaceRoot",
+            "${workspaceFolder}",
+            "-SkipWorkspaceBootstrap"
         ]
     },
     "terminal.integrated.tabs.enabled": true,
