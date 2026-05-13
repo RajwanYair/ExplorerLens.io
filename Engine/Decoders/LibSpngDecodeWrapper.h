@@ -411,7 +411,7 @@ public:
 
     // ── Constants ─────────────────────────────────────────────────────────────
 
-    /// Maximum image dimension supported (libspng limit: 2^20 = 1 048 576)
+    /// Maximum image dimension supported (libspng limit: 2^20 = 1048576)
     static constexpr std::uint32_t kMaxSpngDimension = 1'048'576u;
 
     /// Minimum PNG bitstream size (8-byte sig + IHDR chunk = 33 bytes minimum)

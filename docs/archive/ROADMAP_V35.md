@@ -13,7 +13,7 @@ collaboratively edited, and remotely accessed files.
 v34.x "Arcturus" established format breadth and GPU-first decode performance.
 v35.x "Vega" builds the **cloud-native layer** — streaming hydration, real-time
 collaboration, zero-trust security, and cross-device sync — so ExplorerLens
-works as well for a SharePoint library of 100 000 files as it does for a local
+works as well for a SharePoint library of 100000 files as it does for a local
 NVMe drive.
 
 **Three pillars of Vega:**

@@ -10,7 +10,7 @@
 // the expensive full-RAW decode path for thumbnail generation.
 //
 // PERFORMANCE vs. FULL DECODE:
-//   Full LibRaw decode (16-bit demosaicing): 800–3 000 ms
+//   Full LibRaw decode (16-bit demosaicing): 800–3000 ms
 //   unpack_thumb() embedded JPEG path:          5–  30 ms
 //   Speed-up: typically 50–200×
 //

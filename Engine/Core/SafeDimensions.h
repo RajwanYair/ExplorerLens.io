@@ -51,7 +51,7 @@ namespace Core {
 inline constexpr uint32_t kMaxThumbDimension = 32768u;
 
 /// Maximum allowed pixel count per thumbnail decode.
-/// 16K × 16K = 268 435 456 pixels ≈ 268 M pixels.
+/// 16K × 16K = 268435456 pixels ≈ 268 M pixels.
 inline constexpr uint64_t kMaxThumbPixels =
     static_cast<uint64_t>(kMaxThumbDimension) * kMaxThumbDimension;
 

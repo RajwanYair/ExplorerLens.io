@@ -104,7 +104,7 @@ class LensCLI
     {
         wprintf(L"\n");
         wprintf(L"  \033[1mExplorerLens CLI\033[0m — GPU-accelerated thumbnail generator\n");
-        wprintf(L"  Version 39.2.0 (Betelgeuse)\n");
+        wprintf(L"  Version 39.3.0 (Betelgeuse)\n");
         wprintf(L"\n");
         wprintf(L"  \033[1mUSAGE\033[0m\n");
         wprintf(L"    lens <command> [options]\n");

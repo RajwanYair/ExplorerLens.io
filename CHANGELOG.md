@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.3.0] — 2026-05-13 — Betelgeuse
+
+Phase 2 correctness: timeout guard (H39), per-format memory budgets (H42), WIC passthrough selector (H24), async cache writer, decode error telemetry (H48), E_FAIL blank-bitmap guard, magic-byte validator (S4 security), thumbnail placeholder broker (H1), parallel readahead N=8 (H8)
+
+---
+
 ## [39.2.0] — 2026-04-23 — Betelgeuse
 
 Phase 1 foundation: engine consolidation (CLI->Core, Codec->Decoders), libjpeg-turbo interface, LibRaw embedded preview fast-path, NOTICE file (LGPL), README Windows-only scope, 3 new Catch2 wave-5 test files
