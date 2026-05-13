@@ -2971,6 +2971,15 @@ int main()
     RUN_TEST(TestS358_UbsanSuppressor_IsClean);
     RUN_TEST(TestS359_ChocolateyPackageSchema_Factory);
     RUN_TEST(TestS360_ThumbnailStreamSerializer_PremulNoop);
+    RUN_TEST(TestS362_IccProfileStore_WellKnown);
+    RUN_TEST(TestS363_LazyLibraryLoader_Status);
+    RUN_TEST(TestS364_FreeTypeCachePolicy_ShellPolicy);
+    RUN_TEST(TestS365_SsimCorpusBaseline_Threshold);
+    RUN_TEST(TestS366_DecoderAuditCollector_AllClean);
+    RUN_TEST(TestS367_SlsaProvenanceBuilder_Level);
+    RUN_TEST(TestS368_FormatFamilyDispatcher_Counts);
+    RUN_TEST(TestS369_ThumbCacheWarmer_NotRunning);
+    RUN_TEST(TestS370_WicFormatNegotiator_Passthrough);
 
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;

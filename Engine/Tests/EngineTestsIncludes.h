@@ -1481,5 +1481,15 @@ using namespace ExplorerLens::Engine;
 #include "../Core/UbsanSuppressor.h"
 #include "../Core/ChocolateyPackageSchema.h"
 #include "../Pipeline/ThumbnailStreamSerializer.h"
+// Sprint S362-S370 — ROADMAP v8.0 Phase 3 Quality & Polish (continued)
+#include "../Core/IccProfileStore.h"
+#include "../Core/LazyLibraryLoader.h"
+#include "../Core/FreeTypeCachePolicy.h"
+#include "../Core/SsimCorpusBaseline.h"
+#include "../Core/DecoderAuditCollector.h"
+#include "../Core/SlsaProvenanceBuilder.h"
+#include "../Pipeline/FormatFamilyDispatcher.h"
+#include "../Core/ThumbCacheWarmer.h"
+#include "../Core/WicFormatNegotiator.h"
 
 #include "EngineTestsMacros.h"

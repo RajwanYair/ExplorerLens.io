@@ -1920,6 +1920,15 @@ set(ENGINE_HEADERS
     Core/UbsanSuppressor.h                       # S358 — UBSAN annotation helpers (Phase4 CI)
     Core/ChocolateyPackageSchema.h               # S359 — Chocolatey manifest schema (Phase4 distribution)
     Pipeline/ThumbnailStreamSerializer.h         # S360 — BGRA → HBITMAP/IStream serializer (Phase3/4)
+    Core/IccProfileStore.h                       # S362 — ICC profile in-process store (H12/H30 Phase3)
+    Core/LazyLibraryLoader.h                     # S363 — lazy LoadLibrary for codec DLLs (H43 Phase3)
+    Core/FreeTypeCachePolicy.h                   # S364 — FreeType FTC_Manager cache policy (Phase3)
+    Core/SsimCorpusBaseline.h                    # S365 — SSIM corpus baseline mgmt 0.97 gate (Phase3)
+    Core/DecoderAuditCollector.h                 # S366 — per-decoder error telemetry (H48 Phase2/3)
+    Core/SlsaProvenanceBuilder.h                 # S367 — SLSA L2 provenance bundle builder (H32 Phase3)
+    Pipeline/FormatFamilyDispatcher.h            # S368 — 5-family format dispatch table (ADR A32 Phase3)
+    Core/ThumbCacheWarmer.h                      # S369 — thumbnail cache pre-warming (H47 Phase5 prep)
+    Core/WicFormatNegotiator.h                   # S370 — WIC encoder/decoder capability query (H24 Phase2)
 
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h

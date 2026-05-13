@@ -11166,3 +11166,383 @@ TEST(TestS360_ThumbnailStreamSerializer_PremulNoop)
     ASSERT_EQ(px2[2], 0u);
     ASSERT_EQ(px2[3], 0u);
 }
+
+// =============================================================================
+// Sprint S362-S370 — Phase 3 Quality & Polish (continued)
+// =============================================================================
+
+TEST(TestS362_IccProfileStore_WellKnown)
+{
+    using namespace ExplorerLens::Engine;
+    // Constants
+    ASSERT_EQ(kIccProfileStoreMaxEntries, 64u);
+    ASSERT_EQ(kIccProfileMaxBytes, 4u * 1024u * 1024u);
+
+    // IccProfileId ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(IccProfileId::UNKNOWN),          0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(IccProfileId::SRGB_IEC61966),    1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(IccProfileId::EMBEDDED_CUSTOM),  8u);
+
+    // IccProfileStoreStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(IccProfileStoreStatus::OK),       0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(IccProfileStoreStatus::OVERSIZED),2u);
+
+    // IccProfileEntry default state
+    IccProfileEntry e{};
+    ASSERT(!e.IsValid());
+    ASSERT(e.Data() == nullptr);
+    ASSERT_EQ(e.Size(), 0u);
+
+    // Well-known entry (no raw bytes, but ID set)
+    IccProfileEntry wellKnown{};
+    wellKnown.profileId = IccProfileId::SRGB_IEC61966;
+    ASSERT(wellKnown.IsValid());
+    ASSERT_EQ(wellKnown.Size(), 0u);
+
+    // Config factories
+    auto def = IccProfileStoreConfig::Default();
+    ASSERT_EQ(def.maxEntries, kIccProfileStoreMaxEntries);
+    ASSERT_EQ(def.maxProfileBytes, kIccProfileMaxBytes);
+
+    auto lowMem = IccProfileStoreConfig::ForLowMemory();
+    ASSERT(lowMem.maxEntries < def.maxEntries);
+    ASSERT(lowMem.maxProfileBytes < def.maxProfileBytes);
+}
+
+TEST(TestS363_LazyLibraryLoader_Status)
+{
+    using namespace ExplorerLens::Engine;
+    // LazyLibTarget ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibTarget::LIBHEIF),  0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibTarget::LIBJXL),   1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibTarget::LIBAVIF),  2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibTarget::LIBRAW),   3u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibTarget::MUPDF),    4u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibTarget::COUNT),    5u);
+
+    // LazyLibStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibStatus::OK),             0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibStatus::ALREADY_LOADED), 1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(LazyLibStatus::INVALID_TARGET), 4u);
+
+    // LazyLibEntry helper flags
+    LazyLibEntry notLoaded{};
+    notLoaded.status = LazyLibStatus::NOT_FOUND;
+    ASSERT(!notLoaded.IsLoaded());
+    ASSERT(notLoaded.HasFailed());
+
+    LazyLibEntry loaded{};
+    loaded.status = LazyLibStatus::ALREADY_LOADED;
+    ASSERT(loaded.IsLoaded());
+    ASSERT(!loaded.HasFailed());
+
+    // Config factories
+    auto def   = LazyLibConfig::Default();
+    auto shell = LazyLibConfig::ForShellExtension();
+    ASSERT(shell.preferSystemPaths);
+    ASSERT(!shell.retryOnFailure);
+    ASSERT(!def.preferSystemPaths);
+
+    // DLL name table
+    ASSERT(LazyLibraryLoader::kDllNames[0] != nullptr);
+    ASSERT(std::wstring(LazyLibraryLoader::kDllNames[0]) == L"libheif.dll");
+    ASSERT(std::wstring(LazyLibraryLoader::kDllNames[1]) == L"jxl.dll");
+}
+
+TEST(TestS364_FreeTypeCachePolicy_ShellPolicy)
+{
+    using namespace ExplorerLens::Engine;
+    // Constants
+    ASSERT_EQ(kFtcMaxFaceSlots,    8u);
+    ASSERT_EQ(kFtcMaxSizeSlots,   16u);
+    ASSERT_EQ(kFtcMaxCacheBytes,  512u * 1024u);
+    ASSERT_EQ(kFtcMaxGlyphsPerFace, 128u);
+    ASSERT_EQ(kFtcMaxPixelSize,   512u);
+    ASSERT_EQ(kFtcMinPixelSize,     8u);
+
+    // FreeTypeCacheStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(FreeTypeCacheStatus::OK),              0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FreeTypeCacheStatus::NOT_INITIALISED), 1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FreeTypeCacheStatus::LIBRARY_ERROR),   6u);
+
+    // Policy factories
+    auto def   = FreeTypeCachePolicy::Default();
+    auto shell = FreeTypeCachePolicy::ForShellExtension();
+    auto batch = FreeTypeCachePolicy::ForBatchMode();
+
+    ASSERT(shell.maxFaceSlots < def.maxFaceSlots);
+    ASSERT(batch.maxFaceSlots > def.maxFaceSlots);
+    ASSERT(!shell.warmOnInit);
+    ASSERT(batch.warmOnInit);
+    ASSERT(shell.maxCacheBytes < def.maxCacheBytes);
+
+    // FreeTypeFaceEntry validation
+    FreeTypeFaceEntry invalidEntry{};
+    ASSERT(!invalidEntry.IsValid()); // filePath == nullptr
+
+    FreeTypeFaceEntry validEntry{};
+    validEntry.filePath  = L"C:\\Windows\\Fonts\\arial.ttf";
+    validEntry.pixelSize = 24u;
+    ASSERT(validEntry.IsValid());
+
+    FreeTypeFaceEntry tooSmall{};
+    tooSmall.filePath  = L"C:\\Windows\\Fonts\\arial.ttf";
+    tooSmall.pixelSize = 2u; // below kFtcMinPixelSize
+    ASSERT(!tooSmall.IsValid());
+}
+
+TEST(TestS365_SsimCorpusBaseline_Threshold)
+{
+    using namespace ExplorerLens::Engine;
+    // Phase thresholds
+    ASSERT(kSsimPhase3Threshold > kSsimPhase2Threshold);
+    ASSERT(kSsimPhase3Threshold == 0.97);
+    ASSERT(kSsimPhase2Threshold == 0.95);
+    ASSERT(kSsimRegressionTolerance > 0.0);
+    ASSERT(kSsimRegressionTolerance < 0.05);
+
+    // SsimBaselineStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(SsimBaselineStatus::OK),             0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SsimBaselineStatus::BELOW_THRESHOLD),2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SsimBaselineStatus::INVALID_SCORE),  4u);
+
+    // SsimBaselineEntry helpers
+    SsimBaselineEntry passing{};
+    passing.threshold    = kSsimPhase3Threshold;
+    passing.latestScore  = 0.98;
+    ASSERT(passing.MeetsThreshold());
+    ASSERT(!passing.HasRegressed()); // sampleCount == 0
+
+    SsimBaselineEntry failing{};
+    failing.threshold   = kSsimPhase3Threshold;
+    failing.latestScore = 0.96;
+    ASSERT(!failing.MeetsThreshold());
+
+    SsimBaselineEntry regressed{};
+    regressed.threshold      = kSsimPhase3Threshold;
+    regressed.baselineScore  = 0.98;
+    regressed.latestScore    = 0.97 - kSsimRegressionTolerance - 0.001;
+    regressed.sampleCount    = 5u;
+    ASSERT(regressed.HasRegressed());
+
+    // SsimBaselineReport
+    SsimBaselineReport report{};
+    report.failedThreshold = 0u;
+    report.regressions     = 0u;
+    ASSERT(report.IsGreen());
+    report.regressions = 1u;
+    ASSERT(!report.IsGreen());
+
+    // Config factories
+    auto p3 = SsimBaselineConfig::ForPhase3();
+    ASSERT_EQ(p3.threshold, kSsimPhase3Threshold);
+    ASSERT(!p3.autoUpdateBaseline);
+
+    auto p2 = SsimBaselineConfig::ForPhase2();
+    ASSERT_EQ(p2.threshold, kSsimPhase2Threshold);
+    ASSERT(p2.autoUpdateBaseline);
+}
+
+TEST(TestS366_DecoderAuditCollector_AllClean)
+{
+    using namespace ExplorerLens::Engine;
+    // Constants
+    ASSERT_EQ(kDecoderAuditMaxDecoders,          64u);
+    ASSERT_EQ(kDecoderAuditMaxRecentPerDecoder,  16u);
+
+    // DecoderAuditStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(DecoderAuditStatus::OK),             0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(DecoderAuditStatus::RECORDER_FULL),  1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(DecoderAuditStatus::FLUSH_IO_ERROR), 3u);
+
+    // DecoderAuditEntry helpers
+    DecoderAuditEntry cleanEntry{};
+    cleanEntry.totalDecodes  = 100u;
+    cleanEntry.totalFailures = 0u;
+    ASSERT(cleanEntry.IsClean());
+    ASSERT_EQ(static_cast<std::uint32_t>(cleanEntry.FailureRate() * 100u), 0u);
+
+    DecoderAuditEntry failingEntry{};
+    failingEntry.totalDecodes  = 100u;
+    failingEntry.totalFailures = 10u;
+    ASSERT(!failingEntry.IsClean());
+    ASSERT(failingEntry.FailureRate() > 0.09);
+    ASSERT(failingEntry.FailureRate() < 0.11);
+
+    // DecoderAuditSummary
+    DecoderAuditSummary summary{};
+    summary.failingDecoders = 0u;
+    ASSERT(summary.AllClean());
+    summary.failingDecoders = 1u;
+    ASSERT(!summary.AllClean());
+
+    // Config factories
+    auto def  = DecoderAuditConfig::Default();
+    auto prod = DecoderAuditConfig::ForProduction();
+    ASSERT(prod.flushToSqliteOnEvict);
+    ASSERT(!def.flushToSqliteOnEvict);
+    ASSERT(prod.trackSuccesses);
+}
+
+TEST(TestS367_SlsaProvenanceBuilder_Level)
+{
+    using namespace ExplorerLens::Engine;
+    // SlsaProvenanceLevel ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaProvenanceLevel::L0), 0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaProvenanceLevel::L1), 1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaProvenanceLevel::L2), 2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaProvenanceLevel::L3), 3u);
+
+    // SlsaProvBuildStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaProvBuildStatus::OK),              0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaProvBuildStatus::MISSING_SUBJECT), 1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(SlsaProvBuildStatus::SERIAL_ERROR),    4u);
+
+    // SlsaSubjectDigest validation
+    SlsaSubjectDigest badDigest{};
+    ASSERT(!badDigest.IsValid()); // empty name and digest
+
+    SlsaSubjectDigest goodDigest{};
+    goodDigest.artifactName = L"ExplorerLens-39.7.0-x64.msi";
+    goodDigest.sha256Hex    = std::string(64u, 'a');
+    ASSERT(goodDigest.IsValid());
+
+    SlsaSubjectDigest shortDigest{};
+    shortDigest.artifactName = L"test.dll";
+    shortDigest.sha256Hex    = std::string(32u, 'b'); // wrong length
+    ASSERT(!shortDigest.IsValid());
+
+    // SlsaBuilderMetadata validation
+    SlsaBuilderMetadata noBuilder{};
+    ASSERT(!noBuilder.IsValid());
+
+    SlsaBuilderMetadata withBuilder{};
+    withBuilder.builderId    = "https://github.com/actions/runner";
+    withBuilder.workflowRef  = "RajwanYair/ExplorerLens.io/.github/workflows/release.yml";
+    ASSERT(withBuilder.IsValid());
+
+    // SlsaProvenanceBundle completeness
+    SlsaProvenanceBundle incomplete{};
+    ASSERT(!incomplete.IsComplete());
+
+    // Builder API
+    SlsaProvenanceBuilder builderObj{};
+    ASSERT_EQ(static_cast<std::uint8_t>(builderObj.Level()),
+              static_cast<std::uint8_t>(SlsaProvenanceLevel::L2));
+    ASSERT_EQ(builderObj.SubjectCount(), 0u);
+
+    // Predicate type URI
+    ASSERT(SlsaProvenanceBuilder::kSlsaPredicateTypeV1 != nullptr);
+    std::string uri(SlsaProvenanceBuilder::kSlsaPredicateTypeV1);
+    ASSERT(!uri.empty());
+}
+
+TEST(TestS368_FormatFamilyDispatcher_Counts)
+{
+    using namespace ExplorerLens::Engine;
+    // FormatFamilyKind ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(FormatFamilyKind::UNKNOWN),  0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FormatFamilyKind::IMAGE),    1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FormatFamilyKind::MODERN),   2u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FormatFamilyKind::CAMERA),   3u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FormatFamilyKind::DOCUMENT), 4u);
+    ASSERT_EQ(static_cast<std::uint8_t>(FormatFamilyKind::MEDIA),    5u);
+
+    // Format count constants
+    ASSERT(FormatFamilyDispatcher::kImageFormatCount    >  0u);
+    ASSERT(FormatFamilyDispatcher::kModernFormatCount   >  0u);
+    ASSERT(FormatFamilyDispatcher::kCameraFormatCount   > 10u);
+    ASSERT(FormatFamilyDispatcher::kDocumentFormatCount >  0u);
+    ASSERT(FormatFamilyDispatcher::kMediaFormatCount    >  0u);
+    ASSERT_EQ(FormatFamilyDispatcher::kTotalFormatCount,
+              FormatFamilyDispatcher::kImageFormatCount   +
+              FormatFamilyDispatcher::kModernFormatCount  +
+              FormatFamilyDispatcher::kCameraFormatCount  +
+              FormatFamilyDispatcher::kDocumentFormatCount+
+              FormatFamilyDispatcher::kMediaFormatCount);
+
+    // FormatFamilyRoute defaults
+    FormatFamilyRoute unknown{};
+    ASSERT(!unknown.IsKnown());
+
+    FormatFamilyRoute known{};
+    known.family = FormatFamilyKind::MODERN;
+    ASSERT(known.IsKnown());
+
+    // FormatFamilyDispatchConfig factories
+    auto def   = FormatFamilyDispatchConfig::Default();
+    auto shell = FormatFamilyDispatchConfig::ForShellExtension();
+    ASSERT(shell.enableLazyLoading);
+    ASSERT(shell.enableWicPassthrough);
+    ASSERT(!shell.enableGpuAcceleration); // Phase 4 only
+}
+
+TEST(TestS369_ThumbCacheWarmer_NotRunning)
+{
+    using namespace ExplorerLens::Engine;
+    // Constants
+    ASSERT_EQ(kCacheWarmMaxFiles,   2048u);
+    ASSERT_EQ(kCacheWarmMaxSeconds,  300u);
+    ASSERT_EQ(kCacheWarmMaxCacheMb,  128u);
+
+    // ThumbCacheWarmStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(ThumbCacheWarmStatus::OK),              0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ThumbCacheWarmStatus::ALREADY_RUNNING), 1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ThumbCacheWarmStatus::CANCELLED),       3u);
+    ASSERT_EQ(static_cast<std::uint8_t>(ThumbCacheWarmStatus::NOT_WIN32),       6u);
+
+    // CacheWarmConfig factories
+    auto def     = CacheWarmConfig::Default();
+    auto minimal = CacheWarmConfig::MinimalInstall();
+    ASSERT(minimal.maxFiles   < def.maxFiles);
+    ASSERT(minimal.maxSeconds < def.maxSeconds);
+    ASSERT(minimal.maxCacheMb < def.maxCacheMb);
+    ASSERT(!minimal.warmDocuments);
+    ASSERT(!minimal.warmDownloads);
+    ASSERT(def.warmDesktop);
+    ASSERT(def.warmPictures);
+    ASSERT(!def.warmDownloads);
+
+    // CacheWarmProgress defaults
+    CacheWarmProgress prog{};
+    ASSERT(!prog.isRunning);
+    ASSERT_EQ(prog.filesDecoded, 0u);
+}
+
+TEST(TestS370_WicFormatNegotiator_Passthrough)
+{
+    using namespace ExplorerLens::Engine;
+    // WicNegotiatorStatus ordinals
+    ASSERT_EQ(static_cast<std::uint8_t>(WicNegotiatorStatus::OK),                  0u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WicNegotiatorStatus::NOT_WIN32),            1u);
+    ASSERT_EQ(static_cast<std::uint8_t>(WicNegotiatorStatus::FORMAT_NOT_SUPPORTED), 3u);
+
+    // WicCodecCapabilities defaults
+    WicCodecCapabilities caps{};
+    ASSERT(!caps.canDecode);
+    ASSERT(!caps.canEncode);
+    ASSERT(!caps.IsPassthroughCandidate()); // canDecode && hasThumbnailReader both false
+
+    WicCodecCapabilities fullCaps{};
+    fullCaps.canDecode         = true;
+    fullCaps.hasThumbnailReader = true;
+    ASSERT(fullCaps.IsPassthroughCandidate());
+
+    // kAlwaysPassthrough table
+    ASSERT_EQ(WicFormatNegotiator::kAlwaysPassthroughCount, 9u);
+    ASSERT(WicFormatNegotiator::kAlwaysPassthrough[0] != nullptr);
+
+    bool foundPng = false;
+    bool foundJpg = false;
+    for (std::uint32_t i = 0u; i < WicFormatNegotiator::kAlwaysPassthroughCount; ++i) {
+        if (std::wstring(WicFormatNegotiator::kAlwaysPassthrough[i]) == L"png") foundPng = true;
+        if (std::wstring(WicFormatNegotiator::kAlwaysPassthrough[i]) == L"jpg") foundJpg = true;
+    }
+    ASSERT(foundPng);
+    ASSERT(foundJpg);
+
+    // WicFormatEntry defaults
+    WicFormatEntry entry{};
+    ASSERT(entry.extension.empty());
+    ASSERT(!entry.caps.canDecode);
+}
