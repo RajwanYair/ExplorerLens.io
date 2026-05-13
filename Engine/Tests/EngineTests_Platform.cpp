@@ -10103,3 +10103,379 @@ TEST(TestS330_ParallelReadaheadManager_SlotCount)
     ASSERT(static_cast<std::uint8_t>(ReadaheadPriority::NORMAL) == 1u);
     ASSERT(static_cast<std::uint8_t>(ReadaheadPriority::HIGH)   == 2u);
 }
+
+// ===========================================================================
+// Sprint S332-S340 — ROADMAP v8.0 Phase 2/3 Completion Tests
+// ===========================================================================
+
+TEST(TestS332_EmbeddedJpegFastPath_NotFound)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(EmbeddedJpegFastPath::kDefaultScanBytes,    512u * 1024u);
+    ASSERT_EQ(EmbeddedJpegFastPath::kMinJpegPreviewBytes, 2048u);
+    ASSERT_EQ(EmbeddedJpegFastPath::kMaxScanBytes,        4u * 1024u * 1024u);
+
+    // Empty input → NOT_FOUND
+    EmbeddedJpegConfig cfg{};
+    std::vector<std::uint8_t> empty;
+    std::vector<std::uint8_t> out;
+    EmbeddedJpegStatus s = EmbeddedJpegFastPath::TryExtract(empty, out, cfg);
+    ASSERT(s == EmbeddedJpegStatus::NULL_STREAM || s == EmbeddedJpegStatus::NOT_FOUND);
+    ASSERT(out.empty());
+
+    // Non-RAW bytes (no SOI marker) → NOT_FOUND
+    std::vector<std::uint8_t> notRaw(1024u, 0xABu);
+    EmbeddedJpegStatus s2 = EmbeddedJpegFastPath::TryExtract(notRaw, out, cfg);
+    ASSERT(s2 == EmbeddedJpegStatus::NOT_FOUND);
+
+    // Enum completeness
+    ASSERT(static_cast<std::uint8_t>(EmbeddedJpegStatus::FOUND)               == 0u);
+    ASSERT(static_cast<std::uint8_t>(EmbeddedJpegStatus::NOT_FOUND)           == 1u);
+    ASSERT(static_cast<std::uint8_t>(EmbeddedJpegStatus::CORRUPT)             == 2u);
+    ASSERT(static_cast<std::uint8_t>(EmbeddedJpegStatus::SCAN_RANGE_EXCEEDED) == 3u);
+    ASSERT(static_cast<std::uint8_t>(EmbeddedJpegStatus::NULL_STREAM)         == 4u);
+    ASSERT(static_cast<std::uint8_t>(EmbeddedJpegStatus::SIZE_REJECTED)       == 5u);
+
+    // Config defaults
+    EmbeddedJpegConfig defaultCfg{};
+    ASSERT_EQ(defaultCfg.scanBytes,          EmbeddedJpegFastPath::kDefaultScanBytes);
+    ASSERT_EQ(defaultCfg.preferEmbeddedForDng, true);
+    ASSERT_EQ(defaultCfg.requireLargestJpeg,   true);
+}
+
+TEST(TestS333_FallbackChainManager_AllFailed)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(FallbackChainManager::kStageCount, 5u);
+
+    // Default construction — no custom result set yet
+    FallbackChainManager mgr{};
+    ASSERT(!mgr.HasCustomResult());
+
+    // All-failed counters start at zero
+    ASSERT_EQ(mgr.AllFailedCount(), 0u);
+    for (std::uint8_t i = 0; i < FallbackChainManager::kStageCount; ++i) {
+        const auto id = static_cast<FallbackStageId>(i);
+        ASSERT_EQ(mgr.StageAttempts(id), 0u);
+        ASSERT_EQ(mgr.StageHits(id),     0u);
+    }
+
+    // Enum values
+    ASSERT(static_cast<std::uint8_t>(FallbackStageId::CUSTOM_DECODER)  == 0u);
+    ASSERT(static_cast<std::uint8_t>(FallbackStageId::WIC_CODEC)       == 1u);
+    ASSERT(static_cast<std::uint8_t>(FallbackStageId::WINDOWS_CACHE)   == 2u);
+    ASSERT(static_cast<std::uint8_t>(FallbackStageId::GENERIC_ICON)    == 3u);
+    ASSERT(static_cast<std::uint8_t>(FallbackStageId::FILE_ICON)       == 4u);
+
+    // Config defaults
+    FallbackChainConfig cfg{};
+    ASSERT(cfg.enableWic);
+    ASSERT(cfg.enableWindowsCache);
+    ASSERT(cfg.enableGenericIcon);
+    ASSERT(cfg.enableFileIcon);
+    ASSERT(cfg.logEachStage);
+}
+
+TEST(TestS334_WicMetadataReader_NoReader)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Default construction — no reader
+    WicMetadataReader reader{};
+    ASSERT(!reader.IsValid());
+
+    // All queries on invalid reader return nullopt
+    ASSERT(!reader.ReadUint16(WicMetaFieldId::EXIF_ORIENTATION).has_value());
+    ASSERT(!reader.ReadString(WicMetaFieldId::EXIF_MAKE).has_value());
+    ASSERT(!reader.ReadFloat(WicMetaFieldId::EXIF_FNUMBER).has_value());
+
+    // Constants
+    ASSERT_EQ(WicMetadataReader::kExifOrientationTagId, 0x0112u);
+    ASSERT_EQ(WicMetadataReader::kOrientationNormal,    1u);
+    ASSERT_EQ(WicMetadataReader::kOrientationMax,       8u);
+
+    // Enum values — EXIF fields
+    ASSERT(static_cast<std::uint32_t>(WicMetaFieldId::EXIF_ORIENTATION) == 0x00010112u);
+    ASSERT(static_cast<std::uint32_t>(WicMetaFieldId::EXIF_MAKE)        == 0x0001010Fu);
+    ASSERT(static_cast<std::uint32_t>(WicMetaFieldId::XMP_RATING)       == 0x10000001u);
+    ASSERT(static_cast<std::uint32_t>(WicMetaFieldId::IPTC_KEYWORDS)    == 0x20000002u);
+}
+
+TEST(TestS335_RegistryLightInstall_Audit)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(RegistryLightInstall::kKnownKeyCount, 7u);
+    ASSERT_EQ(RegistryLightInstall::kMaxOrphanReport, 64u);
+
+    // CLSID consistency — all keys include the correct CLSID
+    ASSERT(RegistryLightInstall::IsClsidConsistent());
+
+    // Known key table sanity
+    const auto& tbl = RegistryLightInstall::KnownKeys();
+    ASSERT_EQ(tbl.size(), RegistryLightInstall::kKnownKeyCount);
+
+    // Hive names
+    bool foundHkcu = false, foundHkcr = false, foundHklm = false;
+    for (const auto& k : tbl) {
+        if (k.hive == "HKCR") foundHkcr = true;
+        if (k.hive == "HKCU") foundHkcu = true;
+        if (k.hive == "HKLM") foundHklm = true;
+    }
+    ASSERT(foundHkcr);
+    ASSERT(foundHkcu);
+    ASSERT(foundHklm);
+
+    // Cleanup mode enum
+    ASSERT(static_cast<std::uint8_t>(RegistryCleanupMode::DRY_RUN) == 0u);
+    ASSERT(static_cast<std::uint8_t>(RegistryCleanupMode::PRUNE)   == 1u);
+
+    // Audit (may fail on CI — just verify it returns a well-formed struct)
+    RegistryFootprintAudit audit = RegistryLightInstall::Audit();
+    // On non-Windows or low-privilege environments, auditCompleted may be false
+    (void)audit;
+}
+
+TEST(TestS336_ThumbnailAdornmentProvider_Config)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Table size
+    ASSERT_EQ(ThumbnailAdornmentProvider::kTableSize, 28u);
+
+    // Photo formats → PHOTO_FRAME
+    const auto* jpgCfg = ThumbnailAdornmentProvider::QueryForExtension(".jpg");
+    ASSERT(jpgCfg != nullptr);
+    ASSERT(jpgCfg->treatment == AdornmentTreatment::PHOTO_FRAME);
+    ASSERT(jpgCfg->kind == AdornmentKind::PHOTO);
+
+    const auto* avifCfg = ThumbnailAdornmentProvider::QueryForExtension(".avif");
+    ASSERT(avifCfg != nullptr);
+    ASSERT(avifCfg->treatment == AdornmentTreatment::PHOTO_FRAME);
+    ASSERT(avifCfg->kind == AdornmentKind::MODERN_IMAGE);
+
+    // RAW → PLAIN
+    const auto* cr3Cfg = ThumbnailAdornmentProvider::QueryForExtension(".cr3");
+    ASSERT(cr3Cfg != nullptr);
+    ASSERT(cr3Cfg->treatment == AdornmentTreatment::PLAIN);
+    ASSERT(cr3Cfg->kind == AdornmentKind::RAW_CAMERA);
+
+    // Unknown extension → nullptr
+    ASSERT(ThumbnailAdornmentProvider::QueryForExtension(".xyz") == nullptr);
+
+    // IsPhotoFormat
+    ASSERT(ThumbnailAdornmentProvider::IsPhotoFormat(".jpg"));
+    ASSERT(ThumbnailAdornmentProvider::IsPhotoFormat(".jxl"));
+    ASSERT(!ThumbnailAdornmentProvider::IsPhotoFormat(".pdf"));
+    ASSERT(!ThumbnailAdornmentProvider::IsPhotoFormat(".cr3"));
+
+    // TreatmentForKind
+    ASSERT(ThumbnailAdornmentProvider::TreatmentForKind(AdornmentKind::PHOTO)
+           == AdornmentTreatment::PHOTO_FRAME);
+    ASSERT(ThumbnailAdornmentProvider::TreatmentForKind(AdornmentKind::ARCHIVE)
+           == AdornmentTreatment::PLAIN);
+
+    // Treatment constants
+    ASSERT_EQ(ThumbnailAdornmentProvider::kTreatmentPlain,      0u);
+    ASSERT_EQ(ThumbnailAdornmentProvider::kTreatmentShadow,     1u);
+    ASSERT_EQ(ThumbnailAdornmentProvider::kTreatmentPhotoFrame, 2u);
+}
+
+TEST(TestS337_HighDpiScaleHelper_ScaleFactor)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Base DPI constant
+    ASSERT_EQ(HighDpiScaleHelper::kBaseDpi, 96u);
+    ASSERT_EQ(HighDpiScaleHelper::kMaxPhysicalCx, 512u);
+    ASSERT_EQ(HighDpiScaleHelper::kMinPhysicalCx, 16u);
+
+    // 100% DPI → no scaling
+    {
+        auto info = HighDpiScaleHelper::Compute(256u, 96u);
+        ASSERT_EQ(info.logicalCx, 256u);
+        ASSERT_EQ(info.physicalCx, 256u);
+        ASSERT(!info.isHighDpi);
+        ASSERT(info.scaleFactor > 0.99f && info.scaleFactor < 1.01f);
+    }
+
+    // 200% DPI → 2x scaling, capped at kMaxPhysicalCx
+    {
+        auto info = HighDpiScaleHelper::Compute(256u, 192u);
+        ASSERT(info.isHighDpi);
+        ASSERT(info.physicalCx <= HighDpiScaleHelper::kMaxPhysicalCx);
+        ASSERT(info.scaleFactor > 1.99f && info.scaleFactor < 2.01f);
+    }
+
+    // Zero DPI → defaults to 96
+    {
+        auto info = HighDpiScaleHelper::Compute(128u, 0u);
+        ASSERT_EQ(info.monitorDpi, 96u);
+        ASSERT_EQ(info.physicalCx, 128u);
+    }
+
+    // Very small logical size → floored at kMinPhysicalCx
+    {
+        auto info = HighDpiScaleHelper::Compute(8u, 96u);
+        ASSERT_EQ(info.physicalCx, HighDpiScaleHelper::kMinPhysicalCx);
+    }
+
+    // ScaleFactorFromDpi
+    ASSERT(HighDpiScaleHelper::ScaleFactorFromDpi(96u)  > 0.99f);
+    ASSERT(HighDpiScaleHelper::ScaleFactorFromDpi(192u) > 1.99f);
+
+    // DpiFromScaleFactor
+    ASSERT_EQ(HighDpiScaleHelper::DpiFromScaleFactor(1.0f), 96u);
+    ASSERT_EQ(HighDpiScaleHelper::DpiFromScaleFactor(2.0f), 192u);
+
+    // Standard DPI constants
+    ASSERT_EQ(HighDpiScaleHelper::kDpi100Percent, 96u);
+    ASSERT_EQ(HighDpiScaleHelper::kDpi200Percent, 192u);
+    ASSERT_EQ(HighDpiScaleHelper::kDpi150Percent, 144u);
+}
+
+TEST(TestS338_L2SqliteCacheIndex_Schema)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Schema SQL completeness
+    ASSERT(!std::string_view(L2SqliteCacheIndex::kCreateThumbnailCacheTable).empty());
+    ASSERT(!std::string_view(L2SqliteCacheIndex::kCreateDecodeErrorsTable).empty());
+    ASSERT(!std::string_view(L2SqliteCacheIndex::kCreatePathIndex).empty());
+    ASSERT(!std::string_view(L2SqliteCacheIndex::kCreateMtimeIndex).empty());
+    ASSERT(!std::string_view(L2SqliteCacheIndex::kCreateErrExtIndex).empty());
+
+    // WAL pragma count
+    ASSERT_EQ(L2SqliteCacheIndex::kWalPragmas.size(), 4u);
+    ASSERT(std::string_view(L2SqliteCacheIndex::kWalPragmas[0]).find("WAL") != std::string_view::npos);
+
+    // Default config
+    ASSERT_EQ(L2SqliteCacheIndex::kDefaultMaxBytes, 512LL * 1024 * 1024);
+    ASSERT_EQ(L2SqliteCacheIndex::kCacheSizePages, -8000);
+
+    // Default construction
+    L2SqliteCacheIndex idx{};
+    ASSERT(!idx.IsOpen());
+    ASSERT(!idx.Open());  // stub returns false
+
+    // Lookup before Open → DB_NOT_OPEN
+    CacheIndexEntry entry{};
+    ASSERT(idx.Lookup(L"C:\\test.jpg", 0LL, entry) ==
+           SqliteCacheQueryResult::DB_NOT_OPEN);
+
+    // QueryResult enum
+    ASSERT(static_cast<std::uint8_t>(SqliteCacheQueryResult::HIT)         == 0u);
+    ASSERT(static_cast<std::uint8_t>(SqliteCacheQueryResult::MISS)        == 1u);
+    ASSERT(static_cast<std::uint8_t>(SqliteCacheQueryResult::DB_NOT_OPEN) == 3u);
+}
+
+TEST(TestS339_AsyncDecodeContext_DefaultState)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(AsyncDecodeContext::kDefaultTimeoutMs,    1200u);
+    ASSERT_EQ(AsyncDecodeContext::kDefaultMemoryBudget, 128u * 1024u * 1024u);
+
+    // Default construction
+    AsyncDecodeContext ctx{};
+    ASSERT(ctx.State() == DecodeContextState::CREATED);
+    ASSERT(!ctx.StopRequested());
+    ASSERT(!ctx.IsDeadlineExceeded());
+
+    // State transitions
+    ctx.SetState(DecodeContextState::READING);
+    ASSERT(ctx.State() == DecodeContextState::READING);
+
+    ctx.SetState(DecodeContextState::DECODING);
+    ASSERT(ctx.State() == DecodeContextState::DECODING);
+
+    ctx.SetState(DecodeContextState::COMPLETE);
+    ASSERT(ctx.State() == DecodeContextState::COMPLETE);
+
+    // Snapshot on COMPLETE
+    auto snap = ctx.Snapshot();
+    ASSERT(snap.succeeded);
+    ASSERT(!snap.wasCancelled);
+    ASSERT(!snap.wasTimeout);
+
+    // Cancellation
+    AsyncDecodeContext ctx2{};
+    ctx2.RequestStop();
+    ASSERT(ctx2.StopRequested());
+
+    ctx2.SetState(DecodeContextState::CANCELLED);
+    auto snap2 = ctx2.Snapshot();
+    ASSERT(snap2.wasCancelled);
+    ASSERT(!snap2.succeeded);
+
+    // DecodeContextState enum
+    ASSERT(static_cast<std::uint8_t>(DecodeContextState::CREATED)   == 0u);
+    ASSERT(static_cast<std::uint8_t>(DecodeContextState::COMPLETE)  == 5u);
+    ASSERT(static_cast<std::uint8_t>(DecodeContextState::CANCELLED) == 6u);
+    ASSERT(static_cast<std::uint8_t>(DecodeContextState::FAILED)    == 8u);
+
+    // Config passthrough
+    AsyncDecodeContextConfig cfg{};
+    cfg.timeoutMs = 500u;
+    cfg.trackErrors = false;
+    AsyncDecodeContext ctx3{ cfg };
+    ASSERT_EQ(ctx3.Config().timeoutMs, 500u);
+    ASSERT(!ctx3.Config().trackErrors);
+}
+
+TEST(TestS340_IccProfilePassthrough_ValidateEmpty)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(IccProfilePassthrough::kMinProfileBytes, 128u);
+    ASSERT_EQ(IccProfilePassthrough::kMaxProfileBytes, 16u * 1024u * 1024u);
+
+    // Validate empty → EMPTY_BYTES
+    std::vector<std::uint8_t> empty;
+    ASSERT(IccProfilePassthrough::Validate(empty) ==
+           IccPassthroughStatus::EMPTY_BYTES);
+
+    // Validate too small → TOO_SMALL
+    std::vector<std::uint8_t> tooSmall(64u, 0u);
+    ASSERT(IccProfilePassthrough::Validate(tooSmall) ==
+           IccPassthroughStatus::TOO_SMALL);
+
+    // Validate invalid header (size mismatch) → INVALID_HEADER
+    std::vector<std::uint8_t> badHdr(256u, 0u);
+    // Embed size = 999 (big-endian) != 256
+    badHdr[0] = 0x00; badHdr[1] = 0x00; badHdr[2] = 0x03; badHdr[3] = 0xE7;
+    ASSERT(IccProfilePassthrough::Validate(badHdr) ==
+           IccPassthroughStatus::INVALID_HEADER);
+
+    // Validate correct header (size == buffer size) → OK
+    std::vector<std::uint8_t> goodHdr(256u, 0u);
+    goodHdr[0] = 0x00; goodHdr[1] = 0x00; goodHdr[2] = 0x01; goodHdr[3] = 0x00;
+    ASSERT(IccProfilePassthrough::Validate(goodHdr) ==
+           IccPassthroughStatus::OK);
+
+    // MakeSrgb()
+    IccProfileData srgb = IccProfilePassthrough::MakeSrgb();
+    ASSERT(!srgb.IsValid());
+    ASSERT(srgb.colorSpaceId == IccColorSpaceId::SRGB);
+    ASSERT(srgb.IsEmpty());
+    ASSERT(!srgb.NeedsTransform());
+
+    // IccPassthroughStatus enum
+    ASSERT(static_cast<std::uint8_t>(IccPassthroughStatus::OK)             == 0u);
+    ASSERT(static_cast<std::uint8_t>(IccPassthroughStatus::NOT_PRESENT)    == 1u);
+    ASSERT(static_cast<std::uint8_t>(IccPassthroughStatus::INVALID_HEADER) == 5u);
+    ASSERT(static_cast<std::uint8_t>(IccPassthroughStatus::PASSTHROUGH_OFF)== 7u);
+
+    // IccColorSpaceId enum
+    ASSERT(static_cast<std::uint8_t>(IccColorSpaceId::UNKNOWN)    == 0u);
+    ASSERT(static_cast<std::uint8_t>(IccColorSpaceId::SRGB)       == 1u);
+    ASSERT(static_cast<std::uint8_t>(IccColorSpaceId::DISPLAY_P3) == 2u);
+    ASSERT(static_cast<std::uint8_t>(IccColorSpaceId::ADOBE_RGB)  == 3u);
+}

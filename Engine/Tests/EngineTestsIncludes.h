@@ -1451,4 +1451,15 @@ using namespace ExplorerLens::Engine;
 #include "../Pipeline/ThumbnailPlaceholderBroker.h"
 #include "../Pipeline/ParallelReadaheadManager.h"
 
+// Sprint S332-S340 — ROADMAP v8.0 Phase 2/3 Completion
+#include "../Core/EmbeddedJpegFastPath.h"
+#include "../Pipeline/FallbackChainManager.h"
+#include "../Core/WicMetadataReader.h"
+#include "../Core/RegistryLightInstall.h"
+#include "../Pipeline/ThumbnailAdornmentProvider.h"
+#include "../Pipeline/HighDpiScaleHelper.h"
+#include "../Cache/L2SqliteCacheIndex.h"
+#include "../Core/AsyncDecodeContext.h"
+#include "../Core/IccProfilePassthrough.h"
+
 #include "EngineTestsMacros.h"

@@ -1892,6 +1892,17 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailPlaceholderBroker.h        # S329 — return last-cached bitmap immediately; no blank squares (H1)
     Pipeline/ParallelReadaheadManager.h          # S330 — folder-scan parallel I/O readahead N=8 (H8)
 
+    # Sprint S332-S340 — ROADMAP v8.0 Phase 2/3 Completion
+    Core/EmbeddedJpegFastPath.h                  # S332 — RAW embedded JPEG extraction (H7)
+    Pipeline/FallbackChainManager.h              # S333 — graceful fallback chain (H20/H37)
+    Core/WicMetadataReader.h                     # S334 — WIC EXIF/XMP metadata reader (H44)
+    Core/RegistryLightInstall.h                  # S335 — minimal registry footprint (H26)
+    Pipeline/ThumbnailAdornmentProvider.h        # S336 — Shell TypeOverlay + Treatment (H35/H38)
+    Pipeline/HighDpiScaleHelper.h                # S337 — WM_DPICHANGED-aware thumbnail sizing
+    Cache/L2SqliteCacheIndex.h                   # S338 — SQLite WAL catalog schema + key types
+    Core/AsyncDecodeContext.h                    # S339 — unified Phase 2 decode context
+    Core/IccProfilePassthrough.h                 # S340 — Phase 3 kickoff: ICC (pixels,icc) pair (H3/H30)
+
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h

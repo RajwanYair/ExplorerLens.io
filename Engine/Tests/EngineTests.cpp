@@ -2940,6 +2940,17 @@ int main()
     RUN_TEST(TestS329_ThumbnailPlaceholderBroker_Miss);
     RUN_TEST(TestS330_ParallelReadaheadManager_SlotCount);
 
+    // ROADMAP v8.0 Phase 2/3 Completion (S332-S340) Tests:
+    RUN_TEST(TestS332_EmbeddedJpegFastPath_NotFound);
+    RUN_TEST(TestS333_FallbackChainManager_AllFailed);
+    RUN_TEST(TestS334_WicMetadataReader_NoReader);
+    RUN_TEST(TestS335_RegistryLightInstall_Audit);
+    RUN_TEST(TestS336_ThumbnailAdornmentProvider_Config);
+    RUN_TEST(TestS337_HighDpiScaleHelper_ScaleFactor);
+    RUN_TEST(TestS338_L2SqliteCacheIndex_Schema);
+    RUN_TEST(TestS339_AsyncDecodeContext_DefaultState);
+    RUN_TEST(TestS340_IccProfilePassthrough_ValidateEmpty);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);
