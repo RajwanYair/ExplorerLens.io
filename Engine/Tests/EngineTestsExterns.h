@@ -4911,3 +4911,13 @@ extern void TestS316_ReadaheadIO_SlotCount_Runner();
 extern void TestS317_D3D11BlitPipeline_CPUFallback_Runner();
 extern void TestS318_LibJpegTurboEncode_WIC_Runner();
 extern void TestS319_LibSpngDecode_WIC_Runner();
+// Sprint S322-S330 — ROADMAP v8.0 Phase 2 Correctness & Robustness
+extern void TestS322_DecodeTimeoutGuard_Defaults_Runner();
+extern void TestS323_PerFormatMemoryBudget_Limits_Runner();
+extern void TestS324_WicPassthroughSelector_Jpeg_Runner();
+extern void TestS325_AsyncCacheWriter_StartStop_Runner();
+extern void TestS326_DecodeErrorTracker_Record_Runner();
+extern void TestS327_EFailDecodeGuard_BlankReject_Runner();
+extern void TestS328_FormatMagicValidator_JpegMatch_Runner();
+extern void TestS329_ThumbnailPlaceholderBroker_Miss_Runner();
+extern void TestS330_ParallelReadaheadManager_SlotCount_Runner();

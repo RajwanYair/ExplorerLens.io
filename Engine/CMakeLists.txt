@@ -1881,6 +1881,17 @@ set(ENGINE_HEADERS
     Decoders/LibJpegTurboEncodeWrapper.h         # S318 — libjpeg-turbo encode; replaces stb_image_write
     Decoders/LibSpngDecodeWrapper.h              # S319 — libspng decode; replaces stb_image PNG path
 
+    # Sprint S322-S330 — ROADMAP v8.0 Phase 2 Correctness & Robustness
+    Core/DecodeTimeoutGuard.h                    # S322 — 500ms hard decode timeout + std::jthread watchdog (H39)
+    Core/PerFormatMemoryBudget.h                 # S323 — per-format memory limits; prevents allocation bombs (H42)
+    Core/WicPassthroughSelector.h                # S324 — WIC-first passthrough for JPEG/PNG/BMP/GIF/TIFF/ICO (H24)
+    Cache/AsyncCacheWriter.h                     # S325 — bounded async queue for background L2 cache writes
+    Core/DecodeErrorTracker.h                    # S326 — per-decoder failure counters + ETW event emission (H48)
+    Core/EFailDecodeGuard.h                      # S327 — COM fix: E_FAIL instead of S_OK + blank bitmap
+    Core/FormatMagicValidator.h                  # S328 — magic-byte validation before decode dispatch (S4 security)
+    Pipeline/ThumbnailPlaceholderBroker.h        # S329 — return last-cached bitmap immediately; no blank squares (H1)
+    Pipeline/ParallelReadaheadManager.h          # S330 — folder-scan parallel I/O readahead N=8 (H8)
+
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h
     Pipeline/ZeroCopyRenderer.h

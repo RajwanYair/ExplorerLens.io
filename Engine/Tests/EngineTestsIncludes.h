@@ -1440,4 +1440,15 @@ using namespace ExplorerLens::Engine;
 #include "../Decoders/LibJpegTurboEncodeWrapper.h"
 #include "../Decoders/LibSpngDecodeWrapper.h"
 
+// Sprint S322-S330 — ROADMAP v8.0 Phase 2 Correctness & Robustness
+#include "../Core/DecodeTimeoutGuard.h"
+#include "../Core/PerFormatMemoryBudget.h"
+#include "../Core/WicPassthroughSelector.h"
+#include "../Cache/AsyncCacheWriter.h"
+#include "../Core/DecodeErrorTracker.h"
+#include "../Core/EFailDecodeGuard.h"
+#include "../Core/FormatMagicValidator.h"
+#include "../Pipeline/ThumbnailPlaceholderBroker.h"
+#include "../Pipeline/ParallelReadaheadManager.h"
+
 #include "EngineTestsMacros.h"

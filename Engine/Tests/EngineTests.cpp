@@ -2929,6 +2929,17 @@ int main()
     RUN_TEST(TestS318_LibJpegTurboEncode_WIC);
     RUN_TEST(TestS319_LibSpngDecode_WIC);
 
+    // ROADMAP v8.0 Phase 2 (S322-S330) Tests:
+    RUN_TEST(TestS322_DecodeTimeoutGuard_Defaults);
+    RUN_TEST(TestS323_PerFormatMemoryBudget_Limits);
+    RUN_TEST(TestS324_WicPassthroughSelector_Jpeg);
+    RUN_TEST(TestS325_AsyncCacheWriter_StartStop);
+    RUN_TEST(TestS326_DecodeErrorTracker_Record);
+    RUN_TEST(TestS327_EFailDecodeGuard_BlankReject);
+    RUN_TEST(TestS328_FormatMagicValidator_JpegMatch);
+    RUN_TEST(TestS329_ThumbnailPlaceholderBroker_Miss);
+    RUN_TEST(TestS330_ParallelReadaheadManager_SlotCount);
+
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);

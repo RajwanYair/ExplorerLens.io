@@ -9681,3 +9681,425 @@ TEST(TestS319_LibSpngDecode_WIC)
     ASSERT(LibSpngDecodeWrapper::kMaxSpngDimension     == 1'048'576u);
     ASSERT(LibSpngDecodeWrapper::kMinPngSignatureBytes == 8u);
 }
+
+//== Sprint S322-S330 — ROADMAP v8.0 Phase 2 Correctness & Robustness ==
+
+TEST(TestS322_DecodeTimeoutGuard_Defaults)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants must match ROADMAP H39 specification
+    ASSERT_EQ(DecodeTimeoutGuard::kDefaultTimeoutMs, 500u);
+    ASSERT_EQ(DecodeTimeoutGuard::kMinTimeoutMs,     100u);
+    ASSERT_EQ(DecodeTimeoutGuard::kMaxTimeoutMs,     5000u);
+    ASSERT_EQ(DecodeTimeoutGuard::kWatchdogPollMs,   32u);
+
+    // Constructed with default config → IDLE status
+    DecodeTimeoutGuard g{};
+    ASSERT(g.Status() == DecodeTimeoutStatus::IDLE);
+    ASSERT(!g.IsExpired());
+
+    // Invalid config (timeout below minimum) → INVALID_CONFIG
+    DecodeTimeoutConfig bad{};
+    bad.timeoutMs = 10u;  // below kMinTimeoutMs
+    DecodeTimeoutGuard badGuard{ bad };
+    ASSERT(badGuard.Status() == DecodeTimeoutStatus::INVALID_CONFIG);
+    ASSERT(!badGuard.Start());  // must refuse to start
+
+    // Valid start / complete cycle
+    DecodeTimeoutGuard g2{};
+    ASSERT(g2.Start());
+    ASSERT(g2.Status() == DecodeTimeoutStatus::RUNNING);
+    g2.Complete();
+    ASSERT(g2.Status() == DecodeTimeoutStatus::COMPLETED);
+    ASSERT(!g2.IsExpired());
+
+    // stop_token is initially not requested
+    DecodeTimeoutGuard g3{};
+    ASSERT(!g3.StopToken().stop_requested());
+}
+
+TEST(TestS323_PerFormatMemoryBudget_Limits)
+{
+    using namespace ExplorerLens::Engine;
+
+    // RAW camera images get the largest budget
+    ASSERT(PerFormatMemoryBudget::kBudgetRaw    == 128u * 1024u * 1024u);
+    ASSERT(PerFormatMemoryBudget::kBudgetRaster ==  48u * 1024u * 1024u);
+    ASSERT(PerFormatMemoryBudget::kBudgetIcon   ==   1u * 1024u * 1024u);
+
+    // Known formats must return OK for reasonable sizes
+    ASSERT(PerFormatMemoryBudget::Check("image/jpeg",  4u * 1024u * 1024u)
+           == BudgetCheckResult::OK);
+    ASSERT(PerFormatMemoryBudget::Check("image/x-raw", 64u * 1024u * 1024u)
+           == BudgetCheckResult::OK);
+
+    // Oversized claim must be rejected
+    ASSERT(PerFormatMemoryBudget::Check("image/x-icon", 256u * 1024u * 1024u)
+           == BudgetCheckResult::BUDGET_EXCEEDED);
+    ASSERT(PerFormatMemoryBudget::Check("image/jpeg",   512u * 1024u * 1024u)
+           == BudgetCheckResult::BUDGET_EXCEEDED);
+
+    // Unknown format gets fallback budget (kBudgetUnknown = 16 MiB)
+    ASSERT(PerFormatMemoryBudget::LimitFor("image/x-unknown")
+           == PerFormatMemoryBudget::kBudgetUnknown);
+    ASSERT(PerFormatMemoryBudget::Check("image/x-unknown", 8u * 1024u * 1024u)
+           == BudgetCheckResult::OK);
+    ASSERT(PerFormatMemoryBudget::Check("image/x-unknown", 64u * 1024u * 1024u)
+           == BudgetCheckResult::BUDGET_EXCEEDED);
+}
+
+TEST(TestS324_WicPassthroughSelector_Jpeg)
+{
+    using namespace ExplorerLens::Engine;
+
+    // JPEG → USE_CUSTOM (libjpeg-turbo preferred over WIC)
+    auto r = WicPassthroughSelector::SelectByFormatId("image/jpeg");
+    ASSERT(r.decision == WicPassthroughDecision::USE_CUSTOM);
+    ASSERT(r.status   == WicPassthroughStatus::OK);
+
+    // PNG → USE_CUSTOM (libspng preferred)
+    r = WicPassthroughSelector::SelectByFormatId("image/png");
+    ASSERT(r.decision == WicPassthroughDecision::USE_CUSTOM);
+
+    // BMP → USE_WIC (WIC handles BMP natively, no quality gap)
+    r = WicPassthroughSelector::SelectByFormatId("image/bmp");
+    ASSERT(r.decision == WicPassthroughDecision::USE_WIC);
+
+    // GIF → USE_WIC
+    r = WicPassthroughSelector::SelectByFormatId("image/gif");
+    ASSERT(r.decision == WicPassthroughDecision::USE_WIC);
+
+    // Unknown → UNKNOWN_FORMAT
+    r = WicPassthroughSelector::SelectByFormatId("application/x-unknown");
+    ASSERT(r.decision == WicPassthroughDecision::UNKNOWN_FORMAT);
+
+    // Magic-byte path: JPEG FF D8 FF
+    std::array<std::byte, 4> jpegMagic{
+        std::byte{0xFF}, std::byte{0xD8}, std::byte{0xFF}, std::byte{0xE0}
+    };
+    auto mr = WicPassthroughSelector::SelectByMagic(
+        std::span<const std::byte>{ jpegMagic.data(), jpegMagic.size() });
+    ASSERT(mr.decision == WicPassthroughDecision::USE_CUSTOM);
+    ASSERT(mr.resolvedFormatId == "image/jpeg");
+
+    // Empty magic → EMPTY_MAGIC
+    auto er = WicPassthroughSelector::SelectByMagic({});
+    ASSERT(er.status == WicPassthroughStatus::EMPTY_MAGIC);
+
+    // Minimum magic bytes constant
+    ASSERT(WicPassthroughSelector::kMinMagicBytes == 4u);
+    ASSERT(WicPassthroughSelector::kTableEntryCount == 22u);
+}
+
+TEST(TestS325_AsyncCacheWriter_StartStop)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(AsyncCacheWriter::kDefaultQueueDepth, 64u);
+    ASSERT_EQ(AsyncCacheWriter::kMinQueueDepth,      4u);
+    ASSERT_EQ(AsyncCacheWriter::kMaxQueueDepth,    512u);
+
+    // Default constructed → not running
+    AsyncCacheWriter writer{};
+    ASSERT(!writer.IsRunning());
+
+    // Start → running; second Start is idempotent
+    ASSERT(writer.Start());
+    ASSERT(writer.IsRunning());
+    ASSERT(!writer.Start());  // already running
+
+    // Enqueue invalid request → INVALID_REQUEST
+    ASSERT(writer.Enqueue({}) == CacheWriteStatus::INVALID_REQUEST);
+
+    // Enqueue valid request → ENQUEUED
+    CacheWriteRequest req;
+    req.cachePath = L"C:\\Test\\thumb_0001.png";
+    req.pixelsBGRA.assign(16u, std::byte{0xAA});
+    req.width  = 2u;
+    req.height = 2u;
+    ASSERT(writer.Enqueue(req) == CacheWriteStatus::ENQUEUED);
+    ASSERT(writer.EnqueuedTotal() == 1u);
+
+    // Stop → not running; stats preserved
+    writer.Stop();
+    ASSERT(!writer.IsRunning());
+    ASSERT(writer.EnqueuedTotal() >= 1u);
+
+    // Enqueue after stop → WRITER_STOPPED
+    ASSERT(writer.Enqueue(req) == CacheWriteStatus::WRITER_STOPPED);
+
+    // Custom queue depth
+    AsyncCacheWriterConfig cfg{};
+    cfg.queueDepth = 8u;
+    AsyncCacheWriter small{ cfg };
+    ASSERT(small.QueueDepth() == 8u);
+}
+
+TEST(TestS326_DecodeErrorTracker_Record)
+{
+    using namespace ExplorerLens::Engine;
+
+    DecodeErrorTracker tracker;
+
+    // Fresh tracker: zero failures, zero slots
+    ASSERT_EQ(tracker.TotalFailures(), 0u);
+    ASSERT_EQ(tracker.SlotCount(), 0u);
+
+    // Record one failure → slot created
+    DecodeErrorEvent evt;
+    evt.decoderId     = "libjpeg-turbo";
+    evt.fileExtension = ".jpg";
+    evt.hresult       = static_cast<std::int32_t>(0x80070057u);  // E_INVALIDARG
+    evt.wasTimeout    = false;
+    tracker.Record(evt);
+
+    ASSERT_EQ(tracker.TotalFailures(), 1u);
+    ASSERT_EQ(tracker.SlotCount(),     1u);
+
+    // Stats for that decoder
+    const auto stats = tracker.GetStats("libjpeg-turbo");
+    ASSERT_EQ(stats.failureCount, 1u);
+    ASSERT_EQ(stats.timeoutCount, 0u);
+    ASSERT_EQ(stats.lastHresult,  static_cast<std::int32_t>(0x80070057u));
+
+    // Record a timeout failure for a different decoder
+    DecodeErrorEvent tevt;
+    tevt.decoderId     = "libheif";
+    tevt.fileExtension = ".heic";
+    tevt.wasTimeout    = true;
+    tracker.Record(tevt);
+    ASSERT_EQ(tracker.TotalFailures(), 2u);
+    ASSERT_EQ(tracker.SlotCount(),     2u);
+
+    const auto heifStats = tracker.GetStats("libheif");
+    ASSERT_EQ(heifStats.timeoutCount, 1u);
+
+    // Reset clears all counters
+    tracker.Reset();
+    ASSERT_EQ(tracker.TotalFailures(), 0u);
+    ASSERT_EQ(tracker.SlotCount(),     0u);
+
+    // Unknown decoder stats → zeroed struct
+    const auto unknown = tracker.GetStats("does-not-exist");
+    ASSERT_EQ(unknown.failureCount, 0u);
+}
+
+TEST(TestS327_EFailDecodeGuard_BlankReject)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(EFailDecodeGuard::kDefaultPolicy == DecodeResultPolicy::STRICT);
+    ASSERT_EQ(EFailDecodeGuard::kMinSamplePixels, 64u);
+
+    // Null buffer → NULL_BITMAP
+    ASSERT(EFailDecodeGuard::ValidatePixels({}, 100u, 100u)
+           == EFailValidationResult::NULL_BITMAP);
+
+    // Zero dimensions → ZERO_DIMENSIONS
+    std::vector<std::byte> px(4u, std::byte{0xAA});
+    ASSERT(EFailDecodeGuard::ValidatePixels(px, 0u, 1u)
+           == EFailValidationResult::ZERO_DIMENSIONS);
+    ASSERT(EFailDecodeGuard::ValidatePixels(px, 1u, 0u)
+           == EFailValidationResult::ZERO_DIMENSIONS);
+
+    // All-white 4×4 BGRA → BLANK_BITMAP
+    constexpr std::size_t kDim = 4u;
+    std::vector<std::byte> white(kDim * kDim * 4u, std::byte{0xFF});
+    ASSERT(EFailDecodeGuard::ValidatePixels(
+        std::span<const std::byte>{ white.data(), white.size() }, kDim, kDim)
+        == EFailValidationResult::BLANK_BITMAP);
+
+    // All-transparent 4×4 BGRA → BLANK_BITMAP
+    std::vector<std::byte> transparent(kDim * kDim * 4u, std::byte{0x00});
+    ASSERT(EFailDecodeGuard::ValidatePixels(
+        std::span<const std::byte>{ transparent.data(), transparent.size() }, kDim, kDim)
+        == EFailValidationResult::BLANK_BITMAP);
+
+    // Non-blank 4×4 BGRA (mixed pixels) → VALID
+    std::vector<std::byte> mixed(kDim * kDim * 4u, std::byte{0x00});
+    mixed[0] = std::byte{0x10};
+    mixed[4] = std::byte{0x80};
+    ASSERT(EFailDecodeGuard::ValidatePixels(
+        std::span<const std::byte>{ mixed.data(), mixed.size() }, kDim, kDim)
+        == EFailValidationResult::VALID);
+
+    // CoalesceHresult: VALID → S_OK (0)
+    // We test the integer value since HRESULT isn't available in all configs
+#ifdef _WIN32
+    ASSERT(EFailDecodeGuard::CoalesceHresult(
+        EFailValidationResult::VALID, DecodeResultPolicy::STRICT) == S_OK);
+    ASSERT(EFailDecodeGuard::CoalesceHresult(
+        EFailValidationResult::NULL_BITMAP, DecodeResultPolicy::STRICT) == E_FAIL);
+    ASSERT(EFailDecodeGuard::CoalesceHresult(
+        EFailValidationResult::TIMEOUT_EXPIRED, DecodeResultPolicy::STRICT) == E_ABORT);
+    ASSERT(EFailDecodeGuard::CoalesceHresult(
+        EFailValidationResult::BUDGET_EXCEEDED, DecodeResultPolicy::STRICT) == E_OUTOFMEMORY);
+#endif
+}
+
+TEST(TestS328_FormatMagicValidator_JpegMatch)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Table constants
+    ASSERT_EQ(FormatMagicValidator::kTableSize,      22u);
+    ASSERT_EQ(FormatMagicValidator::kMinHeaderBytes, 12u);
+
+    // JPEG magic: FF D8 FF E0
+    std::array<std::byte, 16> jpegHdr{
+        std::byte{0xFF}, std::byte{0xD8}, std::byte{0xFF}, std::byte{0xE0},
+        std::byte{0x00}, std::byte{0x10}, std::byte{0x4A}, std::byte{0x46},
+        std::byte{0x49}, std::byte{0x46}, std::byte{0x00}, std::byte{0x01}
+    };
+    ASSERT(FormatMagicValidator::Validate(".jpg",
+        std::span<const std::byte>{ jpegHdr.data(), jpegHdr.size() })
+        == MagicValidatorResult::MATCH);
+    ASSERT(FormatMagicValidator::Validate(".jpeg",
+        std::span<const std::byte>{ jpegHdr.data(), jpegHdr.size() })
+        == MagicValidatorResult::MATCH);
+
+    // PNG magic: 89 50 4E 47 0D 0A 1A 0A
+    std::array<std::byte, 12> pngHdr{
+        std::byte{0x89}, std::byte{0x50}, std::byte{0x4E}, std::byte{0x47},
+        std::byte{0x0D}, std::byte{0x0A}, std::byte{0x1A}, std::byte{0x0A},
+        std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x0D}
+    };
+    ASSERT(FormatMagicValidator::Validate(".png",
+        std::span<const std::byte>{ pngHdr.data(), pngHdr.size() })
+        == MagicValidatorResult::MATCH);
+
+    // Extension mismatch: JPEG bytes labelled as PNG → MISMATCH
+    ASSERT(FormatMagicValidator::Validate(".png",
+        std::span<const std::byte>{ jpegHdr.data(), jpegHdr.size() })
+        == MagicValidatorResult::MISMATCH);
+
+    // Unknown extension → UNKNOWN_FORMAT
+    ASSERT(FormatMagicValidator::Validate(".xyz",
+        std::span<const std::byte>{ jpegHdr.data(), jpegHdr.size() })
+        == MagicValidatorResult::UNKNOWN_FORMAT);
+
+    // Empty buffer → EMPTY_BUFFER
+    ASSERT(FormatMagicValidator::Validate(".jpg", {})
+           == MagicValidatorResult::EMPTY_BUFFER);
+
+    // Too-short buffer (1 byte) → TOO_SHORT
+    std::array<std::byte, 1> tiny{ std::byte{0xFF} };
+    ASSERT(FormatMagicValidator::Validate(".jpg",
+        std::span<const std::byte>{ tiny.data(), tiny.size() })
+        == MagicValidatorResult::TOO_SHORT);
+
+    // IsKnownExtension
+    ASSERT(FormatMagicValidator::IsKnownExtension(".jpg"));
+    ASSERT(FormatMagicValidator::IsKnownExtension(".png"));
+    ASSERT(!FormatMagicValidator::IsKnownExtension(".xyz"));
+}
+
+TEST(TestS329_ThumbnailPlaceholderBroker_Miss)
+{
+    using namespace ExplorerLens::Engine;
+
+    ThumbnailPlaceholderBroker broker;
+
+    // Fresh broker: no entries
+    ASSERT_EQ(broker.LiveCount(), 0u);
+    ASSERT_EQ(broker.RegisteredTotal(), 0u);
+
+    // Resolve on empty cache → CACHE_EMPTY
+    PlaceholderEntry out{};
+    ASSERT(broker.Resolve(0xDEADBEEFCAFEBABEull, 256u, out)
+           == PlaceholderResolveResult::CACHE_EMPTY);
+
+    // Register a valid entry
+    PlaceholderEntry entry{};
+    entry.valid    = true;
+    entry.pathHash = 0xDEADBEEFCAFEBABEull;
+    entry.width    = 256u;
+    entry.height   = 256u;
+    broker.Register(entry);
+
+    ASSERT_EQ(broker.LiveCount(),       1u);
+    ASSERT_EQ(broker.RegisteredTotal(), 1u);
+
+    // Resolve → exact hit
+    PlaceholderEntry hit{};
+    ASSERT(broker.Resolve(0xDEADBEEFCAFEBABEull, 256u, hit)
+           == PlaceholderResolveResult::HIT_EXACT);
+    ASSERT(hit.valid);
+    ASSERT_EQ(hit.pathHash, 0xDEADBEEFCAFEBABEull);
+    ASSERT_EQ(hit.width,    256u);
+
+    // Different size → HIT_SCALED
+    ASSERT(broker.Resolve(0xDEADBEEFCAFEBABEull, 128u, hit)
+           == PlaceholderResolveResult::HIT_SCALED);
+
+    // Unknown path hash → MISS (one valid entry exists, just not this hash)
+    ASSERT(broker.Resolve(0x1234567890ABCDEFull, 256u, hit)
+           == PlaceholderResolveResult::MISS);
+
+    // Invalidate → entry removed
+    broker.Invalidate(0xDEADBEEFCAFEBABEull);
+    ASSERT_EQ(broker.LiveCount(), 0u);
+
+    // Clear
+    broker.Register(entry);
+    ASSERT_EQ(broker.LiveCount(), 1u);
+    broker.Clear();
+    ASSERT_EQ(broker.LiveCount(), 0u);
+
+    // Constants
+    ASSERT_EQ(ThumbnailPlaceholderBroker::kMaxEntries, 128u);
+    ASSERT(ThumbnailPlaceholderBroker::kMaxAgeMs == 30'000);
+}
+
+TEST(TestS330_ParallelReadaheadManager_SlotCount)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT_EQ(ParallelReadaheadManager::kDefaultSlotCount, 8u);
+    ASSERT_EQ(ParallelReadaheadManager::kMaxSlotCount,    16u);
+    ASSERT_EQ(ParallelReadaheadManager::kAcquireTimeoutMs, 32u);
+
+    // Default construction
+    ParallelReadaheadManager mgr{};
+    ASSERT(!mgr.IsRunning());
+    ASSERT_EQ(mgr.SlotCount(), 8u);
+
+    // Custom slot count
+    ParallelReadaheadConfig cfg{};
+    cfg.slotCount     = 4u;
+    cfg.asyncPrefetch = false;  // synchronous mode for unit test
+    ParallelReadaheadManager small{ cfg };
+    ASSERT_EQ(small.SlotCount(), 4u);
+
+    // Start in sync mode → running, no thread launched
+    ASSERT(small.Start());
+    ASSERT(small.IsRunning());
+
+    // Set queue and verify stats start at zero
+    std::vector<std::wstring> paths = {
+        L"C:\\Photos\\001.jpg",
+        L"C:\\Photos\\002.jpg",
+        L"C:\\Photos\\003.jpg",
+    };
+    small.SetQueue(paths);
+    ASSERT_EQ(small.AcquiredTotal(),   0u);
+    ASSERT_EQ(small.PrefetchedTotal(), 0u);
+    ASSERT_EQ(small.ErrorTotal(),      0u);
+
+    // AcquireStream for path not yet prefetched → nullptr (caller does sync open)
+    IStream* s = small.AcquireStream(L"C:\\Photos\\001.jpg");
+    (void)s;  // may be nullptr in stub mode; both outcomes are valid
+
+    // Stop
+    small.Stop();
+    ASSERT(!small.IsRunning());
+
+    // ReadaheadPriority enum values
+    ASSERT(static_cast<std::uint8_t>(ReadaheadPriority::LOW)    == 0u);
+    ASSERT(static_cast<std::uint8_t>(ReadaheadPriority::NORMAL) == 1u);
+    ASSERT(static_cast<std::uint8_t>(ReadaheadPriority::HIGH)   == 2u);
+}
