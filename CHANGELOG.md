@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.6.0] — 2026-05-13 — Betelgeuse
+
+Phase 3/4 boundary: PE code signing validator, MiniDump crash capture, SEH decode fault barrier, DXVA2 surface pool, EXIF IPropertyStore provider (H46), out-of-process decoder proxy (H36), UBSAN CI gate, Chocolatey manifest schema, thumbnail HBITMAP serializer
+
+---
+
 ## [39.5.0] — 2026-05-13 — Betelgeuse
 
 Phase 3 quality and polish: lcms2 ICC colour pipeline (H12/H30), CPU AVX2 Lanczos resize (H41), DLL size budget checker (H18), WTL dark mode completion, high-DPI adaptor, SLSA L2 provenance (H32), SSIM-weighted eviction policy, decode time budget, WinGet manifest schema (ADR A26)
