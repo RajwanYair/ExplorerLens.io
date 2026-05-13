@@ -15,9 +15,9 @@ This is the **only** correct way to bump a version. Never edit version-bearing f
 
 ---
 
-## Complete Version-Bearing File Registry (20 files)
+## Complete Version-Bearing File Registry (21 files)
 
-All 20 files are updated by `Bump-Version.ps1`. Files marked *(conditional)* are only updated when
+All 21 files are updated by `Bump-Version.ps1`. Files marked *(conditional)* are only updated when
 they exist on disk; the script skips them silently if absent.
 
 | # | File | What Changes | Conditional? |
@@ -35,13 +35,14 @@ they exist on disk; the script skips them silently if absent.
 | 11 | `vcpkg.json` | `"version"` field | No |
 | 12 | `docs/assets/social-preview.svg` | Version chip, codename label | No |
 | 13 | `docs/assets/architecture-build.svg` | MSI artifact filename chip, version label | No |
-| 14 | `docs/USER_GUIDE.md` | `**Version:** X.Y.Z "Codename"` header line | No |
+| 14 | `docs/USER_GUIDE.md` | `**Version:** X.Y.Z "Codename"` header line, MSI filename | No |
 | 15 | `docs/SBOM.json` | `serialNumber`, `metadata.component.version`, `timestamp` | No |
 | 16 | `.github/copilot-instructions.md` | Version + codename in header; test count | No |
 | 17 | `.github/standards/tool-versions.md` | Version header line | No |
 | 18 | `.github/standards/build-method.md` | Version reference line | No |
-| 19 | `packaging/npm/package.json` | `"version"` field | **Yes** |
-| 20 | `Dockerfile` | `ARG EXPLORERLENS_VERSION=X.Y.Z` | **Yes** |
+| 19 | `Engine/CLI/LensCLI.h` | `Version X.Y.Z (Codename)` in PrintUsage | No |
+| 20 | `packaging/npm/package.json` | `"version"` field | **Yes** |
+| 21 | `Dockerfile` | `ARG EXPLORERLENS_VERSION=X.Y.Z` | **Yes** |
 
 ---
 

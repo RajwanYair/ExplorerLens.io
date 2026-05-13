@@ -25,7 +25,7 @@ git ls-files | Where-Object { $_ -notmatch '^external/' } | ForEach-Object {
 }
 ```
 
-Check that `VERSION`, `CHANGELOG.md`, `copilot-instructions.md`, and all 20 version-bearing
+Check that `VERSION`, `CHANGELOG.md`, `copilot-instructions.md`, and all 21 version-bearing
 files match the current version. Reference `version-bump.instructions.md` for the full registry.
 
 ### 2. Orphan Headers

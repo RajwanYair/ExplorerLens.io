@@ -66,7 +66,7 @@ ROADMAP §10 requires: **No new decoder lands without a corpus test.**
 
 If this PR changes any functionality that affects version strings:
 
-1. All 20 version-bearing files (version-bump.instructions.md table) must be updated via `Bump-Version.ps1`
+1. All 21 version-bearing files (version-bump.instructions.md table) must be updated via `Bump-Version.ps1`
 2. `CHANGELOG.md` must have an entry for the current sprint
 3. If `Engine/CMakeLists.txt` changed → `ENGINE_HEADERS` / `ENGINE_SOURCES` must include all new files
 

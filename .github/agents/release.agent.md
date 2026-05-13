@@ -101,8 +101,8 @@ After running `Bump-Version.ps1`, verify these all contain the new version:
 | 16 | `.github/copilot-instructions.md` | Version + codename + test count |
 | 17 | `.github/standards/tool-versions.md` | Version header |
 | 18 | `.github/standards/build-method.md` | Version reference |
-| 19 | `packaging/npm/package.json` | `"version"` (if exists) |
-| 20 | `packaging/ruby/.../version.rb` | `VERSION = 'X.Y.Z'` (if exists) |
+| 19 | `Engine/CLI/LensCLI.h` | `Version X.Y.Z (Codename)` |
+| 20 | `packaging/npm/package.json` | `"version"` (if exists) |
 | 21 | `Dockerfile` | `ARG EXPLORERLENS_VERSION=X.Y.Z` (if exists) |
 
 ## Post-Release Verification

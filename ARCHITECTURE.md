@@ -121,7 +121,7 @@ flowchart LR
 
 - **Build driver:** `build-scripts/Build-MSVC.ps1` (sources vcvars64 automatically)
 - **Test driver:** `ctest --test-dir build -C Release --output-on-failure`
-- **Version driver:** `build-scripts/Bump-Version.ps1` (updates 20 version-bearing files atomically)
+- **Version driver:** `build-scripts/Bump-Version.ps1` (updates 21 version-bearing files atomically)
 
 ## 6. CI topology
 

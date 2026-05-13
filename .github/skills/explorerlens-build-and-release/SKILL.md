@@ -13,7 +13,7 @@ task — each section contains non-obvious constraints specific to this repo.
 - Running the canonical MSVC build pipeline
 - Performing clean builds or build-plus-test runs
 - Validating whether release prerequisites are satisfied
-- Bumping version across all 20 version-bearing files
+- Bumping version across all 21 version-bearing files
 - Checking whether workflow-facing release docs still match repo behavior
 - Diagnosing build failures (stale cache, missing vcvars, PCH corruption)
 
@@ -43,7 +43,7 @@ Clang from PATH instead of MSVC, silently building with the wrong compiler.
 ## Step-by-Step: Version Bump and Release
 
 ```powershell
-# Single command — updates ALL 20 version-bearing files, commits, tags, pushes
+# Single command — updates ALL 21 version-bearing files, commits, tags, pushes
 .\build-scripts\Bump-Version.ps1 -Version "X.Y.Z" -Codename "Name" -TestCount NNNN `
     -ChangelogEntry "Short summary" -TagAndPush
 ```

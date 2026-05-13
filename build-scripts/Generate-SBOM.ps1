@@ -19,9 +19,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent $PSScriptRoot
+$currentVersion = (Get-Content (Join-Path $rootDir "VERSION") -Raw).Trim()
 
 Write-Host "=========================================" -ForegroundColor Cyan
-Write-Host "  SBOM Generation — ExplorerLens v15.0.0" -ForegroundColor Cyan
+Write-Host "  SBOM Generation — ExplorerLens v$currentVersion" -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 
 $timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
@@ -83,7 +84,7 @@ $sbom = [ordered]@{
             type        = "application"
             "bom-ref"   = "ExplorerLens-main"
             name        = "ExplorerLens"
-            version     = "15.0.0"
+            version     = $currentVersion
             description = "Advanced Windows Shell Extension for GPU-accelerated thumbnail generation supporting 200+ file formats"
             licenses    = @(
                 @{ license = @{ name = "MIT"; url = "https://opensource.org/licenses/MIT" } }

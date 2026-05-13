@@ -1,0 +1,290 @@
+{
+  "$schema": "https://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:54fb7f9c-272d-4e68-9930-c4e6eae0d5d8",
+  "metadata": {
+    "timestamp": "2026-05-13T11:21:31Z",
+    "tools": [
+      {
+        "vendor": "ExplorerLens Project",
+        "name": "Generate-SBOM.ps1",
+        "version": "2.0.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "bom-ref": "ExplorerLens-main",
+      "name": "ExplorerLens",
+      "version": "39.2.0",
+      "description": "Advanced Windows Shell Extension for GPU-accelerated thumbnail generation supporting 200+ file formats",
+      "licenses": [
+        {
+          "license": {
+            "url": "https://opensource.org/licenses/MIT",
+            "name": "MIT"
+          }
+        }
+      ],
+      "copyright": "Copyright (c) 2024-2026 ExplorerLens Project"
+    }
+  },
+  "components": [
+    {
+      "scope": "required",
+      "bom-ref": "zlib",
+      "version": "1.3.1",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "Zlib"
+          }
+        }
+      ],
+      "purl": "pkg:generic/zlib@1.3.1",
+      "name": "zlib"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "lz4",
+      "version": "1.10.0",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/lz4@1.10.0",
+      "name": "LZ4"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "zstd",
+      "version": "1.5.7",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/zstd@1.5.7",
+      "name": "zstd"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "lzma sdk",
+      "version": "26.00",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "public-domain"
+          }
+        }
+      ],
+      "purl": "pkg:generic/lzma-sdk@26.00",
+      "name": "LZMA SDK"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "minizip-ng",
+      "version": "4.0.10",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "Zlib"
+          }
+        }
+      ],
+      "purl": "pkg:generic/minizip-ng@4.0.10",
+      "name": "minizip-ng"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "unrar",
+      "version": "7.2.2",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "UnRAR"
+          }
+        }
+      ],
+      "purl": "pkg:generic/unrar@7.2.2",
+      "name": "UnRAR"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "libwebp",
+      "version": "1.5.0",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/libwebp@1.5.0",
+      "name": "libwebp"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "libavif",
+      "version": "1.3.0",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/libavif@1.3.0",
+      "name": "libavif"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "libjxl",
+      "version": "0.11.1",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/libjxl@0.11.1",
+      "name": "libjxl"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "libheif",
+      "version": "1.19.5",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "LGPL-3.0"
+          }
+        }
+      ],
+      "purl": "pkg:generic/libheif@1.19.5",
+      "name": "libheif"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "libde265",
+      "version": "1.0.15",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "LGPL-3.0"
+          }
+        }
+      ],
+      "purl": "pkg:generic/libde265@1.0.15",
+      "name": "libde265"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "libraw",
+      "version": "0.21.3",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "LGPL-2.1"
+          }
+        }
+      ],
+      "purl": "pkg:generic/libraw@0.21.3",
+      "name": "LibRaw"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "dav1d",
+      "version": "1.5.1",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/dav1d@1.5.1",
+      "name": "dav1d"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "openjpeg",
+      "version": "2.5.3",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/openjpeg@2.5.3",
+      "name": "OpenJPEG"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "freetype",
+      "version": "2.13.3",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "FTL"
+          }
+        }
+      ],
+      "purl": "pkg:generic/freetype@2.13.3",
+      "name": "FreeType"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "mupdf",
+      "version": "1.24.11",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "AGPL-3.0"
+          }
+        }
+      ],
+      "purl": "pkg:generic/mupdf@1.24.11",
+      "name": "MuPDF"
+    },
+    {
+      "scope": "required",
+      "bom-ref": "bzip2",
+      "version": "1.0.8",
+      "type": "library",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        }
+      ],
+      "purl": "pkg:generic/bzip2@1.0.8",
+      "name": "bzip2"
+    }
+  ]
+}

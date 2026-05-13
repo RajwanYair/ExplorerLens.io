@@ -29,7 +29,7 @@
 2. **Run the installer** as Administrator:
  ```powershell
  # Right-click installer → "Run as Administrator"
- .\ExplorerLens-33.0.0-x64.msi
+ .\ExplorerLens-39.2.0-x64.msi
  ```
 
 3. **Follow the wizard**:

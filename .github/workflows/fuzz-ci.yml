@@ -145,10 +145,9 @@ jobs:
           - FuzzRawDecoder
           - FuzzZipDecoder
           - FuzzRarDecoder
-          # Phase 3 targets (added when decoders land):
-          # - FuzzExrDecoder
-          # - FuzzDdsDecoder
-          # - FuzzGlbDecoder
+          - FuzzExrDecoder
+          - FuzzDdsDecoder
+          # - FuzzGlbDecoder  (GLB decoder is a stub; enable after TinyGLTF integration)
 
     steps:
       - name: Checkout

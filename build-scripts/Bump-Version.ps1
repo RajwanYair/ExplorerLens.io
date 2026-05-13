@@ -235,14 +235,24 @@ if (Test-Path $dockerPath) {
     Write-Host "[bump] Dockerfile ARG EXPLORERLENS_VERSION updated"
 }
 
-# 14d. docs/USER_GUIDE.md — Version header line
+# 14d. docs/USER_GUIDE.md — Version header line + MSI filename
 $ugPath = "$rootDir\docs\USER_GUIDE.md"
 if (Test-Path $ugPath) {
     $ug = Get-Content $ugPath -Raw
     $ug = $ug -replace '(\*\*Version:\*\*\s*)[\.\d]+\s*"[^"]+"', "`${1}$Version `"$Codename`""
     $ug = $ug -replace '(v)[\.\d]+\s*(\([^)]+\)\s*with build info)', "`${1}$Version ($Codename) with build info"
+    $ug = $ug -replace 'ExplorerLens-[\d.]+-x64\.msi', "ExplorerLens-$Version-x64.msi"
     Set-Content $ugPath -Value $ug -NoNewline
     Write-Host "[bump] docs/USER_GUIDE.md updated"
+}
+
+# 14e. Engine/CLI/LensCLI.h — PrintUsage version string
+$cliPath = "$rootDir\Engine\CLI\LensCLI.h"
+if (Test-Path $cliPath) {
+    $cli = Get-Content $cliPath -Raw
+    $cli = $cli -replace 'Version [\d.]+ \([^)]+\)', "Version $Version ($Codename)"
+    Set-Content $cliPath -Value $cli -NoNewline
+    Write-Host "[bump] Engine/CLI/LensCLI.h updated"
 }
 
 # 15. CHANGELOG.md — prepend new versioned section (proper Keep-a-Changelog format)
@@ -271,7 +281,7 @@ if ($cl.Contains($sectionGuard)) {
 
 # 6. Commit
 $commitMsg = "chore: bump version to $Version ($Codename)"
-$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, LENSShell.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md, USER_GUIDE.md, packaging/npm/package.json, Dockerfile"
+$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, LENSShell.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md, USER_GUIDE.md, LensCLI.h, packaging/npm/package.json, Dockerfile"
 $fullMsg = "$commitMsg`n`n$details"
 [IO.File]::WriteAllText("$rootDir\.git\BUMP_MSG.txt", $fullMsg)
 git add -A
