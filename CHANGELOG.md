@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.5.0] — 2026-05-13 — Betelgeuse
+
+Phase 3 quality and polish: lcms2 ICC colour pipeline (H12/H30), CPU AVX2 Lanczos resize (H41), DLL size budget checker (H18), WTL dark mode completion, high-DPI adaptor, SLSA L2 provenance (H32), SSIM-weighted eviction policy, decode time budget, WinGet manifest schema (ADR A26)
+
+---
+
 ## [39.4.0] — 2026-05-13 — Betelgeuse
 
 Phase 2 completions: embedded JPEG fast-path (H7), fallback chain (H20/H37), WIC metadata reader (H44), registry footprint (H26), adornments (H35/H38), high-DPI scaling, SQLite cache index, unified decode context, ICC passthrough (H3/H30 Phase 3 kickoff)
