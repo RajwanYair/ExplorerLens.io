@@ -21,7 +21,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
 ![MSVC](https://img.shields.io/badge/MSVC-v145%20%2819.50%29-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-5081%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-5090%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 ![Roadmap](https://img.shields.io/badge/Roadmap-Phase%201%20Foundation-informational)
 
@@ -310,7 +310,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 39.6.0 "Betelgeuse"
+**Current Version:** 39.7.0 "Betelgeuse"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 4,978 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Betelgeuse

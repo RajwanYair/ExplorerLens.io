@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [39.6.0] — 2026-05-13 — Betelgeuse
+## [39.7.0] — 2026-05-13 — Betelgeuse
 
 Phase 3/4 boundary: PE code signing validator, MiniDump crash capture, SEH decode fault barrier, DXVA2 surface pool, EXIF IPropertyStore provider (H46), out-of-process decoder proxy (H36), UBSAN CI gate, Chocolatey manifest schema, thumbnail HBITMAP serializer
 

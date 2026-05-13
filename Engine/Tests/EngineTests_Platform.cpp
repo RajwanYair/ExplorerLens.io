@@ -11093,7 +11093,7 @@ TEST(TestS359_ChocolateyPackageSchema_Factory)
     std::wstring sha64(64u, L'a');
     auto schema = ChocolateyPackageSchema::MakeExplorerLens(
         39u, 6u, 0u,
-        L"https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.6.0/ExplorerLens-Setup-39.6.0.msi",
+        L"https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.7.0/ExplorerLens-Setup-39.7.0.msi",
         std::wstring(64u, L'a'));
 
     // ASSERT valid

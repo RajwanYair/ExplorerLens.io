@@ -10,7 +10,7 @@
 // Chocolatey .nuspec format is NuGet XML-based:
 //   <package><metadata>
 //     <id>explorerlens</id>
-//     <version>39.6.0</version>
+//     <version>39.7.0</version>
 //     <authors>RajwanYair</authors>
 //     ...
 //   </metadata></package>
