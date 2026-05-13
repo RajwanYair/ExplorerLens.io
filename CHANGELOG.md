@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.4.0] — 2026-05-13 — Betelgeuse
+
+Phase 2 completions: embedded JPEG fast-path (H7), fallback chain (H20/H37), WIC metadata reader (H44), registry footprint (H26), adornments (H35/H38), high-DPI scaling, SQLite cache index, unified decode context, ICC passthrough (H3/H30 Phase 3 kickoff)
+
+---
+
 ## [39.3.0] — 2026-05-13 — Betelgeuse
 
 Phase 2 correctness: timeout guard (H39), per-format memory budgets (H42), WIC passthrough selector (H24), async cache writer, decode error telemetry (H48), E_FAIL blank-bitmap guard, magic-byte validator (S4 security), thumbnail placeholder broker (H1), parallel readahead N=8 (H8)
