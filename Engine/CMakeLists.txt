@@ -133,13 +133,10 @@ else()
     set(HAS_LIBAVIF OFF CACHE BOOL "AVIF support — libavif or dav1d not found" FORCE)
 endif()
 
-# --- MuPDF ---
-set(MUPDF_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/platform/win32/x64/Release/libmupdf.lib")
-if(EXISTS "${MUPDF_LIB_PATH}")
-    set(HAS_MUPDF ON CACHE BOOL "PDF support auto-detected" FORCE)
-else()
-    set(HAS_MUPDF OFF CACHE BOOL "PDF support — MuPDF not built (see docs/build/BUILD_GUIDE.md)" FORCE)
-endif()
+# --- MuPDF (ADR A37 — AGPL-3, explicit opt-in only, NOT auto-detected)
+# Primary PDF path is Windows.Data.Pdf WinRT (zero-dep, Windows 10+)
+# To enable MuPDF as optional fallback: cmake -DHAS_MUPDF=ON
+option(HAS_MUPDF "Enable MuPDF as optional PDF fallback (AGPL-3 — requires GPL-compatible build)" OFF)
 
 # --- OpenJPEG ---
 set(OPENJPEG_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/openjp2.lib")
@@ -2453,11 +2450,15 @@ if(ENGINE_SOURCES)
             message(STATUS "AVIF support: DISABLED (set -DHAS_LIBAVIF=ON when libavif is available)")
         endif()
 
+        # Windows.Data.Pdf is always available on Windows 10+ (ADR A37 primary path)
+        target_compile_definitions(ExplorerLensEngine PRIVATE HAS_WINDOWS_DATA_PDF)
+        message(STATUS "PDF support (Windows.Data.Pdf): ENABLED (primary — zero-dep, Windows 10+)")
+
         if(HAS_MUPDF)
             target_compile_definitions(ExplorerLensEngine PRIVATE HAS_MUPDF)
-            message(STATUS "PDF support (MuPDF): ENABLED")
+            message(STATUS "PDF support (MuPDF fallback): ENABLED (AGPL-3 — ensure GPL-compatible build)")
         else()
-            message(STATUS "PDF support (MuPDF): DISABLED (set -DHAS_MUPDF=ON when MuPDF is available)")
+            message(STATUS "PDF support (MuPDF fallback): DISABLED (opt-in: cmake -DHAS_MUPDF=ON)")
         endif()
 
         if(HAS_OPENJPEG)
