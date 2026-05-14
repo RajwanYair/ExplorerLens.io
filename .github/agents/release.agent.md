@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 name: Release
 description: "ExplorerLens release agent — orchestrates version bumps, validates all 21 version-bearing files, checks artifacts, runs pre-release scrubbing, and verifies post-release CI results."
@@ -82,7 +82,7 @@ The new `## [X.Y.Z]` section must exist in `CHANGELOG.md` with:
 After running `Bump-Version.ps1`, verify these all contain the new version:
 
 | # | File | Check Pattern |
-|---|------|--------------|
+| --- | ------ | -------------- |
 | 1 | `VERSION` | File content == "X.Y.Z" |
 | 2 | `CHANGELOG.md` | `## [X.Y.Z]` header exists |
 | 3 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ...)` |
@@ -125,7 +125,7 @@ gh run list --workflow publish-packages.yml --limit 1
 ## Release Artifact Checklist
 
 | Artifact | Required | Notes |
-|----------|----------|-------|
+| ---------- | ---------- | ------- |
 | `LENSShell.dll` (x64) | ✅ Always | COM shell extension |
 | `LENSManager.exe` | ✅ Always | Configuration GUI |
 | `lens.exe` | ✅ Always | CLI tool |

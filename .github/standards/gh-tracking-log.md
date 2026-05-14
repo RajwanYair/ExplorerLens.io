@@ -1,4 +1,4 @@
-# ExplorerLens — GitHub Sprint & Issue Tracking Log
+﻿# ExplorerLens — GitHub Sprint & Issue Tracking Log
 
 > This file is the authoritative local record of sprint deliveries and issue resolutions.
 > It is updated after each sprint release and used as the source of truth when the GitHub
@@ -30,7 +30,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 ### v35.0.0 "Vega" — Sprint 1281-1290 — Adaptive Fidelity + Roadmap Bootstrap
 
 | Item | Status | Commit |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | `AdaptiveFidelitySelector.h/.cpp` | ✅ Delivered | `f41436c0` |
 | `PartialDecodeStateCache.h/.cpp` | ✅ Delivered | `f41436c0` |
 | `ThumbnailETagValidator.h/.cpp` | ✅ Delivered | `f41436c0` |
@@ -43,7 +43,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 | 5-registry publish triggered | ✅ | tag `v35.0.0` |
 
 **GH close commands (run when API is available):**
-```
+```text
 # No open issues were associated — sprint was a clean delivery
 ```
 
@@ -52,7 +52,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 ### v35.1.0 "Vega-R" — Sprint 1291-1300 — Real-Time Collaboration & Live Edit Sync
 
 | Item | Status | Commit |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | `LiveSyncTokenManager.h/.cpp` | ✅ Delivered | `58e12150` |
 | `CollaborativeCacheCoordinator.h/.cpp` | ✅ Delivered | `58e12150` |
 | `ThumbnailDeltaEncoder.h/.cpp` | ✅ Delivered | `58e12150` |
@@ -68,7 +68,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 - `EngineTestsExterns.h` architecture documented for first time
 
 **GH close commands:**
-```
+```text
 # No open issues — sprint was clean
 ```
 
@@ -77,7 +77,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 ### v35.2.0 "Vega-S" — Sprint 1301-1310 — Network-Aware Streaming Cache
 
 | Item | Status | Commit |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | `NetworkTopologyProbe.h/.cpp` | ✅ Delivered | `0813a5e8` |
 | `StreamingCacheTierPolicy.h/.cpp` | ✅ Delivered | `0813a5e8` |
 | `BandwidthThrottleGuard.h/.cpp` | ✅ Delivered | `0813a5e8` |
@@ -92,7 +92,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 - SBOMGenerator.h file lock: second run of Bump-Version.ps1 succeeded; documented in lessons-learned.md §11.1
 
 **GH close commands:**
-```
+```text
 # No open issues — sprint was clean
 ```
 
@@ -101,7 +101,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 ### v35.3.0 "Vega-T" — Sprint 1311-1320 — Zero-Trust Thumbnail Security
 
 | Item | Status | Commit |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | `ThumbnailManifestSigner.h/.cpp` | ✅ Delivered | `b2965d69` |
 | `ZeroTrustDecodeWorker.h/.cpp` | ✅ Delivered | `b2965d69` |
 | `TokenBoundCacheEntry.h/.cpp` | ✅ Delivered | `b2965d69` |
@@ -119,7 +119,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 - file-size-policy.instructions.md updated with `EngineTestsExterns.h` entry
 
 **GH close commands:**
-```
+```text
 # No open issues — sprint was clean
 ```
 
@@ -128,7 +128,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 ### v35.3.0 Build-Fix Session (2026-04-10) — Post-Sprint Collision Resolution
 
 | Item | Status | Commit |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | 13 type name collisions from Sprint 1311-1320 resolved | ✅ Fixed | `e2c9d7b1` |
 | 18 header/source files renamed + updated | ✅ | `e2c9d7b1` |
 | 3 test split files updated | ✅ | `e2c9d7b1` |
@@ -152,7 +152,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 ### v35.4.0 "Vega-U" — Sprint 1321-1330 — WebAssembly / Browser Extension Pipeline
 
 | Item | Status | Commit |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | `WasmDecoderShim.h/.cpp` | ✅ Delivered | `2cafb37e` |
 | `BrowserThumbnailBridge.h/.cpp` | ✅ Delivered | `2cafb37e` |
 | `OffscreenCanvasRenderer.h/.cpp` | ✅ Delivered | `2cafb37e` |
@@ -166,7 +166,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 | social-preview.svg tagline fixed (was v33.0.0 Spica) | ✅ | — |
 
 **GH close commands:**
-```
+```text
 # No open issues — sprint was a clean delivery
 ```
 
@@ -175,7 +175,7 @@ gh issue close <N> --comment "Fixed in commit <hash> (vX.Y.Z)"
 ## Known Open Items (as of v35.4.0)
 
 | Item | Kind | Priority | Notes |
-|------|------|----------|-------|
+| ------ | ------ | ---------- | ------- |
 | Next sprint: v35.5.0 "Vega-V" | Feature | High | Sprint 1331-1340: Cross-Device Preview Sync |
 | `EngineTestsExterns.h` monitor | Monitor | Low | ~233 KB; split when > 400 KB |
 | v35.4.0 GH Release artifacts | Verify | Medium | Confirm all .dll/.msi/.zip/.sbom attached once CI completes |
@@ -207,7 +207,7 @@ gh issue list --state open --label "sprint-1311-1320"
 ## Historical Sprint Summary (v34.x — Arcturus Series)
 
 | Version | Codename | Sprint | Commit | Theme |
-|---------|----------|--------|--------|-------|
+| --------- | ---------- | -------- | -------- | ------- |
 | v34.0.0 | Arcturus | — | `89634315` | Platform Abstraction Layer (PAL) |
 | v34.1.0 | Arcturus-R | 1221-1230 | `5dbac4b6` | Live Preview / Scrubber |
 | v34.2.0 | Arcturus-S | 1231-1240 | `1c65ad9b` | Multi-Tenant Cache |

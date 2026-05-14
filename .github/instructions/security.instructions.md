@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/*.h,**/*.cpp,**/*.ps1,**/*.yml,**/*.yaml"
 ---
 
@@ -257,7 +257,7 @@ signtool sign /f "$certPath" /p "$certPassword" /fd SHA256 `
 ### Response SLA
 
 | Severity | Response Time | Fix Time |
-|----------|---------------|----------|
+| ---------- | --------------- | ---------- |
 | Critical (RCE, privilege escalation) | 24 hours | 72 hours |
 | High (information disclosure, DoS) | 48 hours | 7 days |
 | Medium (minor info leak, crash) | 7 days | 30 days |

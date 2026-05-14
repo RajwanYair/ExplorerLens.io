@@ -1,4 +1,4 @@
-# ExplorerLens Architecture Diagrams
+﻿# ExplorerLens Architecture Diagrams
 
 Visual architecture documentation for the ExplorerLens project.
 
@@ -7,7 +7,7 @@ Visual architecture documentation for the ExplorerLens project.
 Dark-theme SVG diagrams in [`docs/assets/`](../assets/):
 
 | Diagram | Description |
-|---------|-------------|
+| --------- | ------------- |
 | [System Components](../assets/architecture-components.svg) | High-level component overview |
 | [Data Flow](../assets/architecture-dataflow.svg) | Thumbnail generation data flow |
 | [Build Pipeline](../assets/architecture-build.svg) | CMake + MSBuild + packaging pipeline |
@@ -25,7 +25,7 @@ Dark-theme SVG diagrams in [`docs/assets/`](../assets/):
 Interactive Mermaid diagrams (rendered natively on GitHub):
 
 | Diagram | Description |
-|---------|-------------|
+| --------- | ------------- |
 | [system-overview.md](system-overview.md) | High-level system components and data flow |
 | [decode-pipeline.md](decode-pipeline.md) | Thumbnail decode pipeline stages |
 | [plugin-architecture.md](plugin-architecture.md) | Plugin ecosystem and trust chain |
@@ -33,4 +33,5 @@ Interactive Mermaid diagrams (rendered natively on GitHub):
 ## Viewing
 
 - **SVGs:** Open directly in any browser, or view inline on GitHub
-- **Mermaid:** GitHub renders natively in `.md` files; or use the [VS Code Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) extension
+- **Mermaid:** GitHub renders natively in `.md` files; or use the [VS Code Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid)
+  extension

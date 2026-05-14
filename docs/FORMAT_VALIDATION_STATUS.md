@@ -1,4 +1,4 @@
-# FORMAT_VALIDATION_STATUS.md
+﻿# FORMAT_VALIDATION_STATUS.md
 
 > **Auto-generated** — update by running `tools/Validate-Corpus.ps1 -UpdateBadges`  
 > Last updated: v39.9.0 (2026-07-18)
@@ -6,7 +6,7 @@
 ## Summary
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | Total formats tracked | 42 |
 | Fully validated | 38 |
 | Partial (stub decoder) | 3 |
@@ -18,7 +18,7 @@
 ## Images
 
 | Format | Extension | Decoder | Status | P50 (ms) | Notes |
-|--------|-----------|---------|--------|----------|-------|
+| -------- | ----------- | --------- | -------- | ---------- | ------- |
 | JPEG | .jpg .jpeg | libjpeg-turbo | ✅ Pass | 2.1 | Hardware-accelerated via NVDEC on NVIDIA |
 | PNG | .png | libpng | ✅ Pass | 3.4 | |
 | WebP | .webp | libwebp | ✅ Pass | 1.8 | Lossless + lossy |
@@ -39,7 +39,7 @@
 ## RAW Camera Formats
 
 | Format | Extension | Decoder | Status | P50 (ms) |
-|--------|-----------|---------|--------|----------|
+| -------- | ----------- | --------- | -------- | ---------- |
 | Canon CR2/CR3 | .cr2 .cr3 | LibRaw + EmbeddedPreviewExtractor | ✅ Pass | 4.2 |
 | Nikon NEF | .nef | LibRaw + EmbeddedPreviewExtractor | ✅ Pass | 4.8 |
 | Sony ARW | .arw | LibRaw + EmbeddedPreviewExtractor | ✅ Pass | 4.5 |
@@ -52,7 +52,7 @@
 ## Archives
 
 | Format | Extension | Decoder | Status | P50 (ms) |
-|--------|-----------|---------|--------|----------|
+| -------- | ----------- | --------- | -------- | ---------- |
 | ZIP / CBZ | .zip .cbz | libarchive + ArchiveCoverExtractor | ✅ Pass | 8.0 |
 | RAR / CBR | .rar .cbr | UnRAR + ArchiveCoverExtractor | ✅ Pass | 9.2 |
 | 7-Zip | .7z .cb7 | LZMA SDK | ✅ Pass | 22.0 |
@@ -63,8 +63,8 @@
 
 ## Documents
 
-| Format | Extension | Decoder | Status | P50 (ms) |
-|--------|-----------|---------|--------|----------|
+| Format | Extension | Decoder | Status | P50 (ms) | Notes |
+| -------- | ----------- | --------- | -------- | ---------- | ------- |
 | PDF | .pdf | MuPDF | ✅ Pass | 35.0 | Page 1 |
 | EPUB | .epub | ZIP + HTML parser | ⚠️ Stub | — | Cover image extraction only |
 
@@ -72,8 +72,8 @@
 
 ## 3D / CAD
 
-| Format | Extension | Decoder | Status | P50 (ms) |
-|--------|-----------|---------|--------|----------|
+| Format | Extension | Decoder | Status | P50 (ms) | Notes |
+| -------- | ----------- | --------- | -------- | ---------- | ------- |
 | glTF 2.0 | .gltf .glb | built-in | ✅ Pass | 28.0 | |
 | STL | .stl | CAD decoder | ✅ Pass | 18.0 | ASCII + binary |
 | OBJ | .obj | CAD decoder | ⚠️ Stub | — | |
@@ -83,14 +83,14 @@
 ## Validation Procedure
 
 1. Generate corpus: `tools\Generate-Corpus.ps1`
-2. Build engine: `.\build-scripts\Build-MSVC.ps1 -Test`
-3. Run full validation: `tools\Validate-Corpus.ps1 -Verbose`
-4. Expected: all `✅ Pass` entries decode within 2× their P50 baseline
+1. Build engine: `.\build-scripts\Build-MSVC.ps1 -Test`
+1. Run full validation: `tools\Validate-Corpus.ps1 -Verbose`
+1. Expected: all `✅ Pass` entries decode within 2× their P50 baseline
 
 ## Known Issues
 
 | Format | Issue | Tracking |
-|--------|-------|---------|
+| -------- | ------- | --------- |
 | EXR | HDR EXR decode not yet connected to thumbnail pipeline | #234 |
 | EPUB | Only cover extraction; no full content render | #198 |
 | OBJ | Large mesh triangulation causes > 100 ms for complex files | #256 |

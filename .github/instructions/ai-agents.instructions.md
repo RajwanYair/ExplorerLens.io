@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: ".github/agents/**"
 ---
 
@@ -13,7 +13,7 @@ to workspace tools, MCP servers, and instruction files.
 ## Current Agent Inventory
 
 | Agent | File | Domain |
-|-------|------|--------|
+| ------- | ------ | -------- |
 | ExplorerLens | `explorerlens.agent.md` | Engine development, sprints, build, version bumps |
 | Docs | `docs.agent.md` | Documentation accuracy, link validation, content tiers |
 | Release | `release.agent.md` | Version bumps, artifact validation, post-release checks |
@@ -84,7 +84,7 @@ description: Short description for VS Code agent picker (max 120 chars).
 ## Naming Conventions
 
 | Element | Convention | Example |
-|---------|-----------|---------|
+| --------- | ----------- | --------- |
 | File name | `kebab-case.agent.md` | `ci-ops.agent.md` |
 | Agent display name | PascalCase | `CI-Ops`, `TestCorpus` |
 | Description | Imperative, < 120 chars | `Manages CI/CD workflows and debugs action failures` |

@@ -1,4 +1,4 @@
-# Tool Versions & Upgrade Matrix
+﻿# Tool Versions & Upgrade Matrix
 
 **Last Updated:** 14 May 2026 (v39.9.0 Betelgeuse release)
 **Version:** 39.9.0 "Betelgeuse"
@@ -8,7 +8,7 @@
 ## Build Toolchain
 
 | Tool | Current | Latest Stable | Status | Upgrade Path |
-|------|---------|---------------|--------|--------------|
+| ------ | --------- | --------------- | -------- | -------------- |
 | **MSVC (cl.exe)** | 19.50.35720 (v145) | 19.50.35720 | ✅ Current | VS 18 2026 BuildTools |
 | **MSBuild** | 18.3 | 18.3 | ✅ Current | Bundled with VS 18 |
 | **CMake** | 4.3.1 | 4.3.1 | ✅ Current | `scoop update cmake` |
@@ -19,7 +19,7 @@
 ## Developer Tools
 
 | Tool | Current | Latest Stable | Status | Install |
-|------|---------|---------------|--------|---------|
+| ------ | --------- | --------------- | -------- | --------- |
 | **Git** | 2.53.0.2 | 2.53.0.2 | ✅ Current | `scoop update git` |
 | **LLVM / Clang** | 22.1.1 | 22.1.1 | ✅ Current | `scoop update llvm` |
 | **MinGW** | 15.2.0-rt_v13-rev1 | 15.2.0-rt_v13-rev1 | ✅ Current | `scoop update mingw` |
@@ -39,7 +39,7 @@
 ## AI Tooling & Automation Surface
 
 | Surface | Current Standard | Status | Notes |
-|--------|------------------|--------|-------|
+| -------- | ------------------ | -------- | ------- |
 | GitHub Actions JS runtime | Node 24 opt-in (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`) | ✅ Current | Avoids Node 20 deprecation noise in workflows |
 | Copilot repository instructions | `.github/copilot-instructions.md` + `.github/instructions/*.instructions.md` | ✅ Current | Canonical rules plus scoped instruction files |
 | Custom agent definitions | `.github/agents/*.agent.md` | ✅ Current | ExplorerLens repo-specific delegated agent |
@@ -53,7 +53,7 @@
 ### Compression Libraries
 
 | Library | Current | Latest Stable | Status | Notes |
-|---------|---------|---------------|--------|-------|
+| --------- | --------- | --------------- | -------- | ------- |
 | **zlib** | 1.3.1 | 1.3.1 | ✅ Current | Stable, no recent releases |
 | **LZ4** | 1.10.0 | 1.10.0 | ✅ Current | |
 | **zstd** | 1.5.7 | 1.5.7 | ✅ Current | Facebook/Meta maintained |
@@ -66,7 +66,7 @@
 ### Image Libraries
 
 | Library | Current | Latest Stable | Status | Notes |
-|---------|---------|---------------|--------|-------|
+| --------- | --------- | --------------- | -------- | ------- |
 | **libwebp** | 1.5.0 | 1.5.0 | ✅ Current | Google maintained |
 | **libavif** | 1.3.0 | 1.3.0 | ✅ Current | AOM/Google maintained |
 | **dav1d** | 1.5.1 | 1.5.1 | ✅ Current | VideoLAN AV1 decoder |
@@ -78,7 +78,7 @@
 ### Document/PDF Libraries
 
 | Library | Current | Latest Stable | Status | Notes |
-|---------|---------|---------------|--------|-------|
+| --------- | --------- | --------------- | -------- | ------- |
 | **MuPDF** | 1.24.11 | 1.24.11 | ✅ Current | Verified ABI compatible |
 | **FreeType** | bundled | 2.13.3 | ✅ Current | Via MuPDF |
 | **OpenJPEG** | bundled | 2.5.3 | ✅ Current | Via MuPDF |
@@ -86,7 +86,7 @@
 ## CRT Linkage Policy
 
 | Target | CRT Mode | Notes |
-|--------|----------|-------|
+| -------- | ---------- | ------- |
 | **ExplorerLensEngine** | `/MD` (MultiThreadedDLL) | Standard |
 | **LENSShell.dll** | `/MD` (MultiThreadedDLL) | COM DLL |
 | **LENSManager.exe** | `/MD` (MultiThreadedDLL) | GUI app |

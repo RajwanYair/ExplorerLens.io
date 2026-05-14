@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**"
 ---
 
@@ -7,7 +7,7 @@ applyTo: "**"
 ## Thresholds
 
 | Threshold | Action |
-|-----------|--------|
+| ----------- | -------- |
 | > 500 KB | **Must split** — impacts git diff, blame, and merge performance |
 | 200–500 KB | **Monitor** — consider splitting on next major change |
 | < 200 KB | OK |
@@ -17,7 +17,7 @@ applyTo: "**"
 These are known large files that cannot be easily split:
 
 | File | Size | Reason |
-|------|------|--------|
+| ------ | ------ | -------- |
 | `LENSShell/Resources/zip.ico` | 264 KB | Binary icon resource |
 | `LENSManager/RegManager.h` | 103 KB | Registry format table — monolithic by design |
 | `LENSShell/LENSArchive.h` | 103 KB | Format dispatch table — monolithic by design |
@@ -30,7 +30,7 @@ These are known large files that cannot be easily split:
 
 Test files are split to keep each under ~400 KB:
 
-```
+```text
 Engine/Tests/
 ├── EngineTestsIncludes.h      — Shared #include block (all Engine headers)
 ├── EngineTestsMacros.h        — TEST/ASSERT/RUN_TEST macros + MockDecoder

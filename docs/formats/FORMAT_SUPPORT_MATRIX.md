@@ -1,9 +1,9 @@
-# Format Support Matrix — ExplorerLens v39.9.0
+﻿# Format Support Matrix — ExplorerLens v39.9.0
 
-**Last Updated:** May 2026 
-**Engine Version:** 39.9.0 "Betelgeuse" 
-**Total Formats:** 200+ file extensions across 25 decoders 
-**Shell Registrations:** 93 extensions in LENSShell.rgs 
+**Last Updated:** May 2026
+**Engine Version:** 39.9.0 "Betelgeuse"
+**Total Formats:** 200+ file extensions across 25 decoders
+**Shell Registrations:** 93 extensions in LENSShell.rgs
 **Decoder Compliance:** 25/25 (100%)
 
 ---
@@ -11,7 +11,7 @@
 ## Coverage Summary
 
 | Category | Extensions | Decoders | Shell Registered | Status |
-|----------|-----------|----------|-----------------|--------|
+| ---------- | ----------- | ---------- | ----------------- | -------- |
 | **Standard Images** | 10 | ImageDecoder | No (Windows native) | ✅ Complete |
 | **Modern Images** | 14 | WebP/AVIF/HEIF/JXL | 7 | ✅ Complete |
 | **Professional Images** | 12 | PSD/DDS/HDR/EXR/TGA/ICO/QOI | 12 | ✅ Complete |
@@ -34,7 +34,7 @@
 ### 1.1 Standard Images — ImageDecoder (WIC-based)
 
 | Extension | Format Name | LENSTYPE | Performance | Status |
-|-----------|------------|---------|-------------|--------|
+| ----------- | ------------ | --------- | ------------- | -------- |
 | .jpg, .jpeg, .jpe, .jfif | JPEG | WIC | <5ms | ✅ |
 | .png | PNG | WIC | <10ms | ✅ |
 | .bmp, .dib | Windows Bitmap | LENSTYPE_BMP (76) | <5ms | ✅ |
@@ -44,7 +44,7 @@
 ### 1.2 Modern Image Formats
 
 | Extension | Format Name | LENSTYPE | Decoder | Library | Performance | Status |
-|-----------|------------|---------|---------|---------|-------------|--------|
+| ----------- | ------------ | --------- | --------- | --------- | ------------- | -------- |
 | .webp | WebP | LENSTYPE_WEBP (40) | WebPDecoder | libwebp 1.5.0 | <20ms lossy, <30ms lossless | ✅ |
 | .avif, .avifs | AV1 Image | LENSTYPE_AVIF (41) | AVIFDecoder | libavif 1.3.0 + dav1d 1.5.1 | <25ms HW, <80ms SW | ✅ |
 | .heic | HEIC (Apple) | LENSTYPE_HEIC (42) | HEIFDecoder | libheif 1.19.5 + libde265 1.0.15 | <10ms embedded, <50ms full | ✅ |
@@ -56,7 +56,7 @@
 ### 1.3 Professional Image Formats
 
 | Extension | Format Name | LENSTYPE | Decoder | Status |
-|-----------|------------|---------|---------|--------|
+| ----------- | ------------ | --------- | --------- | -------- |
 | .psd, .psb | Adobe Photoshop | LENSTYPE_PSD (48) | PSDDecoder | ✅ |
 | .dds | DirectX Surface | LENSTYPE_DDS (49) | DDSDecoder | ✅ |
 | .hdr | Radiance RGBE | LENSTYPE_HDR (55) | HDRDecoder | ✅ |
@@ -68,14 +68,14 @@
 ### 1.4 Vector Graphics — SVGDecoder
 
 | Extension | Format Name | LENSTYPE | Status |
-|-----------|------------|---------|--------|
+| ----------- | ------------ | --------- | -------- |
 | .svg | SVG | LENSTYPE_SVG (46) | ✅ |
 | .svgz | Compressed SVG | LENSTYPE_SVG (46) | ✅ |
 
 ### 1.5 Netpbm Formats — PPMDecoder
 
 | Extension | Format Name | LENSTYPE | Status |
-|-----------|------------|---------|--------|
+| ----------- | ------------ | --------- | -------- |
 | .ppm | Portable Pixmap | LENSTYPE_PPM (57) | ✅ |
 | .pgm | Portable Graymap | LENSTYPE_PPM (57) | ✅ |
 | .pbm | Portable Bitmap | LENSTYPE_PPM (57) | ✅ |
@@ -88,7 +88,7 @@
 ## 2. Camera RAW Formats — RAWDecoder (LibRaw 0.21.3)
 
 | Extension | Camera Brand | LENSTYPE | Status |
-|-----------|-------------|---------|--------|
+| ----------- | ------------- | --------- | -------- |
 | .cr2 | Canon (older) | LENSTYPE_RAW (47) | ✅ |
 | .cr3 | Canon (newer) | LENSTYPE_RAW (47) | ✅ |
 | .crw | Canon (legacy) | LENSTYPE_RAW (47) | ✅ |
@@ -122,7 +122,7 @@
 ## 3. Archive & Compression Formats — ArchiveDecoder
 
 | Extension | Format Name | LENSTYPE | Library | Status |
-|-----------|------------|---------|---------|--------|
+| ----------- | ------------ | --------- | --------- | -------- |
 | .zip | ZIP Archive | LENSTYPE_ZIP (1) | minizip-ng 4.0.10 | ✅ |
 | .cbz | Comic Book ZIP | LENSTYPE_CBZ (2) | minizip-ng | ✅ |
 | .rar | RAR Archive | — | UnRAR 7.2.2 | ✅ |
@@ -150,7 +150,7 @@
 Backend: Windows Media Foundation (primary), DirectShow fallback, DXVA2 hardware acceleration.
 
 | Extension | Format | Status |
-|-----------|--------|--------|
+| ----------- | -------- | -------- |
 | .mp4 | MPEG-4 | ✅ |
 | .mkv | Matroska | ✅ |
 | .avi | AVI | ✅ |
@@ -169,14 +169,15 @@ Backend: Windows Media Foundation (primary), DirectShow fallback, DXVA2 hardware
 | .xvid | XviD | ✅ |
 | .rm, .rmvb | RealMedia | ✅ |
 
-**Note:** Video extensions are NOT registered in LENSShell.rgs to avoid conflicts with Windows native video thumbnail handlers.
+**Note:** Video extensions are NOT registered in LENSShell.rgs to avoid conflicts with Windows native video thumbnail
+handlers.
 
 ---
 
 ## 5. Audio Formats — AudioDecoder (Media Foundation)
 
 | Extension | Format | Status |
-|-----------|--------|--------|
+| ----------- | -------- | -------- |
 | .mp3 | MPEG Audio Layer 3 | ✅ |
 | .flac | Free Lossless Audio | ✅ |
 | .m4a | AAC Audio | ✅ |
@@ -202,13 +203,13 @@ Extracts embedded album art or generates waveform visualization.
 ### PDF
 
 | Extension | Format | LENSTYPE | Status |
-|-----------|--------|---------|--------|
+| ----------- | -------- | --------- | -------- |
 | .pdf | PDF | LENSTYPE_PDF (19) | ✅ (MuPDF) |
 
 ### Office Documents
 
 | Extension | Format | LENSTYPE | Status |
-|-----------|--------|---------|--------|
+| ----------- | -------- | --------- | -------- |
 | .docx | Word 2007+ | LENSTYPE_DOCX (60) | ✅ |
 | .doc | Word Legacy | LENSTYPE_DOC (63) | ✅ |
 | .pptx | PowerPoint 2007+ | LENSTYPE_PPTX (61) | ✅ |
@@ -220,7 +221,7 @@ Extracts embedded album art or generates waveform visualization.
 ### OpenDocument Formats
 
 | Extension | Format | LENSTYPE | Status |
-|-----------|--------|---------|--------|
+| ----------- | -------- | --------- | -------- |
 | .odt | OpenDocument Text | LENSTYPE_ODT (24) | ✅ |
 | .odp | OpenDocument Presentation | LENSTYPE_ODP (25) | ✅ |
 | .ods | OpenDocument Spreadsheet | — | ✅ |
@@ -229,7 +230,7 @@ Extracts embedded album art or generates waveform visualization.
 ### eBook Formats
 
 | Extension | Format | LENSTYPE | Status |
-|-----------|--------|---------|--------|
+| ----------- | -------- | --------- | -------- |
 | .epub | EPUB | LENSTYPE_EPUB (5) | ✅ |
 | .mobi | Mobipocket | LENSTYPE_MOBI (10) | ✅ |
 | .azw | Kindle | LENSTYPE_AZW (12) | ✅ |
@@ -243,7 +244,7 @@ Extracts embedded album art or generates waveform visualization.
 ## 7. Font Formats — FontDecoder
 
 | Extension | Format | LENSTYPE | Status |
-|-----------|--------|---------|--------|
+| ----------- | -------- | --------- | -------- |
 | .ttf | TrueType Font | LENSTYPE_FONT (70) | ✅ |
 | .otf | OpenType Font | LENSTYPE_FONT (70) | ✅ |
 | .woff | Web Open Font Format | LENSTYPE_FONT (70) | ✅ |
@@ -255,7 +256,7 @@ Extracts embedded album art or generates waveform visualization.
 ## 8. 3D Model Formats — ModelDecoder
 
 | Extension | Format | LENSTYPE | Status |
-|-----------|--------|---------|--------|
+| ----------- | -------- | --------- | -------- |
 | .obj | Wavefront OBJ | LENSTYPE_MODEL (80) | ✅ |
 | .stl | Stereolithography | LENSTYPE_MODEL (80) | ✅ |
 | .gltf | GL Transmission Format | LENSTYPE_MODEL (80) | ✅ |
@@ -274,7 +275,7 @@ Rendered via DirectX 11 viewport with wireframe fallback.
 All 25 decoders implement the `IThumbnailDecoder` interface. Each must provide:
 
 - `CanDecode()` — Format detection
-- `Decode()` — Decoding logic 
+- `Decode()` — Decoding logic
 - `GetInfo()` — Capability reporting
 - `GetName()` — Decoder identification
 - `GetSupportedExtensions()` / `GetExtensionCount()` — Extension enumeration
@@ -284,7 +285,7 @@ All 25 decoders implement the `IThumbnailDecoder` interface. Each must provide:
 ### Compliance Matrix
 
 | # | Decoder | Extensions | GPU | Archive | Status |
-|---|---------|-----------|-----|---------|--------|
+| --- | --------- | ----------- | ----- | --------- | -------- |
 | 1 | ImageDecoder (WIC) | 10 | ✅ | — | ✅ |
 | 2 | WebPDecoder | 1 | ✅ | — | ✅ |
 | 3 | AVIFDecoder | 2 | ✅ | — | ✅ |
@@ -320,7 +321,7 @@ All 25 decoders implement the `IThumbnailDecoder` interface. Each must provide:
 The Shell extension DLL includes dedicated decoders that do NOT use the `IThumbnailDecoder` interface:
 
 | Decoder | Extensions | Library | Notes |
-|---------|-----------|---------|-------|
+| --------- | ----------- | --------- | ------- |
 | AVIFDecoder | .avif | WIC | Separate from Engine AVIFDecoder |
 | WebPDecoder | .webp | libwebp | Separate from Engine WebPDecoder |
 | JXLDecoder | .jxl | libjxl | Requires libjxl always (no #ifdef) |
@@ -338,7 +339,7 @@ The Shell extension DLL includes dedicated decoders that do NOT use the `IThumbn
 ## 11. LENSTYPE Enum Reference
 
 | Value | Constant | Category |
-|-------|----------|----------|
+| ------- | ---------- | ---------- |
 | 0 | LENSTYPE_NONE | None |
 | 1 | LENSTYPE_ZIP | Archive |
 | 2 | LENSTYPE_CBZ | Archive |
@@ -405,9 +406,11 @@ The Shell extension DLL includes dedicated decoders that do NOT use the `IThumbn
 
 ## 12. Shell Registration
 
-**Registered (93 extensions):** All extensions that trigger ExplorerLens thumbnail generation in Windows Explorer via `regsvr32`.
+**Registered (93 extensions):** All extensions that trigger ExplorerLens thumbnail generation in Windows Explorer via
+`regsvr32`.
 
 **Not registered (by design):**
+
 - Standard images (.jpg, .png, .bmp, .gif, .tiff) — Windows has native handlers
 - Video formats — Potential conflict with Windows Media handlers
 - Audio formats — Potential conflict with media player handlers
@@ -434,7 +437,7 @@ option(ENABLE_AUDIO_DECODER "Enable Audio thumbnail support" ON)
 ### Decode Time Ranges (256×256 thumbnail)
 
 | Tier | Time | Formats |
-|------|------|---------|
+| ------ | ------ | --------- |
 | Ultra Fast | <10ms | JPEG, BMP, PNG (cached), HEIF (embedded thumbnail) |
 | Fast | 10–30ms | PNG, GIF, WebP (lossy), AVIF (HW), Fonts |
 | Good | 30–80ms | WebP (lossless), JXL, Video (HW), Audio, Text |
@@ -442,11 +445,12 @@ option(ENABLE_AUDIO_DECODER "Enable Audio thumbnail support" ON)
 
 ### Performance Targets
 
-- Single thumbnail: 17ms 
-- Batch throughput: 235 img/sec 
+- Single thumbnail: 17ms
+- Batch throughput: 235 img/sec
 - Cache hit: <5ms
 
 ---
 
-*This document consolidates FORMAT_SUPPORT_MATRIX_V8.md, DECODER_STATUS.md, DECODER_AUDIT_REPORT.md, and CAPABILITY_AUDIT.md.* 
-*Synchronized with LENSArchive.h LENSTYPE enum and LENSShell.rgs.*
+_This document consolidates FORMAT_SUPPORT_MATRIX_V8.md, DECODER_STATUS.md, DECODER_AUDIT_REPORT.md, and
+CAPABILITY_AUDIT.md._
+_Synchronized with LENSArchive.h LENSTYPE enum and LENSShell.rgs._

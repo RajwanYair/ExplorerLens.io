@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Generate comprehensive tests for the selected code following workspace testing standards"
 ---
@@ -30,7 +30,7 @@ ExplorerLens uses `TEST(name)`, `ASSERT(cond)`, and `RUN_TEST(name)` macros — 
 ### File Placement Rules
 
 | What | Where |
-|------|-------|
+| ------ | ------- |
 | `#include` directive | `Engine/Tests/EngineTestsIncludes.h` |
 | `extern void TestXxx_Runner();` | `Engine/Tests/EngineTestsExterns.h` |
 | `RUN_TEST(TestXxx);` call | `Engine/Tests/EngineTests.cpp` (before `// Isolation & Stability Tests`) |

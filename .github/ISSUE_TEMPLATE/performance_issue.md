@@ -1,4 +1,4 @@
----
+﻿---
 name: Performance Issue
 about: Report a performance problem (slow execution, high memory, etc.)
 title: "[Perf] "
@@ -26,7 +26,7 @@ Which component is slow? (e.g., `LENSShell.dll / HEIC decode`, `LENSManager / st
 <details>
 <summary>Profile output (optional)</summary>
 
-```
+```text
 Paste ETW trace / EngineTests benchmark / lens benchmark output here
 ```
 

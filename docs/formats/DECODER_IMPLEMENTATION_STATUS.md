@@ -1,4 +1,4 @@
-# Decoder Implementation Status
+﻿# Decoder Implementation Status
 
 **Last Verified:** v39.9.0 "Betelgeuse"
 **Auto-audit:** Run `.\build-scripts\Audit-Headers.ps1` for header-level inventory
@@ -6,7 +6,7 @@
 ## Top 20 Priority Formats — All Implemented
 
 | # | Format | Decoder File | Library | Status | Notes |
-|---|--------|-------------|---------|--------|-------|
+| --- | -------- | ------------- | --------- | -------- | ------- |
 | 1 | JPEG | ImageDecoder.cpp | WIC | **REAL** | EXIF rotation, progressive, CMYK |
 | 2 | PNG | ImageDecoder.cpp | WIC | **REAL** | 8/16-bit, alpha, interlaced |
 | 3 | WebP | WebPDecoder.cpp | libwebp 1.5+ | **REAL** | Lossy, lossless, alpha, animated |
@@ -31,7 +31,7 @@
 ## Additional Implemented Decoders
 
 | Format | Decoder File | Library | Status |
-|--------|-------------|---------|--------|
+| -------- | ------------- | --------- | -------- |
 | DDS | DDSDecoder.cpp | DirectXTex | **REAL** |
 | DICOM | DICOMDecoder.cpp | Custom + GDCM | **REAL** |
 | FITS | FITSDecoder.cpp | Custom parser | **REAL** |

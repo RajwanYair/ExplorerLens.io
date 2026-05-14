@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/CMakeLists.txt,**/build-scripts/**"
 ---
 
@@ -61,7 +61,7 @@ set(ENGINE_SOURCES
 ## External Libraries
 
 All external libraries live in `external/`:
-```
+```text
 external/
   compression-libs/  — zlib, lz4, zstd, minizip-ng, lzma, unrar, bzip2, libarchive, xz
   image-libs/        — libwebp, libjxl, libavif, libheif, libde265, dav1d
@@ -83,7 +83,7 @@ $rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 ## Preset Reference
 
 | Preset | Generator | Use Case |
-|--------|-----------|----------|
+| -------- | ----------- | ---------- |
 | `default-release` | Ninja | Normal development |
 | `default-debug` | Ninja | Debugging |
 | `vcpkg-release` | Ninja | vcpkg dependency test |
@@ -150,7 +150,7 @@ cmake --preset default-release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_C
 ### Cache Locations
 
 | Storage | Config | Use Case |
-|---------|--------|----------|
+| --------- | -------- | ---------- |
 | Local disk | `SCCACHE_DIR` (default `~/.cache/sccache`) | Developer machine |
 | GitHub Actions cache | `SCCACHE_GHA_ENABLED=true` | CI pipeline |
 | S3/Azure Blob | `SCCACHE_BUCKET`, `SCCACHE_AZURE_*` | Shared team cache |

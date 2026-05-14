@@ -1,4 +1,4 @@
-# ExplorerLens — Build and Release Skill
+﻿# ExplorerLens — Build and Release Skill
 
 ## Purpose
 
@@ -63,7 +63,7 @@ tag and skips. If `SBOMGenerator.h` is locked, re-run with identical parameters.
 ## Step-by-Step: Diagnose Build Failures
 
 | Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
+| --------- | ------------- | ----- |
 | `cl.exe not found` | vcvars not sourced | Use `Build-MSVC.ps1`, never raw cmake |
 | `LNK2038: mismatch detected for RuntimeLibrary` | `/MT` vs `/MD` conflict | Rebuild offending external lib with `/MD` |
 | `PCH: fatal error C1853` | PCH corruption | `Remove-Item build -Recurse -Force` |
@@ -89,7 +89,7 @@ tag and skips. If `SBOMGenerator.h` is locked, re-run with identical parameters.
 ## Canonical File Paths
 
 | Purpose | Path |
-|---------|------|
+| --------- | ------ |
 | Main build script | `build-scripts/Build-MSVC.ps1` |
 | Full package build | `build-scripts/Build-All-And-Package.ps1` |
 | Version bump | `build-scripts/Bump-Version.ps1` |
@@ -137,7 +137,7 @@ All 18 libraries must be built with `/MD` (DLL CRT) before the Engine build.
 Build scripts in `build-scripts/external-libs/` handle each one.
 
 | Library | Build Script | Build System | Typical Build Time |
-|---------|-------------|--------------|-------------------|
+| --------- | ------------- | -------------- | ------------------- |
 | zlib 1.3.1 | `Build-Zlib.ps1` | CMake | < 30s |
 | zstd 1.5.7 | `Build-Zstd.ps1` | CMake | < 60s |
 | LZ4 1.10.0 | `Build-LZ4.ps1` | CMake | < 30s |
@@ -165,7 +165,7 @@ Build scripts in `build-scripts/external-libs/` handle each one.
 **Common external lib build failures:**
 
 | Symptom | Fix |
-|---------|-----|
+| --------- | ----- |
 | `/MT` vs `/MD` link error | Rebuild lib with `-Clean` flag — scripts use `/MD` |
 | Missing NASM for dav1d | `scoop install nasm` |
 | Missing Meson for dav1d | `scoop install meson` |

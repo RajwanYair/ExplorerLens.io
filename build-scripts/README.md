@@ -1,6 +1,6 @@
-# Build Scripts - ExplorerLens v23.6.0
+﻿# Build Scripts - ExplorerLens v23.6.0
 
-**Unified Build System for Windows 11** 
+**Unified Build System for Windows 11**
 Comprehensive build infrastructure for external dependencies, engine, and installer packaging.
 
 > **⚡ NEW in v23.6.0:** Unified build modules, 50% code reduction, vcpkg integration
@@ -9,7 +9,7 @@ Comprehensive build infrastructure for external dependencies, engine, and instal
 
 ## 📁 Directory Structure
 
-```
+```text
 build-scripts/
 ├── core/ # 🆕 Core build modules
 │ ├── Build-Library-Core.ps1 # Unified build functions (CMake, MSBuild, NMake)
@@ -39,6 +39,7 @@ build-scripts/
 ## 🚀 Quick Start
 
 ### ⭐ Recommended: Complete Build
+
 ```powershell
 # Build everything: dependencies, engine, solution, and MSI installer
 .\build-scripts\Build-All-And-Package.ps1
@@ -54,6 +55,7 @@ build-scripts/
 ```
 
 ### Legacy: Individual Components
+
 ```powershell
 # Build external dependencies (refactored)
 .\build-scripts\external-libs\Build-LibWebP-NMake.ps1
@@ -73,6 +75,7 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m
 ```
 
 ### Verify Build Environment
+
 ```powershell
 .\build-scripts\validation\check-tools.ps1
 ```
@@ -88,6 +91,7 @@ The unified build module provides consistent functions for all build systems.
 #### Key Functions
 
 ##### `Invoke-CMakeBuild`
+
 Build CMake-based libraries with automatic configuration and verification.
 
 ```powershell
@@ -109,12 +113,15 @@ Invoke-CMakeBuild `
 ```
 
 ##### `Invoke-MSBuildLibrary` | `Invoke-NMakeBuild`
+
 Build MSBuild projects or NMake projects with automatic tool discovery.
 
 ##### `Find-MSBuildPath`, `Find-CMakePath`, `Test-VisualStudioTools`
+
 Automatically locate and verify build tools.
 
 ##### `Write-BuildLog`
+
 Unified colored logging across all scripts.
 
 ```powershell
@@ -219,11 +226,13 @@ Build verification and testing:
 ## Build Configurations
 
 ### Debug
+
 - Full debug symbols, no optimizations
 - Runtime Library: `/MDd` (Multi-threaded Debug DLL)
 - Used for development and debugging
 
 ### Release
+
 - Optimizations: `/O2` (Maximize Speed)
 - Runtime Library: `/MD` (Multi-threaded DLL)
 - Whole Program Optimization: `/GL`
@@ -250,12 +259,14 @@ The build system respects these environment variables:
 ### Common Issues
 
 **"MSBuild not found"**
+
 ```powershell
 # MSBuild is auto-discovered via Find-MSBuildPath in Build-Library-Core.ps1
 # Install Visual Studio 18 2026 Build Tools if missing
 ```
 
 **"NASM not found"**
+
 ```powershell
 # Download from https://www.nasm.us/
 # Add to PATH or install via chocolatey:
@@ -263,6 +274,7 @@ choco install nasm
 ```
 
 **"Library build failed"**
+
 ```powershell
 # Check prerequisites
 .\Test-Build-Environment.ps1
@@ -272,6 +284,7 @@ Get-Content build-logs\*.log | Select-Object -Last 50
 ```
 
 **"Link errors with external libraries"**
+
 ```powershell
 # Rebuild external libraries with correct runtime
 .\production\Rebuild-External-Libs-Correct-Runtime.ps1
@@ -290,10 +303,10 @@ GitHub Actions workflows use these scripts:
 When adding new build scripts:
 
 1. Place in appropriate subdirectory
-2. Follow PowerShell naming conventions: `Verb-Noun.ps1`
-3. Include script documentation (`.SYNOPSIS`, `.DESCRIPTION`)
-4. Add error handling (`$ErrorActionPreference = "Stop"`)
-5. Update this README
+1. Follow PowerShell naming conventions: `Verb-Noun.ps1`
+1. Include script documentation (`.SYNOPSIS`, `.DESCRIPTION`)
+1. Add error handling (`$ErrorActionPreference = "Stop"`)
+1. Update this README
 
 ## See Also
 
@@ -304,12 +317,13 @@ When adding new build scripts:
 ## Support
 
 For build issues:
+
 1. Check [Build Guide](../docs/build/BUILD_GUIDE.md)
-2. Run diagnostics: `.\Test-Build-Environment.ps1`
-3. Review logs in `build-logs/`
-4. Open issue on GitHub with build log
+1. Run diagnostics: `.\Test-Build-Environment.ps1`
+1. Review logs in `build-logs/`
+1. Open issue on GitHub with build log
 
 ---
 
-**Last Updated:** February 16, 2026 
+**Last Updated:** February 16, 2026
 **Maintainer:** ExplorerLens Development Team

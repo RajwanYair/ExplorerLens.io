@@ -1,4 +1,4 @@
-# ADR-012: Engine Directory Consolidation — 16 Subdirectories to 7
+﻿# ADR-012: Engine Directory Consolidation — 16 Subdirectories to 7
 
 **Status:** Accepted
 **Version:** v38.4.0 (scheduled for Phase 1 exit)
@@ -11,7 +11,7 @@ As of v38.4.0 the `Engine/` directory contains **16 subdirectories**, many of wh
 stub folders created speculatively for features not yet implemented:
 
 | Subdirectory | Files | Status | Disposition |
-|-------------|-------|--------|-------------|
+| ------------- | ------- | -------- | ------------- |
 | `Core/` | ~50 | Active — decode pipeline, registry, observability | **Keep** |
 | `Decoders/` | ~45 | Active — 25+ format decoders | **Keep** |
 | `GPU/` | ~8 | Active — vendor routing, D3D11 stubs | **Keep** |
@@ -37,7 +37,7 @@ counterpart.
 
 Consolidate the 16 subdirectories into **7 target directories** over the course of Phase 1:
 
-```
+```text
 Engine/
 ├── Core/        ← pipeline + routing + observability + enterprise + plugin host + AI stubs
 ├── Decoders/    ← all format decoders + video frame extraction (absorbs Media/ + Codec/)
@@ -51,14 +51,14 @@ Engine/
 ### Migration process
 
 1. **No renaming of headers** in the first pass — move files physically, update `#include` paths
-2. **Update `ENGINE_HEADERS` and `ENGINE_SOURCES`** in `Engine/CMakeLists.txt` after each move
-3. **Zero-warnings build required** after each subdirectory fold before proceeding to the next
-4. **Test pass rate must remain 100%** throughout the migration
+1. **Update `ENGINE_HEADERS` and `ENGINE_SOURCES`** in `Engine/CMakeLists.txt` after each move
+1. **Zero-warnings build required** after each subdirectory fold before proceeding to the next
+1. **Test pass rate must remain 100%** throughout the migration
 
 ### Priority order
 
 | Step | Action | Risk |
-|------|--------|------|
+| ------ | -------- | ------ |
 | 1 | Delete `Engine/CLI/` (empty) | Low |
 | 2 | Fold `Engine/AI/` → `Engine/Core/AI/` | Low (stubs only) |
 | 3 | Fold `Engine/Enterprise/` → `Engine/Core/Enterprise/` | Low (stubs only) |
@@ -71,6 +71,7 @@ Engine/
 ### Implement-before-declare rule (for ratio reduction)
 
 Alongside the directory consolidation, every header moved from a stub directory must either:
+
 - Gain a corresponding `.cpp` implementation (preferred), OR
 - Be deleted if it declares only empty/TBD stubs, OR
 - Be merged into an existing active header
@@ -88,12 +89,14 @@ Tracking metric: checked against `Engine/CMakeLists.txt` ENGINE_SOURCES count af
 ## Consequences
 
 ### Positive
+
 - Clearer ownership per directory — each of 7 has an active deliverable
 - `Engine/CMakeLists.txt` list shrinks as stubs are either implemented or deleted
 - Phase 1 exit criterion becomes achievable
 - New contributors see a legible directory structure
 
 ### Negative
+
 - Large git diff during migration — must use `git mv` to preserve history
 - All in-repo `#include` paths change → automated `sed`/`grep` pass required
 - Downstream users of the SDK include paths change (no external SDK consumers yet in Phase 1)
@@ -101,7 +104,7 @@ Tracking metric: checked against `Engine/CMakeLists.txt` ENGINE_SOURCES count af
 ## Alternatives Considered
 
 | Alternative | Why rejected |
-|-------------|-------------|
+| ------------- | ------------- |
 | Keep 16 directories | Perpetuates ratio problem; blocks Phase 1 exit |
 | Consolidate to 4 directories | Loses GPU/Platform separation; makes future macOS harder |
 | Delete all stubs immediately | Risk breaking builds that include stubs transitively |

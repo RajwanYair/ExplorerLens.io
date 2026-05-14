@@ -1,7 +1,7 @@
-# Third-Party Libraries - Build & Integration Guide
+﻿# Third-Party Libraries - Build & Integration Guide
 
-**Last Updated:** July 2025 
-**Version:** 15.0.0 
+**Last Updated:** July 2025
+**Version:** 15.0.0
 **Policy:** All libraries must be x64 and use `/MD` (dynamic CRT — `MultiThreadedDLL`) for Release builds
 
 ---
@@ -9,7 +9,7 @@
 ## Library Status
 
 | Library | Version | Status | Built | Linked |
-|---------|---------|--------|-------|--------|
+| --------- | --------- | -------- | ------- | -------- |
 | **zlib** | 1.3.1 | ✅ Complete | Yes | Yes |
 | **lz4** | 1.10.0 | ✅ Complete | Yes | Yes |
 | **zstd** | 1.5.7 | ✅ Complete | Yes | Yes |
@@ -31,9 +31,10 @@
 ## Download & Extract
 
 ### Centralized Downloads
+
 All third-party archives go to `/downloads/` only:
 
-```
+```text
 /downloads/
  compression/
  zlib-1.3.1.tar.gz
@@ -50,6 +51,7 @@ All third-party archives go to `/downloads/` only:
 ```
 
 ### Extraction Script
+
 ```powershell
 # Extract all archives to /external/
 $archives = Get-ChildItem downloads -Recurse -Filter "*.tar.gz"
@@ -64,6 +66,7 @@ foreach ($archive in $archives) {
 ## Build Instructions
 
 ### zlib 1.3.1
+
 ```powershell
 cd external/zlib-1.3.1
 cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
@@ -72,6 +75,7 @@ cmake --build build --config Release
 ```
 
 ### lz4 1.10.0
+
 ```powershell
 cd external/lz4-1.10.0
 cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
@@ -80,6 +84,7 @@ cmake --build build --config Release
 ```
 
 ### zstd 1.5.7
+
 ```powershell
 cd external/zstd-1.5.7/build/cmake
 cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
@@ -88,6 +93,7 @@ cmake --build build --config Release
 ```
 
 ### minizip-ng 4.0.10
+
 ```powershell
 cd external/minizip-ng-4.0.10
 cmake -B build -G "Ninja" `
@@ -100,6 +106,7 @@ cmake --build build --config Release
 ```
 
 ### libwebp 1.5.0
+
 ```powershell
 cd external/libwebp-1.5.0
 cmake -B build -G "Ninja" `
@@ -113,6 +120,7 @@ cmake --build build --config Release
 ```
 
 ### libavif 1.3.0 (requires dav1d)
+
 ```powershell
 # Build dav1d first
 cd external/dav1d-1.5.1
@@ -132,6 +140,7 @@ cmake --build build --config Release
 ```
 
 ### libjxl 0.11.1 (requires highway, brotli)
+
 ```powershell
 # Build dependencies first
 cd external/highway-1.0.7
@@ -161,6 +170,7 @@ cmake --build build-msvc --config Release
 ## Integration with ExplorerLens
 
 ### Include Paths (LENSShell.vcxproj)
+
 ```xml
 <AdditionalIncludeDirectories>
  ..\Engine;
@@ -177,6 +187,7 @@ cmake --build build-msvc --config Release
 ```
 
 ### Library Paths (LENSShell.vcxproj)
+
 ```xml
 <AdditionalLibraryDirectories>
  ..\Engine\Release\Release;
@@ -192,6 +203,7 @@ cmake --build build-msvc --config Release
 ```
 
 ### Linked Libraries (LENSShell.vcxproj)
+
 ```xml
 <AdditionalDependencies>
  ExplorerLensEngine.lib;
@@ -241,15 +253,18 @@ foreach ($lib in $libs) {
 ## Troubleshooting
 
 ### "Cannot find library X"
+
 - Verify library built successfully
 - Check AdditionalLibraryDirectories paths
 - Ensure x64 architecture (not Win32)
 
 ### "Unresolved external symbol"
+
 - Check runtime library mismatch: all libs must use `/MD` (dynamic CRT)
 - Verify all dependencies included (e.g., jxl needs jxl_threads)
 
 ### "LNK1104: cannot open file"
+
 - Ensure CMake build completed without errors
 - Check paths are relative to .vcxproj location (use `..`)
 
@@ -272,11 +287,11 @@ Use `Build-Library-Core.ps1` from `build-scripts/core/` for shared build utiliti
 
 ## References
 
-- zlib: https://github.com/madler/zlib
-- lz4: https://github.com/lz4/lz4
-- zstd: https://github.com/facebook/zstd
-- minizip-ng: https://github.com/zlib-ng/minizip-ng
-- libwebp: https://github.com/webmproject/libwebp
-- libavif: https://github.com/AOMediaCodec/libavif
-- libjxl: https://github.com/libjxl/libjxl
+- zlib: <https://github.com/madler/zlib>
+- lz4: <https://github.com/lz4/lz4>
+- zstd: <https://github.com/facebook/zstd>
+- minizip-ng: <https://github.com/zlib-ng/minizip-ng>
+- libwebp: <https://github.com/webmproject/libwebp>
+- libavif: <https://github.com/AOMediaCodec/libavif>
+- libjxl: <https://github.com/libjxl/libjxl>
 

@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Sweep the ExplorerLens workspace for dead code, stale references, orphan files, and inconsistencies"
 ---
@@ -93,7 +93,7 @@ Report each occurrence with file, line, and context. Classify as:
 
 ### Summary
 | Category | Issues Found | Critical |
-|----------|-------------|----------|
+| ---------- | ------------- | ---------- |
 | Stale versions | N | Y/N |
 | Orphan headers | N | Y/N |
 | ...

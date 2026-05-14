@@ -1,4 +1,4 @@
----
+﻿---
 mode: ask
 description: "Generate a pull request description for an ExplorerLens change. Follows the PR authoring standards from .github/instructions/pr-authoring.instructions.md."
 ---
@@ -13,7 +13,7 @@ Generate a PR description for the following change:
 
 ## PR Title
 
-```
+```powershell
 ${input:type:feat}(${input:scope:engine}): ${input:imperativeSummary}
 ```
 

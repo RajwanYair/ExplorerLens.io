@@ -1,4 +1,4 @@
-# Local Documentation Verification — ExplorerLens
+﻿# Local Documentation Verification — ExplorerLens
 
 Use this guide to verify the docs site, `index.html`, and all SVG diagrams render correctly before
 pushing a documentation change.
@@ -10,8 +10,8 @@ pushing a documentation change.
 ### Option A — VS Code Task (recommended)
 
 1. Open the **Run Task** palette (`Ctrl+Shift+B` or `Terminal → Run Task`)
-2. Select **Serve Local Site**
-3. Open a browser and navigate to <http://localhost:8080>
+1. Select **Serve Local Site**
+1. Open a browser and navigate to <http://localhost:8080>
 
 ### Option B — PowerShell directly
 
@@ -27,8 +27,8 @@ Press **Ctrl-C** to stop the server.
 ## Prerequisites
 
 | Tool | Minimum version | Install |
-|------|----------------|---------|
-| Python 3 | 3.9+ | https://python.org |
+| ------ | ---------------- | --------- |
+| Python 3 | 3.9+ | <https://python.org> |
 | (Optional) MkDocs | 1.5+ | `pip install mkdocs mkdocs-material` |
 
 ---
@@ -48,7 +48,7 @@ Run through these checks after every documentation change:
 Check each diagram loads and is readable in both browser light mode and dark mode:
 
 | Diagram | URL |
-|---------|-----|
+| --------- | ----- |
 | System context | `/docs/assets/system-context.svg` |
 | Decode pipeline | `/docs/assets/decode-pipeline.svg` |
 | Cache architecture | `/docs/assets/cache-architecture.svg` |
@@ -86,7 +86,7 @@ The local checks above mirror the **docs-validation** CI job in
 ## Troubleshooting
 
 | Symptom | Fix |
-|---------|-----|
+| --------- | ----- |
 | "Address already in use" | Another process owns the port — use `-Port 9000` |
 | Python not found | Install Python 3.9+, ensure it is on `PATH` |
 | SVG not found (404) | Check the file exists in `docs/assets/`; run `git status` |

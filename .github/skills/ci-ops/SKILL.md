@@ -1,4 +1,4 @@
-# CI-Ops — GitHub Actions Management Skill
+﻿# CI-Ops — GitHub Actions Management Skill
 
 ## Purpose
 
@@ -24,7 +24,7 @@ for operational (non-feature) changes.
 ## Step-by-Step: Debug a Failing Workflow
 
 1. **Identify the failing workflow and job**
-   ```
+   ```text
    gh run list --workflow=<name>.yml --limit 5
    gh run view <run-id> --log-failed
    ```
@@ -45,7 +45,7 @@ for operational (non-feature) changes.
    | `Annotations limit` | >50 annotations in a run | Batch annotations or use `::group::` for log sections |
 
 3. **Check if the failure is flaky**
-   ```
+   ```text
    gh run list --workflow=<name>.yml --limit 10 --json conclusion,startedAt
    ```
 
@@ -215,7 +215,7 @@ jobs:
 ## Workflow Inventory (21 Workflows)
 
 | Category | Workflows |
-|----------|-----------|
+| ---------- | ----------- |
 | **Build** | `build.yml`, `ci-matrix.yml`, `toolchain-verify.yml` |
 | **Quality** | `code-quality.yml`, `codeql.yml`, `coverage.yml` |
 | **Testing** | `catch2-tests.yml`, `corpus-validation.yml`, `performance-regression-gate.yml`, `screenshot-regression.yml` |

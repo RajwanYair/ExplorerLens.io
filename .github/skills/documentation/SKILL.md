@@ -1,4 +1,4 @@
-# ExplorerLens — Documentation Skill
+﻿# ExplorerLens — Documentation Skill
 
 ## Purpose
 
@@ -21,7 +21,7 @@ working. See ROADMAP §8 for the right-sizing strategy.
 ## Documentation Tiers
 
 | Tier | Audience | Location | Rule |
-|------|----------|----------|------|
+| ------ | ---------- | ---------- | ------ |
 | **Tier 1 — User** | End users | `README.md`, `docs/USER_GUIDE.md`, `CHANGELOG.md`, `LICENSE` | **ONLY working features** — no aspirational claims |
 | **Tier 2 — Developer** | Contributors | `docs/development/`, `.github/CONTRIBUTING.md`, `.github/standards/` | Accurate build instructions; working commands only |
 | **Tier 3 — Architecture** | Deep contributors | `ROADMAP.md`, `docs/architecture/`, ADRs | Vision + current state, clearly labeled as planned or done |
@@ -94,7 +94,7 @@ Add detail to the entry after the version bump.
 **All 13 SVGs are complete.** Existing diagrams in `docs/assets/`:
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `architecture-components.svg` | High-level system component overview |
 | `architecture-dataflow.svg` | Thumbnail generation data flow |
 | `architecture-build.svg` | CMake + MSBuild + MSI packaging pipeline |

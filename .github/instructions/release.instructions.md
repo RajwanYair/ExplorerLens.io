@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/Bump-Version.ps1,**/CHANGELOG.md,**/VERSION"
 ---
 
@@ -58,7 +58,7 @@ git ls-files | Where-Object { $_ -notmatch '^external/' } | ForEach-Object {
 ## Post-Release Verification
 
 | Step | Command / Check |
-|------|----------------|
+| ------ | ---------------- |
 | Tag pushed | `git tag -l vX.Y.Z` |
 | Release exists | `gh release view vX.Y.Z` |
 | All artifacts | LENSShell.dll, LENSManager.exe, .msi, .zip, SHA256SUMS.txt, SBOM.json |

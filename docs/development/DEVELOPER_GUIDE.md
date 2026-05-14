@@ -1,10 +1,12 @@
-# ExplorerLens Developer Guide
-**Version:** 24.1.0 "Altair-R" 
-**Last Updated:** March 28, 2026 
-**Target Audience:** Contributors, Plugin Developers, Maintainers 
+﻿# ExplorerLens Developer Guide
+
+**Version:** 24.1.0 "Altair-R"
+**Last Updated:** March 28, 2026
+**Target Audience:** Contributors, Plugin Developers, Maintainers
 **Build Status:** 0 errors, 0 warnings (Release x64)
 
 ## Table of Contents
+
 - [Architecture Overview](#architecture-overview)
 - [Development Setup](#development-setup)
 - [Building from Source](#building-from-source)
@@ -19,7 +21,7 @@
 
 ### High-Level Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │ Windows Explorer (Shell) │
 └─────────────────┬───────────────────────────────────┘
@@ -75,23 +77,26 @@
 ### Key Components
 
 1. **LENSShell.dll** - Windows Shell Extension (COM DLL)
- - Implements `IThumbnailProvider` COM interface
- - Handles Explorer integration
- - SEH exception protection wrapper
- - Delegates to `ExplorerLensEngine.lib`
 
-2. **ExplorerLensEngine.lib** - Core thumbnail engine (static library)
- - Format detection and dispatching
- - Decoder implementations
- - GPU acceleration via DirectX 11
- - SIMD-optimized image processing
- - Circuit breaker pattern for failing decoders
+- Implements `IThumbnailProvider` COM interface
+- Handles Explorer integration
+- SEH exception protection wrapper
+- Delegates to `ExplorerLensEngine.lib`
 
-3. **LENSManager.exe** - Configuration utility (WinUI 3 / Win32)
- - Handler registration/unregistration
- - Cache management
- - GPU selection
- - Statistics and diagnostics
+1. **ExplorerLensEngine.lib** - Core thumbnail engine (static library)
+
+- Format detection and dispatching
+- Decoder implementations
+- GPU acceleration via DirectX 11
+- SIMD-optimized image processing
+- Circuit breaker pattern for failing decoders
+
+1. **LENSManager.exe** - Configuration utility (WinUI 3 / Win32)
+
+- Handler registration/unregistration
+- Cache management
+- GPU selection
+- Statistics and diagnostics
 
 ---
 
@@ -108,27 +113,28 @@ Install using the provided script:
 Or manually install:
 
 - **Visual Studio 2026** (18.x+) with:
- - C++ desktop development workload
- - Windows 11 SDK (10.0.22621.0+)
- - CMake tools
+- C++ desktop development workload
+- Windows 11 SDK (10.0.22621.0+)
+- CMake tools
 
 - **Build Tools:**
- - CMake 3.28+
- - Ninja 1.11+
- - PowerShell 7+
+- CMake 3.28+
+- Ninja 1.11+
+- PowerShell 7+
 
 - **Compilers:**
- - MSVC v145+ (Visual Studio 2026)
- - Clang 17+ (optional, for LLVM builds)
+- MSVC v145+ (Visual Studio 2026)
+- Clang 17+ (optional, for LLVM builds)
 
 - **Verification:**
+
 ```powershell
 .\scripts\verify-tools.ps1
 ```
 
 ### Repository Structure
 
-```
+```text
 ExplorerLens/
 ├── Engine/ # Core thumbnail engine (C++20)
 │ ├── Core/ # API surface, initialization
@@ -273,10 +279,10 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /t:LENSManager /m
 ### Build Configurations
 
 | Configuration | Compiler | Optimization | Debug Info | Runtime |
-|---------------|----------|--------------|------------|---------|
+| --------------- | ---------- | -------------- | ------------ | --------- |
 | Debug | MSVC | O0 | Full | /MDd |
 | Release | MSVC/Clang | O2/O3 | None | /MD |
-| RelWithDebInfo| MSVC | O2 | Full | /MD |
+| RelWithDebInfo | MSVC | O2 | Full | /MD |
 
 ---
 
@@ -332,7 +338,7 @@ private:
 };
 ```
 
-2. Register in `Engine/Core/DecoderRegistry.cpp`:
+1. Register in `Engine/Core/DecoderRegistry.cpp`:
 
 ```cpp
 void DecoderRegistry::Initialize() {
@@ -341,7 +347,7 @@ void DecoderRegistry::Initialize() {
 }
 ```
 
-3. Add tests in `tests/DecoderTests/`:
+1. Add tests in `tests/DecoderTests/`:
 
 ```cpp
 TEST(PNGDecoderTest, DecodeValidPNG) {
@@ -361,38 +367,45 @@ TEST(PNGDecoderTest, DecodeValidPNG) {
 - **C++ Standard:** C++20
 - **Formatting:** clang-format (Google style)
 - **Naming:**
- - Classes: `PascalCase`
- - Functions: `PascalCase`
- - Variables: `camelCase`
- - Constants: `UPPER_SNAKE_CASE`
+- Classes: `PascalCase`
+- Functions: `PascalCase`
+- Variables: `camelCase`
+- Constants: `UPPER_SNAKE_CASE`
 
 ### Pull Request Process
 
 1. **Fork** the repository
-2. **Create branch** from `main`:
+1. **Create branch** from `main`:
+
  ```bash
  git checkout -b feature/amazing-decoder
  ```
-3. **Implement** your changes
-4. **Add tests** (required for new features)
-5. **Run test suite**:
+
+1. **Implement** your changes
+1. **Add tests** (required for new features)
+1. **Run test suite**:
+
  ```powershell
  ctest --test-dir build --output-on-failure
  ```
-6. **Build with zero warnings**:
+
+1. **Build with zero warnings**:
+
  ```powershell
  msbuild /p:TreatWarningsAsErrors=true
  ```
-7. **Submit PR** with:
- - Clear description
- - Test coverage report
- - Before/after performance metrics (if applicable)
+
+1. **Submit PR** with:
+
+- Clear description
+- Test coverage report
+- Before/after performance metrics (if applicable)
 
 ### Commit Messages
 
 Follow conventional commits:
 
-```
+```text
 feat: Add TIFF decoder with BigTIFF support
 fix: Resolve memory leak in WebP decoder
 docs: Update build instructions for Clang 17

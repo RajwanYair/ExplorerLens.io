@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 name: Performance
 description: "ExplorerLens performance profiling agent — analyzes benchmarks, manages regression gates, interprets ETW traces, and enforces decode latency targets from baseline.json."
@@ -94,7 +94,7 @@ When asked about memory usage:
 
 ## Decision Tree
 
-```
+```text
 User asks about performance
 ├── "Is format X fast enough?"
 │   → Read baseline.json → Compare against targets → Report with table

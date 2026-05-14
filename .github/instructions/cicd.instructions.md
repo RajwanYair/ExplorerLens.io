@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/*.yml,**/*.yaml,.github/**"
 ---
 
@@ -154,7 +154,7 @@ jobs:
 
 ## Commit Message Convention (Conventional Commits)
 
-```
+```text
 <type>(<scope>): <subject>
 
 [optional body]
@@ -212,7 +212,7 @@ permissions:
 **Common permission sets by workflow type:**
 
 | Workflow Type | Required Permissions |
-|--------------|---------------------|
+| -------------- | --------------------- |
 | Build/test | `contents: read` |
 | PR checks | `contents: read`, `pull-requests: read` |
 | Code scanning | `contents: read`, `security-events: write` |
@@ -282,7 +282,7 @@ on:
 All `upload-artifact` steps MUST specify `retention-days:`:
 
 | Artifact Type | Retention |
-|--------------|-----------|
+| -------------- | ----------- |
 | Test results | 30 days |
 | Build binaries | 14 days |
 | Release artifacts | 90 days |
@@ -307,7 +307,7 @@ Build and test steps should emit timing via `::notice::` annotations:
 ## ExplorerLens Workflow Inventory
 
 | Workflow | Trigger | Role |
-|----------|---------|------|
+| ---------- | --------- | ------ |
 | `ci-matrix.yml` | push/PR | Canonical CI build matrix |
 | `build.yml` | dispatch/schedule | Manual verification build |
 | `reusable-build.yml` | workflow_call | DRY build+test callable |
@@ -361,7 +361,7 @@ $git = "$env:USERPROFILE\scoop\apps\git\current\bin\git.exe"
 ### What `release.yml` Publishes
 
 | Artifact | Notes |
-|----------|-------|
+| ---------- | ------- |
 | `LENSShell.dll` (x64) | COM shell extension — always |
 | `LENSManager.exe` | WTL config GUI — always |
 | `lens.exe` | CLI tool — Sprint 17+ |
@@ -373,7 +373,7 @@ $git = "$env:USERPROFILE\scoop\apps\git\current\bin\git.exe"
 
 ### Release Workflow Architecture
 
-```
+```text
 git tag vX.Y.Z → release.yml
   └─ build job (windows-latest)
        configure MSVC via vswhere
@@ -405,7 +405,7 @@ automatically so the team has an actionable ticket.
 
 ### Architecture
 
-```
+```text
 git tag vX.Y.Z → release.yml
   └─ build job   (windows-latest)  — compile, package, upload artifacts
   └─ publish job (ubuntu-latest)   — create GitHub Release
@@ -415,7 +415,7 @@ git tag vX.Y.Z → release.yml
 ### What the `verify` Job Checks
 
 | Check | Pass Condition |
-|-------|---------------|
+| ------- | --------------- |
 | Required artifacts present | `ExplorerLens-X.Y.Z-x64.zip`, `SHA256SUMS.txt`, `SBOM.json`, `verification-report.json` all in `dist/` |
 | ZIP integrity | ZIP contains `LENSShell.dll` |
 | SHA256 checksums | Every hash in `SHA256SUMS.txt` matches the actual artifact |
@@ -476,7 +476,7 @@ verify:
 ### Approved Action Inventory (v36.5.0)
 
 | Action | Pinned Version | Notes |
-|--------|---------------|-------|
+| -------- | --------------- | ------- |
 | `actions/checkout` | `@v4` | Official |
 | `actions/upload-artifact` | `@v4` | Official |
 | `actions/download-artifact` | `@v4` | Official |
@@ -538,7 +538,7 @@ env:
 ### Common Permission Patterns
 
 | Workflow Type | Minimum Permissions |
-|-------------- |-------------------- |
+| -------------- | -------------------- |
 | Build + test (read-only) | `contents: read` |
 | Release (create GH Release) | `contents: write`, `actions: read` |
 | Package publish (OIDC) | `contents: read`, `packages: write`, `id-token: write` |
@@ -559,7 +559,7 @@ Extract a called workflow (`.github/workflows/reusable-*.yml`) when:
 
 ### Naming Convention
 
-```
+```text
 .github/workflows/reusable-<purpose>.yml   # Called workflow
 .github/workflows/<trigger>-<purpose>.yml  # Caller workflow
 ```

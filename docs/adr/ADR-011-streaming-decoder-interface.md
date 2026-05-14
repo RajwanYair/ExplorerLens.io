@@ -1,4 +1,4 @@
-# ADR-011: IStreamingDecoder Interface for Probe-then-Decode Pipeline
+﻿# ADR-011: IStreamingDecoder Interface for Probe-then-Decode Pipeline
 
 **Status:** Accepted
 **Version:** v38.4.0+
@@ -11,11 +11,11 @@ ExplorerLens currently dispatches decodes through a monolithic `LENSArchive::Dec
 reads the full file before format detection and routing. This has several problems:
 
 1. **Full-read on probe** — detecting a format requires reading the entire file in some decoders
-2. **No partial decode** — progressive JPEG, HEIC embedded previews, and RAW embedded JPEGs cannot
+1. **No partial decode** — progressive JPEG, HEIC embedded previews, and RAW embedded JPEGs cannot
    return a preview without completing the full decode pipeline
-3. **No cancellation** — long decodes inside `explorer.exe` block the UI thread with no escape hatch
-4. **No streaming** — decoders that could work on the first 16 KB must wait for full IStream content
-5. **No metadata extraction without pixel decode** — width/height/colorspace require running the
+1. **No cancellation** — long decodes inside `explorer.exe` block the UI thread with no escape hatch
+1. **No streaming** — decoders that could work on the first 16 KB must wait for full IStream content
+1. **No metadata extraction without pixel decode** — width/height/colorspace require running the
    whole decoder even when only metadata is needed
 
 XnView MP (§3.1, H4) uses a "probe then decode" model: a `ProbeHeader()` pass reads only the first
@@ -121,7 +121,7 @@ public:
 ### Phase schedule
 
 | Phase | Requirement |
-|-------|-------------|
+| ------- | ------------- |
 | 1 | Interface defined; all new decoders implement it; shim wraps legacy |
 | 2 | P0 decoders (JPEG, PNG, WebP, AVIF, HEIC, JXL, RAW) fully native |
 | 3 | All P1/P2 decoders native; legacy shim retired |
@@ -141,12 +141,14 @@ public:
 ## Consequences
 
 ### Positive
+
 - ProbeHeader results can be cached; repeat thumbnails skip full decode
 - `std::stop_token` allows `explorer.exe` to cancel stale thumbnail requests
 - Embedded preview extraction turns 150ms RAW decode into < 2ms for small thumbnails
 - Uniform interface enables the `lens benchmark` JSON report (§6.3, Phase 2)
 
 ### Negative
+
 - Shim adds one vtable call overhead per decode (~0 ns in practice)
 - `std::expected` requires `/std:c++23preview` guard until MSVC stabilises C++23 library
 - Legacy decoders needing cancellation must be refactored to poll `stop_token`
@@ -154,7 +156,7 @@ public:
 ## Alternatives Considered
 
 | Alternative | Why rejected |
-|-------------|-------------|
+| ------------- | ------------- |
 | `std::function` callbacks for progress | Heap allocation per decode; less composable |
 | COM `IAsyncOperation` | Requires marshalling overhead; COM-leaks into Engine |
 | Future/Promise model | Heavier machinery; `stop_token` is sufficient for this use case |

@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Apply the Universal Project Enhancement Framework v15.0.0 to transform a project into production-ready, enterprise-grade quality"
 ---
@@ -135,7 +135,7 @@ def main():
 
 ### 3. Three Interfaces (Feature Parity)
 
-```
+```text
 Desktop GUI (Tkinter) ──┐
 Web GUI (FastAPI)  ──────┼──> Shared Backend Services
 CLI (argparse)     ──────┘
@@ -350,7 +350,7 @@ gui:
 
 ## PROJECT STRUCTURE TEMPLATE
 
-```
+```text
 project-root/
 ├── project-name                  # Single entry point (no .py extension)
 ├── README.md                     # Main documentation
@@ -434,7 +434,7 @@ project-root/
 ### 1. User Interface Requirements
 
 | Interface | Framework | Purpose |
-|-----------|-----------|---------|
+| ----------- | ----------- | --------- |
 | Desktop GUI | Tkinter + ttk | Local desktop use |
 | Web GUI | FastAPI/Flask | Remote/headless access |
 | CLI | argparse + rich | Automation and scripting |
@@ -442,7 +442,7 @@ project-root/
 ### 2. Cross-Platform Support
 
 | Platform | Status |
-|----------|--------|
+| ---------- | -------- |
 | Windows 10/11 | Required |
 | WSL (Ubuntu) | Required |
 | Linux (Ubuntu/Debian) | Required |
@@ -542,7 +542,7 @@ logging.basicConfig(
 ## SUCCESS METRICS & VALIDATION
 
 | Metric | Target |
-|--------|--------|
+| -------- | -------- |
 | Code | Clean, modular, documented, portable |
 | Tests | 90%+ coverage, all platforms |
 | Performance | Sub-second response |
@@ -557,7 +557,7 @@ logging.basicConfig(
 ### For Different Project Types
 
 | Type | Focus Areas |
-|------|-------------|
+| ------ | ------------- |
 | CLI Tools | Rich CLI, config files, shell completion |
 | Web Apps | API design, authentication, database |
 | Desktop Apps | Cross-platform GUI, local storage, auto-update |
@@ -568,7 +568,7 @@ logging.basicConfig(
 ### For Different Technology Stacks
 
 | Stack | Equivalent Components |
-|-------|----------------------|
+| ------- | ---------------------- |
 | Python | argparse, pytest, PyYAML, tqdm, rich |
 | Node.js | commander, jest, js-yaml, ora |
 | Java | Spring Boot, JUnit, SnakeYAML |
@@ -601,7 +601,7 @@ logging.basicConfig(
 When the primary target is Windows native code, establish a fixed MSVC toolchain:
 
 | Component | Best Practice |
-|-----------|--------------|
+| ----------- | -------------- |
 | **Compiler** | MSVC cl.exe (specific version pinned in CI + copilot-instructions.md) |
 | **Build System** | CMake 3.25+ with Presets (`CMakePresets.json`) + Ninja generator |
 | **Package Manager** | vcpkg (manifest mode) or local `external/` with per-library build scripts |
@@ -657,7 +657,7 @@ For projects that don't need GTest overhead:
 
 When a project has both a native (C++/WTL) GUI and a Python (tkinter) GUI:
 
-```
+```text
 Native GUI (WTL/Win32)  ──→ Registry-based config
 Python GUI (tkinter)    ──→ JSON-based config
                               ↕ (shared format definitions)
@@ -781,7 +781,7 @@ set(ENGINE_SOURCES
 GitHub has "magic" filenames that get special treatment. These **MUST** remain uppercase:
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `CONTRIBUTING.md` | Shown in PR creation UI, linked from issue templates |
 | `SECURITY.md` | Shown in Security tab, linked from vulnerability reporting |
 | `PULL_REQUEST_TEMPLATE.md` | Auto-populates PR description |
@@ -794,7 +794,7 @@ All other files (docs, configs, scripts) should use lowercase-with-dashes.
 
 ### `.github/` Directory Structure
 
-```
+```text
 .github/
 ├── CONTRIBUTING.md          # Uppercase — GitHub magic file
 ├── SECURITY.md              # Uppercase — GitHub magic file
@@ -896,7 +896,7 @@ Define tasks for every common operation:
 ### Copilot Customization Files
 
 | File | Scope | Purpose |
-|------|-------|---------|
+| ------ | ------- | --------- |
 | `.github/copilot-instructions.md` | Repository | AI coding instructions for entire repo |
 | `.github/instructions/*.instructions.md` | Repository | Scoped instruction files applied by path/pattern |
 | `.github/agents/*.agent.md` | Repository | Custom agent definitions |
@@ -930,7 +930,7 @@ For long-running builds (60-120s):
 
 ### IThumbnailProvider Architecture
 
-```
+```text
 Explorer.exe
   └─ Calls IExtractImage / IThumbnailProvider
       └─ COM CLSID lookup in HKCR\CLSID\{...}
@@ -942,7 +942,7 @@ Explorer.exe
 ### Registry-Based Configuration
 
 Native Windows apps store settings in registry:
-```
+```text
 HKCU\Software\ExplorerLens\
 ├── Handlers\    (per-format: CBZ=1, RAR=0, ...)
 ├── Options\     (Sort=0, ShowIcon=1)

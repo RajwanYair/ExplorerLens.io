@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 name: ExplorerLens
 description: "Expert C++20 Windows Shell Extension engineer for ExplorerLens — handles Engine development, build automation, sprint delivery, version bumps, and COM/GPU pipeline work with zero-warnings enforcement."
@@ -193,7 +193,7 @@ TEST(FeatureName) {
 ## Architecture Knowledge
 
 | Component | Location | Purpose |
-|-----------|----------|---------|
+| ----------- | ---------- | --------- |
 | Decode pipeline | `Engine/Core/` | Format detection → decoder routing → thumbnail render |
 | GPU renderer | `Engine/Core/`, `Engine/GPU/` | DX11 primary, DX12 + Vulkan optional, CPU fallback |
 | Cache system | `Engine/Cache/` | Sub-ms robin-hood cache, adaptive budget, PSO cache |
@@ -210,7 +210,7 @@ TEST(FeatureName) {
 All statically linked with `/MD`. Rebuild with `.\build-scripts\Rebuild-All-With-MD.ps1` if CRT conflicts arise.
 
 | Library | Version | Build Script |
-|---------|---------|-------------|
+| --------- | --------- | ------------- |
 | zlib | 1.3.1 | `Build-Zlib.ps1` |
 | LZ4 | 1.10.0 | `Build-LZ4.ps1` |
 | zstd | 1.5.7 | `Build-Zstd.ps1` |

@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/tests/**,**/conftest.py,**/*_test.py,**/test_*.py"
 ---
 
@@ -14,7 +14,7 @@ applyTo: "**/tests/**,**/conftest.py,**/*_test.py,**/test_*.py"
 
 ## Test Structure
 
-```
+```text
 tests/
 ├── conftest.py           # Shared fixtures, markers
 ├── unit/                 # Pure Python, no I/O
@@ -114,14 +114,14 @@ ExplorerLens uses a **custom test framework** — NOT GTest, NOT Catch2.
 ### Framework Macros (defined in `EngineTestsMacros.h`)
 
 | Macro | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `TEST(name)` | Define a test function (expands to `void TestName_Runner()`) |
 | `ASSERT(cond)` | Assert condition; throws on failure, increments counters |
 | `RUN_TEST(name)` | Execute a test, catch failures, print pass/fail |
 
 ### Test File Layout
 
-```
+```text
 Engine/Tests/
 ├── EngineTestsIncludes.h      — Shared #include block (all Engine headers)
 ├── EngineTestsMacros.h        — TEST/ASSERT/RUN_TEST macros + MockDecoder
@@ -182,7 +182,7 @@ component tests that benefit from `SECTION`, `GENERATE`, and `REQUIRE` semantics
 
 ### File Location
 
-```
+```text
 Engine/Tests/catch2/
 ├── catch2_tests.cpp      — Main Catch2 runner (SESSION_START/END)
 ├── test_*.cpp             — Individual test files
@@ -232,7 +232,7 @@ TEST_CASE("Decoder routing with generated inputs", "[decoder]") {
 ### When to Use Catch2 vs Custom Framework
 
 | Use Custom `TEST()` | Use Catch2 |
-|--------------------- |-----------|
+| --------------------- | ----------- |
 | Sprint test batches (10 per sprint) | Isolated component deep-dives |
 | Build validation (compile-time checks) | Property-based / generative tests |
 | Quick regression checks (<1ms per test) | Slow integration tests with rich output |
@@ -249,7 +249,7 @@ Corpus tests validate decoder correctness against real files. The test corpus li
 
 ### Structure
 
-```
+```text
 data/corpus/
 ├── MANIFEST.json          — Index: file, format, expected dimensions, SSIM baseline
 ├── images/                — Real image files (PNG, JPEG, WebP, AVIF, TIFF, RAW, ...)

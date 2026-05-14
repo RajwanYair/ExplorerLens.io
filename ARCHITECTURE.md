@@ -1,10 +1,11 @@
-# ExplorerLens — Architecture
+﻿# ExplorerLens — Architecture
 
 > Root-level architecture summary. Detailed diagrams (SVG + Mermaid) live in
 > [`docs/architecture/`](docs/architecture/README.md).
 > Strategic direction lives in [`ROADMAP.md`](ROADMAP.md).
 
-**Version:** 39.9.0 "Betelgeuse" · **Language:** C++23 (MSVC v145) · **Primary artifact:** `LENSShell.dll` (Windows Shell Extension, COM `IThumbnailProvider`)
+**Version:** 39.9.0 "Betelgeuse" · **Language:** C++23 (MSVC v145) · **Primary artifact:** `LENSShell.dll` (Windows
+Shell Extension, COM `IThumbnailProvider`)
 
 ---
 
@@ -36,7 +37,7 @@ flowchart LR
 ## 2. Binary layout
 
 | Artifact | Size | Role |
-|---|---|---|
+| --- | --- | --- |
 | `LENSShell.dll` | ~2940 KB | Shell extension (COM in-process DLL, CLSID `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`) |
 | `LENSManager.exe` | ~400 KB | WTL admin GUI (registration, settings, diagnostics) |
 | `lens.exe` | ~250 KB | Batch CLI, scriptable thumbnail extraction |
@@ -92,7 +93,8 @@ flowchart LR
     Tests --> Core
 ```
 
-> The v4.0 roadmap consolidates 16 sub-directories to 7 (`Core`, `Decoders`, `GPU`, `Cache`, `Platform`, `Tests`, `Utils`). See ROADMAP §7.2.
+> The v4.0 roadmap consolidates 16 sub-directories to 7 (`Core`, `Decoders`, `GPU`, `Cache`, `Platform`, `Tests`,
+> `Utils`). See ROADMAP §7.2.
 
 ## 5. Build graph
 
@@ -128,7 +130,7 @@ flowchart LR
 22 workflows under `.github/workflows/`:
 
 | Category | Workflows |
-|---|---|
+| --- | --- |
 | Build & test | `build.yml`, `ci-matrix.yml`, `reusable-build.yml`, `catch2-tests.yml`, `toolchain-verify.yml` |
 | Quality | `code-quality.yml`, `codeql.yml`, `coverage.yml`, `pr-checks.yml` |
 | Performance & visual | `performance-regression-gate.yml`, `screenshot-regression.yml`, `binary-size.yml` |

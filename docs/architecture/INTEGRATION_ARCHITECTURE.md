@@ -1,4 +1,4 @@
-# ExplorerLens Integration Architecture
+﻿# ExplorerLens Integration Architecture
 
 **Document Version:** 1.0
 **Date:** January 12, 2026
@@ -8,7 +8,9 @@
 
 ## Overview
 
-This document describes the complete integration architecture between the COM-based Windows Shell Extension (LENSShell.dll) and the standalone ExplorerLens Engine library. The architecture uses a clean adapter pattern to bridge COM and modern C++ interfaces.
+This document describes the complete integration architecture between the COM-based Windows Shell Extension
+(LENSShell.dll) and the standalone ExplorerLens Engine library. The architecture uses a clean adapter pattern to bridge
+COM and modern C++ interfaces.
 
 ---
 
@@ -128,6 +130,7 @@ This document describes the complete integration architecture between the COM-ba
 #### 1.1 CLENSShell (COM Object)
 
 **COM Interfaces:**
+
 - `IThumbnailProvider` - Windows 7+ thumbnail API
 - `IPersistFile` - File persistence
 - `IExtractImage2` - Legacy thumbnail API (Windows XP/Vista)
@@ -309,6 +312,7 @@ HRESULT EngineAdapter::GenerateThumbnail(
 ```
 
 **Key Responsibilities:**
+
 1. **Lifetime Management:** Creates and destroys ThumbnailPipeline
 1. **Configuration:** Sets up pipeline with COM-appropriate defaults
 1. **Decoder Registration:** Registers all available decoders on startup
@@ -335,6 +339,7 @@ HRESULT EngineAdapter::GenerateThumbnail(
 **Implementation:** [Engine/Pipeline/ThumbnailPipeline.cpp](../Engine/Pipeline/ThumbnailPipeline.cpp)
 
 **Responsibilities:**
+
 1. **Format Detection:** Uses FormatDetector to identify file types
 1. **Decoder Selection:** Queries DecoderRegistry for appropriate decoder
 1. **Cache Management:** Checks cache before generating
@@ -400,7 +405,8 @@ GenerateThumbnail(request)
 
 **Design Pattern:** Non-owning registry (stores pointers, doesn't manage lifetime)
 
-**Key Insight:** Registry was initially heap-corrupting due to calling `delete` on stack-allocated decoder pointers. Fixed by making registry non-owning.
+**Key Insight:** Registry was initially heap-corrupting due to calling `delete` on stack-allocated decoder pointers.
+Fixed by making registry non-owning.
 
 **Public API:**
 
@@ -549,6 +555,7 @@ public:
 ```
 
 **Timeline:** Typically 5-50ms depending on:
+
 - Cache hit: ~1-5ms
 - Cache miss (simple image): ~10-30ms
 - Cache miss (archive, needs extraction): ~30-100ms
@@ -633,10 +640,12 @@ if (SUCCEEDED(result.status)) {
 ### Throughput
 
 **Single File:**
+
 - Cache hit: ~1000 thumbnails/second
 - Cache miss: ~20-100 thumbnails/second
 
 **Batch Generation (100 files):**
+
 - With caching: ~500 thumbnails/second
 - Without caching: ~30 thumbnails/second
 
@@ -725,12 +734,14 @@ cd x64\Release
  ```
 
 1. **Test with Explorer:**
+
 - Navigate to folder with test images
 - Enable thumbnail view
 - Verify thumbnails appear correctly
 - Check Performance Monitor for ExplorerLensEngine activity
 
 1. **Verify Formats:**
+
 - JPEG: ✅ Should work
 - PNG: ✅ Should work
 - WebP: ✅ Should work
@@ -757,22 +768,26 @@ cd x64\Release
 ### Current Limitations
 
 1. **DLL Lock Issue** ⚠️
+
 - **Problem:** LENSShell.dll locked by Explorer during development
 - **Impact:** Cannot rebuild while shell extension is loaded
 - **Workaround:** Restart Explorer or unregister DLL before rebuild
 - **Fix:** Create test harness that doesn't require Explorer
 
 1. **JXL/HEIF Decoders** ⏳
+
 - **Status:** Interface declarations complete, implementation pending
 - **Impact:** .jxl and .heif files not yet supported
 - **Timeline:** (after library integration)
 
 1. **GPU Rendering** 🔄
+
 - **Status:** Interface exists, implementation pending validation
 - **Impact:** GPU acceleration not yet verified
 - **Timeline:** Near-term (Week 5-6)
 
 1. **Cache Persistence** ⏳
+
 - **Status:** In-memory cache works, disk persistence not implemented
 - **Impact:** Cache cleared on restart
 - **Timeline:**
@@ -788,21 +803,25 @@ cd x64\Release
 ## Future Enhancements
 
 ### Library Integration
+
 - Complete JXL decoder implementation (libjxl integration)
 - Complete HEIF decoder implementation (libheif integration)
 - Re-enable JXL/HEIF unit tests
 
 ### Cache Persistence
+
 - Implement disk-based cache
 - Add cache invalidation logic
 - Cache cleanup and size limits
 
 ### GPU Optimization
+
 - Profile GPU rendering performance
 - Optimize texture uploads
 - Add CPU fallback for small images
 
 ### Plugin Architecture
+
 - Define plugin API
 - Create sample external decoder
 - Document plugin development
@@ -846,6 +865,7 @@ cd x64\Release
 ### Building the Integration
 
 **Prerequisites:**
+
 - Visual Studio 2019/2022
 - Windows 10/11 SDK
 - CMake 3.20+

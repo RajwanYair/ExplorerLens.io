@@ -1,4 +1,4 @@
-# Contributing to ExplorerLens
+﻿# Contributing to ExplorerLens
 
 Thank you for your interest in contributing to ExplorerLens!
 
@@ -84,7 +84,7 @@ ExplorerLens is migrating its unit tests from the legacy custom-macro harness to
 **Current state (v38.5+):** 10 Catch2 test files in `Engine/Tests/Catch2Tests/`:
 
 | File | Coverage area |
-|------|--------------|
+| ------ | -------------- |
 | `FormatDetectionTests.cpp` | Magic byte detection for 18+ formats |
 | `CacheSubsystemTests.cpp` | LRU cache invariants, eviction, hit-rate |
 | `DecoderUnitTests.cpp` | EXIF orientation, size grid, prefetch engine |
@@ -172,7 +172,7 @@ Get-ChildItem docs -Recurse -Filter "*.md" | Select-String "Installation"
 ### Canonical File Locations
 
 | Purpose | Canonical Path | Notes |
-|---------|---------------|-------|
+| --------- | --------------- | ------- |
 | **Main build** | `build-scripts/Build-MSVC.ps1` | Canonical Engine build entry point |
 | **All-in-one packaging** | `build-scripts/Build-All-And-Package.ps1` | Production packaging entry point |
 | **Version bump / release prep** | `build-scripts/Bump-Version.ps1` | Only supported version sync path |
@@ -219,7 +219,7 @@ For detailed troubleshooting, see [Installation Guide](docs/build/INSTALLATION_G
 
 ### Commit Message Format
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body>

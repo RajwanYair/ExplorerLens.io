@@ -1,4 +1,4 @@
-# ExplorerLens — System Overview
+﻿# ExplorerLens — System Overview
 
 ## Component Architecture
 
@@ -147,6 +147,7 @@ graph LR
 ```
 
 `TwoTierCacheManager` coordinates the two tiers:
+
 - **L1** — `SubMillisecondCacheEngine` (XXH3-keyed robin-hood LRU, in-process)
 - **L2** — `DiskCacheStore` (FNV-1a keyed flat-file blobs under `%LOCALAPPDATA%\ExplorerLens\Cache`)
 - **Invalidation** — `CacheInvalidationWatcher` (ReadDirectoryChangesW) fires prefix invalidation on file changes
@@ -158,7 +159,7 @@ graph LR
 New HLSL compute shaders in `Engine/GPU/shaders/`:
 
 | Shader | Purpose |
-|--------|---------|
+| -------- | --------- |
 | `resize_bilinear.hlsl` | Fast bilinear downscale for thumbnail generation |
 | `resize_lanczos.hlsl` | High-quality Lanczos-3 resize for preview pane |
 | `tonemap_pq_to_srgb.hlsl` | HDR10 PQ → sRGB for HEIF/AVIF HDR content |
@@ -171,7 +172,7 @@ New HLSL compute shaders in `Engine/GPU/shaders/`:
 ## New Components (v35.5)
 
 | Component | Location | Purpose |
-|-----------|----------|---------|
+| ----------- | ---------- | --------- |
 | `EmbeddedPreviewExtractor` | `Engine/Core/` | LibRaw `unpack_thumb()` fast path for RAW thumbnails |
 | `ArchiveCoverExtractor` | `Engine/Core/` | First-image extraction from ZIP/CBZ/RAR via libarchive |
 | `ExifOrientationNormalizer` | `Engine/Core/` | In-place BGRA pixel rotation for EXIF tags 1–8 |

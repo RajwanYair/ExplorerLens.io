@@ -1,10 +1,10 @@
-# ExplorerLens Test Corpus
+﻿# ExplorerLens Test Corpus
 
 This directory holds **decoder validation test files** for ExplorerLens.
 
 ## Structure
 
-```
+```text
 data/corpus/
 ├── MANIFEST.json       — Master index: format → decoder → expected performance
 ├── images/             — Raster images (JPEG, PNG, WebP, AVIF, HEIC, JXL, …)
@@ -45,7 +45,7 @@ against every PR that touches decoder code. See MANIFEST.json for per-format lat
 ## Contributing Samples
 
 1. Ensure the sample file is freely licensed (CC0 / public domain)
-2. Add it to the appropriate subdirectory
-3. Update `MANIFEST.json` with the `test_file` field
-4. Run `Validate-Corpus.ps1` locally to confirm it decodes correctly
-5. Open a PR — the corpus-validation CI will verify it
+1. Add it to the appropriate subdirectory
+1. Update `MANIFEST.json` with the `test_file` field
+1. Run `Validate-Corpus.ps1` locally to confirm it decodes correctly
+1. Open a PR — the corpus-validation CI will verify it

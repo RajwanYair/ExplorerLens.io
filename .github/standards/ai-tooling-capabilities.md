@@ -1,4 +1,4 @@
-# AI Tooling Capabilities & Integration Matrix
+﻿# AI Tooling Capabilities & Integration Matrix
 
 **Last Updated:** 23 April 2026  
 **Version:** v39.9.0 "Betelgeuse" (post S381–S389)  
@@ -26,7 +26,7 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 ## Repository AI Asset Layout
 
 | Asset Type | Location | Purpose |
-|-----------|----------|---------|
+| ----------- | ---------- | --------- |
 | Copilot repository instructions | `.github/copilot-instructions.md` | Primary project rules, build constraints, release policy, architectural guidance |
 | Scoped instruction files | `.github/instructions/*.instructions.md` | Narrow, file-pattern-aware rules for CI, tests, versions, file size, and workspace conventions |
 | Custom agents | `.github/agents/*.agent.md` | Domain-specific delegated agents with project-specialized operating rules |
@@ -42,7 +42,7 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 ### Current Instruction Inventory (15 files)
 
 | File | Primary Scope (`applyTo`) | Use When | Last Revised |
-|------|--------------------------|----------|-------------|
+| ------ | -------------------------- | ---------- | ------------- |
 | `workspace.instructions.md` | `**` | Cross-project workspace conventions (Python + C++ projects) | v38.0 |
 | `cpp-coding.instructions.md` | `**/*.h, **/*.cpp` | C++20 coding standards, MSVC v145, naming, patterns | v38.0 |
 | `build.instructions.md` | `**/CMakeLists.txt, **/build-scripts/**` | Build system, CMake, MSBuild, external libraries | v38.0 |
@@ -73,7 +73,7 @@ When updating any AI-facing repository asset under `.github/`, keep this file in
 ### Active Repository Agents
 
 | Agent | File | Role | Last Revised |
-|------|------|------|--------------|
+| ------ | ------ | ------ | -------------- |
 | `ExplorerLens` | `.github/agents/explorerlens.agent.md` | Specialized native-code agent for MSVC/CMake/MSBuild/COM/GPU work | v38.0 |
 | `Docs` | `.github/agents/docs.agent.md` | Documentation accuracy agent — checks docs reflect actual code | v38.0 |
 | `Release` | `.github/agents/release.agent.md` | Release orchestration — version bumps, artifact validation, post-release checks | v38.0 |
@@ -108,7 +108,7 @@ Add a new `.agent.md` file only when all of the following are true:
 ### Current Prompt Inventory
 
 | Prompt | File | Purpose | Last Revised |
-|-------|------|---------|-------------|
+| ------- | ------ | --------- | ------------- |
 | Architecture review | `.github/prompts/architecture-review.prompt.md` | Architecture and design review | v38.0 |
 | Benchmark analysis | `.github/prompts/benchmark-analysis.prompt.md` | Performance benchmark analysis | v38.0 |
 | Code review | `.github/prompts/code-review.prompt.md` | Structured security, quality, and architecture review | v38.0 |
@@ -139,7 +139,7 @@ Add a new `.agent.md` file only when all of the following are true:
 ### Current Skill Inventory
 
 | Skill | File | Use For | Last Revised |
-|------|------|---------|-------------|
+| ------ | ------ | --------- | ------------- |
 | ExplorerLens build and release | `.github/skills/explorerlens-build-and-release/SKILL.md` | Build, clean build, test, version bump, release preparation | v38.0 |
 | ExplorerLens workflows and MCP | `.github/skills/explorerlens-workflows-and-mcp/SKILL.md` | Workflow edits, automation review, MCP alignment, repo AI configuration | v38.0 |
 | Decoder development | `.github/skills/decoder-development/SKILL.md` | New decoder authoring, format registration, test integration | v38.0 |
@@ -161,7 +161,7 @@ Add a new `.agent.md` file only when all of the following are true:
 The workspace currently defines MCP servers in `.vscode/mcp.json`.
 
 | Server | Backing Package | Scope | Primary Use | Last Revised |
-|--------|------------------|-------|-------------|-------------|
+| -------- | ------------------ | ------- | ------------- | ------------- |
 | `github` | `@modelcontextprotocol/server-github` | GitHub API via PAT input | Issues, PRs, repo metadata, automation triage | v38.4 |
 | `filesystem` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}` | Full workspace file inspection and read/write operations | v38.4 |
 | `project-docs` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}\.github`, `${workspaceFolder}\docs` | Documentation-only editing and review | v38.4 |
@@ -183,7 +183,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 ### Core Build and Validation Workflows
 
 | Workflow | File | Purpose |
-|---------|------|---------|
+| --------- | ------ | --------- |
 | Canonical CI | `.github/workflows/ci-matrix.yml` | Main push/PR build matrix for Engine and shell validation |
 | Scheduled build | `.github/workflows/build.yml` | Manual/scheduled weekly verification build (not push/PR) |
 | Reusable build | `.github/workflows/reusable-build.yml` | Reusable `workflow_call` Engine build+test pattern (DRY) |
@@ -197,7 +197,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 ### Release and Distribution Workflows
 
 | Workflow | File | Purpose |
-|---------|------|---------|
+| --------- | ------ | --------- |
 | Release packaging | `.github/workflows/release.yml` | Build artifacts, package release assets, create draft release |
 | Package publishing | `.github/workflows/publish-packages.yml` | Publish NuGet, npm, and container packages (Maven/RubyGems removed — R5) |
 | Release drafting | `.github/workflows/release-drafter.yml` | Maintains release draft notes |
@@ -205,14 +205,14 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 ### Phase 4 Stub Workflows (gated — not yet active on push/PR)
 
 | Workflow | File | Purpose |
-|---------|------|---------|
+| --------- | ------ | --------- |
 | Sanitizer CI | `.github/workflows/sanitizer-ci.yml` | ASAN + UBSAN build + tests (Phase 4 gate; `workflow_dispatch` only) |
 | Fuzz CI | `.github/workflows/fuzz-ci.yml` | libFuzzer targets for 13 P0/P1 decoders (Phase 4 gate; `workflow_dispatch` only) |
 
 ### Regression and Specialized Validation
 
 | Workflow | File | Purpose |
-|---------|------|---------|
+| --------- | ------ | --------- |
 | Binary size gate | `.github/workflows/binary-size.yml` | Size regression protection |
 | Catch2 tests | `.github/workflows/catch2-tests.yml` | Catch2-specific validation surface |
 | Corpus validation | `.github/workflows/corpus-validation.yml` | Test corpus/data validation |
@@ -222,7 +222,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 ### Repository Operations
 
 | Workflow | File | Purpose |
-|---------|------|---------|
+| --------- | ------ | --------- |
 | Auto label | `.github/workflows/auto-label.yml` | Issue/PR labeling automation |
 | Sync labels | `.github/workflows/sync-labels.yml` | Label catalog synchronization |
 | Notify failure | `.github/workflows/notify-failure.yml` | Failure notification routing |
@@ -241,7 +241,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 ### Workflow Compliance Status (Audited v39.9.0 — post S381)
 
 | Check | Status |
-|-------|--------|
+| ------- | -------- |
 | All actions at v4+ (or latest stable) | 26/26 ✅ |
 | `permissions:` block present | 26/26 ✅ |
 | `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` | 26/26 ✅ |
@@ -257,7 +257,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 ## Standards Reference Documents
 
 | Document | File | Purpose | Last Revised |
-|----------|------|---------|-------------|
+| ---------- | ------ | --------- | ------------- |
 | Lessons learned | `.github/standards/lessons-learned.md` | Engineering retrospective, sprint incident log | v38.4 |
 | Tool versions | `.github/standards/tool-versions.md` | Canonical toolchain version table | v38.4 |
 | Build method | `.github/standards/build-method.md` | Build entry-point reference | v38.4 |
@@ -272,7 +272,7 @@ ADRs live in `docs/adr/` and are indexed in `docs/adr/README.md`.
 ### Active ADRs (v39.9.0)
 
 | ADR | File | Status | Topic | Version |
-|-----|------|--------|-------|---------|
+| ----- | ------ | -------- | ------- | --------- |
 | ADR-001 | `ADR-001-wasm-sandbox.md` | Accepted | WASM sandbox for plugin isolation | — |
 | ADR-002 | `ADR-002-npu-acceleration.md` | Accepted | NPU acceleration strategy | — |
 | ADR-003 | `ADR-003-clip-embeddings.md` | Accepted | CLIP embeddings for visual search | — |

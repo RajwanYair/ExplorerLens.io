@@ -1,4 +1,4 @@
-# ExplorerLens Build Troubleshooting Guide
+﻿# ExplorerLens Build Troubleshooting Guide
 
 **Last Updated:** May 2026
 **Applies To:** v24.1.0 "Altair-R", VS 18 2026 Build Tools, MSVC v145 toolset
@@ -378,7 +378,7 @@ round exposes only the next 100 errors — multiple fix iterations are required.
 ### Known Type Rename Mapping (v23.x batch)
 
 | Old Name | New Name | File |
-|----------|----------|------|
+| ---------- | ---------- | ------ |
 | `PackageType` | `MSIXPackageType` | `Engine/Utils/MSIXPackageBuilder.h` |
 | `GateVerdict` | `ReleaseGateVerdict` | `Engine/Utils/ReleaseGate.h` |
 | `QualityPreset` | `ExportQualityPreset` | `Engine/Utils/ThumbnailExportPipeline.h` |

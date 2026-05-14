@@ -6,8 +6,6 @@
 //
 #pragma once
 
-#include "../AI/SceneUnderstandingEngine.h"
-#include "../AI/SmartCropV2.h"
 #include "../Cache/CacheWarmingService.h"
 #include "../Cache/MultiTenantCacheManager.h"
 #include "../Cache/PersistentCacheManager.h"
@@ -179,18 +177,12 @@
 #include "../Utils/WindowsCompat.h"
 
 // Sprint 1061-1070 — Intelligent Workflow Automation (v31.3.0 "Achernar-T")
-#include "../AI/ContentCategorizationEngine.h"
-#include "../AI/PredictivePregenEngine.h"
-#include "../AI/ThumbnailQualityPredictor.h"
 #include "../Core/SmartBatchProcessor.h"
 #include "../Core/UserBehaviorAnalytics.h"
 #include "../Core/WorkflowAutomationEngine.h"
 #include "../Pipeline/AdaptivePipelineOptimizer.h"
 #include "../Pipeline/IntelligentPrefetchScheduler.h"
 // v31.9.0 — Autonomous Shell Intelligence
-#include "../AI/AutonomousWorkflowOrchestrator.h"
-#include "../AI/ShellIntelligenceAdapter.h"
-#include "../AI/ThumbnailRelevanceRanker.h"
 #include "../Core/AdaptiveShellIntegrationEngine.h"
 #include "../Core/ShellExtensionLifecycleManager.h"
 #include "../Pipeline/AutotuningPipelineEngine.h"
@@ -205,7 +197,6 @@
 #include "../Plugin/PluginZeroTrustSandbox.h"
 #include "../Utils/SecurityPostureAnalyzer.h"
 // v32.1.0 — Edge AI & Hardware-Accelerated Inference
-#include "../AI/HardwareCapabilityNegotiator.h"
 #include "../Core/ComputeDeviceRegistry.h"
 #include "../GPU/AMDXDNABackend.h"
 #include "../GPU/EdgeAIInferenceEngine.h"
@@ -232,11 +223,6 @@
 #include "../Core/DirectStorageProfiler.h"
 #include "../Core/ZeroCopyDecodeSession.h"
 // Sprint 1121-1130: CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
-#include "../AI/HNSWIndexEngine.h"
-#include "../AI/CLIPQueryProcessor.h"
-#include "../AI/SemanticSearchOrchestrator.h"
-#include "../AI/EmbeddingPersistenceEngine.h"
-#include "../AI/VisualQueryOptimizer.h"
 // Sprint 1131-1140: Live Preview Scrubber (v32.7.0 "Fomalhaut-X")
 #include "../Media/VideoFrameExtractor.h"
 #include "../Media/VideoScrubberTimeline.h"
@@ -255,11 +241,6 @@
 #include "../Enterprise/EnterpriseAuditLogger.h"
 #include "../Enterprise/ConfigMgrPolicyBridge.h"
 // Sprint 1171-1180: Generative AI Thumbnails (v33.3.0 "Spica-T")
-#include "../AI/NPUThumbnailSynthesizer.h"
-#include "../AI/DiffusionModelEngine.h"
-#include "../AI/ThumbnailInpaintEngine.h"
-#include "../AI/OffDeviceInferenceRouter.h"
-#include "../AI/AIThumbnailBatchProcessor.h"
 // Sprint 1181-1190: Plugin Marketplace v5 (v33.4.0 "Spica-U")
 #include "../Plugin/PluginMarketplaceV5.h"
 #include "../Plugin/SDKCompatKit3.h"
@@ -419,11 +400,6 @@
 
 #include "../Core/LivePreviewScrubber.h"
 // --- Sprint additions: stub headers for missing types ---
-#include "../AI/AISearchIntegration.h"
-#include "../AI/ContentAwareInpainter.h"
-#include "../AI/GenerativeThumbnailEngine.h"
-#include "../AI/ImageDescriptionSynthesizer.h"
-#include "../AI/StyleTransferRenderer.h"
 #include "../Core/DarkModeEngine.h"
 #include "../Core/DecoderCompatLayer.h"
 #include "../Core/DecoderHotfixApplicator.h"
@@ -437,16 +413,6 @@
 #include "../Plugin/PluginHotReload.h"
 #include "../Utils/DocumentationExcellenceV2.h"
 // --- Sprint 991-1060: core, decoders, AI, plugin, enterprise additions ---
-#include "../AI/CLIPEmbeddingEngine.h"
-#include "../AI/ContentModerationFilter.h"
-#include "../AI/EmbeddingCacheStore.h"
-#include "../AI/GenerativeAuditTrail.h"
-#include "../AI/GenerativeUpscalerV3.h"
-#include "../AI/IncrementalIndexUpdater.h"
-#include "../AI/MultiModalRanker.h"
-#include "../AI/NaturalLanguageQueryParser.h"
-#include "../AI/SearchResultDeduplicator.h"
-#include "../AI/ThumbnailPersonalisationEngine.h"
 #include "../Cache/DirectStorageCacheTier.h"
 #include "../Core/AnimatedFrameScrubber.h"
 #include "../Core/AnnotationExportPipelineV2.h"
@@ -745,7 +711,6 @@
 #include "../Utils/PerceptualHashing.h"
 
 // Additional module headers
-#include "../AI/ImageQualityAssessorV2.h"
 #include "../Core/DiagnosticsCollector.h"
 #include "../Core/IntegrationTestRunner.h"
 #include "../Core/SBOMGenerator.h"
@@ -756,8 +721,6 @@
 #include "../Utils/InstallerLifecycleManager.h"
 
 // Additional module headers
-#include "../AI/DecodeStrategyOptimizer.h"
-#include "../AI/ImageComplexityAnalyzer.h"
 #include "../Cache/CacheBudgetAutoTuner.h"
 #include "../Cache/CacheCoherencyManager.h"
 #include "../Cache/CacheDiagnostics.h"
@@ -919,8 +882,6 @@
 #include "../Core/GracefulDegradation.h"
 
 // Sprint 69-88: Beyond Zenith
-#include "../AI/FaceDetectionThumbnail.h"
-#include "../AI/ObjectSaliencyMapper.h"
 #include "../Cache/SemanticCacheIndex.h"
 #include "../Core/AdaptiveLODEngine.h"
 #include "../Core/ContentAwareCompositor.h"
@@ -955,8 +916,6 @@
 #include "../Plugin/PluginTelemetryBridge.h"
 
 // Sprint 349-393: Enhancement Plan V15 — Production Polish
-#include "../AI/DirectMLInferenceEngine.h"
-#include "../AI/ONNXModelLoader.h"
 #include "../Core/AVX2ScaleKernel.h"
 #include "../Core/CRTLinkageValidator.h"
 #include "../Core/FFmpegExtractor.h"
@@ -999,7 +958,6 @@
 #include "../Pipeline/RequestDeduplicator.h"
 
 // Sprint 395+: Enhancement Plan V15 — 50 New Feature Headers
-#include "../AI/FileTypePredictor.h"
 #include "../Cache/CacheGarbageCollector.h"
 #include "../Cache/CachePartitionManager.h"
 #include "../Core/ExplorerIntegrationMonitor.h"
@@ -1228,7 +1186,6 @@
 #include "../Core/SecureStringPool.h"
 #include "../Core/StackGuardPolicy.h"
 // Sprint 341-350 (v22.2.0 "Sirius-S") — Security & Audit v3
-#include "../AI/BlurDetectionFilter.h"
 #include "../Utils/CertificatePinner.h"
 #include "../Utils/ColorBlindFilter.h"
 #include "../Utils/FirstRunExperience.h"
@@ -1237,10 +1194,6 @@
 #include "../Utils/LocalizationValidator.h"
 #include "../Utils/StoreReadinessChecker.h"
 // Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2
-#include "../AI/AIModelRegistry.h"
-#include "../AI/AIPerformanceProfiler.h"
-#include "../AI/AIThumbnailPipeline.h"
-#include "../AI/AIUpscaler.h"
 // Sprint 361-370 — Advanced Scheduling & Concurrency v2 (v22.4.0)
 #include "../Core/CPUAffinityRouter.h"
 #include "../Core/CooperativeTaskScheduler.h"
@@ -1314,9 +1267,6 @@
 #include "../Plugin/PluginRuntimeValidation.h"
 
 // Sprint 1071-1080 — Contextual Intelligence & Self-Healing (v31.4.0 "Achernar-U")
-#include "../AI/ContextualRenderingEngine.h"
-#include "../AI/FormatComplexityAnalyzer.h"
-#include "../AI/SmartThumbnailCompositor.h"
 #include "../Core/DecoderFaultIsolator.h"
 #include "../Core/DiagnosticTelemetryCollector.h"
 #include "../Core/FaultTolerantDecodeOrchestrator.h"
@@ -1324,8 +1274,6 @@
 #include "../Pipeline/SmartRetryOrchestrator.h"
 
 // Sprint 1081-1090 — Format Routing & Enhanced Accessibility (v31.5.0 "Achernar-V")
-#include "../AI/AdaptiveColorProfileManager.h"
-#include "../AI/ThumbnailAccessibilityEngine.h"
 #include "../Core/CrossFormatMetadataEngine.h"
 #include "../Core/DecoderVersionManager.h"
 #include "../Core/SmartFileTypeRouter.h"

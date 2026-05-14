@@ -1,4 +1,4 @@
-# MCP Server Evaluation — SQLite + Fetch (§13.1 P2)
+﻿# MCP Server Evaluation — SQLite + Fetch (§13.1 P2)
 
 > **Status:** Evaluated · Decision: **Adopt both (conditional)**
 > **Updated:** 2026-04-23 · Follows `.vscode/mcp.json` conventions (see
@@ -26,7 +26,7 @@ Expose a SQLite database over MCP so agents can:
 ### Candidate databases
 
 | Database | Location | Schema owner |
-|----------|----------|--------------|
+| ---------- | ---------- | -------------- |
 | `cache.db` | `%LOCALAPPDATA%\ExplorerLens\cache\cache.db` | `Engine/Cache/` |
 | `pso-cache.db` | `%LOCALAPPDATA%\ExplorerLens\cache\pso-cache.db` | `Engine/Cache/PSOCache.h` |
 | `baseline.db` | `data/baselines/` (planned, v39+) | `Engine/Tests/benchmarks/` |
@@ -34,7 +34,7 @@ Expose a SQLite database over MCP so agents can:
 ### Evaluation findings
 
 | Criterion | Result |
-|-----------|--------|
+| ----------- | -------- |
 | Installation | `npx @modelcontextprotocol/server-sqlite <path>` |
 | Read-only mode | Supported via `--readonly` flag — **required for cache DBs** |
 | Schema exposure | `list_tables`, `describe_table`, `run_query` tools |
@@ -86,7 +86,7 @@ from the web without leaving the agent context:
 ### Evaluation findings
 
 | Criterion | Result |
-|-----------|--------|
+| ----------- | -------- |
 | Installation | `npx @modelcontextprotocol/server-fetch` |
 | Allowed domains | Configurable via `--allowed-domains` — **always restrict** |
 | DNS rebinding | Mitigated by domain allowlist |
@@ -96,7 +96,7 @@ from the web without leaving the agent context:
 
 ### Recommended domain allowlist
 
-```
+```text
 github.com
 raw.githubusercontent.com
 www.w3.org
@@ -138,7 +138,7 @@ scoop.sh
 ## 3. Action Items
 
 | Item | Owner | Target |
-|------|-------|--------|
+| ------ | ------- | -------- |
 | Add `sqlite-cache` server to `.vscode/mcp.json` | Engineering | v39 sprint |
 | Add `fetch-specs` server to `.vscode/mcp.json` | Engineering | v39 sprint |
 | Update `ai-tooling-capabilities.md` MCP server inventory | AI tooling | same sprint |

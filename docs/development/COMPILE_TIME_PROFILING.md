@@ -1,4 +1,4 @@
-# Compile-Time Profiling Guide
+﻿# Compile-Time Profiling Guide
 
 > MSVC `/d1reportTime` for identifying slow-to-compile headers and template instantiations.
 
@@ -11,7 +11,7 @@ productivity. A single bloated header included transitively across 50 TUs can ad
 to a clean build.
 
 | Build Type | Target | Alert |
-|-----------|--------|-------|
+| ----------- | -------- | ------- |
 | Full rebuild (Release) | < 120 s | > 180 s → investigate |
 | Incremental (1 file) | < 15 s | > 30 s → investigate |
 | PCH generation | < 10 s | > 15 s → consider splitting |
@@ -36,7 +36,7 @@ Select-String "time\(" build-logs/d1-DecodePipeline.txt |
 
 ### Reading the Output
 
-```
+```text
 time(source): 0.00523s    Engine/Core/DecodePipeline.h
 time(source): 0.00312s    Engine/Decoders/JpegDecoder.h
 time(source): 0.12500s    <windows.h>           ← slow system header
@@ -174,7 +174,7 @@ Update this file after each major version bump to track trends.
 ## Thresholds and Actions
 
 | Metric | Threshold | Action |
-|--------|-----------|--------|
+| -------- | ----------- | -------- |
 | Single header | > 500 ms | Move to PCH or add forward declarations |
 | Template instantiation | > 200 ms | Use explicit instantiation in `.cpp` |
 | PCH generation | > 15 s | Split PCH into stable/volatile sections |

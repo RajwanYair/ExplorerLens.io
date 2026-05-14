@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 name: TestCorpus
 description: "ExplorerLens test corpus agent — manages the data/corpus/ directory, validates decoder output against real CC0 files, tracks SSIM scores, and ensures every decoder is tested with real I/O."
@@ -27,7 +27,7 @@ You are the **ExplorerLens Test Corpus Agent**. Your job is to maintain the test
 
 ## Corpus Structure
 
-```
+```text
 data/corpus/
 ├── images/
 │   ├── jpeg/     (≥5 files: basic, EXIF-rotated, progressive, CMYK, 6MP)
@@ -113,7 +113,7 @@ JPEG, PNG, WebP, AVIF, HEIC, JXL, PDF, RAW (any camera), ZIP/CBZ, RAR/CBR, 7Z, E
 
 Corpus files are uploaded to CI cache via `.github/workflows/build-engine.yml`.
 The corpus runner is invoked as part of the test suite:
-```
+```powershell
 ctest --test-dir build -C Release -R CorpusValidation
 ```
 
@@ -162,7 +162,7 @@ When removing a file, remove its entry from MANIFEST.json in the same commit.
 After generating thumbnails from corpus files, enforce these SSIM thresholds:
 
 | Category | Min SSIM | Examples |
-|----------|----------|---------|
+| ---------- | ---------- | --------- |
 | Lossless | 0.99 | PNG, BMP, TIFF 8-bit |
 | Lossy high-quality | 0.95 | JPEG q90+, WebP |
 | Lossy compressed | 0.85 | JPEG q50, DDS BC1 |

@@ -1,4 +1,4 @@
-# Coding Standards
+﻿# Coding Standards
 
 This document defines the coding standards and conventions for the ExplorerLens project.
 
@@ -64,7 +64,7 @@ using ImageBuffer_t = std::vector<uint8_t>;
 
 ### File Naming
 
-```
+```text
 ThumbnailEngine.h // Header file: PascalCase
 ThumbnailEngine.cpp // Implementation: PascalCase
 format_utils.h // Utility headers: lowercase with underscores
@@ -443,9 +443,9 @@ Get-ChildItem -Path "C:\Temp"
 ## Tables
 
 | Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
+| ---------- | ---------- | ---------- |
 | Data 1 | Data 2 | Data 3 |
-```
+```text
 
 ### README Files
 
@@ -476,7 +476,7 @@ How to use this directory
 
 ### Commit Message Format
 
-```
+```text
 <type>(<scope>): <subject>
 
 <body>
@@ -499,7 +499,7 @@ How to use this directory
 
 ### Examples
 
-```
+```text
 feat(decoder): add JPEG XL format support
 
 Implement JXL decoder using libjxl 0.11.1.
@@ -508,7 +508,7 @@ Supports basic decoding and thumbnail generation.
 Closes #123
 ```
 
-```
+```text
 fix(cache): resolve memory leak in cache eviction
 
 The LRU cache was not properly releasing memory when
@@ -517,7 +517,7 @@ evicting old entries. Now uses RAII for cleanup.
 Fixes #456
 ```
 
-```
+```text
 docs(readme): update build instructions
 
 Add section for building on Windows 11.
@@ -577,13 +577,13 @@ See [PROJECT_STRUCTURE.md](../../PROJECT_STRUCTURE.md) for complete structure.
 Be constructive and specific:
 
 ✅ **Good:**
-```
+```text
 Consider using std::make_unique here for exception safety:
 auto decoder = std::make_unique<WebPDecoder>();
 ```
 
 ❌ **Bad:**
-```
+```text
 This code is wrong.
 ```
 

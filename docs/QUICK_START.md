@@ -1,4 +1,4 @@
-# ExplorerLens — Quick Start Guide
+﻿# ExplorerLens — Quick Start Guide
 
 > **Version:** 39.9.0 "Antares"  
 > **Target:** Windows 10/11 x64, Visual Studio 18 2026 (MSVC v145)
@@ -8,7 +8,7 @@
 ## 1. Prerequisites
 
 | Tool | Version | Install |
-|------|---------|---------|
+| ------ | --------- | --------- |
 | Visual Studio 18 2026 BuildTools | v145 (cl.exe 19.50) | [visualstudio.microsoft.com](https://visualstudio.microsoft.com/downloads/) |
 | CMake | 4.3+ | `scoop install cmake` |
 | Ninja | 1.13+ | `scoop install ninja` |
@@ -84,7 +84,8 @@ regsvr32 "x64\Release\LENSShell.dll"
 regsvr32 /u "x64\Release\LENSShell.dll"
 ```
 
-After registration, restart Windows Explorer (`taskkill /f /im explorer.exe && explorer.exe`) or simply browse to an image folder to verify thumbnails appear.
+After registration, restart Windows Explorer (`taskkill /f /im explorer.exe && explorer.exe`) or simply browse
+to an image folder to verify thumbnails appear.
 
 ---
 
@@ -111,7 +112,7 @@ Expected: `~4724 tests passed, 0 failed`.
 ## 8. CMake Presets
 
 | Preset | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `default-release` | Ninja + MSVC v145, local `external/` libs |
 | `default-debug` | Debug build with /Z7 info |
 | `vcpkg-release` | Use vcpkg for all dependencies |
@@ -143,7 +144,7 @@ cmake --preset default-release -DBUILD_CATCH2_TESTS=ON -DBUILD_TESTS=OFF
 
 ## 10. Project Layout
 
-```
+```text
 ExplorerLens/
 ├── Engine/               Core decode + GPU pipeline (C++23 static lib)
 │   ├── Core/             Decode pipeline, GPU renderer, resource management
@@ -166,7 +167,7 @@ ExplorerLens/
 ## 11. Common Issues
 
 | Symptom | Fix |
-|---------|-----|
+| --------- | ----- |
 | CMake picks Clang instead of MSVC | Source `vcvars64.bat` first, or use `Build-MSVC.ps1` |
 | `LNK2019` unresolved external | Rebuild external libs with matching `/MD` CRT |
 | Thumbnails don't appear after install | Run `regsvr32 LENSShell.dll` in elevated prompt |
@@ -178,9 +179,9 @@ ExplorerLens/
 ## 12. Contributing
 
 1. Fork → create a feature branch
-2. Follow conventions in `.github/standards/coding-standards.md`
-3. Run `.\build-scripts\Build-MSVC.ps1 -Clean -Test` — must pass with 0 errors, 0 warnings
-4. Run `.\tools\Validate-Corpus.ps1` — all corpus entries must validate
-5. Open a PR — binary-size gate + all CI checks must pass
+1. Follow conventions in `.github/standards/coding-standards.md`
+1. Run `.\build-scripts\Build-MSVC.ps1 -Clean -Test` — must pass with 0 errors, 0 warnings
+1. Run `.\tools\Validate-Corpus.ps1` — all corpus entries must validate
+1. Open a PR — binary-size gate + all CI checks must pass
 
 See [ROADMAP.md](../ROADMAP.md) for planned features and open issues on GitHub for contribution opportunities.

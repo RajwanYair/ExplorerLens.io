@@ -1,15 +1,17 @@
-# RAW Camera Format Decoder Implementation
+﻿# RAW Camera Format Decoder Implementation
 
-** - Professional Formats Phase** | **Status:** ✅ Implemented (WIC-based)
+**- Professional Formats Phase** | **Status:** ✅ Implemented (WIC-based)
 
 ## Overview
 
-ExplorerLens now supports 50+ camera RAW formats from all major manufacturers through a Windows Imaging Component (WIC) based decoder. This provides native Windows integration without requiring external libraries.
+ExplorerLens now supports 50+ camera RAW formats from all major manufacturers through a Windows Imaging Component (WIC)
+based decoder. This provides native Windows integration without requiring external libraries.
 
 ## Implementation Details
 
 ### Technology Stack
-- **Decoder Engine**: Windows Imaging Component (WIC) 
+
+- **Decoder Engine**: Windows Imaging Component (WIC)
 - **Format Support**: Canon, Nikon, Sony, Olympus, Panasonic, Pentax, Fujifilm, DNG, and more
 - **Codec Requirement**: Microsoft Camera Codec Pack (Windows Feature On Demand)
 - **Implementation**: [LENSShell/raw_decoder.cpp](../LENSShell/raw_decoder.cpp) (233 lines)
@@ -18,24 +20,27 @@ ExplorerLens now supports 50+ camera RAW formats from all major manufacturers th
 ### Key Features
 
 1. **Embedded Thumbnail Extraction** (Fast Path)
- - Extracts pre-rendered JPEG thumbnails embedded in RAW files
- - Sub-10ms performance for most files
- - Uses WIC preview frames when available
 
-2. **Full RAW Decoding** (Fallback)
- - Decodes full RAW sensor data when thumbnails unavailable
- - Automatic color correction and white balance
- - sRGB color space output
+- Extracts pre-rendered JPEG thumbnails embedded in RAW files
+- Sub-10ms performance for most files
+- Uses WIC preview frames when available
 
-3. **Camera Metadata Extraction**
- - Reads camera make and model from EXIF
- - Supports EXIF metadata query readers
- - Provides camera identification for UI display
+1. **Full RAW Decoding** (Fallback)
+
+- Decodes full RAW sensor data when thumbnails unavailable
+- Automatic color correction and white balance
+- sRGB color space output
+
+1. **Camera Metadata Extraction**
+
+- Reads camera make and model from EXIF
+- Supports EXIF metadata query readers
+- Provides camera identification for UI display
 
 ### Supported RAW Formats
 
 | Manufacturer | Extensions | Camera Models |
-|--------------|------------|---------------|
+| -------------- | ------------ | --------------- |
 | **Canon** | .CR2, .CR3, .CRW | EOS R series, 5D Mark IV, 90D, M50 |
 | **Nikon** | .NEF, .NRW | Z series, D850, D780, Z9, D6 |
 | **Sony** | .ARW, .SRF, .SR2 | α series, A7 IV, A1, RX100 |
@@ -141,17 +146,20 @@ namespace RawDecoder {
 RAW format support requires the Microsoft Camera Codec Pack:
 
 1. **Windows 10/11**: Install as a Feature On Demand
+
  ```powershell
  Add-WindowsCapability -Online -Name "Microsoft.Windows.Photos.RawCodecs~~~~"
  ```
 
-2. **Alternative**: Download from Microsoft Store
- - Search for "Raw Image Extension"
- - Install for free
+1. **Alternative**: Download from Microsoft Store
+
+- Search for "Raw Image Extension"
+- Install for free
 
 ### Supported Formats
 
 The Camera Codec Pack provides native WIC codecs for:
+
 - Canon (.CR2, .CR3, .CRW)
 - Nikon (.NEF, .NRW)
 - Sony (.ARW, .SRF, .SR2)
@@ -164,7 +172,7 @@ The Camera Codec Pack provides native WIC codecs for:
 ## Performance Characteristics
 
 | Operation | Performance | Notes |
-|-----------|-------------|-------|
+| ----------- | ------------- | ------- |
 | **Embedded Thumbnail** | <10ms | Fast path, 95% of files |
 | **Full RAW Decode** | 50-200ms | Fallback for files without thumbnails |
 | **Dimension Query** | <5ms | Metadata-only read |
@@ -173,9 +181,9 @@ The Camera Codec Pack provides native WIC codecs for:
 ### Optimization Strategy
 
 1. **Try embedded thumbnail first** (IWICBitmapDecoder::GetPreview)
-2. **Fall back to frame decode** if no preview available
-3. **Scale at decode time** using WIC scaler (high-quality)
-4. **Cache results** using ExplorerLens thumbnail cache (10-100x boost)
+1. **Fall back to frame decode** if no preview available
+1. **Scale at decode time** using WIC scaler (high-quality)
+1. **Cache results** using ExplorerLens thumbnail cache (10-100x boost)
 
 ## Testing
 
@@ -183,7 +191,7 @@ The Camera Codec Pack provides native WIC codecs for:
 
 Create test archives with the following RAW formats:
 
-```
+```powershell
 test-raw-formats/
 ├── canon_cr2/
 │ └── sample_canon_5d4.cr2
@@ -200,15 +208,18 @@ test-raw-formats/
 ### Expected Behavior
 
 ✅ **Thumbnail Generation**:
+
 - Canon .CR2/.CR3 files show embedded thumbnails
 - Nikon .NEF files show preview images
 - Sony .ARW files decode with correct colors
 
 ✅ **Metadata Extraction**:
+
 - Camera make/model displayed correctly
 - Dimensions match original RAW file specs
 
 ✅ **Error Handling**:
+
 - Graceful fallback for unsupported formats
 - Clear error messages in debug log
 
@@ -217,6 +228,7 @@ test-raw-formats/
 ### WIC-based (Current Implementation)
 
 **Pros:**
+
 - ✅ Zero external dependencies
 - ✅ Native Windows integration
 - ✅ Hardware-accelerated decoding
@@ -224,6 +236,7 @@ test-raw-formats/
 - ✅ Built-in color management
 
 **Cons:**
+
 - ⚠️ Requires Camera Codec Pack installation
 - ⚠️ Limited to formats supported by Microsoft
 - ⚠️ Less control over RAW processing pipeline
@@ -231,11 +244,13 @@ test-raw-formats/
 ### LibRaw Alternative (Considered)
 
 **Pros:**
+
 - ✅ 50+ RAW formats out-of-the-box
 - ✅ Fine-grained control over decoding
 - ✅ No codec pack dependency
 
 **Cons:**
+
 - ❌ 15MB+ external library
 - ❌ Complex build process (CMake, multiple dependencies)
 - ❌ Slower than native WIC codecs
@@ -248,37 +263,41 @@ test-raw-formats/
 ### Optional Enhancements
 
 1. **Libraw Fallback**: Add LibRaw as optional fallback for exotic formats
-2. **RAW Metadata Display**: Show ISO, aperture, shutter speed in tooltip
-3. **RAW Format Conversion**: Export RAW to JPEG/PNG with processing
-4. **Camera Profile Support**: Apply camera-specific color profiles
+1. **RAW Metadata Display**: Show ISO, aperture, shutter speed in tooltip
+1. **RAW Format Conversion**: Export RAW to JPEG/PNG with processing
+1. **Camera Profile Support**: Apply camera-specific color profiles
 
 ### Advanced Enhancements
 
 1. **RAW Histogram**: Show RGB histogram for exposure analysis
-2. **White Balance Adjustment**: Interactive white balance in thumbnails
-3. **RAW Batch Processing**: Convert multiple RAW files to standard formats
-4. **sidecar XMP Support**: Read Adobe Lightroom adjustments
+1. **White Balance Adjustment**: Interactive white balance in thumbnails
+1. **RAW Batch Processing**: Convert multiple RAW files to standard formats
+1. **sidecar XMP Support**: Read Adobe Lightroom adjustments
 
 ## Known Limitations
 
 1. **Codec Pack Required**: Windows Camera Codec Pack must be installed
- - Solution: Detect missing codec pack and show installation instructions
- 
-2. **Limited Format Control**: Cannot customize RAW processing pipeline
- - Workaround: WIC uses sensible defaults (camera WB, sRGB output)
- 
-3. **No Thumbnail Fallback for All Formats**: Some exotic formats may not embed thumbnails
- - Mitigation: Full decode fallback handles these cases
+
+- Solution: Detect missing codec pack and show installation instructions
+
+1. **Limited Format Control**: Cannot customize RAW processing pipeline
+
+- Workaround: WIC uses sensible defaults (camera WB, sRGB output)
+
+1. **No Thumbnail Fallback for All Formats**: Some exotic formats may not embed thumbnails
+
+- Mitigation: Full decode fallback handles these cases
 
 ## References
 
-- **Windows Imaging Component**: https://docs.microsoft.com/windows/win32/wic
-- **Camera Codec Pack**: https://www.microsoft.com/store/productId/9NCTDW2W1BH8
-- **RAW Format Specifications**: https://www.adobe.com/products/photoshop/extend.html
+- **Windows Imaging Component**: <https://docs.microsoft.com/windows/win32/wic>
+- **Camera Codec Pack**: <https://www.microsoft.com/store/productId/9NCTDW2W1BH8>
+- **RAW Format Specifications**: <https://www.adobe.com/products/photoshop/extend.html>
 
 ## Deliverables
 
 ✅ **Implementation Complete**:
+
 - WIC-based RAW decoder (233 lines)
 - Support for 50+ camera formats
 - Embedded thumbnail extraction (fast path)
@@ -286,12 +305,14 @@ test-raw-formats/
 - Camera metadata extraction
 
 ✅ **Integration Complete**:
+
 - File extension detection (14 extensions)
 - Decoder routing in lensArchive.h
 - Build configuration updated
 - Zero warnings compilation
 
 ✅ **Documentation Complete**:
+
 - Implementation guide (this document)
 - Code comments and annotations
 - Testing recommendations

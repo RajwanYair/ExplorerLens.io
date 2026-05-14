@@ -1,4 +1,4 @@
-# ExplorerLens Engine
+﻿# ExplorerLens Engine
 
 **Version:** 25.0.0 "Rigel"
 **Created:** January 7, 2026
@@ -8,7 +8,8 @@
 
 ## Overview
 
-The ExplorerLens Engine is a standalone, reusable thumbnail generation library extracted from the LENSShell COM extension. It provides a clean interface-based architecture that enables:
+The ExplorerLens Engine is a standalone, reusable thumbnail generation library extracted from the LENSShell COM
+extension. It provides a clean interface-based architecture that enables:
 
 - **Independent Development**: Engine can be developed and tested without COM overhead
 - **Plugin Support**: Third-party plugins can implement `IThumbnailDecoder`
@@ -132,6 +133,7 @@ if (SUCCEEDED(hr)) {
 Orchestrates the full thumbnail generation process. Thread-safe for `GenerateThumbnail()` calls.
 
 **Performance Baseline:**
+
 - First call: ~50–100ms (cold cache, decoder init)
 - Cache hit: <1ms (sub-millisecond cache engine)
 - Average (warm): ~17ms per thumbnail
@@ -139,19 +141,23 @@ Orchestrates the full thumbnail generation process. Thread-safe for `GenerateThu
 
 ### Decoder System
 
-Plugin-based architecture with `IThumbnailDecoder` interface. 25 built-in decoders covering 200+ formats. Decoders are tried in registration order; first `CanDecode() = true` match handles the file.
+Plugin-based architecture with `IThumbnailDecoder` interface. 25 built-in decoders covering 200+ formats. Decoders are
+tried in registration order; first `CanDecode() = true` match handles the file.
 
 ### Cache System
 
-Disk-backed LRU cache with adaptive budget control. Cache keys derived from `MD5(filepath + filesize + mtime + width + height)`. Sub-millisecond cache engine uses robin-hood open-addressing with XXH3 hashing.
+Disk-backed LRU cache with adaptive budget control. Cache keys derived from `MD5(filepath + filesize + mtime + width +
+height)`. Sub-millisecond cache engine uses robin-hood open-addressing with XXH3 hashing.
 
 ### SIMD Optimization
 
-Runtime CPU feature detection for AVX2 (~3–4x), SSE4.1 (~2–3x), or scalar fallback. Used for color conversion (RGBA ↔ BGRA), image scaling, and RAW demosaicing.
+Runtime CPU feature detection for AVX2 (~3–4x), SSE4.1 (~2–3x), or scalar fallback. Used for color conversion (RGBA ↔
+BGRA), image scaling, and RAW demosaicing.
 
 ### GPU Acceleration
 
-DirectX 11/12 compute shaders for image scaling >4K, batch requests, and HEIF/AVIF decode via WIC GPU path. Falls back to CPU automatically on GPU init failure. Requires DirectX 11.0+, WDDM 2.0+ driver, 256MB VRAM minimum.
+DirectX 11/12 compute shaders for image scaling >4K, batch requests, and HEIF/AVIF decode via WIC GPU path. Falls back
+to CPU automatically on GPU init failure. Requires DirectX 11.0+, WDDM 2.0+ driver, 256MB VRAM minimum.
 
 ### Format Detection
 
@@ -199,18 +205,20 @@ ctest --test-dir build -C Release --output-on-failure
 ## Design Principles
 
 1. **Interface-Based**: All major components accessed via interfaces
-2. **Dependency Injection**: Decoders, renderers, cache providers injected into pipeline
-3. **Zero COM Dependencies**: Engine has no COM dependencies (pure C++)
-4. **Testability First**: All components designed for unit testing
-5. **Performance**: GPU acceleration, smart caching, fast format detection
-6. **Extensibility**: Easy to add new decoders via plugin system
+1. **Dependency Injection**: Decoders, renderers, cache providers injected into pipeline
+1. **Zero COM Dependencies**: Engine has no COM dependencies (pure C++)
+1. **Testability First**: All components designed for unit testing
+1. **Performance**: GPU acceleration, smart caching, fast format detection
+1. **Extensibility**: Easy to add new decoders via plugin system
 
 ---
 
 ## References
 
-- [docs/formats/FORMAT_SUPPORT_MATRIX.md](../docs/formats/FORMAT_SUPPORT_MATRIX.md) — Format support and decoder compliance
-- [docs/architecture/INTEGRATION_ARCHITECTURE.md](../docs/architecture/INTEGRATION_ARCHITECTURE.md) — Integration architecture
+- [docs/formats/FORMAT_SUPPORT_MATRIX.md](../docs/formats/FORMAT_SUPPORT_MATRIX.md) — Format support and decoder
+  compliance
+- [docs/architecture/INTEGRATION_ARCHITECTURE.md](../docs/architecture/INTEGRATION_ARCHITECTURE.md) — Integration
+  architecture
 - [docs/archive/ENHANCEMENT_PLAN_V15.md](../docs/archive/ENHANCEMENT_PLAN_V15.md) — v15.0 roadmap (completed)
 
 ---

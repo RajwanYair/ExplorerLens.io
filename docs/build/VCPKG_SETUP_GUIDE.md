@@ -1,8 +1,9 @@
-# vcpkg Setup Guide for ExplorerLens.io v39.9.0
+﻿# vcpkg Setup Guide for ExplorerLens.io v39.9.0
 
 ## Overview
 
-vcpkg is a C++ package manager that simplifies dependency management. While ExplorerLens.io currently builds most libraries from source, vcpkg integration provides:
+vcpkg is a C++ package manager that simplifies dependency management. While ExplorerLens.io currently builds most
+libraries from source, vcpkg integration provides:
 
 - ✅ **Simplified Updates:** Easily update to latest library versions
 - ✅ **Consistent Builds:** Reproducible builds across machines
@@ -141,7 +142,7 @@ cmake --build build-vcpkg --config Release
 The following packages can be installed via vcpkg:
 
 | Package | Purpose | Size | Build Time |
-|---------|---------|------|------------|
+| --------- | --------- | ------ | ------------ |
 | **zlib** | Compression | ~1 MB | 30s |
 | **zstd** | Zstandard compression | ~2 MB | 1m |
 | **lz4** | LZ4 compression | ~1 MB | 20s |
@@ -155,7 +156,7 @@ The following packages can be installed via vcpkg:
 | **libheif** | HEIF/HEIC decoder | ~8 MB | 3m |
 | **libraw** | Camera RAW decoder | ~12 MB | 4m |
 
-**Total Size:** ~50 MB 
+**Total Size:** ~50 MB
 **Total Build Time:** ~20 minutes (first run only)
 
 ### Manual Package Installation
@@ -205,7 +206,7 @@ Triplets define the target platform and linkage type.
 ### Recommended Triplets
 
 | Triplet | Platform | Linkage | Use Case |
-|---------|----------|---------|----------|
+| --------- | ---------- | --------- | ---------- |
 | **x64-windows** | Windows x64 | Dynamic | Development, quick iteration |
 | **x64-windows-static** | Windows x64 | Static | Release builds, no DLL dependencies |
 | **x64-windows-static-md** | Windows x64 | Static libs, `/MD` runtime | ExplorerLens.io preferred |
@@ -241,7 +242,7 @@ vcpkg install libwebp
 
 ### Issue: vcpkg Not Found
 
-```
+```text
 Error: vcpkg command not found
 ```
 
@@ -258,7 +259,7 @@ $env:VCPKG_ROOT = "$env:USERPROFILE\vcpkg"
 
 ### Issue: Git Clone Fails
 
-```
+```text
 fatal: unable to access 'https://github.com/Microsoft/vcpkg.git/': 
 Failed to connect to github.com port 443
 ```
@@ -285,7 +286,7 @@ Rename-Item "$env:USERPROFILE\vcpkg-master" "$env:USERPROFILE\vcpkg"
 
 ### Issue: Bootstrap Fails
 
-```
+```text
 Error: Failed to bootstrap vcpkg
 ```
 
@@ -307,7 +308,7 @@ winget install Microsoft.VisualStudio.2022.BuildTools
 
 ### Issue: CMake Can't Find vcpkg
 
-```
+```powershell
 CMake Error: Could not find CMAKE_TOOLCHAIN_FILE
 ```
 
@@ -326,7 +327,7 @@ cmake -B build -DCMAKE_TOOLCHAIN_FILE="C:\Users\YourName\vcpkg\scripts\buildsyst
 
 ### Issue: Package Build Fails
 
-```
+```text
 Error: Building package libwebp:x64-windows-static failed
 ```
 
@@ -451,22 +452,22 @@ $env:VCPKG_BINARY_SOURCES = "clear;nuget,https://pkgs.dev.azure.com/...;readwrit
 
 ## Additional Resources
 
-- **vcpkg Official Docs:** https://vcpkg.io/en/docs/README.html
-- **vcpkg GitHub:** https://github.com/microsoft/vcpkg
-- **Package Search:** https://vcpkg.io/en/packages.html
-- **Triplet Reference:** https://vcpkg.io/en/docs/users/triplets.html
+- **vcpkg Official Docs:** <https://vcpkg.io/en/docs/README.html>
+- **vcpkg GitHub:** <https://github.com/microsoft/vcpkg>
+- **Package Search:** <https://vcpkg.io/en/packages.html>
+- **Triplet Reference:** <https://vcpkg.io/en/docs/users/triplets.html>
 
 ---
 
 ## Version Compatibility
 
 | ExplorerLens.io | vcpkg Baseline | CMake | Notes |
-|------------|----------------|-------|-------|
+| ------------ | ---------------- | ------- | ------- |
 | 7.0.0 | 2024.02.14 | 3.20+ | vcpkg manifest mode |
 | 6.2.0 | N/A | 3.20+ | No vcpkg support |
 
 ---
 
-**ExplorerLens.io v39.9.0 - vcpkg Setup Guide** 
-*Last Updated: May 2026* 
-*For packaging and installer creation, see: [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md)*
+**ExplorerLens.io v39.9.0 - vcpkg Setup Guide**
+_Last Updated: May 2026_
+_For packaging and installer creation, see: [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md)_

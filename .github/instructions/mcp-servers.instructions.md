@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: ".vscode/mcp.json"
 ---
 
@@ -12,7 +12,7 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
 ## Current Server Inventory
 
 | Server | Package | Scope | Purpose |
-|--------|---------|-------|---------|
+| -------- | --------- | ------- | --------- |
 | `github` | `@modelcontextprotocol/server-github` | Full GitHub API | Issues, PRs, Actions, repo metadata |
 | `filesystem` | `@modelcontextprotocol/server-filesystem` | `${workspaceFolder}` | Full workspace read/write |
 | `project-docs` | `@modelcontextprotocol/server-filesystem` | `.github/`, `docs/` | Docs-only editing scope |
@@ -70,7 +70,7 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
-|---------|-------|-----|
+| --------- | ------- | ----- |
 | "Cannot find module" | Node.js not on PATH | Add scoop/nvm nodejs paths to `env.PATH` |
 | "EACCES" or "Access denied" | Filesystem scope too narrow | Widen the server's path arguments |
 | Token prompt on every session | VS Code doesn't cache MCP inputs | Use `"type": "promptString"` — this is expected |
@@ -87,7 +87,7 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
 The `github` MCP server requires a PAT with the following scopes for full agent functionality:
 
 | Scope | Why Needed | Required? |
-|-------|-----------|-----------|
+| ------- | ----------- | ----------- |
 | `repo` | Read/write repo contents, issues, PRs, releases | ✅ Required |
 | `workflow` | Trigger and view GitHub Actions workflow runs | ✅ Required |
 | `read:packages` | Read packages from GitHub Packages (NuGet, Container) | ✅ Required |
@@ -110,7 +110,7 @@ If the PAT is missing `write:packages`, the Release agent cannot publish to GitH
 ## Evaluated and Deferred Servers
 
 | Server | Package | Decision | Rationale |
-|--------|---------|----------|-----------|
+| -------- | --------- | ---------- | ----------- |
 | Git MCP | `@anthropic/mcp-server-git` | **Deferred** | GitKraken MCP (`mcp_gitkraken_*`) already provides git blame, log, diff, stash, branch, status, and push operations. Adding a second git server would be redundant. Re-evaluate if GitKraken MCP is removed. |
 | SQLite MCP | `@anthropic/mcp-server-sqlite` | **Deferred** | No SQLite databases in active development workflow yet. Add when cache DB debugging becomes common (Phase 2+). |
 | Fetch MCP | `@anthropic/mcp-server-fetch` | **Deferred** | Built-in `fetch_webpage` tool covers URL content needs. Add only if agents need structured HTTP API access to format specification servers. |

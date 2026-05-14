@@ -1,4 +1,4 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Versions
 
@@ -32,7 +32,7 @@ We provide security patches and updates for the following release lines:
 ### What to Expect
 
 | Severity | Initial Response | Resolution Target |
-|----------|-----------------|-------------------|
+| ---------- | ----------------- | ------------------- |
 | Critical (CVSSv3 9.0+) | 24 hours | 7 days |
 | High (7.0–8.9) | 48 hours | 30 days |
 | Medium (4.0–6.9) | 5 days | 90 days |

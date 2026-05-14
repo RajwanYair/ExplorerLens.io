@@ -1,4 +1,4 @@
-# ExplorerLens — Architecture Decision Records
+﻿# ExplorerLens — Architecture Decision Records
 
 This directory contains Architecture Decision Records (ADRs) documenting key design
 choices made during ExplorerLens development. Each ADR explains the context, decision,
@@ -7,7 +7,7 @@ rationale, and consequences of significant architectural choices.
 ## Index
 
 | ADR | Title | Status | Version |
-|-----|-------|--------|---------|
+| ----- | ------- | -------- | --------- |
 | [ADR-001](ADR-001-WASM-plugin-sandbox.md) | WASM Plugin Sandbox over Native DLL | Accepted | v25.0.0 |
 | [ADR-002](ADR-002-NPU-heterogeneous-compute.md) | NPU & Heterogeneous Compute Routing | Accepted | v25.2.0 |
 | [ADR-003](ADR-003-CLIP-semantic-search.md) | CLIP Embeddings for Semantic Search | Proposed | v30.2.0 |
@@ -22,6 +22,7 @@ rationale, and consequences of significant architectural choices.
 ## Format
 
 Each ADR uses the following structure:
+
 - **Title** — Short descriptive title
 - **Status** — Proposed / Accepted / Deprecated / Superseded
 - **Context** — The situation that motivated the decision

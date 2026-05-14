@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: ".github/**"
 ---
 
@@ -6,7 +6,7 @@ applyTo: ".github/**"
 
 ## PR Title Format
 
-```
+```text
 <type>(<scope>): <imperative short description>
 
 Types: feat | fix | refactor | perf | test | docs | chore | ci | build
@@ -77,7 +77,7 @@ All commits on `main` follow [Conventional Commits v1.0.0](https://www.conventio
 ### Type Reference
 
 | Type | When to Use | Bumps |
-|------|------------|-------|
+| ------ | ------------ | ------- |
 | `feat` | New feature (decoder, API, capability) | Minor |
 | `fix` | Bug fix | Patch |
 | `perf` | Performance improvement (no functional change) | Patch |
@@ -91,7 +91,7 @@ All commits on `main` follow [Conventional Commits v1.0.0](https://www.conventio
 
 ### Breaking Changes
 
-```
+```text
 feat(decoder)!: rename ProbeHeader to Probe
 
 BREAKING CHANGE: All decoder subclasses must rename ProbeHeader() to Probe().
@@ -103,7 +103,7 @@ BREAKING CHANGE: All decoder subclasses must rename ProbeHeader() to Probe().
 ### Complete Scope Reference
 
 | Scope | Directory / Domain | Examples |
-|-------|--------------------|----------|
+| ------- | -------------------- | ---------- |
 | `engine` | `Engine/Core/`, `Engine/Engine.h` | Pipeline changes, core architecture |
 | `shell` | `LENSShell/` | COM DLL, thumbnail provider, shell integration |
 | `manager` | `LENSManager/` | GUI config utility, WTL dialogs |
@@ -134,7 +134,7 @@ and mention others in the commit body.
 ## PR Size Guidelines
 
 | Size | Lines Changed | Expected Review Time | Policy |
-|------|--------------|---------------------|--------|
+| ------ | -------------- | --------------------- | -------- |
 | XS | 1–10 | < 5 min | Self-merge OK for docs/config |
 | S | 11–50 | 15 min | Standard review |
 | M | 51–200 | 30 min | Standard review |
@@ -153,7 +153,7 @@ the XL rule because they are machine-generated batches that must be atomic.
 Apply these labels to PRs based on content:
 
 | Label | When |
-|-------|------|
+| ------- | ------ |
 | `build` | CMakeLists, build-scripts, external-libs changes |
 | `ci/cd` | `.github/workflows/` changes |
 | `decoder` | `Engine/Decoders/` changes |
@@ -184,7 +184,7 @@ Convert to "Ready for Review" only when all CI checks pass.
 
 ## Branch Naming Convention
 
-```
+```text
 <type>/<scope>-<short-description>
 
 Examples:
@@ -221,7 +221,7 @@ Examples:
 
 ### Multi-Sprint Commits
 
-```
+```text
 chore: bump version to 36.7.0 (Antares)
 
 Sprints S51-S60:
@@ -252,7 +252,7 @@ If any match is found, the PR must not be opened until the artifact is removed.
 ### Ownership Areas
 
 | Path Pattern | Required Reviewer | Reason |
-|-------------|-------------------|--------|
+| ------------- | ------------------- | -------- |
 | `LENSShell/**` | Security-aware reviewer | COM DLL loaded by explorer.exe |
 | `Engine/Core/**` | Engine lead | Core pipeline changes affect all decoders |
 | `Engine/Decoders/**` | Decoder author + one other | Format-specific expertise required |
@@ -264,7 +264,7 @@ If any match is found, the PR must not be opened until the artifact is removed.
 ### Review SLA
 
 | PR Size | Initial Review | Final Approval |
-|---------|---------------|----------------|
+| --------- | --------------- | ---------------- |
 | XS / S | Same day | Same day |
 | M | 1 business day | 2 business days |
 | L | 2 business days | 3 business days |

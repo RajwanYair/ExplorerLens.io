@@ -1,4 +1,4 @@
-# docs/assets/ — SVG Diagrams
+﻿# docs/assets/ — SVG Diagrams
 
 ## Theme Compatibility (Audited v39.9.0)
 
@@ -19,7 +19,7 @@ readability is not affected.
 ## Inventory
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `architecture-build.svg` | MSI artifact pipeline and build system |
 | `architecture-components.svg` | High-level component architecture |
 | `architecture-dataflow.svg` | Data flow through decode pipeline |

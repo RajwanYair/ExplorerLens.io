@@ -696,23 +696,12 @@ set(ENGINE_HEADERS
     Plugin/PluginAuditLog.h
 
     # AI/ML modules
-    AI/AIThumbnailEnhancer.h
-    AI/SceneUnderstandingEngine.h
-    AI/SmartCropV2.h
 
     # Sprint 1061-1070 — Intelligent Workflow Automation (v31.3.0 "Achernar-T")
-    AI/PredictivePregenEngine.h
-    AI/ContentCategorizationEngine.h
-    AI/ThumbnailQualityPredictor.h
 
     # Sprint 1071-1080 — Contextual Intelligence & Self-Healing (v31.4.0 "Achernar-U")
-    AI/ContextualRenderingEngine.h
-    AI/SmartThumbnailCompositor.h
-    AI/FormatComplexityAnalyzer.h
 
     # Sprint 1081-1090 — Format Routing & Enhanced Accessibility (v31.5.0 "Achernar-V")
-    AI/AdaptiveColorProfileManager.h
-    AI/ThumbnailAccessibilityEngine.h
 
     # Codec modules consolidated to Decoders/ (Phase 1 — Codec/ deprecated)
     Decoders/CodecLoader.h
@@ -906,8 +895,6 @@ set(ENGINE_HEADERS
     Core/HealthScoreAggregator.h
     Core/PerformanceRegressionDetector.h
     # Batch 9: Smart Features (634-638)
-    AI/ImageComplexityAnalyzer.h
-    AI/DecodeStrategyOptimizer.h
     # Batch 10: Platform & Integration (639-643)
     Core/ClipboardMonitorIntegration.h
     Core/ExplorerStatusBarProvider.h
@@ -1004,8 +991,6 @@ set(ENGINE_HEADERS
     Memory/MemoryBandwidthProfiler.h
 
     # Beyond Zenith — AI/ML
-    AI/FaceDetectionThumbnail.h
-    AI/ObjectSaliencyMapper.h
 
     # Beyond Zenith — Plugin Ecosystem
     Plugin/PluginTelemetryBridge.h
@@ -1048,8 +1033,6 @@ set(ENGINE_HEADERS
     # Category F: Cache Performance
 
     # Category E: AI/ML Production
-    AI/DirectMLInferenceEngine.h
-    AI/ONNXModelLoader.h
 
     # Category D: GUI/UX Utilities
     Utils/DPIScalingManager.h
@@ -1135,7 +1118,6 @@ set(ENGINE_HEADERS
     Memory/ThreadLocalPoolAllocator.h
 
     # AI/ML enhancements
-    AI/FileTypePredictor.h
 
     # Plugin enhancements
 
@@ -1387,12 +1369,7 @@ set(ENGINE_HEADERS
     Utils/CertificatePinner.h
     Utils/ColorBlindFilter.h
     Utils/FirstRunExperience.h
-    AI/BlurDetectionFilter.h
     # Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2
-    AI/AIModelRegistry.h
-    AI/AIPerformanceProfiler.h
-    AI/AIThumbnailPipeline.h
-    AI/AIUpscaler.h
     # Sprint 361-370 — Advanced Scheduling & Concurrency v2 (v22.4.0 Sirius-U)
     Core/LockFreeMPMCQueue.h
     Core/CPUAffinityRouter.h
@@ -1705,14 +1682,6 @@ set(ENGINE_HEADERS
     GPU/StagingBufferPoolV2.h
 
     # Sprint 981-990 — CLIP Semantic Search & Discovery (v30.2.0 "Deneb-S")
-    AI/CLIPEmbeddingEngine.h
-    AI/SemanticSearchIndex.h
-    AI/NaturalLanguageQueryParser.h
-    AI/VisualSimilarityGraph.h
-    AI/EmbeddingCacheStore.h
-    AI/MultiModalRanker.h
-    AI/SearchResultDeduplicator.h
-    AI/IncrementalIndexUpdater.h
 
     # Sprint 991-1000 — Live Preview Scrubber & Rich Media (v30.3.0 "Deneb-T")
     Core/LivePreviewScrubber.h
@@ -1757,14 +1726,6 @@ set(ENGINE_HEADERS
     Enterprise/UsageAnomalyDetector.h
     Enterprise/EnterpriseAuditExporter.h
     # Sprint 1041-1050 — Generative AI Thumbnails (v31.0.0 Achernar)
-    AI/GenerativeThumbnailEngine.h
-    AI/ContentAwareInpainter.h
-    AI/StyleTransferRenderer.h
-    AI/ImageDescriptionSynthesizer.h
-    AI/ThumbnailPersonalisationEngine.h
-    AI/GenerativeUpscalerV3.h
-    AI/ContentModerationFilter.h
-    AI/GenerativeAuditTrail.h
     # Sprint 1051-1060 — Cross-Platform Shell Extensions (v31.1.0 Achernar-R)
     Core/LinuxNautilusExtension.h
     Core/KDEDolphinExtension.h
@@ -1776,7 +1737,6 @@ set(ENGINE_HEADERS
     Core/XPlatformTestHarness.h
 
     # Consolidated — previously unregistered headers
-    AI/ImageQualityAssessorV2.h
     # CLI headers consolidated to Core/ (Phase 1 — CLI/ deprecated)
     Core/CLICommandParser.h
     Core/LensCLI.h
@@ -1957,7 +1917,6 @@ set(ENGINE_HEADERS
     Core/ErrorReportingPipeline.h
     Core/ShellOverlayHandler.h
     Core/TelemetryAnalyticsEngine.h
-    AI/AISearchIntegration.h
     Core/DarkModeEngine.h
     Core/DecoderCompatLayer.h
     Core/DecoderHotfixApplicator.h
@@ -1983,7 +1942,6 @@ set(ENGINE_HEADERS
     # Sprint 1081-1090 — Edge AI & Hardware-Accelerated Inference (v32.1.0 "Fomalhaut-R")
     GPU/NPUAccelerationEngine.h
     GPU/EdgeAIInferenceEngine.h
-    AI/HardwareCapabilityNegotiator.h
     GPU/AMDXDNABackend.h
     GPU/QualcommAIEBackend.h
     GPU/IntelAMXBackend.h
@@ -2008,11 +1966,6 @@ set(ENGINE_HEADERS
     Core/DirectStorageProfiler.h
     Core/ZeroCopyDecodeSession.h
     # Sprint 1121-1130 — CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
-    AI/HNSWIndexEngine.h
-    AI/CLIPQueryProcessor.h
-    AI/SemanticSearchOrchestrator.h
-    AI/EmbeddingPersistenceEngine.h
-    AI/VisualQueryOptimizer.h
     # Sprint 1131-1140 — Live Preview Scrubber (v32.7.0 "Fomalhaut-X")
     Media/VideoFrameExtractor.h
     Media/VideoScrubberTimeline.h
@@ -2032,11 +1985,6 @@ set(ENGINE_HEADERS
     Enterprise/EnterpriseAuditLogger.h
     Enterprise/ConfigMgrPolicyBridge.h
     # Sprint 1171-1180 — Generative AI Thumbnails (v33.3.0 "Spica-T")
-    AI/NPUThumbnailSynthesizer.h
-    AI/DiffusionModelEngine.h
-    AI/ThumbnailInpaintEngine.h
-    AI/OffDeviceInferenceRouter.h
-    AI/AIThumbnailBatchProcessor.h
     # Sprint 1181-1190 — Plugin Marketplace v5 (v33.4.0 "Spica-U")
     Plugin/PluginMarketplaceV5.h
     Plugin/SDKCompatKit3.h
@@ -2150,14 +2098,6 @@ set(ENGINE_SOURCES
     Decoders/XPMDecoder.cpp
 
     # AI implementations
-    AI/ContentAwareInpainter.cpp
-    AI/ContentModerationFilter.cpp
-    AI/GenerativeAuditTrail.cpp
-    AI/GenerativeThumbnailEngine.cpp
-    AI/GenerativeUpscalerV3.cpp
-    AI/ImageDescriptionSynthesizer.cpp
-    AI/StyleTransferRenderer.cpp
-    AI/ThumbnailPersonalisationEngine.cpp
     # v31.6.0 — Format Routing & Enhanced Accessibility
     # v31.7.0 — Contextual Intelligence & Self-Healing
     # v31.8.0 — Intelligent Workflow Automation
@@ -2242,10 +2182,6 @@ set(ENGINE_SOURCES
     Pipeline/DirectStorageBatchScheduler.cpp
     Core/DirectStorageProfiler.cpp
     # Sprint 1121-1130 — CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")
-    AI/HNSWIndexEngine.cpp
-    AI/CLIPQueryProcessor.cpp
-    AI/SemanticSearchOrchestrator.cpp
-    AI/EmbeddingPersistenceEngine.cpp
     # Sprint 1131-1140 — Live Preview Scrubber (v32.7.0 "Fomalhaut-X")
     Media/VideoFrameExtractor.cpp
     Media/VideoScrubberTimeline.cpp
@@ -2262,11 +2198,6 @@ set(ENGINE_SOURCES
     Enterprise/EnterpriseAuditLogger.cpp
     Enterprise/ConfigMgrPolicyBridge.cpp
     # Sprint 1171-1180 — Generative AI Thumbnails (v33.3.0 "Spica-T")
-    AI/NPUThumbnailSynthesizer.cpp
-    AI/DiffusionModelEngine.cpp
-    AI/ThumbnailInpaintEngine.cpp
-    AI/OffDeviceInferenceRouter.cpp
-    AI/AIThumbnailBatchProcessor.cpp
     # Sprint 1181-1190 — Plugin Marketplace v5 (v33.4.0 "Spica-U")
     Plugin/PluginMarketplaceV5.cpp
     Plugin/SDKCompatKit3.cpp

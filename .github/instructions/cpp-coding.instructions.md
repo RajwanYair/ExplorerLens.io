@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/*.h,**/*.cpp"
 ---
 
@@ -14,7 +14,7 @@ applyTo: "**/*.h,**/*.cpp"
 ## Naming Conventions
 
 | Symbol | Convention | Example |
-|--------|-----------|---------|
+| -------- | ----------- | --------- |
 | Classes/structs | `PascalCase` | `JpegDecoder`, `SubMillisecondCacheEngine` |
 | Functions/methods | `PascalCase` | `DecodeAtSize()`, `ProbeHeader()` |
 | Local variables | `camelBack` | `pixelWidth`, `decoderResult` |

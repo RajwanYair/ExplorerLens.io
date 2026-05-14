@@ -1,4 +1,4 @@
----
+﻿---
 mode: ask
 description: "Architecture review for a new Engine module or subsystem. Checks naming collisions, validates the implement-before-declare rule, and ensures CMakeLists registration."
 ---
@@ -33,7 +33,7 @@ For every proposed header file, verify:
 ## Directory Placement Check
 
 | Proposed location | Correct? | If not, where? |
-|-------------------|----------|----------------|
+| ------------------- | ---------- | ---------------- |
 | `Engine/Core/` | If it's pipeline/detection/enterprise | |
 | `Engine/Decoders/` | If it decodes a file format | |
 | `Engine/GPU/` | If it uses D3D/Vulkan | |

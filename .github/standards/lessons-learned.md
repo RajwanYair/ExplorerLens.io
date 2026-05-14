@@ -1,4 +1,4 @@
-# ExplorerLens — Engineering Lessons Learned
+﻿# ExplorerLens — Engineering Lessons Learned
 
 > Retrospective captured from git history (v15.1.0 through v37.2.0, 380+ commits).  
 > Maintained by Copilot — update after every major sprint block.  
@@ -190,7 +190,7 @@ Manual edits cause drift between files (e.g. RC files still showing old version 
 
 ### 4.3 RC File Version Format
 Both `LENSManager.rc` and `LENSShell.rc` have **four** version strings that must all match:
-```
+```text
 FILEVERSION X,Y,Z,0
 PRODUCTVERSION X,Y,Z,0
 VALUE "FileVersion", "X.Y.Z.0"
@@ -218,7 +218,7 @@ Always run `markdownlint CHANGELOG.md` before committing. Use markdownlint-disab
 ### 5.1 Test File Split Architecture
 EngineTests are split across 5 files to keep each under ~500 KB:
 | File | Contents |
-|---|---|
+| --- | --- |
 | `EngineTestsIncludes.h` | All `#include` directives |
 | `EngineTestsMacros.h` | `TEST()`, `ASSERT()`, `RUN_TEST()` macros + MockDecoder |
 | `EngineTests.cpp` | Harness globals, `extern void` decls, `main()`, all `RUN_TEST()` calls |
@@ -269,7 +269,7 @@ Large "consolidate" commits (removing 50-70 files at once) can:
 The Python wrapper (`ExplorerLens.py`) was removed at commit `c4444102` as part of workspace consolidation. The C++ engine is the sole implementation.
 
 ### 6.4 COM CLSID Is Permanently Fixed
-```
+```text
 9E6ECB90-5A61-42BD-B851-D3297D9C7F39
 ```
 This is registered in the Windows Registry and WiX installer. Changing it would break all existing installations. Never change it.  
@@ -348,7 +348,7 @@ For each sprint batch (5 headers + 5 sources + tests):
 ## 10. Recurring Commit Fix Patterns (Quick Reference)
 
 | Problem | Fix Pattern | Key Commit |
-|---------|-------------|------------|
+| --------- | ------------- | ------------ |
 | git exit-128 on Windows CI | `safe.directory` in global + system git config | `d0a02e91` |
 | StaleGenerator CMake error | Delete CMakeCache.txt, re-run cmake --preset | `d862ca42` |
 | /wdXXXX warning suppression in CMake | Remove /wd flags, fix the underlying warning | `981b1387` |
@@ -378,7 +378,7 @@ For each sprint batch (5 headers + 5 sources + tests):
 
 ### 11.1 SBOMGenerator.h File Lock (Idempotency / Retry Pattern)
 **Symptom:** `Bump-Version.ps1` fails with:
-```
+```powershell
 Set-Content: The process cannot access the file 'Engine/Core/SBOMGenerator.h'
 because it is being used by another process.
 ```
@@ -390,7 +390,7 @@ because it is being used by another process.
 ### 11.2 EngineTestsExterns.h Architecture
 **Discovery:** A dedicated `Engine/Tests/EngineTestsExterns.h` file holds all `extern void TestFoo_Runner()` declarations. It is `#include`d at line 16 of `EngineTests.cpp`.  
 **Correct wiring for a new sprint:**
-```
+```text
 EngineTestsIncludes.h  — #include "../Path/NewFeature.h"
 EngineTestsExterns.h   — extern void TestNewFeature_Foo_Runner();
 EngineTests.cpp        — RUN_TEST(TestNewFeature_Foo);
@@ -418,7 +418,7 @@ EngineTests_Late.cpp   — TEST(TestNewFeature_Foo) { ... }
 The v35.x release series uses the "Vega" constellation codenames with suffixes:
 
 | Version | Codename | Sprint | Theme |
-|---------|----------|--------|-------|
+| --------- | ---------- | -------- | ------- |
 | v35.0.0 | Vega | 1281-1290 | Adaptive Fidelity + Roadmap bootstrap |
 | v35.1.0 | Vega-R | 1291-1300 | Real-Time Collaboration & Live Edit Sync |
 | v35.2.0 | Vega-S | 1301-1310 | Network-Aware Streaming Cache |
@@ -471,7 +471,7 @@ sprint headers in `EngineTestsIncludes.h`, these produced **13 type name collisi
 **All 13 collisions resolved:**
 
 | Old Name | Winner (older header) | Renamed To | Updated |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `AnimatedFormat` | `AnimatedFormatHandler.h` | `SampledAnimFormat` | .h, .cpp, 2 test files |
 | `ToneMapOperator` | `D3D12ComputePipeline.h` | `PQToneMapOp` | .h, .cpp, test |
 | `LTSGateStatus` | `LTSHardeningController.h` | `LTSValidatorStatus` | .h, .cpp |

@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/Engine/**,**/benchmarks/**"
 ---
 
@@ -7,7 +7,7 @@ applyTo: "**/Engine/**,**/benchmarks/**"
 ## Decode Performance Targets
 
 | Format | P50 Target | Library | Fast Path |
-|--------|-----------|---------|-----------|
+| -------- | ----------- | --------- | ----------- |
 | JPEG | < 5 ms | libjpeg-turbo | WIC HW hint |
 | PNG | < 5 ms | WIC / libpng | — |
 | WebP | < 8 ms | libwebp | — |
@@ -23,7 +23,7 @@ applyTo: "**/Engine/**,**/benchmarks/**"
 ## Memory Budgets
 
 | Component | Budget |
-|-----------|--------|
+| ----------- | -------- |
 | L1 cache (in-process) | 64 MB max |
 | Peak decode working set | < 128 MB |
 | Idle (LENSShell.dll loaded) | < 10 MB |

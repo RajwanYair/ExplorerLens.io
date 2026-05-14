@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Validate that a PR title, description, and changed files are consistent with the ExplorerLens ROADMAP phase plan. Flags out-of-phase work, missing corpus tests, missing ADRs, and version-bearing file drift."
 ---
@@ -105,14 +105,14 @@ Per `.github/instructions/security.instructions.md`:
 
 Produce a review summary:
 
-```
+```text
 ## Roadmap Guardian Review
 
 **Phase:** [current phase]
 **PR phase:** [inferred phase of this PR]
 
 | Gate | Status | Notes |
-|------|--------|-------|
+| ------ | -------- | ------- |
 | Gate 1: Phase Alignment | ✅/❌ | ... |
 | Gate 2: Decision Log | ✅/❌ | ... |
 | Gate 3: Corpus & Tests | ✅/❌ | ... |

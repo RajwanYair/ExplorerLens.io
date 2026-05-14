@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Diagnose and fix a failing GitHub Actions workflow run for ExplorerLens"
 ---
@@ -26,7 +26,7 @@ Read `.github/workflows/${input:workflowName}` to understand:
 ### Step 2 — Match Against Known Failure Patterns
 
 | Pattern | Root Cause | Fix |
-|---------|-----------|-----|
+| --------- | ----------- | ----- |
 | `toolset "14.50" not found` | MSVC v145 not on GitHub runner | Remove `toolset:` from `ilammy/msvc-dev-cmd` |
 | `CMake Error: could not find preset` | Wrong preset name or missing `CMakePresets.json` | Check preset names match exactly |
 | `vcvarsall.bat not found` | MSVC not installed on runner | Use `ilammy/msvc-dev-cmd@v1` before cmake |

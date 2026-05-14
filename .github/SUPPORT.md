@@ -1,4 +1,4 @@
-# Support
+﻿# Support
 
 ## Before Opening an Issue
 
@@ -9,7 +9,7 @@
 ## How to Get Help
 
 | Problem | Where to go |
-|---------|------------|
+| --------- | ------------ |
 | Bug or crash | [Open a Bug Report](https://github.com/RajwanYair/ExplorerLens.io/issues/new?template=bug_report.md) |
 | Build failure | [Open a Build Issue](https://github.com/RajwanYair/ExplorerLens.io/issues/new?template=build_issue.yml) |
 | Feature request | [Open a Feature Request](https://github.com/RajwanYair/ExplorerLens.io/issues/new?template=feature_request.md) |
@@ -20,7 +20,7 @@
 ## Response Times
 
 | Severity | Target |
-|----------|--------|
+| ---------- | -------- |
 | Security (critical) | 48 hours |
 | Build failures | 72 hours |
 | Bugs | 1 week |

@@ -1,4 +1,4 @@
-# ExplorerLens — Performance Skill
+﻿# ExplorerLens — Performance Skill
 
 ## Purpose
 
@@ -22,7 +22,7 @@ targets, or diagnosing regressions. The performance baseline is defined in
 ## Performance Targets (Phase 1/2)
 
 | Format | Library | P50 Target | P95 Target | Notes |
-|--------|---------|-----------|-----------|-------|
+| -------- | --------- | ----------- | ----------- | ------- |
 | JPEG (6MP) | libjpeg-turbo | < 5 ms | < 10 ms | EXIF orient applied |
 | PNG (4K) | WIC / libpng | < 5 ms | < 12 ms | |
 | WebP | libwebp | < 8 ms | < 15 ms | |
@@ -94,7 +94,7 @@ BENCHMARK_MAIN();
 6. **Common root causes:**
 
 | Symptom | Root Cause | Fix |
-|---------|-----------|-----|
+| --------- | ----------- | ----- |
 | JPEG P95 > 15ms | Full YCbCr transform instead of fast path | Use `jpeg_calc_output_dimensions` + `scale_num/scale_denom` |
 | PNG slow on large files | Decompressing at full resolution | Use WIC `IWICBitmapScaler` with `WICBitmapInterpolationModeFant` |
 | RAW > 100ms | Full demosaic instead of thumbnail | Call `unpack_thumb()` not `dcraw_process()` |
@@ -210,7 +210,7 @@ Select-String "time\(" build-logs/compile-time-report.txt |
 ### What to Look For
 
 | Metric | Threshold | Action |
-|--------|-----------|--------|
+| -------- | ----------- | -------- |
 | Single header > 500ms | Investigate | May need PCH inclusion or forward declarations |
 | Template instantiation > 200ms | Investigate | Consider explicit instantiation or PIMPL |
 | PCH generation > 5s | Monitor | Normal for large PCH; split if > 15s |

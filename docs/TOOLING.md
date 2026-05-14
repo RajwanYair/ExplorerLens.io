@@ -1,11 +1,11 @@
-# Shared Tooling Architecture
+﻿# Shared Tooling Architecture
 
 > Documents the configuration inheritance model for ExplorerLens and sibling projects
 > under the `MyScripts\` workspace. See ROADMAP §11 for the full plan.
 
 ## Inheritance Model
 
-```
+```text
 MyScripts\                              ← SHARED (all projects inherit)
 ├── .editorconfig                       ← Universal editor rules (cascades natively)
 ├── pyproject.toml                      ← Shared Python tool config (ruff, mypy)
@@ -30,17 +30,17 @@ MyScripts\                              ← SHARED (all projects inherit)
 ## Key Rules
 
 1. **Inherit, don't duplicate.** If `MyScripts\.editorconfig` covers a rule, don't repeat it in the project.
-2. **Override only what differs.** Project configs contain only the delta from the shared baseline.
-3. **`.editorconfig` cascades natively** — the EditorConfig spec defines upward directory search.
-4. **VS Code multi-root workspaces** cascade settings from outer `.vscode/` to inner.
-5. **Never put secrets or machine-local paths** in shared configs.
+1. **Override only what differs.** Project configs contain only the delta from the shared baseline.
+1. **`.editorconfig` cascades natively** — the EditorConfig spec defines upward directory search.
+1. **VS Code multi-root workspaces** cascade settings from outer `.vscode/` to inner.
+1. **Never put secrets or machine-local paths** in shared configs.
 
 ## Configuration File Registry
 
 ### ExplorerLens-Specific (not shared)
 
 | File | Purpose | Why project-specific |
-|------|---------|----------------------|
+| ------ | --------- | ---------------------- |
 | `.clang-format` | C++ formatting | Only C++ project needs this |
 | `.clang-tidy` | C++ static analysis | Only C++ project needs this |
 | `CMakePresets.json` | CMake build presets | Only C++ project uses CMake |
@@ -53,7 +53,7 @@ MyScripts\                              ← SHARED (all projects inherit)
 ### Shared at MyScripts Level
 
 | File | Purpose | Inherited by |
-|------|---------|--------------|
+| ------ | --------- | -------------- |
 | `.editorconfig` | Charset, indentation, line endings | All projects |
 | `pyproject.toml` | Ruff, mypy, pytest defaults | All Python projects |
 | `pyrightconfig.json` | Type checking baseline | All Python projects |
@@ -84,7 +84,7 @@ indent_size = 2
 Tools are pinned in two places:
 
 | Source | Format | Used by |
-|--------|--------|---------|
+| -------- | -------- | --------- |
 | `packaging/scoop/scoopfile.json` | JSON manifest | Local dev: `scoop import packaging/scoop/scoopfile.json` |
 | `.github/standards/tool-versions.md` | Markdown table | CI reference + documentation |
 | `.devcontainer/devcontainer.json` | JSON | Codespaces / dev containers |
@@ -95,7 +95,7 @@ script handles `tool-versions.md`; `packaging/scoop/scoopfile.json` and devconta
 ## Status
 
 | Step | Status |
-|------|--------|
+| ------ | -------- |
 | Audit config files across projects | ⏳ In progress |
 | Consolidate shared configs at `MyScripts\` | 🔜 Next |
 | Create this document (`TOOLING.md`) | ✅ Done |

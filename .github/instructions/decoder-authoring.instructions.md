@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/Engine/Decoders/**"
 ---
 
@@ -114,7 +114,7 @@ TEST_CASE("JpegDecoder corpus validation", "[decoder][jpeg][corpus]") {
 ## Naming Convention
 
 | Class | Example |
-|-------|---------|
+| ------- | --------- |
 | Decoder class | `JpegDecoder`, `WebPDecoder`, `AvifDecoder` |
 | Source file | `JpegDecoder.cpp`, `WebPDecoder.cpp` |
 | Header file | `JpegDecoder.h`, `WebPDecoder.h` |

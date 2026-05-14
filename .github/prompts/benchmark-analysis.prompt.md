@@ -1,4 +1,4 @@
----
+﻿---
 mode: ask
 description: "Analyze benchmark results from Google Benchmark JSON output. Identifies regressions, compares to baseline.json, and suggests root causes."
 ---
@@ -30,7 +30,7 @@ Get-Content Engine\Tests\benchmarks\baseline.json | ConvertFrom-Json |
 
 For each benchmark, calculate the regression:
 
-```
+```text
 Regression % = ((current_p50 - baseline_p50) / baseline_p50) × 100
 
 Thresholds:
@@ -69,7 +69,7 @@ git commit -m "perf: update benchmark baseline — {{improvement}} improvement i
 ## Performance Targets
 
 | Format | P50 Target | P95 Target |
-|--------|-----------|-----------|
+| -------- | ----------- | ----------- |
 | JPEG 6MP | < 5 ms | < 10 ms |
 | PNG 4K | < 5 ms | < 10 ms |
 | WebP | < 8 ms | < 15 ms |

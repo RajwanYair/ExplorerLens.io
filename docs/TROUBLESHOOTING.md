@@ -1,18 +1,20 @@
-# ExplorerLens Troubleshooting Guide
-**Documentation Completion** 
+﻿# ExplorerLens Troubleshooting Guide
+
+**Documentation Completion**
 **Date:** March 28, 2026
 
 ---
 
 ## Table of Contents
+
 1. [Installation Issues](#installation-issues)
-2. [Thumbnails Not Showing](#thumbnails-not-showing)
-3. [Performance Problems](#performance-problems) 
-4. [COM Registration Failures](#com-registration-failures)
-5. [File Format Issues](#file-format-issues)
-6. [Windows Explorer Integration](#windows-explorer-integration)
-7. [Build & Development Issues](#build--development-issues)
-8. [Advanced Diagnostics](#advanced-diagnostics)
+1. [Thumbnails Not Showing](#thumbnails-not-showing)
+1. [Performance Problems](#performance-problems)
+1. [COM Registration Failures](#com-registration-failures)
+1. [File Format Issues](#file-format-issues)
+1. [Windows Explorer Integration](#windows-explorer-integration)
+1. [Build & Development Issues](#build--development-issues)
+1. [Advanced Diagnostics](#advanced-diagnostics)
 
 ---
 
@@ -23,8 +25,10 @@
 **Cause:** Insufficient permissions
 
 **Solution:**
+
 1. Right-click installer → **Run as Administrator**
-2. Or: Open elevated PowerShell:
+1. Or: Open elevated PowerShell:
+
  ```powershell
  Start-Process -FilePath "ExplorerLens-Setup.msi" -Verb RunAs
  ```
@@ -36,9 +40,10 @@
 **Cause:** Unsigned binaries (SmartScreen filter)
 
 **Solution:**
+
 1. Click "More info"
-2. Click "Run anyway"
-3. **Long-term fix:** Use code-signed binaries (planned for Phase 4)
+1. Click "Run anyway"
+1. **Long-term fix:** Use code-signed binaries (planned for Phase 4)
 
 ---
 
@@ -47,13 +52,16 @@
 **Cause:** Corrupted registry or incomplete uninstall
 
 **Solution:**
+
 1. **Clean uninstall:**
+
  ```powershell
  # Force remove via product code
  msiexec /x {9E6ECB90-5A61-42BD-B851-D3297D9C7F39} /qn
  ```
 
-2. **Manual cleanup:**
+1. **Manual cleanup:**
+
  ```powershell
  # Run LENSManager as admin
  cd "C:\Program Files\ExplorerLens"
@@ -61,10 +69,11 @@
  # Click "Uninstall All" button
  ```
 
-3. **Registry cleanup (advanced):**
- - Open `regedit.exe` as Administrator
- - Delete: `HKEY_CLASSES_ROOT\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}`
- - Delete: `HKEY_LOCAL_MACHINE\SOFTWARE\ExplorerLens`
+1. **Registry cleanup (advanced):**
+
+- Open `regedit.exe` as Administrator
+- Delete: `HKEY_CLASSES_ROOT\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}`
+- Delete: `HKEY_LOCAL_MACHINE\SOFTWARE\ExplorerLens`
 
 ---
 
@@ -75,6 +84,7 @@
 **Cause #1:** Explorer thumbnail cache corruption
 
 **Solution:** Clear thumbnail cache:
+
 ```powershell
 # Stop Explorer
 Stop-Process -Name explorer -Force
@@ -91,6 +101,7 @@ Start-Process explorer.exe
 **Cause #2:** Shell extension not registered
 
 **Solution:** Re-register LENSShell.dll:
+
 ```powershell
 cd "C:\Program Files\ExplorerLens"
 regsvr32 /u LENSShell.dll # Unregister
@@ -98,6 +109,7 @@ regsvr32 LENSShell.dll # Re-register
 ```
 
 **Verify registration:**
+
 ```powershell
 # Check CLSID exists
 Test-Path "HKCR:\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
@@ -109,10 +121,11 @@ Test-Path "HKCR:\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
 **Cause #3:** Conflicting thumbnail provider
 
 **Solution:** Check for conflicts:
+
 1. Open **LENSManager.exe**
-2. Click "Scan for Conflicts" button
-3. Review "Third-Party Handlers" tab
-4. Backup and remove conflicting handlers if needed
+1. Click "Scan for Conflicts" button
+1. Review "Third-Party Handlers" tab
+1. Backup and remove conflicting handlers if needed
 
 **Example conflict:** Windows Photo Viewer or Adobe Photoshop handlers
 
@@ -121,6 +134,7 @@ Test-Path "HKCR:\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
 **Cause #4:** File extension not associated
 
 **Solution:** Verify extension registration:
+
 ```powershell
 # Check .webp extension
 Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
@@ -129,9 +143,10 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 ```
 
 **Re-register via LENSManager:**
+
 1. Open LENSManager.exe as Administrator
-2. Select desired formats
-3. Click "Install" button
+1. Select desired formats
+1. Click "Install" button
 
 ---
 
@@ -140,14 +155,17 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** Windows rendering at low resolution
 
 **Solution:**
-1. **Increase thumbnail size:**
- - Right-click Explorer folder view
- - Choose "Extra Large Icons" or "Large Icons"
 
-2. **Adjust DPI scaling (4K displays):**
- - Right-click desktop → **Display settings**
- - Set "Scale" to 150% or 200%
- - Restart Explorer
+1. **Increase thumbnail size:**
+
+- Right-click Explorer folder view
+- Choose "Extra Large Icons" or "Large Icons"
+
+1. **Adjust DPI scaling (4K displays):**
+
+- Right-click desktop → **Display settings**
+- Set "Scale" to 150% or 200%
+- Restart Explorer
 
 ---
 
@@ -156,19 +174,23 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** File-specific issues (corruption, encryption, permissions)
 
 **Solution:**
+
 1. **Check file permissions:**
+
  ```powershell
  Get-Acl "problem_file.jpg" | Format-List
  # Ensure current user has Read permissions
  ```
 
-2. **Test file validity:**
- - Try opening file in native app (Photoshop, VLC, etc.)
- - Corrupted files won't generate thumbnails
+1. **Test file validity:**
 
-3. **Check file size limits:**
- - Default max: 50 MP for images, 4K for videos
- - Edit: `HKLM\SOFTWARE\ExplorerLens\MaxImageSize` (pixels)
+- Try opening file in native app (Photoshop, VLC, etc.)
+- Corrupted files won't generate thumbnails
+
+1. **Check file size limits:**
+
+- Default max: 50 MP for images, 4K for videos
+- Edit: `HKLM\SOFTWARE\ExplorerLens\MaxImageSize` (pixels)
 
 ---
 
@@ -179,22 +201,28 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** Synchronous thumbnail generation blocking UI
 
 **Solution:**
+
 1. **Reduce thumbnail size:**
- - File Explorer → View → Smaller icons
- - Reduces processing load per thumbnail
 
-2. **Disable preview pane:**
- - View → Preview pane (toggle off)
- - Pane forces immediate thumbnail generation
+- File Explorer → View → Smaller icons
+- Reduces processing load per thumbnail
 
-3. **Enable caching:**
- - Verify cache enabled:
+1. **Disable preview pane:**
+
+- View → Preview pane (toggle off)
+- Pane forces immediate thumbnail generation
+
+1. **Enable caching:**
+
+- Verify cache enabled:
+
  ```powershell
  Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCache
  # Should be: 1
  ```
 
-4. **Increase cache size:**
+1. **Increase cache size:**
+
  ```powershell
  # Set cache to 1 GB (default: 500 MB)
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
@@ -207,20 +235,24 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** Decoder inefficiency or large file processing
 
 **Solution:**
+
 1. **Check GPU acceleration:**
+
  ```powershell
  # Verify GPU enabled
  Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU
  # Should be: 1
  ```
 
-2. **Limit concurrent decodes:**
+1. **Limit concurrent decodes:**
+
  ```powershell
  # Reduce thread count (default: CPU core count)
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 4
  ```
 
-3. **Skip large files:**
+1. **Skip large files:**
+
  ```powershell
  # Set max file size (default: unlimited)
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
@@ -233,8 +265,10 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** First-time generation without cache
 
 **Solution:**
+
 - **Expected behavior:** First view is slow, subsequent views fast (cached)
 - **Pre-generate cache:**
+
  ```powershell
  # Use benchmark tool to pre-populate cache
  cd "C:\Program Files\ExplorerLens"
@@ -250,18 +284,22 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** Missing dependencies or DLL load failure
 
 **Solution:**
+
 1. **Check dependencies:**
+
  ```powershell
  # Use Dependency Walker or dumpbin
  dumpbin /dependents "LENSShell.dll"
  ```
 
-2. **Install Visual C++ Redistributable:**
+1. **Install Visual C++ Redistributable:**
+
  ```powershell
  winget install Microsoft.VCRedist.2022.x64
  ```
 
-3. **Verify DLL bitness:**
+1. **Verify DLL bitness:**
+
  ```powershell
  # LENSShell.dll MUST be 64-bit for modern Windows
  dumpbin /headers LENSShell.dll | Select-String "machine"
@@ -275,16 +313,19 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** Missing external DLLs (libwebp, libavif, etc.)
 
 **Solution:**
+
 1. **Verify DLLs present:**
+
  ```powershell
  Test-Path "C:\Program Files\ExplorerLens\libwebp.dll"
  Test-Path "C:\Program Files\ExplorerLens\libavif.dll"
  ```
 
-2. **Reinstall from MSI:** Ensures all dependencies copied
+1. **Reinstall from MSI:** Ensures all dependencies copied
 
-3. **Manual DLL placement:**
- - Copy DLLs from `SDK/bin/` to `C:\Program Files\ExplorerLens\`
+1. **Manual DLL placement:**
+
+- Copy DLLs from `SDK/bin/` to `C:\Program Files\ExplorerLens\`
 
 ---
 
@@ -295,6 +336,7 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Cause:** libwebp not loaded or outdated
 
 **Solution:**
+
 ```powershell
 # Check libwebp version
 cd "C:\Program Files\ExplorerLens"
@@ -304,6 +346,7 @@ cd "C:\Program Files\ExplorerLens"
 ```
 
 **Update libwebp:**
+
 - Rebuild with latest: [Build-LibWebP-NMake.ps1](../build-scripts/external-libs/Build-LibWebP-NMake.ps1)
 
 ---
@@ -313,13 +356,16 @@ cd "C:\Program Files\ExplorerLens"
 **Cause:** AVIF decoder initialization failure
 
 **Solution:**
+
 1. **Check libavif + dav1d present:**
+
  ```powershell
  Test-Path "C:\Program Files\ExplorerLens\avif.dll"
  Test-Path "C:\Program Files\ExplorerLens\dav1d.dll"
  ```
 
-2. **Verify decoder registration:**
+1. **Verify decoder registration:**
+
  ```powershell
  .\IntegrationTests.exe
  # Should show: AVIFDecoder registered (9 total decoders)
@@ -332,14 +378,17 @@ cd "C:\Program Files\ExplorerLens"
 **Cause:** JXL support not compiled in
 
 **Solution:**
+
 1. **Check CMake flag:**
+
  ```powershell
  cd build
  cat CMakeCache.txt | Select-String "HAS_LIBJXL"
  # Should show: HAS_LIBJXL:BOOL=ON
  ```
 
-2. **Rebuild with JXL:**
+1. **Rebuild with JXL:**
+
  ```powershell
  cmake -S . -B build -DHAS_LIBJXL=ON
  cmake --build build --config Release
@@ -352,18 +401,22 @@ cd "C:\Program Files\ExplorerLens"
 **Cause:** LibRaw not installed or metadata corruption
 
 **Solution:**
+
 1. **Verify LibRaw linkage:**
+
  ```powershell
  dumpbin /imports LENSShell.dll | Select-String "libraw"
  ```
 
-2. **Test specific RAW format:**
+1. **Test specific RAW format:**
+
  ```powershell
  .\EngineTests.exe --gtest_filter="*CR3*"
  ```
 
-3. **Metadata stripping:** Some RAW files have no embedded thumbnails
- - ExplorerLens will decode full image (slower)
+1. **Metadata stripping:** Some RAW files have no embedded thumbnails
+
+- ExplorerLens will decode full image (slower)
 
 ---
 
@@ -374,6 +427,7 @@ cd "C:\Program Files\ExplorerLens"
 **Cause:** Shell extension not approved
 
 **Solution:**
+
 ```powershell
 # Add to approved shell extensions
 $clsid = "{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
@@ -389,18 +443,22 @@ Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensio
 **Cause:** Decoder exception not handled
 
 **Solution:**
+
 1. **Enable crash dumps:**
+
  ```powershell
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCrashDumps -Value 1
  ```
 
-2. **Reproduce crash:**
- - Navigate to problematic folder
- - Crash dump saved to: `C:\ProgramData\ExplorerLens\Crashes\`
+1. **Reproduce crash:**
 
-3. **Report crash:**
- - Open dump in WinDbg or Visual Studio
- - File GitHub issue with stack trace
+- Navigate to problematic folder
+- Crash dump saved to: `C:\ProgramData\ExplorerLens\Crashes\`
+
+1. **Report crash:**
+
+- Open dump in WinDbg or Visual Studio
+- File GitHub issue with stack trace
 
 ---
 
@@ -409,15 +467,18 @@ Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensio
 **Cause:** Another program overwriting registry
 
 **Solution:**
+
 1. **Monitor registry changes:**
+
  ```powershell
  # Use Process Monitor (procmon.exe) to track writes to:
  # HKCR\.webp\shellex\{e357fccd-...}
  ```
 
-2. **Lock registry key (advanced):**
- - Set permissions to prevent write access
- - regedit → Right-click key → Permissions → Advanced
+1. **Lock registry key (advanced):**
+
+- Set permissions to prevent write access
+- regedit → Right-click key → Permissions → Advanced
 
 ---
 
@@ -428,6 +489,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensio
 **Cause:** Missing dependencies or incorrect paths
 
 **Solution:**
+
 ```powershell
 # Clear CMake cache
 Remove-Item build -Recurse -Force
@@ -437,6 +499,7 @@ cmake -S . -B build --debug-output
 ```
 
 **Common issues:**
+
 - JPEG XL not found: Set `-DLIBJXL_ROOT=C:\Path\To\libjxl`
 - Visual Studio not detected: Install **C++ Desktop Development** workload
 
@@ -447,15 +510,19 @@ cmake -S . -B build --debug-output
 **Cause:** Missing library linkage
 
 **Solution:**
-1. **Check CMakeLists.txt:**
- - Ensure `target_link_libraries()` includes all deps
 
-2. **Verify library exists:**
+1. **Check CMakeLists.txt:**
+
+- Ensure `target_link_libraries()` includes all deps
+
+1. **Verify library exists:**
+
  ```powershell
  Test-Path "SDK/lib/libwebp.lib"
  ```
 
-3. **Check library bitness:**
+1. **Check library bitness:**
+
  ```powershell
  dumpbin /headers SDK/lib/libwebp.lib | Select-String "machine"
  # Should match: x64
@@ -468,12 +535,14 @@ cmake -S . -B build --debug-output
 **Cause:** Test executable can't find runtime DLLs
 
 **Solution:**
+
 ```powershell
 # Copy DLLs to test directory
 Copy-Item SDK/bin/*.dll build/bin/Release/
 ```
 
 **Or add to PATH:**
+
 ```powershell
 $env:PATH += ";$PWD\SDK\bin"
 .\build\bin\Release\EngineTests.exe
@@ -555,7 +624,7 @@ $testFile = "C:\Photos\sample.webp"
 ## Common Error Codes
 
 | Error Code | Meaning | Solution |
-|------------|---------|----------|
+| ------------ | --------- | ---------- |
 | **0x80004005** | E_FAIL (generic) | Check event logs: `Get-WinEvent -LogName Application -MaxEvents 50` |
 | **0x80070002** | File not found | Verify file path and permissions |
 | **0x8007000E** | Out of memory | Close other apps, increase page file |
@@ -568,13 +637,15 @@ $testFile = "C:\Photos\sample.webp"
 ## Getting Help
 
 ### **Before Reporting Issues:**
+
 1. ✅ Check this troubleshooting guide
-2. ✅ Verify latest version installed
-3. ✅ Clear thumbnail cache and test again
-4. ✅ Run diagnostic tests: `.\EngineTests.exe`
+1. ✅ Verify latest version installed
+1. ✅ Clear thumbnail cache and test again
+1. ✅ Run diagnostic tests: `.\EngineTests.exe`
 
 ### **GitHub Issues:**
-- Repository: https://github.com/RajwanYair/ExplorerLens.io/issues
+
+- Repository: <https://github.com/RajwanYair/ExplorerLens.io/issues>
 - Include:
   - Windows version (`winver`)
   - ExplorerLens version (`Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name Version`)
@@ -583,7 +654,8 @@ $testFile = "C:\Photos\sample.webp"
   - Steps to reproduce
 
 ### **Community Support:**
-- Discussions: https://github.com/RajwanYair/ExplorerLens.io/discussions
+
+- Discussions: <https://github.com/RajwanYair/ExplorerLens.io/discussions>
 
 ---
 
@@ -592,7 +664,7 @@ $testFile = "C:\Photos\sample.webp"
 **Version:** 24.1.0 "Altair-R" — all P0 and P1 issues resolved
 
 | Priority | Issue | Status | Workaround |
-|----------|-------|--------|------------|
+| ---------- | ------- | -------- | ------------ |
 | P2 | Large archives >500MB first-thumbnail latency | Improved −68% (0.8s) | None for most; use `MaxFileSizeMB` registry key to skip very large files |
 | P2 | RAW color accuracy (CR3/NEF/ARW) | LibRaw limitation | Slight variation from Lightroom expected; use embedded JPEG for speed |
 | P2 | Explorer thumbnail cache corruption | Windows bug | `LENSManager.exe /ClearCache` — see [Thumbnails Not Showing](#thumbnails-not-showing) |
@@ -602,7 +674,7 @@ $testFile = "C:\Photos\sample.webp"
 ### Resolved in v15.0.0
 
 | Issue | Fix |
-|-------|-----|
+| ------- | ----- |
 | JPEG XL build config | libjxl 0.11.1 integrated, `HAS_LIBJXL=ON` default |
 | HEIF/HEIC requires external codec | Native HEIFDecoder with libheif 1.19.5 + libde265 1.0.15 |
 | Video thumbnails missing (AV1/VP9/HEVC) | K-Lite Codec Pack + LAV Filters integration |
@@ -612,11 +684,11 @@ $testFile = "C:\Photos\sample.webp"
 ### Resolved in v6.2.0
 
 | Issue | Fix |
-|-------|-----|
+| ------- | ----- |
 | MSVC CRT runtime mismatch | All external libs rebuilt with `/MD` |
 | Explorer crash on malformed archives | SEH wrapper in `LENSShellClass::GetThumbnail` |
 
 ---
 
-**Last Updated:** March 28, 2026 
+**Last Updated:** March 28, 2026
 **Version:** 24.1.0

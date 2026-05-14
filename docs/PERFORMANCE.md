@@ -1,4 +1,4 @@
-# ExplorerLens Performance Reference
+﻿# ExplorerLens Performance Reference
 
 > **Version:** 39.9.0 "Antares" | Consolidated from `docs/PERFORMANCE.md` + `.github/standards/performance-benchmarks.md`
 > **Hardware:** Intel Core Ultra 9 285K · 64 GB DDR5-6400 · NVIDIA RTX 4090 · NVMe 7 GB/s
@@ -13,15 +13,16 @@
 ---
 
 ## Table of Contents
+
 1. [Performance Overview](#performance-overview)
 1. [Hardware Acceleration](#hardware-acceleration)
-3. [Cache Optimization](#cache-optimization)
-4. [Thread Pool Tuning](#thread-pool-tuning)
-5. [Memory Management](#memory-management)
-6. [Network Drive Optimization](#network-drive-optimization)
-7. [Decoder-Specific Tuning](#decoder-specific-tuning)
-8. [Benchmarking](#benchmarking)
-9. [Profiling](#profiling)
+1. [Cache Optimization](#cache-optimization)
+1. [Thread Pool Tuning](#thread-pool-tuning)
+1. [Memory Management](#memory-management)
+1. [Network Drive Optimization](#network-drive-optimization)
+1. [Decoder-Specific Tuning](#decoder-specific-tuning)
+1. [Benchmarking](#benchmarking)
+1. [Profiling](#profiling)
 
 ---
 
@@ -30,7 +31,7 @@
 ### Key Performance Metrics
 
 | Metric | Typical Value | Measurement |
-|--------|---------------|-------------|
+| -------- | --------------- | ------------- |
 | **Cache Hit Rate** | 85-95% | Cached thumbnails / Total requests |
 | **Decode Latency** | 10-50 ms | Time to generate thumbnail (cached) |
 | **Decode Latency** | 100-500 ms | Time to generate thumbnail (first time) |
@@ -45,7 +46,7 @@
 **Common bottlenecks and solutions:**
 
 | Bottleneck | Symptom | Solution |
-|------------|---------|----------|
+| ------------ | --------- | ---------- |
 | **Disk I/O** | Slow folder loading | Enable SSD caching, increase cache size |
 | **CPU Decoding** | High CPU usage | Enable GPU acceleration |
 | **Memory Pressure** | System slowdown | Reduce cache size, limit max image dimensions |
@@ -59,12 +60,14 @@
 ### GPU Acceleration (Direct3D 11)
 
 **What it accelerates:**
+
 - Image decompression (JPEG, WebP, AVIF)
 - Color space conversion (YUV → RGB, HDR → SDR)
 - Image resizing (bilinear/bicubic)
 - 3D model rendering
 
 **Performance gain:**
+
 - **5x faster:** Standard images (JPEG, PNG, WebP)
 - **10x faster:** Large images (RAW, TIFF, PSD)
 - **15x faster:** 3D models (OBJ, STL, GLTF)
@@ -106,16 +109,19 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0
 ### GPU Hardware Requirements
 
 **Minimum:**
+
 - DirectX 11 Feature Level 11.0
 - 512 MB VRAM
 - Any NVIDIA/AMD/Intel GPU from 2012+
 
 **Recommended:**
+
 - DirectX 11 Feature Level 11.1
 - 2 GB VRAM
 - NVIDIA GTX 1050+ / AMD RX 560+ / Intel Iris Xe
 
 **Fallback:** WARP software renderer (D3D11 on CPU)
+
 - Used when no GPU detected
 - 2-3x faster than pure CPU decoding
 - Automatic, no configuration needed
@@ -142,10 +148,12 @@ cd "C:\Program Files\ExplorerLens"
 ### GPU Profiling
 
 **Tools:**
-- **NVIDIA Nsight Graphics**: https://developer.nvidia.com/nsight-graphics
-- **AMD Radeon GPU Profiler**: https://gpuopen.com/rgp/
-- **Intel GPA**: https://www.intel.com/content/www/us/en/developer/tools/graphics-performance-analyzers/overview.html (third-party tool, reference only)
-- **PIX (Microsoft)**: https://devblogs.microsoft.com/pix/
+
+- **NVIDIA Nsight Graphics**: <https://developer.nvidia.com/nsight-graphics>
+- **AMD Radeon GPU Profiler**: <https://gpuopen.com/rgp/>
+- **Intel GPA**: <https://www.intel.com/content/www/us/en/developer/tools/graphics-performance-analyzers/overview.html>
+  (third-party tool, reference only)
+- **PIX (Microsoft)**: <https://devblogs.microsoft.com/pix/>
 
 **Example with PIX:**
 
@@ -168,16 +176,18 @@ cd "C:\Program Files\ExplorerLens"
 **ExplorerLens uses a 2-level cache:**
 
 1. **Memory Cache (L1):**
-  - In-process LRU cache
-  - Stores decoded bitmaps
-  - Size: Dynamic (up to 100 MB)
-  - Eviction: Least Recently Used
+
+- In-process LRU cache
+- Stores decoded bitmaps
+- Size: Dynamic (up to 100 MB)
+- Eviction: Least Recently Used
 
 1. **Disk Cache (L2):**
-  - Persistent file-based cache
-  - Location: `C:\ProgramData\ExplorerLens\Cache\`
-  - Size: Configurable (default 500 MB)
-  - Format: PNG thumbnails with metadata
+
+- Persistent file-based cache
+- Location: `C:\ProgramData\ExplorerLens\Cache\`
+- Size: Configurable (default 500 MB)
+- Format: PNG thumbnails with metadata
 
 ---
 
@@ -211,6 +221,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 0
 ```
 
 **Recommendation:**
+
 - **General use:** 500 MB (~5,000 thumbnails)
 - **Photographers:** 1-2 GB (~10,000-20,000 thumbnails)
 - **Video editors:** 2-4 GB (video thumbnails are larger)
@@ -239,6 +250,7 @@ Start-Process explorer.exe
 ```
 
 **Best practices:**
+
 - Use SSD (not HDD) for cache
 - Avoid network drives
 - Separate partition from OS (if possible)
@@ -248,6 +260,7 @@ Start-Process explorer.exe
 ### Cache Eviction Policy
 
 **LRU (Least Recently Used):**
+
 - Thumbnails sorted by last access time
 - When cache > Max size → delete oldest entries
 - Runs every 24 hours or when 110% full
@@ -284,6 +297,7 @@ cd "C:\Program Files\ExplorerLens"
 ```
 
 **Target hit rate:** 85-95%
+
 - **<70%:** Increase cache size
 - **>98%:** Cache may be too large (wasted disk space)
 
@@ -312,6 +326,7 @@ cd "C:\Program Files\ExplorerLens"
 ```
 
 **Recommended scenarios:**
+
 - After installing ExplorerLens
 - New photo library import
 - Network drive browsing
@@ -324,6 +339,7 @@ cd "C:\Program Files\ExplorerLens"
 ### Thread Pool Architecture
 
 **ExplorerLens uses a fixed-size thread pool:**
+
 - **Worker threads:** Decode thumbnails in parallel
 - **Default size:** CPU core count (detected automatically)
 - **Queue depth:** 256 pending requests
@@ -359,7 +375,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
 **Guidelines:**
 
 | Storage Type | Recommended Threads |
-|--------------|---------------------|
+| -------------- | --------------------- |
 | **HDD (5400 RPM)** | 2-4 (avoid thrashing) |
 | **HDD (7200 RPM)** | 4-6 |
 | **SATA SSD** | Match CPU cores |
@@ -393,6 +409,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
 ### Memory Usage Overview
 
 **Typical memory footprint:**
+
 - **Base (idle):** 10-20 MB
 - **Active (decoding):** 50-150 MB
 - **Cached (100 thumbnails):** +10 MB
@@ -434,6 +451,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 0
 ```
 
 **Example limits:**
+
 - 25 MP = 5,000 × 5,000 pixels
 - 50 MP = 7,071 × 7,071 pixels
 - 100 MP = 10,000 × 10,000 pixels
@@ -469,6 +487,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 0
 ### Memory Pressure Handling
 
 **ExplorerLens monitors system memory:**
+
 - **<20% free RAM** → Reduce cache size dynamically
 - **<10% free RAM** → Skip thumbnail generation
 - **Critical pressure** → Clear in-memory cache
@@ -492,9 +511,10 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 0
 ### Problem: Slow NAS/SMB Thumbnails
 
 **Causes:**
+
 1. Network latency (file read delays)
 1. No local caching (repeated network requests)
-3. Too many concurrent operations (network congestion)
+1. Too many concurrent operations (network congestion)
 
 ---
 
@@ -625,7 +645,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name RAWUseEmbedded -Value 1
 **Comparison:**
 
 | Mode | Quality | Speed | File Size |
-|------|---------|-------|-----------|
+| ------ | --------- | ------- | ----------- |
 | **Full decode** | Native (14-bit) | 500-1000 ms | 50 MP RAW |
 | **Embedded** | JPEG (8-bit) | 100-200 ms | 2 MP preview |
 
@@ -636,6 +656,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name RAWUseEmbedded -Value 1
 #### **Preview Mode** (default: First file)
 
 **Modes:**
+
 - `0`: First image/video in archive
 - `1`: Largest image in archive
 - `2`: Montage of first 4 images (2×2 grid)
@@ -767,17 +788,20 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 ### CPU Profiling (Visual Studio)
 
 1. **Attach to Explorer:**
-  - Debug → Performance Profiler → Attach to Process
-  - Select `explorer.exe`
-  - Choose "CPU Usage" profiler
+
+- Debug → Performance Profiler → Attach to Process
+- Select `explorer.exe`
+- Choose "CPU Usage" profiler
 
 1. **Trigger thumbnail generation:**
-  - Navigate to folder with images
-  - Enable thumbnails view
 
-3. **Analyze results:**
-  - Hot Path: `LENSShell.dll!CThumbnailProvider::GetThumbnail`
-  - Look for bottlenecks in decoder functions
+- Navigate to folder with images
+- Enable thumbnails view
+
+1. **Analyze results:**
+
+- Hot Path: `LENSShell.dll!CThumbnailProvider::GetThumbnail`
+- Look for bottlenecks in decoder functions
 
 ---
 
@@ -851,16 +875,19 @@ wpa thumbnail_trace.etl
 ### Quick Wins (5 minutes)
 
 1. **Enable GPU acceleration:**
+
  ```powershell
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
  ```
 
 1. **Increase cache size:**
+
  ```powershell
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
  ```
 
-3. **Pre-cache photo library:**
+1. **Pre-cache photo library:**
+
  ```powershell
  .\EngineBenchmark.exe --cache-warmup "C:\Photos"
  ```
@@ -871,8 +898,8 @@ wpa thumbnail_trace.etl
 
 1. **Move cache to fast SSD**
 1. **Tune thread count** (benchmark different values)
-3. **Enable RAW embedded thumbnails** (if quality acceptable)
-4. **Profile with PIX/Nsight** (find decoder bottlenecks)
+1. **Enable RAW embedded thumbnails** (if quality acceptable)
+1. **Profile with PIX/Nsight** (find decoder bottlenecks)
 
 ---
 
@@ -903,6 +930,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 ---
 
 **Next Steps:**
+
 - [Troubleshooting](TROUBLESHOOTING.md) - Fix performance issues
 - [User Guide](USER_GUIDE.md) - General configuration guide
 

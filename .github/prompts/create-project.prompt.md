@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Create a new Python project following the Universal Project Enhancement Framework v15.0.0 structure"
 ---
@@ -15,7 +15,7 @@ Python minimum version: `${input:pythonVersion:3.9}`
 
 ## Required Output Structure
 
-```
+```powershell
 ${input:projectName}/
 ├── ${input:projectName}        # Entry point script (no .py extension)
 ├── README.md                   # Full documentation with badges

@@ -1,4 +1,4 @@
-# ExplorerLens — winget package manifest
+﻿# ExplorerLens — winget package manifest
 
 Three-file winget manifest for submission to
 [winget-pkgs](https://github.com/microsoft/winget-pkgs).
@@ -6,7 +6,7 @@ Three-file winget manifest for submission to
 ## Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `ExplorerLens.ExplorerLens.yaml` | Version manifest — identifies the package |
 | `ExplorerLens.ExplorerLens.installer.yaml` | Installer manifest — MSI URL + SHA256 + product code |
 | `ExplorerLens.ExplorerLens.locale.en-US.yaml` | Locale manifest — publisher/description metadata |
@@ -14,17 +14,21 @@ Three-file winget manifest for submission to
 ## Publishing Workflow
 
 1. Build and upload the MSI to the v39.9.0 GitHub Release.
-2. Compute the SHA-256 of `ExplorerLens-Setup-39.9.0.msi`:
+1. Compute the SHA-256 of `ExplorerLens-Setup-39.9.0.msi`:
+
    ```powershell
    (Get-FileHash packaging/output/ExplorerLens-Setup-39.9.0.msi -Algorithm SHA256).Hash
    ```
-3. Replace `InstallerSha256` in `ExplorerLens.ExplorerLens.installer.yaml`
+
+1. Replace `InstallerSha256` in `ExplorerLens.ExplorerLens.installer.yaml`
    with the real hash.
-4. Validate locally:
+1. Validate locally:
+
    ```powershell
    winget validate --manifest packaging/winget
    ```
-5. Fork [winget-pkgs](https://github.com/microsoft/winget-pkgs), copy the
+
+1. Fork [winget-pkgs](https://github.com/microsoft/winget-pkgs), copy the
    three files to `manifests/e/ExplorerLens/ExplorerLens/39.9.0/`, open a PR.
 
 ## Updating for a new version

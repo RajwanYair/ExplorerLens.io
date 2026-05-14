@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 name: Corpus
 description: "ExplorerLens corpus ingest agent — downloads CC0/public-domain test files, verifies SHA-256 checksums, updates MANIFEST.json, validates SSIM baselines, and detects corpus gaps across all 25+ decoder families."
@@ -38,7 +38,7 @@ You are the **ExplorerLens Corpus Ingest Agent**. Your job is to maintain the CC
 
 ## Corpus Structure
 
-```
+```text
 data/corpus/
 ├── images/
 │   ├── jpeg/     ≥5 files: basic, EXIF-rotated, progressive, CMYK, 6MP
@@ -138,7 +138,7 @@ Get-ChildItem data/corpus -Recurse -File | Where-Object {
 ## Source Catalog (CC0/Public-Domain)
 
 | Format | Source | License | Notes |
-|--------|--------|---------|-------|
+| -------- | -------- | --------- | ------- |
 | AVIF | `aomedia.googlesource.com/aom/+/refs/heads/main/test/` | BSD/CC0 | AV1 reference test files |
 | JXL | `github.com/libjxl/libjxl/tree/main/testdata` | BSD | Official libjxl test files |
 | HEIC | `github.com/strukturag/libheif/tree/master/examples` | LGPL test files | GPAC + Nokia samples |

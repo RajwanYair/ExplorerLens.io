@@ -1,4 +1,4 @@
-# ADR-013: SQLite WAL for L2 Thumbnail Cache Index
+﻿# ADR-013: SQLite WAL for L2 Thumbnail Cache Index
 
 **Status:** Accepted
 **Version:** v38.4.0 (scheduled for Phase 2 implementation)
@@ -27,7 +27,7 @@ Implement a **two-tier cache** in `Engine/Cache/`:
 ### L1 — In-process LRU (Phase 1, already partially implemented)
 
 | Property | Value |
-|----------|-------|
+| ---------- | ------- |
 | Storage | In-process memory |
 | Data structure | Robin-Hood open-addressing hashmap + doubly-linked LRU list |
 | Key | `XXH3_128(canonical_path ‖ mtime_ns ‖ size_bytes ‖ target_w ‖ target_h ‖ decoder_ver)` |
@@ -39,7 +39,7 @@ Implement a **two-tier cache** in `Engine/Cache/`:
 ### L2 — SQLite WAL index + memory-mapped blob store (Phase 2)
 
 | Property | Value |
-|----------|-------|
+| ---------- | ------- |
 | Index location | `%LOCALAPPDATA%\ExplorerLens\cache.db` |
 | Blob location | `%LOCALAPPDATA%\ExplorerLens\Cache\<hash_prefix>\<full_hash>.thumb` |
 | SQLite mode | WAL (Write-Ahead Logging) — allows concurrent readers without blocking |
@@ -49,7 +49,7 @@ Implement a **two-tier cache** in `Engine/Cache/`:
 
 ### Cache key schema
 
-```
+```text
 CacheKey = XXH3_128(
   NormalizedAbsolutePath(file),   // e.g., "C:\Users\...\photo.jpg" → lowercased, long path form
   file_mtime_epoch_ns,             // 100ns resolution NTFS timestamps
@@ -88,7 +88,7 @@ memory-mapped file. Large blobs (> 1 MB, i.e., thumbnails > 512×512) use LZ4 co
 
 ### Invalidation flow
 
-```
+```text
 1. ReadDirectoryChangesW fires for directory D
 2. For each changed file F in D:
    a. Compute path_hash(F)
@@ -100,6 +100,7 @@ memory-mapped file. Large blobs (> 1 MB, i.e., thumbnails > 512×512) use LZ4 co
 ### Cache compaction
 
 Scheduled daily via a Windows Task (registered by MSI installer):
+
 ```powershell
 lens.exe cache compact --max-age 30d --max-size 1GB
 ```
@@ -120,12 +121,14 @@ The `lens.exe cache` commands (§6.3 ROADMAP) drive all cache management.
 ## Consequences
 
 ### Positive
+
 - Cache hit P50 < 5 ms (vs. re-decode cost of 5–150 ms for P0 formats)
 - Multiple Explorer windows share the same L2 — folder thumbnail grids appear instantaneously on revisit
 - `lens.exe cache stats` gives visibility into hit rate / size / top-100 paths
 - Corpus validation tests can validate cache consistency (decode → store → retrieve → SSIM)
 
 ### Negative
+
 - SQLite dependency added to `Engine/Cache/` (header-only is insufficient; link `sqlite3.c` as Unity build)
 - `%LOCALAPPDATA%` writes from inside `explorer.exe` require careful path resolution (no `GetTempPath`)
 - WAL checkpoint must be triggered periodically from a background thread to reclaim disk space
@@ -141,7 +144,7 @@ The `lens.exe cache` commands (§6.3 ROADMAP) drive all cache management.
 ## Alternatives Considered
 
 | Alternative | Why rejected |
-|-------------|-------------|
+| ------------- | ------------- |
 | LevelDB | Process-exclusive lock; breaks multi-Explorer concurrency |
 | LMDB | Good, but less battle-tested on Windows; no human-readable debugging |
 | RocksDB | Heavyweight; server-oriented |

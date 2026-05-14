@@ -1,4 +1,4 @@
-# ExplorerLens — Performance Benchmarks Baseline
+﻿# ExplorerLens — Performance Benchmarks Baseline
 
 > ⚠️ **DEPRECATED** — This file has been merged into [`docs/PERFORMANCE.md`](../../docs/PERFORMANCE.md).
 > `docs/PERFORMANCE.md` is the **single source of truth** for all performance baselines and targets.
@@ -14,7 +14,7 @@
 ### Target: < 17 ms (P50 median), < 50 ms (P99)
 
 | Format | File Size | Cold CPU (ms) | Cold NPU (ms) | Warm Cache (ms) | Target P50 (ms) |
-|--------|-----------|---------------|---------------|-----------------|-----------------|
+| -------- | ----------- | --------------- | --------------- | ----------------- | ----------------- |
 | JPEG | 5 MB | 15–35 | 8–20 | 1–2 | < 15 |
 | PNG | 8 MB | 20–45 | 10–25 | 1–2 | < 20 |
 | WebP | 2 MB | 20–45 | 10–22 | 1–2 | < 20 |
@@ -35,7 +35,7 @@
 ### Target: > 235 images/sec CPU, > 350 img/sec with NPU offload
 
 | Scenario | CPU (img/s) | NPU+GPU (img/s) | Target (img/s) | Method |
-|----------|-------------|-----------------|----------------|--------|
+| ---------- | ------------- | ----------------- | ---------------- | -------- |
 | JPEG batch (100 files) | 280 | 420 | 300+ | Pipeline + GPU |
 | Mixed formats (100 files) | 180 | 280 | 220+ | Pipeline |
 | Archive extraction (50 CBZ) | 100 | 140 | 130+ | Parallel I/O |
@@ -54,7 +54,7 @@
 ### Target: < 45 MB idle, < 500 MB peak
 
 | State | Current (MB) | Target (MB) |
-|-------|-------------|-------------|
+| ------- | ------------- | ------------- |
 | Idle (loaded, no activity) | 50-100 | < 45 |
 | Active (10 thumbnails) | 150-300 | < 200 |
 | Heavy load (100 thumbnails) | 500-1000 | < 500 |
@@ -65,7 +65,7 @@
 ## 5. Build Performance
 
 | Metric | Current | Target |
-|--------|---------|--------|
+| -------- | --------- | -------- |
 | Clean build (152 targets) | ~120 s | < 90 s |
 | Incremental build (1 file) | ~5 s | < 3 s |
 | Test suite (1243 tests) | ~2 s | < 2 s |
@@ -77,7 +77,7 @@
 ## 6. GPU Acceleration
 
 | Operation | CPU (ms) | GPU DX11 (ms) | Speedup |
-|-----------|----------|--------------|---------|
+| ----------- | ---------- | -------------- | --------- |
 | Bilinear scale 4K→256 | 8.5 | 0.6 | 14x |
 | Lanczos scale 4K→256 | 15.2 | 1.1 | 14x |
 | Color space conversion | 3.2 | 0.3 | 11x |
@@ -88,7 +88,7 @@
 ## 7. Cold Start
 
 | Stage | Current (ms) | Target (ms) |
-|-------|-------------|-------------|
+| ------- | ------------- | ------------- |
 | DLL load + COM init | 50 | < 30 |
 | Decoder registration | 30 | < 20 |
 | GPU device creation | 80 | < 50 |
@@ -99,7 +99,7 @@
 
 ## 8. Benchmark Test Names (CTest)
 
-```
+```text
 EngineBenchmark:
   BM_JpegDecode256
   BM_PngDecode256
@@ -126,7 +126,7 @@ EngineBenchmark:
 ## 9. Profiling Tools
 
 | Tool | Usage | Best For |
-|------|-------|----------|
+| ------ | ------- | ---------- |
 | ETW + WPA | `xperf -on PROC_THREAD+CSWITCH+LOADER` | System-level bottlenecks |
 | VS Profiler | Debug → Performance Profiler | CPU hot paths |
 | PIX | GPU capture | Shader/dispatch analysis |
@@ -140,7 +140,7 @@ EngineBenchmark:
 CI should flag performance regressions exceeding these thresholds:
 
 | Metric | Threshold | Action |
-|--------|-----------|--------|
+| -------- | ----------- | -------- |
 | Median latency | +20% | Warning |
 | P99 latency | +50% | Warning |
 | Batch throughput | -15% | Error (blocks merge) |

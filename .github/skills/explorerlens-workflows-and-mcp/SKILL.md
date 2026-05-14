@@ -1,4 +1,4 @@
-# ExplorerLens — Workflows and MCP Skill
+﻿# ExplorerLens — Workflows and MCP Skill
 
 ## Purpose
 
@@ -151,7 +151,7 @@ Get-ChildItem .github/workflows/*.yml | ForEach-Object {
 ### Approved Action Registry
 
 | Action | Current Pin | Node Runtime |
-|--------|------------|-------------|
+| -------- | ------------ | ------------- |
 | `actions/checkout` | `@v4` | node20 |
 | `actions/upload-artifact` | `@v4` | node20 |
 | `actions/download-artifact` | `@v4` | node20 |
@@ -208,7 +208,7 @@ All actions are at `@v4` or later. No Node 16 actions remain.
 ### Troubleshooting
 
 | Symptom | Fix |
-|---------|-----|
+| --------- | ----- |
 | `Node.js 16 actions are deprecated` warning | Upgrade action to `@v4` |
 | `This request was rejected` on `upload-artifact` | Upgrade from `@v3` to `@v4` (breaking API change) |
 | Custom action fails with Node 24 | Check `engines.node` in action's `package.json`; file issue with action author |
@@ -218,7 +218,7 @@ All actions are at `@v4` or later. No Node 16 actions remain.
 ## AI Tooling Inventory (Current State)
 
 | Asset Type | Count | Location |
-|------------|-------|----------|
+| ------------ | ------- | ---------- |
 | Instructions (scoped) | 15 | `.github/instructions/` |
 | Agents | 5 | `.github/agents/` |
 | Prompts | 14 | `.github/prompts/` |
@@ -241,7 +241,7 @@ All actions are at `@v4` or later. No Node 16 actions remain.
 ## Canonical File Paths
 
 | Purpose | Path |
-|---------|------|
+| --------- | ------ |
 | Workflow rules | `.github/instructions/cicd.instructions.md` |
 | AI capability inventory | `.github/standards/ai-tooling-capabilities.md` |
 | Main repository rules | `.github/copilot-instructions.md` |

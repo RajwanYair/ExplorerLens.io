@@ -1,0 +1,6 @@
+# markdownlint ignore file
+# Exclude generated/session files not part of project documentation
+build-logs/**
+CHANGELOG-archive.md
+packages/**
+external/**

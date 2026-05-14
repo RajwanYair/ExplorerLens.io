@@ -1,5 +1,6 @@
-# ExplorerLens Build Quick Reference
-**For AI Assistants & Developers** 
+﻿# ExplorerLens Build Quick Reference
+
+**For AI Assistants & Developers**
 **Updated:** February 9, 2026
 
 ---
@@ -161,7 +162,7 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:
 ## 🐛 Quick Troubleshooting
 
 | Problem | Solution |
-|---------|----------|
+| --------- | ---------- |
 | "cl.exe not found" | Run `Load-MSVCEnvironment` or `Setup-ExplorerLensEnv -Force` |
 | "CMake generator not found" | Ensure VS Build Tools are installed, run `Setup-ExplorerLensEnv` |
 | "Build failed" | Check `build.log` or add `/v:detailed` to msbuild command |
@@ -171,7 +172,7 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:
 
 ## 📁 Project Structure
 
-```
+```text
 ExplorerLens/
 ├── LENSShell.sln # Main VS solution
 ├── LENSShell/ # Shell extension DLL
@@ -227,25 +228,29 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 ## ⚡ Pro Tips
 
 1. **Add to Profile for Auto-Load:**
+
  ```powershell
  notepad $PROFILE
  # Add: . "C:\...\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
  ```
 
-2. **Use Aliases:**
+1. **Use Aliases:**
+
  ```powershell
  dtbuild # Instead of Invoke-ExplorerLensBuild
  dtclean # Instead of cleaning manually
  dttest # Instead of navigating to test folder
  ```
 
-3. **Monitor Builds:**
+1. **Monitor Builds:**
+
  ```powershell
  # In separate terminal:
  Get-Content build.log -Wait
  ```
 
-4. **Check Build Output:**
+1. **Check Build Output:**
+
  ```powershell
  # List recent DLLs:
  Get-ChildItem -Recurse -Filter "*.dll" | 
@@ -259,8 +264,8 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 - **Detailed Tool Docs:** `.github/standards/tool-versions.md`
 - **Environment Script:** `scripts/Setup-DevEnvironment.ps1`
 - **Build Scripts:** `build-scripts/`
-- ** Docs:** `docs/PluginSecurityGuide.md`
+- **Docs:** `docs/PluginSecurityGuide.md`
 
 ---
 
-*Auto-updated: February 9, 2026 - All tools verified working*
+_Auto-updated: February 9, 2026 - All tools verified working_

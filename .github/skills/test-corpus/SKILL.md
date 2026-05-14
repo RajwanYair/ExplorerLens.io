@@ -1,4 +1,4 @@
-# ExplorerLens — Test Corpus Skill
+﻿# ExplorerLens — Test Corpus Skill
 
 ## Purpose
 
@@ -20,7 +20,7 @@ the single highest-priority gap identified in ROADMAP §7.3.
 
 ## Corpus Directory Layout
 
-```
+```text
 data/corpus/
 ├── images/
 │   ├── jpeg/       (5+ files: basic, EXIF-rotated, progressive, CMYK, large)
@@ -215,7 +215,7 @@ When a decoder improvement intentionally changes output (e.g., better color spac
 ### SSIM Thresholds
 
 | Comparison | Minimum SSIM | Notes |
-|-----------|-------------|-------|
+| ----------- | ------------- | ------- |
 | CPU decode vs reference | 0.99 | Baseline correctness |
 | GPU decode vs CPU decode | 0.98 | Allow minor GPU rounding |
 | Cross-platform (Win/Mac/Linux) | 0.97 | Platform renderer differences |
@@ -271,7 +271,7 @@ TEST_CASE("JpegDecoder: truncated file does not crash", "[decoder][jpeg][fuzz]")
 ## Current Corpus Status (v36.3.0)
 
 | Format | Files in corpus | Target | Status |
-|--------|----------------|--------|--------|
+| -------- | ---------------- | -------- | -------- |
 | WebP | 1 (webp-basic) | 5+ | Needs expansion |
 | QOI | 1 (qoi-gradient) | 3+ | Needs expansion |
 | PPM | 1 (ppm-red-gradient) | 3+ | Needs expansion |
@@ -375,7 +375,7 @@ For each decoder, check if a matching `data/corpus/<category>/<format>/` directo
 with the required minimum files. Output a gap report:
 
 | Format | Decoder | Min Files | Actual | Status |
-|--------|---------|-----------|--------|--------|
+| -------- | --------- | ----------- | -------- | -------- |
 | JPEG   | JpegDecoder | 5 | 5 | ✅ |
 | AVIF   | AvifDecoder | 3 | 0 | ❌ GAP |
 
@@ -393,7 +393,7 @@ Priority order for sourcing files:
 ### Approved Sources
 
 | Source | License | Best For | Notes |
-|--------|---------|----------|-------|
+| -------- | --------- | ---------- | ------- |
 | [Unsplash](https://unsplash.com/) | Unsplash License | JPEG, PNG photos | Free for all uses; download direct |
 | [Wikimedia Commons](https://commons.wikimedia.org/) | CC0 / PD | All image formats | Filter: `License = CC0` or `PD-self` |
 | [IIIF Image API](https://iiif.io/api/image/) | Varies (CC0 common) | JPEG, TIFF, JP2 | Museums/libraries; use `info.json` to get format caps |
@@ -452,7 +452,7 @@ $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
 ## SSIM Threshold Reference
 
 | Format Category | Min SSIM | Rationale |
-|----------------|----------|-----------|
+| ---------------- | ---------- | ----------- |
 | Lossless (PNG, BMP, TIFF 8-bit) | 0.99 | Near-perfect reproduction expected |
 | Lossy high-quality (JPEG q90+, WebP) | 0.95 | Slight decode variation acceptable |
 | Lossy compressed (JPEG q50, DDS BC1) | 0.85 | Compression artifacts expected |

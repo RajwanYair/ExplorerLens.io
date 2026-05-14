@@ -1,4 +1,4 @@
-# Benchmark History — `history.jsonl`
+﻿# Benchmark History — `history.jsonl`
 
 This file tracks Engine benchmark results across releases. Each line is a JSON object recording
 performance metrics for a single version.
@@ -8,7 +8,7 @@ performance metrics for a single version.
 Each line in `history.jsonl` is a JSON object with these top-level fields:
 
 | Field | Type | Description |
-|-------|------|-------------|
+| ------- | ------ | ------------- |
 | `schema_version` | `"1"` | Schema version — increment when fields change |
 | `version` | `string` | ExplorerLens release version (e.g., `"39.9.0"`) |
 | `codename` | `string` | Release codename |
@@ -24,7 +24,7 @@ Each line in `history.jsonl` is a JSON object with these top-level fields:
 Each value in `benchmarks` is an object with any combination of:
 
 | Field | Unit | Description |
-|-------|------|-------------|
+| ------- | ------ | ------------- |
 | `p50_ms` | milliseconds | Median latency |
 | `p95_ms` | milliseconds | 95th percentile latency |
 | `p99_ms` | milliseconds | 99th percentile latency |
@@ -35,7 +35,7 @@ Each value in `benchmarks` is an object with any combination of:
 Benchmark names match those in `Engine/Tests/benchmarks/baseline.json`:
 
 | Name | Category | Description |
-|------|----------|-------------|
+| ------ | ---------- | ------------- |
 | `BM_SingleDecode_JPEG` | single_decode | Median JPEG decode for a 6MP image |
 | `BM_SingleDecode_PNG` | single_decode | Median PNG decode for a 4K image |
 | `BM_SingleDecode_WebP` | single_decode | Median WebP decode |
@@ -63,6 +63,7 @@ After a version bump and performance validation:
 `performance-regression-gate.yml`. `history.jsonl` is a historical record — it does not gate builds.
 
 The `performance-regression-gate.yml` workflow blocks PRs that regress beyond:
+
 - Single decode latency: 20% block / 10% warn
 - Batch throughput: 15% block
 - Cache hit latency: 50% block

@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**/*.md,docs/**"
 ---
 
@@ -12,7 +12,7 @@ Documentation must lag code — document what works, not what is planned.
 ## Tier Placement (Required)
 
 | Tier | Files | Audience | Rule |
-|------|-------|----------|------|
+| ------ | ------- | ---------- | ------ |
 | 1 — User | `README.md`, `docs/USER_GUIDE.md`, `CHANGELOG.md` | End users | Validated features ONLY |
 | 2 — Developer | `docs/development/`, `.github/standards/` | Contributors | Accurate build/test instructions |
 | 3 — Architecture | `ROADMAP.md`, `docs/architecture/` | Deep contributors | Label aspirational sections clearly |
@@ -232,7 +232,7 @@ When creating a new architecture or workflow SVG:
 Two SVGs are patched by `Bump-Version.ps1`:
 
 | SVG | Patched Elements |
-|-----|-----------------|
+| ----- | ----------------- |
 | `social-preview.svg` | Version chip, codename label, build/test stats |
 | `architecture-build.svg` | MSI filename chip (`ExplorerLens-X.Y.Z-x64.msi`), version label |
 

@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**"
 ---
 
@@ -65,7 +65,7 @@ config = "C:\\Users\\name\\project\\config.yaml"
 
 ### Standard Project Structure
 
-```
+```text
 project-name/
 ├── project-name          # Single entry point (no .py extension)
 ├── README.md

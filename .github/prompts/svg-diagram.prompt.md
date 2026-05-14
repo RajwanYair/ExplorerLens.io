@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Generate a standardized SVG architecture or workflow diagram for ExplorerLens using the project's brand palette and conventions"
 ---
@@ -18,7 +18,7 @@ Create a publication-quality SVG diagram for the ExplorerLens project.
 All ExplorerLens diagrams use this consistent color palette:
 
 | Role | Color | Hex | Usage |
-|------|-------|-----|-------|
+| ------ | ------- | ----- | ------- |
 | Primary | Blue | `#2563EB` | Main components, headers, active states |
 | Accent | Amber | `#F59E0B` | Highlights, callouts, version chips |
 | Success | Green | `#10B981` | Passing tests, healthy states, completed |

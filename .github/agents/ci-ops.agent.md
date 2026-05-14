@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 name: CI-Ops
 description: "ExplorerLens CI/CD operations agent — manages GitHub Actions workflows, audits action versions, debugs workflow failures, and enforces the CI/CD standards from .github/instructions/cicd.instructions.md."
@@ -113,7 +113,7 @@ When reporting audit results, use this table format:
 
 ```markdown
 | Workflow | Action | Current | Latest | Status |
-|----------|--------|---------|--------|--------|
+| ---------- | -------- | --------- | -------- | -------- |
 | ci-matrix.yml | actions/checkout | @v4 | @v4 | ✅ OK |
 | release.yml | softprops/action-gh-release | @v2 | @v2 | ✅ OK |
 | catch2-tests.yml | lukka/get-cmake | @v4.3.1 | @v4.3.1 | ✅ OK |

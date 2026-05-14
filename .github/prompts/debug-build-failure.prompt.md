@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 description: "Debug a failed ExplorerLens build. Reads build logs, identifies errors and warnings, suggests root causes, and provides fix strategies."
 ---
@@ -19,7 +19,7 @@ Get-Content build-logs\{{logFile}} | Select-String "error C|error LNK|fatal erro
 ## Step 2: Classify the Error
 
 | Error Code | Category | Common Cause |
-|------------|----------|-------------|
+| ------------ | ---------- | ------------- |
 | `error C2065` | Undeclared identifier | Missing `#include` or wrong namespace |
 | `error C2440` | Type conversion | Implicit narrowing; `std::span` mismatch |
 | `error C2039` | Member not found | Typo in member name; wrong header included |
@@ -102,7 +102,7 @@ std::min(a, b)
 ## Build Timings (Don't Panic)
 
 | Phase | Normal Time |
-|-------|-------------|
+| ------- | ------------- |
 | CMake configure | 10-30s |
 | EngineTests.cpp compile (~22K lines) | 60-90s |
 | LTCG linking | 20-40s |

@@ -1,4 +1,4 @@
----
+﻿---
 mode: agent
 name: Docs
 description: "ExplorerLens documentation accuracy agent — checks that docs reflect actual code, fixes broken links, right-sizes content tiers, and enforces the documentation standards from .github/instructions/documentation.instructions.md."
@@ -72,7 +72,7 @@ Get-ChildItem docs -Recurse -Filter "*.md" | ForEach-Object {
 Every markdown file belongs to one tier:
 
 | Tier | Files | Validated-only? |
-|------|-------|----------------|
+| ------ | ------- | ---------------- |
 | 1 — User | `README.md`, `docs/USER_GUIDE.md`, `CHANGELOG.md` | ✅ YES |
 | 2 — Developer | `docs/development/`, `.github/standards/` | ✅ YES |
 | 3 — Architecture | `ROADMAP.md`, `docs/architecture/` | Label clearly |
@@ -94,7 +94,7 @@ Every markdown file belongs to one tier:
 
 When reporting issues, use this format:
 
-```
+```text
 ACCURACY ISSUE: [README.md L45] Claims AVIF support — no AvifDecoder.cpp found
 BROKEN LINK: [docs/development/BUILD.md L12] -> ../architecture/gpu.md (does not exist)
 NAMING ISSUE: [docs/performance.md] Should be PERFORMANCE.md

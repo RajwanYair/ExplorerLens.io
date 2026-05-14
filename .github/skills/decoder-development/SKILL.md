@@ -1,4 +1,4 @@
-# ExplorerLens — Decoder Development Skill
+﻿# ExplorerLens — Decoder Development Skill
 
 ## Purpose
 
@@ -192,7 +192,7 @@ Register Catch2 test files in `Engine/Tests/CMakeLists.txt` under the `Catch2Tes
 All decoders MUST implement the two-phase pattern:
 
 | Phase | Purpose | Data Access | Performance Target |
-|-------|---------|-------------|-------------------|
+| ------- | --------- | ------------- | ------------------- |
 | `ProbeHeader` | Magic bytes only — confirm format | First 16 KB | < 0.1 ms |
 | `DecodeAtSize` | Minimal decode at requested size | Full stream | Format-specific |
 
@@ -210,7 +210,7 @@ render at full resolution.
 ## Format-Specific Rules
 
 | Format | Library | Key Constraint |
-|--------|---------|---------------|
+| -------- | --------- | --------------- |
 | JPEG | libjpeg-turbo | Always apply EXIF orientation (tag 0x0112) |
 | PNG | WIC / libpng | Handle 16-bit; return first APNG frame |
 | AVIF | libavif + dav1d | Use `avifDecoderSetIOMemory`; do not call `avifDecoderNextImage` in loop |

@@ -1,4 +1,4 @@
----
+﻿---
 applyTo: "**"
 ---
 
@@ -21,7 +21,7 @@ All 21 files are updated by `Bump-Version.ps1`. Files marked *(conditional)* are
 they exist on disk; the script skips them silently if absent.
 
 | # | File | What Changes | Conditional? |
-|---|------|-------------|--------------|
+| --- | ------ | ------------- | -------------- |
 | 1 | `VERSION` | Plain version string | No |
 | 2 | `CHANGELOG.md` | Prepends new `## [X.Y.Z]` section | No |
 | 3 | `CMakeLists.txt` | `project(... VERSION X.Y.Z ...)` | No |
@@ -121,7 +121,7 @@ gh release upload vX.Y.Z `
 ## Post-Release Verification
 
 | Step | Command / Check |
-|------|----------------|
+| ------ | ---------------- |
 | Tag pushed | `git tag -l vX.Y.Z` |
 | Release exists | `gh release view vX.Y.Z` |
 | All artifacts attached | GitHub Release page shows .dll, .exe, .msi, .zip, SHA256SUMS.txt, SBOM.json |
