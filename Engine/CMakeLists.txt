@@ -31,7 +31,6 @@ endif()
 #==============================================================================
 
 option(BUILD_TESTS "Build unit tests" ON)  # Enabled for CI/CD
-option(BUILD_CATCH2_TESTS "Build Catch2-based unit tests" ON)
 option(BUILD_BENCHMARKS "Build performance benchmarks" ON)
 option(BUILD_SHARED_LIBS "Build as shared library" ON)
 option(ENABLE_GPU "Enable GPU acceleration" ON)

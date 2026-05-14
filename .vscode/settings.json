@@ -150,11 +150,9 @@
                 "-NoLogo",
                 "-NoExit",
                 "-File",
-                "${workspaceFolder}/../.vscode/scripts/Initialize-CommonTooling.ps1",
+                "${workspaceFolder}/.vscode/scripts/Initialize-ExplorerLens.ps1",
                 "-WorkspaceRoot",
-                "${workspaceFolder}",
-                "-WorkspaceBootstrap",
-                "${workspaceFolder}\\.env.ps1"
+                "${workspaceFolder}"
             ]
         },
         "PowerShell 7": {
@@ -173,11 +171,9 @@
                 "-NoLogo",
                 "-NoExit",
                 "-File",
-                "${workspaceFolder}/../.vscode/scripts/Initialize-CommonTooling.ps1",
+                "${workspaceFolder}/.vscode/scripts/Initialize-ExplorerLens.ps1",
                 "-WorkspaceRoot",
                 "${workspaceFolder}",
-                "-WorkspaceBootstrap",
-                "${workspaceFolder}\\.env.ps1",
                 "-LoadMsvcEnv"
             ]
         },
@@ -199,13 +195,7 @@
         "path": "pwsh.exe",
         "args": [
             "-NoProfile",
-            "-NoLogo",
-            "-NoExit",
-            "-File",
-            "${workspaceFolder}/../.vscode/scripts/Initialize-CommonTooling.ps1",
-            "-WorkspaceRoot",
-            "${workspaceFolder}",
-            "-SkipWorkspaceBootstrap"
+            "-NoLogo"
         ]
     },
     "terminal.integrated.tabs.enabled": true,

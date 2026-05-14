@@ -30,9 +30,9 @@ if (-not $env:HTTPS_PROXY) {
 }
 
 if (-not $SkipCommonBootstrap) {
-    $commonBootstrap = Join-Path (Split-Path $PSScriptRoot -Parent) '.vscode\scripts\Initialize-CommonTooling.ps1'
-    if (Test-Path $commonBootstrap -PathType Leaf) {
-        . $commonBootstrap -WorkspaceRoot $PSScriptRoot -SkipWorkspaceBootstrap
+    $localInit = Join-Path $PSScriptRoot '.vscode\scripts\Initialize-ExplorerLens.ps1'
+    if (Test-Path $localInit -PathType Leaf) {
+        . $localInit -WorkspaceRoot $PSScriptRoot -SkipWorkspaceBootstrap
     }
 }
 

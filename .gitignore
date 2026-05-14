@@ -11,18 +11,6 @@
 build-error.txt
 build-result.txt
 
-# Removed stale version-specific documentation (consolidated 2026-03-27)
-docs/ROADMAP_V16.md
-docs/FEATURE_FREEZE_16.md
-docs/MIGRATION_GUIDE_V16.md
-docs/RELEASE_NOTES_19.md
-packaging/RELEASE_MANIFEST_19.2.0.md
-
-# Removed stale docs superseded by copilot-instructions/SDK/architecture (consolidated 2026-04-03)
-docs/RELEASE_PROCESS.md
-docs/SDK.md
-docs/README_ARCHITECTURE.md
-
 # User-specific files
 *.rsuser
 *.suo

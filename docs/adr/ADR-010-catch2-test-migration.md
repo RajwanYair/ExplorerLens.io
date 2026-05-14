@@ -1,8 +1,8 @@
 # ADR-010: Catch2 as Primary Test Framework
 
-**Status:** Accepted  
-**Version:** v36.2.0+ (Catch2 tests active as of v39.9.0)  
-**Date:** 2026-07-19  
+**Status:** Proposed  
+**Version:** Target: v40.0.0+ (not yet implemented — custom `TEST()`/`RUN_TEST()` framework active)  
+**Date:** 2026-07-19 (planned)  
 
 ## Context
 
