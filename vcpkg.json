@@ -78,10 +78,6 @@
       "platform": "windows"
     },
     {
-      "name": "stb",
-      "platform": "windows"
-    },
-    {
       "name": "directxtex",
       "platform": "windows"
     },
