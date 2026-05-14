@@ -190,6 +190,19 @@ class PersistentDiskCache
     mutable std::mutex m_cacheMutex;
     std::unordered_map<std::wstring, CacheEntry> m_index;
 
+    // SQLite L2 persistence — winsqlite3.dll (Windows 10+ built-in, zero external dep)
+    void* m_sqliteDb = nullptr;       ///< sqlite3* handle (opaque to avoid include)
+    bool  m_sqliteLoaded = false;     ///< winsqlite3.dll loaded successfully
+
+    bool OpenSqliteDb(const std::wstring& dbPath);
+    void CloseSqliteDb();
+    bool SqlitePut(const std::wstring& key, const std::wstring& filePath,
+                   uint32_t width, uint32_t height,
+                   const uint8_t* data, uint32_t dataSize,
+                   double decodeCostMs, const std::wstring& formatName);
+    bool SqliteGet(const std::wstring& filePath, uint32_t& width, uint32_t& height,
+                   std::vector<uint8_t>& data);
+
     // Statistics
     uint64_t m_totalHits = 0;
     uint64_t m_totalMisses = 0;
