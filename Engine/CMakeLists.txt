@@ -1929,6 +1929,15 @@ set(ENGINE_HEADERS
     Pipeline/FormatFamilyDispatcher.h            # S368 — 5-family format dispatch table (ADR A32 Phase3)
     Core/ThumbCacheWarmer.h                      # S369 — thumbnail cache pre-warming (H47 Phase5 prep)
     Core/WicFormatNegotiator.h                   # S370 — WIC encoder/decoder capability query (H24 Phase2)
+    Core/IccProfileApplicator.h                  # S372 — ICC profile apply end-to-end (H12/H30 Phase3)
+    Core/DarkModeSystemEvent.h                   # S373 — WM_SETTINGCHANGE dark mode event handler (Phase3)
+    Core/PerMonitorDpiConfig.h                   # S374 — Per-Monitor V2 DPI config for LENSManager (Phase3)
+    Core/EvSigningPipeline.h                     # S375 — EV code signing CI pipeline (S11 Phase3)
+    Platform/WinGetPublishConfig.h               # S376 — WinGet publish config + PR builder (A26 Phase3)
+    Core/FontPreviewPipeline.h                   # S377 — FreeType→thumbnail TTF/OTF preview pipeline (Phase3)
+    Core/DllSymbolAuditor.h                      # S378 — DLL symbol auditor for <2500KB target (Phase3)
+    Core/SimdLanczosKernel.h                     # S379 — SIMD AVX2 Lanczos resize kernel (H41 Phase3)
+    Core/CorpusManifestBuilder.h                 # S380 — Corpus manifest builder for 300 CC0 files (Phase3)
 
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h

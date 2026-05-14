@@ -2980,6 +2980,15 @@ int main()
     RUN_TEST(TestS368_FormatFamilyDispatcher_Counts);
     RUN_TEST(TestS369_ThumbCacheWarmer_NotRunning);
     RUN_TEST(TestS370_WicFormatNegotiator_Passthrough);
+    RUN_TEST(TestS372_IccProfileApplicator_Apply);
+    RUN_TEST(TestS373_DarkModeSystemEvent_Subscribe);
+    RUN_TEST(TestS374_PerMonitorDpiConfig_LensManager);
+    RUN_TEST(TestS375_EvSigningPipeline_TsaUrl);
+    RUN_TEST(TestS376_WinGetPublishConfig_DryRun);
+    RUN_TEST(TestS377_FontPreviewPipeline_Spec);
+    RUN_TEST(TestS378_DllSymbolAuditor_Budget);
+    RUN_TEST(TestS379_SimdLanczosKernel_DetectSimd);
+    RUN_TEST(TestS380_CorpusManifestBuilder_Phase3Target);
 
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;

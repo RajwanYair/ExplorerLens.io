@@ -1491,5 +1491,15 @@ using namespace ExplorerLens::Engine;
 #include "../Pipeline/FormatFamilyDispatcher.h"
 #include "../Core/ThumbCacheWarmer.h"
 #include "../Core/WicFormatNegotiator.h"
+// Sprint S372-S380 — ROADMAP v8.0 Phase 3 Quality & Polish (completion)
+#include "../Core/IccProfileApplicator.h"
+#include "../Core/DarkModeSystemEvent.h"
+#include "../Core/PerMonitorDpiConfig.h"
+#include "../Core/EvSigningPipeline.h"
+#include "../Platform/WinGetPublishConfig.h"
+#include "../Core/FontPreviewPipeline.h"
+#include "../Core/DllSymbolAuditor.h"
+#include "../Core/SimdLanczosKernel.h"
+#include "../Core/CorpusManifestBuilder.h"
 
 #include "EngineTestsMacros.h"

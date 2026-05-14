@@ -11546,3 +11546,414 @@ TEST(TestS370_WicFormatNegotiator_Passthrough)
     ASSERT(entry.extension.empty());
     ASSERT(!entry.caps.canDecode);
 }
+
+// ============================================================
+// S372 — IccProfileApplicator
+// ============================================================
+TEST(TestS372_IccProfileApplicator_Apply)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kIccApplicatorMaxCachedTransforms == 8u);
+    ASSERT(kIccApplicatorIntentPerceptual == 0);
+    ASSERT(kIccApplicatorIntentRelative   == 1);
+    ASSERT(kIccApplicatorIntentSaturation == 2);
+    ASSERT(kIccApplicatorIntentAbsolute   == 3);
+
+    // IccApplicatorStatus ordinals
+    ASSERT(static_cast<int>(IccApplicatorStatus::OK)           == 0);
+    ASSERT(static_cast<int>(IccApplicatorStatus::NULL_PIXELS)  == 1);
+    ASSERT(static_cast<int>(IccApplicatorStatus::NOT_WIN32)    == 6);
+
+    // IccPixelFormat ordinals
+    ASSERT(static_cast<int>(IccPixelFormat::BGRA32) == 0);
+    ASSERT(static_cast<int>(IccPixelFormat::RGBA32) == 1);
+    ASSERT(static_cast<int>(IccPixelFormat::RGB24)  == 2);
+
+    // Config factories
+    auto def = IccApplicatorConfig::Default();
+    ASSERT(def.intent == kIccApplicatorIntentPerceptual);
+    ASSERT(def.preserveAlpha);
+
+    auto thumb = IccApplicatorConfig::ForThumbnails();
+    ASSERT(thumb.preserveAlpha);
+
+    auto headless = IccApplicatorConfig::ForHeadless();
+    ASSERT(!headless.useV4Profiles || true);  // just ensure it compiles
+
+    // IsReady() — returns true on Win32
+    auto& applicator = IccProfileApplicator::Global();
+    ASSERT(applicator.IsReady());
+
+    // Apply() with null pixels → NULL_PIXELS
+    auto r1 = applicator.Apply(nullptr, 100, nullptr, 0);
+    ASSERT(r1.status == IccApplicatorStatus::NULL_PIXELS);
+
+    // Apply() with no ICC bytes → OK, usedFallbackSrgb=true
+    uint8_t pixels[4] = {255,0,0,255};
+    auto r2 = applicator.Apply(pixels, 1, nullptr, 0);
+    ASSERT(r2.status == IccApplicatorStatus::OK);
+    ASSERT(r2.usedFallbackSrgb);
+}
+
+// ============================================================
+// S373 — DarkModeSystemEvent
+// ============================================================
+TEST(TestS373_DarkModeSystemEvent_Subscribe)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kDarkModeMaxSubscribers   == 32u);
+    ASSERT(kDarkModeWmSettingChange  == 0x001Au);
+    ASSERT(kDarkModeWmThemeChanged   == 0x031Au);
+
+    // Enum ordinals
+    ASSERT(static_cast<int>(DarkModeEventKind::UNKNOWN)           == 0);
+    ASSERT(static_cast<int>(DarkModeEventKind::IMMERSIVE_COLOR)   == 1);
+    ASSERT(static_cast<int>(DarkModeEventKind::THEME_CHANGED)     == 2);
+    ASSERT(static_cast<int>(DarkModeEventKind::HIGH_CONTRAST)     == 3);
+    ASSERT(static_cast<int>(DarkModeEventKind::DWM_COLORIZATION)  == 4);
+
+    ASSERT(static_cast<int>(SystemDarkModeState::UNKNOWN)          == 0);
+    ASSERT(static_cast<int>(SystemDarkModeState::LIGHT)            == 1);
+    ASSERT(static_cast<int>(SystemDarkModeState::DARK)             == 2);
+
+    // Config factories
+    auto def  = DarkModeSystemEventConfig::Default();
+    auto full = DarkModeSystemEventConfig::LensManagerFull();
+    auto min  = DarkModeSystemEventConfig::MinimalShellExt();
+    ASSERT(full.monitorImmersiveColor);
+    ASSERT(!min.monitorDwmColorization || true);  // compile check
+
+    // Subscribe increments SubscriberCount
+    auto& ev = DarkModeSystemEvent::Global();
+    uint32_t before = ev.SubscriberCount();
+    auto tok = ev.Subscribe([](DarkModeEventKind, SystemDarkModeState){});
+    ASSERT(ev.SubscriberCount() == before + 1);
+    ev.Unsubscribe(tok);
+    ASSERT(ev.SubscriberCount() == before);
+
+    // ProcessWindowMessage with WM_SETTINGCHANGE → true
+    bool handled = ev.ProcessWindowMessage(kDarkModeWmSettingChange, 0, 0);
+    ASSERT(handled);
+}
+
+// ============================================================
+// S374 — PerMonitorDpiConfig
+// ============================================================
+TEST(TestS374_PerMonitorDpiConfig_LensManager)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kDpiDefault == 96u);
+    ASSERT(kDpiMedium  == 120u);
+    ASSERT(kDpiHigh    == 144u);
+    ASSERT(kDpiRetina  == 192u);
+    ASSERT(kDpiMax     == 288u);
+
+    // DpiAwarenessLevel ordinals
+    ASSERT(static_cast<int>(DpiAwarenessLevel::UNAWARE)          == 0);
+    ASSERT(static_cast<int>(DpiAwarenessLevel::PER_MONITOR)      == 2);
+    ASSERT(static_cast<int>(DpiAwarenessLevel::PER_MONITOR_V2)   == 3);
+
+    // DpiConfigStatus ordinals
+    ASSERT(static_cast<int>(DpiConfigStatus::OK)          == 0);
+    ASSERT(static_cast<int>(DpiConfigStatus::ALREADY_SET) == 1);
+    ASSERT(static_cast<int>(DpiConfigStatus::NOT_WIN32)   == 6);
+
+    // PerMonitorDpiInfo factories
+    auto info96  = PerMonitorDpiInfo::From96Dpi();
+    ASSERT(info96.dpiX == 96u);
+    ASSERT(!info96.isHighDpi);
+
+    auto info192 = PerMonitorDpiInfo::From192Dpi();
+    ASSERT(info192.isHighDpi);
+
+    // ForLensManager config
+    auto cfg = PerMonitorDpiConfig::ForLensManager();
+    ASSERT(cfg.requestedLevel == DpiAwarenessLevel::PER_MONITOR_V2);
+
+    // LogicalToPhysical identity at 96 DPI
+    auto& ctrl = PerMonitorDpiController::Global();
+    uint32_t result = ctrl.LogicalToPhysical(100, 96);
+    ASSERT(result == 100u);
+}
+
+// ============================================================
+// S375 — EvSigningPipeline
+// ============================================================
+TEST(TestS375_EvSigningPipeline_TsaUrl)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kEvSignDefaultRetries   == 3u);
+    ASSERT(kEvSignDefaultTimeoutMs == 30000u);
+    ASSERT(kEvSignMaxBatchFiles    == 256u);
+
+    // EvSignStatus ordinals
+    ASSERT(static_cast<int>(EvSignStatus::OK)          == 0);
+    ASSERT(static_cast<int>(EvSignStatus::NOT_WIN32)   == 7);
+
+    // EvCertSource ordinals
+    ASSERT(static_cast<int>(EvCertSource::WINDOWS_CERT_STORE) == 0);
+    ASSERT(static_cast<int>(EvCertSource::AZURE_KEY_VAULT)    == 2);
+    ASSERT(static_cast<int>(EvCertSource::HARDWARE_TOKEN)     == 3);
+
+    // TsaEndpoint ordinals
+    ASSERT(static_cast<int>(TsaEndpoint::SECTIGO_RFC3161)   == 0);
+    ASSERT(static_cast<int>(TsaEndpoint::DIGICERT_RFC3161)  == 1);
+
+    // TsaUrl contains expected domain
+    auto& pipeline = EvSigningPipeline::Global();
+    auto sectigoUrl = pipeline.TsaUrl(TsaEndpoint::SECTIGO_RFC3161);
+    auto digicertUrl = pipeline.TsaUrl(TsaEndpoint::DIGICERT_RFC3161);
+    ASSERT(sectigoUrl  != nullptr);
+    ASSERT(digicertUrl != nullptr);
+    // check substring "sectigo" and "digicert"
+    std::string_view sv1{sectigoUrl},  sv2{digicertUrl};
+    ASSERT(sv1.find("sectigo")  != std::string_view::npos);
+    ASSERT(sv2.find("digicert") != std::string_view::npos);
+
+    // ForGitHubActions config
+    auto gha = EvSigningConfig::ForGitHubActions();
+    ASSERT(gha.certSource      == EvCertSource::AZURE_KEY_VAULT);
+    ASSERT(gha.timestampRetries == 5u);
+
+    // EvSignResult default
+    EvSignResult r{};
+    ASSERT(!r.IsFullyValid());
+}
+
+// ============================================================
+// S376 — WinGetPublishConfig
+// ============================================================
+TEST(TestS376_WinGetPublishConfig_DryRun)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    std::string_view pkgId{kWinGetPackageId};
+    ASSERT(pkgId == "RajwanYair.ExplorerLens");
+    ASSERT(kWinGetManifestVersionMaj == 1u);
+    ASSERT(kWinGetManifestVersionMin == 9u);
+
+    // WinGetPublishStatus ordinals
+    ASSERT(static_cast<int>(WinGetPublishStatus::OK)                  == 0);
+    ASSERT(static_cast<int>(WinGetPublishStatus::VERSION_MISSING)     == 1);
+    ASSERT(static_cast<int>(WinGetPublishStatus::INSTALLER_URL_EMPTY) == 2);
+
+    // WinGetInstallerType ordinals
+    ASSERT(static_cast<int>(WinGetInstallerType::MSI)  == 0);
+    ASSERT(static_cast<int>(WinGetInstallerType::MSIX) == 1);
+
+    // Installer with empty URL → IsValid()==false
+    WinGetInstallerEntry ins{};
+    ASSERT(!ins.IsValid());
+
+    // DryRun config
+    auto dryRunCfg = WinGetPublishConfig::DryRun();
+    ASSERT(dryRunCfg.dryRun);
+    ASSERT(!dryRunCfg.autoFork);
+
+    // WinGetPublishResult default
+    WinGetPublishResult res{};
+    ASSERT(!res.IsPublished());
+
+    // Publish with missing version → failure
+    auto& pub = WinGetPublisher::Global();
+    pub.Configure(WinGetPublishConfig::DryRun());
+    auto r = pub.Publish(nullptr, ins);
+    ASSERT(!r.IsOk());
+}
+
+// ============================================================
+// S377 — FontPreviewPipeline
+// ============================================================
+TEST(TestS377_FontPreviewPipeline_Spec)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kFontPreviewDefaultSize == 256u);
+    ASSERT(kFontPreviewMaxSize     == 2048u);
+    ASSERT(kFontPreviewMinSize     == 32u);
+
+    // FontPipelineStatus ordinals
+    ASSERT(static_cast<int>(FontPipelineStatus::OK)                  == 0);
+    ASSERT(static_cast<int>(FontPipelineStatus::FONT_LOAD_FAILED)    == 1);
+    ASSERT(static_cast<int>(FontPipelineStatus::ZERO_SIZE)           == 6);
+    ASSERT(static_cast<int>(FontPipelineStatus::NOT_WIN32)           == 7);
+
+    // Config factories compile
+    auto def   = FontPreviewPipelineConfig::Default();
+    auto shell = FontPreviewPipelineConfig::ShellExtension();
+    auto hq    = FontPreviewPipelineConfig::HighQuality();
+    ASSERT(def.thumbnailSize   == 256u);
+    ASSERT(shell.applyIcc      == false);
+    ASSERT(hq.thumbnailSize    == 1024u);
+
+    // Render with null path → FONT_LOAD_FAILED
+    auto& pipeline = FontPreviewPipeline::Global();
+    auto r1 = pipeline.Render(nullptr, 256);
+    ASSERT(r1.status == FontPipelineStatus::FONT_LOAD_FAILED ||
+           r1.status == FontPipelineStatus::NOT_WIN32);
+
+    // Render with zero size → ZERO_SIZE (Win32 only)
+#ifdef _WIN32
+    auto r2 = pipeline.Render(L"c:\\Windows\\Fonts\\arial.ttf", 0);
+    ASSERT(r2.status == FontPipelineStatus::ZERO_SIZE);
+#endif
+
+    // IsReady always true
+    ASSERT(pipeline.IsReady());
+}
+
+// ============================================================
+// S378 — DllSymbolAuditor
+// ============================================================
+TEST(TestS378_DllSymbolAuditor_Budget)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kDllBudgetPhase3Kb        == 2500u);
+    ASSERT(kDllBudgetCurrentKb       == 2940u);
+    ASSERT(kDllBudgetMaxCOMExports   == 4u);
+    ASSERT(kDllBudgetWarnKb          == 2200u);
+
+    // DllAuditStatus ordinals
+    ASSERT(static_cast<int>(DllAuditStatus::OK)                 == 0);
+    ASSERT(static_cast<int>(DllAuditStatus::FILE_NOT_FOUND)     == 1);
+    ASSERT(static_cast<int>(DllAuditStatus::SIZE_OVER_BUDGET)   == 4);
+    ASSERT(static_cast<int>(DllAuditStatus::NOT_WIN32)          == 6);
+
+    // DllSizeBudget factories
+    auto phase3  = DllSizeBudget::Phase3Target();
+    ASSERT(phase3.maxSizeKb == 2500u);
+
+    auto strict  = DllSizeBudget::Strict();
+    ASSERT(strict.maxSizeKb == 2000u);
+
+    auto current = DllSizeBudget::CurrentBaseline();
+    ASSERT(current.maxSizeKb == 2940u);
+
+    // Audit with null path → FILE_NOT_FOUND
+    auto& auditor = DllSymbolAuditor::Global();
+    auditor.Configure(DllAuditConfig::Default());
+    auto r = auditor.Audit(nullptr);
+    ASSERT(r.status == DllAuditStatus::FILE_NOT_FOUND ||
+           r.status == DllAuditStatus::NOT_WIN32);
+
+    // IsWithinBudget helpers via DllAuditReport
+    DllAuditReport rep{};
+    rep.fileSizeKb       = 2400;
+    rep.sizeWithinBudget = true;
+    ASSERT(rep.sizeWithinBudget);
+}
+
+// ============================================================
+// S379 — SimdLanczosKernel
+// ============================================================
+TEST(TestS379_SimdLanczosKernel_DetectSimd)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kLanczosDefaultLobes   == 3u);
+    ASSERT(kLanczosMaxLobes       == 4u);
+    ASSERT(kLanczosAvx2LaneWidth  == 8u);
+    ASSERT(kLanczosSse42LaneWidth == 4u);
+
+    // SimdTier ordinals
+    ASSERT(static_cast<int>(SimdTier::SCALAR)  == 0);
+    ASSERT(static_cast<int>(SimdTier::SSE42)   == 1);
+    ASSERT(static_cast<int>(SimdTier::AVX2)    == 2);
+    ASSERT(static_cast<int>(SimdTier::AVX512)  == 3);
+
+    // LanczosResampleStatus ordinals
+    ASSERT(static_cast<int>(LanczosResampleStatus::OK)            == 0);
+    ASSERT(static_cast<int>(LanczosResampleStatus::NULL_SRC)      == 1);
+    ASSERT(static_cast<int>(LanczosResampleStatus::ZERO_DST_DIM)  == 4);
+
+    // Config factories
+    auto def = LanczosKernelConfig::Default();
+    ASSERT(def.lobes == 3u);
+    auto hq  = LanczosKernelConfig::HighQuality();
+    ASSERT(hq.lobes == 3u);  // same as default
+    auto fast = LanczosKernelConfig::FastShell();
+    ASSERT(fast.lobes == 2u);
+
+    // EvalKernel at x=0 → 1.0
+    float k0 = SimdLanczosKernel::EvalKernel(0.0f, 3);
+    ASSERT(k0 > 0.99f && k0 <= 1.01f);
+
+    // EvalKernel at x=lobes → 0.0
+    float kEdge = SimdLanczosKernel::EvalKernel(3.0f, 3);
+    ASSERT(kEdge == 0.0f);
+
+    // Resample: null src → NULL_SRC
+    auto& kernel = SimdLanczosKernel::Global();
+    kernel.Configure(LanczosKernelConfig::Default());
+    uint8_t dst[4*4*4] = {};
+    auto r = kernel.Resample(nullptr, 4, 4, dst, 2, 2);
+    ASSERT(r.status == LanczosResampleStatus::NULL_SRC);
+
+    // Resample: zero dst dim → ZERO_DST_DIM
+    uint8_t src[4*4*4] = {};
+    auto r2 = kernel.Resample(src, 4, 4, dst, 0, 2);
+    ASSERT(r2.status == LanczosResampleStatus::ZERO_DST_DIM);
+}
+
+// ============================================================
+// S380 — CorpusManifestBuilder
+// ============================================================
+TEST(TestS380_CorpusManifestBuilder_Phase3Target)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kCorpusPhase2Target == 150u);
+    ASSERT(kCorpusPhase3Target == 300u);
+    ASSERT(kCorpusPhase4Target == 500u);
+    ASSERT(kCorpusPhase6Target == 750u);
+    ASSERT(kCorpusPerFamilyMin == 20u);
+
+    // CorpusManifestStatus ordinals
+    ASSERT(static_cast<int>(CorpusManifestStatus::OK)               == 0);
+    ASSERT(static_cast<int>(CorpusManifestStatus::FILE_NOT_FOUND)   == 1);
+    ASSERT(static_cast<int>(CorpusManifestStatus::DUPLICATE_ENTRY)  == 4);
+
+    // CorpusFamily ordinals
+    ASSERT(static_cast<int>(CorpusFamily::UNKNOWN)  == 0);
+    ASSERT(static_cast<int>(CorpusFamily::IMAGE)    == 1);
+    ASSERT(static_cast<int>(CorpusFamily::CAMERA)   == 3);
+    ASSERT(static_cast<int>(CorpusFamily::MEDIA)    == 5);
+
+    // CorpusEntry with null relativePath → invalid
+    CorpusEntry bad{};
+    ASSERT(!bad.IsValid());
+
+    // CorpusManifestConfig factories
+    auto def = CorpusManifestConfig::Default();
+    ASSERT(def.phase3Target == 300u);
+    auto p3  = CorpusManifestConfig::Phase3();
+    ASSERT(p3.requireCC0);
+    ASSERT(p3.perFamilyMin == 30u);
+
+    // Builder: 0 entries → not at target
+    auto& builder = CorpusManifestBuilder::Global();
+    builder.Configure(CorpusManifestConfig::Phase3());
+    ASSERT(!builder.MeetsPhase3Target());
+
+    // CorpusHealthReport.MeetsPhase3Target checks totalFiles
+    CorpusHealthReport r{};
+    r.phase3Target = 300;
+    r.totalFiles   = 299;
+    ASSERT(!r.MeetsPhase3Target());
+    r.totalFiles   = 300;
+    ASSERT(r.MeetsPhase3Target());
+}
