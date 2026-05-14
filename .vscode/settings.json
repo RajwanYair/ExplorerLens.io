@@ -96,8 +96,19 @@
         "**/x64/Debug": true,
         "**/ipch": true,
         "**/*.user": true,
-        "**/*.suo": true
+        "**/*.suo": true,
+        // Exclude vendor web assets — not our code, linting them generates false positives
+        "external/**/*.html": true,
+        "external/**/*.css": true,
+        "external/**/*.js": true,
+        "external/**/*.ts": true,
+        "packages/**/*.html": true,
+        "packages/**/*.css": true,
+        "packages/**/*.js": true
     },
+    // CSS validation settings
+    "css.validate": true,
+    "css.lint.unknownAtRules": "ignore",
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
@@ -318,7 +329,7 @@
     },
     // ── HTTP Proxy ───────────────────────────────────────────────
     "http.proxySupport": "on",
-    "http.proxyStrictSSL": false,
+    "http.proxyStrictSSL": true,
     // Set http.proxy to your corporate proxy URL if you are behind a firewall, e.g. "http://proxy.example.com:8080"
     "http.proxy": "",
     // ── Copilot ──────────────────────────────────────────────────

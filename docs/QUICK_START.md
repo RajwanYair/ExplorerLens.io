@@ -145,7 +145,7 @@ cmake --preset default-release -DBUILD_CATCH2_TESTS=ON -DBUILD_TESTS=OFF
 
 ```
 ExplorerLens/
-├── Engine/               Core decode + GPU pipeline (C++20 static lib)
+├── Engine/               Core decode + GPU pipeline (C++23 static lib)
 │   ├── Core/             Decode pipeline, GPU renderer, resource management
 │   ├── Decoders/         25+ format-specific decoders
 │   ├── Cache/            Two-tier cache (L1 LRU + L2 disk)

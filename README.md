@@ -18,7 +18,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 [![Latest Release](https://img.shields.io/github/v/release/RajwanYair/ExplorerLens.io?label=release&color=brightgreen)](https://github.com/RajwanYair/ExplorerLens.io/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/RajwanYair/ExplorerLens.io/total?color=blue)](https://github.com/RajwanYair/ExplorerLens.io/releases)
 ![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11%20x64-blue)
-![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
+![C++23](https://img.shields.io/badge/C%2B%2B-23-orange)
 ![MSVC](https://img.shields.io/badge/MSVC-v145%20%2819.50%29-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Tests](https://img.shields.io/badge/Tests-5108%20passing-success)
@@ -32,7 +32,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 | **Platform** | **Windows 10 1809+ / Windows 11 (x64)** · macOS/Linux: planned Phase 5 |
 | **Formats** | 200+ extensions — HEIC, AVIF, JXL, WebP, RAW, PDF, CBZ, CBR, EPUB, glTF, DDS, EXR, MP4, MP3, TTF … |
 | **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
-| **Language** | C++20 · MSVC v145 · Visual Studio 18 2026 BuildTools |
+| **Language** | C++23 · MSVC v145 · Visual Studio 18 2026 BuildTools |
 | **Build** | CMake 4.3 · Ninja · vcpkg / local external libs |
 | **Tests** | 5,108 unit tests · 5 benchmarks · 100% pass rate |
 | **Install** | One-click MSI **or** `winget install ExplorerLens.ExplorerLens` **or** `regsvr32 LENSShell.dll` |
@@ -41,7 +41,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
   GitHub Search Metadata
   ======================
   Project: ExplorerLens — IThumbnailProvider Windows Shell Extension
-  Language: C++20 | Build: CMake + Ninja + MSVC v145 | GPU: DirectX 11/12 + Vulkan
+  Language: C++23 | Build: CMake + Ninja + MSVC v145 | GPU: DirectX 11/12 + Vulkan
   Platform: Windows 10 1809+ / Windows 11 x64
   Formats: HEIC HEIF AVIF JXL JPEG-XL WebP RAW DNG CR2 NEF ARW PDF CBZ CBR EPUB MOBI
            glTF GLB OBJ STL DDS EXR HDR QOI KTX TTF OTF MP4 MKV FLAC MP3
@@ -374,6 +374,6 @@ MIT License — See [LICENSE](LICENSE) for details.
 
 ---
 
-Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
+Built with ❤️ using C++23, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
 Last Updated: March 29, 2026 (v25.0.0 "Rigel")
