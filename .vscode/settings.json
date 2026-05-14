@@ -30,7 +30,7 @@
     "C_Cpp.intelliSenseEngine": "default",
     "C_Cpp.autocomplete": "Default",
     "C_Cpp.errorSquiggles": "enabled",
-    "C_Cpp.default.cppStandard": "c++20",
+    "C_Cpp.default.cppStandard": "c++23",
     "C_Cpp.default.cStandard": "c17",
     "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",

@@ -115,7 +115,7 @@
       "name": "PS: Install (Admin)",
       "type": "PowerShell",
       "request": "launch",
-      "script": "${workspaceFolder}/Install-ExplorerLens.ps1",
+      "script": "${workspaceFolder}/packaging/Install-ExplorerLens.ps1",
       "cwd": "${workspaceFolder}",
       "args": [
         "-Configuration",
@@ -127,7 +127,7 @@
       "name": "PS: Uninstall (Admin)",
       "type": "PowerShell",
       "request": "launch",
-      "script": "${workspaceFolder}/Install-ExplorerLens.ps1",
+      "script": "${workspaceFolder}/packaging/Install-ExplorerLens.ps1",
       "cwd": "${workspaceFolder}",
       "args": [
         "-Uninstall"

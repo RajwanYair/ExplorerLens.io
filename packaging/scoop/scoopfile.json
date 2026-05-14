@@ -1,5 +1,5 @@
 {
-  "_comment": "ExplorerLens Scoop manifest — install all required build tools with one command: scoop import scoopfile.json",
+  "_comment": "ExplorerLens Scoop manifest — install all required build tools with one command: scoop import packaging/scoop/scoopfile.json",
   "_updated": "2026-07-07",
   "apps": [
     {
@@ -70,8 +70,8 @@
     }
   ],
   "usage": {
-    "install_all": "scoop import scoopfile.json",
-    "install_missing": "scoop import scoopfile.json --skip-installed",
+    "install_all": "scoop import packaging/scoop/scoopfile.json",
+    "install_missing": "scoop import packaging/scoop/scoopfile.json --skip-installed",
     "add_extras_bucket": "scoop bucket add extras",
     "notes": [
       "Visual Studio 2022 BuildTools (MSVC v143) or VS 2026 BuildTools (MSVC v145) must be installed separately via winget or the Visual Studio Installer.",

@@ -52,7 +52,7 @@ v9.0 is a **ground-truth deep-rethink edition**. v8.0 ("Vega") forced confrontat
 | Arm64 support | Phase 6 | **PROMOTES TO PHASE 3** — Windows on Arm (Copilot+ PCs) is fastest-growing segment. Blocking key users. New ADR A41 |
 | Test framework duality (custom + Catch2) | Coexistence plan | **COMMIT TO CATCH2** — No new `TEST()` bodies after v41.0. Migrate all to Catch2 by v42.0. New ADR A42 |
 | WIC codec registration | Not in scope | **MISSED OPPORTUNITY** — Registering as WIC codec would give access to ALL WIC apps (Office, Photos, Paint, etc.). New ADR A43 |
-| Phase 1 items from v8.0 | "S301-S310 done" | **PHASE 1 IS NOT COMPLETE** — `/WX-` still present in CMakeLists.txt. AI headers still registered. GPU stubs still present. Must complete before any Phase 2 work. |
+| Phase 1 items from v8.0 | "S301-S310 done" | **PHASE 1 IN PROGRESS** — `/WX` restored in all CMakeLists.txt (fixed in production-readiness pass). AI headers + GPU stubs still registered. Must complete before Phase 2 work. |
 
 ### Phase 1 Compliance Check (carry-over from v8.0)
 
@@ -60,11 +60,11 @@ These v8.0 Phase 1 items are **still outstanding** as of v39.9.0:
 
 | v8.0 Requirement | Status | Blocker |
 |---|---|---|
-| Restore `/WX` in Engine/CMakeLists.txt | ❌ **OUTSTANDING** | Line ~2654 still has `/WX-` |
+| Restore `/WX` in Engine/CMakeLists.txt | ✅ **DONE** | Fixed in production-readiness pass: root, Engine, PluginHost CMakeLists.txt |
 | Archive AI module headers (45 files) | ❌ **OUTSTANDING** | Still in ENGINE_HEADERS list |
 | Archive unused GPU stubs (85 files) | ❌ **OUTSTANDING** | Still in ENGINE_HEADERS list |
 | Reconcile test count | ❌ **OUTSTANDING** | README ≠ BuildValidation.h |
-| Delete root `index.html` | ❌ **OUTSTANDING** | File still present |
+| Delete root `index.html` | ✅ **DONE** | Deleted (docs/index.html is canonical) |
 | vcpkg.json audit | ⚠️ Partial | Done but not complete |
 
 **No Phase 2 feature work until Phase 1 is complete.** This is the #1 priority.
@@ -138,9 +138,9 @@ v8.0 made many good decisions that are retained unchanged:
 - **Stale test count claims** — stubs inflate header count without adding test value
 - **LGPL exposure** — more static-linked LGPL libs than necessary
 
-**The CI release gap**: Every GitHub Release artifact is incomplete — LENSShell.dll is never included in CI artifacts because MSBuild for LENSShell.sln cannot be completed in GitHub Actions (requires MuPDF, JXL, HEIF, AVIF, dav1d — all custom-built external libs). Users must manually build or use GitHub Actions only for Engine testing. This is the #2 architectural priority after `/WX` restoration.
+**The CI release gap**: Every GitHub Release artifact is incomplete — LENSShell.dll is never included in CI artifacts because MSBuild for LENSShell.sln cannot be completed in GitHub Actions (requires MuPDF, JXL, HEIF, AVIF, dav1d — all custom-built external libs). Users must manually build or use GitHub Actions only for Engine testing. This is the #1 architectural priority.
 
-**The `/WX-` contradiction**: Still present as of v39.9.0. `/WX` must be restored before any Phase 2 work begins.
+**The `/WX` fix**: Completed in production-readiness pass — `/WX` is now enforced in root, Engine, and PluginHost CMakeLists.txt. Zero-warnings discipline is active.
 
 ---
 
@@ -476,9 +476,9 @@ No Rust in production path. C++23 + ASAN + fuzzing is sufficient for the use cas
 
 Clang 18 for ASan, fuzzer builds, and clang-tidy only. Production DLL is always MSVC v145.
 
-### WARNING: Restore `/WX` (ADR A29)
+### `/WX` Restored (ADR A29 — DONE)
 
-**The `/WX-` flag in `Engine/CMakeLists.txt` line 2559 must be changed to `/WX` before any Phase 2 work begins.** The project's core discipline is zero-warnings builds. This cannot be aspirational.
+**`/WX` is now active in all CMakeLists.txt** (root, Engine, PluginHost). The project's core discipline is zero-warnings builds. Also fixed: `/GS` re-enabled (buffer security), `C++23` consistent across all targets, `/fp:precise` for thumbnail accuracy.
 
 ### Compiler Flags (authoritative, v8.0)
 
@@ -1139,7 +1139,7 @@ v7.0 targeted 45. Still too many. A 1-person project cannot maintain 45 document
 | Item | Reason | Phase |
 |---|---|---|
 | `IThumbnailProvider` error path | Returns `S_OK` with blank bitmap on failure; should return `E_FAIL` | 2 |
-| CMakeLists.txt `/WX-` flag | Must be `/WX` | 1 |
+| CMakeLists.txt `/WX-` flag | ✅ Done — `/WX` active in root, Engine, PluginHost | 1 |
 | stb_image JPEG/PNG paths | Replace primary paths with libjpeg-turbo + libspng | 2 |
 
 ### REFACTOR (correct but needs improvement)

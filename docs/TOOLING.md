@@ -19,7 +19,7 @@ MyScripts\                              ← SHARED (all projects inherit)
 │   ├── .vscode/                        ← Workspace settings, tasks, launch, MCP
 │   ├── CMakePresets.json               ← CMake build presets
 │   ├── vcpkg.json                      ← C++ dependency manifest
-│   ├── scoopfile.json                  ← Dev tool versions (cmake, ninja, nasm, etc.)
+│   ├── packaging/scoop/scoopfile.json   ← Dev tool versions (cmake, ninja, nasm, etc.)
 │   └── .github/                        ← Repo-specific CI, agents, instructions
 │
 ├── RegiLattice/                        ← Python project (inherits shared Python config)
@@ -45,7 +45,7 @@ MyScripts\                              ← SHARED (all projects inherit)
 | `.clang-tidy` | C++ static analysis | Only C++ project needs this |
 | `CMakePresets.json` | CMake build presets | Only C++ project uses CMake |
 | `vcpkg.json` | C++ package manifest | Only C++ project uses vcpkg |
-| `scoopfile.json` | Dev tools manifest | C++ tools (NASM, Meson, WiX) |
+| `packaging/scoop/scoopfile.json` | Dev tools manifest | C++ tools (NASM, Meson, WiX) |
 | `.vscode/c_cpp_properties.json` | IntelliSense config | MSVC v145 paths |
 | `.vscode/mcp.json` | MCP server config | Repo-scoped GitHub + filesystem |
 | `.github/` (entire directory) | CI, agents, instructions | Repo-specific |
@@ -85,12 +85,12 @@ Tools are pinned in two places:
 
 | Source | Format | Used by |
 |--------|--------|---------|
-| `scoopfile.json` | JSON manifest | Local dev: `scoop install` |
+| `packaging/scoop/scoopfile.json` | JSON manifest | Local dev: `scoop import packaging/scoop/scoopfile.json` |
 | `.github/standards/tool-versions.md` | Markdown table | CI reference + documentation |
 | `.devcontainer/devcontainer.json` | JSON | Codespaces / dev containers |
 
 **Rule:** When updating a tool version, update all three locations. The `Bump-Version.ps1`
-script handles `tool-versions.md`; `scoopfile.json` and devcontainer must be updated manually.
+script handles `tool-versions.md`; `packaging/scoop/scoopfile.json` and devcontainer must be updated manually.
 
 ## Status
 

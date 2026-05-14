@@ -330,11 +330,12 @@ jobs:
           }
 
           # Support files
-          foreach ($f in @('README.md','LICENSE','Install-ExplorerLens.ps1','CHANGELOG.md')) {
+          foreach ($f in @('README.md','LICENSE','CHANGELOG.md')) {
             if (Test-Path $f) { Copy-Item $f "$stage\" -Force }
           }
-          if (Test-Path 'scripts\lens-autocomplete.ps1') {
-            Copy-Item 'scripts\lens-autocomplete.ps1' "$stage\" -Force
+          # Installer script (moved to packaging/)
+          if (Test-Path 'packaging\Install-ExplorerLens.ps1') {
+            Copy-Item 'packaging\Install-ExplorerLens.ps1' "$stage\" -Force
           }
 
           # Emit outputs

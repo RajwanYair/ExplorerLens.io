@@ -46,9 +46,9 @@ option(ENABLE_CACHE "Enable thumbnail caching" ON)
 # CMake Settings
 #==============================================================================
 
-set(CMAKE_CXX_STANDARD 20)  # C++20 for latest features (modules, concepts, coroutines)
+set(CMAKE_CXX_STANDARD 23)  # C++23 (ADR A23 — C++23 commit; matches Engine/CMakeLists.txt)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)  # No compiler extensions — portable C++23 only
 
 # Use /MD runtime (Multi-threaded DLL) to match existing project
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -85,15 +85,15 @@ endif()
 if(MSVC)
     add_compile_options(
         /W4                 # Warning level 4
-        /WX-                # Don't treat warnings as errors (for flexibility)
+        /WX                 # Treat warnings as errors (ADR A29 — zero-warnings discipline)
         /permissive-        # Standards conformance
         /Zc:__cplusplus     # Enable correct __cplusplus macro
         /Zc:inline          # Remove unreferenced functions/data
         /Zc:preprocessor    # Conforming preprocessor
         /MP                 # Multi-processor compilation
         /EHsc               # Exception handling model
-        /GS-                # Disable buffer security checks for performance
-        /fp:fast            # Fast floating point model
+        /GS                 # Buffer security checks enabled (stack overflow protection)
+        /fp:precise         # Precise floating point model (safe for thumbnails)
         /arch:AVX2          # Enable AVX2 instructions (modern CPUs)
         $<$<CONFIG:Release>:/O2>      # Maximum optimization
         $<$<CONFIG:Release>:/Oi>      # Enable intrinsic functions
@@ -113,9 +113,8 @@ if(MSVC)
         $<$<CONFIG:Release>:/INCREMENTAL:NO> # Disable incremental linking
         $<$<CONFIG:Release>:/RELEASE>     # Set checksum in header
         /DYNAMICBASE        # ASLR support
-        /NXCOMPAT          # DEP support
-        /HIGHENTROPYVA     # 64-bit ASLR
-        /IGNORE:4099                      # Ignore missing PDB warnings
+        /NXCOMPAT           # DEP support
+        /HIGHENTROPYVA      # 64-bit ASLR
     )
 
     # Profile-Guided Optimization support
@@ -178,10 +177,10 @@ if(BUILD_MODERN_RUNTIME AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src")
 endif()
 
 if(NOT BUILD_ENGINE_ONLY)
-    # Build the shell extension and manager via unified CMake
-    # OFF by default — LENSShell has pre-existing source issues under /W4 /permissive-
-    # Enable with: cmake -DBUILD_SHELL=ON -DBUILD_MANAGER=ON
-    option(BUILD_SHELL "Build LENSShell COM DLL (requires ATL)" OFF)
+    # Shell extension and Manager build via unified CMake (ADR A36 — Phase 2)
+    # Requires WTL to be vendored (NuGet dependency eliminated).
+    # Set -DBUILD_SHELL=ON -DBUILD_MANAGER=ON once CMake migration is complete.
+    option(BUILD_SHELL "Build LENSShell COM DLL (requires ATL + WTL)" OFF)
     option(BUILD_MANAGER "Build LENSManager GUI app (requires WTL)" OFF)
 
     if(BUILD_SHELL)

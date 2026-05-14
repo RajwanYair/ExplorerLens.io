@@ -53,7 +53,7 @@ Use the PowerShell script for custom installations:
 cd ExplorerLens
 
 # Run installation script
-.\Install-ExplorerLens.ps1 -Verbose
+.\packaging\Install-ExplorerLens.ps1 -Verbose
 
 # Restart Explorer
 Stop-Process -Name explorer -Force

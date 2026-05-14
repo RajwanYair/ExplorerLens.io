@@ -2623,14 +2623,13 @@ if(ENGINE_SOURCES)
     if(MSVC)
         target_compile_options(ExplorerLensEngine PRIVATE
             /W4               # Warning level 4
-            /WX-              # Warnings NOT as errors during consolidation
+            /WX               # Treat warnings as errors (ADR A29 — zero-warnings)
             /permissive-      # Standards conformance
             /arch:AVX2        # Enable AVX2 instructions for SIMD operations
-            /diagnostics:caret  # Rich diagnostics with source caret (better error context)
+            /diagnostics:caret  # Rich diagnostics with source caret
         )
         # MSVC linker flags
         target_link_options(ExplorerLensEngine PRIVATE
-            /IGNORE:4099            # Ignore missing PDB warnings for external libs
         )
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_compile_options(ExplorerLensEngine PRIVATE

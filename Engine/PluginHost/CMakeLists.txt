@@ -25,7 +25,7 @@ target_link_libraries(PluginHost PRIVATE
 if(MSVC)
     target_compile_options(PluginHost PRIVATE
         /W4           # Warning level 4
-        /WX-          # Warnings NOT as errors (matches project convention)
+        /WX           # Treat warnings as errors (ADR A29 — zero-warnings)
         /permissive-  # Standards conformance
         /Zc:__cplusplus  # Correct __cplusplus macro
     )
