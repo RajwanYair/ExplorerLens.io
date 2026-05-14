@@ -115,7 +115,7 @@ public:
         m_status.store(DecodeTimeoutStatus::RUNNING, std::memory_order_relaxed);
 
         const std::uint32_t timeoutMs  = m_cfg.timeoutMs;
-        const std::uint32_t pollMs     = m_cfg.watchdogPollMs;
+        const std::uint32_t pollMs     = DecodeTimeoutConfig::kWatchdogPollMs;
         const bool          doStop     = m_cfg.requestStopOnTimeout;
         std::stop_source&   ss         = m_stopSource;
         std::atomic<bool>&  expired    = m_expired;

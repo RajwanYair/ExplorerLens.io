@@ -46,11 +46,11 @@ namespace ExplorerLens::Engine {
 enum class DecodeResultPolicy : std::uint8_t {
     /// Return E_FAIL whenever the bitmap is empty, null, or blank.
     /// Explorer retries on next access.  RECOMMENDED for production.
-    STRICT  = 0,
+    STRICT_EFAIL  = 0,
 
     /// Return a placeholder (1×1 transparent) bitmap with S_OK on transient
     /// failures (timeout, OOM).  Return E_FAIL only on permanent errors.
-    LENIENT = 1,
+    LENIENT_OK = 1,
 };
 
 // ---------------------------------------------------------------------------
@@ -130,7 +130,7 @@ public:
         case EFailValidationResult::BUDGET_EXCEEDED:
             return E_OUTOFMEMORY;
         case EFailValidationResult::BLANK_BITMAP:
-            return (policy == DecodeResultPolicy::LENIENT) ? S_OK : E_FAIL;
+            return (policy == DecodeResultPolicy::LENIENT_OK) ? S_OK : E_FAIL;
         default:
             return E_FAIL;
         }
@@ -153,7 +153,7 @@ public:
     static constexpr std::size_t  kMinSamplePixels  = 64u;
 
     /// Default policy for production COM server.
-    static constexpr DecodeResultPolicy kDefaultPolicy = DecodeResultPolicy::STRICT;
+    static constexpr DecodeResultPolicy kDefaultPolicy = DecodeResultPolicy::STRICT_EFAIL;
 
 private:
     EFailDecodeGuard() = delete;

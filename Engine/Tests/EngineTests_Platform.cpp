@@ -9891,7 +9891,7 @@ TEST(TestS327_EFailDecodeGuard_BlankReject)
     using namespace ExplorerLens::Engine;
 
     // Constants
-    ASSERT(EFailDecodeGuard::kDefaultPolicy == DecodeResultPolicy::STRICT);
+    ASSERT(EFailDecodeGuard::kDefaultPolicy == DecodeResultPolicy::STRICT_EFAIL);
     ASSERT_EQ(EFailDecodeGuard::kMinSamplePixels, 64u);
 
     // Null buffer → NULL_BITMAP
@@ -9930,13 +9930,13 @@ TEST(TestS327_EFailDecodeGuard_BlankReject)
     // We test the integer value since HRESULT isn't available in all configs
 #ifdef _WIN32
     ASSERT(EFailDecodeGuard::CoalesceHresult(
-        EFailValidationResult::VALID, DecodeResultPolicy::STRICT) == S_OK);
+        EFailValidationResult::VALID, DecodeResultPolicy::STRICT_EFAIL) == S_OK);
     ASSERT(EFailDecodeGuard::CoalesceHresult(
-        EFailValidationResult::NULL_BITMAP, DecodeResultPolicy::STRICT) == E_FAIL);
+        EFailValidationResult::NULL_BITMAP, DecodeResultPolicy::STRICT_EFAIL) == E_FAIL);
     ASSERT(EFailDecodeGuard::CoalesceHresult(
-        EFailValidationResult::TIMEOUT_EXPIRED, DecodeResultPolicy::STRICT) == E_ABORT);
+        EFailValidationResult::TIMEOUT_EXPIRED, DecodeResultPolicy::STRICT_EFAIL) == E_ABORT);
     ASSERT(EFailDecodeGuard::CoalesceHresult(
-        EFailValidationResult::BUDGET_EXCEEDED, DecodeResultPolicy::STRICT) == E_OUTOFMEMORY);
+        EFailValidationResult::BUDGET_EXCEEDED, DecodeResultPolicy::STRICT_EFAIL) == E_OUTOFMEMORY);
 #endif
 }
 
