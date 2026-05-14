@@ -545,19 +545,8 @@ set(ENGINE_HEADERS
 
     # GPU rendering and compute
     GPU/D3D11Renderer.h
-    GPU/D3D12ComputePipeline.h
     GPU/GDIRenderer.h
-    GPU/AdaptiveGPUScheduler.h
-    GPU/HDRToneMapKernel.h
-    GPU/LanczosGPUKernel.h
-    GPU/AsyncTextureSampler.h
-    GPU/ShaderCacheCompiler.h
-    GPU/VulkanComputePipeline.h
-    GPU/VulkanMemoryAllocator.h
-    GPU/GPUWorkloadBalancer.h
-    GPU/GPUDecodeAccelerationV2.h
     GPU/GPUFallbackChain.h
-    GPU/GPUMemoryTracker.h
     # Sprint 1211-1220 — GPU-First Decode Pipeline (v34.1.0 "Arcturus-R")
     GPU/GPUDecodeFormatRouter.h
     GPU/GPUJPEGDecodeAccelerator.h
@@ -812,7 +801,6 @@ set(ENGINE_HEADERS
     Core/SmartQualityPredictor.h
     Pipeline/LockFreeDecodePipeline.h
     Pipeline/MemoryMappedIOOptimizer.h
-    GPU/GPUTextureAtlasManager.h
     Pipeline/PredictivePrefetchEngine.h
     Pipeline/ThreadPoolOptimizer.h
     Core/WindowsSearchProtocol.h
@@ -835,7 +823,6 @@ set(ENGINE_HEADERS
     Core/DirectStorage12Integration.h
     Core/NeuralTextureCompression.h
     Core/QuantumReadyHashPipeline.h
-    GPU/WebGPUThumbnailRenderer.h
     Core/WASMDecoderSandbox.h
     Core/LivePreviewStreamingProtocol.h
     Core/DragDropThumbnailPreview.h
@@ -848,7 +835,6 @@ set(ENGINE_HEADERS
     Core/ExifOrientationFixer.h
     Memory/VirtualAllocOptimizer.h
     Core/FileAssociationManager.h
-    GPU/DX12FenceManager.h
     Core/WindowsSearchIntegration.h
 
     # Sprints 594-643 — New Decoders, Pipeline, Core, AI features
@@ -920,11 +906,6 @@ set(ENGINE_HEADERS
     Cache/CacheCompressionEngine.h
     Cache/CacheIntegrityVerifier.h
     # Sprint 59-60: GPU Enhancement
-    GPU/GPUShaderCompiler.h
-    GPU/GPUOccupancyOptimizer.h
-    GPU/GPUDebugLayer.h
-    GPU/GPUMemoryPoolManager.h
-    GPU/GPUAsyncCopyEngine.h
     # Sprint 61-62: Enterprise & Deployment
     Utils/EnterpriseTelemetryRouter.h
     Utils/PolicyComplianceValidator.h
@@ -971,11 +952,6 @@ set(ENGINE_HEADERS
     Decoders/PCBLayoutDecoder.h
 
     # Beyond Zenith — GPU
-    GPU/GPUTensorAccelerator.h
-    GPU/VulkanRayTracingPreview.h
-    GPU/DirectStorageIntegration.h
-    GPU/GPUDecompressionEngine.h
-    GPU/ShaderModelValidator.h
 
     # Beyond Zenith — Pipeline
     Pipeline/StreamingMipChain.h
@@ -1013,11 +989,6 @@ set(ENGINE_HEADERS
     Core/NEONScaleKernel.h
 
     # Category B/C: GPU Shader Library & Rendering
-    GPU/ShaderLibraryManager.h
-    GPU/LanczosGPUScaler.h
-    GPU/BicubicResizeKernel.h
-    GPU/ACESTonemapKernel.h
-    GPU/ColorConvertKernel.h
 
     # Category B/F: Pipeline Activation & Integration
     Pipeline/ZeroCopyActivator.h
@@ -1051,8 +1022,6 @@ set(ENGINE_HEADERS
     Core/ColdStartOptimizer.h
     Pipeline/DecodeCancellationEngine.h
     Pipeline/RequestDeduplicator.h
-    GPU/GPUPowerStateManager.h
-    GPU/GPUWorkgroupOptimizer.h
     Memory/CopyOnWriteBufferPool.h
     Memory/MemoryMappedThumbnailAtlas.h
 
@@ -1100,11 +1069,6 @@ set(ENGINE_HEADERS
     Pipeline/ExplorerQueryOptimizer.h
 
     # GPU enhancements
-    GPU/GPUDeviceSelector.h
-    GPU/GPUFeatureProbe.h
-    GPU/AdaptiveShaderSelection.h
-    GPU/GPUErrorRecovery.h
-    GPU/ComputeShaderProfiler.h
 
     # Cache enhancements
     Cache/CachePartitionManager.h
@@ -1154,12 +1118,6 @@ set(ENGINE_HEADERS
     Pipeline/PipelineTelemetrySink.h
     Pipeline/DecodeWorkDistributor.h
     # GPU enhancements
-    GPU/GPUVendorCapabilityMap.h
-    GPU/GPUBatchSubmitter.h
-    GPU/GPUFenceOrchestrator.h
-    GPU/ShaderPermutationManager.h
-    GPU/GPUThermalMonitor.h
-    GPU/GPUResourceLeakDetector.h
     # Cache enhancements
     Cache/CacheReplicationEngine.h
     # Memory enhancements
@@ -1208,11 +1166,6 @@ set(ENGINE_HEADERS
     Pipeline/BatchDemuxOptimizer.h
     Pipeline/AccessPatternRecorder.h
     # GPU enhancements
-    GPU/ShaderWarmupEngine.h
-    GPU/LanczosKernelOptimizer.h
-    GPU/HDRMetadataParser.h
-    GPU/GPUCommandBundler.h
-    GPU/GPUTimestampProfiler.h
     # Cache enhancements
     # Memory enhancements
     Memory/BitmapPoolPartitioner.h
@@ -1245,11 +1198,6 @@ set(ENGINE_HEADERS
     Pipeline/PipelineTelemetryEmitter.h
     Pipeline/DecodeWatermarkStamper.h
     # GPU enhancements
-    GPU/ShaderVariantSelector.h
-    GPU/TextureSamplerCache.h
-    GPU/GPUBarrierOptimizer.h
-    GPU/ShaderCompileListener.h
-    GPU/GPUVendorQuirksTable.h
     # Cache enhancements
     Cache/CacheSerializationCodec.h
     # Memory enhancements
@@ -1285,12 +1233,6 @@ set(ENGINE_HEADERS
     Pipeline/MemoryMappedPipelineStage.h
     Pipeline/PipelineLatencyTracker.h
     # GPU
-    GPU/GPUTextureMipChain.h
-    GPU/ShaderHotReloader.h
-    GPU/GPUOccupancyCalculator.h
-    GPU/ComputeDispatchOptimizer.h
-    GPU/GPUFormatConverter.h
-    GPU/GPUThumbnailCompositor.h
     # Cache
     # Memory
     Memory/BitmapMemoryRecycler.h
@@ -1327,9 +1269,6 @@ set(ENGINE_HEADERS
     Decoders/WebPAnimationDecoder.h
     # Sprint 291-300 (v21.1.0 "Rigel-R") — Advanced GPU Compute v2
     GPU/D3D11DPIAdapter.h
-    GPU/DirectStorageLoader.h
-    GPU/VulkanComputeAccelerator.h
-    GPU/VulkanComputeDecoder.h
     Core/ThreadPoolV2.h
     Core/ZeroCopyTextureUploader.h
     Core/BatchDecodeScheduler.h
@@ -1409,14 +1348,6 @@ set(ENGINE_HEADERS
     Pipeline/DomainEventBus.h
     Pipeline/ReactiveAPIGateway.h
     # Sprint 411-420 — GPU Acceleration v3 (v23.1.0 Vega-R)
-    GPU/CUDATextureDecoder.h
-    GPU/HIPComputeBackend.h
-    GPU/MultiGPULoadBalancerV3.h
-    GPU/GPUTextureAtlasBuilder.h
-    GPU/GPUResourceAliasingManager.h
-    GPU/AsyncDMACopyEngine.h
-    GPU/GPUMemoryDefragmenterV2.h
-    GPU/GPUThumbnailAtlasManager.h
     # Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0 Vega-S)
     # Sprint 431-440 — Memory Optimization v3 (v23.3.0 Vega-T)
     Memory/MemoryOptimizationV3.h
@@ -1440,13 +1371,8 @@ set(ENGINE_HEADERS
     Core/SyntheticDecoderGenerator.h
 
     # Sprint 581-590 — NPU & Heterogeneous Compute (v25.2.0 "Rigel-S")
-    GPU/IntelNPUBackend.h
-    GPU/HexagonDSPBackend.h
-    GPU/ONNXEPRouter.h
-    GPU/HardwareCapabilityProfiler.h
     Pipeline/PowerAwareScheduler.h
     Memory/NPUMemoryPool.h
-    GPU/ARM64DecodeBackend.h
 
     # Sprint 591-600 — VCS Integration (v25.3.0 "Rigel-T")
     Core/GitStatusOverlay.h
@@ -1512,12 +1438,10 @@ set(ENGINE_HEADERS
     # Sprint 661-670 — Immersive 3D Preview Engine (v26.2.0 "Canopus-S")
     Core/ImmersivePreviewRenderer.h
     Core/VolumetricThumbnailEngine.h
-    GPU/RealtimeLightingSimulator.h
     Core/HolographicProjectionEngine.h
     Core/MeshLODGeneratorV2.h
     Core/AnimationPreviewScrubber.h
     Core/MaterialPreviewEngine.h
-    GPU/GPUPathTracerPreview.h
     # Sprint 671-680 — Real-Time Collaboration (v26.3.0 "Canopus-T")
     Core/CollaborationPresenceEngine.h
     Core/LiveAnnotationBroadcaster.h
@@ -1529,7 +1453,6 @@ set(ENGINE_HEADERS
     # Sprint 681-690 — Adaptive Performance Governor v2 (v26.4.0 "Canopus-U")
     Core/AdaptivePerformanceGovernorV2.h
     Memory/ThermalAwareMemoryScheduler.h
-    GPU/WorkloadBalancerV2.h
     Core/PowerBudgetController.h
     Core/BackgroundIntelligenceService.h
     Core/QoSThrottleEngine.h
@@ -1550,7 +1473,6 @@ set(ENGINE_HEADERS
     Decoders/USDADecoder.h
     Core/XRSpatialPreviewEngine.h
     Core/ARMarkerDetectionEngine.h
-    GPU/StereoscopicRenderPipeline.h
     Core/PointCloudVisualizerV2.h
     Decoders/NerfDecoder.h
     Core/XRMetadataExtractor.h
@@ -1571,7 +1493,6 @@ set(ENGINE_HEADERS
     Core/MediaTimelineRenderer.h
     Decoders/DASHStreamDecoder.h
     Core/LiveThumbnailPoller.h
-    GPU/VideoTextureStreamEngine.h
     # Sprint 741-750 — Distributed Rendering Cluster (v27.2.0 "Sirius-S")
     Core/RenderClusterManager.h
     Core/RenderJobScheduler.h
@@ -1587,7 +1508,6 @@ set(ENGINE_HEADERS
     Core/FolderPredictionModel.h
     Core/ColdStartFolderBootstrapper.h
     Core/PredictionScanOrchestrator.h
-    GPU/DMADirectPreloader.h
     Core/PerUserPredictionIsolator.h
     Core/PredictionAccuracyTracker.h
     # Sprint 771-780 — Collaborative Annotation v2 (v27.5.0 "Sirius-V")
@@ -1611,7 +1531,6 @@ set(ENGINE_HEADERS
     Core/NeuralCodecV2Engine.h
     Core/ProgressiveNeuralDecoder.h
     Core/NeuralContainerFormat.h
-    GPU/NeuralCodecHWAccelerator.h
     Core/CodecNegotiationProtocol.h
 
     # Sprint 801-810 — Cross-Platform Electron Shell (v28.0.0 "Polaris")
@@ -1636,13 +1555,10 @@ set(ENGINE_HEADERS
     Utils/KeyRotationScheduler.h
 
     # Sprint 871-880 — Cross-Platform Preview macOS+Linux (v28.7.0 "Polaris-X")
-    GPU/MetalRenderBridge.h
-    GPU/LinuxVulkanPreview.h
     Core/PlatformNeutralBuffer.h
     Utils/GTK4ThumbnailWidget.h
     Core/MacOSShellBridge.h
     Core/XDGThumbnailProvider.h
-    GPU/MetalShaderCompiler.h
     Utils/PlatformCapabilityProbe.h
 
     # Sprint 881-890 — Gen-5 Platform WinUI 4 (v29.0.0 "Capella")
@@ -1663,8 +1579,6 @@ set(ENGINE_HEADERS
 
     # Sprint 961-970 — Gen-6 Platform Unification (v30.0.0 "Deneb")
     Core/PlatformAbstractionLayer.h
-    GPU/MetalPipelineV2.h
-    GPU/LinuxDRMBackend.h
     Core/UniversalWindowBroker.h
     Core/NativeFilesystemAdapter.h
     Core/CrossPlatformShellProvider.h
@@ -1672,14 +1586,9 @@ set(ENGINE_HEADERS
     Utils/PlatformBuildMatrix.h
 
     # Sprint 971-980 — DirectStorage & GPU Decompression (v30.1.0 "Deneb-R")
-    GPU/DirectStorageEngine.h
-    GPU/GPUDecompressScheduler.h
     Pipeline/DirectStoragePipelineStage.h
-    GPU/NvGDeflateBackend.h
-    GPU/AMDDecompressBackend.h
     Cache/DirectStorageCacheTier.h
     Core/AsyncFileStreamBroker.h
-    GPU/StagingBufferPoolV2.h
 
     # Sprint 981-990 — CLIP Semantic Search & Discovery (v30.2.0 "Deneb-S")
 
@@ -1940,11 +1849,6 @@ set(ENGINE_HEADERS
     Core/ThreatModelingEngine.h
     Utils/SecurityPostureAnalyzer.h
     # Sprint 1081-1090 — Edge AI & Hardware-Accelerated Inference (v32.1.0 "Fomalhaut-R")
-    GPU/NPUAccelerationEngine.h
-    GPU/EdgeAIInferenceEngine.h
-    GPU/AMDXDNABackend.h
-    GPU/QualcommAIEBackend.h
-    GPU/IntelAMXBackend.h
     Pipeline/HardwareAcceleratedPipeline.h
     Core/ComputeDeviceRegistry.h
     # Sprint 1091-1100 — DirectStorage & Zero-Latency Pipeline (v32.2.0 "Fomalhaut-S")
@@ -1960,8 +1864,6 @@ set(ENGINE_HEADERS
     Core/FormatSignatureDetector.h
     Core/MemoryMappedDecoder.h
     # Sprint 1111-1120 — DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
-    GPU/ZStdGPUKernel.h
-    GPU/GPUDecompressOrchestrator.h
     Pipeline/DirectStorageBatchScheduler.h
     Core/DirectStorageProfiler.h
     Core/ZeroCopyDecodeSession.h
@@ -2116,9 +2018,7 @@ set(ENGINE_SOURCES
 
     # GPU rendering implementations
     GPU/D3D11Renderer.cpp
-    GPU/D3D12ComputePipeline.cpp
     GPU/GDIRenderer.cpp
-    GPU/VulkanComputePipeline.cpp
 
     # Cache implementations
     Cache/PersistentDiskCache.cpp
@@ -2178,7 +2078,6 @@ set(ENGINE_SOURCES
     # Sprint 1091-1100 — DirectStorage & Zero-Latency Pipeline (v32.2.0 "Fomalhaut-S")
     # Sprint 1101-1110 — Annotation, HDR Tone Mapping & Format Detection (v32.3.0 "Fomalhaut-T")
     # Sprint 1111-1120 — DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
-    GPU/GPUDecompressOrchestrator.cpp
     Pipeline/DirectStorageBatchScheduler.cpp
     Core/DirectStorageProfiler.cpp
     # Sprint 1121-1130 — CLIP Semantic Search + HNSW Index (v32.6.0 "Fomalhaut-W")

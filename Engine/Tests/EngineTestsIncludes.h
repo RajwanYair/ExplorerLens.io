@@ -130,9 +130,6 @@
 #include "../Core/ProcessPoolManager.h"
 #include "../Core/SharedStateCoordinator.h"
 #include "../Engine.h"
-#include "../GPU/D3D12ComputePipeline.h"
-#include "../GPU/GPUDecodeAccelerationV2.h"
-#include "../GPU/VulkanComputePipeline.h"
 #include "../Memory/MemoryFootprintOptimizerV2.h"
 #include "../Pipeline/AsyncThumbnailProvider.h"
 #include "../Pipeline/DecoderRegistry.h"
@@ -198,11 +195,6 @@
 #include "../Utils/SecurityPostureAnalyzer.h"
 // v32.1.0 — Edge AI & Hardware-Accelerated Inference
 #include "../Core/ComputeDeviceRegistry.h"
-#include "../GPU/AMDXDNABackend.h"
-#include "../GPU/EdgeAIInferenceEngine.h"
-#include "../GPU/IntelAMXBackend.h"
-#include "../GPU/NPUAccelerationEngine.h"
-#include "../GPU/QualcommAIEBackend.h"
 #include "../Pipeline/HardwareAcceleratedPipeline.h"
 // Sprint 1091-1100: DirectStorage & Zero-Latency Pipeline (v32.2.0 "Fomalhaut-S")
 #include "../Core/DirectStorageManager.h"
@@ -217,8 +209,6 @@
 #include "../Core/ThumbnailAnnotationOverlay.h"
 #include "../Pipeline/BatchThumbnailExporter.h"
 // Sprint 1111-1120: DirectStorage Zero-Copy GPU Decompress (v32.5.0 "Fomalhaut-V")
-#include "../GPU/ZStdGPUKernel.h"
-#include "../GPU/GPUDecompressOrchestrator.h"
 #include "../Pipeline/DirectStorageBatchScheduler.h"
 #include "../Core/DirectStorageProfiler.h"
 #include "../Core/ZeroCopyDecodeSession.h"
@@ -473,13 +463,6 @@
 #include "../Enterprise/PolicyVersionControl.h"
 #include "../Enterprise/RemoteDecoderControl.h"
 #include "../Enterprise/UsageAnomalyDetector.h"
-#include "../GPU/AMDDecompressBackend.h"
-#include "../GPU/DMADirectPreloader.h"
-#include "../GPU/DirectStorageEngine.h"
-#include "../GPU/GPUDecompressScheduler.h"
-#include "../GPU/NeuralCodecHWAccelerator.h"
-#include "../GPU/NvGDeflateBackend.h"
-#include "../GPU/StagingBufferPoolV2.h"
 #include "../Pipeline/DirectStoragePipelineStage.h"
 #include "../Plugin/AutoUpdatePolicyV4.h"
 #include "../Plugin/MarketplaceClientV4.h"
@@ -546,8 +529,6 @@
 #include "../Core/VisualSimilarityIndex.h"
 #include "../Core/WASMDecoderSandbox.h"
 #include "../Core/WindowsSearchProtocol.h"
-#include "../GPU/GPUTextureAtlasManager.h"
-#include "../GPU/WebGPUThumbnailRenderer.h"
 #include "../Pipeline/LockFreeDecodePipeline.h"
 #include "../Pipeline/MemoryMappedIOOptimizer.h"
 #include "../Pipeline/PredictivePrefetchEngine.h"
@@ -566,9 +547,6 @@
 #include "../Pipeline/ZeroCopyActivation.h"
 
 // --- GPU Compute ---
-#include "../GPU/AdaptiveGPUScheduler.h"
-#include "../GPU/HDRToneMapKernel.h"
-#include "../GPU/LanczosGPUKernel.h"
 
 // --- Cache Layer ---
 #include "../Cache/PSOPersistenceManager.h"
@@ -589,8 +567,6 @@
 #include "../Utils/RemoteDesktopOptimizer.h"
 
 // --- GPU Sampling & Compilation ---
-#include "../GPU/AsyncTextureSampler.h"
-#include "../GPU/ShaderCacheCompiler.h"
 
 // --- Format Detection & Storage ---
 #include "../Memory/SmartPointerPool.h"
@@ -603,7 +579,6 @@
 #include "../Core/FileIntegrityMonitor.h"
 #include "../Core/HotReloadConfigEngine.h"
 #include "../Core/IntelligentPrefetchV2.h"
-#include "../GPU/GPUWorkloadBalancer.h"
 #include "../Pipeline/FilesystemWatchdog.h"
 #include "../Utils/RegistrySnapshotManager.h"
 
@@ -625,14 +600,12 @@
 #include "../Core/FilePreviewRouter.h"
 #include "../Core/FormatConversionPipeline.h"
 #include "../Core/ResourceQuotaManager.h"
-#include "../GPU/VulkanMemoryAllocator.h"
 
 // --- DirectShow & Health ---
 #include "../Core/DirectShowThumbnailBridge.h"
 #include "../Core/ExifOrientationFixer.h"
 #include "../Core/FileAssociationManager.h"
 #include "../Core/WindowsSearchIntegration.h"
-#include "../GPU/DX12FenceManager.h"
 #include "../Memory/VirtualAllocOptimizer.h"
 #include "../Pipeline/AsyncIOCompletionEngine.h"
 
@@ -793,7 +766,6 @@
 #include "../Decoders/XZStreamDecoder.h"
 #include "../Decoders/ZstdFrameDecoder.h"
 #include "../GPU/GPUFallbackChain.h"
-#include "../GPU/GPUMemoryTracker.h"
 #include "../Memory/AllocationTracker.h"
 #include "../Memory/MemoryBudgetEnforcer.h"
 #include "../Pipeline/AsyncPrefetchQueue.h"
@@ -844,11 +816,6 @@
 #include "../Cache/CacheIntegrityVerifier.h"
 
 // --- Sprint 59-60: GPU Enhancement ---
-#include "../GPU/GPUAsyncCopyEngine.h"
-#include "../GPU/GPUDebugLayer.h"
-#include "../GPU/GPUMemoryPoolManager.h"
-#include "../GPU/GPUOccupancyOptimizer.h"
-#include "../GPU/GPUShaderCompiler.h"
 
 // --- Sprint 61-62: Enterprise & Deployment ---
 #include "../Utils/DeploymentHealthChecker.h"
@@ -902,11 +869,6 @@
 #include "../Decoders/PCBLayoutDecoder.h"
 #include "../Decoders/PointCloudStreamDecoder.h"
 #include "../Decoders/VDBVolumeDecoder.h"
-#include "../GPU/DirectStorageIntegration.h"
-#include "../GPU/GPUDecompressionEngine.h"
-#include "../GPU/GPUTensorAccelerator.h"
-#include "../GPU/ShaderModelValidator.h"
-#include "../GPU/VulkanRayTracingPreview.h"
 #include "../Memory/MemoryBandwidthProfiler.h"
 #include "../Memory/MemoryCompressionEngine.h"
 #include "../Memory/ZeroCostAbstractionLayer.h"
@@ -930,11 +892,6 @@
 #include "../Core/RegistryBatchHandler.h"
 #include "../Decoders/JPEG2000DecoderV2.h"
 #include "../Decoders/UniversalVideoDecoder.h"
-#include "../GPU/ACESTonemapKernel.h"
-#include "../GPU/BicubicResizeKernel.h"
-#include "../GPU/ColorConvertKernel.h"
-#include "../GPU/LanczosGPUScaler.h"
-#include "../GPU/ShaderLibraryManager.h"
 #include "../Memory/MemoryCompactionScheduler.h"
 #include "../Memory/SIMDMemoryAligner.h"
 #include "../Pipeline/FFmpegCodecRouter.h"
@@ -950,8 +907,6 @@
 
 // Sprint 394: New feature headers
 #include "../Core/ColdStartOptimizer.h"
-#include "../GPU/GPUPowerStateManager.h"
-#include "../GPU/GPUWorkgroupOptimizer.h"
 #include "../Memory/CopyOnWriteBufferPool.h"
 #include "../Memory/MemoryMappedThumbnailAtlas.h"
 #include "../Pipeline/DecodeCancellationEngine.h"
@@ -973,11 +928,6 @@
 #include "../Decoders/MetadataOnlyDecoder.h"
 #include "../Decoders/MultiFormatBatchDecoder.h"
 #include "../Decoders/WICFallbackDecoder.h"
-#include "../GPU/AdaptiveShaderSelection.h"
-#include "../GPU/ComputeShaderProfiler.h"
-#include "../GPU/GPUDeviceSelector.h"
-#include "../GPU/GPUErrorRecovery.h"
-#include "../GPU/GPUFeatureProbe.h"
 #include "../Memory/MemoryWatermarkTracker.h"
 #include "../Memory/PoolAllocatorMetrics.h"
 #include "../Memory/ScopedMemoryBudget.h"
@@ -1011,12 +961,6 @@
 #include "../Pipeline/RateLimitedDecodeQueue.h"
 #include "../Pipeline/ThumbnailInvalidationTracker.h"
 // GPU
-#include "../GPU/GPUBatchSubmitter.h"
-#include "../GPU/GPUFenceOrchestrator.h"
-#include "../GPU/GPUResourceLeakDetector.h"
-#include "../GPU/GPUThermalMonitor.h"
-#include "../GPU/GPUVendorCapabilityMap.h"
-#include "../GPU/ShaderPermutationManager.h"
 // Cache
 #include "../Cache/CacheReplicationEngine.h"
 // Memory
@@ -1039,11 +983,6 @@
 // Core
 // Pipeline
 // GPU
-#include "../GPU/GPUCommandBundler.h"
-#include "../GPU/GPUTimestampProfiler.h"
-#include "../GPU/HDRMetadataParser.h"
-#include "../GPU/LanczosKernelOptimizer.h"
-#include "../GPU/ShaderWarmupEngine.h"
 // Cache
 // Memory
 #include "../Memory/AddressSpaceReserver.h"
@@ -1076,11 +1015,6 @@
 #include "../Pipeline/PipelineTelemetryEmitter.h"
 #include "../Pipeline/StreamingMipGenerator.h"
 // GPU
-#include "../GPU/GPUBarrierOptimizer.h"
-#include "../GPU/GPUVendorQuirksTable.h"
-#include "../GPU/ShaderCompileListener.h"
-#include "../GPU/ShaderVariantSelector.h"
-#include "../GPU/TextureSamplerCache.h"
 // Cache
 #include "../Cache/CacheSerializationCodec.h"
 // Memory
@@ -1112,12 +1046,6 @@
 #include "../Decoders/EmbeddedThumbnailDecoder.h"
 #include "../Decoders/MultipageDocumentDecoder.h"
 #include "../Decoders/SidecarMetadataDecoder.h"
-#include "../GPU/ComputeDispatchOptimizer.h"
-#include "../GPU/GPUFormatConverter.h"
-#include "../GPU/GPUOccupancyCalculator.h"
-#include "../GPU/GPUTextureMipChain.h"
-#include "../GPU/GPUThumbnailCompositor.h"
-#include "../GPU/ShaderHotReloader.h"
 #include "../Memory/BitmapMemoryRecycler.h"
 #include "../Memory/MemoryAllocationTracer.h"
 #include "../Memory/MemoryPressureResponder.h"
@@ -1154,9 +1082,6 @@
 #include "../Core/ThreadPoolV2.h"
 #include "../Core/ZeroCopyTextureUploader.h"
 #include "../GPU/D3D11DPIAdapter.h"
-#include "../GPU/DirectStorageLoader.h"
-#include "../GPU/VulkanComputeAccelerator.h"
-#include "../GPU/VulkanComputeDecoder.h"
 // Sprint 301-310 (v21.2.0 "Rigel-S") — Enterprise Policy v2
 #include "../Core/ACLManager.h"
 #include "../Core/AuditLogger.h"
@@ -1234,14 +1159,6 @@
 #include "../Pipeline/ThumbnailEventStore.h"
 #include "../Pipeline/ThumbnailSagaOrchestrator.h"
 // Sprint 411-420 — GPU Acceleration v3 (v23.1.0)
-#include "../GPU/AsyncDMACopyEngine.h"
-#include "../GPU/CUDATextureDecoder.h"
-#include "../GPU/GPUMemoryDefragmenterV2.h"
-#include "../GPU/GPUResourceAliasingManager.h"
-#include "../GPU/GPUTextureAtlasBuilder.h"
-#include "../GPU/GPUThumbnailAtlasManager.h"
-#include "../GPU/HIPComputeBackend.h"
-#include "../GPU/MultiGPULoadBalancerV3.h"
 // Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0)
 // Sprint 431-440 — Memory Optimization v3 (v23.3.0)
 #include "../Memory/ECCErrorDetector.h"
@@ -1341,7 +1258,6 @@ using namespace ExplorerLens::Engine;
 #include "../Pipeline/FolderCoverImageStage.h"
 
 // Sprint S271-S279 (ROADMAP v6.0 Phase 3) GPU / color / HDR / privacy
-#include "../GPU/GpuVendorRoutingContract.h"
 #include "../Core/IccColorPipelineContract.h"
 #include "../Decoders/AnimatedImagePlaybackContract.h"
 #include "../Pipeline/ArchiveNestingGuardStage.h"
@@ -1367,7 +1283,6 @@ using namespace ExplorerLens::Engine;
 #include "../Decoders/ArchiveFileBadgeOverlayContract.h"
 #include "../Core/MtlsRestAuthContract.h"
 #include "../Core/EngineDllAbiContract.h"
-#include "../GPU/VulkanResizePipelineContract.h"
 #include "../Platform/DbusThumbnailerContract.h"
 #include "../Plugin/PluginCatalogSchemaContract.h"
 
@@ -1379,7 +1294,6 @@ using namespace ExplorerLens::Engine;
 
 // Sprint S311-S320 — ROADMAP v7.0 Phase 2 First GPU Pixels
 #include "../GPU/D3D11DeviceManager.h"
-#include "../GPU/DXVA2JpegDecodeContract.h"
 #include "../Core/CancelAwareBindCallback.h"
 #include "../Core/OOMKillGuard.h"
 #include "../Pipeline/LastCachedBitmapContract.h"
@@ -1423,7 +1337,6 @@ using namespace ExplorerLens::Engine;
 #include "../Core/CodeSigningValidator.h"
 #include "../Core/MiniDumpCapture.h"
 #include "../Pipeline/DecodeFaultBarrier.h"
-#include "../GPU/Dxva2SurfacePool.h"
 #include "../Core/ExifPropertyProvider.h"
 #include "../Platform/OutOfProcessDecoder.h"
 #include "../Core/UbsanSuppressor.h"
@@ -1450,7 +1363,6 @@ using namespace ExplorerLens::Engine;
 #include "../Core/SimdLanczosKernel.h"
 #include "../Core/CorpusManifestBuilder.h"
 // Sprint S381-S389 — ROADMAP Phase 4 Depth & Safety
-#include "../GPU/Dxva2JpegSession.h"
 #include "../Core/ProcessIsolationConfig.h"
 #include "../Core/IPropertyStoreAdapter.h"
 #include "../Core/UbsanSuppressProfile.h"
