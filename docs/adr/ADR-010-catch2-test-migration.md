@@ -1,12 +1,12 @@
 # ADR-010: Catch2 as Primary Test Framework
 
 **Status:** Accepted  
-**Version:** v36.2.0+  
+**Version:** v36.2.0+ (Catch2 tests active as of v39.9.0)  
 **Date:** 2026-07-19  
 
 ## Context
 
-ExplorerLens has ~4744 unit tests using a custom macro-based framework (`TEST()`, `RUN_TEST()`,
+ExplorerLens has ~5108 unit tests using a custom macro-based framework (`TEST()`, `RUN_TEST()`,
 `ASSERT()` with counters) defined in `EngineTestsMacros.h`. While functional, this framework has
 limitations:
 

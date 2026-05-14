@@ -1,6 +1,6 @@
 # ExplorerLens — Quick Start Guide
 
-> **Version:** 37.2.0 "Antares"  
+> **Version:** 39.9.0 "Antares"  
 > **Target:** Windows 10/11 x64, Visual Studio 18 2026 (MSVC v145)
 
 ---

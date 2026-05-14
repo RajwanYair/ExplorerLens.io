@@ -1,13 +1,13 @@
 # ExplorerLens Performance Reference
 
-> **Version:** 37.2.0 "Antares" | Consolidated from `docs/PERFORMANCE.md` + `.github/standards/performance-benchmarks.md`
+> **Version:** 39.9.0 "Antares" | Consolidated from `docs/PERFORMANCE.md` + `.github/standards/performance-benchmarks.md`
 > **Hardware:** Intel Core Ultra 9 285K · 64 GB DDR5-6400 · NVIDIA RTX 4090 · NVMe 7 GB/s
 > **OS:** Windows 11 24H2 (Build 26100) | **Compiler:** MSVC 19.50.35720 (/O2 /GL /arch:AVX2)
 >
 > ⚠ **Single source of truth for performance.** The file `.github/standards/performance-benchmarks.md`
 > has been merged into this document. See §1 for current baselines and §2 for Phase 2 targets.
 
-**Current v37.2.0 Baselines:** 4.2 ms JPEG P50 · 235 img/s batch · 0.8 ms cache hit P50 · ~24 MB idle
+**Current v39.9.0 Baselines:** 4.2 ms JPEG P50 · 235 img/s batch · 0.8 ms cache hit P50 · ~24 MB idle
 **Phase 2 Targets (v38.x):** < 1.5 ms JPEG P50 · > 600 img/s batch · < 0.3 ms cache hit · Full GPU pipeline
 
 ---

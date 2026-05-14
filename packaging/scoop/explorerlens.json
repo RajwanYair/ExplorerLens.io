@@ -1,13 +1,13 @@
 {
-  "version": "39.2.0",
+  "version": "39.9.0",
   "description": "ExplorerLens — GPU-accelerated thumbnail provider for Windows Explorer (200+ file formats). Codename Betelgeuse.",
   "homepage": "https://github.com/RajwanYair/ExplorerLens.io",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.2.0/ExplorerLens-39.2.0-Portable.zip",
-      "hash": "590cd89bff1ea315f588956926761770b51f30de0a6b663b6509839942ec4042",
-      "extract_dir": "ExplorerLens-39.2.0-Portable"
+      "url": "https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.9.0/ExplorerLens-39.9.0-Portable.zip",
+      "hash": "PLACEHOLDER_SHA256_REPLACE_ON_RELEASE",
+      "extract_dir": "ExplorerLens-39.9.0-Portable"
     }
   },
   "bin": [

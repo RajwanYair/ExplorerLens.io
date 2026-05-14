@@ -235,7 +235,7 @@ Store compile-time snapshots in `data/baselines/compile-times.json`:
 
 ```json
 {
-  "_comment": "Compile-time profiling baseline — ExplorerLens v37.2.0",
+  "_comment": "Compile-time profiling baseline — ExplorerLens v39.9.0",
   "_updated": "2025-01-01T00:00:00Z",
   "full_rebuild_seconds": 95,
   "incremental_seconds": 12,

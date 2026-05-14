@@ -8,7 +8,7 @@
 //
 // STATUS:  TODO (Phase 2 — S318/S319 will remove stb_image JPEG/PNG paths)
 //
-// AUDIT TABLE (as of v39.2.0):
+// AUDIT TABLE (as of v39.9.0):
 //   File                                          | Usage               | Replacement
 //   Engine/Core/EncoderExportEngine.cpp           | stb_image_write     | libjpeg-turbo / libspng
 //   Engine/Decoders/ExampleDecoder.cpp            | stb_image_resize    | SIMD resize kernel

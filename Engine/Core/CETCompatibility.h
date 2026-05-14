@@ -45,7 +45,7 @@ constexpr bool HasBit(MitigationBits mask, MitigationBits bit) noexcept
     return (static_cast<std::uint32_t>(mask) & static_cast<std::uint32_t>(bit)) != 0;
 }
 
-/// <summary>Baseline mitigation set v39.2.0 ships with (Phase 1 — no CET yet).</summary>
+/// <summary>Baseline mitigation set v39.9.0 ships with (Phase 1 — no CET yet).</summary>
 inline constexpr MitigationBits kMitigationsPhase1 =
       MitigationBits::DYNAMIC_BASE
     | MitigationBits::HIGH_ENTROPY_VA

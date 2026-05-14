@@ -2,7 +2,7 @@
 
 > **Zero-illusions edition.** Every decision stress-tested against shipping reality.
 > Archived: `docs/archive/ROADMAP_V7.md` (v7.0 "Sirius", ~45 KB, 24 sections, ADRs A1–A28).
-> Current version: **39.2.0 "Betelgeuse"** · Last updated: **2026-05-12**
+> Current version: **39.9.0 "Betelgeuse"** · Last updated: **2026-05-14**
 
 ---
 
@@ -59,7 +59,7 @@ v8.0 is a zero-illusions rewrite. v7.0 was ambitious but still contained marketi
 
 ## 2. Brutal Reality Check
 
-### What actually compiles and runs today (v39.2.0)
+### What actually compiles and runs today (v39.9.0)
 
 | Component | Status | Evidence |
 |---|---|---|
@@ -1392,6 +1392,6 @@ This debt reduction would:
 
 ---
 
-*ROADMAP v8.0 "Vega" — ExplorerLens 39.2.0 → 50.0*
+*ROADMAP v8.0 "Vega" — ExplorerLens 39.9.0 → 50.0*
 *Archived predecessor: `docs/archive/ROADMAP_V7.md`*
 *Next review: v41.0 milestone*

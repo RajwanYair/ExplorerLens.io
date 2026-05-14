@@ -1,8 +1,8 @@
 {
   "_comment": "Unified index of all ExplorerLens package distribution manifests",
   "_schema": "https://explorerlens.io/schemas/package-manifests/v1",
-  "version": "37.2.0",
-  "updated": "2026-07-18",
+  "version": "39.9.0",
+  "updated": "2026-05-14",
   "manifests": {
     "winget": {
       "path": "packaging/winget/ExplorerLens.yaml",

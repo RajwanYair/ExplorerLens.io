@@ -6,7 +6,7 @@
 // actual decode calls are replaced with controlled-latency no-ops so the
 // fixture infrastructure can be validated in CI without real image data.
 //
-// Performance targets (from data/benchmarks/baseline.json v38.8.0):
+// Performance targets (from data/benchmarks/baseline.json v39.9.0):
 //   BM_SingleDecode_JPEG     p50 ≤ 4.2 ms
 //   BM_SingleDecode_PNG      p50 ≤ 5.8 ms
 //   BM_SingleDecode_WebP     p50 ≤ 6.3 ms

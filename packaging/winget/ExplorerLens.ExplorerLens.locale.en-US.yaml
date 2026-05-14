@@ -1,6 +1,6 @@
 # ExplorerLens — winget Default Locale Manifest
 PackageIdentifier: ExplorerLens.ExplorerLens
-PackageVersion: 39.2.0
+PackageVersion: 39.9.0
 PackageLocale: en-US
 Publisher: ExplorerLens Project
 PublisherUrl: https://github.com/RajwanYair/ExplorerLens.io
@@ -28,6 +28,6 @@ Tags:
   - archive
   - com
   - explorer
-ReleaseNotesUrl: https://github.com/RajwanYair/ExplorerLens.io/releases/tag/v39.2.0
+ReleaseNotesUrl: https://github.com/RajwanYair/ExplorerLens.io/releases/tag/v39.9.0
 ManifestType: defaultLocale
 ManifestVersion: 1.6.0

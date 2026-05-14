@@ -1,6 +1,6 @@
 # ExplorerLens — winget Installer Manifest
 PackageIdentifier: ExplorerLens.ExplorerLens
-PackageVersion: 39.2.0
+PackageVersion: 39.9.0
 Platform:
   - Windows.Desktop
 MinimumOSVersion: 10.0.19041.0
@@ -29,10 +29,10 @@ FileExtensions:
   - zip
   - 7z
   - rar
-ReleaseDate: 2026-04-24
+ReleaseDate: 2026-05-14
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.2.0/ExplorerLens-Setup-39.2.0.msi
+    InstallerUrl: https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.9.0/ExplorerLens-Setup-39.9.0.msi
     # InstallerSha256 — replace with actual SHA256 of the .msi when publishing
     InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
     ProductCode: '{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}'

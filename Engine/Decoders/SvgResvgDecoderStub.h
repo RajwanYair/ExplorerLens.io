@@ -15,7 +15,7 @@ namespace ExplorerLens::Engine {
 
 enum class SvgResvgBackend : uint8_t
 {
-    NANOSVG_LEGACY  = 0,   // current v39.2.0
+    NANOSVG_LEGACY  = 0,   // current v39.9.0
     RESVG_20        = 1,   // resvg 0.44.x (2026)
     RESVG_SKIA      = 2,   // resvg Skia backend (experimental)
 };

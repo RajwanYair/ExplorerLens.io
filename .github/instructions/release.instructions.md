@@ -30,7 +30,7 @@ git grep -rn "proxy"     -- "*.ps1" "*.yml" "*.yaml" "*.md" "*.json"
 git grep -rn "928\b"     -- "*.ps1" "*.yml" "*.yaml"
 
 # 3. Find stale old-version references
-$old = "37.2.0"  # previous version
+$old = "39.9.0"  # previous version
 git ls-files | Where-Object { $_ -notmatch '^external/' } | ForEach-Object {
     $c = Get-Content $_ -Raw -ErrorAction SilentlyContinue
     if ($c -match [regex]::Escape($old)) { Write-Host "STALE: $_" }

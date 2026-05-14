@@ -1,7 +1,7 @@
 # FORMAT_VALIDATION_STATUS.md
 
 > **Auto-generated** — update by running `tools/Validate-Corpus.ps1 -UpdateBadges`  
-> Last updated: v37.2.0 (2026-07-18)
+> Last updated: v39.9.0 (2026-07-18)
 
 ## Summary
 
