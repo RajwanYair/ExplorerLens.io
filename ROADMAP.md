@@ -55,22 +55,26 @@ understated, and produces a realistic phase plan rooted in the project's actual 
 | Arm64 support                            | Phase 6                                 | **PROMOTES TO PHASE 3** — Windows on Arm (Copilot+ PCs) is fastest-growing segment. Blocking key users. New ADR A41                                                                |
 | Test framework duality (custom + Catch2) | Coexistence plan                        | **COMMIT TO CATCH2** — No new `TEST()` bodies after v41.0. Migrate all to Catch2 by v42.0. New ADR A42                                                                           |
 | WIC codec registration                   | Not in scope                            | **MISSED OPPORTUNITY** — Registering as WIC codec would give access to ALL WIC apps (Office, Photos, Paint, etc.). New ADR A43                                                     |
-| Phase 1 items from v8.0                  | "S301-S310 done"                        | **PHASE 1 IN PROGRESS** — `/WX` restored in all CMakeLists.txt (fixed in production-readiness pass). AI headers + GPU stubs still registered. Must complete before Phase 2 work. |
+| Phase 1 items from v8.0                  | "S301-S310 done"                        | ✅ **PHASE 1 COMPLETE** — S301–S310 fully implemented in v40.0.0 (Procyon). Phase 2 work may begin. |
 
 ### Phase 1 Compliance Check (carry-over from v8.0)
 
-These v8.0 Phase 1 items are **still outstanding** as of v39.9.0:
+**v40.0.0 (Procyon) — Phase 1 COMPLETE ✅**
 
-| v8.0 Requirement                         | Status                  | Blocker                                                                     |
+| v8.0 Requirement                         | Status                  | Resolution                                                                  |
 | ---------------------------------------- | ----------------------- | --------------------------------------------------------------------------- |
-| Restore `/WX` in Engine/CMakeLists.txt | ✅**DONE**        | Fixed in production-readiness pass: root, Engine, PluginHost CMakeLists.txt |
-| Archive AI module headers (45 files)     | ❌**OUTSTANDING** | Still in ENGINE_HEADERS list                                                |
-| Archive unused GPU stubs (85 files)      | ❌**OUTSTANDING** | Still in ENGINE_HEADERS list                                                |
-| Reconcile test count                     | ❌**OUTSTANDING** | README ≠ BuildValidation.h                                                 |
-| Delete root `index.html`               | ✅**DONE**        | Deleted (docs/index.html is canonical)                                      |
-| vcpkg.json audit                         | ⚠️ Partial            | Done but not complete                                                       |
+| Restore `/WX` in Engine/CMakeLists.txt | ✅ **DONE (S301)**  | Fixed in production-readiness pass: root, Engine, PluginHost CMakeLists.txt |
+| SQLite L2 cache implementation           | ✅ **DONE (S302)**  | PersistentDiskCache.cpp rewritten with winsqlite3.dll (ADR A40)             |
+| Replace MuPDF with Windows.Data.Pdf      | ✅ **DONE (S303)**  | Windows.Data.Pdf WinRT is primary path; MuPDF explicit opt-in (ADR A37)    |
+| LGPL dynamic linking (libde265/LibRaw)   | ✅ **DONE (S304)**  | libraw_static → libraw shared; DLL install rules added (ADR A38)            |
+| Reconcile test count                     | ✅ **DONE (S305)**  | 4877 everywhere: README, BuildValidation.h, TESTING_GUIDE.md, SVG badge     |
+| Workspace root clean                     | ✅ **DONE (S306)**  | Root verified clean; src/ confirmed as active code, no orphan files         |
+| Archive AI module headers (70 files)     | ✅ **DONE (S307)**  | Engine/AI/* → docs/archive/ai-research/AI/ (ADR A34)                       |
+| Archive unused GPU stubs (111 files)     | ✅ **DONE (S308)**  | Engine/GPU/* (non-core) → docs/archive/gpu-research/ (ADR A33)             |
+| vcpkg.json audit                         | ✅ **DONE (S309)**  | Removed duplicate stb dependency                                             |
+| Version bump to v40.0.0                  | ✅ **DONE (S310)**  | 20 version-bearing files updated; codename Procyon                          |
 
-**No Phase 2 feature work until Phase 1 is complete.** This is the #1 priority.
+**Phase 2 feature work is now unblocked.**
 
 ### What v9.0 Preserves from v8.0
 
