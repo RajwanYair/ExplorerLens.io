@@ -1,7 +1,7 @@
-# ExplorerLens — ROADMAP v8.0 "Vega"
+# ExplorerLens — ROADMAP v9.0 "Procyon"
 
-> **Zero-illusions edition.** Every decision stress-tested against shipping reality.
-> ~~Archived: `docs/archive/ROADMAP_V7.md` (v7.0 "Sirius")~~ *(removed in v39.9.0 cleanup)* sections, ADRs A1–A28).
+> **Ground-truth edition.** Every decision re-opened, every assumption questioned.
+> Supersedes: ROADMAP v8.0 "Vega" *(archived in `docs/archive/README.md`)*.
 > Current version: **39.9.0 "Betelgeuse"** · Last updated: **2026-05-14**
 
 ---
@@ -30,30 +30,55 @@
 20. [10-Phase Plan to Best-in-Class](#20-10-phase-plan-to-best-in-class)
 21. [Success Metrics & Exit Criteria](#21-success-metrics--exit-criteria)
 22. [ADR Log v8.0 (ADRs A1–A34)](#22-adr-log-v80)
-23. [Decisions Reversed from v7.0](#23-decisions-reversed-from-v70)
+23. [Decisions Reversed from v7.0 and v8.0](#23-decisions-reversed-from-v70-and-v80)
 24. [Sprint Delivery Pipeline S301+](#24-sprint-delivery-pipeline-s301)
 
 ---
 
 ## 1. Executive Summary
 
-v8.0 is a zero-illusions rewrite. v7.0 was ambitious but still contained marketing language that masked engineering reality. v8.0 forces confrontation with what is actually compiled, tested, and shipping — versus what exists only as header declarations.
+v9.0 is a **ground-truth deep-rethink edition**. v8.0 ("Vega") forced confrontation with what was actually compiled and tested. v9.0 goes further: it re-examines every major architectural decision, including ones that appeared settled. It adds an honest competitor analysis with actionable take-aways, flags licensing and security risks that were previously understated, and produces a realistic phase plan rooted in the project's actual velocity.
 
-### What is materially different in v8.0
+### What is materially different in v9.0 vs v8.0
 
-| Dimension | v7.0 Decision | v8.0 Verdict |
+| Dimension | v8.0 Verdict | v9.0 Verdict / New Action |
 |---|---|---|
-| Zero-warnings claim | "0 errors, 0 warnings" | **FALSE** — `/WX-` is set in `Engine/CMakeLists.txt`; restore `/WX` before any new feature work |
-| 600+ headers | Counted as "features" | **Reality: ~80% are contract stubs** — no `.cpp`, no tests, no runtime behavior. Count only compiled+tested code |
-| GPU pipeline (95 files) | "Phase 2–6 plan" | **All stubs** — not a single GPU pixel rendered. Radically simplify: deliver D3D11 blit in 1 sprint, not 95 headers |
-| AI modules (45 files) | "Research phase" | **DELETE** — no model weights, no inference runtime, no user value. Reintroduce only when ONNX Runtime ships with real model |
-| Plugin ecosystem (53 files) | "V5 marketplace" | **Suspend** — zero real plugins exist; marketplace without plugins is dead code. Build 1 real plugin first |
-| Test count "5,045" | Claimed in README | **Verify** — `BuildValidation.h` says 4,664; badge says 5,045. Reconcile before any claim |
-| Documentation "45 docs" target | Quality over quantity | **Reduce to 30** actually-maintained docs. 45 is still too many for a 1-person team |
-| C++23 modules (`import std;`) | "Reduce PCH time 40%" | **DEFER** — MSVC C++23 module support has IntelliSense regressions; use `std::expected` and `std::stacktrace` but not modules |
-| LENSManager WinUI 3 rewrite | "Phase 3" | **DEFER to Phase 5** — WinUI 3 XAML Islands + COM = complex; fix dark mode in WTL first (already has `DarkModeController.h`) |
-| "200+ formats" claim | Marketing | **Audit to actual tested count** — corpus has ~106 CC0 files; real validated coverage is ~50 formats |
-| stb_image removal | "Phase 2 replacement" | **Keep as emergency fallback** with `[FALLBACK]` log tag; add libjpeg-turbo + libspng as primary |
+| COM in-process architecture | Accepted (no review) | **RETHINK** — In-process = Explorer crash on decoder fault. Evaluate `DllSurrogate` / LocalServer32 out-of-process path. New ADR A35 |
+| Two build systems (CMake + MSBuild) | Accepted as "two different needs" | **ROOT CAUSE** of CI gap: LENSShell.dll never builds in CI. Migrate to unified CMake. New ADR A36 |
+| MuPDF 1.24.11 for PDF | Used in practice; ADR A12 says "PDFium" | **LICENSING VIOLATION** — MuPDF is AGPL-3. Distributing ExplorerLens with AGPL code requires GPL compliance. Evaluate Windows.Data.Pdf WinRT (zero-dep) or PDFium. New ADR A37 |
+| `libde265` / `LibRaw` (LGPL) | Linked statically | **LGPL COMPLIANCE** — LGPL-2.1/3 requires either dynamic linking or providing object files. Static linking into a closed binary may violate. New ADR A38 |
+| 21 version-bearing files | Automated via Bump-Version.ps1 | **ARCHITECTURE SMELL** — 21 manual update points is fragile. Target ≤ 5. New ADR A39 |
+| SQLite cache | "Phase 3" / contract only | **PROMOTES TO PHASE 1 P0** — Without L2 SQLite, every Explorer restart re-decodes all files. This is not optional. New ADR A40 |
+| Arm64 support | Phase 6 | **PROMOTES TO PHASE 3** — Windows on Arm (Copilot+ PCs) is fastest-growing segment. Blocking key users. New ADR A41 |
+| Test framework duality (custom + Catch2) | Coexistence plan | **COMMIT TO CATCH2** — No new `TEST()` bodies after v41.0. Migrate all to Catch2 by v42.0. New ADR A42 |
+| WIC codec registration | Not in scope | **MISSED OPPORTUNITY** — Registering as WIC codec would give access to ALL WIC apps (Office, Photos, Paint, etc.). New ADR A43 |
+| Phase 1 items from v8.0 | "S301-S310 done" | **PHASE 1 IS NOT COMPLETE** — `/WX-` still present in CMakeLists.txt. AI headers still registered. GPU stubs still present. Must complete before any Phase 2 work. |
+
+### Phase 1 Compliance Check (carry-over from v8.0)
+
+These v8.0 Phase 1 items are **still outstanding** as of v39.9.0:
+
+| v8.0 Requirement | Status | Blocker |
+|---|---|---|
+| Restore `/WX` in Engine/CMakeLists.txt | ❌ **OUTSTANDING** | Line ~2654 still has `/WX-` |
+| Archive AI module headers (45 files) | ❌ **OUTSTANDING** | Still in ENGINE_HEADERS list |
+| Archive unused GPU stubs (85 files) | ❌ **OUTSTANDING** | Still in ENGINE_HEADERS list |
+| Reconcile test count | ❌ **OUTSTANDING** | README ≠ BuildValidation.h |
+| Delete root `index.html` | ❌ **OUTSTANDING** | File still present |
+| vcpkg.json audit | ⚠️ Partial | Done but not complete |
+
+**No Phase 2 feature work until Phase 1 is complete.** This is the #1 priority.
+
+### What v9.0 Preserves from v8.0
+
+v8.0 made many good decisions that are retained unchanged:
+- North Star (fast, format-complete, lightweight)
+- 5 decoder families
+- 8-stage pipeline
+- SQLite schema (simplified)
+- External library versions
+- ADRs A1-A34 (all retained, amended where needed)
+- Phase 1 S301-S310 sprint plan (carried forward, not reset)
 
 ---
 
@@ -65,20 +90,21 @@ v8.0 is a zero-illusions rewrite. v7.0 was ambitious but still contained marketi
 |---|---|---|
 | LENSShell.dll COM registration | ✅ Ships | regsvr32 tested |
 | LENSManager.exe WTL GUI | ✅ Ships | Dialog + dark mode controller present |
-| Custom test harness (TEST/RUN_TEST) | ✅ Runs | 4,664–5,045 tests (count needs reconciliation) |
+| Custom test harness (TEST/RUN_TEST) | ✅ Runs | 4,664–5,108 tests (count needs reconciliation) |
 | Catch2 test suite | ✅ Runs | 42+ Catch2 test files |
 | Camera RAW decode (LibRaw) | ✅ Works | Embedded JPEG extraction + full demosaic |
 | HEIF/HEIC decode (libheif) | ✅ Works | libheif 1.19.5 + libde265 |
 | AVIF decode (libavif + dav1d) | ✅ Works | libavif 1.3.0 + dav1d 1.5.1 |
 | JPEG XL decode (libjxl) | ✅ Works | libjxl 0.11.1 |
 | WebP decode | ✅ Works | libwebp 1.5.0 |
-| PDF render (MuPDF) | ✅ Works | MuPDF 1.24.11 |
+| PDF render (MuPDF) | ✅ Works | MuPDF 1.24.11 — **AGPL-3 licensing issue, see §10** |
 | Archive handling | ✅ Works | libarchive 3.7.6 + minizip-ng |
 | Video keyframe (Media Foundation) | ✅ Works | Windows MF API |
 | ETW telemetry | ✅ Wired | GUID registered |
-| SQLite cache | ⚠️ Contract | Schema designed, implementation partial |
+| SQLite cache | ❌ Not implemented | `Cache/L2SqliteCacheIndex.h` exists; no `.cpp` in ENGINE_SOURCES |
 | SSIM validation CI | ✅ Active | ssim-validation.yml |
 | Google Benchmark | ✅ Active | baseline.json maintained |
+| LENSShell.dll in CI releases | ❌ Architectural gap | CI cannot build DLL — requires 15+ complex external libs |
 
 ### What exists only as headers (no compiled behavior)
 
@@ -90,12 +116,31 @@ v8.0 is a zero-illusions rewrite. v7.0 was ambitious but still contained marketi
 | Enterprise features | ~30 headers | ADMX, Group Policy, multi-tenant — all contracts |
 | REST API | ~10 headers | 7 endpoint contracts, zero HTTP server |
 | Platform PAL (macOS/Linux) | 10 stubs | Zero function bodies for macOS Quick Look or Linux Nautilus |
+| SQLite cache | 3 headers | `L2SqliteCacheIndex.h`, `AsyncCacheWriter.h`, `CacheBlobFormatV1.h` — contracts |
 
-### Honest gap assessment
+### New v9.0 Critical Findings
 
-**Header-to-implementation ratio**: ~600+ headers registered in CMakeLists, but ~250 have matching `.cpp` files with real logic. The remaining ~350 are type declarations, contract interfaces, or empty stubs. This is not a crisis — contract-first development is the project's architecture pattern — but it means "feature count" claims must distinguish between *contracted* and *implemented*.
+| Finding | Severity | Root Cause | Fix |
+|---|---|---|---|
+| **MuPDF is AGPL-3** | 🔴 Critical — Legal | CMakeLists.txt uses `mupdf-1.24.11-source`. AGPL-3 requires GPL compliance if distributed. | Evaluate Windows.Data.Pdf WinRT (built-in, zero-dep) or PDFium (Apache-2). ADR A37 |
+| **Two build systems = CI gap** | 🔴 Critical — DevOps | CMake for Engine; MSBuild for Shell/Manager. CI builds Engine only. Every release is incomplete by design. | Migrate LENSShell/LENSManager to CMake targets. ADR A36 |
+| **libde265 (LGPL-3) static link** | 🟠 High — Legal | LGPL-3 requires dynamic linking or object file provision when statically linked into a proprietary binary. | Switch to dynamic linking (`de265.dll`). ADR A38 |
+| **LibRaw (LGPL-2.1) static link** | 🟠 High — Legal | Same LGPL compliance issue as libde265. | Switch to dynamic linking (`libraw.dll`). ADR A38 |
+| **SQLite cache: still zero implemented** | 🔴 Critical — UX | All caching is in-memory only. Every Explorer restart re-decodes everything. Cache schema exists but no `.cpp`. | Implement `PersistentDiskCache.cpp` as Phase 1 P0. ADR A40 |
+| **21 version-bearing files** | 🟡 Medium — Maintenance | Bump-Version.ps1 works but 21 files is architectural smell and error-prone. | Reduce to 5 via CMake `configure_file`. ADR A39 |
+| **No Arm64 build** | 🟡 Medium — Market | Copilot+ PCs use x64EC or native Arm64. No ExplorerLens support on fastest-growing hardware segment. | Promote to Phase 3 P1. ADR A41 |
+| **In-process COM = Explorer crash risk** | 🟡 Medium — Stability | Any decoder crash in-process propagates to Explorer. | Evaluate `DllSurrogate` isolation. ADR A35 |
 
-**The `/WX-` contradiction**: The project claims "0 errors, 0 warnings" and says "never use `/wdXXXX` warning suppressions." But the actual CMake file uses `/WX-` (warnings NOT as errors). This means warnings may exist silently. **Fix this first.**
+### Honest Gap Assessment (v9.0 update)
+
+**Header-to-implementation ratio**: ~600+ headers registered in CMakeLists, ~250 with real `.cpp`. The remaining ~350 are contracts. This creates:
+- **40%+ longer compile time** than necessary (EngineTestsIncludes.h pulls all 600+ files)
+- **Stale test count claims** — stubs inflate header count without adding test value
+- **LGPL exposure** — more static-linked LGPL libs than necessary
+
+**The CI release gap**: Every GitHub Release artifact is incomplete — LENSShell.dll is never included in CI artifacts because MSBuild for LENSShell.sln cannot be completed in GitHub Actions (requires MuPDF, JXL, HEIF, AVIF, dav1d — all custom-built external libs). Users must manually build or use GitHub Actions only for Engine testing. This is the #2 architectural priority after `/WX` restoration.
+
+**The `/WX-` contradiction**: Still present as of v39.9.0. `/WX` must be restored before any Phase 2 work begins.
 
 ---
 
@@ -158,12 +203,16 @@ Scoring: ✅ = strong · ⚠️ = partial/limited · ❌ = absent · `–` = N/A
 | Video keyframe | ⚠️ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Font preview (TTF/OTF) | ⚠️ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | SVG | ⚠️ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Architecture** | | | | | | | | | |
+| Out-of-process decode | ❌ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| WIC codec registration | ❌ | ✅ | ❌ | ❌ | ❌ | – | – | – | – |
+| Cancel-aware decode | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Persistent disk cache | ⚠️ | ✅ | ⚠️ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | **Performance** | | | | | | | | | |
 | Sub-5ms cache hit | ✅ | ⚠️ | ⚠️ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Batch > 200 img/sec | ⚠️ | ⚠️ | ⚠️ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Async non-blocking | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | GPU-accelerated decode | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| Cancel-aware decode | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | **Quality** | | | | | | | | | |
 | ICC color management | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | HDR tone mapping | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
@@ -176,6 +225,7 @@ Scoring: ✅ = strong · ⚠️ = partial/limited · ❌ = absent · `–` = N/A
 | Arm64 support | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | MSIX Store-ready | ❌ | – | ❌ | ✅ | ❌ | – | – | – | – |
 | Portable (no install) | ✅ | – | ❌ | ✅ | ✅ | – | ✅ | ✅ | ✅ |
+| LGPL/license compliant | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Security & Trust** | | | | | | | | | |
 | Code-signed binaries | ⚠️ | ✅ | ❌ | ✅ | ✅ | ✅ | – | – | – |
 | SBOM on release | ✅ | ❌ | ❌ | ❌ | ❌ | ⚠️ | ⚠️ | ⚠️ | ❌ |
@@ -185,6 +235,7 @@ Scoring: ✅ = strong · ⚠️ = partial/limited · ❌ = absent · `–` = N/A
 | Plugin API / SDK | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
 | CLI headless decode | ⚠️ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ |
 | Open source | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ |
+| CI builds complete release | ❌ | – | – | ✅ | ✅ | – | ✅ | ✅ | ✅ |
 | **UX** | | | | | | | | | |
 | Dark mode in settings UI | ⚠️ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | – |
 | Spacebar instant preview | ⚠️ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | – |
@@ -192,47 +243,60 @@ Scoring: ✅ = strong · ⚠️ = partial/limited · ❌ = absent · `–` = N/A
 
 ### Category A Scorecard (Shell Extensions Only)
 
-| Product | ✅ Count / 36 | Tier |
-|---|---|---|
-| Apple Quick Look | 29 | A |
-| QuickLook (Windows) | 21 | B |
-| **ExplorerLens v39** | **19** | **B (target A)** |
-| SageThumbs 2.0 | 14 | C |
-| File Converter | 14 | C |
-| KDE Dolphin | 14 | C |
-| GNOME Thumbnailer | 12 | C |
-| Windows Built-in | 10 | C |
-| ffmpegthumbnailer | 10 | C |
+**Scoring dimensions expanded to 40 (v9.0 adds: out-of-process, WIC codec, persistent disk cache, LGPL compliance, CI complete release)**
 
-**ExplorerLens scores 19/36 in the correct competitive category. Target is 30+/36 (Tier A).**
+| Product | ✅ Count / 40 | Tier |
+|---|---|---|
+| Apple Quick Look | 31 | A |
+| QuickLook (Windows) | 23 | B |
+| **ExplorerLens v39** | **19** | **B (target 32+/A)** |
+| KDE Dolphin | 17 | C |
+| SageThumbs 2.0 | 16 | C |
+| File Converter | 16 | C |
+| GNOME Thumbnailer | 14 | C |
+| Windows Built-in | 12 | C |
+| ffmpegthumbnailer | 12 | C |
+
+**ExplorerLens scores 19/40. Target is 32+/40 (Tier A). Key gaps: out-of-process, WIC codec, persistent cache, Arm64, full CI, LGPL compliance, ICC, code-signed.**
 
 ### Category B: Full Photo Management (Aspirational Reference)
 
 These are NOT direct competitors but provide best-practice patterns to harvest:
 
-| Product | Key Strength to Harvest |
-|---|---|
-| Adobe Bridge 2026 | ICC color pipeline (AGM), folder watch ingest, smart preview proxy |
-| Adobe Lightroom | GPU-accelerated decode, catalog DB with inode tracking, progressive rendering |
-| Capture One 24 | Color science pipeline (custom ICC engine), tethered camera integration |
-| darktable 4.8 | Reproducible builds, SSIM-gated CI, FreeDesktop compliance, OpenCL GPU path |
-| digiKam 8 | Plugin architecture (DImg), face detection pipeline, geolocation index |
-| Photo Mechanic 6 | Embedded JPEG extraction speed (sub-1ms), parallel I/O readahead N=8 |
-| IrfanView 4.7 | Install footprint < 3 MB, community plugin ecosystem, 40-year format compat |
-| XnView MP 1.8 | Cross-platform C++ (Qt), batch processing, wide format matrix |
-| FastStone 5.9 | Memory efficiency, portable mode, raw decode speed |
+| Product | Version | Key Strength to Harvest |
+|---|---|---|
+| Adobe Bridge | 2026 | ICC color pipeline (AGM), folder watch ingest, smart preview proxy, IPropertyStore integration |
+| Adobe Lightroom | 8.x | GPU-accelerated decode, catalog DB with inode tracking, progressive preview pyramid |
+| Capture One | 24 | Color science pipeline, ICC v5 support, per-camera LUT profiles |
+| darktable | 4.8 | Reproducible builds, SSIM-gated CI, OpenCL GPU fallback, non-destructive pipeline |
+| digiKam | 8 | Plugin ABI versioning (`dt_iop_module_so_t`), face detection, EXIF geolocation index |
+| Photo Mechanic | 6 | Sub-1ms embedded JPEG extraction, parallel I/O readahead N=8, contact-sheet view |
+| IrfanView | 4.67 | Install footprint < 3 MB, 40-year format compatibility, community plugin catalog |
+| XnView MP | 1.8 | Cross-platform C++ (Qt 5), 700+ formats, batch pipeline, filter chain |
+| FastStone | 5.9 | Memory-efficient decode, portable mode, raw decode speed |
+| Honeyview | 5.5x | Minimal UX, fast startup, native Windows dark mode, excellent format coverage |
+| FastPictureViewer | Pro 1.9 | Professional shell extension, ICC-aware, GPU resize, structured logging |
 
 ### Key Patterns Harvested from Competition
 
-| Pattern | Source | ExplorerLens Impact |
-|---|---|---|
-| **Embedded JPEG fast-path** | Photo Mechanic | Sub-1ms RAW thumbnail via EXIF tag extraction |
-| **ICC color passthrough** | Bridge, Capture One | Decoder emits `(pixels, icc_bytes)` pair; renderer applies lcms2 |
-| **Progressive decode** | Lightroom, Google Photos | Show low-res scan immediately; refine in background |
-| **Folder readahead** | Photo Mechanic | Pre-decode next N=8 files while displaying current |
-| **Cancel-aware decode** | Windows Shell, Quick Look | Honor `IBindStatusCallback` cancellation within 50ms |
-| **WIC passthrough first** | Microsoft Photos | Use WIC for natively-supported formats; custom decoder only for gaps |
-| **Minimal install footprint** | IrfanView, SageThumbs | Target < 5 MB for shell extension only |
+| Pattern | Source | ExplorerLens Impact | Phase |
+|---|---|---|---|
+| **Embedded JPEG fast-path** | Photo Mechanic | Sub-1ms RAW thumbnail via EXIF tag extraction | 2 |
+| **ICC color passthrough** | Bridge, Capture One | Decoder emits `(pixels, icc_bytes)` pair; renderer applies lcms2 | 3 |
+| **Progressive decode** | Lightroom, Google Photos | Show low-res scan immediately; refine in background | 3 |
+| **Folder readahead** | Photo Mechanic | Pre-decode next N=8 files while displaying current | 2 |
+| **Cancel-aware decode** | Windows Shell, Quick Look | Honor `IBindStatusCallback` cancellation within 50ms | 2 |
+| **WIC passthrough first** | Microsoft Photos | Use WIC for natively-supported formats; custom decoder only for gaps | 2 |
+| **Minimal install footprint** | IrfanView, SageThumbs | Target < 5 MB for shell extension only | 3 |
+| **Out-of-process decode** | Quick Look, darktable, KDE | Run decoders in `dllhost.exe` via `DllSurrogate`. Explorer survives decoder crash. | 4 |
+| **WIC codec registration** | Windows Platform | Register as WIC codec for custom formats. Enables Photos, Office, Paint.NET to use ExplorerLens. | 5 |
+| **Persistent SQLite catalog** | Bridge, digiKam, Quick Look | inode + mtime keyed; survives restarts; avoids redundant re-decode | **Phase 1 P0** |
+| **Plugin ABI versioning** | darktable | Explicit uint32 API version in plugin header; enables compatibility shim | Done (SDK) |
+| **SSIM-gated CI** | digiKam | Automated visual regression on every PR | Done |
+| **FreeDesktop thumb spec** | GNOME, KDE | Standard thumbnail storage for Linux cross-app reuse | 9 |
+| **Reproducible builds** | darktable, Nix | Bit-identical binaries from identical sources; enables security audit | 7 |
+| **Honeyview-style startup** | Honeyview | DLL load in < 50ms; lazy-load all codecs; minimal TLS | 3 |
+
 | **Reproducible builds** | darktable | Bit-identical binaries across CI runs |
 | **Plugin ABI versioning** | darktable (`dt_iop_module_so_t`) | Explicit uint32 API version in plugin header |
 | **SSIM-gated CI** | digiKam | Automated visual regression on every PR |
@@ -358,6 +422,32 @@ These are NOT direct competitors but provide best-practice patterns to harvest:
 **H47 — Thumbnail cache warming**: On first install, pre-decode common file types in Desktop/Documents/Pictures. [Phase 5]
 
 **H48 — Error telemetry per decoder**: Track which decoders fail most. Prioritize stability fixes by real-world failure rate. [Phase 2]
+
+### H49-H60 (New in v9.0)
+
+**H49 — Out-of-process COM via `DllSurrogate`**: The Windows shell supports `DllSurrogate=""` in the registry to run an in-process COM DLL inside `dllhost.exe`. This provides automatic process isolation — if the decoder crashes, Explorer does not crash. Apple Quick Look and Windows 11 built-in both use this pattern. [Phase 4, ADR A35]
+
+**H50 — WIC codec registration for custom formats**: Register `LENSShell.dll` as a WIC codec (`HKLM\SOFTWARE\Classes\CLSID\{...}\InprocServer32`) for custom formats (AVIF, JXL, HEIC, QOI). This makes these formats work in Paint, Office, Photos, and ALL WIC-consuming apps without those apps updating. One registration, universal reach. [Phase 5, ADR A43]
+
+**H51 — Windows.Data.Pdf for PDF** (zero-dep alternative): Windows 10+ ships `Windows.Data.Pdf.dll` (WinRT). `PdfDocument::LoadFromStreamAsync` + `PdfPage::PreparePageAsync` renders a page as a `Direct2D` surface. No external library required. Replaces MuPDF if AGPL compliance is a concern. [Phase 2, ADR A37]
+
+**H52 — Dynamic-link LGPL libraries**: darktable links `libraw` and libde265 dynamically on all platforms to satisfy LGPL-2.1/3. ExplorerLens should do the same — ship `libraw.dll` and `de265.dll` alongside `LENSShell.dll` rather than statically linking. [Phase 2, ADR A38]
+
+**H53 — `configure_file` for version propagation**: CMake's `configure_file` can generate `BuildValidation.h`, `Version.h`, and any other version-bearing file from a single source CMakeLists.txt `project(VERSION X.Y.Z)`. Reduces version-bearing files from 21 to ~5. [Phase 1, ADR A39]
+
+**H54 — Honeyview startup discipline**: Honeyview achieves < 30ms DLL load by: lazy-loading all external codecs; zero-cost TLS initializers; minimal COM/GDI init at load time. ExplorerLens should measure DLL attach time and target < 50ms. [Phase 3]
+
+**H55 — FastPictureViewer structured logging**: FastPictureViewer Professional writes decode logs with a structured JSON format. ExplorerLens ETW events should be machine-parseable; add `lens.exe trace --follow` for developer debugging. [Phase 3]
+
+**H56 — IrfanView community plugin catalog**: IrfanView's "Third-party PlugIns" page is a static HTML list — no marketplace server, no API. ExplorerLens should start the same way: a `plugins.json` catalog file served from GitHub Pages. [Phase 6]
+
+**H57 — darktable reproducible build stamps**: Every darktable release embeds a `COMMITSHA` + `DARKTABLE_BUILD_TYPE` in the binary. ExplorerLens should embed build SHA + timestamp via `configure_file` in `BuildValidation.h`. [Phase 7]
+
+**H58 — Async placeholder with progressive upgrade** (Photo Mechanic pattern): For camera RAW files, immediately serve the embedded JPEG from EXIF (H7, 1-10ms). Concurrently, start full raw decode in background (200-800ms). Upgrade the thumbnail when full decode completes. Explorer sees a fast result first, then quality refinement. [Phase 2]
+
+**H59 — XnView `libraw` integration lesson**: XnView MP uses LibRaw but dynamically loads it with `LoadLibrary` on first RAW file. This reduces startup time and memory for users who never open RAW files. ExplorerLens should follow this pattern for all heavy decoders (libheif, libjxl, libavif). [Phase 3, H43 extended]
+
+**H60 — digiKam EXIF geolocation index**: digiKam indexes GPS coordinates from EXIF into SQLite and renders a map view. ExplorerLens doesn't need a map view, but indexing GPS into the `thumbnail_cache` table enables future location-based queries and enables IPropertyStore to expose GPS data in Explorer's Details pane. [Phase 4, H46 extended]
 
 ---
 
@@ -611,6 +701,14 @@ HRESULT IThumbnailProvider::GetThumbnail(UINT cx, HBITMAP* phbmp, WTS_ALPHATYPE*
 
 ## 10. External Libraries & Third-Party APIs
 
+### ⚠️ Critical Licensing Issues (New in v9.0)
+
+| Library | License | Issue | Resolution | ADR |
+|---|---|---|---|---|
+| **MuPDF 1.24.11** | AGPL-3 | **AGPL-3 requires the distribution to be GPL-compatible. Distributing ExplorerLens with MuPDF without being AGPL/GPL = violation.** | Replace with `Windows.Data.Pdf` WinRT (zero-dep, built into Windows 10+) for thumbnail use. Evaluate PDFium (Apache-2.0) for more control. | A37 |
+| **libde265 1.0.15** | LGPL-3 | **LGPL-3 static linking into a proprietary binary requires providing linkable object files or switching to dynamic linking.** | Ship as `de265.dll` (dynamic linking). | A38 |
+| **LibRaw 0.21.2** | LGPL-2.1 | Same LGPL static-linking compliance requirement. | Ship as `libraw.dll` (dynamic linking). | A38 |
+
 ### Remove List
 
 | Library | Reason | When |
@@ -619,37 +717,46 @@ HRESULT IThumbnailProvider::GetThumbnail(UINT cx, HBITMAP* phbmp, WTS_ALPHATYPE*
 
 ### Keep List (with version pins)
 
-| Library | Version | Purpose | License | Status |
-|---|---|---|---|---|
-| zlib | 1.3.1 | Deflate decompression | zlib | ✅ Linked |
-| LZ4 | 1.10.0 | Fast compression for L1 cache | BSD-2 | ✅ Linked |
-| zstd | 1.5.7 | High-ratio compression for L2 cache | BSD-3 | ✅ Linked |
-| libwebp | 1.5.0 | WebP decode | BSD-3 | ✅ Linked |
-| minizip-ng | 4.0.10 | ZIP archive handling | zlib | ✅ Linked |
-| LibRaw | 0.21.2 | Camera RAW decode | LGPL-2.1 | ✅ Linked |
-| dav1d | 1.5.1 | AV1 video decode | BSD-2 | ✅ Linked |
-| libde265 | 1.0.15 | HEVC decode (HEIF) | LGPL-3 | ✅ Linked |
-| libheif | 1.19.5 | HEIF/HEIC container | LGPL-3 | ✅ Linked |
-| libjxl | 0.11.1 | JPEG XL decode | BSD-3 | ✅ Linked |
-| libavif | 1.3.0 | AVIF container | BSD-2 | ✅ Linked |
-| libarchive | 3.7.6 | Multi-format archives | BSD-2 | ✅ Linked |
-| MuPDF | 1.24.11 | PDF page rasterization | AGPL-3 | ✅ Linked |
-| tinyexr | 1.0.4 | OpenEXR decode | BSD-3 | ✅ Bundled |
-| pugixml | 1.14 | XML parsing | MIT | ✅ Linked |
-| xxhash | latest | Fast hashing for cache keys | BSD-2 | ✅ Linked |
-| nlohmann-json | latest | JSON parsing | MIT | ✅ Linked |
-| Catch2 | 3.7.1 | Unit test framework | BSL-1 | ✅ Test only |
-| Google Benchmark | 1.9.1 | Performance benchmarks | Apache-2 | ✅ Test only |
+| Library | Version | Purpose | License | Distribution | Status |
+|---|---|---|---|---|---|
+| zlib | 1.3.1 | Deflate decompression | zlib | Static | ✅ |
+| LZ4 | 1.10.0 | Fast compression for L1 cache | BSD-2 | Static | ✅ |
+| zstd | 1.5.7 | High-ratio compression for L2 cache | BSD-3 | Static | ✅ |
+| libwebp | 1.5.0 | WebP decode | BSD-3 | Static | ✅ |
+| minizip-ng | 4.0.10 | ZIP archive handling | zlib | Static | ✅ |
+| LibRaw | 0.21.2 | Camera RAW decode | **LGPL-2.1** | **→ Dynamic (dll)** | ⚠️ |
+| dav1d | 1.5.1 | AV1 video decode | BSD-2 | Static | ✅ |
+| libde265 | 1.0.15 | HEVC decode (HEIF) | **LGPL-3** | **→ Dynamic (dll)** | ⚠️ |
+| libheif | 1.19.5 | HEIF/HEIC container | LGPL-3 | **→ Dynamic (dll)** | ⚠️ |
+| libjxl | 0.11.1 | JPEG XL decode | BSD-3 | Static | ✅ |
+| libavif | 1.3.0 | AVIF container | BSD-2 | Static | ✅ |
+| libarchive | 3.7.6 | Multi-format archives | BSD-2 | Static | ✅ |
+| **MuPDF** | **1.24.11** | **PDF page rasterization** | **AGPL-3 🔴** | **Static** | **⚠️ REPLACE** |
+| tinyexr | 1.0.4 | OpenEXR decode | BSD-3 | Bundled | ✅ |
+| pugixml | 1.14 | XML parsing | MIT | Static | ✅ |
+| xxhash | latest | Fast hashing for cache keys | BSD-2 | Static | ✅ |
+| nlohmann-json | latest | JSON parsing | MIT | Static | ✅ |
+| Catch2 | 3.7.1 | Unit test framework | BSL-1 | Test only | ✅ |
+| Google Benchmark | 1.9.1 | Performance benchmarks | Apache-2 | Test only | ✅ |
 
 ### Add List (Phase-gated)
 
-| Library | Purpose | Phase | License |
+| Library | Purpose | Phase | License | Notes |
+|---|---|---|---|---|
+| libjpeg-turbo 3.1 | Replace stb for JPEG; SIMD-accelerated | 2 | BSD-3 | Static |
+| libspng 0.7 | Replace stb for PNG; ASAN-clean | 2 | BSD-2 | Static |
+| lcms2 2.16 | ICC color management | 3 | MIT | Static |
+| FreeType 2.13.3 | Font rasterization (TTF/OTF preview) | 3 | FTL | Static |
+| DirectXTex | DDS texture loading (already in vcpkg) | 3 | MIT | Static |
+
+### PDF Replace Options (ADR A37 evaluation)
+
+| Option | License | Pros | Cons |
 |---|---|---|---|
-| libjpeg-turbo 3.1 | Replace stb for JPEG; SIMD-accelerated | 2 | BSD-3 |
-| libspng 0.7 | Replace stb for PNG; ASAN-clean | 2 | BSD-2 |
-| lcms2 2.16 | ICC color management | 3 | MIT |
-| FreeType 2.13.3 | Font rasterization (TTF/OTF preview) | 3 | FTL |
-| DirectXTex | DDS texture loading (already in vcpkg) | 3 | MIT |
+| Windows.Data.Pdf (WinRT) | Built-in | Zero dependency, zero footprint, always up-to-date | Slower than MuPDF; requires WinRT interop; Windows 10+ only |
+| PDFium (Google) | Apache-2.0 | Apache-2; excellent quality; used by Chrome | Complex build (requires Python, LLVM); 10+ MB |
+| poppler 24.x | GPL-2+ | Widely used; good quality | GPL = same problem as AGPL for commercial use |
+| **Verdict** | **Windows.Data.Pdf** | **Use WinRT for Phase 2 (shell thumbnail use case)** | **PDFium if higher fidelity needed in Phase 4+** |
 
 ### Evaluate List (Research, No Commitment)
 
@@ -665,6 +772,7 @@ HRESULT IThumbnailProvider::GetThumbnail(UINT cx, HBITMAP* phbmp, WTS_ALPHATYPE*
 |---|---|---|
 | Windows Imaging Component (WIC) | Native codec passthrough for supported formats | ✅ Active |
 | Windows Media Foundation | Video keyframe extraction | ✅ Active |
+| Windows.Data.Pdf | PDF page thumbnail (replaces MuPDF) | ❌ Phase 2 |
 | GDI+ | Bitmap manipulation, fallback resize | ✅ Active |
 | DirectWrite | Font enumeration + rendering | ⚠️ Partial |
 | ETW | Structured telemetry | ✅ Active |
@@ -1295,9 +1403,37 @@ v7.0 targeted 45. Still too many. A 1-person project cannot maintain 45 document
 | A33 | Radical GPU simplification: D3D11 resize only; delete 85 stub headers | **Accepted** | 2026-05-12 |
 | A34 | Delete AI module headers; reintroduce only with real model + separate process | **Accepted** | 2026-05-12 |
 
+### New in v9.0 (ADRs A35–A43)
+
+| ID | Title | Status | Date |
+|---|---|---|---|
+| A35 | Evaluate out-of-process COM via `DllSurrogate` for decoder isolation | **Accepted — Phase 4** | 2026-05-14 |
+| A36 | Migrate LENSShell and LENSManager builds from MSBuild to CMake | **Accepted — Phase 2** | 2026-05-14 |
+| A37 | Replace MuPDF (AGPL-3) with Windows.Data.Pdf (Phase 2) / PDFium (Phase 4+) | **Accepted — Phase 2** | 2026-05-14 |
+| A38 | Dynamic-link LGPL libraries: libde265, LibRaw, libheif shipped as .dll | **Accepted — Phase 2** | 2026-05-14 |
+| A39 | Reduce version-bearing files from 21 → 5 via CMake `configure_file` | **Accepted — Phase 2** | 2026-05-14 |
+| A40 | Implement SQLite L2 cache as Phase 1 P0 (not Phase 3) | **Accepted — Phase 1** | 2026-05-14 |
+| A41 | Arm64 EC build promoted to Phase 3 P1 (from Phase 6) | **Accepted — Phase 3** | 2026-05-14 |
+| A42 | WIC codec registration alongside thumbnail provider (HEIC, AVIF, JXL, QOI) | **Accepted — Phase 5** | 2026-05-14 |
+| A43 | Full Catch2 migration: no new `TEST()` bodies after v41.0; all migrated by v42.0 | **Accepted** | 2026-05-14 |
+
+**Architecture Decision Notes:**
+
+**A35 — Out-of-Process Justification**: In-process COM DLLs loaded into Explorer's address space cause Explorer crashes when decoders crash (e.g., malformed JXL, malicious HEIF). Microsoft's `DllSurrogate=""` registry value causes Windows to automatically create/reuse a `dllhost.exe` process for COM activation. The performance cost is ~5ms IPC overhead per thumbnail request — acceptable given the stability benefit. This does NOT require changing the COM interface; only the registry registration changes. Phase 4 evaluation includes perf benchmarking to confirm the overhead is within budget.
+
+**A36 — Build System Unification Justification**: CMake supports MSVC 100% and generates proper `.vcxproj` via `cmake -G "Visual Studio 18 2026"`. The primary blocker to migration is that `LENSShell.sln` uses NuGet packages (WTL). WTL can be vendored directly (MIT license) to eliminate the NuGet dependency. Once migrated, CI can build `LENSShell.dll` and every release artifact is complete. This is the most impactful single change for CI quality.
+
+**A37 — MuPDF Replacement Justification**: AGPL-3 is incompatible with distributing ExplorerLens under any permissive license. `Windows.Data.Pdf` provides equivalent quality for the thumbnail use case (page 1 rendering at 256px) with zero licensing cost and zero added DLL footprint. PDFium is reserved for Phase 4 if higher fidelity (multi-page, rotation, links) is needed.
+
+**A38 — LGPL Dynamic Linking Justification**: LGPL-2.1 (LibRaw) and LGPL-3 (libde265, libheif) permit linking if the user can substitute their own version of the library. Static linking makes this impossible. Dynamic linking (shipping the `.dll`) satisfies LGPL requirements while maintaining the same functionality. The DLL delivery also enables users to update decoders without reinstalling ExplorerLens.
+
+**A43 — Catch2 Migration Justification**: The custom `TEST/RUN_TEST/ASSERT` framework was built before Catch2 was in the project. It lacks parameterization, data-driven tests, BDD-style sections, and IDE integration (test explorer). Catch2 provides all of these. The migration effort is ~1 sprint to write helpers that map old macros to Catch2 `TEST_CASE`. After v41.0, new tests are exclusively Catch2; existing tests migrate opportunistically.
+
 ---
 
-## 23. Decisions Reversed from v7.0
+## 23. Decisions Reversed from v7.0 and v8.0
+
+### Reversed from v7.0 (established in v8.0)
 
 | v7.0 Decision | v8.0 Reversal | Rationale |
 |---|---|---|
@@ -1314,26 +1450,52 @@ v7.0 targeted 45. Still too many. A 1-person project cannot maintain 45 document
 | 9-stage pipeline | **8 stages** | Removed redundant "Header Validation" and "Fallback" pseudo-stages |
 | `file_inode` in cache DB | **Removed** | NTFS inode unreliable across volumes |
 
+### NEW — Reversed from v8.0 (v9.0 changes)
+
+| v8.0 Decision | v9.0 Reversal | Rationale |
+|---|---|---|
+| MuPDF for PDF (AGPL-3) | **Replace with Windows.Data.Pdf or PDFium (Apache-2)** | AGPL-3 requires GPL-compatible distribution. Licensing conflict. ADR A37 |
+| Static-link libde265, LibRaw, libheif | **Dynamic-link (ship as .dll)** | LGPL compliance requires dynamic linking. ADR A38 |
+| SQLite cache deferred to Phase 3 | **Phase 1 P0** | Without persistent L2 cache every restart re-decodes. Foundation feature. ADR A40 |
+| Arm64 deferred to Phase 6 | **Phase 3 P1** | Copilot+ PCs launched; fastest-growing Windows segment. ADR A41 |
+| Two build systems (CMake + MSBuild) | **Migrate Shell + Manager to CMake (Phase 2)** | CI cannot produce LENSShell.dll today. Two systems = permanent gap. ADR A36 |
+| 21 version-bearing files (automated via script) | **Reduce to ≤5 via configure_file (Phase 2)** | Script automation doesn't eliminate the fragility of 21 manual targets. ADR A39 |
+| Custom `TEST()` as primary test framework | **Catch2 becomes primary; custom deprecated post-v41.0** | Catch2 provides parameterization, IDE integration, BDD sections. ADR A43 |
+| In-process COM (no review) | **Evaluate `DllSurrogate` out-of-process isolation (Phase 4)** | In-process decoder crash = Explorer crash. ADR A35 |
+| WIC as passthrough only | **WIC codec registration for custom formats (Phase 5)** | Enables Photos, Office, Paint.NET to use ExplorerLens codecs. ADR A42 |
+
 ---
 
 ## 24. Sprint Delivery Pipeline S301+
 
-### Phase 1 Sprints (S301–S310): Discipline Restoration
+### Phase 1 Sprints (S301–S310): Discipline Restoration + Compliance (CARRY-OVER + NEW)
 
-| Sprint | Title | Deliverable |
-|---|---|---|
-| S301 | Restore `/WX` in Engine/CMakeLists.txt | Fix all existing warnings; `/WX` enabled |
-| S302 | Reconcile test count across all docs | Single source of truth for test count |
-| S303 | Delete root `index.html`; verify `scripts/`, `tools/`, `src/` dirs | Clean workspace |
-| S304 | Archive AI module headers (45 files) | Move to `docs/archive/ai-research/` |
-| S305 | Archive unused GPU stubs (85 files) | Move to `docs/archive/gpu-research/`; keep D3D11 core |
-| S306 | Audit vcpkg.json — remove unused packages | Leaner dependency manifest |
-| S307 | Freeze contract-header creation policy | Update CONTRIBUTING.md with A32 rule |
-| S308 | Plugin ecosystem cleanup — keep V5 only | Remove V1–V4 superseded headers |
-| S309 | Enterprise contract audit — archive unimplemented | Reduce header count to compiled+tested only |
-| S310 | Update ROADMAP, README, BuildValidation.h to v40.0 | Version consistency |
+> **Note (v9.0):** These are CARRY-OVER items from v8.0 Phase 1, plus 3 new P0 items added after the ground-truth audit. **No Phase 2 work begins until all Phase 1 exit criteria are green.**
 
-### Phase 2 Preview (S311–S320): Correctness
+| Sprint | Priority | Title | Deliverable |
+|---|---|---|---|
+| S301 | P0 | Restore `/WX` in Engine/CMakeLists.txt | Fix all existing warnings; `/WX` re-enabled; zero-warnings CI green |
+| S302 | P0 | **Implement SQLite L2 cache** | `Engine/Cache/PersistentDiskCache.cpp` — minimal implementation: open/create db, store/retrieve by SHA-256 key, expire by LRU; registered in ENGINE_SOURCES |
+| S303 | P0 | **Replace MuPDF with Windows.Data.Pdf** | Remove `mupdf-1.24.11-source` from CMakeLists.txt; implement `PdfDecoder.cpp` via `Windows.Data.Pdf` WinRT API; ADR A37 compliant |
+| S304 | P0 | **LGPL dynamic-linking: libde265 + LibRaw** | Build as `.dll`; remove static link; ship DLLs with installer; ADR A38 compliant |
+| S305 | P1 | Reconcile test count across all docs | Single source of truth; test count in README, copilot-instructions.md, BuildValidation.h match |
+| S306 | P1 | Delete root `index.html`; clean `scripts/`, `tools/`, `src/` | No orphan files in workspace root |
+| S307 | P1 | Archive AI module headers (45 files) | Move to `docs/archive/ai-research/` |
+| S308 | P1 | Archive unused GPU stubs (85 files) | Move to `docs/archive/gpu-research/`; keep D3D11 core |
+| S309 | P2 | Audit vcpkg.json — remove unused packages | Leaner dependency manifest |
+| S310 | P2 | Update ROADMAP, README, BuildValidation.h to v40.0 | Version consistency; all 21 version-bearing files updated |
+
+**Phase 1 Exit Criteria (ALL must be green before Phase 2):**
+
+- [ ] CI pipeline builds cleanly with `/WX` (zero warnings, zero errors)
+- [ ] `Engine/Cache/PersistentDiskCache.cpp` exists, compiles, passes tests (basic LRU SQLite cache)
+- [ ] `PdfDecoder.cpp` uses Windows.Data.Pdf; MuPDF removed from CMakeLists.txt
+- [ ] libde265, LibRaw, libheif linked dynamically; DLLs present in `x64/Release/`
+- [ ] Test count reported in ≤ 2 places (README and BuildValidation.h); both match
+- [ ] Root `index.html` deleted; workspace root is clean
+- [ ] AI headers archived; GPU stubs archived
+
+### Phase 2 Preview (S311–S320): Correctness + CMake Unification
 
 | Sprint | Title |
 |---|---|
@@ -1341,32 +1503,41 @@ v7.0 targeted 45. Still too many. A 1-person project cannot maintain 45 document
 | S312 | `DecodeTimeout.h` — 500ms hard timeout with fallback |
 | S313 | Per-format memory budget enforcement |
 | S314 | Cancel-aware decode in COM server (`IBindStatusCallback`) |
-| S315 | OOM kill protection (`SetProcessWorkingSetSizeEx`) |
+| S315 | **Migrate LENSShell.vcxproj to CMake** (ADR A36 Phase 2) |
 | S316 | Async placeholder thumbnail (return last-cached immediately) |
 | S317 | Add libjpeg-turbo to build; replace stb JPEG paths |
 | S318 | Add libspng to build; replace stb PNG paths |
 | S319 | D3D11 device init + texture blit resize |
-| S320 | Parallel I/O readahead N=8 |
+| S320 | **Reduce version-bearing files 21 → ≤5 via configure_file** (ADR A39) |
+
+**Phase 2 Exit Criteria (ALL must be green):**
+
+- [ ] LENSShell.dll built by CMake (not MSBuild); NuGet dependency eliminated
+- [ ] CI produces complete release artifact (`LENSShell.dll` + `LENSManager.exe` + `ExplorerLensEngine.lib`)
+- [ ] `libjpeg-turbo` is primary JPEG decoder; `stb_image` only as final fallback
+- [ ] `libspng` is primary PNG decoder
+- [ ] D3D11 resize path active for all output thumbnails ≥ 256px
+- [ ] Version source-of-truth: `VERSION` → `configure_file` generates all others
 
 ---
 
-## Appendix A: v7.0 Survivor Registry
+## Appendix A: v7.0 + v8.0 Survivor Registry
 
-Decisions from v7.0 retained unchanged in v8.0:
+Decisions from prior versions retained unchanged in v9.0:
 
 - **COM CLSID** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39` — immutable
 - **Contract-header model** (A7) — retained but amended (A32: requires `.cpp` within sprint)
 - **ETW observability** (A6)
-- **SQLite persistence** (A14) — schema simplified
-- **LibRaw, MuPDF, dav1d, libheif, libjxl, libavif** — all retained
-- **Custom TEST/RUN_TEST macros** (A8) — test placement rules unchanged
+- **SQLite persistence** (A14, now A40) — promoted to Phase 1 P0; schema simplified from v7.0
+- **LibRaw, dav1d, libheif, libjxl, libavif** — all retained; LGPL items → dynamic link
+- **Custom TEST/RUN_TEST macros** (A8) — deprecated after v41.0 (ADR A43); placement rules unchanged until then
 - **Google Benchmark baseline gates** (A9)
 - **SSIM quality gate** (A16) — threshold stays at 0.95 for Phase 1–2
 - **OSS-Fuzz + ASAN** (A17, A18)
 - **CycloneDX SBOM** (A19)
 - **Rust terminated** (A24)
 - **Sprint cadence: 10 sprints/session**
-- **Zero-warnings build discipline** — NOW ENFORCED (A29)
+- **Zero-warnings build discipline** — REAFFIRMED (A29)
 
 ## Appendix B: Header Debt Metrics
 
@@ -1392,6 +1563,6 @@ This debt reduction would:
 
 ---
 
-*ROADMAP v8.0 "Vega" — ExplorerLens 39.9.0 → 50.0*
-> Archived predecessor: `docs/archive/ROADMAP_V7.md` *(removed in v39.9.0 cleanup — see docs/archive/README.md)*
+*ROADMAP v9.0 "Procyon" — ExplorerLens 39.9.0 → 50.0*
+> Archived predecessor: `docs/archive/ROADMAP_V8.md` *(v8.0 "Vega" superseded by this document)*
 *Next review: v41.0 milestone*
