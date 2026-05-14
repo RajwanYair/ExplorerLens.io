@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.9.0] — 2026-05-14 — Betelgeuse
+
+S381-S389: DXVA2 JPEG session, process isolation config, IPropertyStore EXIF adapter, UBSAN suppression profile, Chocolatey package config, shared memory IPC channel, EXIF property bag, OpenCL resize path, corpus Phase 4 expansion tracker; Phase 4 depth and safety sprint 1
+
+---
+
 ## [39.8.0] — 2026-05-14 — Betelgeuse
 
 S372-S380: ICC profile applicator, dark mode system events, per-monitor DPI config, EV signing pipeline, WinGet publish config, font preview pipeline, DLL symbol auditor, SIMD Lanczos kernel, corpus manifest builder; Phase 3 complete

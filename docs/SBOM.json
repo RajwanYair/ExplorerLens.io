@@ -17,7 +17,7 @@
       "type": "application",
       "bom-ref": "ExplorerLens-main",
       "name": "ExplorerLens",
-      "version": "39.8.0",
+      "version": "39.9.0",
       "description": "Advanced Windows Shell Extension for GPU-accelerated thumbnail generation supporting 200+ file formats",
       "licenses": [
         {
