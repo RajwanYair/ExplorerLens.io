@@ -521,9 +521,10 @@ jobs:
 
     steps:
       - name: Configure git safe.directory
+        shell: bash
         run: |
           git config --global safe.directory '*'
-          git config --system safe.directory '*' 2>&1 | Out-Null
+          git config --system safe.directory '*' 2>/dev/null || true
 
       - name: Checkout (for CHANGELOG)
         uses: actions/checkout@v4
