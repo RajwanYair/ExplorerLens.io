@@ -10,7 +10,7 @@ Each line in `history.jsonl` is a JSON object with these top-level fields:
 | Field | Type | Description |
 |-------|------|-------------|
 | `schema_version` | `"1"` | Schema version — increment when fields change |
-| `version` | `string` | ExplorerLens release version (e.g., `"38.4.0"`) |
+| `version` | `string` | ExplorerLens release version (e.g., `"39.9.0"`) |
 | `codename` | `string` | Release codename |
 | `date` | `string` | ISO 8601 date when measurement was taken |
 | `toolchain` | `string` | Compiler + flags description |

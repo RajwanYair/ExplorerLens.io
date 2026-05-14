@@ -39,7 +39,7 @@ Paste ETW trace / EngineTests benchmark / lens benchmark output here
 - **RAM:** (e.g., 32 GB)
 - **GPU:** (e.g., Intel Arc A770 / NVIDIA RTX 4090 / CPU fallback)
 - **Storage:** (e.g., NVMe SSD / HDD)
-- **ExplorerLens Version:** (e.g., v38.2.0)
+- **ExplorerLens Version:** (e.g., v39.9.0)
 
 ## Additional Context
 

@@ -40,7 +40,7 @@ Run through these checks after every documentation change:
 ### Root Site
 
 - [ ] `http://localhost:8080/index.html` loads without 404 or console errors
-- [ ] Version chip shows the current version (e.g., `38.4.0`)
+- [ ] Version chip shows the current version (e.g., `39.9.0`)
 - [ ] All navigation links reach valid targets
 
 ### Architecture SVGs (`docs/assets/`)

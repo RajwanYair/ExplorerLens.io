@@ -1,7 +1,7 @@
 {
-  "_comment": "Per-format thumbnail decode baselines — v38.5.0 (2026-04-23). Update by running Engine/Tests/benchmarks with --benchmark-out.",
+  "_comment": "Per-format thumbnail decode baselines — v39.9.0 (2026-05-14). Update by running Engine/Tests/benchmarks with --benchmark-out.",
   "_schema": "https://explorerlens.io/schemas/baselines/v1",
-  "version": "38.5.0",
+  "version": "39.9.0",
   "generated": "2026-04-23",
   "machine": { "cpu": "Intel Core i9-14900K", "ram_gb": 64, "gpu": "NVIDIA RTX 4090" },
   "sizes_tested": [256, 512],

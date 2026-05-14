@@ -10713,7 +10713,7 @@ TEST(TestS347_SlsaAttestationRecord_Validate)
 
     // MakeGitHubActionsL2 factory
     std::string sha(40u, 'a');
-    auto rec = SlsaAttestationRecord::MakeGitHubActionsL2("39.5.0", sha, "refs/tags/v39.5.0");
+    auto rec = SlsaAttestationRecord::MakeGitHubActionsL2("39.9.0", sha, "refs/tags/v39.9.0");
     ASSERT_EQ(rec.level, SlsaLevel::L2);
     ASSERT_EQ(rec.buildSource, SlsaBuildSource::GITHUB_ACTIONS);
     ASSERT(rec.attestationEnabled);
@@ -10838,17 +10838,17 @@ TEST(TestS350_WinGetManifestSchema_Factory)
     ASSERT(empty.Validate() == WinGetManifestValidationStatus::MISSING_PACKAGE_ID);
 
     // Factory with empty SHA → MISSING_INSTALLER_SHA256
-    auto m1 = WinGetManifestPackage::MakeExplorerLens("39.5.0", "https://example.com/EL.msi", "");
+    auto m1 = WinGetManifestPackage::MakeExplorerLens("39.9.0", "https://example.com/EL.msi", "");
     ASSERT(m1.Validate() == WinGetManifestValidationStatus::MISSING_INSTALLER_SHA256);
 
     // Factory with 63-char SHA → INVALID_SHA256_LENGTH
     std::string sha63(63u, 'a');
-    auto m2 = WinGetManifestPackage::MakeExplorerLens("39.5.0", "https://example.com/EL.msi", sha63);
+    auto m2 = WinGetManifestPackage::MakeExplorerLens("39.9.0", "https://example.com/EL.msi", sha63);
     ASSERT(m2.Validate() == WinGetManifestValidationStatus::INVALID_SHA256_LENGTH);
 
     // Valid factory manifest
     std::string sha64(64u, 'b');
-    auto m3 = WinGetManifestPackage::MakeExplorerLens("39.5.0", "https://example.com/EL.msi", sha64);
+    auto m3 = WinGetManifestPackage::MakeExplorerLens("39.9.0", "https://example.com/EL.msi", sha64);
     ASSERT(m3.Validate() == WinGetManifestValidationStatus::OK);
     ASSERT_EQ(m3.packageIdentifier, std::string("RajwanYair.ExplorerLens"));
     ASSERT(!m3.locale.shortDescription.empty());
@@ -11093,7 +11093,7 @@ TEST(TestS359_ChocolateyPackageSchema_Factory)
     std::wstring sha64(64u, L'a');
     auto schema = ChocolateyPackageSchema::MakeExplorerLens(
         39u, 6u, 0u,
-        L"https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.7.0/ExplorerLens-Setup-39.7.0.msi",
+        L"https://github.com/RajwanYair/ExplorerLens.io/releases/download/v39.9.0/ExplorerLens-Setup-39.9.0.msi",
         std::wstring(64u, L'a'));
 
     // ASSERT valid
@@ -11403,7 +11403,7 @@ TEST(TestS367_SlsaProvenanceBuilder_Level)
     ASSERT(!badDigest.IsValid()); // empty name and digest
 
     SlsaSubjectDigest goodDigest{};
-    goodDigest.artifactName = L"ExplorerLens-39.7.0-x64.msi";
+    goodDigest.artifactName = L"ExplorerLens-39.9.0-x64.msi";
     goodDigest.sha256Hex    = std::string(64u, 'a');
     ASSERT(goodDigest.IsValid());
 

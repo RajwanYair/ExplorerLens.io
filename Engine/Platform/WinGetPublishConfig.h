@@ -75,7 +75,7 @@ struct WinGetInstallerEntry final {
 
 struct WinGetPublishConfig final {
     const char*          packageId       = "RajwanYair.ExplorerLens";
-    const char*          version         = nullptr;  // e.g. "39.8.0"
+    const char*          version         = nullptr;  // e.g. "39.9.0"
     WinGetManifestTier   tier            = WinGetManifestTier::MULTI_FILE;
     WinGetInstallerEntry installer;
     bool                 dryRun          = false;   // validate only, don't submit PR

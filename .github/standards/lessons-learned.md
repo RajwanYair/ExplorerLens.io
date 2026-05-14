@@ -2,7 +2,7 @@
 
 > Retrospective captured from git history (v15.1.0 through v37.2.0, 380+ commits).  
 > Maintained by Copilot — update after every major sprint block.  
-> Last updated: 2026-07-18 (v37.2.0 Antares production hardening session)
+> Last updated: 2026-05-14 (v39.9.0 Betelgeuse production release session)
 
 ---
 
@@ -399,11 +399,11 @@ EngineTests_Late.cpp   — TEST(TestNewFeature_Foo) { ... }
 **Common mistake:** Putting `extern void` declarations directly in `EngineTests.cpp` (above main) instead of in `EngineTestsExterns.h`. The linker will still find them, but the file organization scheme is violated.  
 **File size as of v35.3.0:** ~233 KB — monitor; split when it approaches 500 KB.
 
-### 11.3 ROADMAP_VXX.md Creation Pattern
-**Rule:** When starting a new major-version series (X.0.0), create `docs/ROADMAP_VXX.md` in the same commit/sprint.  
-**Content:** Full sprint timeline (T1–T8+), baseline table (test count, versions), per-sprint module tables, next major-version preview.  
-**Created:** `docs/ROADMAP_V35.md` at commit `f41436c0` (v35.0.0 Vega).  
-**Templates:** Use ROADMAP_V34.md as the template; update codename series and baseline values.
+### 11.3 ROADMAP_VXX.md Creation Pattern *(Discontinued)*
+**Rule (historical):** When starting a new major-version series (X.0.0), a versioned `docs/ROADMAP_VXX.md` was created in the same commit/sprint.  
+**Status:** This pattern was **discontinued in v39.9.0 production cleanup**. All `ROADMAP_V*.md` files (V30, V34, V35, and earlier) were removed via `git rm`. The single living roadmap is now `ROADMAP.md` in the workspace root.  
+**Created:** `docs/ROADMAP_V35.md` at commit `f41436c0` (v35.0.0 Vega) — *file subsequently removed*.  
+**Archive note:** See `docs/archive/README.md` for the list of removed roadmap files.
 
 ### 11.4 Token Budget / Session Continuation Pattern
 **Issue:** Long sprint deliveries (5 headers + 5 CPPs + test wiring + test bodies) may exceed the AI assistant token budget mid-sprint.  

@@ -125,7 +125,7 @@ struct WinGetDefaultLocale final {
 struct WinGetManifestPackage final {
     WinGetManifestVersion schemaVersion = WinGetManifestVersion::V1_4;
     std::string packageIdentifier{};              ///< e.g. "RajwanYair.ExplorerLens"
-    std::string packageVersion{};                 ///< e.g. "39.5.0"
+    std::string packageVersion{};                 ///< e.g. "39.9.0"
     std::vector<WinGetInstallerEntry> installers{};
     WinGetDefaultLocale locale{};
 

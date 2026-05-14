@@ -1,6 +1,6 @@
 # docs/assets/ — SVG Diagrams
 
-## Theme Compatibility (Audited v38.3.0)
+## Theme Compatibility (Audited v39.9.0)
 
 All 13 SVGs use **opaque dark backgrounds** (#0d1117 / gradient) with light text.
 They render correctly on both GitHub light and dark themes because the background

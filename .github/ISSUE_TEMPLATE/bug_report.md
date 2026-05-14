@@ -24,7 +24,7 @@ What actually happened instead.
 ## System Information
 - **OS:** Windows 11 [Version]
 - **GPU:** [e.g., Intel Arc A770, NVIDIA RTX 4090]
-- **ExplorerLens Version:** [e.g., v38.2.0]
+- **ExplorerLens Version:** [e.g., v39.9.0]
 - **Build:** x64 Release
 - **GPU Acceleration:** [D3D11 / D3D12 / CPU fallback]
 

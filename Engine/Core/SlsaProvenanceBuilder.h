@@ -14,8 +14,8 @@
 //
 // Usage:
 //   auto builder = SlsaProvenanceBuilder::ForGitHubActions();
-//   builder.SetSubject(L"ExplorerLens-39.7.0-x64.msi", sha256hex);
-//   builder.SetVersion(L"39.7.0");
+//   builder.SetSubject(L"ExplorerLens-39.9.0-x64.msi", sha256hex);
+//   builder.SetVersion(L"39.9.0");
 //   std::string json = builder.Build();
 
 #ifndef EXPLORERLENS_ENGINE_SLSAPROVENANCEBUILDER_H
@@ -41,7 +41,7 @@ enum class SlsaProvenanceLevel : std::uint8_t {
 // SlsaSubjectDigest — artifact subject with its content digest
 // ---------------------------------------------------------------------------
 struct SlsaSubjectDigest {
-    std::wstring  artifactName;   ///< e.g. L"ExplorerLens-39.7.0-x64.msi"
+    std::wstring  artifactName;   ///< e.g. L"ExplorerLens-39.9.0-x64.msi"
     std::string   sha256Hex;      ///< 64-character lower-case hex SHA-256
     std::uint64_t sizeBytes = 0u; ///< Artifact size (0 = unknown)
 
@@ -56,10 +56,10 @@ struct SlsaSubjectDigest {
 struct SlsaBuilderMetadata {
     std::string builderId;         ///< e.g. "https://github.com/actions/runner/..."
     std::string builderVersion;    ///< Runner version string
-    std::string workflowRef;       ///< e.g. "RajwanYair/ExplorerLens.io/.github/workflows/release.yml@refs/tags/v39.7.0"
+    std::string workflowRef;       ///< e.g. "RajwanYair/ExplorerLens.io/.github/workflows/release.yml@refs/tags/v39.9.0"
     std::string runId;             ///< GitHub Actions run ID
     std::string repositoryUri;     ///< "https://github.com/RajwanYair/ExplorerLens.io"
-    std::string refName;           ///< e.g. "refs/tags/v39.7.0"
+    std::string refName;           ///< e.g. "refs/tags/v39.9.0"
     std::string sha1Commit;        ///< 40-character git commit SHA
 
     [[nodiscard]] bool IsValid() const noexcept {

@@ -4,7 +4,7 @@
 > [`docs/architecture/`](docs/architecture/README.md).
 > Strategic direction lives in [`ROADMAP.md`](ROADMAP.md).
 
-**Version:** 38.3.0 "Betelgeuse" · **Language:** C++20 (MSVC v145) · **Primary artifact:** `LENSShell.dll` (Windows Shell Extension, COM `IThumbnailProvider`)
+**Version:** 39.9.0 "Betelgeuse" · **Language:** C++20 (MSVC v145) · **Primary artifact:** `LENSShell.dll` (Windows Shell Extension, COM `IThumbnailProvider`)
 
 ---
 

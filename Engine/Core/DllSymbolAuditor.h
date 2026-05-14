@@ -68,7 +68,7 @@ struct DllSizeBudget final {
     }
 
     static constexpr DllSizeBudget CurrentBaseline() noexcept {
-        return DllSizeBudget{ 2940, 100, 2700, false };  // v39.7.0 actual size
+        return DllSizeBudget{ 2940, 100, 2700, false };  // v39.9.0 actual size
     }
 
     static constexpr DllSizeBudget Strict() noexcept {
@@ -164,7 +164,7 @@ inline DllAuditReport DllSymbolAuditor::Audit(const wchar_t* dllPath) noexcept {
 #else
     if (!dllPath) { r.status = DllAuditStatus::FILE_NOT_FOUND; return r; }
     // Stub: real impl uses GetFileSize + DbgHelp or DUMPBIN
-    r.fileSizeKb       = 2940;  // v39.7.0 baseline
+    r.fileSizeKb       = 2940;  // v39.9.0 baseline
     r.exportedSymbols  = 4;     // COM entries only
     r.comEntrySymbols  = 4;
     r.sizeWithinBudget = r.fileSizeKb <= m_config.budget.maxSizeKb;
@@ -194,7 +194,7 @@ inline DllAuditStatus DllSymbolAuditor::CheckSizeBudget(
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 static constexpr uint32_t kDllBudgetPhase3Kb           = 2500u;  // Phase 3 target
-static constexpr uint32_t kDllBudgetCurrentKb          = 2940u;  // v39.7.0 actual
+static constexpr uint32_t kDllBudgetCurrentKb          = 2940u;  // v39.9.0 actual
 static constexpr uint32_t kDllBudgetMaxCOMExports       = 4u;    // COM entries only
 static constexpr uint32_t kDllBudgetWarnKb             = 2200u;
 

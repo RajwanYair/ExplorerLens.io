@@ -82,10 +82,10 @@ struct SlsaAttestationRecord final {
     /// Git commit SHA-1 (40 hex characters) or SHA-256 for modern repos.
     std::string commitSha{};
 
-    /// Ref / tag at build time — e.g. "refs/tags/v39.5.0"
+    /// Ref / tag at build time — e.g. "refs/tags/v39.9.0"
     std::string ref{};
 
-    /// Product version string — e.g. "39.5.0"
+    /// Product version string — e.g. "39.9.0"
     std::string version{};
 
     /// Workflow / job name — e.g. "build-and-release"

@@ -29,10 +29,10 @@
 namespace ExplorerLens::Tests::Version {
 
 // Current build constants (updated by Bump-Version.ps1)
-static constexpr int    MAJOR          = 38;
-static constexpr int    MINOR          = 8;
+static constexpr int    MAJOR          = 39;
+static constexpr int    MINOR          = 9;
 static constexpr int    PATCH          = 0;
-static constexpr const char* VERSION_STRING = "38.8.0";
+static constexpr const char* VERSION_STRING = "39.9.0";
 static constexpr const char* CODENAME       = "Betelgeuse";
 
 // Limits
@@ -41,8 +41,8 @@ static constexpr int MAX_MINOR = 9999;
 static constexpr int MAX_PATCH = 9999;
 
 // Minimum test count (from §10 — must never regress below Phase 1 baseline)
-static constexpr int MIN_TEST_COUNT  = 4978;
-static constexpr int DECLARED_TESTS  = 4978;
+static constexpr int MIN_TEST_COUNT  = 5108;
+static constexpr int DECLARED_TESTS  = 5108;
 
 // Decoder count (from §7)
 static constexpr int DECODER_COUNT       = 25;
@@ -250,9 +250,9 @@ TEST_CASE("TestCount — DECLARED_TESTS >= Phase 1 baseline MIN_TEST_COUNT",
     REQUIRE(DECLARED_TESTS >= MIN_TEST_COUNT);
 }
 
-TEST_CASE("TestCount — MIN_TEST_COUNT is >= 4978 (v38.8.0 baseline)",
+TEST_CASE("TestCount — MIN_TEST_COUNT is >= 5108 (v39.9.0 baseline)",
           "[version][testcount]") {
-    REQUIRE(MIN_TEST_COUNT >= 4978);
+    REQUIRE(MIN_TEST_COUNT >= 5108);
 }
 
 // ===========================================================================
@@ -293,7 +293,7 @@ TEST_CASE("ParseSemVer — parses valid version strings",
           "[version][parser]") {
     int ma{}, mi{}, pa{};
     REQUIRE(ParseSemVer("1.0.0",   ma, mi, pa)); CHECK(ma==1); CHECK(mi==0); CHECK(pa==0);
-    REQUIRE(ParseSemVer("38.8.0",  ma, mi, pa)); CHECK(ma==38); CHECK(mi==8); CHECK(pa==0);
+    REQUIRE(ParseSemVer("39.9.0",  ma, mi, pa)); CHECK(ma==39); CHECK(mi==9); CHECK(pa==0);
     REQUIRE(ParseSemVer("0.0.1",   ma, mi, pa)); CHECK(ma==0); CHECK(mi==0); CHECK(pa==1);
     REQUIRE(ParseSemVer("100.200.300", ma, mi, pa)); CHECK(ma==100); CHECK(mi==200); CHECK(pa==300);
 }

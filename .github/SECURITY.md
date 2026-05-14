@@ -11,7 +11,7 @@ We provide security patches and updates for the following release lines:
 | 36.x    | :white_check_mark: Security fixes only |
 | < 36.0  | :x: End of Life |
 
-> We strongly recommend running the latest release (v38.2.0 "Betelgeuse").
+> We strongly recommend running the latest release (v39.9.0 "Betelgeuse").
 > Patch releases are issued within 7 days for critical/high CVEs.
 
 ## Reporting a Vulnerability

@@ -1,7 +1,7 @@
 # AI Tooling Capabilities & Integration Matrix
 
 **Last Updated:** 23 April 2026  
-**Version:** v39.0.0 "Betelgeuse" (post S211–S218)  
+**Version:** v39.9.0 "Betelgeuse" (post S381–S389)  
 **Scope:** Repository-local AI instructions, prompts, agents, skills, MCP server usage, and workflow automation guidance
 
 ---
@@ -238,7 +238,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 3. Workflow guidance belongs in `.github/instructions/cicd.instructions.md`; workflow inventory belongs here.
 4. When adding a workflow, add both the YAML and a one-line purpose entry in this file.
 
-### Workflow Compliance Status (Audited v38.7.0 — post S188)
+### Workflow Compliance Status (Audited v39.9.0 — post S381)
 
 | Check | Status |
 |-------|--------|
@@ -269,7 +269,7 @@ See `.github/instructions/mcp-servers.instructions.md` for the full PAT scope ta
 
 ADRs live in `docs/adr/` and are indexed in `docs/adr/README.md`.
 
-### Active ADRs (v38.6.0)
+### Active ADRs (v39.9.0)
 
 | ADR | File | Status | Topic | Version |
 |-----|------|--------|-------|---------|

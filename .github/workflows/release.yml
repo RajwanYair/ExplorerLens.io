@@ -541,8 +541,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: binaries-${{ needs.build.outputs.version }}
-          path: dist/
+          path: dist/binaries-staging/
         continue-on-error: true
+
+      - name: Flatten binaries into dist/
+        shell: bash
+        run: |
+          # upload-artifact@v4 preserves subdirectory structure (release-staging/)
+          # Find all binary files anywhere under dist/binaries-staging/ and copy flat to dist/
+          find dist/binaries-staging/ -maxdepth 3 -type f \( -name "*.dll" -o -name "*.exe" \) \
+            -exec cp -n {} dist/ \; 2>/dev/null || true
+          ls -lh dist/*.dll dist/*.exe 2>/dev/null | head -20 || true
 
       - name: Extract CHANGELOG section for this version
         id: changelog

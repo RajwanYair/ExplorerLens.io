@@ -88,7 +88,7 @@ Every markdown file belongs to one tier:
 
 - ROADMAP.md §16 (Phase Plan) checkboxes: mark `[x]` when features are confirmed working
 - ROADMAP.md §18 (Decision Log): append-only; never modify existing entries
-- Old roadmap files (`ROADMAP_V30.md`, `V34.md`, `V35.md`, and earlier) were removed in v39.9.0 production cleanup. See `docs/archive/README.md`.ived in `docs/archive/` — do not reference or update them
+- Old roadmap files (`ROADMAP_V30.md`, `V34.md`, `V35.md`, and earlier) were removed in v39.9.0 production cleanup. See `docs/archive/README.md` — do not reference or update them
 
 ## Output Format
 
