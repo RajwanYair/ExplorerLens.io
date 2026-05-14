@@ -1,5 +1,5 @@
 # ExplorerLens User Guide
-**Version:** 39.7.0 "Betelgeuse"
+**Version:** 39.8.0 "Betelgeuse"
 **Last Updated:** July 2026
 
 ## Table of Contents
@@ -29,7 +29,7 @@
 2. **Run the installer** as Administrator:
  ```powershell
  # Right-click installer → "Run as Administrator"
- .\ExplorerLens-39.7.0-x64.msi
+ .\ExplorerLens-39.8.0-x64.msi
  ```
 
 3. **Follow the wizard**:
@@ -135,7 +135,7 @@ The modern Manager provides a full-featured GUI organized into pages:
 - **Export** — Diagnostic bundle (.zip), copy system info, open log folder
 
 ### About
-- **Version** — v39.7.0 (Betelgeuse) with build info
+- **Version** — v39.8.0 (Betelgeuse) with build info
 - **Quick stats** — 200+ formats, 25+ decoders, <17ms per thumbnail
 - **System info** — GPU, Windows version, COM CLSID, test pass rate
 - **Links** — GitHub, docs, bug reports, changelog

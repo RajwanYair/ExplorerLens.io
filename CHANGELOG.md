@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [39.8.0] — 2026-05-14 — Betelgeuse
+
+S372-S380: ICC profile applicator, dark mode system events, per-monitor DPI config, EV signing pipeline, WinGet publish config, font preview pipeline, DLL symbol auditor, SIMD Lanczos kernel, corpus manifest builder; Phase 3 complete
+
+---
+
 ## [39.7.0] — 2026-05-13 — Betelgeuse
 
 Phase 3/4 boundary: PE code signing validator, MiniDump crash capture, SEH decode fault barrier, DXVA2 surface pool, EXIF IPropertyStore provider (H46), out-of-process decoder proxy (H36), UBSAN CI gate, Chocolatey manifest schema, thumbnail HBITMAP serializer
