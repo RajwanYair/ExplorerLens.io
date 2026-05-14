@@ -2560,7 +2560,10 @@ if(ENGINE_SOURCES)
             target_link_libraries(ExplorerLensEngine PUBLIC jxl jxl_cms jxl_threads brotlicommon brotlidec hwy)
         endif()
         if(HAS_LIBRAW)
-            target_link_libraries(ExplorerLensEngine PUBLIC libraw_static)
+            # ADR A38: LibRaw is LGPL-2.1 — must link as shared (import lib) not static
+            # The .dll must ship alongside LENSShell.dll for LGPL compliance
+            target_link_libraries(ExplorerLensEngine PUBLIC libraw)
+            message(STATUS "LibRaw: linking as SHARED import lib (LGPL-2.1 compliance — ADR A38)")
         endif()
         if(HAS_LIBHEIF)
             if(NOT EXISTS "${LIBHEIF_LIBRARY_PATH}")
@@ -2569,7 +2572,10 @@ if(ENGINE_SOURCES)
             if(NOT EXISTS "${LIBDE265_LIBRARY_PATH}")
                 message(FATAL_ERROR "HAS_LIBHEIF=ON but libde265 library was not found. Expected at ${LIBDE265_LIBRARY_PATH}")
             endif()
+            # ADR A38: libheif (LGPL-3) and libde265 (LGPL-3) must link as shared for compliance
+            # Import libs: heif.lib / de265.lib — corresponding .dll must be distributed
             target_link_libraries(ExplorerLensEngine PUBLIC "${LIBHEIF_LIBRARY_PATH}" "${LIBDE265_LIBRARY_PATH}")
+            message(STATUS "libheif + libde265: linking as SHARED import libs (LGPL-3 compliance — ADR A38)")
         endif()
         if(HAS_LIBAVIF)
             target_link_libraries(ExplorerLensEngine PUBLIC avif dav1d)
@@ -2680,6 +2686,43 @@ install(TARGETS ExplorerLensEngine
 install(FILES ${ENGINE_HEADERS}
     DESTINATION include/ExplorerLens/Engine
 )
+
+# ADR A38: LGPL compliance — install LGPL shared libraries (.dll) alongside the engine
+# These DLLs must be distributed to allow users to relink with modified LGPL library versions.
+if(HAS_LIBRAW)
+    set(LIBRAW_DLL_SEARCH_DIRS
+        "${CMAKE_CURRENT_SOURCE_DIR}/../external/camera-libs/LibRaw-0.21.2/install/bin"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release"
+    )
+    foreach(_dir IN LISTS LIBRAW_DLL_SEARCH_DIRS)
+        if(EXISTS "${_dir}/libraw.dll")
+            install(FILES "${_dir}/libraw.dll" DESTINATION bin)
+            break()
+        endif()
+    endforeach()
+endif()
+if(HAS_LIBHEIF)
+    set(LIBHEIF_DLL_SEARCH_DIRS
+        "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/install/bin"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release"
+    )
+    foreach(_dir IN LISTS LIBHEIF_DLL_SEARCH_DIRS)
+        if(EXISTS "${_dir}/heif.dll")
+            install(FILES "${_dir}/heif.dll" DESTINATION bin)
+            break()
+        endif()
+    endforeach()
+    set(LIBDE265_DLL_SEARCH_DIRS
+        "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libde265-1.0.15/install/bin"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release"
+    )
+    foreach(_dir IN LISTS LIBDE265_DLL_SEARCH_DIRS)
+        if(EXISTS "${_dir}/de265.dll")
+            install(FILES "${_dir}/de265.dll" DESTINATION bin)
+            break()
+        endif()
+    endforeach()
+endif()
 
 #==============================================================================
 # Package Configuration (Commented out for now - not needed for development)
