@@ -50,7 +50,7 @@ struct BuildInfo
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 4664;
+    static constexpr int UnitTestCount = 4877; // S305: reconciled from actual RUN_TEST() count
     static constexpr int BenchmarkSuites = 5;
 };
 

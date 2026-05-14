@@ -1,4 +1,4 @@
-# ExplorerLens — Copilot Instructions
+﻿# ExplorerLens — Copilot Instructions
 
 > **Scoped instructions** for C++, build, CI, release, security, and testing live in
 > `.github/instructions/*.instructions.md`. Read those files before making changes in their domain.
@@ -19,7 +19,7 @@ GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
 ## Architecture
 
-```
+```text
 LENSShell.dll (2940 KB) — COM Shell Extension (IThumbnailProvider)
 LENSManager.exe (400 KB) — GUI Configuration Utility
 ExplorerLensEngine.lib — Core decode + render pipeline
@@ -30,7 +30,7 @@ ExplorerLensEngine.lib — Core decode + render pipeline
 ExplorerLens is configured for the current 2026 GitHub Copilot and VS Code agent workflow surface.
 
 | Asset | Location | Role |
-|-------|----------|------|
+| ------- | ---------- | ------ |
 | Repository rules | `.github/copilot-instructions.md` | Primary project contract for agents and Copilot |
 | Scoped instructions | `.github/instructions/*.instructions.md` | Pattern-specific rules for CI, tests, versions, size policy, and workspace behavior |
 | Custom agents | `.github/agents/*.agent.md` | 5 repo-specialized agents (ExplorerLens, Docs, Release, TestCorpus, CI-Ops) + Explore |
@@ -97,7 +97,7 @@ ctest --test-dir build -C Release --output-on-failure
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~5108 unit tests, 5 benchmarks (v39.9.0 baseline)
+- **Test count:** ~4877 unit tests, 5 benchmarks (v39.9.0 baseline, S305 reconciled)
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -135,7 +135,7 @@ See `.github/standards/lessons-learned.md` for the full engineering retrospectiv
 ## Scoped Instructions Index
 
 | Domain | File | applyTo |
-|--------|------|---------|
+| -------- | ------ | --------- |
 | C++ coding | `.github/instructions/cpp-coding.instructions.md` | `**/*.h, **/*.cpp` |
 | Build system | `.github/instructions/build.instructions.md` | `**/CMakeLists.txt, **/build-scripts/**` |
 | CI/CD | `.github/instructions/cicd.instructions.md` | `**/*.yml, **/*.yaml` |

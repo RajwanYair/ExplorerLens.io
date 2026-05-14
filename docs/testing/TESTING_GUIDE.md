@@ -1,8 +1,8 @@
-# Testing Guide — ExplorerLens v39.9.0
+﻿# Testing Guide — ExplorerLens v39.9.0
 
-**Version:** 39.9.0 "Betelgeuse" 
-**Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros) 
-**Test Count:** 5108 unit tests + 5 benchmarks 
+**Version:** 39.9.0 "Betelgeuse"
+**Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros)
+**Test Count:** 4877 unit tests + 5 benchmarks
 **Pass Rate:** 100%
 
 ---
@@ -25,7 +25,7 @@ ctest --test-dir build -C Release --output-on-failure
 ## Test Suite Overview
 
 | Test Suite | Tests | Coverage |
-|-----------|-------|----------|
+| ----------- | ------- | ---------- |
 | ArchiveDecoder | 12 | ZIP, RAR, 7z, TAR, CBZ/CBR decode |
 | ImageDecoder | 15 | JPEG, PNG, BMP, GIF, TIFF |
 | WebPDecoder | 6 | WebP lossy/lossless |
@@ -57,7 +57,7 @@ All suites: **✅ Pass**
 ## Benchmarks
 
 | Benchmark | Target | Actual | Status |
-|-----------|--------|--------|--------|
+| ----------- | -------- | -------- | -------- |
 | Single Thumbnail | <20ms | 17ms | ✅ |
 | Batch Throughput | >200 img/sec | 235 img/sec | ✅ |
 | Cache Hit | <5ms | <5ms | ✅ |
@@ -69,7 +69,7 @@ All suites: **✅ Pass**
 ## Format Coverage
 
 | Category | Formats Tested | Decoder |
-|----------|---------------|---------|
+| ---------- | --------------- | --------- |
 | Archives | ZIP, RAR, 7z, TAR, GZ, BZ2, XZ, ZST, LZMA | ArchiveDecoder |
 | Comics | CBZ, CBR, CB7, CBT | ArchiveDecoder |
 | Standard Images | JPEG, PNG, BMP, GIF, TIFF, ICO | ImageDecoder |
@@ -89,7 +89,7 @@ All suites: **✅ Pass**
 ## Platform Compatibility
 
 | OS | Architecture | GPU | Status |
-|----|-------------|-----|--------|
+| ---- | ------------- | ----- | -------- |
 | Windows 11 24H2 | x64 | D3D12 | ✅ Primary |
 | Windows 11 23H2 | x64 | D3D11 | ✅ Tested |
 | Windows 10 22H2 | x64 | D3D11 | ✅ Tested |
@@ -100,7 +100,7 @@ All suites: **✅ Pass**
 ## Build Configurations
 
 | Configuration | Generator | Result | Time |
-|--------------|-----------|--------|------|
+| -------------- | ----------- | -------- | ------ |
 | Release x64 | Ninja | ✅ 0 errors, 0 warnings | ~55s |
 | Release x64 | MSBuild | ✅ 0 errors, 0 warnings | ~75s |
 | Debug x64 | Ninja | ✅ 0 errors | ~45s |
@@ -131,16 +131,17 @@ RUN_TEST(MyNewFeatureTest);
 ```
 
 **Registration requirements:**
+
 1. New test source files must be registered in `Engine/Tests/CMakeLists.txt`
-2. New headers must be registered in `Engine/CMakeLists.txt` ENGINE_HEADERS
-3. Tests use `g_testsRun`, `g_testsPassed`, `g_testsFailed` counters
+1. New headers must be registered in `Engine/CMakeLists.txt` ENGINE_HEADERS
+1. Tests use `g_testsRun`, `g_testsPassed`, `g_testsFailed` counters
 
 ---
 
 ## Test Data
 
 | Location | Contents |
-|----------|----------|
+| ---------- | ---------- |
 | `tests/test-images/` | JPEG, PNG, WebP, AVIF test images |
 | `test-archives/` | ZIP, CBZ, TAR test archives |
 | `data/corpus/` | Extended test corpus |
@@ -150,7 +151,7 @@ RUN_TEST(MyNewFeatureTest);
 ## Performance Thresholds
 
 | Metric | Pass | Warning | Fail |
-|--------|------|---------|------|
+| -------- | ------ | --------- | ------ |
 | Image decode (256px) | <100ms | 100–200ms | >200ms |
 | Archive extract | <200ms | 200–500ms | >500ms |
 | GPU init | <50ms | 50–100ms | >100ms |
@@ -168,4 +169,4 @@ RUN_TEST(MyNewFeatureTest);
 
 ---
 
-*Consolidates TESTING_GUIDE.md, TEST_VALIDATION_CHECKLIST.md, and INTEGRATION_TEST_MATRIX.md.*
+_Consolidates TESTING_GUIDE.md, TEST_VALIDATION_CHECKLIST.md, and INTEGRATION_TEST_MATRIX.md._

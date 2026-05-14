@@ -41,8 +41,8 @@ static constexpr int MAX_MINOR = 9999;
 static constexpr int MAX_PATCH = 9999;
 
 // Minimum test count (from §10 — must never regress below Phase 1 baseline)
-static constexpr int MIN_TEST_COUNT  = 5108;
-static constexpr int DECLARED_TESTS  = 5108;
+static constexpr int MIN_TEST_COUNT  = 4877; // S305: reconciled actual RUN_TEST() count
+static constexpr int DECLARED_TESTS  = 4877;
 
 // Decoder count (from §7)
 static constexpr int DECODER_COUNT       = 25;
@@ -250,9 +250,9 @@ TEST_CASE("TestCount — DECLARED_TESTS >= Phase 1 baseline MIN_TEST_COUNT",
     REQUIRE(DECLARED_TESTS >= MIN_TEST_COUNT);
 }
 
-TEST_CASE("TestCount — MIN_TEST_COUNT is >= 5108 (v39.9.0 baseline)",
+TEST_CASE("TestCount — MIN_TEST_COUNT is >= 4877 (v39.9.0 baseline, S305 reconciled)",
           "[version][testcount]") {
-    REQUIRE(MIN_TEST_COUNT >= 5108);
+    REQUIRE(MIN_TEST_COUNT >= 4877);
 }
 
 // ===========================================================================

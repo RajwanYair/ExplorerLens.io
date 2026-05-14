@@ -1,12 +1,15 @@
-# ExplorerLens.io — High-Performance Thumbnail Generator
+﻿# ExplorerLens.io — High-Performance Thumbnail Generator
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg" alt="ExplorerLens.io — High-Performance Windows Shell Extension" width="960"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg"
+  alt="ExplorerLens.io — High-Performance Windows Shell Extension" width="960"/>
 </p>
 
 ## Windows Shell extension for 200+ file formats
 
-ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **multi-threaded processing** with GPU acceleration planned for Phase 2. The project root directory is `ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
+ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using
+**multi-threaded processing** with GPU acceleration planned for Phase 2. The project root directory is
+`ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
 
 [![Build](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml)
 [![CI Matrix](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/ci-matrix.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/ci-matrix.yml)
@@ -21,12 +24,12 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![C++23](https://img.shields.io/badge/C%2B%2B-23-orange)
 ![MSVC](https://img.shields.io/badge/MSVC-v145%20%2819.50%29-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-5108%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-4877%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 ![Roadmap](https://img.shields.io/badge/Roadmap-Phase%201%20Foundation-informational)
 
 | | |
-|---|---|
+| --- | --- |
 | **Type** | Windows Shell Extension (`IThumbnailProvider` COM in-process DLL) |
 | **GPU** | CPU decode with GDI+ fallback · DirectX 11 GPU acceleration planned (Phase 2) |
 | **Platform** | **Windows 10 1809+ / Windows 11 (x64)** · macOS/Linux: planned Phase 5 |
@@ -34,7 +37,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 | **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
 | **Language** | C++23 · MSVC v145 · Visual Studio 18 2026 BuildTools |
 | **Build** | CMake 4.3 · Ninja · vcpkg / local external libs |
-| **Tests** | 5,108 unit tests · 5 benchmarks · 100% pass rate |
+| **Tests** | 4,877 unit tests · 5 benchmarks · 100% pass rate |
 | **Install** | One-click MSI **or** `winget install ExplorerLens.ExplorerLens` **or** `regsvr32 LENSShell.dll` |
 
 <!--
@@ -52,14 +55,33 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
                 iithumbnailprovider com server dll regsvr32 clsid file preview
                 image thumbnail generator windows 11 thumbnail provider c++ gpu
 -->
-<!-- SEO keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d gltf stl cpp20 msvc wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11 shell namespace extension com server inprocess server regsvr32 clsid shell handler preview handler extract image iextractimage ipersistfile ipropertystore windows imaging component wic bitmap thumbnail lru cache thumbnail cache simd avx2 sse4 gpu decode nvdec quicksync amf d3d11 d3d12 vulkan compute hlsl shader gpu accelerated rendering windows registry hkcr progid file association photoshop psd svg openexr radiance hdr directx texture dds ktx ktx2 farbfeld qoi netpbm ppm tga targa jpeg2000 openjpeg comic book reader cbz cbr cb7 cbt manga reader ebook reader epub mobi kindle azw archive viewer zip rar 7zip tar xz bzip2 lzma zstd lz4 font preview ttf otf 3d model viewer gltf glb obj stl dicom medical image geospatial fits astronomical image video thumbnail mp4 mkv avi webm audio waveform mp3 flac camera raw cr2 nef arw dng sony canon nikon fujifilm olympus hasselblad phase one leica windows 10 windows 11 explorer thumbnail handler shell extension c++ 20 visual studio 2026 msvc v145 cmake ninja gpu render pipeline zero copy memory management -->
+<!-- SEO keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan
+     gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d
+     gltf stl cpp20 msvc wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11
+     shell namespace extension com server inprocess server regsvr32 clsid shell handler preview handler extract image
+     iextractimage ipersistfile ipropertystore windows imaging component wic bitmap thumbnail lru cache thumbnail
+     cache simd avx2 sse4 gpu decode nvdec quicksync amf d3d11 d3d12 vulkan compute hlsl shader gpu accelerated
+     rendering windows registry hkcr progid file association photoshop psd svg openexr radiance hdr directx texture
+     dds ktx ktx2 farbfeld qoi netpbm ppm tga targa jpeg2000 openjpeg comic book reader cbz cbr cb7 cbt manga reader
+     ebook reader epub mobi kindle azw archive viewer zip rar 7zip tar xz bzip2 lzma zstd lz4 font preview ttf otf 3d
+     model viewer gltf glb obj stl dicom medical image geospatial fits astronomical image video thumbnail mp4 mkv avi
+     webm audio waveform mp3 flac camera raw cr2 nef arw dng sony canon nikon fujifilm olympus hasselblad phase one
+     leica windows 10 windows 11 explorer thumbnail handler shell extension c++ 20 visual studio 2026 msvc v145 cmake
+     ninja gpu render pipeline zero copy memory management -->
 
 <details>
 <summary><b>🏷️ GitHub Topics</b> (live on this repo)</summary>
 
-`windows-shell-extension` &nbsp; `thumbnail-provider` &nbsp; `ithumbnailprovider` &nbsp; `windows-explorer-extension` &nbsp; `file-preview` &nbsp; `gpu-acceleration` &nbsp; `directx` &nbsp; `cpp20` &nbsp; `heic` &nbsp; `avif` &nbsp; `jpeg-xl` &nbsp; `raw-image` &nbsp; `webp` &nbsp; `windows-11` &nbsp; `comic-book` &nbsp; `image-decoder` &nbsp; `thumbnail-cache` &nbsp; `com-server` &nbsp; `pdf-viewer` &nbsp; `msvc`
+`windows-shell-extension` &nbsp; `thumbnail-provider` &nbsp; `ithumbnailprovider` &nbsp; `windows-explorer-extension`
+&nbsp; `file-preview` &nbsp; `gpu-acceleration` &nbsp; `directx` &nbsp; `cpp20` &nbsp; `heic` &nbsp; `avif` &nbsp;
+`jpeg-xl` &nbsp; `raw-image` &nbsp; `webp` &nbsp; `windows-11` &nbsp; `comic-book` &nbsp; `image-decoder` &nbsp;
+`thumbnail-cache` &nbsp; `com-server` &nbsp; `pdf-viewer` &nbsp; `msvc`
 
-**More keyword tags for discoverability:** `ithumbnailprovider` · `iextractimage` · `com-dll` · `directx11` · `directx12` · `vulkan-compute` · `hlsl` · `libraw` · `libheif` · `libjxl` · `libavif` · `mupdf` · `libwebp` · `dav1d` · `cbz-reader` · `cbr-reader` · `manga-viewer` · `epub-reader` · `archive-viewer` · `3d-model-viewer` · `gltf` · `stl-viewer` · `dicom` · `openexr` · `hdr` · `font-preview` · `video-thumbnail` · `audio-waveform` · `wic` · `simd` · `avx2` · `zero-copy` · `lru-cache` · `windows-registry` · `regsvr32` · `shell-handler`
+**More keyword tags for discoverability:** `ithumbnailprovider` · `iextractimage` · `com-dll` · `directx11` ·
+`directx12` · `vulkan-compute` · `hlsl` · `libraw` · `libheif` · `libjxl` · `libavif` · `mupdf` · `libwebp` · `dav1d` ·
+`cbz-reader` · `cbr-reader` · `manga-viewer` · `epub-reader` · `archive-viewer` · `3d-model-viewer` · `gltf` ·
+`stl-viewer` · `dicom` · `openexr` · `hdr` · `font-preview` · `video-thumbnail` · `audio-waveform` · `wic` · `simd` ·
+`avx2` · `zero-copy` · `lru-cache` · `windows-registry` · `regsvr32` · `shell-handler`
 
 </details>
 
@@ -98,20 +120,26 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ### Supported Formats (200+ file extensions via 25 specialized decoders)
 
 #### Core Image Formats (✅ Fully Supported)
+
 - **Standard:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.tif`
 - **Modern:** `.webp` (WebP), `.avif` (AV1 Image), `.jxl` (JPEG XL) ✅
 - **Mobile:** `.heif`, `.heic`, `.hif`, `.avci`, `.avcs` (Apple HEIC/HEIF) ✅
 - **Implementation:** JXL via libjxl 0.11.1 | HEIF via libheif 1.19.5 (with WIC fallback on Windows 11)
 
 #### Archives & Comic Books (✅ Fully Supported)
+
 - **Comic Books:** `.cbz`, `.cbr`, `.cb7`, `.cbt`
 - **E-Books:** `.epub`, `.mobi`, `.azw`, `.azw3`, `.fb2`
 - **Archives:** `.zip`, `.rar`, `.7z`, `.tar`, `.gz`, `.bz2`, `.xz`
 
 #### Professional Formats (✅ RAW Photos & Modern Formats)
-- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f` and 100+ more camera formats (✅ LibRaw 0.21.3)
-  - **Features:** Embedded JPEG thumbnail extraction (< 10ms), full RAW decode with demosaicing, EXIF orientation support, auto white balance
-  - **Cameras:** Canon, Nikon, Sony, Olympus, Panasonic, Fujifilm, Pentax, Adobe DNG, Leica, Samsung, Hasselblad, Phase One, Sigma
+
+- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f` and
+  100+ more camera formats (✅ LibRaw 0.21.3)
+  - **Features:** Embedded JPEG thumbnail extraction (< 10ms), full RAW decode with demosaicing, EXIF orientation
+    support, auto white balance
+  - **Cameras:** Canon, Nikon, Sony, Olympus, Panasonic, Fujifilm, Pentax, Adobe DNG, Leica, Samsung, Hasselblad, Phase
+    One, Sigma
 - **Modern Images:** `.jxl` (JPEG XL) via libjxl 0.11.1, `.heif`/`.heic` (HEIF/HEIC) via libheif 1.19.5 + WIC fallback
   - **JXL Features:** Next-gen format support, better compression than WebP, wide color gamut
   - **HEIF Features:** Apple iPhone photos (iOS 11+), HDR support, 16-bit depth, wide color
@@ -121,20 +149,26 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 - **Legacy:** `.tga` (Targa), `.ico` (icons), `.jp2` (JPEG2000)
 
 #### Video & Audio (✅ Media Foundation)
-- **Video:** `.mp4`, `.mkv`, `.avi`, `.webm`, `.mov`, `.wmv`, `.flv`, `.mpg`, `.mpeg`, `.ts`, `.mts`, `.m2ts`, `.3gp`, `.vob`, `.ogv` (22 extensions)
+
+- **Video:** `.mp4`, `.mkv`, `.avi`, `.webm`, `.mov`, `.wmv`, `.flv`, `.mpg`, `.mpeg`, `.ts`, `.mts`, `.m2ts`, `.3gp`,
+  `.vob`, `.ogv` (22 extensions)
 - **Audio:** `.mp3`, `.flac`, `.m4a`, `.ogg`, `.wma`, `.wav`, `.opus` - extracts album art or generates waveform
 
 #### Documents & Fonts (✅ Shell API + GDI+)
+
 - **Documents:** `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.epub` (Office/Edge required for Office formats)
 - **Fonts:** `.ttf`, `.otf`, `.ttc` - renders font preview
 
 #### 3D Models (✅ Built-in parser)
+
 - **Models:** `.obj`, `.stl`, `.gltf`, `.glb` - orthographic preview rendering
 
 #### Vector Graphics (✅ GDI+ renderer)
+
 - **SVG:** `.svg`, `.svgz` - rasterizes vector graphics to thumbnail
 
 #### Special Formats (✅ Native decoders)
+
 - **QOI:** `.qoi` (Quite OK Image - fastest decode format)
 - **ICO:** `.ico`, `.cur` (Windows icons/cursors)
 - **TGA:** `.tga` (Targa)
@@ -193,49 +227,57 @@ Run `LENSManager.exe` to enable/disable file format categories.
 ### System Components
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-components.svg" alt="ExplorerLens System Architecture" width="960"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-components.svg"
+  alt="ExplorerLens System Architecture" width="960"/>
 </p>
 
 ### Thumbnail Generation Data Flow
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-dataflow.svg" alt="Thumbnail Generation Data Flow" width="720"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-dataflow.svg"
+  alt="Thumbnail Generation Data Flow" width="720"/>
 </p>
 
 ### Build Pipeline
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-build.svg" alt="ExplorerLens Build Pipeline" width="960"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-build.svg"
+  alt="ExplorerLens Build Pipeline" width="960"/>
 </p>
 
 ### Decode Pipeline
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/decode-pipeline.svg" alt="ExplorerLens Decode Pipeline" width="720"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/decode-pipeline.svg"
+  alt="ExplorerLens Decode Pipeline" width="720"/>
 </p>
 
 ### CI/CD Pipeline
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/ci-cd-pipeline.svg" alt="ExplorerLens CI/CD Pipeline" width="960"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/ci-cd-pipeline.svg"
+  alt="ExplorerLens CI/CD Pipeline" width="960"/>
 </p>
 
 ### Test Architecture
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/test-architecture.svg" alt="ExplorerLens Test Architecture" width="720"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/test-architecture.svg"
+  alt="ExplorerLens Test Architecture" width="720"/>
 </p>
 
 ### Release Flow
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/release-flow.svg" alt="ExplorerLens Release Flow" width="960"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/release-flow.svg"
+  alt="ExplorerLens Release Flow" width="960"/>
 </p>
 
 ### Cache Architecture
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/cache-architecture.svg" alt="ExplorerLens Cache Architecture" width="720"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/cache-architecture.svg"
+  alt="ExplorerLens Cache Architecture" width="720"/>
 </p>
 
 > See all 13 architecture SVGs in [`docs/architecture/`](docs/architecture/README.md)
@@ -270,7 +312,7 @@ graph TD
     ENG --> MEM["🧠 <b>Memory/</b><br/>BitmapPool · Pressure Ctrl"]
     ENG --> PLUGIN["🔩 <b>Plugin/</b><br/>Plugin Ecosystem · Sandbox"]
     ENG --> AI["🤖 <b>AI/</b><br/>Smart Crop · IQA · Scene"]
-    ENG --> TESTS["✅ <b>Tests/</b><br/>4,978 Unit Tests · 5 Benchmarks"]
+    ENG --> TESTS["✅ <b>Tests/</b><br/>4,877 Unit Tests · 5 Benchmarks"]
 
     style ROOT fill:#1e3a5f,color:#fff,stroke:#4a9eff,stroke-width:2px
     style ENG  fill:#1b4332,color:#fff,stroke:#40916c,stroke-width:2px
@@ -312,7 +354,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 **Current Version:** 39.9.0 "Betelgeuse"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 4,978 unit tests, 5 benchmarks (100% pass rate)
+**Test Status:** 4,877 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Betelgeuse
 
 > **Platform scope:** ExplorerLens is a **Windows-only** Shell Extension (`IThumbnailProvider`).
