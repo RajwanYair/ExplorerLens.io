@@ -550,8 +550,9 @@ jobs:
         run: |
           VERSION="${{ needs.build.outputs.version }}"
           # Extract the section for this version from CHANGELOG.md
+          # Note: grep -v can exit 1 when all lines match; || true prevents pipefail from aborting
           NOTES=$(awk "/^## \[$VERSION\]/,/^## \[/" CHANGELOG.md \
-                  | grep -v "^## \[" | sed 's/^### /\n### /' | head -150)
+                  | grep -v "^## \[" | sed 's/^### /\n### /' | head -150) || true
           if [ -z "$NOTES" ]; then
             NOTES="See [CHANGELOG.md](CHANGELOG.md) for full details."
           fi
