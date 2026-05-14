@@ -1938,6 +1938,15 @@ set(ENGINE_HEADERS
     Core/DllSymbolAuditor.h                      # S378 — DLL symbol auditor for <2500KB target (Phase3)
     Core/SimdLanczosKernel.h                     # S379 — SIMD AVX2 Lanczos resize kernel (H41 Phase3)
     Core/CorpusManifestBuilder.h                 # S380 — Corpus manifest builder for 300 CC0 files (Phase3)
+    GPU/Dxva2JpegSession.h                       # S381 — DXVA2 HW JPEG decode session (Phase4 #1)
+    Core/ProcessIsolationConfig.h                # S382 — Out-of-process decoder config (H36 Phase4)
+    Core/IPropertyStoreAdapter.h                 # S383 — IPropertyStore EXIF adapter (H46 Phase4)
+    Core/UbsanSuppressProfile.h                  # S384 — UBSAN suppression profile for CI (Phase4)
+    Core/ChocolateyPackageConfig.h               # S385 — Chocolatey package manifest (Phase4)
+    Core/SharedMemoryChannel.h                   # S386 — Shared memory thumbnail IPC (H45 Phase4)
+    Core/ExifPropertyBag.h                       # S387 — EXIF property bag for IPropertyStore (Phase4)
+    Core/OpenClResizePath.h                      # S388 — OpenCL 1.2 GPU resize fallback (H17 Phase4)
+    Core/CorpusExpansionPhase4.h                 # S389 — Corpus expansion to 500 CC0 files (Phase4)
 
     Decoders/FITSDecoder.h
     Pipeline/HiDPIScaler.h

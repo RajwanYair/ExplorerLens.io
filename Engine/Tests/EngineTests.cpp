@@ -2989,6 +2989,15 @@ int main()
     RUN_TEST(TestS378_DllSymbolAuditor_Budget);
     RUN_TEST(TestS379_SimdLanczosKernel_DetectSimd);
     RUN_TEST(TestS380_CorpusManifestBuilder_Phase3Target);
+    RUN_TEST(TestS381_Dxva2JpegSession_FallbackPath);
+    RUN_TEST(TestS382_ProcessIsolationConfig_Router);
+    RUN_TEST(TestS383_IPropertyStoreAdapter_ExifMapping);
+    RUN_TEST(TestS384_UbsanSuppressProfile_CleanStatus);
+    RUN_TEST(TestS385_ChocolateyPackageConfig_Publish);
+    RUN_TEST(TestS386_SharedMemoryChannel_Header);
+    RUN_TEST(TestS387_ExifPropertyBag_Parse);
+    RUN_TEST(TestS388_OpenClResizePath_Availability);
+    RUN_TEST(TestS389_CorpusExpansionPhase4_Target);
 
     // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;

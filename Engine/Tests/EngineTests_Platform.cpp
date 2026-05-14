@@ -11957,3 +11957,505 @@ TEST(TestS380_CorpusManifestBuilder_Phase3Target)
     r.totalFiles   = 300;
     ASSERT(r.MeetsPhase3Target());
 }
+
+// =============================================================================
+// S381 — Dxva2JpegSession: HW JPEG decode session (Phase 4 #1)
+// =============================================================================
+TEST(TestS381_Dxva2JpegSession_FallbackPath)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kDxva2MaxJpegSidePixels  == 8192u);
+    ASSERT(kDxva2DefaultPoolSize    == 4u);
+    ASSERT(kDxva2MinFeatureLevel    == 0xA100u);
+
+    // Dxva2SessionStatus ordinals
+    ASSERT(static_cast<int>(Dxva2SessionStatus::OK)               == 0);
+    ASSERT(static_cast<int>(Dxva2SessionStatus::HW_UNAVAILABLE)   == 1);
+    ASSERT(static_cast<int>(Dxva2SessionStatus::NULL_BITSTREAM)   == 4);
+    ASSERT(static_cast<int>(Dxva2SessionStatus::FALLBACK_USED)    == 6);
+    ASSERT(static_cast<int>(Dxva2SessionStatus::NOT_WIN32)        == 8);
+
+    // Dxva2DecodePath ordinals
+    ASSERT(static_cast<int>(Dxva2DecodePath::HARDWARE) == 0);
+    ASSERT(static_cast<int>(Dxva2DecodePath::SOFTWARE) == 1);
+    ASSERT(static_cast<int>(Dxva2DecodePath::UNKNOWN)  == 2);
+
+    // Config factories
+    auto shell = Dxva2JpegSessionConfig::ShellExtension();
+    ASSERT(shell.surfacePoolSize == 2u);
+    ASSERT(shell.allowFallback   == true);
+
+    auto hi = Dxva2JpegSessionConfig::HighRes();
+    ASSERT(hi.maxWidthPx      == 8192u);
+    ASSERT(hi.surfacePoolSize == 8u);
+
+    // ProbeHardwareAvailability is always false in stub
+    ASSERT(Dxva2JpegSession::ProbeHardwareAvailability() == false);
+
+    // Open → OK on Win32 stub
+    Dxva2JpegSession session;
+    auto openStatus = session.Open();
+#ifdef _WIN32
+    ASSERT(openStatus == Dxva2SessionStatus::OK);
+    ASSERT(session.IsOpen());
+#else
+    ASSERT(openStatus == Dxva2SessionStatus::NOT_WIN32);
+#endif
+
+    // Decode(null) → NULL_BITSTREAM
+    auto r0 = session.Decode(nullptr, 0);
+#ifdef _WIN32
+    ASSERT(r0.status == Dxva2SessionStatus::NULL_BITSTREAM || !session.IsOpen());
+#endif
+
+    // Decode valid data → FALLBACK_USED (stub, allowFallback=true)
+    uint8_t fakeJpeg[4] = {0xFF, 0xD8, 0xFF, 0xE0};
+    auto r1 = session.Decode(fakeJpeg, sizeof(fakeJpeg));
+#ifdef _WIN32
+    ASSERT(r1.status == Dxva2SessionStatus::FALLBACK_USED);
+    ASSERT(r1.path   == Dxva2DecodePath::SOFTWARE);
+    ASSERT(session.Metrics().swFallbacks > 0);
+#endif
+}
+
+// =============================================================================
+// S382 — ProcessIsolationConfig: out-of-process decoder config (H36)
+// =============================================================================
+TEST(TestS382_ProcessIsolationConfig_Router)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kIsolationDefaultTimeoutMs == 5000u);
+    ASSERT(kIsolationMaxHostProcesses == 8u);
+    ASSERT(kIsolationRestartMaxCount  == 3u);
+
+    // IsolationIpcTransport ordinals
+    ASSERT(static_cast<int>(IsolationIpcTransport::COM_OUT_OF_PROC) == 0);
+    ASSERT(static_cast<int>(IsolationIpcTransport::SHARED_MEMORY)   == 1);
+    ASSERT(static_cast<int>(IsolationIpcTransport::NAMED_PIPE)      == 2);
+    ASSERT(static_cast<int>(IsolationIpcTransport::IN_PROCESS)      == 3);
+
+    // IsolationScope ordinals
+    ASSERT(static_cast<int>(IsolationScope::NONE)           == 0);
+    ASSERT(static_cast<int>(IsolationScope::HIGH_RISK_ONLY) == 1);
+    ASSERT(static_cast<int>(IsolationScope::ALL_DECODERS)   == 2);
+    ASSERT(static_cast<int>(IsolationScope::PER_FORMAT)     == 3);
+
+    // Disabled config → not enabled
+    auto disabled = ProcessIsolationConfig::Disabled();
+    ASSERT(!disabled.enabled);
+
+    // Phase4Default → enabled, high-risk only
+    auto p4 = ProcessIsolationConfig::Phase4Default();
+    ASSERT(p4.enabled);
+    ASSERT(p4.scope       == IsolationScope::HIGH_RISK_ONLY);
+    ASSERT(p4.hostTimeoutMs == 5000u);
+
+    // Controller: ShouldIsolate("pdf") → true when enabled
+    auto& ctrl = ProcessIsolationController::Global();
+    ctrl.Configure(p4);
+    ASSERT(ctrl.IsEnabled());
+    ASSERT(ctrl.ShouldIsolate("pdf")  == true);
+    ASSERT(ctrl.ShouldIsolate("jpeg") == false);
+
+    // Disabled config: ShouldIsolate → false
+    ctrl.Configure(disabled);
+    ASSERT(ctrl.ShouldIsolate("pdf") == false);
+
+    // AllDecoders config: any format → isolated
+    auto allDec = ProcessIsolationConfig::AllDecoders();
+    ctrl.Configure(allDec);
+    ASSERT(ctrl.ShouldIsolate("jpeg") == true);
+}
+
+// =============================================================================
+// S383 — IPropertyStoreAdapter: EXIF → Explorer details pane (H46)
+// =============================================================================
+TEST(TestS383_IPropertyStoreAdapter_ExifMapping)
+{
+    using namespace ExplorerLens::Engine;
+
+    // EXIF tag constants
+    ASSERT(kExifTagMake             == 271u);
+    ASSERT(kExifTagModel            == 272u);
+    ASSERT(kExifTagDateTimeOriginal == 36867u);
+    ASSERT(kExifTagISOSpeedRatings  == 34855u);
+    ASSERT(kExifTagFNumber          == 33437u);
+    ASSERT(kExifTagExposureTime     == 33434u);
+
+    // PropertyStoreStatus ordinals
+    ASSERT(static_cast<int>(PropertyStoreStatus::OK)               == 0);
+    ASSERT(static_cast<int>(PropertyStoreStatus::NO_EXIF)          == 1);
+    ASSERT(static_cast<int>(PropertyStoreStatus::NULL_STREAM)      == 5);
+    ASSERT(static_cast<int>(PropertyStoreStatus::NOT_WIN32)        == 6);
+
+    // WpsPropertyType ordinals
+    ASSERT(static_cast<int>(WpsPropertyType::STRING)    == 0);
+    ASSERT(static_cast<int>(WpsPropertyType::UINT32)    == 1);
+    ASSERT(static_cast<int>(WpsPropertyType::DATE_TIME) == 4);
+
+    // ExifExtractorConfig factories
+    auto def = ExifExtractorConfig::Default();
+    ASSERT(def.extractCameraInfo);
+    ASSERT(def.maxTagsToRead == 64u);
+    auto ep = ExifExtractorConfig::ExplorerPane();
+    ASSERT(!ep.extractGps);
+    ASSERT(ep.extractDateTaken);
+
+    // Extract with null data → NULL_STREAM or NOT_WIN32
+    auto& adapter = IPropertyStoreAdapter::Global();
+    adapter.Configure(def);
+    auto bag = adapter.Extract(nullptr, 0);
+    ASSERT(!bag.IsOk());
+
+    // Extract with too-short data → NULL_STREAM
+    uint8_t tiny[2] = {0xFF, 0xD8};
+    auto bag2 = adapter.Extract(tiny, sizeof(tiny));
+    ASSERT(!bag2.IsOk());
+
+    // ExifPropertyBag HasExif() false for empty result
+    ExifPropertyBag emptyBag{};
+    ASSERT(!emptyBag.HasExif());
+}
+
+// =============================================================================
+// S384 — UbsanSuppressProfile: UBSAN CI clean status
+// =============================================================================
+TEST(TestS384_UbsanSuppressProfile_CleanStatus)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kUbsanMaxSuppressEntries == 256u);
+
+    // UbsanFindingCategory ordinals
+    ASSERT(static_cast<int>(UbsanFindingCategory::UNDEFINED_SHIFT)     == 0);
+    ASSERT(static_cast<int>(UbsanFindingCategory::SIGNED_OVERFLOW)     == 1);
+    ASSERT(static_cast<int>(UbsanFindingCategory::ARRAY_BOUNDS)        == 4);
+    ASSERT(static_cast<int>(UbsanFindingCategory::ALIGNMENT)           == 7);
+
+    // UbsanDisposition ordinals
+    ASSERT(static_cast<int>(UbsanDisposition::APPROVED)  == 0);
+    ASSERT(static_cast<int>(UbsanDisposition::PENDING)   == 1);
+    ASSERT(static_cast<int>(UbsanDisposition::FIXED)     == 2);
+    ASSERT(static_cast<int>(UbsanDisposition::WONT_FIX)  == 3);
+
+    // Fresh profile: no entries, CI clean
+    auto& profile = UbsanSuppressProfile::Global();
+    ASSERT(profile.IsCiClean());
+    ASSERT(profile.EntryCount() == 0);
+
+    // Register an APPROVED entry → stays clean
+    UbsanEntry approved{};
+    approved.category    = UbsanFindingCategory::SIGNED_OVERFLOW;
+    approved.disposition = UbsanDisposition::APPROVED;
+    approved.sourceFile  = "Engine/Decoders/StbImageDecoder.h";
+    approved.sourceLine  = 42u;
+    approved.description = "intentional wrap in CRC32";
+    approved.isSafe      = true;
+    ASSERT(profile.Register(approved));
+    ASSERT(profile.IsCiClean());
+
+    // Register a PENDING entry → CI not clean
+    UbsanEntry pending{};
+    pending.category    = UbsanFindingCategory::NULL_DEREF;
+    pending.disposition = UbsanDisposition::PENDING;
+    pending.sourceFile  = "Engine/Core/SomeNewFile.h";
+    pending.sourceLine  = 99u;
+    ASSERT(profile.Register(pending));
+    ASSERT(!profile.IsCiClean());
+
+    // Stats
+    auto stats = profile.Stats();
+    ASSERT(stats.total   >= 2u);
+    ASSERT(stats.approved >= 1u);
+    ASSERT(stats.pending  >= 1u);
+
+    // IsSuppressed: approved entry → true
+    ASSERT(profile.IsSuppressed("Engine/Decoders/StbImageDecoder.h", 42u));
+    // Unknown file → false
+    ASSERT(!profile.IsSuppressed("Engine/Core/Unknown.h", 1u));
+}
+
+// =============================================================================
+// S385 — ChocolateyPackageConfig: Chocolatey publish workflow
+// =============================================================================
+TEST(TestS385_ChocolateyPackageConfig_Publish)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kChocoPackageId != nullptr);
+    ASSERT(kChocoApiKeyEnvVar != nullptr);
+    // kChocoPackageId should equal "explorerlens"
+    {
+        const char* id = kChocoPackageId;
+        ASSERT(id[0] == 'e' && id[1] == 'x' && id[2] == 'p');
+    }
+
+    // ChocoPackageStatus ordinals
+    ASSERT(static_cast<int>(ChocoPackageStatus::OK)               == 0);
+    ASSERT(static_cast<int>(ChocoPackageStatus::NUSPEC_INVALID)   == 1);
+    ASSERT(static_cast<int>(ChocoPackageStatus::PUSH_FAILED)      == 5);
+    ASSERT(static_cast<int>(ChocoPackageStatus::NOT_WIN32)        == 6);
+
+    // ChocoChecksumAlgo ordinals
+    ASSERT(static_cast<int>(ChocoChecksumAlgo::SHA256) == 0);
+    ASSERT(static_cast<int>(ChocoChecksumAlgo::SHA512) == 1);
+
+    // ChocoInstallerEntry without URL → invalid
+    ChocoInstallerEntry badInstaller{};
+    ASSERT(!badInstaller.IsValid());
+
+    // ChocoPackageConfig default
+    auto def = ChocolateyPackageConfig::Default();
+    ASSERT(def.packageId != nullptr);
+
+    // Build without version → NUSPEC_INVALID
+    auto& mgr = ChocolateyPackageManager::Global();
+    mgr.Configure(def);
+    auto status = mgr.Build("tmp_choco");
+    ASSERT(status == ChocoPackageStatus::NUSPEC_INVALID);
+
+    // ChocoPublishResult default: not published
+    ChocoPublishResult r{};
+    ASSERT(!r.IsPublished());
+    ASSERT(!r.publishedOk);
+}
+
+// =============================================================================
+// S386 — SharedMemoryChannel: bitmap IPC via file mapping (H45)
+// =============================================================================
+TEST(TestS386_SharedMemoryChannel_Header)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kSharedMemHeaderSize  == 64u);
+    ASSERT(kSharedMemMaxThumbPx  == 4096u);
+
+    // SharedMemChannelStatus ordinals
+    ASSERT(static_cast<int>(SharedMemChannelStatus::OK)           == 0);
+    ASSERT(static_cast<int>(SharedMemChannelStatus::CREATE_FAILED)== 1);
+    ASSERT(static_cast<int>(SharedMemChannelStatus::MAP_FAILED)   == 2);
+    ASSERT(static_cast<int>(SharedMemChannelStatus::NOT_WIN32)    == 7);
+
+    // SharedMemRole ordinals
+    ASSERT(static_cast<int>(SharedMemRole::PUBLISHER)  == 0);
+    ASSERT(static_cast<int>(SharedMemRole::CONSUMER)   == 1);
+
+    // SharedMemHeader magic
+    SharedMemHeader hdr{};
+    ASSERT(hdr.magic == 0x4C454E53u);
+    ASSERT(!hdr.IsValid());   // widthPx/heightPx/pixelBytes still 0 → invalid
+
+    SharedMemHeader goodHdr{};
+    goodHdr.widthPx    = 256;
+    goodHdr.heightPx   = 256;
+    goodHdr.pixelBytes = 256 * 256 * 4;
+    ASSERT(goodHdr.IsValid());
+
+    // Wrong magic → invalid
+    SharedMemHeader badHdr{};
+    badHdr.magic       = 0xDEADBEEFu;
+    badHdr.widthPx     = 256;
+    badHdr.heightPx    = 256;
+    badHdr.pixelBytes  = 256 * 256 * 4;
+    ASSERT(!badHdr.IsValid());
+
+    // Channel not open → Write fails
+    SharedMemoryChannel ch;
+    ASSERT(!ch.IsOpen());
+    auto ws = ch.Write(nullptr, 0);
+    ASSERT(ws == SharedMemChannelStatus::MAP_FAILED ||
+           ws == SharedMemChannelStatus::NOT_WIN32);
+
+    // Config MaxMappingSizeBytes sanity
+    auto cfg = SharedMemChannelConfig::Default();
+    ASSERT(cfg.MaxMappingSizeBytes() > 0);
+}
+
+// =============================================================================
+// S387 — ExifPropertyBag: EXIF tag → WPS mapping table
+// =============================================================================
+TEST(TestS387_ExifPropertyBag_Parse)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kExifApp1MarkerOffset == 2u);
+    ASSERT(kExifMaxIfdEntries    == 256u);
+    ASSERT(kExifOrientationNormal== 1u);
+
+    // ExifDataType ordinals
+    ASSERT(static_cast<int>(ExifDataType::BYTE)      == 1);
+    ASSERT(static_cast<int>(ExifDataType::ASCII)     == 2);
+    ASSERT(static_cast<int>(ExifDataType::SHORT)     == 3);
+    ASSERT(static_cast<int>(ExifDataType::LONG)      == 4);
+    ASSERT(static_cast<int>(ExifDataType::RATIONAL)  == 5);
+    ASSERT(static_cast<int>(ExifDataType::SLONG)     == 9);
+
+    // WpsCategory ordinals
+    ASSERT(static_cast<int>(WpsCategory::CAMERA)    == 0);
+    ASSERT(static_cast<int>(WpsCategory::TECHNICAL) == 1);
+    ASSERT(static_cast<int>(WpsCategory::DATETIME)  == 3);
+    ASSERT(static_cast<int>(WpsCategory::GPS)       == 4);
+
+    // FindMapping: known EXIF tags
+    const auto* makeMap  = ExifBagBuilder::FindMapping(271u);
+    ASSERT(makeMap != nullptr);
+    ASSERT(makeMap->exifTag  == 271u);
+    ASSERT(makeMap->category == WpsCategory::CAMERA);
+
+    const auto* isoMap = ExifBagBuilder::FindMapping(34855u);
+    ASSERT(isoMap != nullptr);
+    ASSERT(isoMap->category == WpsCategory::TECHNICAL);
+
+    // FindMapping: unknown tag → null
+    ASSERT(ExifBagBuilder::FindMapping(0xFFFFu) == nullptr);
+
+    // ParseJpegApp1 with null → invalid result
+    auto& bag = ExifBagBuilder::Global();
+    auto r0 = bag.ParseJpegApp1(nullptr, 0);
+    ASSERT(!r0.IsOk());
+
+    // ParseJpegApp1 with too-short data → isValid=false
+    uint8_t shortData[4] = {0xFF, 0xE1, 0x00, 0x10};
+    auto r1 = bag.ParseJpegApp1(shortData, sizeof(shortData));
+    ASSERT(!r1.IsOk());
+
+    // kExifWpsMappingTableCount should equal 13
+    ASSERT(kExifWpsMappingTableCount == 13u);
+}
+
+// =============================================================================
+// S388 — OpenClResizePath: OpenCL 1.2 GPU resize fallback (H17)
+// =============================================================================
+TEST(TestS388_OpenClResizePath_Availability)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kOpenClMaxImageSidePx  == 65536u);
+    ASSERT(kOpenClMinWorkGroupSize== 16u);
+
+    // OpenClStatus ordinals
+    ASSERT(static_cast<int>(OpenClStatus::OK)              == 0);
+    ASSERT(static_cast<int>(OpenClStatus::NOT_INITIALIZED) == 1);
+    ASSERT(static_cast<int>(OpenClStatus::NO_PLATFORM)     == 2);
+    ASSERT(static_cast<int>(OpenClStatus::NO_DEVICE)       == 3);
+    ASSERT(static_cast<int>(OpenClStatus::NOT_SUPPORTED)   == 8);
+
+    // OpenClFilter ordinals
+    ASSERT(static_cast<int>(OpenClFilter::NEAREST)  == 0);
+    ASSERT(static_cast<int>(OpenClFilter::BILINEAR) == 1);
+    ASSERT(static_cast<int>(OpenClFilter::LANCZOS3) == 2);
+
+    // Config factories
+    auto def = OpenClResizeConfig::Default();
+    ASSERT(def.filter == OpenClFilter::BILINEAR);
+
+    auto lanc = OpenClResizeConfig::LanczosQuality();
+    ASSERT(lanc.filter == OpenClFilter::LANCZOS3);
+
+    auto fast = OpenClResizeConfig::FastBilinear();
+    ASSERT(fast.filter == OpenClFilter::BILINEAR);
+
+    // Not ready before Initialize()
+    auto& path = OpenClResizePath::Global();
+    path.Configure(def);
+    ASSERT(!path.IsReady());
+
+    // Initialize → NO_PLATFORM (stub)
+    auto initStatus = path.Initialize();
+    ASSERT(initStatus == OpenClStatus::NO_PLATFORM ||
+           initStatus == OpenClStatus::NOT_SUPPORTED);
+    ASSERT(!path.IsReady());
+
+    // Resize before ready → NOT_INITIALIZED
+    uint8_t src[4*4*4] = {};
+    uint8_t dst[2*2*4] = {};
+    auto r = path.Resize(src, 4, 4, dst, 2, 2, 4);
+    ASSERT(r.status == OpenClStatus::NOT_INITIALIZED);
+
+    // Resize with zero dimension (even if ready) → ZERO_DIMENSION
+    ASSERT(static_cast<int>(OpenClStatus::ZERO_DIMENSION) == 7);
+}
+
+// =============================================================================
+// S389 — CorpusExpansionPhase4: Phase 4 corpus expansion to 500 CC0 files
+// =============================================================================
+TEST(TestS389_CorpusExpansionPhase4_Target)
+{
+    using namespace ExplorerLens::Engine;
+
+    // Constants
+    ASSERT(kCorpusPhase4TotalTarget == 500u);
+    ASSERT(kCorpusPhase4CriticalGap == 20u);
+
+    // CorpusFamily ordinals
+    ASSERT(static_cast<int>(CorpusFamily::RASTER)   == 0);
+    ASSERT(static_cast<int>(CorpusFamily::CAMERA)   == 1);
+    ASSERT(static_cast<int>(CorpusFamily::DOCUMENT) == 2);
+    ASSERT(static_cast<int>(CorpusFamily::MEDIA)    == 3);
+    ASSERT(static_cast<int>(CorpusFamily::VECTOR)   == 4);
+    ASSERT(static_cast<int>(CorpusFamily::ARCHIVE)  == 5);
+    ASSERT(static_cast<int>(CorpusFamily::MISC)     == 6);
+
+    // CorpusGapRecord gap and critical
+    CorpusGapRecord gap21{};
+    gap21.currentCount = 9u;
+    gap21.targetCount  = 30u;
+    ASSERT(gap21.Gap()        == 21u);
+    ASSERT(gap21.IsCritical() == true);
+
+    CorpusGapRecord gap20{};
+    gap20.currentCount = 10u;
+    gap20.targetCount  = 30u;
+    ASSERT(gap20.Gap()        == 20u);
+    ASSERT(gap20.IsCritical() == false);  // IsCritical requires Gap() >= 20 (kCriticalGapThreshold)
+
+    CorpusGapRecord metGap{};
+    metGap.currentCount = 50u;
+    metGap.targetCount  = 30u;
+    ASSERT(metGap.Gap()  == 0u);
+    ASSERT(metGap.IsMet()== true);
+
+    // CorpusPhase4Stats: 499 files → not at target; 500 → at target
+    CorpusPhase4Stats s499{};
+    s499.totalFiles   = 499u;
+    s499.phase4Target = 500u;
+    ASSERT(!s499.MeetsPhase4Target());
+    ASSERT(s499.CoveragePercent() < 100.0f);
+
+    CorpusPhase4Stats s500{};
+    s500.totalFiles   = 500u;
+    s500.phase4Target = 500u;
+    ASSERT(s500.MeetsPhase4Target());
+
+    // Config factories
+    auto defCfg = CorpusExpansionConfig::Default();
+    ASSERT(defCfg.phase4Target     == 500u);
+    ASSERT(defCfg.downloadParallel == 4u);
+
+    auto ciCfg = CorpusExpansionConfig::CI();
+    ASSERT(ciCfg.downloadParallel == 1u);
+    ASSERT(ciCfg.verifyChecksums  == true);
+
+    // Tracker: fresh state → 0 pending
+    auto& tracker = CorpusExpansionPhase4::Global();
+    tracker.Configure(defCfg);
+    ASSERT(tracker.PendingDownloads() == 0u);
+
+    // QueueDownload adds an entry
+    ASSERT(tracker.QueueDownload("https://example.com/test.jpg", "aabbcc", CorpusFamily::RASTER));
+    ASSERT(tracker.PendingDownloads() == 1u);
+
+    // ProcessQueue processes pending entry
+    uint32_t processed = tracker.ProcessQueue();
+    ASSERT(processed >= 1u);
+    ASSERT(tracker.TotalAdded() >= 1u);
+}

@@ -1501,5 +1501,15 @@ using namespace ExplorerLens::Engine;
 #include "../Core/DllSymbolAuditor.h"
 #include "../Core/SimdLanczosKernel.h"
 #include "../Core/CorpusManifestBuilder.h"
+// Sprint S381-S389 — ROADMAP Phase 4 Depth & Safety
+#include "../GPU/Dxva2JpegSession.h"
+#include "../Core/ProcessIsolationConfig.h"
+#include "../Core/IPropertyStoreAdapter.h"
+#include "../Core/UbsanSuppressProfile.h"
+#include "../Core/ChocolateyPackageConfig.h"
+#include "../Core/SharedMemoryChannel.h"
+#include "../Core/ExifPropertyBag.h"
+#include "../Core/OpenClResizePath.h"
+#include "../Core/CorpusExpansionPhase4.h"
 
 #include "EngineTestsMacros.h"
