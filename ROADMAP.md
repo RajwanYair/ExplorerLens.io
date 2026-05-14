@@ -1,7 +1,7 @@
 # ExplorerLens — ROADMAP v8.0 "Vega"
 
 > **Zero-illusions edition.** Every decision stress-tested against shipping reality.
-> Archived: `docs/archive/ROADMAP_V7.md` (v7.0 "Sirius", ~45 KB, 24 sections, ADRs A1–A28).
+> ~~Archived: `docs/archive/ROADMAP_V7.md` (v7.0 "Sirius")~~ *(removed in v39.9.0 cleanup)* sections, ADRs A1–A28).
 > Current version: **39.9.0 "Betelgeuse"** · Last updated: **2026-05-14**
 
 ---
@@ -1393,5 +1393,5 @@ This debt reduction would:
 ---
 
 *ROADMAP v8.0 "Vega" — ExplorerLens 39.9.0 → 50.0*
-*Archived predecessor: `docs/archive/ROADMAP_V7.md`*
+> Archived predecessor: `docs/archive/ROADMAP_V7.md` *(removed in v39.9.0 cleanup — see docs/archive/README.md)*
 *Next review: v41.0 milestone*

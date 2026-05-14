@@ -380,7 +380,7 @@ A: Thumbnail appearance is controlled by Windows Explorer. ExplorerLens only pro
 - **Developer Guide:** [DEVELOPER_GUIDE.md](development/DEVELOPER_GUIDE.md)
 - **Build Instructions:** [.github/standards/build-method.md](../.github/standards/build-method.md)
 - **Plugin SDK:** [SDK/README.md](../SDK/README.md)
-- **Roadmap v34 (Arcturus):** [ROADMAP_V34.md](archive/ROADMAP_V34.md)
+- **Roadmap v34 (Arcturus):** *(archived — removed in v39.9.0 production cleanup)*
 
 **Support:** For issues, please open a GitHub issue with detailed information.
 
