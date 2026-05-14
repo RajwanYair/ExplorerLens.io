@@ -1,8 +1,8 @@
-# Testing Guide — ExplorerLens v24.1.0
+# Testing Guide — ExplorerLens v39.9.0
 
-**Version:** 24.1.0 "Altair-R" 
+**Version:** 39.9.0 "Betelgeuse" 
 **Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros) 
-**Test Count:** 3,269 unit tests + 5 benchmarks 
+**Test Count:** 5108 unit tests + 5 benchmarks 
 **Pass Rate:** 100%
 
 ---

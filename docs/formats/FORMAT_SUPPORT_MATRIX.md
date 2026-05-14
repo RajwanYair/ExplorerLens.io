@@ -1,7 +1,7 @@
-# Format Support Matrix — ExplorerLens v15.0.0
+# Format Support Matrix — ExplorerLens v39.9.0
 
-**Last Updated:** February 2026 
-**Engine Version:** 15.0.0 "Zenith" 
+**Last Updated:** May 2026 
+**Engine Version:** 39.9.0 "Betelgeuse" 
 **Total Formats:** 200+ file extensions across 25 decoders 
 **Shell Registrations:** 93 extensions in LENSShell.rgs 
 **Decoder Compliance:** 25/25 (100%)

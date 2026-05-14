@@ -1,6 +1,6 @@
 # Decoder Implementation Status
 
-**Last Verified:** v36.3.0 "Antares"
+**Last Verified:** v39.9.0 "Betelgeuse"
 **Auto-audit:** Run `.\build-scripts\Audit-Headers.ps1` for header-level inventory
 
 ## Top 20 Priority Formats — All Implemented

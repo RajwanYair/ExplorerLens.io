@@ -1,4 +1,4 @@
-# vcpkg Setup Guide for ExplorerLens.io v15.0.0
+# vcpkg Setup Guide for ExplorerLens.io v39.9.0
 
 ## Overview
 
@@ -467,6 +467,6 @@ $env:VCPKG_BINARY_SOURCES = "clear;nuget,https://pkgs.dev.azure.com/...;readwrit
 
 ---
 
-**ExplorerLens.io v15.0.0 - vcpkg Setup Guide** 
-*Last Updated: March 2026* 
-*For installation package creation, see: [INSTALLER_GUIDE_V7.md](../packaging/INSTALLER_GUIDE_V7.md)*
+**ExplorerLens.io v39.9.0 - vcpkg Setup Guide** 
+*Last Updated: May 2026* 
+*For packaging and installer creation, see: [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md)*

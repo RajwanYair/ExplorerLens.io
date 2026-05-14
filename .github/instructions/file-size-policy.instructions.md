@@ -22,9 +22,9 @@ These are known large files that cannot be easily split:
 | `LENSManager/RegManager.h` | 103 KB | Registry format table — monolithic by design |
 | `LENSShell/LENSArchive.h` | 103 KB | Format dispatch table — monolithic by design |
 | `Engine/Utils/ReleaseGate.h` | 94 KB | Gate evaluators V2–V33 — append-only |
-| `Engine/CMakeLists.txt` | 83 KB | Single build definition — cannot split |
+| `Engine/CMakeLists.txt` | 108 KB | Single build definition — cannot split |
 | `CHANGELOG-archive.md` | 113 KB | Historical archive — rarely changed |
-| `Engine/Tests/EngineTestsExterns.h` | ~233 KB | Extern Runner declarations — append-only; split when >400 KB |
+| `Engine/Tests/EngineTestsExterns.h` | ~244 KB | Extern Runner declarations — append-only; split when >400 KB |
 
 ## Test File Split Convention
 
@@ -47,6 +47,7 @@ Engine/Tests/
 - New `extern void` declarations + `RUN_TEST()` calls go into `EngineTests.cpp`
 - New `#include` directives go into `EngineTestsIncludes.h`
 - When any split file exceeds 500 KB, split it again at a `//==` section boundary
+- **Monitor:** `EngineTests_Platform.cpp` is ~417 KB (v39.9.0) — split when it exceeds 500 KB
 
 ## CHANGELOG Split Convention
 
