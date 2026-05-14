@@ -1,4 +1,4 @@
-﻿# ExplorerLens.io — High-Performance Thumbnail Generator
+# ExplorerLens.io — High-Performance Thumbnail Generator
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg"
@@ -352,10 +352,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 39.9.0 "Betelgeuse"
+**Current Version:** 40.0.0 "Procyon"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 4,877 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Betelgeuse
+**Codename:** Procyon
 
 > **Platform scope:** ExplorerLens is a **Windows-only** Shell Extension (`IThumbnailProvider`).
 > macOS Quick Look and Linux Nautilus extensions are on the roadmap (Phase 5 and Phase 6 respectively)

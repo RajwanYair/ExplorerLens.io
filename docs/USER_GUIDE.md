@@ -1,6 +1,6 @@
-﻿# ExplorerLens User Guide
+# ExplorerLens User Guide
 
-**Version:** 39.9.0 "Betelgeuse"
+**Version:** 40.0.0 "Procyon"
 **Last Updated:** July 2026
 
 ## Table of Contents
@@ -33,7 +33,7 @@
 
  ```powershell
  # Right-click installer → "Run as Administrator"
- .\ExplorerLens-39.9.0-x64.msi
+ .\ExplorerLens-40.0.0-x64.msi
  ```
 
 1. **Follow the wizard**:
@@ -151,7 +151,7 @@ The modern Manager provides a full-featured GUI organized into pages:
 
 ### About
 
-- **Version** — v39.9.0 (Betelgeuse) with build info
+- **Version** — v40.0.0 (Procyon) with build info
 - **Quick stats** — 200+ formats, 25+ decoders, <17ms per thumbnail
 - **System info** — GPU, Windows version, COM CLSID, test pass rate
 - **Links** — GitHub, docs, bug reports, changelog
