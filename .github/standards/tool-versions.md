@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 14 May 2026 (v40.0.0 Procyon release)
-**Version:** 40.0.0 "Procyon"
+**Last Updated:** 24 May 2026 (v40.0.1 Procyon release)
+**Version:** 40.0.1 "Procyon"
 
 ---
 

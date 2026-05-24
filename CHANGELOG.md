@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [40.0.1] — 2026-05-24 — Procyon
+
+Phase 2 GPU stubs: DXVA2 JPEG decode, D3D11 device manager, Vulkan resize pipeline, surface pool, vendor routing contracts (S311-S320)
+
+---
+
 ## [40.0.0] — 2026-05-14 — Procyon
 
 Phase 1 Discipline Restoration complete: SQLite cache, Windows.Data.Pdf, LGPL compliance, AI/GPU stub archive, test count reconciliation.

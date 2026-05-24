@@ -1,4 +1,4 @@
-﻿# ExplorerLens.io — High-Performance Thumbnail Generator
+# ExplorerLens.io — High-Performance Thumbnail Generator
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg"
@@ -352,7 +352,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 40.0.0 "Procyon"
+**Current Version:** 40.0.1 "Procyon"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 4,877 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Procyon
