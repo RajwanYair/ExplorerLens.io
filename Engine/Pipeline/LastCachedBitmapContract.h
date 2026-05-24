@@ -107,7 +107,7 @@ public:
     /// Phase 2 stub: always returns NONE.
     [[nodiscard]] LastCachedBitmapResult Fetch(
         std::uint64_t               filePathHash,
-        std::uint32_t               requestedSide,
+        std::uint32_t               requestedSide = 256u,
         const LastCachedBitmapConfig& cfg = LastCachedBitmapConfig{}) const noexcept
     {
         (void)filePathHash; (void)requestedSide; (void)cfg;

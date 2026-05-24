@@ -88,7 +88,7 @@ public:
     /// Check whether the decode token has been cancelled.
     /// Called from OnProgress() in the concrete COM class.
     [[nodiscard]] BindCallbackPolicy ShouldCancel(
-        const BindCallbackProgress& progress) noexcept
+        const BindCallbackProgress& progress = BindCallbackProgress{}) noexcept
     {
         m_callCount.fetch_add(1u, std::memory_order_relaxed);
         (void)progress;

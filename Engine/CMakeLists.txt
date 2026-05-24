@@ -13,6 +13,17 @@ project(ExplorerLensEngine
 )
 
 #==============================================================================
+# S320 / ADR A39 — Version header auto-generation via configure_file
+# Reduces version-bearing files from 21 → ≤5.
+# Version.h.in is the single source of truth; CMake injects VERSION components.
+#==============================================================================
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Version.h
+    @ONLY
+)
+
+#==============================================================================
 # Architecture Guard (x64-only)
 #==============================================================================
 
@@ -2019,6 +2030,7 @@ set(ENGINE_SOURCES
     # GPU rendering implementations
     GPU/D3D11Renderer.cpp
     GPU/GDIRenderer.cpp
+    GPU/D3D11DeviceManager.cpp       # S319 — D3D11 device manager (Phase 2 stub)
 
     # Cache implementations
     Cache/PersistentDiskCache.cpp
@@ -2220,6 +2232,7 @@ if(ENGINE_SOURCES)
     target_include_directories(ExplorerLensEngine
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  # S320: generated Version.h
             $<INSTALL_INTERFACE:include>
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/../SDK/include

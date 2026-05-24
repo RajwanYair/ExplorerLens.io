@@ -1,4 +1,4 @@
-# ExplorerLens.io — High-Performance Thumbnail Generator
+﻿# ExplorerLens.io — High-Performance Thumbnail Generator
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg"

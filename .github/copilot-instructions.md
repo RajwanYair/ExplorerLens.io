@@ -1,4 +1,4 @@
-# ExplorerLens — Copilot Instructions
+﻿# ExplorerLens — Copilot Instructions
 
 > **Scoped instructions** for C++, build, CI, release, security, and testing live in
 > `.github/instructions/*.instructions.md`. Read those files before making changes in their domain.

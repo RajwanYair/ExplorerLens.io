@@ -1294,6 +1294,7 @@ using namespace ExplorerLens::Engine;
 
 // Sprint S311-S320 — ROADMAP v7.0 Phase 2 First GPU Pixels
 #include "../GPU/D3D11DeviceManager.h"
+#include "../GPU/DXVA2JpegDecodeContract.h"
 #include "../Core/CancelAwareBindCallback.h"
 #include "../Core/OOMKillGuard.h"
 #include "../Pipeline/LastCachedBitmapContract.h"
