@@ -1,7 +1,7 @@
 # ExplorerLens External Libraries - Optimized Build Configuration
 # VS2026 | x64 | Maximum Performance
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.2)
 project(ExplorerLensExternalLibs VERSION 4.6.0 LANGUAGES C CXX)
 
 # VS2026 Optimization Flags

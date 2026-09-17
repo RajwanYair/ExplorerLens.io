@@ -5,7 +5,7 @@
 .DESCRIPTION
     Downloads and builds FreeType as a static library with /MD runtime.
     Optionally builds HarfBuzz for advanced text shaping.
-    ExplorerLens v15.0.0 "Zenith"
+    ExplorerLens FreeType external-library build
 
 .PARAMETER Clean
     Remove existing build artifacts before building.
@@ -35,7 +35,7 @@ $outputDir = Join-Path $rootDir "x64" "Release"
 
 Write-BuildLog "========================================" "Info"
 Write-BuildLog "FreeType $FreeTypeVersion Build Script" "Info"
-Write-BuildLog "ExplorerLens v15.0.0 Zenith" "Info"
+Write-BuildLog "ExplorerLens FreeType external-library build" "Info"
 Write-BuildLog "========================================" "Info"
 
 # ============================================================================

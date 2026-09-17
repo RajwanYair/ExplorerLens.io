@@ -7,7 +7,7 @@
 # Split architecture: LensCLILib (static library) + LensCLI (thin executable).
 # EngineTests links LensCLILib for unit-testing CLI layer without duplicating sources.
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.2)
 
 # --------------------------------------------------------------------------
 # LensCLILib — static library containing all CLI logic (no main.cpp)

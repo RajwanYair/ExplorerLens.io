@@ -6,6 +6,7 @@
     // ═══════════════════════════════════════════════════════════════
     // ── CMake Tools ──────────────────────────────────────────────
     "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.cmakePath": "${env:ProgramFiles}/CMake/bin/cmake.exe",
     "cmake.useCMakePresets": "always",
     "cmake.generator": "Ninja",
     "cmake.configureOnOpen": false,
@@ -13,28 +14,25 @@
     "cmake.defaultConfigurePreset": "default-release",
     "cmake.defaultBuildPreset": "default-release",
     "cmake.defaultTestPreset": "default-release-test",
-    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.buildDirectory": "${env:TEMP}/ExplorerLens-build",
     "cmake.configureSettings": {},
     "cmake.configureOnEdit": false,
     "cmake.automaticReconfigure": false,
     "cmake.allowCommentsInPresetsFile": true,
     "cmake.options.statusBarVisibility": "visible",
-    "cmake.configureEnvironment": {
-        "CMAKE_GENERATOR_PLATFORM": "x64"
-    },
+    "cmake.configureEnvironment": {},
     "cmake.buildBeforeRun": true,
     "cmake.ctest.allowParallelJobs": true,
     "cmake.parallelJobs": 8,
-    "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
     // ── C/C++ IntelliSense ───────────────────────────────────────
     "C_Cpp.intelliSenseEngine": "default",
-    "C_Cpp.autocomplete": "Default",
+    "C_Cpp.autocomplete": "default",
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.default.cppStandard": "c++23",
     "C_Cpp.default.cStandard": "c17",
     "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.default.compileCommands": "${env:TEMP}/ExplorerLens-build/compile_commands.json",
     "C_Cpp.default.defines": [
         "WIN32_LEAN_AND_MEAN",
         "NOMINMAX",
@@ -217,21 +215,6 @@
     "git.autofetch": true,
     "git.confirmSync": false,
     "git.enableSmartCommit": true,
-    // ── Markdown ─────────────────────────────────────────────────
-    "markdownlint.config": {
-        "MD033": false,
-        "MD013": false,
-        "MD024": {
-            "siblings_only": true
-        },
-        "MD036": false,
-        "MD005": false,
-        "MD007": false,
-        "MD029": {
-            "style": "ordered"
-        },
-        "MD040": false
-    },
     // ── Spell Checker ────────────────────────────────────────────
     "cSpell.words": [
         "ExplorerLens",
@@ -330,11 +313,7 @@
         "scminput": false
     },
     "github.copilot.chat.welcomeMessage": "never",
-    "github.copilot.chat.codeGeneration.instructions": [
-        { "file": ".github/copilot-instructions.md" },
-        { "file": ".github/instructions/workspace.instructions.md" }
-    ],
-    "github.copilot.chat.agent.terminal.allowList": {
+    "chat.tools.terminal.autoApprove": {
         "Remove-Item": true,
         "cmake": true,
         "ninja": true,

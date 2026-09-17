@@ -78,13 +78,12 @@
 		{
 			"label": "Build Shell Extension (MSBuild)",
 			"type": "shell",
-			"command": "msbuild",
+			"command": "pwsh",
 			"args": [
-				"LENSShell.sln",
-				"/p:Configuration=Release",
-				"/p:Platform=x64",
-				"/m",
-				"/v:minimal"
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}/build-scripts/Build-LENSShell-MSBuild.ps1"
 			],
 			"group": "build",
 			"problemMatcher": "$msCompile",
@@ -93,21 +92,17 @@
 				"panel": "shared",
 				"showReuseMessage": false
 			},
-			"options": {
-				"cwd": "${workspaceFolder}"
-			}
 		},
 		{
 			"label": "Rebuild Shell Extension (Clean)",
 			"type": "shell",
-			"command": "msbuild",
+			"command": "pwsh",
 			"args": [
-				"LENSShell.sln",
-				"/p:Configuration=Release",
-				"/p:Platform=x64",
-				"/t:Rebuild",
-				"/m",
-				"/v:minimal"
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}/build-scripts/Build-LENSShell-MSBuild.ps1",
+				"-Clean"
 			],
 			"group": "build",
 			"problemMatcher": "$msCompile",
@@ -116,9 +111,6 @@
 				"panel": "shared",
 				"showReuseMessage": false
 			},
-			"options": {
-				"cwd": "${workspaceFolder}"
-			}
 		},
 		// ══════════════════════════════════════════════════════════
 		//  PACKAGING
@@ -147,15 +139,17 @@
 		//  EXTERNAL LIBRARY BUILDS
 		// ══════════════════════════════════════════════════════════
 		{
-			"label": "Build All Libraries (Slow Machine)",
+			"label": "Build All (Slow Machine)",
 			"type": "shell",
 			"command": "pwsh",
 			"args": [
 				"-NoProfile",
 				"-NoLogo",
 				"-File",
-				"${workspaceFolder}/build-scripts/production/Build-Production-SlowMachine.ps1",
-				"-Clean"
+				"${workspaceFolder}/build-scripts/Build-All-And-Package.ps1",
+				"-Clean",
+				"-SkipTests",
+				"-SkipPackaging"
 			],
 			"group": "build",
 			"isBackground": true,
@@ -474,7 +468,7 @@
 				"-NoProfile",
 				"-NoLogo",
 				"-Command",
-				"& '${workspaceFolder}/build/bin/EngineTests.exe'"
+				"ctest --preset default-release-test"
 			],
 			"group": {
 				"kind": "test",
@@ -494,13 +488,8 @@
 			"type": "shell",
 			"command": "ctest",
 			"args": [
-				"--test-dir",
-				"build",
-				"-C",
-				"Release",
-				"--output-on-failure",
-				"-j",
-				"4"
+				"--preset",
+				"default-release-test"
 			],
 			"group": "test",
 			"problemMatcher": [],

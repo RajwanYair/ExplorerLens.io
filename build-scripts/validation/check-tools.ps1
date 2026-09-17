@@ -70,15 +70,17 @@ try {
     Write-Host "[WARN]  GCC: Not found (optional)" -ForegroundColor Yellow
 }
 
-# Scoop
-if (Test-Path "C:\Users\ryair\scoop") {
-    Write-Host "[OK] Scoop Package Manager: Installed" -ForegroundColor Green
+# Machine-wide package root
+$machineVcpkgRoot = [Environment]::GetEnvironmentVariable('VCPKG_ROOT', 'Machine')
+if ($machineVcpkgRoot -and (Test-Path -LiteralPath (Join-Path $machineVcpkgRoot 'vcpkg.exe') -PathType Leaf)) {
+    Write-Host "[OK] Machine-wide vcpkg: $machineVcpkgRoot" -ForegroundColor Green
 } else {
-    Write-Host "[FAIL] Scoop Package Manager: Not found" -ForegroundColor Red
+    Write-Host "[WARN] Machine-wide vcpkg: Not configured (required only for vcpkg presets)" -ForegroundColor Yellow
 }
 
 Write-Host ""
 Write-Host "=== Summary ===" -ForegroundColor Cyan
 Write-Host "Core tools (Git, CMake, Ninja, Python, VS BuildTools) should all be [OK]"
+Write-Host "Tool installers must target machine-wide locations; user-profile package managers are not supported."
 Write-Host "MSVC tools (MSBuild, cl.exe) require running vcvarsall.bat or using Developer PowerShell"
 Write-Host ""

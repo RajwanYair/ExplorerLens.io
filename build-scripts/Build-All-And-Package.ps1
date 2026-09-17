@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# ExplorerLens v15.0.0 "Zenith" - Complete Build & Package Script
+# ExplorerLens complete build and package script
 # Builds all dependencies, projects, and creates MSI installer
 #
 # USAGE:
@@ -15,7 +15,7 @@ param(
     [switch]$SkipTests,
     [switch]$Clean,
     [switch]$SkipPackaging,
-    [string]$Version = "15.0.0"
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = 'Stop'
@@ -39,6 +39,12 @@ if (Test-Path $helperModule) {
 # ============================================================================
 
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+$rootDir = Split-Path -Parent $PSScriptRoot
+$buildScriptsDir = Join-Path $rootDir "build-scripts"
+$externalLibsDir = Join-Path $buildScriptsDir "external-libs"
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $Version = (Get-Content -LiteralPath (Join-Path $rootDir 'VERSION') -Raw).Trim()
+}
 
 Write-Host ""
 Write-Host ("=" * 80) -ForegroundColor Cyan
@@ -49,10 +55,6 @@ Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
 Write-Host "Clean Build:   $Clean" -ForegroundColor Yellow
 Write-Host "Date:          $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Yellow
 Write-Host ""
-
-$rootDir = Split-Path -Parent $PSScriptRoot
-$buildScriptsDir = Join-Path $rootDir "build-scripts"
-$externalLibsDir = Join-Path $buildScriptsDir "external-libs"
 
 # ============================================================================
 # Phase 1: Build External Dependencies
@@ -67,20 +69,19 @@ if (-not $SkipDependencies) {
 
     $libScripts = @(
         # Compression libraries (build order matters - zlib first)
-        "Build-Zlib.ps1",
-        "Build-LZ4.ps1",
-        "Build-Zstd.ps1",
-        "Build-LZMA-SDK-26.00.ps1",
-        "Build-UnRAR.ps1",
-        "Build-MinizipNG.ps1",
+        'Build-Zlib.ps1',
+        'Build-LZ4.ps1',
+        'Build-Zstd.ps1',
+        'build-unrar.ps1',
+        'Build-MinizipNG.ps1',
         # Image libraries
-        "Build-LibWebP-NMake.ps1",
-        "Build-Dav1d.ps1",
-        "Build-LibAVIF.ps1",
-        "Build-LibJXL.ps1",
-        "Build-LibHEIF.ps1",
+        'Build-LibWebP-NMake.ps1',
+        'build-dav1d.ps1',
+        'build-libavif.ps1',
+        'build-libjxl.ps1',
+        'Build-LibHEIF.ps1',
         # Camera RAW
-        "Build-LibRaw.ps1"
+        'Build-LibRaw.ps1'
     )
 
     foreach ($script in $libScripts) {
@@ -92,7 +93,18 @@ if (-not $SkipDependencies) {
             Write-Host ("-" * 80) -ForegroundColor Gray
 
             try {
-                & $scriptPath -Configuration $Configuration -Clean:$Clean
+                $scriptArgs = @('-Configuration', $Configuration, "-Clean:$Clean")
+                if ($script -eq 'Build-LibWebP-NMake.ps1') {
+                    $scriptArgs = @("-Clean:$Clean")
+                } elseif ($script -eq 'Build-LibHEIF.ps1') {
+                    $scriptArgs = @(
+                        '-Configuration', $Configuration,
+                        "-Clean:$Clean",
+                        '-Libde265ZipPath', '',
+                        '-LibheifZipPath', ''
+                    )
+                }
+                & $scriptPath @scriptArgs
 
                 if ($LASTEXITCODE -ne 0) {
                     throw "Build failed with exit code $LASTEXITCODE"

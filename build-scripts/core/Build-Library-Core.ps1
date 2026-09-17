@@ -1,5 +1,5 @@
 # Build-Library-Core.ps1
-# ExplorerLens v7.0 - Unified Build Library Core Functions
+# ExplorerLens - Unified Build Library Core Functions
 # Consolidates common build patterns across all external library scripts
 #
 # USAGE:
@@ -34,8 +34,8 @@ $Script:BuildConfig = @{
 
     # Optimization flags — NOTE: /GL (LTCG) is intentionally excluded.
     # /GL embeds compiler-version-specific IR into .lib files, making them
-    # incompatible across MSVC toolset versions (e.g. v145-built .lib fails
-    # to link with v143). LTCG is handled at the main Engine link stage instead.
+    # incompatible across MSVC toolset versions. LTCG is handled at the main
+    # Engine link stage instead.
     OptimizationFlags   = @('/O2', '/Oi', '/Ot', '/Ob2')
 
     # Security flags
@@ -108,7 +108,7 @@ function Write-BuildHeader {
 function Find-MSBuildPath {
     <#
     .SYNOPSIS
-        Finds MSBuild.exe path (VS 2022/2026)
+        Finds MSBuild.exe path from the VS 18 2026 installation
     .OUTPUTS
         String path to MSBuild.exe or $null if not found
     #>
@@ -116,10 +116,13 @@ function Find-MSBuildPath {
     param()
 
     # Try vswhere first (most reliable)
-    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-    if (Test-Path $vswhere) {
-        $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild `
-            -property installationPath -version '[17.0,19.0)'
+    $vswhere = @(
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\Installer\vswhere.exe"
+    ) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    if ($vswhere) {
+        $vsPath = & $vswhere -latest -products '*' -version '[18.0,19.0)' `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
 
         if ($vsPath) {
             $vsCandidates = @(
@@ -137,25 +140,21 @@ function Find-MSBuildPath {
 
     # Fallback: Check common paths
     $commonPaths = @(
-        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe",
-        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2026\Enterprise\MSBuild\Current\Bin\amd64\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2026\Professional\MSBuild\Current\Bin\amd64\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2026\Community\MSBuild\Current\Bin\amd64\MSBuild.exe",
-        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe",
-        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe",
-        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe",
-        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
     )
 
     foreach ($path in $commonPaths) {
-        if (Test-Path $path) {
+        if (Test-Path -LiteralPath $path -PathType Leaf) {
             Write-BuildLog "Found MSBuild: $path" -Level Success
             return $path
         }
     }
 
-    Write-BuildLog "MSBuild not found. Install Visual Studio 2022 Build Tools" -Level Error
+    Write-BuildLog "MSBuild not found. Install Visual Studio 18 2026 Build Tools with MSVC v145" -Level Error
     return $null
 }
 
@@ -169,27 +168,32 @@ function Find-CMakePath {
     [CmdletBinding()]
     param()
 
-    # Check if cmake is in PATH
-    $cmake = Get-Command cmake.exe -ErrorAction SilentlyContinue
-    if ($cmake) {
-        Write-BuildLog "Found CMake: $($cmake.Source)" -Level Success
-        return $cmake.Source
-    }
-
-    # Check common installation paths
+    # Resolve from machine PATH and machine-wide roots only. Process/user PATH
+    # entries may contain unsupported user-scoped CMake installations.
+    $machinePathEntries = [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        ForEach-Object { Join-Path $_.TrimEnd('\') 'cmake.exe' }
     $commonPaths = @(
+        $machinePathEntries
         "${env:ProgramFiles}\CMake\bin\cmake.exe",
-        "${env:ProgramFiles(x86)}\CMake\bin\cmake.exe"
-    )
+        "${env:ProgramFiles(x86)}\CMake\bin\cmake.exe",
+        'C:\ProgramData\scoop\shims\cmake.exe'
+    ) | Where-Object { $_ } | Select-Object -Unique
 
     foreach ($path in $commonPaths) {
-        if (Test-Path $path) {
-            Write-BuildLog "Found CMake: $path" -Level Success
+        if (Test-Path -LiteralPath $path -PathType Leaf) {
+            $versionOutput = & $path --version 2>&1 | Select-Object -First 1
+            $versionMatch = [regex]::Match([string]$versionOutput, '(\d+\.\d+(?:\.\d+)?)')
+            if (-not $versionMatch.Success -or [version]$versionMatch.Value -lt [version]'4.2.0') {
+                Write-BuildLog "CMake is outdated at $path ($versionOutput); requires 4.2+" -Level Warning
+                continue
+            }
+            Write-BuildLog "Found CMake: $path ($versionOutput)" -Level Success
             return $path
         }
     }
 
-    Write-BuildLog "CMake not found. Install CMake 3.20+" -Level Error
+    Write-BuildLog "CMake 4.2+ not found in machine PATH or machine-wide installation roots" -Level Error
     return $null
 }
 

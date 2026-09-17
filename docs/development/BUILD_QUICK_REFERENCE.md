@@ -1,271 +1,102 @@
 ﻿# ExplorerLens Build Quick Reference
 
-**For AI Assistants & Developers**
-**Updated:** February 9, 2026
+## Prerequisites
 
----
+Use Windows 11 x64, PowerShell 7, Visual Studio 2026 Build Tools with MSVC v145,
+ATL, and Windows SDK 10.0.26100.0. Import [the component manifest](https://github.com/RajwanYair/ExplorerLens.io/blob/main/.vsconfig)
+through Visual Studio Installer's **More > Import configuration** for the VS 2026
+instance. Installing or repairing these machine-wide components requires elevation.
 
-## 🚀 ONE-LINE SETUP
+CMake 4.2 or newer is required for the Visual Studio 18 2026 generator. Prefer
+current stable releases, not preview compilers. The project uses C++23 and `/MD`.
 
-```powershell
-# In ANY PowerShell session:
-.\scripts\Setup-DevEnvironment.ps1
-
-# Or add to $PROFILE for automatic loading in every session
-```
-
-**Done!** All tools (MSBuild, CMake, CL, NMake, Git) are now available.
-
----
-
-## 📦 Quick Build Commands
-
-After running setup script above:
+Install the auxiliary utilities machine-wide. The examples below require an
+elevated PowerShell session and keep the executables available to every user:
 
 ```powershell
-# Build full solution (Release, x64)
-dtbuild Release
-
-# Build Engine only (CMake project)
-dtbuild Engine
-
-# Build LENSShell only
-dtbuild Shell
-
-# Clean all build outputs
-dtbuild Clean
-
-# Full rebuild (Clean + Release)
-dtbuild Rebuild
-
-# Run tests
-dttest
-
-# Show environment info
-Show-ExplorerLensInfo
+winget install --id Kitware.CMake --exact --scope machine
+winget install --id Ninja-build.Ninja --exact --scope machine
+winget install --id NASM.NASM --exact --scope machine
+winget install --id Git.Git --exact --scope machine
+winget install --id 7zip.7zip --exact --scope machine
 ```
 
----
+Install Meson, NuGet, sccache, and WiX through machine-wide installers or
+machine-wide tool directories under `C:\Program Files` or `C:\ProgramData`.
+Do not use user-profile Scoop, `pip --user`, or the user-scoped .NET tool path.
 
-## 🔧 Direct Tool Commands (Without Shortcuts)
+WiX and .NET are needed for MSI packaging. Review the
+[WiX licensing and upgrade notes](https://docs.firegiant.com/wix/whatsnew/releasenotes/)
+before changing major versions; WiX 7 requires explicit OSMF EULA acceptance.
 
-### MSBuild - Full Solution
+## Non-Executing Checks
+
+From the repository root, run the VS Code **Verify Tools** task or:
 
 ```powershell
-msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+.\build-scripts\Test-Build-Environment.ps1
 ```
 
-### MSBuild - Single Project
+This checks prerequisite files and tool availability. It does not configure,
+compile, run tests, register the COM extension, or launch ExplorerLens.
+Passing does not certify compiled libraries, linking, or runtime correctness.
+
+## Build Commands
+
+These commands compile code. Do not run them during a collateral-only audit.
 
 ```powershell
-msbuild LENSShell\LENSShell.vcxproj /p:Configuration=Release /p:Platform=x64 /m
+.\build-scripts\Build-MSVC.ps1
+.\build-scripts\Build-MSVC.ps1 -Preset default-debug
+.\build-scripts\Build-MSVC.ps1 -Preset vs2026
 ```
 
-### CMake - Engine
+The launcher discovers VS 2026 through `vswhere`, selects the newest installed
+v145 patch, and initializes the x64 compiler environment before CMake. It resolves
+CMake and Ninja from machine PATH, machine-wide roots, or the Visual Studio
+installation. Use it rather than configuring
+from an uninitialized terminal, where unrelated compilers can be found on PATH.
 
-```powershell
-cd Engine
-cmake -B build -G "Visual Studio 18 2026" -A x64
-cmake --build build --config Release -j 8
-```
+Local presets use `%TEMP%/ExplorerLens-build` and corresponding `-debug`, `-vs`,
+or `-vcpkg` directories. CI presets use the repository's build directory.
+Inspect [the presets](https://github.com/RajwanYair/ExplorerLens.io/blob/main/CMakePresets.json) for exact output locations.
+The `-Test` switch runs project tests and is not part of a non-executing audit.
 
-### CMake - With Tests
+## Dependencies and Data
 
-```powershell
-cd Engine/build
-ctest --output-on-failure
-```
+The vcpkg presets require `VCPKG_ROOT` to identify a complete installation and use
+`x64-windows-static-md`: static dependency libraries with the dynamic MSVC CRT.
+Do not select `x64-windows-static`, which uses a different CRT policy.
 
----
+The default build still uses versioned, vendored native dependencies. Updating
+vcpkg alone does not update these sources or produce their compiled libraries.
+Native upgrades must update source provenance, build/link paths, and the SBOM
+together, followed by a clean MSVC build and format regression validation.
 
-## 📋 Installed Tools & Versions (Updated Mar 25, 2026)
+The [corpus manifest](https://github.com/RajwanYair/ExplorerLens.io/blob/main/data/corpus/MANIFEST.json)
+describes validation inputs,
+not a guarantee that every sample is present. Missing samples limit format testing
+but are not compiler prerequisites. Never replace missing real-format samples with
+empty files or rename unrelated data to make an inventory pass.
 
-- **Visual Studio:** 2026 Build Tools (v18)
-- **MSVC:** 14.50.35717
-- **MSBuild:** 18.3.0
-- **CMake:** 4.3.0 ✅ Latest
-- **Windows SDK:** 10.0.26100.0
-- **Git:** 2.53.0 ✅ Latest
-- **Ninja:** 1.13.2 (via Scoop)
+## Local Audit: 2026-09-17
 
----
+| Component | Observed state |
+| --- | --- |
+| CMake | Installed and version-checked: 4.4.3 |
+| Ninja | Installed and version-checked: 1.13.2 |
+| Meson | Installed and version-checked: 1.12.0 |
+| NASM | Installed and version-checked: 3.02 |
+| sccache | Installed and version-checked: 0.18.0 |
+| NuGet | Installed and version-checked: 7.9.0 |
+| VS Code / GitHub CLI | Already current: 1.138.0 / 2.101.0 |
+| .NET SDK / VC++ x64 runtime | Present: 10.0.401 / 14.51.36247 |
+| Windows SDK | Required headers, libraries, and resource tools present |
+| MSVC v145 / ATL | Missing; VS installer metadata does not prove the payload exists |
+| WiX | 6.0.2 retained pending WiX 7 license acceptance |
+| Vendored compiled libraries | No `.lib` files found under `external/` |
+| Corpus files | 16 of 106 manifest paths present; 90 missing |
 
-## 🛠️ Tool Paths (Hard-Coded - No Searching!)
-
-```powershell
-# Already configured in Setup-DevEnvironment.ps1:
-$Global:ExplorerLensConfig = @{
- VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
- MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
- CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
- Git = "C:\Users\ryair\scoop\shims\git.exe"
- VCVarsAll = "$VSPath\VC\Auxiliary\Build\vcvarsall.bat"
-}
-```
-
----
-
-## ✅ Verify Environment
-
-```powershell
-# Check all tools are accessible
-Test-BuildTools
-
-# Show full environment details
-Show-ExplorerLensInfo
-
-# Test specific tool
-cl.exe # MSVC compiler
-nmake /? # NMake make tool
-msbuild -version # MSBuild
-cmake --version # CMake
-git --version # Git
-```
-
----
-
-## 🏗️ Common Build Scenarios
-
-### Scenario 1: Quick Test Build
-
-```powershell
-dtbuild Release # Fast build with /m (parallel)
-```
-
-### Scenario 2: Clean Rebuild
-
-```powershell
-dtbuild Rebuild # Cleans then builds
-```
-
-### Scenario 3: Engine Development
-
-```powershell
-dtbuild Engine # Build Engine with CMake
-dttest # Run Engine tests
-```
-
-### Scenario 4: Debug Build
-
-```powershell
-msbuild LENSShell.sln /p:Configuration=Debug /p:Platform=x64 /m
-```
-
-### Scenario 5: Check for Errors Only
-
-```powershell
-msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:ErrorsOnly
-```
-
----
-
-## 🐛 Quick Troubleshooting
-
-| Problem | Solution |
-| --------- | ---------- |
-| "cl.exe not found" | Run `Load-MSVCEnvironment` or `Setup-ExplorerLensEnv -Force` |
-| "CMake generator not found" | Ensure VS Build Tools are installed, run `Setup-ExplorerLensEnv` |
-| "Build failed" | Check `build.log` or add `/v:detailed` to msbuild command |
-| Tools reset after reboot | Add setup script to `$PROFILE` for persistence |
-
----
-
-## 📁 Project Structure
-
-```text
-ExplorerLens/
-├── LENSShell.sln # Main VS solution
-├── LENSShell/ # Shell extension DLL
-│ └── LENSShell.vcxproj
-├── LENSManager/ # Manager application
-│ └── LENSManager.vcxproj
-├── Engine/ # CMake-based engine library
-│ ├── CMakeLists.txt
-│ └── Tests/ # Security tests, benchmarks
-├── external/ # Pre-built dependencies
-├── scripts/ # Build & utility scripts
-│ └── Setup-DevEnvironment.ps1 # ⭐ Main setup script
-└── .github/ # Build documentation
- ├── tool-versions.md # Detailed tool info (this file)
- └── BUILD_QUICK_REFERENCE.txt
-```
-
----
-
-## 🔄 Git Workflow
-
-```powershell
-# Check status
-git status
-
-# Stage changes
-git add .
-
-# Commit
-git commit -m "feat: description"
-
-# View recent commits
-git log --oneline --graph -10
-
-# View changes
-git diff --stat
-```
-
----
-
-## 📊 Build Performance
-
-Typical build times on this machine:
-
-- **LENSShell.dll:** ~60 seconds (incremental), ~120 seconds (clean)
-- **Engine library:** ~45 seconds (CMake + compile)
-- **Full solution:** ~3 minutes (clean build)
-
-Use `/m` flag for parallel builds to maximize CPU usage.
-
----
-
-## ⚡ Pro Tips
-
-1. **Add to Profile for Auto-Load:**
-
- ```powershell
- notepad $PROFILE
- # Add: . "C:\...\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
- ```
-
-1. **Use Aliases:**
-
- ```powershell
- dtbuild # Instead of Invoke-ExplorerLensBuild
- dtclean # Instead of cleaning manually
- dttest # Instead of navigating to test folder
- ```
-
-1. **Monitor Builds:**
-
- ```powershell
- # In separate terminal:
- Get-Content build.log -Wait
- ```
-
-1. **Check Build Output:**
-
- ```powershell
- # List recent DLLs:
- Get-ChildItem -Recurse -Filter "*.dll" | 
- Where LastWriteTime -gt (Get-Date).AddMinutes(-5)
- ```
-
----
-
-## 📚 Additional Resources
-
-- **Detailed Tool Docs:** `.github/standards/tool-versions.md`
-- **Environment Script:** `scripts/Setup-DevEnvironment.ps1`
-- **Build Scripts:** `build-scripts/`
-- **Docs:** `docs/PluginSecurityGuide.md`
-
----
-
-_Auto-updated: February 9, 2026 - All tools verified working_
+**Not build-ready.** Compiler installation needs administrator action. Native
+dependency updates and compiled artifacts remain outstanding. No project binaries,
+tests, shell registration, or installers were executed during this audit.

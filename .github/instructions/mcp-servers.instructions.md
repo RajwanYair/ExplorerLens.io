@@ -23,11 +23,14 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
 
 1. **Justify the addition** — document what agent workflow requires it.
 2. **Minimize scope** — prefer narrow filesystem paths over full workspace access.
-3. **Use `npx -y`** — do not install packages globally; `npx -y` ensures latest version.
-4. **Include PATH fallback** — Windows PATH must include npm, scoop, and nodejs paths:
+4. **Use machine-wide Node.js** — resolve `npx.cmd` from `C:\Program Files\nodejs` and
+  use a machine-wide npm cache such as `C:\ProgramData\npm-cache`.
+5. **Include PATH fallback** — put machine Node.js, Git, and Scoop paths before the
+  inherited PATH; never add user npm, Scoop, or nvm paths:
    ```json
    "env": {
-     "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:USERPROFILE}\\scoop\\apps\\nvm\\current\\nodejs\\nodejs;${env:PROGRAMFILES}\\nodejs;${env:PATH}"
+    "PATH": "${env:PROGRAMFILES}\\nodejs;${env:PROGRAMFILES}\\Git\\cmd;${env:PROGRAMDATA}\\scoop\\shims;${env:PATH}",
+    "npm_config_cache": "${env:PROGRAMDATA}\\npm-cache"
    }
    ```
 5. **Never hardcode tokens** — use `${input:...}` for secrets with `"password": true`.
@@ -48,7 +51,8 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
     "${workspaceFolder}\\target-dir"
   ],
   "env": {
-    "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:PATH}"
+    "PATH": "${env:PROGRAMFILES}\\nodejs;${env:PROGRAMFILES}\\Git\\cmd;${env:PROGRAMDATA}\\scoop\\shims;${env:PATH}",
+    "npm_config_cache": "${env:PROGRAMDATA}\\npm-cache"
   }
 }
 ```
@@ -71,7 +75,7 @@ tool access. Configuration lives in `.vscode/mcp.json` (workspace-scoped).
 
 | Symptom | Cause | Fix |
 | --------- | ------- | ----- |
-| "Cannot find module" | Node.js not on PATH | Add scoop/nvm nodejs paths to `env.PATH` |
+| "Cannot find module" | Node.js not on PATH | Add the machine-wide Node.js path to `env.PATH` |
 | "EACCES" or "Access denied" | Filesystem scope too narrow | Widen the server's path arguments |
 | Token prompt on every session | VS Code doesn't cache MCP inputs | Use `"type": "promptString"` — this is expected |
 | Server not appearing in Copilot | mcp.json syntax error | Validate JSON; check VS Code Output > MCP panel |

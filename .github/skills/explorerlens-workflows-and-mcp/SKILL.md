@@ -85,7 +85,8 @@ jobs:
      "command": "npx",
      "args": ["-y", "@scope/mcp-server-package", "${workspaceFolder}\\scope-dir"],
      "env": {
-       "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:PATH}"
+      "PATH": "${env:PROGRAMFILES}\\nodejs;${env:PROGRAMFILES}\\Git\\cmd;${env:PROGRAMDATA}\\scoop\\shims;${env:PATH}",
+      "npm_config_cache": "${env:PROGRAMDATA}\\npm-cache"
      }
    }
    ```

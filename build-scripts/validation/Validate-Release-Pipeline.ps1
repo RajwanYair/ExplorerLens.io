@@ -3,7 +3,7 @@
 # Version: 1.0.0
 
 param(
-    [string]$Version = "15.0.0",
+    [string]$Version = "",
     [switch]$DryRun,
     [switch]$SkipMSI,
     [switch]$SkipPortableZip,
@@ -26,6 +26,9 @@ function Write-StepHeader { param([string]$Text) Write-Host "`n═══ $Text �
 
 $RootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Push-Location $RootDir
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $Version = (Get-Content -LiteralPath (Join-Path $RootDir 'VERSION') -Raw).Trim()
+}
 
 try {
     Write-Host "=============================================" -ForegroundColor Cyan

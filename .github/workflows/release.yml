@@ -104,7 +104,8 @@ jobs:
       # ── Setup toolchain ────────────────────────────────────────────────────
       # NOTE: ilammy/msvc-dev-cmd brings the full MSVC environment (cl, link,
       # msbuild, rc, mt, lib). No separate setup-msbuild action needed.
-      # GitHub windows-latest runner ships VS 2022 (MSVC v143, cl.exe 19.43).
+      # CI-only: GitHub windows-latest currently ships VS 2022 (MSVC v143, cl.exe 19.43).
+      # Local development uses the machine-wide VS 18 2026/MSVC v145 toolchain.
       # When GitHub upgrades to VS 2026 runners, this auto-picks v145.
 
       - name: Setup .NET 10 SDK (for WiX + Manager.WinUI)
@@ -115,6 +116,7 @@ jobs:
       - name: Install WiX Toolset 6.x
         shell: pwsh
         run: |
+          # Ephemeral CI tool install; local WiX must be machine-wide, not a user .dotnet tool.
           dotnet tool install --global wix --version 6.0.2
           Write-Host "WiX: $(wix --version)" -ForegroundColor Green
 

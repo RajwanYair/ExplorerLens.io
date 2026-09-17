@@ -1,7 +1,7 @@
 # ExplorerLens PluginHost Executable
 # Separate process for secure plugin execution
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.2)
 
 # PluginHost executable
 add_executable(PluginHost

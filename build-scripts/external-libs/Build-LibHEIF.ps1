@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# ExplorerLens v7.0 - Build libheif 1.19.5 (HEIF/HEIC Support)
+# ExplorerLens - Build libheif 1.19.5 (HEIF/HEIC Support)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -15,7 +15,7 @@
 param(
     [string]$Configuration = "Release",
     [switch]$Clean,
-    [string]$Libde265ZipPath = "C:\Users\ryair\Downloads\libde265-master.zip",
+    [string]$Libde265ZipPath = "",
     [string]$LibheifZipPath = "",
     [string]$GitProxyUrl = "",
     [bool]$DisableGitSslVerifyForProxy = $false

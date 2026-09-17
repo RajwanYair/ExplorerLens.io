@@ -176,7 +176,7 @@ Three-stage detection: extension check (fast path) → magic bytes (first 16 byt
 ### Requirements
 
 - Visual Studio 18 2026 BuildTools (MSVC v145 toolset)
-- CMake 3.25+
+- CMake 4.2+
 - Windows SDK 10.0.26100.0
 
 ### Build Commands

@@ -167,8 +167,8 @@ Build scripts in `build-scripts/external-libs/` handle each one.
 | Symptom | Fix |
 | --------- | ----- |
 | `/MT` vs `/MD` link error | Rebuild lib with `-Clean` flag — scripts use `/MD` |
-| Missing NASM for dav1d | `scoop install nasm` |
-| Missing Meson for dav1d | `scoop install meson` |
+| Missing NASM for dav1d | `winget install --id NASM.NASM --scope machine` |
+| Missing Meson for dav1d | Install Meson machine-wide under `C:\Program Files` or `C:\ProgramData` |
 | libheif cmake can't find libde265 | Build libde265 first (Build-LibHEIF.ps1 handles both) |
 | MuPDF build > 10 minutes | Normal — MuPDF + harfbuzz is huge |
 

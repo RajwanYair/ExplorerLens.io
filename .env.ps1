@@ -36,15 +36,24 @@ if (-not $SkipCommonBootstrap) {
     }
 }
 
-# Ensure git is resolvable even if Initialize-CommonTooling was skipped
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    $scoopGit = "$env:USERPROFILE\scoop\apps\git\current\cmd"
-    $scoopShims = "$env:USERPROFILE\scoop\shims"
-    foreach ($p in @($scoopShims, $scoopGit)) {
-        if ((Test-Path $p) -and ($env:PATH -split ';') -notcontains $p) {
-            $env:PATH = "$p;$env:PATH"
-        }
-    }
+# Ensure machine-wide Git is resolvable even if Initialize-CommonTooling was skipped.
+$machinePathEntries = [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+    ForEach-Object { $_.TrimEnd('\') }
+$machineGitCandidates = @(
+    $machinePathEntries | ForEach-Object { Join-Path $_ 'git.exe' }
+    "$env:ProgramFiles\Git\cmd\git.exe"
+    "${env:ProgramFiles(x86)}\Git\cmd\git.exe"
+    "$env:ProgramData\scoop\shims\git.exe"
+) | Where-Object { $_ } | Select-Object -Unique
+$machineGit = $machineGitCandidates |
+    Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+    Select-Object -First 1
+if ($machineGit) {
+    $machineGitDir = Split-Path -Parent $machineGit
+    $env:PATH = "$machineGitDir;$env:PATH"
+} else {
+    Write-Warning 'Machine-wide Git was not found; user-scoped Git paths are not enabled.'
 }
 
 # ── ExplorerLens project helpers ─────────────────────────────────────────────

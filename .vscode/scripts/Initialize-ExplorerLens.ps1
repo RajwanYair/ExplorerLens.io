@@ -29,7 +29,25 @@ $global:ELRoot = if ($WorkspaceRoot -and (Test-Path $WorkspaceRoot -PathType Con
     Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 }
 
-Set-Location $global:ELRoot
+Set-Location -LiteralPath $global:ELRoot
+
+# Keep shared build tools machine-scoped even when the host account has user tools installed.
+$machinePathEntries = @(
+    [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        ForEach-Object { $_.TrimEnd('\') }
+)
+$userToolPaths = @(
+    "$env:USERPROFILE\scoop\shims",
+    "$env:USERPROFILE\.dotnet\tools"
+)
+$env:PATH = @(
+    $machinePathEntries
+    ($env:PATH -split ';' | Where-Object {
+        $entry = $_.TrimEnd('\')
+        -not [string]::IsNullOrWhiteSpace($entry) -and $userToolPaths -notcontains $entry
+    })
+) | Select-Object -Unique | Join-String -Separator ';'
 
 # ── Corporate proxy (one-time, non-blocking) ──────────────────────────────
 if (-not $env:HTTPS_PROXY) {
@@ -47,16 +65,22 @@ if (-not $env:HTTPS_PROXY) {
     } catch { <# Non-fatal — silently skip on restricted environments #> }
 }
 
-# ── vcpkg root (check once, cache in env) ─────────────────────────────────
-if (-not $env:VCPKG_ROOT) {
-    foreach ($p in @(
-        "$global:ELRoot\external\vcpkg",
-        "$global:ELRoot\build-vcpkg\vcpkg",
-        "$env:USERPROFILE\vcpkg",
-        'C:\vcpkg'
-    )) {
-        if (Test-Path "$p\vcpkg.exe") { $env:VCPKG_ROOT = $p; break }
+# ── vcpkg root (machine-wide only) ─────────────────────────────────────────
+$machineVcpkgRoot = [Environment]::GetEnvironmentVariable('VCPKG_ROOT', 'Machine')
+$env:VCPKG_ROOT = $null
+foreach ($p in @(
+    $machineVcpkgRoot,
+    'C:\ProgramData\vcpkg',
+    'C:\Program Files\vcpkg',
+    'C:\vcpkg'
+) | Where-Object { $_ }) {
+    if (Test-Path -LiteralPath (Join-Path $p 'vcpkg.exe') -PathType Leaf) {
+        $env:VCPKG_ROOT = $p
+        break
     }
+}
+if (-not $env:VCPKG_ROOT) {
+    Write-Warning '[EL] Machine-wide vcpkg not found. Configure VCPKG_ROOT at machine scope before using vcpkg presets.'
 }
 
 # ── MSVC environment (opt-in: -LoadMsvcEnv) ───────────────────────────────
@@ -64,16 +88,17 @@ if (-not $env:VCPKG_ROOT) {
 if ($LoadMsvcEnv -and $env:MSVC_ENV_LOADED -ne '1') {
     # Locate vswhere — the authoritative VS discovery tool
     $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-    if (-not (Test-Path $vswhere)) {
+    if (-not (Test-Path -LiteralPath $vswhere)) {
         $vswhere = "${env:ProgramFiles}\Microsoft Visual Studio\Installer\vswhere.exe"
     }
 
-    if (Test-Path $vswhere) {
+    if (Test-Path -LiteralPath $vswhere) {
         # -products * matches BuildTools and Community/Professional/Enterprise
-        $vsPath = & $vswhere -latest -products * -property installationPath 2>$null
+        $vsPath = & $vswhere -latest -products '*' -version '[18.0,19.0)' `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
         $vcvars = "$vsPath\VC\Auxiliary\Build\vcvars64.bat"
 
-        if (Test-Path $vcvars) {
+        if (Test-Path -LiteralPath $vcvars) {
             # Import all env vars set by vcvars64.bat into this PowerShell process
             $envDump = cmd /c "`"$vcvars`" >nul 2>&1 && set" 2>$null
             foreach ($line in $envDump) {
@@ -139,4 +164,5 @@ Register-ArgumentCompleter -CommandName cmake -ScriptBlock {
 # ── Mark as loaded ─────────────────────────────────────────────────────────
 $env:EXPLORERLENS_ENV_LOADED = '1'
 
-Write-Host "[EL] ExplorerLens 39.9.0  el-build · el-clean · el-test · el-pkg · el-status · el-bump" -ForegroundColor DarkCyan
+$projectVersion = (Get-Content -LiteralPath (Join-Path $global:ELRoot 'VERSION') -Raw).Trim()
+Write-Host "[EL] ExplorerLens $projectVersion  el-build · el-clean · el-test · el-pkg · el-status · el-bump" -ForegroundColor DarkCyan

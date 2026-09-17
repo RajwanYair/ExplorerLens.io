@@ -46,44 +46,99 @@ Set-StrictMode -Version Latest
 # Configuration — VS 18 2026 BuildTools paths
 #==============================================================================
 
-$VS_ROOT = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (-not (Test-Path -LiteralPath $vswhere)) {
+    throw 'Visual Studio Installer discovery tool (vswhere.exe) is missing.'
+}
+$VS_ROOT = & $vswhere -latest -products '*' -version '[18.0,19.0)' `
+    -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+if (-not $VS_ROOT) {
+    throw 'Install Visual Studio 2026 Build Tools with the C++ workload and MSVC v145.'
+}
 $VCVARS64 = "$VS_ROOT\VC\Auxiliary\Build\vcvars64.bat"
-$MSVC_TOOLSET_VER = "14.50.35717"   # Latest v145 sub-version
-
-# Scoop tools (preferred — newer versions)
-$SCOOP_CMAKE = "$env:USERPROFILE\scoop\shims\cmake.exe"
-$SCOOP_NINJA = "$env:USERPROFILE\scoop\shims\ninja.exe"
+$toolset = Get-ChildItem -LiteralPath (Join-Path $VS_ROOT 'VC\Tools\MSVC') -Directory |
+    Where-Object Name -Match '^14\.5\d\.' |
+    Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+if (-not $toolset) {
+    throw 'No MSVC v145 toolset is installed in Visual Studio 2026.'
+}
+$MSVC_TOOLSET_VER = $toolset.Name
 
 # Bundled tools (fallback)
 $BUNDLED_CMAKE = "$VS_ROOT\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
 $BUNDLED_NINJA = "$VS_ROOT\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
+$MACHINE_PATH_ENTRIES = @(
+    [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        ForEach-Object { $_.TrimEnd('\') }
+)
+$MACHINE_CMAKE_CANDIDATES = @(
+    'C:\Program Files\CMake\bin\cmake.exe',
+    'C:\ProgramData\scoop\shims\cmake.exe'
+)
+$MACHINE_NINJA_CANDIDATES = @(
+    'C:\Program Files\Ninja\ninja.exe',
+    'C:\ProgramData\scoop\shims\ninja.exe'
+)
 
 # Project root (parent of build-scripts/)
 $PROJECT_ROOT = Split-Path -Parent $PSScriptRoot
 
 #==============================================================================
-# Tool resolution — prefer latest (Scoop) over bundled
+# Tool resolution — prefer the latest machine-installed tool over the bundled VS copy
 #==============================================================================
 
 function Resolve-Tool {
-    param([string]$Name, [string]$ScoopPath, [string]$BundledPath)
-    if (Test-Path $ScoopPath) {
-        $ver = & $ScoopPath --version 2>&1 | Select-Object -First 1
-        Write-Host "  $Name : $ScoopPath ($ver)" -ForegroundColor Cyan
-        return $ScoopPath
+    param(
+        [string]$Name,
+        [string[]]$MachineCandidates,
+        [string]$BundledPath,
+        [version]$MinimumVersion
+    )
+
+    $candidates = @(
+        $MACHINE_PATH_ENTRIES | ForEach-Object { Join-Path $_ "$Name.exe" }
+        $MachineCandidates
+        $BundledPath
+    ) | Where-Object { $_ } | Select-Object -Unique
+
+    foreach ($candidate in $candidates) {
+        if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
+
+        $versionOutput = & $candidate --version 2>&1 | Select-Object -First 1
+        $versionMatch = [regex]::Match([string]$versionOutput, '(\d+\.\d+(?:\.\d+)?)')
+        if ($MinimumVersion -and (-not $versionMatch.Success -or [version]$versionMatch.Value -lt $MinimumVersion)) {
+            Write-Host "  $Name : $candidate ($versionOutput) [requires $MinimumVersion+]" -ForegroundColor Red
+            continue
+        }
+
+        $scope = if ($candidate -eq $BundledPath) { 'bundled' } else { 'machine' }
+        Write-Host "  $Name : $candidate ($versionOutput) [$scope]" -ForegroundColor Cyan
+        return $candidate
     }
-    if (Test-Path $BundledPath) {
-        $ver = & $BundledPath --version 2>&1 | Select-Object -First 1
-        Write-Host "  $Name : $BundledPath ($ver) [bundled]" -ForegroundColor Yellow
-        return $BundledPath
+
+    throw "$Name not found in machine PATH, machine-wide tool roots, or the Visual Studio installation."
+}
+
+function Resolve-MachineVcpkgRoot {
+    $machineVcpkgRoot = [Environment]::GetEnvironmentVariable('VCPKG_ROOT', 'Machine')
+    $candidates = @(
+        $machineVcpkgRoot,
+        'C:\ProgramData\vcpkg',
+        'C:\Program Files\vcpkg',
+        'C:\vcpkg',
+        'C:\tools\vcpkg',
+        (Join-Path $VS_ROOT 'VC\vcpkg')
+    ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+
+    foreach ($candidate in $candidates) {
+        $toolchainFile = Join-Path $candidate 'scripts\buildsystems\vcpkg.cmake'
+        if (Test-Path -LiteralPath $toolchainFile -PathType Leaf) {
+            return $candidate
+        }
     }
-    # Try PATH as last resort
-    $found = Get-Command $Name -ErrorAction SilentlyContinue
-    if ($found) {
-        Write-Host "  $Name : $($found.Source) [PATH]" -ForegroundColor DarkYellow
-        return $found.Source
-    }
-    Write-Error "$Name not found! Install via Scoop or VS BuildTools."
+
+    throw 'A complete machine-wide vcpkg installation was not found. Configure machine VCPKG_ROOT or install vcpkg under C:\ProgramData\vcpkg.'
 }
 
 #==============================================================================
@@ -110,6 +165,9 @@ Get-ChildItem env: | ForEach-Object { $envBefore[$_.Name] = $_.Value }
 
 # Run vcvars and capture environment
 $vcvarsOutput = cmd /c "`"$VCVARS64`" -vcvars_ver=$MSVC_TOOLSET_VER >nul 2>&1 && set" 2>&1
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to initialize MSVC v145 from $VCVARS64."
+}
 foreach ($line in $vcvarsOutput) {
     if ($line -match '^([^=]+)=(.*)$') {
         $varName = $Matches[1]
@@ -130,8 +188,15 @@ $phaseTimings["vcvars"] = $buildTimer.Elapsed.TotalSeconds
 
 # 3. Resolve cmake and ninja
 Write-Host "`n[2/4] Resolving build tools..." -ForegroundColor Yellow
-$cmakeExe = Resolve-Tool "cmake" $SCOOP_CMAKE $BUNDLED_CMAKE
-$ninjaExe = Resolve-Tool "ninja" $SCOOP_NINJA $BUNDLED_NINJA
+$cmakeExe = Resolve-Tool "cmake" $MACHINE_CMAKE_CANDIDATES $BUNDLED_CMAKE ([version]'4.2.0')
+$ninjaExe = Resolve-Tool "ninja" $MACHINE_NINJA_CANDIDATES $BUNDLED_NINJA
+
+if ($Preset -like 'vcpkg-*') {
+    # Ignore inherited process/user VCPKG_ROOT values. vcpkg presets must use a
+    # complete machine-wide installation so the build is reproducible for all users.
+    $env:VCPKG_ROOT = Resolve-MachineVcpkgRoot
+    Write-Host "  vcpkg   : $env:VCPKG_ROOT [machine]" -ForegroundColor Cyan
+}
 
 # Ensure Ninja is on PATH for CMake to find
 $ninjaDir = Split-Path $ninjaExe
@@ -171,7 +236,11 @@ if ($Clean) {
 Write-Host "`n[3/4] Configuring with preset '$Preset'..." -ForegroundColor Yellow
 Push-Location $PROJECT_ROOT
 try {
-    & $cmakeExe --preset $Preset
+    $configureArgs = @('--preset', $Preset)
+    if ($Preset -ne 'vs2026') {
+        $configureArgs += "-DCMAKE_MAKE_PROGRAM=$ninjaExe"
+    }
+    & $cmakeExe @configureArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Error "CMake configure failed (exit code $LASTEXITCODE)"
     }
@@ -183,18 +252,19 @@ try {
         Write-Host "`n[4/4] Building ($Jobs parallel jobs)..." -ForegroundColor Yellow
 
         # Map configure preset to build preset
-        $buildPreset = $Preset  # They share names in our presets
+        $buildPreset = if ($Preset -eq 'vs2026') { 'vs2026-release' } else { $Preset }
         # Capture all build output to a dedicated log for post-build analysis
         $logDir = Join-Path $env:TEMP "ExplorerLens-logs"
         if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
         $buildLogPath = Join-Path $logDir "build-latest.log"
 
-        $buildArgs = @("--build", "--preset", $buildPreset, "-j", $Jobs, "--",
-                       "-k", "0")   # -k 0: Ninja continues past errors (no limit on failed jobs)
+        $buildArgs = @('--build', '--preset', $buildPreset, '-j', $Jobs)
         if (-not [string]::IsNullOrWhiteSpace($Target)) {
             Write-Host "  Target: $Target" -ForegroundColor Cyan
-            $buildArgs = @("--build", "--preset", $buildPreset, "--target", $Target,
-                           "-j", $Jobs, "--", "-k", "0")
+            $buildArgs += @('--target', $Target)
+        }
+        if ($Preset -ne 'vs2026') {
+            $buildArgs += @('--', '-k', '0')
         }
 
         # Stream output live to terminal AND capture in $buildOutput for analysis.
@@ -243,9 +313,10 @@ try {
         if ($Test) {
             Write-Host "`n[Test] Running CTest..." -ForegroundColor Yellow
             $testPreset = "$Preset-test"
-            & $cmakeExe --test --preset $testPreset 2>$null
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "  Tests: ALL PASSED" -ForegroundColor Green
+            $ctestExe = Join-Path (Split-Path $cmakeExe) 'ctest.exe'
+            $presetData = Get-Content -LiteralPath (Join-Path $PROJECT_ROOT 'CMakePresets.json') -Raw | ConvertFrom-Json
+            if ($testPreset -in $presetData.testPresets.name) {
+                & $ctestExe --preset $testPreset
             } else {
                 # Fallback: resolve binary dir and run ctest directly
                 $presetBinaryDirs = @{
@@ -260,8 +331,13 @@ try {
                 $binDir = $presetBinaryDirs[$Preset]
                 if (-not $binDir) { $binDir = "$env:TEMP\ExplorerLens-build" }
                 $fullBinDir = if ([System.IO.Path]::IsPathRooted($binDir)) { $binDir } else { Join-Path $PROJECT_ROOT $binDir }
-                & ctest --test-dir $fullBinDir -C Release --output-on-failure
+                $configuration = if ($Preset -like '*debug') { 'Debug' } else { 'Release' }
+                & $ctestExe --test-dir $fullBinDir -C $configuration --output-on-failure --no-tests=error
             }
+            if ($LASTEXITCODE -ne 0) {
+                throw "CTest failed (exit code $LASTEXITCODE)."
+            }
+            Write-Host "  Tests: ALL PASSED" -ForegroundColor Green
             $phaseTimings["test"] = $buildTimer.Elapsed.TotalSeconds - ($phaseTimings.Values | Measure-Object -Sum).Sum
         }
     }

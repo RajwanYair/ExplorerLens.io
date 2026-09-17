@@ -118,7 +118,7 @@ Or manually install:
 - CMake tools
 
 - **Build Tools:**
-- CMake 3.28+
+- CMake 4.2+
 - Ninja 1.11+
 - PowerShell 7+
 

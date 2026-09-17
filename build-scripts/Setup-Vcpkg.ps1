@@ -12,7 +12,7 @@
 param(
     [switch]$Force,
     [switch]$InstallPackages,
-    [string]$InstallPath = "$env:USERPROFILE\vcpkg"
+    [string]$InstallPath = 'C:\ProgramData\vcpkg'
 )
 
 # Import helper module
@@ -41,7 +41,7 @@ if ($vcpkgInstalled -and -not $Force) {
     Write-Host "✓ vcpkg is already installed and configured" -ForegroundColor Green
     $vcpkgPath = Get-VcpkgPath
     Write-Host "  Location: $vcpkgPath" -ForegroundColor Gray
-    
+
     if (-not $InstallPackages) {
         Write-Host ""
         Write-Host "Use -InstallPackages to install ExplorerLens dependencies" -ForegroundColor Yellow
@@ -52,7 +52,7 @@ if ($vcpkgInstalled -and -not $Force) {
     try {
         Write-Host "Installing vcpkg..." -ForegroundColor Cyan
         $vcpkgPath = Install-VcpkgIfNeeded -InstallPath $InstallPath -Force:$Force
-        
+
         Write-Host ""
         Write-Host "✓ vcpkg setup complete" -ForegroundColor Green
     } catch {
@@ -69,7 +69,7 @@ if ($InstallPackages) {
     Write-Host "  Installing ExplorerLens Dependencies" -ForegroundColor Cyan
     Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host ""
-    
+
     # Define packages needed for ExplorerLens
     # Note: ExplorerLens currently builds most dependencies from source,
     # but vcpkg can be used for future dependency management
@@ -79,28 +79,28 @@ if ($InstallPackages) {
         # "zstd:x64-windows-static",
         # "lz4:x64-windows-static",
         # "liblzma:x64-windows-static",
-        
+
         # Image libraries (optional - we build from source)
         # "libwebp:x64-windows-static",
         # "libavif:x64-windows-static",
         # "libjxl:x64-windows-static",
-        
+
         # Build tools
         "cmake:x64-windows"
     )
-    
+
     Write-Host "The following packages can be installed via vcpkg:" -ForegroundColor Cyan
     foreach ($pkg in $requiredPackages) {
         Write-Host "  - $pkg" -ForegroundColor Gray
     }
-    
+
     Write-Host ""
     Write-Host "Note: ExplorerLens currently builds most libraries from source." -ForegroundColor Yellow
     Write-Host "vcpkg is available for future dependency management." -ForegroundColor Yellow
     Write-Host ""
-    
+
     $response = Read-Host "Install packages? (y/N)"
-    
+
     if ($response -eq 'y' -or $response -eq 'Y') {
         foreach ($pkg in $requiredPackages) {
             try {
@@ -110,7 +110,7 @@ if ($InstallPackages) {
                 Write-Host "✗ Failed to install $pkg : $($_.Exception.Message)" -ForegroundColor Red
             }
         }
-        
+
         Write-Host ""
         Write-Host "✓ Package installation complete" -ForegroundColor Green
     } else {
@@ -127,7 +127,7 @@ Write-Host ""
 
 $vcpkgPath = Get-VcpkgPath
 Write-Host "vcpkg Location: $vcpkgPath" -ForegroundColor Cyan
-Write-Host "vcpkg Triplet:  x64-windows-static (recommended)" -ForegroundColor Cyan
+Write-Host "vcpkg Triplet:  x64-windows-static-md (recommended)" -ForegroundColor Cyan
 Write-Host ""
 
 # Check for CMake integration
@@ -141,4 +141,3 @@ Write-Host "For more information, visit: https://vcpkg.io" -ForegroundColor Gray
 Write-Host ""
 
 exit 0
-

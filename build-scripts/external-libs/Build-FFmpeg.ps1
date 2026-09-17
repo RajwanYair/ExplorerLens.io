@@ -5,7 +5,7 @@
 .DESCRIPTION
     Downloads and builds a minimal FFmpeg configuration (libavformat + libavcodec + swscale)
     as shared DLLs for dynamic loading. LGPL-compatible build only.
-    ExplorerLens v15.0.0 "Zenith" - Sprints 367-368
+    ExplorerLens FFmpeg external-library build
 
 .PARAMETER Clean
     Remove existing build artifacts before building.
@@ -38,7 +38,7 @@ $installDir = Join-Path $externalDir "ffmpeg-install"
 $outputDir = Join-Path $rootDir "x64" "Release"
 
 Write-BuildHeader "FFmpeg $FFmpegVersion Build Script"
-Write-BuildLog "ExplorerLens v15.0.0 Zenith - Sprints 367-368" -Level Info
+Write-BuildLog "ExplorerLens FFmpeg external-library build" -Level Info
 Write-BuildLog "LGPL-compatible minimal build for video thumbnails" -Level Info
 
 # ============================================================================
@@ -49,7 +49,8 @@ function Get-MSys2Path {
     # Check common locations
     $paths = @(
         "C:\msys64",
-        "$env:USERPROFILE\scoop\apps\msys2\current",
+        "$env:ProgramFiles\msys64",
+        "$env:ProgramData\msys64",
         "C:\tools\msys64"
     )
     foreach ($p in $paths) {
@@ -62,27 +63,15 @@ function Get-MSys2Path {
 
 $msys2Path = Get-MSys2Path
 if (-not $msys2Path) {
-    Write-BuildLog "MSYS2 not found. Installing via scoop..." -Level Warning
-    try {
-        $scoop = Get-Command scoop -ErrorAction SilentlyContinue
-        if ($scoop) {
-            & scoop install msys2
-            $msys2Path = Get-MSys2Path
-        }
-    } catch {
-        Write-BuildLog "Failed to install MSYS2 via scoop" -Level Warning
-    }
-    
-    if (-not $msys2Path) {
-        Write-BuildLog "MSYS2 is required for FFmpeg build (configure script)" -Level Error
-        Write-BuildLog "Install via: scoop install msys2" -Level Info
-        Write-BuildLog "Or download from: https://www.msys2.org/" -Level Info
-        Write-BuildLog "" -Level Info
-        Write-BuildLog "Alternative: Download pre-built FFmpeg shared DLLs:" -Level Info
-        Write-BuildLog "  https://github.com/BtbN/FFmpeg-Builds/releases" -Level Info
-        Write-BuildLog "  Place avformat-61.dll, avcodec-61.dll, swscale-8.dll in x64\Release\" -Level Info
-        exit 1
-    }
+    Write-BuildLog "MSYS2 is required for FFmpeg build (configure script)" -Level Error
+    Write-BuildLog "Install MSYS2 machine-wide in C:\msys64, C:\Program Files\msys64, or C:\ProgramData\msys64." -Level Info
+    Write-BuildLog "Do not install MSYS2 through user-scoped Scoop." -Level Info
+    Write-BuildLog "Download from: https://www.msys2.org/" -Level Info
+    Write-BuildLog "" -Level Info
+    Write-BuildLog "Alternative: Download pre-built FFmpeg shared DLLs:" -Level Info
+    Write-BuildLog "  https://github.com/BtbN/FFmpeg-Builds/releases" -Level Info
+    Write-BuildLog "  Place avformat-61.dll, avcodec-61.dll, swscale-8.dll in x64\Release\" -Level Info
+    exit 1
 }
 
 # ============================================================================
@@ -122,7 +111,7 @@ if (-not (Test-Path $sourceDir)) {
             Remove-Item $tarFile -Force
         }
     } else {
-        Write-BuildLog "7z not found. Install via: scoop install 7zip" -Level Error
+        Write-BuildLog "7z not found. Install 7-Zip machine-wide (for example: winget install --id 7zip.7zip --scope machine)." -Level Error
         exit 1
     }
     Remove-Item $archivePath -Force -ErrorAction SilentlyContinue
@@ -139,7 +128,7 @@ Write-BuildLog "Attempting pre-built LGPL shared library download..." -Level Inf
 
 try {
     $prebuiltZip = Join-Path $externalDir "ffmpeg-prebuilt.zip"
-    
+
     if (-not (Test-Path $prebuiltDir)) {
         Invoke-WebRequest -Uri $prebuiltUrl -OutFile $prebuiltZip -UseBasicParsing -TimeoutSec 60
         Expand-Archive -Path $prebuiltZip -DestinationPath $prebuiltDir -Force

@@ -60,18 +60,18 @@ $allOk = $true
 Write-Step "1/4" "Validating required build tools"
 
 $requiredTools = @(
-    @{ Name = "cmake";   Fix = "Install via: scoop install cmake  OR  winget install Kitware.CMake" },
-    @{ Name = "ninja";   Fix = "Install via: scoop install ninja  OR  winget install Ninja-build.Ninja" },
+    @{ Name = "cmake";   Fix = "Install machine-wide: winget install --id Kitware.CMake --scope machine" },
+    @{ Name = "ninja";   Fix = "Install machine-wide: winget install --id Ninja-build.Ninja --scope machine" },
     @{ Name = "ctest";   Fix = "Comes with cmake — re-install cmake if missing" },
-    @{ Name = "pwsh";    Fix = "Install via: winget install Microsoft.PowerShell" }
+    @{ Name = "pwsh";    Fix = "Install machine-wide: winget install --id Microsoft.PowerShell --scope machine" }
 )
 
 $optionalTools = @(
-    @{ Name = "cl";      Fix = "Install VS 2022 BuildTools: winget install Microsoft.VisualStudio.2022.BuildTools" },
-    @{ Name = "link";    Fix = "Part of MSVC toolset — install with VS 2022 BuildTools" },
-    @{ Name = "nasm";    Fix = "Install via: scoop install nasm  (needed for libAV1/libjpeg-turbo)" },
-    @{ Name = "7z";      Fix = "Install via: scoop install 7zip  (needed for extracting external libraries)" },
-    @{ Name = "git";     Fix = "Install via: winget install Git.Git" }
+    @{ Name = "cl";      Fix = "Install VS 2026 BuildTools machine-wide with Microsoft.VisualStudio.Workload.VCTools and Microsoft.VisualStudio.Component.VC.Tools.x86.x64" },
+    @{ Name = "link";    Fix = "Part of the machine-wide MSVC v145 toolset" },
+    @{ Name = "nasm";    Fix = "Install machine-wide: winget install --id NASM.NASM --scope machine (needed for libAV1/libjpeg-turbo)" },
+    @{ Name = "7z";      Fix = "Install machine-wide: winget install --id 7zip.7zip --scope machine (needed for extracting external libraries)" },
+    @{ Name = "git";     Fix = "Install machine-wide: winget install --id Git.Git --scope machine" }
 )
 
 foreach ($tool in $requiredTools) {
@@ -135,7 +135,7 @@ if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
             Write-OK "cmake configure succeeded"
         } else {
             Write-Fail "cmake configure failed (exit code $LASTEXITCODE)" `
-                "Check that MSVC BuildTools are installed: winget install Microsoft.VisualStudio.2022.BuildTools"
+                "Check that VS 2026 BuildTools with MSVC v145 are installed machine-wide"
             $allOk = $false
             Write-Host ""
             Write-Host "  cmake output (last 20 lines):" -ForegroundColor DarkGray
@@ -157,14 +157,13 @@ Write-Host "  Full build + tests:" -ForegroundColor White
 Write-Host "    .\build-scripts\Build-MSVC.ps1 -Clean -Test" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  CMake only:" -ForegroundColor White
-Write-Host "    cmake --preset default-release" -ForegroundColor Cyan
-Write-Host "    cmake --build build --config Release" -ForegroundColor Cyan
+Write-Host "    .\build-scripts\Build-MSVC.ps1 -Configure" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Run tests:" -ForegroundColor White
-Write-Host "    ctest --test-dir build -C Release --output-on-failure" -ForegroundColor Cyan
+Write-Host "    ctest --preset default-release-test" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Shell extension (MSBuild):" -ForegroundColor White
-Write-Host "    msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64" -ForegroundColor Cyan
+Write-Host "    .\build-scripts\Build-LENSShell-MSBuild.ps1" -ForegroundColor Cyan
 Write-Host ""
 
 # ─────────────────────────────────────────────────────────────────

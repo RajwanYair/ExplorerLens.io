@@ -11,8 +11,8 @@
 | ------ | --------- | --------------- | -------- | -------------- |
 | **MSVC (cl.exe)** | 19.50.35720 (v145) | 19.50.35720 | ✅ Current | VS 18 2026 BuildTools |
 | **MSBuild** | 18.3 | 18.3 | ✅ Current | Bundled with VS 18 |
-| **CMake** | 4.3.1 | 4.3.1 | ✅ Current | `scoop update cmake` |
-| **Ninja** | 1.13.2 | 1.13.2 | ✅ Current | `scoop update ninja` |
+| **CMake** | 4.4.3 | 4.4.3 | ✅ Current | `winget install --id Kitware.CMake --exact --scope machine` |
+| **Ninja** | 1.13.2 | 1.13.2 | ✅ Current | `winget install --id Ninja-build.Ninja --exact --scope machine` |
 | **Windows SDK** | 10.0.26100.0 | 10.0.26100.0 | ✅ Current | VS Installer |
 | **vcpkg** | 2026-02-21 | 2026-02-21 | ✅ Current | Bundled with VS 18 |
 
@@ -20,21 +20,21 @@
 
 | Tool | Current | Latest Stable | Status | Install |
 | ------ | --------- | --------------- | -------- | --------- |
-| **Git** | 2.53.0.2 | 2.53.0.2 | ✅ Current | `scoop update git` |
-| **LLVM / Clang** | 22.1.1 | 22.1.1 | ✅ Current | `scoop update llvm` |
-| **MinGW** | 15.2.0-rt_v13-rev1 | 15.2.0-rt_v13-rev1 | ✅ Current | `scoop update mingw` |
-| **NASM** | 3.01 | 3.01 | ✅ Current | `scoop update nasm` |
-| **Meson** | 1.10.2 | 1.10.2 | ✅ Current | `scoop update meson` |
-| **NuGet** | 7.3.0 | 7.3.0 | ✅ Current | `scoop update nuget` |
-| **7-Zip** | 26.00 | 26.00 | ✅ Current | `scoop update 7zip` |
-| **WiX** | 6.0.2 | 6.0.2 | ✅ Current | `dotnet tool update wix -g` |
-| **cppcheck** | 2.20.0 | 2.20.0 | ✅ Current | `scoop update cppcheck` |
-| **graphviz** | 14.1.4 | 14.1.4 | ✅ Current | `scoop update graphviz` |
-| **delta** | 0.19.2 | 0.19.2 | ✅ Current | `scoop update delta` |
-| **fd** | 10.4.2 | 10.4.2 | ✅ Current | `scoop update fd` |
-| **innounp** | 2.67.6 | 2.67.6 | ✅ Current | `scoop update innounp` |
+| **Git** | 2.53.0.2 | 2.53.0.2 | ✅ Current | `winget install --id Git.Git --exact --scope machine` |
+| **LLVM / Clang** | 22.1.1 | 22.1.1 | ✅ Current | Machine-wide vendor installer |
+| **MinGW** | 15.2.0-rt_v13-rev1 | 15.2.0-rt_v13-rev1 | ✅ Current | Machine-wide vendor installer |
+| **NASM** | 3.02 | 3.02 | ✅ Current | Machine-wide vendor installer |
+| **Meson** | 1.12.0 | 1.12.0 | ✅ Current | Machine-wide vendor installer |
+| **NuGet** | 7.9.0 | 7.9.0 | ✅ Current | Machine-wide vendor installer |
+| **7-Zip** | 26.00 | 26.00 | ✅ Current | Machine-wide vendor installer |
+| **WiX** | 6.0.2 | 6.0.2 | ✅ Current | Machine-wide installer under `C:\Program Files` or `C:\ProgramData` |
+| **cppcheck** | 2.20.0 | 2.20.0 | ✅ Current | Machine-wide vendor installer |
+| **graphviz** | 14.1.4 | 14.1.4 | ✅ Current | Machine-wide vendor installer |
+| **delta** | 0.19.2 | 0.19.2 | ✅ Current | Machine-wide vendor installer |
+| **fd** | 10.4.2 | 10.4.2 | ✅ Current | Machine-wide vendor installer |
+| **innounp** | 2.67.6 | 2.67.6 | ✅ Current | Machine-wide vendor installer |
 | **PowerShell** | 7.6.0 | 7.6.0 | ✅ Current | `winget upgrade PowerShell` |
-| **sccache** | 0.10.0 | 0.10.0 | ✅ Current | `scoop update sccache` |
+| **sccache** | 0.18.0 | 0.18.0 | ✅ Current | `winget install --id Mozilla.sccache --exact --scope machine` |
 
 ## AI Tooling & Automation Surface
 
@@ -97,19 +97,20 @@
 
 ## Upgrade Procedure
 
-### For Scoop-managed tools
+### For machine-wide tools
 
-> **Scoopfile sync:** `scoopfile.json` lists the core build tools (cmake, ninja,
-> git, nasm, meson, nuget, 7zip, sccache, wix, cppcheck, delta).
-> Optional tools (LLVM, MinGW, graphviz, fd, innounp) are documented here but
-> not in the scoopfile — install them individually when needed.
+> `packaging/scoop/scoopfile.json` is retained as legacy distribution metadata and is
+> not a supported local setup path. Install or update local tools at machine scope.
 
 ```powershell
-# Update all tools at once
-scoop update *
+# Install or update core tools at machine scope
+winget install --id Kitware.CMake --exact --scope machine
+winget install --id Ninja-build.Ninja --exact --scope machine
+winget install --id Git.Git --exact --scope machine
+winget install --id Mozilla.sccache --exact --scope machine
 
-# Or individually
-scoop update cmake ninja git nasm meson nuget 7zip
+# Use the vendor installer for tools without a verified winget package ID.
+# Run elevated when the installer writes under C:\Program Files or C:\ProgramData.
 ```
 
 ### For external libraries

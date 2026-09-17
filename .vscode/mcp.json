@@ -9,29 +9,29 @@
   ],
   "servers": {
     "github": {
-      "command": "npx",
+      "command": "${env:ProgramFiles}\\nodejs\\npx.cmd",
       "args": [
         "-y",
         "@modelcontextprotocol/server-github"
       ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github-token}",
-        "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:USERPROFILE}\\scoop\\apps\\nvm\\current\\nodejs\\nodejs;${env:PROGRAMFILES}\\nodejs;${env:PATH}"
+        "PATH": "${env:PROGRAMFILES}\\nodejs;${env:PROGRAMFILES}\\Git\\cmd;${env:PROGRAMDATA}\\scoop\\shims;${env:PATH}"
       }
     },
     "filesystem": {
-      "command": "npx",
+      "command": "${env:ProgramFiles}\\nodejs\\npx.cmd",
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "${workspaceFolder}"
       ],
       "env": {
-        "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:USERPROFILE}\\scoop\\apps\\nvm\\current\\nodejs\\nodejs;${env:PROGRAMFILES}\\nodejs;${env:PATH}"
+        "PATH": "${env:PROGRAMFILES}\\nodejs;${env:PROGRAMFILES}\\Git\\cmd;${env:PROGRAMDATA}\\scoop\\shims;${env:PATH}"
       }
     },
     "project-docs": {
-      "command": "npx",
+      "command": "${env:ProgramFiles}\\nodejs\\npx.cmd",
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
@@ -39,7 +39,7 @@
         "${workspaceFolder}\\docs"
       ],
       "env": {
-        "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:USERPROFILE}\\scoop\\apps\\nvm\\current\\nodejs\\nodejs;${env:PROGRAMFILES}\\nodejs;${env:PATH}"
+        "PATH": "${env:PROGRAMFILES}\\nodejs;${env:PROGRAMFILES}\\Git\\cmd;${env:PROGRAMDATA}\\scoop\\shims;${env:PATH}"
       }
     }
   }

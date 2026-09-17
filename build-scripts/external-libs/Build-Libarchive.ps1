@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# ExplorerLens v15.0.0 - Build libarchive 3.7.6 (Multi-format Archive Support)
+# ExplorerLens - Build libarchive 3.7.6 (Multi-format Archive Support)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: July 2026
 #

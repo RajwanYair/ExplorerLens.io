@@ -120,12 +120,13 @@ ExplorerLens has 500+ headers; full rebuilds take 3–5 minutes even on fast mac
 ### Local Setup
 
 ```powershell
-# Install via scoop (already in scoopfile.json)
-scoop install sccache
+# Install sccache machine-wide using the approved package source.
+# Do not install it into a user profile or the workspace.
+winget install --id Mozilla.sccache --exact --scope machine
 
-# Set environment variables (user-level, persistent)
-[Environment]::SetEnvironmentVariable('CMAKE_C_COMPILER_LAUNCHER',   'sccache', 'User')
-[Environment]::SetEnvironmentVariable('CMAKE_CXX_COMPILER_LAUNCHER', 'sccache', 'User')
+# Set environment variables machine-wide (run elevated if persistent caching is desired)
+[Environment]::SetEnvironmentVariable('CMAKE_C_COMPILER_LAUNCHER',   'sccache', 'Machine')
+[Environment]::SetEnvironmentVariable('CMAKE_CXX_COMPILER_LAUNCHER', 'sccache', 'Machine')
 
 # Or pass to cmake directly:
 cmake --preset default-release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache

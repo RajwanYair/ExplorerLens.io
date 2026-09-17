@@ -28,7 +28,11 @@ $ErrorActionPreference = "Stop"
 # ============================================================================
 
 $ScriptRoot = $PSScriptRoot
-$Version = "15.0.0"
+$VersionFile = Join-Path (Split-Path -Parent $ScriptRoot) "VERSION"
+if (-not (Test-Path -LiteralPath $VersionFile -PathType Leaf)) {
+    throw "VERSION file not found at $VersionFile"
+}
+$Version = (Get-Content -LiteralPath $VersionFile -Raw).Trim()
 $BuildConfig = "Release"
 $Platform = "x64"
 

@@ -13,7 +13,9 @@ Thank you for your interest in contributing to ExplorerLens!
 
 2. **Set up your development environment:**
  - Visual Studio 18 2026 BuildTools with MSVC v145 (cl.exe 19.50)
- - CMake 4.3.1 and Ninja 1.13.2 (install via Scoop: `scoop install cmake ninja`)
+ - CMake 4.2+ and Ninja 1.13.2. Install machine-wide, for example:
+    `winget install --id Kitware.CMake --scope machine` and
+    `winget install --id Ninja-build.Ninja --scope machine`
  - Windows SDK 10.0.26100.0
  - vcpkg 2026-02-21 (optional, managed by `Setup-Vcpkg.ps1`)
  - WiX 6.0.2 (for MSI packaging only)

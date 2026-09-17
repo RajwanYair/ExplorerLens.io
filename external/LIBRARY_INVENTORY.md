@@ -123,11 +123,11 @@
 |------|---------|--------|------|
 | cl.exe | 19.50.35720 | VS 18 BuildTools | `.../MSVC/14.50.35717/bin/Hostx64/x64/cl.exe` |
 | MSBuild | 18.3.0-preview | VS 18 BuildTools | `.../MSBuild/Current/Bin/amd64/MSBuild.exe` |
-| CMake | 4.3.0 | Scoop | `~/scoop/shims/cmake.exe` |
-| Ninja | 1.13.2 | Scoop | `~/scoop/shims/ninja.exe` |
-| Git | 2.53.0 | Scoop | `~/scoop/shims/git.exe` |
-| NASM | 3.01 | Scoop | `~/scoop/shims/nasm.exe` |
-| Meson | 1.10.2 | Scoop | `~/scoop/shims/meson.exe` |
+| CMake | 4.4.3 | Machine installer | `C:\Program Files\CMake\bin\cmake.exe` or machine PATH |
+| Ninja | 1.13.2 | Machine installer | `C:\Program Files\Ninja\ninja.exe` or machine PATH |
+| Git | 2.53.0 | Machine installer | `C:\Program Files\Git\cmd\git.exe` or machine PATH |
+| NASM | 3.02 | Machine installer | `C:\Program Files\NASM\nasm.exe` or machine PATH |
+| Meson | 1.12.0 | Machine installer | `C:\Program Files\Meson\meson.exe` or machine PATH |
 
 ---
 
@@ -144,8 +144,8 @@ for future vendor routing. They are safe to leave as stubs — no SDK or depende
 | nghttp2 | Only in vendored MuPDF/curl (OFF) | Not our code |
 | OpenCASCADE | No references | Clean |
 | IfcOpenShell | No references (comments cleaned) | Clean |
-| NuGet | 7.3.0 | Scoop | `~/scoop/shims/nuget.exe` |
-| WiX | 6.0.2 | .NET tool | `~/.dotnet/tools/wix.exe` |
+| NuGet | 7.9.0 | Machine installer | `C:\Program Files\NuGet\nuget.exe` or machine PATH |
+| WiX | 6.0.2 | Machine installer | `C:\Program Files\WiX Toolset v6.0\bin\wix.exe` or machine PATH |
 
 ---
 

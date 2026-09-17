@@ -1,17 +1,17 @@
 {
   "version": 6,
   "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 25,
+    "major": 4,
+    "minor": 2,
     "patch": 0
   },
   "configurePresets": [
     {
       "name": "vcpkg-base",
       "hidden": true,
-      "description": "Bundled vcpkg from VS 18 BuildTools",
+      "description": "vcpkg installation selected by VCPKG_ROOT",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
       }
     },
@@ -21,12 +21,12 @@
       "description": "MSVC v145 toolset (cl.exe 19.50) from VS 18 2026 BuildTools + Ninja",
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_MAKE_PROGRAM": "C:/Users/ryair/scoop/shims/ninja.exe",
+        "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe",
-        "CMAKE_LINKER": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/link.exe",
-        "CMAKE_AR": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/lib.exe",
-        "CMAKE_MT": "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/mt.exe",
-        "CMAKE_RC_COMPILER": "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/rc.exe",
+        "CMAKE_LINKER": "link.exe",
+        "CMAKE_AR": "lib.exe",
+        "CMAKE_MT": "mt.exe",
+        "CMAKE_RC_COMPILER": "rc.exe",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
         "CMAKE_SYSTEM_VERSION": "10.0.26100.0",

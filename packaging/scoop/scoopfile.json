@@ -1,11 +1,11 @@
 {
-  "_comment": "ExplorerLens Scoop manifest — install all required build tools with one command: scoop import packaging/scoop/scoopfile.json",
+  "_comment": "Legacy Scoop manifest retained for historical distribution metadata. Do not import for local setup; provision tools machine-wide.",
   "_updated": "2026-07-07",
   "apps": [
     {
       "Source": "main",
       "Name": "cmake",
-      "Version": "4.3.1",
+      "Version": "4.4.3",
       "_purpose": "CMake build system generator (CMakePresets.json, Engine/CMakeLists.txt)"
     },
     {
@@ -23,19 +23,19 @@
     {
       "Source": "main",
       "Name": "nasm",
-      "Version": "3.01",
+      "Version": "3.02",
       "_purpose": "NASM assembler — required for dav1d and libjxl SIMD assembly"
     },
     {
       "Source": "main",
       "Name": "meson",
-      "Version": "1.10.2",
+      "Version": "1.12.0",
       "_purpose": "Meson build system — required by dav1d (AV1 decoder)"
     },
     {
       "Source": "main",
       "Name": "nuget",
-      "Version": "7.3.0",
+      "Version": "7.9.0",
       "_purpose": "NuGet package manager — WTL package for LENSManager"
     },
     {
@@ -47,7 +47,7 @@
     {
       "Source": "main",
       "Name": "sccache",
-      "Version": "0.10.0",
+      "Version": "0.18.0",
       "_purpose": "Compilation cache for MSVC cl.exe — speeds up incremental builds"
     },
     {
@@ -70,13 +70,13 @@
     }
   ],
   "usage": {
-    "install_all": "scoop import packaging/scoop/scoopfile.json",
-    "install_missing": "scoop import packaging/scoop/scoopfile.json --skip-installed",
-    "add_extras_bucket": "scoop bucket add extras",
+    "install_all": "Unsupported for local setup; use machine-wide vendor installers or approved machine-scope package sources.",
+    "install_missing": "Unsupported for local setup; use machine-wide vendor installers or approved machine-scope package sources.",
+    "add_extras_bucket": "Not required for local setup.",
     "notes": [
-      "Visual Studio 2022 BuildTools (MSVC v143) or VS 2026 BuildTools (MSVC v145) must be installed separately via winget or the Visual Studio Installer.",
-      "Preferred local toolset: VS 18 2026 BuildTools (MSVC v145, cl.exe 19.50) — see .github/instructions/build.instructions.md",
-      "WiX v6 (preferred): dotnet tool install --global wix",
+      "Legacy reference only; do not use Scoop import commands for Windows 11 local development.",
+      "Install VS 18 2026 BuildTools (MSVC v145, cl.exe 19.50) machine-wide via the Visual Studio Installer.",
+      "Install WiX v6.0.2 machine-wide under C:\\Program Files or C:\\ProgramData; do not use the user .dotnet tool path.",
       "Windows SDK 10.0.26100 is installed with VS BuildTools."
     ]
   }

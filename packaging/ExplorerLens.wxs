@@ -3,7 +3,7 @@
   ExplorerLens Windows Installer (WiX Toolset v6.x)
 
   Build Instructions:
-    wix build ExplorerLens.wxs -out ExplorerLens-Setup-15.0.0.msi
+    wix build ExplorerLens.wxs -out ExplorerLens-Setup-X.Y.Z.msi
 
   Prerequisites:
     - WiX Toolset v6.0+

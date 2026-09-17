@@ -7,7 +7,7 @@ param(
     [switch]$SkipTests = $false,
     [switch]$SkipDocs = $false,
     [switch]$SkipPackaging = $false,
-    [string]$Version = "15.0.0"
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,6 +29,9 @@ Write-Host "============================================`n" -ForegroundColor Cya
 
 $RootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Push-Location $RootDir
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $Version = (Get-Content -LiteralPath (Join-Path $RootDir 'VERSION') -Raw).Trim()
+}
 
 try {
     # =============================================================================

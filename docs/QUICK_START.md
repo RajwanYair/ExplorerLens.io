@@ -1,7 +1,7 @@
 ﻿# ExplorerLens — Quick Start Guide
 
-> **Version:** 39.9.0 "Antares"  
-> **Target:** Windows 10/11 x64, Visual Studio 18 2026 (MSVC v145)
+> **Version:** 40.0.1 "Procyon"
+> **Target:** Windows 11 x64, Visual Studio 18 2026 (MSVC v145)
 
 ---
 
@@ -10,11 +10,11 @@
 | Tool | Version | Install |
 | ------ | --------- | --------- |
 | Visual Studio 18 2026 BuildTools | v145 (cl.exe 19.50) | [visualstudio.microsoft.com](https://visualstudio.microsoft.com/downloads/) |
-| CMake | 4.3+ | `scoop install cmake` |
-| Ninja | 1.13+ | `scoop install ninja` |
-| Git | 2.40+ | `scoop install git` |
+| CMake | 4.2+ | `winget install --id Kitware.CMake --scope machine` |
+| Ninja | 1.13+ | `winget install --id Ninja-build.Ninja --scope machine` |
+| Git | 2.40+ | `winget install --id Git.Git --scope machine` |
 | Windows SDK | 10.0.26100+ | Installed with VS BuildTools |
-| (optional) sccache | any | `scoop install sccache` |
+| (optional) sccache | any | Install machine-wide under `C:\Program Files` or `C:\ProgramData` |
 
 ---
 

@@ -3,7 +3,7 @@
 
 param(
     [string]$Configuration = "Release",
-    [string]$Version = "15.0.0",
+    [string]$Version = "",
     [string]$OutputDir = "",
     [switch]$IncludeDebugSymbols = $false,
     [switch]$IncludeSource = $false
@@ -18,6 +18,14 @@ Write-Host "============================================`n" -ForegroundColor Cya
 
 $ScriptDir = Split-Path -Parent $PSCommandPath
 $RootDir = Split-Path -Parent $ScriptDir
+
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $VersionFile = Join-Path $RootDir "VERSION"
+    if (-not (Test-Path -LiteralPath $VersionFile -PathType Leaf)) {
+        throw "VERSION file not found at $VersionFile"
+    }
+    $Version = (Get-Content -LiteralPath $VersionFile -Raw).Trim()
+}
 
 if ([string]::IsNullOrWhiteSpace($OutputDir)) {
     $OutputDir = Join-Path $ScriptDir "output"

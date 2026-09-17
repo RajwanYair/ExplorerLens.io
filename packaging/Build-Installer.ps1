@@ -3,7 +3,7 @@
 
 param(
     [string]$Configuration = "Release",
-    [string]$Version = "15.0.0"
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,16 +19,42 @@ $RootDir = Split-Path -Parent $ScriptDir
 $PackagingDir = Join-Path $RootDir "packaging"
 $OutputDir = Join-Path $PackagingDir "output"
 
-# Verify WiX installation
-Write-Host "[1/5] Checking for WiX Toolset..." -ForegroundColor Yellow
-$WixBuild = Get-Command wix -ErrorAction SilentlyContinue
-if (-not $WixBuild) {
-    Write-Host "[ERROR] WiX Toolset not found in PATH" -ForegroundColor Red
-    Write-Host "Install from: https://wixtoolset.org/releases/" -ForegroundColor Yellow
-    exit 1
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $VersionFile = Join-Path $RootDir "VERSION"
+    if (-not (Test-Path -LiteralPath $VersionFile -PathType Leaf)) {
+        throw "VERSION file not found at $VersionFile"
+    }
+    $Version = (Get-Content -LiteralPath $VersionFile -Raw).Trim()
 }
 
-$WixVersion = & wix --version
+function Resolve-MachineWix {
+    $machinePathEntries = [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';' |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        ForEach-Object { Join-Path $_.TrimEnd('\') 'wix.exe' }
+    $candidates = @(
+        $machinePathEntries
+        "$env:ProgramFiles\WiX Toolset v6.0\bin\wix.exe"
+        "$env:ProgramFiles\WiX Toolset v5.0\bin\wix.exe"
+        "$env:ProgramFiles\WiX Toolset v4.0\bin\wix.exe"
+        "$env:ProgramData\wix\wix.exe"
+        "$env:ProgramData\dotnet-tools\wix.exe"
+        "$env:ProgramData\scoop\shims\wix.exe"
+    ) | Where-Object { $_ } | Select-Object -Unique
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            return $candidate
+        }
+    }
+
+    throw 'WiX Toolset was not found in machine PATH or machine-wide installation locations. Do not use a user-scoped .dotnet tool for packaging.'
+}
+
+# Verify WiX installation
+Write-Host "[1/5] Checking for WiX Toolset..." -ForegroundColor Yellow
+$WixBuild = Resolve-MachineWix
+
+$WixVersion = & $WixBuild --version
 Write-Host "[OK] Found WiX version: $WixVersion" -ForegroundColor Green
 Write-Host ""
 
@@ -87,7 +113,7 @@ if ($HasLensCLI -eq 1) {
 }
 
 try {
-    & wix build `
+    & $WixBuild build `
         "$WxsFile" `
         -out "$MsiFile" `
         -define "BuildDir=$RootDir" `

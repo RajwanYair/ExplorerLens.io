@@ -1,4 +1,4 @@
-# ExplorerLens v39.9.0 - PowerShell Profile Configuration
+# ExplorerLens v40.0.1 - PowerShell Profile Configuration
 # Bootstraps the ExplorerLens build environment in a persistent $PROFILE.
 #
 # Installation:

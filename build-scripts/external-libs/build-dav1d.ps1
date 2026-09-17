@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# ExplorerLens v7.0 - Build dav1d 1.5.1 (AV1 Video Decoder)
+# ExplorerLens - Build dav1d 1.5.1 (AV1 Video Decoder)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -42,21 +42,23 @@ Write-BuildLog "Install: $installDir" -Level Info
 try {
     # Check for Meson and Ninja
     if (-not (Test-CommandExists "meson")) {
-        Write-BuildLog "Meson not found, installing via pip..." -Level Warning
-        python -m pip install meson --quiet
+        Write-BuildLog "Meson is required but was not found." -Level Error
+        Write-BuildLog "Install Meson machine-wide through an approved vendor or package source before building." -Level Info
+        exit 1
     }
-    
+
     if (-not (Test-CommandExists "ninja")) {
-        Write-BuildLog "Ninja not found, installing via pip..." -Level Warning
-        python -m pip install ninja --quiet
+        Write-BuildLog "Ninja is required but was not found." -Level Error
+        Write-BuildLog "Install Ninja machine-wide through an approved vendor or package source before building." -Level Info
+        exit 1
     }
-    
+
     # Clean build directory if requested
     if ($Clean -and (Test-Path $buildDir)) {
         Write-BuildLog "Cleaning previous build" -Level Info
         Remove-Item $buildDir -Recurse -Force
     }
-    
+
     # Configure with Meson
     $buildNinja = Join-Path $buildDir "build.ninja"
     $needsReconfigure = (-not (Test-Path $buildDir)) -or (-not (Test-Path $buildNinja))
@@ -77,7 +79,7 @@ try {
             Remove-Item $buildDir -Recurse -Force -ErrorAction SilentlyContinue
         }
         Write-BuildLog "Configuring dav1d with Meson..." -Level Info
-        
+
         Push-Location $dav1dDir
         try {
             & meson setup $buildDir `
@@ -89,7 +91,7 @@ try {
                 -Denable_tools=false `
                 -Denable_examples=false `
                 -Denable_tests=false
-            
+
             if ($LASTEXITCODE -ne 0) {
                 throw "Meson configuration failed"
             }
@@ -97,7 +99,7 @@ try {
             Pop-Location
         }
     }
-    
+
     # Build with Meson wrapper (ensures proper VS environment for ninja)
     Write-BuildLog "Building dav1d..." -Level Info
     & meson compile -C $buildDir
@@ -110,7 +112,7 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw "Installation failed"
     }
-    
+
     # Verify output (Meson may emit libdav1d.a on Windows; normalize to dav1d.lib)
     $installLibDir = Join-Path $installDir "lib"
     $expectedLib = Join-Path $installLibDir "dav1d.lib"
@@ -122,12 +124,11 @@ try {
     }
 
     Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
-    
+
     Write-BuildLog "dav1d 1.5.1 build completed successfully" -Level Success
     Write-BuildLog "Features: AV1 video decoder, optimized assembly" -Level Info
-    
+
 } catch {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
-

@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# ExplorerLens v7.0 - Build UnRAR DLL (RAR Archive Extraction)
+# ExplorerLens - Build UnRAR DLL (RAR Archive Extraction)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #

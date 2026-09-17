@@ -6,7 +6,7 @@
 # for unified CMake build system integration.
 #==============================================================================
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.2)
 project(LENSShell LANGUAGES CXX)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)

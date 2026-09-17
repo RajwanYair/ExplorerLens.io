@@ -27,11 +27,11 @@ $MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
 $vcvars64 = "$VSPath\VC\Auxiliary\Build\vcvars64.bat" # Preferred over vcvarsall
 $cl = "$VSPath\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe" # v19.50.35720
 
-# CMake 4.3.1 (via Scoop — auto-detected from PATH)
-$CMake = "$env:USERPROFILE\scoop\shims\cmake.exe"
+# CMake 4.2+ (machine-wide; resolved from machine PATH or Program Files)
+$CMake = "C:\Program Files\CMake\bin\cmake.exe"
 
-# Ninja 1.13.2 (via Scoop — auto-detected from PATH)
-$Ninja = "$env:USERPROFILE\scoop\shims\ninja.exe"
+# Ninja 1.13.2 (machine-wide; resolved from machine PATH or Program Files)
+$Ninja = "C:\Program Files\Ninja\ninja.exe"
 ```
 
 **Note:** Tools are auto-detected by `build-scripts\Find-All-Tools.ps1`.

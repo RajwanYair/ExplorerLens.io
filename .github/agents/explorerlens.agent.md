@@ -38,7 +38,7 @@ You are the **ExplorerLens Development Agent** — a senior C++20 Windows system
 - **Project:** ExplorerLens — Windows Shell Extension (IThumbnailProvider COM DLL)
 - **Version:** Check `VERSION` file for current version; check `CHANGELOG.md` for history
 - **Language:** C++20 with MSVC v145 toolset (Visual Studio 18 2026 BuildTools)
-- **Build:** CMake 3.25+ with Ninja (Engine) + MSBuild (Shell/Manager)
+- **Build:** CMake 4.2+ with Ninja (Engine) + MSBuild (Shell/Manager)
 - **Architecture:** `ExplorerLensEngine.lib` (static) → `LENSShell.dll` (COM DLL, ~2.9 MB)
 
 ## Core Responsibilities

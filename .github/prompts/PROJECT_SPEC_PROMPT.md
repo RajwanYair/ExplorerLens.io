@@ -603,7 +603,7 @@ When the primary target is Windows native code, establish a fixed MSVC toolchain
 | Component | Best Practice |
 | ----------- | -------------- |
 | **Compiler** | MSVC cl.exe (specific version pinned in CI + copilot-instructions.md) |
-| **Build System** | CMake 3.25+ with Presets (`CMakePresets.json`) + Ninja generator |
+| **Build System** | CMake 4.2+ with Presets (`CMakePresets.json`) + Ninja generator |
 | **Package Manager** | vcpkg (manifest mode) or local `external/` with per-library build scripts |
 | **CRT Linkage** | `/MD` (dynamic CRT) across ALL targets and ALL external libs — consistency is critical |
 | **Warning Level** | `/W4` with zero-warnings policy enforced in CI |

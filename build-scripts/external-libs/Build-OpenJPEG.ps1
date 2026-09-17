@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Downloads and builds OpenJPEG as a static library with /MD runtime.
-    ExplorerLens v15.0.0 "Zenith"
+    ExplorerLens OpenJPEG external-library build
 
 .PARAMETER Clean
     Remove existing build artifacts before building.
@@ -33,7 +33,7 @@ $outputDir = Join-Path $rootDir "x64" "Release"
 
 Write-BuildLog "========================================" "Info"
 Write-BuildLog "OpenJPEG $Version Build Script" "Info"
-Write-BuildLog "ExplorerLens v15.0.0 Zenith" "Info"
+Write-BuildLog "ExplorerLens OpenJPEG external-library build" "Info"
 Write-BuildLog "========================================" "Info"
 
 # ============================================================================

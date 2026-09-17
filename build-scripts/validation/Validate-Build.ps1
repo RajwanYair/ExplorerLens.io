@@ -42,7 +42,7 @@ function Test-FileExists {
         [string]$Path,
         [string]$Description
     )
-    
+
     if (Test-Path $Path) {
         $size = (Get-Item $Path).Length
         $sizeMB = [math]::Round($size / 1MB, 2)
@@ -56,14 +56,14 @@ function Test-FileExists {
 
 function Test-CompilationErrors {
     param([string]$LogPath)
-    
+
     if (-not (Test-Path $LogPath)) {
         Write-Warning "Build log not found: $LogPath"
         return $true
     }
-    
+
     $content = Get-Content $LogPath -Raw
-    
+
     # Check for errors
     if ($content -match '(\d+) error\(s\)') {
         $errorCount = [int]$Matches[1]
@@ -72,7 +72,7 @@ function Test-CompilationErrors {
             return $false
         }
     }
-    
+
     # Check for warnings
     if ($content -match '(\d+) warning\(s\)') {
         $warningCount = [int]$Matches[1]
@@ -80,14 +80,14 @@ function Test-CompilationErrors {
             Write-Warning "Build has $warningCount warning(s)"
         }
     }
-    
+
     Write-Success "No compilation errors found"
     return $true
 }
 
 function Test-Dependencies {
     Write-Host "`nChecking Dependencies..." -ForegroundColor Yellow
-    
+
     $libs = @(
         "external\compression\zlib\lib\zlibstatic.lib",
         "external\compression\bzip2\lib\libbz2.lib",
@@ -98,7 +98,7 @@ function Test-Dependencies {
         "external\compression\unrar\lib\unrar.lib",
         "external\image\libwebp\lib\libwebp.lib"
     )
-    
+
     $allExist = $true
     foreach ($lib in $libs) {
         if (Test-Path $lib) {
@@ -110,48 +110,48 @@ function Test-Dependencies {
             $allExist = $false
         }
     }
-    
+
     if ($allExist) {
         Write-Success ("All static libraries present (" + $libs.Count + " files)")
     }
-    
+
     return $allExist
 }
 
 function Test-BuildOutputs {
     Write-Host "`nChecking Build Outputs..." -ForegroundColor Yellow
-    
+
     $outputs = @{
         "LENSShell.dll" = "LENSShell\x64\Release\LENSShell.dll"
         "LENSManager.exe" = "LENSManager\x64\Release\LENSManager.exe"
     }
-    
+
     $allExist = $true
     foreach ($output in $outputs.GetEnumerator()) {
         if (-not (Test-FileExists $output.Value $output.Key)) {
             $allExist = $false
         }
     }
-    
+
     return $allExist
 }
 
 function Test-HeaderFiles {
     Write-Host "`nValidating Header Files..." -ForegroundColor Yellow
-    
+
     $headers = @(
         "LENSShell\error_logger.h",
         "LENSShell\performance_profiler.h",
         "LENSShell\memory_utils.h",
         "LENSShell\enhanced_cache.h"
     )
-    
+
     $allExist = $true
     foreach ($header in $headers) {
         if (Test-Path $header) {
             # Basic syntax check (look for obvious issues)
             $content = Get-Content $header -Raw
-            
+
             if ($content -match '#pragma once' -or $content -match '#ifndef') {
                 if ($Detailed) {
                     Write-Success "Header valid: $header"
@@ -164,90 +164,102 @@ function Test-HeaderFiles {
             $allExist = $false
         }
     }
-    
+
     if ($allExist) {
         Write-Success ("All new header files present (" + $headers.Count + " files)")
     }
-    
+
     return $allExist
 }
 
 function Test-ProjectFiles {
     Write-Host "`nValidating Project Files..." -ForegroundColor Yellow
-    
+
     $projects = @(
         "LENSShell\LENSShell.vcxproj",
         "LENSManager\LENSManager.vcxproj"
     )
-    
+
     $allValid = $true
     foreach ($project in $projects) {
         if (Test-Path $project) {
             $xml = [xml](Get-Content $project)
-            
+
             # Check for common issues
             $includes = $xml.SelectNodes("//ClInclude/@Include")
             $sources = $xml.SelectNodes("//ClCompile/@Include")
-            
+
             if ($Detailed) {
                 Write-Host "  Project: $project" -ForegroundColor Gray
                 Write-Host "    Includes: $($includes.Count)" -ForegroundColor Gray
                 Write-Host "    Sources: $($sources.Count)" -ForegroundColor Gray
             }
-            
+
             Write-Success "Project file valid: $project"
         } else {
             Write-Error "Project file missing: $project"
             $allValid = $false
         }
     }
-    
+
     return $allValid
 }
 
 function Invoke-Rebuild {
     Write-Host "`nRebuilding Project..." -ForegroundColor Yellow
-    
-    $msbuild = & "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsMSBuildCmd.bat" `
-        "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" -ErrorAction SilentlyContinue
-    
+
+    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (-not (Test-Path -LiteralPath $vswhere)) {
+        $vswhere = "${env:ProgramFiles}\Microsoft Visual Studio\Installer\vswhere.exe"
+    }
+
+    $msbuild = $null
+    if (Test-Path -LiteralPath $vswhere) {
+        $vsPath = & $vswhere -latest -products '*' -version '[18.0,19.0)' `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
+        $candidate = Join-Path $vsPath 'MSBuild\Current\Bin\amd64\MSBuild.exe'
+        if (Test-Path -LiteralPath $candidate) {
+            $msbuild = $candidate
+        }
+    }
+
     if (-not $msbuild) {
-        Write-Error "MSBuild not found"
+        Write-Error "MSBuild v18 not found; install Visual Studio 18 2026 Build Tools with MSVC v145"
         return $false
     }
-    
+
     # Clean first
     Write-Host "  Cleaning..." -ForegroundColor Gray
     & $msbuild LENSShell\LENSShell.vcxproj /t:Clean /p:Configuration=Release /p:Platform=x64 /v:m /nologo
     & $msbuild LENSManager\LENSManager.vcxproj /t:Clean /p:Configuration=Release /p:Platform=x64 /v:m /nologo
-    
+
     # Build LENSShell
     Write-Host "  Building LENSShell.dll..." -ForegroundColor Gray
     $result = & $msbuild LENSShell\LENSShell.vcxproj /t:Build /p:Configuration=Release /p:Platform=x64 /v:m /nologo 2>&1
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-Error "LENSShell build failed"
         Write-Host $result -ForegroundColor Red
         return $false
     }
-    
+
     # Build LENSManager
     Write-Host "  Building LENSManager.exe..." -ForegroundColor Gray
     $result = & $msbuild LENSManager\LENSManager.vcxproj /t:Build /p:Configuration=Release /p:Platform=x64 /v:m /nologo 2>&1
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-Error "LENSManager build failed"
         Write-Host $result -ForegroundColor Red
         return $false
     }
-    
+
     Write-Success "Build completed successfully"
     return $true
 }
 
 function Invoke-Tests {
     Write-Host "`nRunning Test Suite..." -ForegroundColor Yellow
-    
+
     if (Test-Path ".\Test-ExplorerLens.ps1") {
         $result = & .\Test-ExplorerLens.ps1 -Quick
         return ($LASTEXITCODE -eq 0)
@@ -329,4 +341,3 @@ if ($allPassed -and $script:Errors.Count -eq 0) {
     Write-Host "✗ VALIDATION FAILED" -ForegroundColor Red
     exit 1
 }
-

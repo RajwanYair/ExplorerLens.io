@@ -1,4 +1,6 @@
 site_name: ExplorerLens Documentation
+docs_dir: .
+site_dir: ../site
 site_description: Advanced Windows Shell Extension for Thumbnail Generation
 site_author: ExplorerLens Project
 site_url: https://rajwanyair.github.io/ExplorerLens.io

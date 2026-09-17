@@ -351,7 +351,7 @@ Every version bump **must** create a `git tag vX.Y.Z` which auto-triggers `relea
 .\build-scripts\Build-MSVC.ps1 -Test
 
 # 3. Stage, commit, tag, push
-$git = "$env:USERPROFILE\scoop\apps\git\current\bin\git.exe"
+$git = "$env:ProgramFiles\Git\cmd\git.exe"
 & $git add -A
 & $git commit -m "chore: bump version to X.Y.Z (Codename)"
 & $git tag vX.Y.Z

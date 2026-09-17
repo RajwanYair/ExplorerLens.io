@@ -868,7 +868,7 @@ cd x64\Release
 
 - Visual Studio 2019/2022
 - Windows 10/11 SDK
-- CMake 3.20+
+- CMake 4.2+
 - PowerShell 5.1+
 
 **Build Steps:**
