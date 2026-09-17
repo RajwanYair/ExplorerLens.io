@@ -253,6 +253,8 @@ bool PersistentDiskCache::Put(const std::wstring& filePath, uint32_t width, uint
     entry.crc32 = ComputeCRC32(data, dataSize);
     entry.decodeCostMs = decodeCostMs;
     entry.formatName = formatName;
+    entry.state = CacheEntryState::Valid;
+    entry.accessCount = 0;
     entry.cacheWriteTime = now;
     entry.lastAccessTime = now;
 
