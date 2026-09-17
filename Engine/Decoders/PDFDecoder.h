@@ -58,9 +58,13 @@ class PDFDecoder : public IThumbnailDecoder
     static bool HasNativeRenderer();
 
   private:
-#ifdef HAS_MUPDF
-    // MuPDF native rendering (preferred path)
+#ifdef HAS_WINDOWS_DATA_PDF
+    // Windows.Data.Pdf native rendering (primary path)
     HRESULT RenderWithWindowsDataPdf(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP* phBitmap);
+#endif
+
+#ifdef HAS_MUPDF
+    // MuPDF native rendering (optional fallback)
     HRESULT RenderWithMuPDF(const wchar_t* filePath, uint32_t width, uint32_t height, HBITMAP* phBitmap);
 #endif
 

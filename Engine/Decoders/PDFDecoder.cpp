@@ -193,8 +193,7 @@ HRESULT PDFDecoder::RenderWithWindowsDataPdf(const wchar_t* filePath, uint32_t w
     renderParams.SourceRect.right  = static_cast<FLOAT>(outW);
     renderParams.SourceRect.bottom = static_cast<FLOAT>(outH);
     renderParams.BackgroundColor   = { 1.0f, 1.0f, 1.0f, 1.0f }; // white background
-    renderParams.IsIgnoringHighContrast = FALSE;
-    renderParams.ShowHiddenContent      = FALSE;
+    renderParams.IgnoreHighContrast = FALSE;
 
     POINT offset = { 0, 0 };
     hr = pdfRenderer->RenderPageToSurface(nullptr /*pdfPage from WinRT handle*/,
