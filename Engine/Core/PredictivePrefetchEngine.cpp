@@ -4,6 +4,7 @@
 #include "PredictivePrefetchEngine.h"
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <filesystem>
 #include <string>
@@ -124,7 +125,10 @@ std::vector<fs::path> PredictivePrefetchEngine::GetDirListing(const fs::path& di
     for (const auto& entry : fs::directory_iterator(dir, ec)) {
         if (!entry.is_regular_file(ec)) continue;
         auto ext = entry.path().extension().string();
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        std::transform(ext.begin(), ext.end(), ext.begin(),
+            [](char character) {
+                return static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+            });
         if (std::find(imageExts.begin(), imageExts.end(), ext) != imageExts.end()) {
             files.push_back(entry.path());
         }

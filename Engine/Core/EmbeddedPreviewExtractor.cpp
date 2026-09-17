@@ -8,7 +8,14 @@
 
 // LibRaw public API header
 #if __has_include(<libraw/libraw.h>)
+#  ifdef _MSC_VER
+#    pragma warning(push)
+#    pragma warning(disable : 4251)
+#  endif
 #  include <libraw/libraw.h>
+#  ifdef _MSC_VER
+#    pragma warning(pop)
+#  endif
 #  define HAVE_LIBRAW 1
 #else
 #  define HAVE_LIBRAW 0

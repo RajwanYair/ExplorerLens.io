@@ -117,11 +117,12 @@ runs:
             & cl.exe /c /MD /O2 /Oi /Ob2 /DNDEBUG /W0 /I"$lz4Src/lib" $lz4Sources /Fo"$lz4Obj\"
             if ($LASTEXITCODE -ne 0) { throw "cl.exe compilation failed for LZ4" }
             $objs = Get-ChildItem $lz4Obj -Filter '*.obj' | Select-Object -ExpandProperty FullName
-            $destDir = Split-Path $libs.lz4 -Parent
+            $destLib = [System.IO.Path]::GetFullPath($libs.lz4)
+            $destDir = Split-Path -Parent $destLib
             New-Item -ItemType Directory -Force $destDir | Out-Null
-            & lib.exe /OUT:"$($libs.lz4)" $objs
+            & lib.exe "/OUT:$destLib" $objs
             if ($LASTEXITCODE -ne 0) { throw "lib.exe archive failed for LZ4" }
-            Write-Host "  Built: $($libs.lz4) ($([int]((Get-Item $libs.lz4).Length/1KB)) KB)" -ForegroundColor Green
+            Write-Host "  Built: $destLib ($([int]((Get-Item $destLib).Length/1KB)) KB)" -ForegroundColor Green
           }
         }
 

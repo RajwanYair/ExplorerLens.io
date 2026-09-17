@@ -4,11 +4,54 @@
 #include "CacheMetricsCollector.h"
 
 #include <chrono>
+#include <filesystem>
 #include <fstream>
+#include <limits>
 #include <mutex>
 #include <sstream>
 #include <string>
 #include <thread>
+
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
+namespace {
+
+std::string WideToUtf8(const std::wstring& widePath) {
+#ifdef _WIN32
+    if (widePath.empty() ||
+        widePath.size() > static_cast<size_t>((std::numeric_limits<int>::max)())) {
+        return {};
+    }
+
+    const int SOURCE_LENGTH = static_cast<int>(widePath.size());
+    const int UTF8_LENGTH = WideCharToMultiByte(
+        CP_UTF8, WC_ERR_INVALID_CHARS, widePath.data(), SOURCE_LENGTH,
+        nullptr, 0, nullptr, nullptr);
+    if (UTF8_LENGTH <= 0) {
+        return {};
+    }
+
+    std::string utf8(static_cast<size_t>(UTF8_LENGTH), '\0');
+    if (WideCharToMultiByte(
+            CP_UTF8, WC_ERR_INVALID_CHARS, widePath.data(), SOURCE_LENGTH,
+            utf8.data(), UTF8_LENGTH, nullptr, nullptr) != UTF8_LENGTH) {
+        return {};
+    }
+    return utf8;
+#else
+    return std::filesystem::path(widePath).string();
+#endif
+}
+
+} // namespace
 
 // Lightweight JSON value extraction (avoids pulling in a JSON library)
 static double ExtractDouble(const std::string& json, const std::string& key, double def = 0.0) {
@@ -56,7 +99,7 @@ void CacheMetricsCollector::SetLogFile(const std::string& path) {
 }
 
 void CacheMetricsCollector::SetLogFile(const std::wstring& path) {
-    SetLogFile(std::string(path.begin(), path.end()));
+    SetLogFile(WideToUtf8(path));
 }
 
 CacheSnapshot CacheMetricsCollector::LastSnapshot() const {
