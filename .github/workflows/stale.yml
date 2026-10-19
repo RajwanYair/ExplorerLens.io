@@ -1,4 +1,4 @@
-﻿# stale.yml — Close abandoned issues and pull requests automatically
+# stale.yml — Close abandoned issues and pull requests automatically
 #
 # Issues:   stale after 30 days of inactivity → closed after 7 more days
 # PRs:      stale after 21 days of inactivity → closed after 7 more days
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v11
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 

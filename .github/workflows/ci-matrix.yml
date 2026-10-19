@@ -59,7 +59,7 @@ jobs:
           git config --global safe.directory '*'
           git config --system safe.directory '*' 2>&1 | Out-Null
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
           fetch-depth: 1
@@ -72,7 +72,7 @@ jobs:
 
       # ── sccache — compiler cache for faster CI rebuilds ──────
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.7
+        uses: mozilla-actions/sccache-action@v0.0.11
 
       - name: Configure sccache environment
         shell: pwsh
@@ -82,7 +82,7 @@ jobs:
           echo "SCCACHE_GHA_ENABLED=true" >> $env:GITHUB_ENV
 
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
@@ -90,7 +90,7 @@ jobs:
             external-libs-
 
       - name: Cache CMake build directory
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             build/CMakeCache.txt
@@ -159,7 +159,7 @@ jobs:
 
       - name: Upload Engine Artifact
         if: always() && matrix.config == 'Release'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: engine-lib-${{ matrix.config }}
           path: |
@@ -192,7 +192,7 @@ jobs:
           git config --global safe.directory '*'
           git config --system safe.directory '*' 2>&1 | Out-Null
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: false
 
@@ -203,7 +203,7 @@ jobs:
           arch: x64
 
       - name: Download Engine Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: engine-lib-Release
           path: build/
@@ -249,7 +249,7 @@ jobs:
 
       - name: Upload Shell DLL
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: shell-dll
           path: |

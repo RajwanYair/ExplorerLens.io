@@ -68,7 +68,7 @@ jobs:
           git config --system safe.directory '*' 2>&1 | Out-Null
 
       - name: Checkout (full history for changelog)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: false
           fetch-depth: 0
@@ -94,7 +94,7 @@ jobs:
 
       # ── Cache external/ pre-built libs (same key as build.yml) ───────────
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
@@ -109,7 +109,7 @@ jobs:
       # When GitHub upgrades to VS 2026 runners, this auto-picks v145.
 
       - name: Setup .NET 10 SDK (for WiX + Manager.WinUI)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"
 
@@ -474,7 +474,7 @@ jobs:
       # ── Upload build diagnostics on failure (for debugging) ─────────────
       - name: Upload build diagnostics on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-diagnostics-failure-${{ steps.version.outputs.version }}
           path: |
@@ -488,7 +488,7 @@ jobs:
 
       # ── Upload artifacts for release job ──────────────────────────────────
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-artifacts-${{ steps.version.outputs.version }}
           path: |
@@ -503,7 +503,7 @@ jobs:
 
       # ── Upload individual binaries as their own artifact ──────────────────
       - name: Upload individual binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: binaries-${{ steps.version.outputs.version }}
           path: |
@@ -530,18 +530,18 @@ jobs:
           git config --system safe.directory '*' 2>/dev/null || true
 
       - name: Checkout (for CHANGELOG)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-artifacts-${{ needs.build.outputs.version }}
           path: dist/
 
       - name: Download individual binaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: binaries-${{ needs.build.outputs.version }}
           path: dist/binaries-staging/
@@ -578,7 +578,7 @@ jobs:
           } > release-notes-body.md
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.build.outputs.version }}
           name: "ExplorerLens v${{ needs.build.outputs.version }}"
@@ -615,10 +615,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-artifacts-${{ needs.build.outputs.version }}
           path: dist/
@@ -718,7 +718,7 @@ jobs:
 
       - name: Open issue on verification failure
         if: steps.verify.outputs.status == 'failed'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs      = require('fs');

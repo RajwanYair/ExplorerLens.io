@@ -1,4 +1,4 @@
-﻿# release-drafter.yml — Auto-draft the next release from merged PR titles
+# release-drafter.yml — Auto-draft the next release from merged PR titles
 #
 # Runs on every push to main. Updates a "Draft" release with categorized PR
 # entries. When you tag vX.Y.Z, release.yml publishes the real release and
@@ -34,6 +34,6 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: release-drafter/release-drafter@v6
+      - uses: release-drafter/release-drafter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

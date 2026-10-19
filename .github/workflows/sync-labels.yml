@@ -1,4 +1,4 @@
-﻿# sync-labels.yml — Keep GitHub repo labels in sync with .github/labels.yml
+# sync-labels.yml — Keep GitHub repo labels in sync with .github/labels.yml
 #
 # Runs automatically when labels.yml changes.
 # Also available via manual dispatch to force a full sync.
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Sync labels
         uses: EndBug/label-sync@v2

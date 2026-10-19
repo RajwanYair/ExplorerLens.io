@@ -1,4 +1,4 @@
-﻿# pr-checks.yml — Pull Request validation checks
+# pr-checks.yml — Pull Request validation checks
 #
 # Runs on every PR opened/updated against main. Validates:
 #   1. Conventional commit format in the PR title
@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Check PR title format
-        uses: amannn/action-semantic-pull-request@v5
+        uses: amannn/action-semantic-pull-request@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -87,12 +87,12 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Compute diff size and label PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const pr     = context.payload.pull_request;
@@ -163,7 +163,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -193,7 +193,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check version files agree
         shell: bash

@@ -1,4 +1,4 @@
-﻿name: Performance Regression Gate
+name: Performance Regression Gate
 
 on:
   pull_request:
@@ -47,7 +47,7 @@ jobs:
           git config --system safe.directory '*' 2>&1 | Out-Null
 
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -57,7 +57,7 @@ jobs:
           arch: x64
 
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Upload Benchmark Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: perf-results-${{ github.run_number }}
           path: |

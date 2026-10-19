@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
           submodules: recursive
@@ -79,14 +79,14 @@ jobs:
           Get-ChildItem sbom-out
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-cyclonedx-${{ steps.ver.outputs.version }}
           path: sbom-out/*.cdx.json
           retention-days: 90
 
       - name: Attest SBOM with Sigstore (keyless)
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@v4
         with:
           subject-path: sbom-out/explorerlens-${{ steps.ver.outputs.version }}.cdx.json
           sbom-path: sbom-out/explorerlens-${{ steps.ver.outputs.version }}.cdx.json

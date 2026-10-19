@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           lfs: false
 
@@ -53,7 +53,7 @@ jobs:
           toolset: '14.5'
 
       - name: Cache CMake build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: build
           key: ssim-build-${{ runner.os }}-${{ hashFiles('Engine/CMakeLists.txt', 'CMakePresets.json') }}
@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload SSIM artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ssim-results-${{ github.run_number }}
           path: ssim-results.txt

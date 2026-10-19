@@ -1,4 +1,4 @@
-﻿name: Code Quality
+name: Code Quality
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
           git config --global safe.directory '*'
           git config --system safe.directory '*' 2>&1 | Out-Null
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install clang-format (pinned LLVM 18)
         shell: pwsh
@@ -95,7 +95,7 @@ jobs:
           git config --global safe.directory '*'
           git config --system safe.directory '*' 2>&1 | Out-Null
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup MSVC (latest available on runner)
         # No toolset pin: auto-selects latest VS. Currently v143/VS2022 on GH runners.
@@ -104,7 +104,7 @@ jobs:
           arch: x64
 
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
@@ -159,7 +159,7 @@ jobs:
           git config --global safe.directory '*'
           git config --system safe.directory '*' 2>&1 | Out-Null
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check header guards (blocking)
         shell: pwsh
@@ -195,7 +195,7 @@ jobs:
           git config --global safe.directory '*'
           git config --system safe.directory '*' 2>&1 | Out-Null
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Validate version consistency across all files
         shell: pwsh
