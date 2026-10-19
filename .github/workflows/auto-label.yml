@@ -1,4 +1,4 @@
-﻿# auto-label.yml — Automatically label PRs and issues based on content
+# auto-label.yml — Automatically label PRs and issues based on content
 #
 # Labels applied by path (PRs) and keyword matching (issues).
 # Keyword → label mappings are defined inline below.
@@ -33,7 +33,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/labeler@v5
+      - uses: actions/labeler@v7
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/labeler.yml
@@ -47,7 +47,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: github/issue-labeler@v3.4
+      - uses: github/issue-labeler@v3.5
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/issue-labeler.yml

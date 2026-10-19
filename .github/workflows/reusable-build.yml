@@ -68,14 +68,14 @@ jobs:
     steps:
       # ── Checkout ──────────────────────────────────────────────
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: false
           fetch-depth: 1
 
       # ── Cache external/ to speed up builds ────────────────────
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
@@ -124,7 +124,7 @@ jobs:
       # ── Upload test results ───────────────────────────────────
       - name: Upload test results
         if: always() && inputs.run-tests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ inputs.build-type }}
           path: |
@@ -135,7 +135,7 @@ jobs:
       # ── Upload build artifacts ────────────────────────────────
       - name: Upload build artifacts
         if: success() && inputs.upload-artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: engine-${{ inputs.build-type }}
           path: |

@@ -1,4 +1,4 @@
-﻿# build.yml — Manual / scheduled verification build for ExplorerLens Engine
+# build.yml — Manual / scheduled verification build for ExplorerLens Engine
 # Copyright (c) 2026 ExplorerLens Project
 #
 # NOTE: ci-matrix.yml is the canonical PR/push CI for ExplorerLens.
@@ -43,14 +43,14 @@ jobs:
     steps:
       # ── Checkout ──────────────────────────────────────────────
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: false
           fetch-depth: 1
 
       # ── Cache external/ to speed up builds ────────────────────
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
@@ -67,7 +67,7 @@ jobs:
 
       # ── sccache — compiler cache for faster rebuilds ─────────
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.7
+        uses: mozilla-actions/sccache-action@v0.0.11
 
       - name: Configure sccache environment
         shell: pwsh
@@ -126,7 +126,7 @@ jobs:
       # ── Upload test results ──────────────────────────────────
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-x64-release
           path: |
@@ -137,7 +137,7 @@ jobs:
       # ── Upload build artifacts ───────────────────────────────
       - name: Upload build artifacts
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-x64-release
           path: |

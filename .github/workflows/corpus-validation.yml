@@ -41,11 +41,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Restore corpus cache
         id: corpus-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/corpus
           key: corpus-v3-${{ hashFiles('tools/Generate-Corpus.ps1', 'scripts/Setup-TestCorpus.ps1', 'data/corpus/MANIFEST.json') }}
@@ -62,7 +62,7 @@ jobs:
             Format-Table -AutoSize
 
       - name: Upload corpus as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-corpus
           path: data/corpus/
@@ -80,10 +80,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download corpus
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: test-corpus
           path: data/corpus/
@@ -115,7 +115,7 @@ jobs:
 
       - name: Publish Catch2 test results
         if: always()
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         with:
           name: Catch2 Tests (${{ matrix.config }})
           path: build/catch2-results.xml
@@ -157,7 +157,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ matrix.config }}
           path: build/*.xml
